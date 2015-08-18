@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r197 - / freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r197%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200603102325.k2ANP7sO001356%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000326.html">
+   <LINK REL="Next"  HREF="000328.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r197 - / freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r197%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200603102325.k2ANP7sO001356%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r197 - / freenx-server/trunk">fabianx at berlios.de
+       </A><BR>
+    <I>Sat Mar 11 00:25:07 CET 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000326.html">[Freenx-cvs] r196 - / freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000328.html">[Freenx-cvs] r198 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#327">[ date ]</a>
+              <a href="thread.html#327">[ thread ]</a>
+              <a href="subject.html#327">[ subject ]</a>
+              <a href="author.html#327">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2006-03-11 00:25:07 +0100 (Sat, 11 Mar 2006)
+New Revision: 197
+
+Modified:
+   /
+   freenx-server/trunk/nxserver
+Log:
+Small syntax error.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:257
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:259
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2006-03-10 23:17:20 UTC (rev 196)
++++ freenx-server/trunk/nxserver	2006-03-10 23:25:07 UTC (rev 197)
+@@ -1409,9 +1409,10 @@
+ 				then
+ 					echo &quot;sessionid=$cmd_sessionid&quot; | su - &quot;$cmd_user&quot; -c &quot;$PATH_BIN/nxnode --suspend&quot;
+ 				fi
+-				;;
++			;;
+ 			--terminate)
+ 				echo &quot;sessionid=$cmd_sessionid&quot; | su - &quot;$cmd_user&quot; -c &quot;$PATH_BIN/nxnode --terminate&quot;
++			;;
+ 			--force-terminate)
+ 				echo &quot;sessionid=$cmd_sessionid&quot; | su - &quot;$cmd_user&quot; -c &quot;$PATH_BIN/nxnode --terminate&quot;
+ 				session_close $cmd_sessionid
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000326.html">[Freenx-cvs] r196 - / freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000328.html">[Freenx-cvs] r198 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#327">[ date ]</a>
+              <a href="thread.html#327">[ thread ]</a>
+              <a href="subject.html#327">[ subject ]</a>
+              <a href="author.html#327">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

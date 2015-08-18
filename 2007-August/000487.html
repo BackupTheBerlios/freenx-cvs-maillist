@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r355 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r355%20-%20freenx-server/trunk&In-Reply-To=%3C200708031846.l73Ik68V000874%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000486.html">
+   <LINK REL="Next"  HREF="000488.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r355 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r355%20-%20freenx-server/trunk&In-Reply-To=%3C200708031846.l73Ik68V000874%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r355 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Fri Aug  3 20:46:06 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000486.html">[Freenx-cvs] r354 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000488.html">[Freenx-cvs] r356 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#487">[ date ]</a>
+              <a href="thread.html#487">[ thread ]</a>
+              <a href="subject.html#487">[ subject ]</a>
+              <a href="author.html#487">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-08-03 20:46:06 +0200 (Fri, 03 Aug 2007)
+New Revision: 355
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxsetup
+Log:
+08_neg_cache_fix.dpatch - If nscd is being used, it can take a few
+seconds to pick up the new user/group after addition. This patch
+causes nscd --invalidate to be called after each user/group
+addition/removal to prevent subsequent commands from failing. In
+particular, addgroup followed by adduser would often fail, with
+adduser complaining that the 'nx' group did not exist as nscd hadn't
+picked up the addition yet. - Stephen Shirley (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">diamond at google.com</A>)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-08-03 18:42:43 UTC (rev 354)
++++ freenx-server/trunk/ChangeLog	2007-08-03 18:46:06 UTC (rev 355)
+@@ -1,6 +1,8 @@
+ xx.10.2007 FreeNX 0.7.1
+ 	* Fixed the issue that makes fonts look tiny and unreadable by default 
+ 	  with freenx and the commercial client. (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">diamond at google.com</A>)
++	* Added invalidating of NSCD cache after group and user add.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">diamond at google.com</A>)
+ 
+ 07.07.2007 FreeNX 0.7.0 &quot;Jornade SPL Edition VI+1&quot;
+ 	* Fixed the printing support for CUPS 1.2.
+
+Modified: freenx-server/trunk/nxsetup
+===================================================================
+--- freenx-server/trunk/nxsetup	2007-08-03 18:42:43 UTC (rev 354)
++++ freenx-server/trunk/nxsetup	2007-08-03 18:46:06 UTC (rev 355)
+@@ -164,7 +164,10 @@
+ 
+ 		# adduser needs a valid group to add the user to
+ 		! nx_group_exists &amp;&amp; addgroup --system --quiet $GROUPADD_OPTIONS nx
++		[ -f /etc/nscd.conf ] &amp;&amp; { nscd --invalidate group; }
++
+ 		adduser $USERADD_OPTIONS nx
++		[ -f /etc/nscd.conf ] &amp;&amp; { nscd --invalidate passwd; }
+ 		
+ 	# no, its a &quot;normal&quot; useradd
+ 	else
+@@ -185,10 +188,16 @@
+ 		if [ &quot;$SETUP_LOCAL_USER&quot; = &quot;yes&quot; ]
+ 		then
+ 			! nx_group_exists &amp;&amp; lgroupadd $GROUPADD_OPTIONS nx 
++			[ -f /etc/nscd.conf ] &amp;&amp; { nscd --invalidate group; }
++
+ 			luseradd $USERADD_OPTIONS nx
++			[ -f /etc/nscd.conf ] &amp;&amp; { nscd --invalidate passwd; }
+ 		else
+ 			! nx_group_exists &amp;&amp; groupadd $GROUPADD_OPTIONS nx
++			[ -f /etc/nscd.conf ] &amp;&amp; { nscd --invalidate group; }
++
+ 			useradd $USERADD_OPTIONS nx
++			[ -f /etc/nscd.conf ] &amp;&amp; { nscd --invalidate passwd; }
+ 		fi
+ 
+ 		
+@@ -448,6 +457,7 @@
+ 	#Perform cleanup?
+ 	[ &quot;$CLEAN&quot; = &quot;yes&quot; ] &amp;&amp; uninstall_nx
+ 	
++	[ -f /etc/nscd.conf ] &amp;&amp; { nscd --invalidate passwd; nscd --invalidate group; }
+ 	install_nx
+ 
+ 	[ &quot;$AUTOMATIC&quot; = &quot;no&quot; ] &amp;&amp; test_nx
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000486.html">[Freenx-cvs] r354 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000488.html">[Freenx-cvs] r356 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#487">[ date ]</a>
+              <a href="thread.html#487">[ thread ]</a>
+              <a href="subject.html#487">[ subject ]</a>
+              <a href="author.html#487">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

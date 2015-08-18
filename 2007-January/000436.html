@@ -1,0 +1,325 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r303 - nx-utils/nxfish
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r303%20-%20nx-utils/nxfish&In-Reply-To=%3C200701260247.l0Q2ln0p016283%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000434.html">
+   <LINK REL="Next"  HREF="000437.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r303 - nx-utils/nxfish</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r303%20-%20nx-utils/nxfish&In-Reply-To=%3C200701260247.l0Q2ln0p016283%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r303 - nx-utils/nxfish">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Fri Jan 26 03:47:49 CET 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000434.html">[Freenx-cvs] r302 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000437.html">[Freenx-cvs] r304 - in nx-utils: . nxfastkde
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#436">[ date ]</a>
+              <a href="thread.html#436">[ thread ]</a>
+              <a href="subject.html#436">[ subject ]</a>
+              <a href="author.html#436">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-01-26 03:47:48 +0100 (Fri, 26 Jan 2007)
+New Revision: 303
+
+Added:
+   nx-utils/nxfish/ChangeLog
+   nx-utils/nxfish/README
+   nx-utils/nxfish/nx-fishsrv.sh
+   nx-utils/nxfish/nxfish
+Modified:
+   nx-utils/nxfish/nx-fishsrv.pl
+Log:
+0.0.3-nx-3
+        * Added cookie authentication.
+        * Added sample script for starting the nx-fishsrv.pl.
+        * Added sample nxfish script with authentication via encrypted session cookie.
+        * Fixed a security problem. If nx-fishsrv.pl was running with . as
+          path it was possible to access &quot;..&quot;.
+        * Added a changelog. :)
+        * Added a README.
+
+In general: Made nxfish usable.
+
+
+
+Added: nx-utils/nxfish/ChangeLog
+===================================================================
+--- nx-utils/nxfish/ChangeLog	2007-01-25 19:40:07 UTC (rev 302)
++++ nx-utils/nxfish/ChangeLog	2007-01-26 02:47:48 UTC (rev 303)
+@@ -0,0 +1,14 @@
++0.0.3-nx-3
++	* Added cookie authentication.
++	* Added sample script for starting the nx-fishsrv.pl.
++	* Added sample nxfish script with authentication via encrypted session cookie.
++	* Fixed a security problem. If nx-fishsrv.pl was running with . as
++	  path it was possible to access &quot;..&quot;.
++	* Added a changelog. :)
++	* Added a README.
++
++0.0.3-nx-2
++	* Prepared KDE patch.
++
++0.0.3-nx-1
++	* Original version.
+
+Added: nx-utils/nxfish/README
+===================================================================
+--- nx-utils/nxfish/README	2007-01-25 19:40:07 UTC (rev 302)
++++ nx-utils/nxfish/README	2007-01-26 02:47:48 UTC (rev 303)
+@@ -0,0 +1,51 @@
++Okay, here we go.
++
++We need:
++
++- KDE 3.5.5 or install kio_nxfish ourselves using the provided sources.
++- ssh access to the nx server we want to use nxfish on.
++- netpipes installed on the client computer.
++
++Now we do:
++
++Client:
++	- Start nx session
++	- Look into ~/.nx/S-&lt;yoursession&gt;/options for the right cookie.
++
++	- Start:
++	
++	$ ./nx-fishsrv.sh &lt;the directory you want to share&gt; - &lt;some port&gt;
++	Please provide password: &lt;cookie&gt;
++	Starting nx-fishsrv.pl ...
++
++	Note:
++	   
++	   You will have complete access from the remote session to the directory 
++	   that you share.
++
++	   It should not contain any symlinks to things you don't want to share.
++
++	   Perhaps a symlink detection is later built into nx-fishrv.pl.
++
++Server:
++	- Install nxfish to /usr/bin or somewhere else in your PATH.
++	- Make sure that (Free)NX does export NXSESSIONID.
++
++	  You might need to use a custom startkde script, where you export it yourself using something
++	  like:
++
++	  for i in $( echo $HOME/.nx/C-*$(echo $DISPLAY | cut -d: -f2)-* | tr ' ' '\n' )
++	  do
++	      [ -f &quot;$i/pids/agent&quot; ] &amp;&amp; break
++	  done
++	  export NXSESSIONID=$i
++
++	- Just open konqueror and browse to nxfish:/
++
++	- Done :)
++
++That's it folk.
++
++Please enjoy.
++
++	Fabian - January 2007
+
+Modified: nx-utils/nxfish/nx-fishsrv.pl
+===================================================================
+--- nx-utils/nxfish/nx-fishsrv.pl	2007-01-25 19:40:07 UTC (rev 302)
++++ nx-utils/nxfish/nx-fishsrv.pl	2007-01-26 02:47:48 UTC (rev 303)
+@@ -1,5 +1,17 @@
+ #!/usr/bin/perl
+ 
++# nx-fishrv.pl - Originally based on KDE sources.
++#
++#   A simple fileserver to allow remote browsing via <A HREF="nxfish://.">nxfish://.</A>
++# 
++# License: GPL - v2
++#
++# Made &quot;secure&quot; for use by NX by Fabian Franz &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">freenx at fabian-franz.de</A>&gt;.
++# 
++# Version: 0.0.3-nx-3
++#
++# SVN: $$ 
++
+ =pod
+ =cut
+ 
+@@ -7,12 +19,19 @@
+ $|++;
+ 
+ my $substpath=$ARGV[0];
++my $cookie=$ARGV[1];
++my $authenticated=0;
+ 
+-if ($substpath eq '')
++if ($substpath eq '' or $substpath eq '.')
+ {
+-	$substpath='.';
++	$substpath='./';
+ }
+ 
++if ($cookie eq '')
++{
++	$authenticated=1;
++}
++
+ use strict;
+ use POSIX qw(getcwd dup2 strftime);
+ $SIG{'CHLD'} = 'IGNORE';
+@@ -20,6 +39,30 @@
+ MAIN: while (&lt;STDIN&gt;) {
+     chomp;
+     chomp;
++
++    #print STDERR &quot;$_\n&quot;; # debug
++    
++    /^#PASS\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        my $usercookie    = $1;
++	
++	if ($usercookie eq $cookie or $authenticated eq 1)
++	{
++		$authenticated=1;
++		#print &quot;### 200\n&quot;;
++	}
++	else
++	{
++		print &quot;### 500 Wrong password supplied.\n&quot;;
++	}
++        next; # or should we bail out here?
++    };
++    
++    if ($authenticated eq 0)
++    {
++    	print &quot;### 500 Not authenticated please use #PASS command.\n&quot;;
++	next;
++    }
++
+     /\#FISH/ &amp;&amp; do {
+ 	print &quot;### 200\n&quot;;
+ 	next;
+
+Added: nx-utils/nxfish/nx-fishsrv.sh
+===================================================================
+--- nx-utils/nxfish/nx-fishsrv.sh	2007-01-25 19:40:07 UTC (rev 302)
++++ nx-utils/nxfish/nx-fishsrv.sh	2007-01-26 02:47:48 UTC (rev 303)
+@@ -0,0 +1,37 @@
++#!/bin/sh
++
++# nx-fishssrv.sh - Copyright (c) 2007 by Fabian Franz.
++#
++#    A simple wrapper script for nx-fishsrv.pl with proper authentication.
++#
++# This is an example how to start nx-fishsrv using faucet and the supplied 
++# nx-fishsrv.pl
++#
++# If - is supplied as cookie the password is read from stdin.
++#
++# Again: 6201 is just an arbitrary port I use for testing.
++#
++# It is assumed that you forward the port via ssh -R.
++
++if [ $# -lt 1 ]
++then
++	echo &quot;Usage: $(basename $0) &lt;directory&gt; &lt;cookie&gt; [port]&quot;
++fi
++
++if [ $1 = '-' ]
++then
++	echo -n &quot;Please provide password: &quot;
++	read -s rawcookie
++	echo &quot;&quot;
++else
++	rawcookie=&quot;$2&quot;
++fi
++echo &quot;Starting nx-fishsrv.pl ...&quot;
++
++PORT=$3
++[ -z &quot;$PORT&quot; ] &amp;&amp; PORT=6201
++
++# We use md5sum so that no one can get our original session cookie to easily
++cookie=$(htpasswd -nbs nxfish &quot;:NXFISH:$rawcookie&quot; | cut -d: -f2 )
++
++faucet $PORT -io sh -c 'echo &quot;FISH:&quot; ; ./nx-fishsrv.pl '&quot;'$1'&quot;' '&quot;'$cookie'&quot;''
+
+
+Property changes on: nx-utils/nxfish/nx-fishsrv.sh
+___________________________________________________________________
+Name: svn:executable
+   + *
+
+Added: nx-utils/nxfish/nxfish
+===================================================================
+--- nx-utils/nxfish/nxfish	2007-01-25 19:40:07 UTC (rev 302)
++++ nx-utils/nxfish/nxfish	2007-01-26 02:47:48 UTC (rev 303)
+@@ -0,0 +1,25 @@
++#!/bin/sh
++
++# nxfish - Copyright (c) 2007 by Fabian Franz.
++#
++#   A simple client for the nxfish kio_slave.
++#
++# This is just a sample script how nxfish could be used on a NX server.
++# It gets the cookie from the NXSESSIONID filedir and encrypts it.
++# Then it sends the cookie and gives control to netcat.
++#
++# If NXFISH_SERVER is set netcat does connect to that one.
++# 
++# The default of 6201 is arbitrary and could as well be DISPLAY+11000
++# once proper forwarding is done.
++#
++# For now this script assumes that you set up the forwarding yourself via ssh -R.
++
++rawcookie=$(cat $HOME/.nx/C-$NXSESSIONID/options | tr ',' '\n' | grep cookie= | cut -d= -f2)
++
++# We use SHA so that no one can get our original session cookie
++cookie=$(htpasswd -nbs nxfish &quot;:NXFISH:$rawcookie&quot; | cut -d: -f2 )
++
++[ -z &quot;$NXFISH_SERVER&quot; ] &amp;&amp; NXFISH_SERVER=&quot;localhost 6201&quot;
++
++(echo &quot;#PASS $cookie&quot;; cat -) | netcat $NXFISH_SERVER
+
+
+Property changes on: nx-utils/nxfish/nxfish
+___________________________________________________________________
+Name: svn:executable
+   + *
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000434.html">[Freenx-cvs] r302 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000437.html">[Freenx-cvs] r304 - in nx-utils: . nxfastkde
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#436">[ date ]</a>
+              <a href="thread.html#436">[ thread ]</a>
+              <a href="subject.html#436">[ subject ]</a>
+              <a href="author.html#436">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

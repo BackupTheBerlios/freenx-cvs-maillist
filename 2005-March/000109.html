@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r58 - thinnx/trunk/thinnx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r58%20-%20thinnx/trunk/thinnx&In-Reply-To=%3C200503182209.j2IM9cjm024153%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000108.html">
+   <LINK REL="Next"  HREF="000110.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r58 - thinnx/trunk/thinnx</H1>
+    <B>Gustavo Noronha Silva at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r58%20-%20thinnx/trunk/thinnx&In-Reply-To=%3C200503182209.j2IM9cjm024153%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r58 - thinnx/trunk/thinnx">kov at sheep.berlios.de
+       </A><BR>
+    <I>Fri Mar 18 23:09:38 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000108.html">[Freenx-cvs] r57 - thinnx/trunk/thinnx
+</A></li>
+        <LI>Next message: <A HREF="000110.html">[Freenx-cvs] CVS: freenx - fabianx modified ChangeLog
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#109">[ date ]</a>
+              <a href="thread.html#109">[ thread ]</a>
+              <a href="subject.html#109">[ subject ]</a>
+              <a href="author.html#109">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: kov
+Date: 2005-03-18 23:09:37 +0100 (Fri, 18 Mar 2005)
+New Revision: 58
+
+Modified:
+   thinnx/trunk/thinnx/thinnx.c
+Log:
+I don't think we need a clear button: removing
+
+
+Modified: thinnx/trunk/thinnx/thinnx.c
+===================================================================
+--- thinnx/trunk/thinnx/thinnx.c	2005-03-18 22:04:46 UTC (rev 57)
++++ thinnx/trunk/thinnx/thinnx.c	2005-03-18 22:09:37 UTC (rev 58)
+@@ -199,7 +199,6 @@
+   GtkWidget *pass_entry;
+ 
+   GtkWidget *connect_button;
+-  GtkWidget *clear_button;
+ 
+   dialog = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+ #if GTK_MAJOR_VERSION == 2
+@@ -245,11 +244,6 @@
+   hbox = gtk_hbox_new (TRUE, 6);
+   gtk_box_pack_start_defaults (GTK_BOX(vbox), hbox);
+ 
+-  clear_button = gtk_button_new_with_label (&quot;Limpar&quot;);
+-  gtk_signal_connect (GTK_OBJECT(clear_button), &quot;clicked&quot;,
+-		      GTK_SIGNAL_FUNC(clear_dialog), NULL);
+-  gtk_box_pack_start_defaults (GTK_BOX(hbox), clear_button);
+-
+   connect_button = gtk_button_new_with_label (&quot;Conectar!&quot;);
+   gtk_signal_connect (GTK_OBJECT(connect_button), &quot;clicked&quot;,
+ 		      GTK_SIGNAL_FUNC(gtk_main_quit), NULL);
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000108.html">[Freenx-cvs] r57 - thinnx/trunk/thinnx
+</A></li>
+	<LI>Next message: <A HREF="000110.html">[Freenx-cvs] CVS: freenx - fabianx modified ChangeLog
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#109">[ date ]</a>
+              <a href="thread.html#109">[ thread ]</a>
+              <a href="subject.html#109">[ subject ]</a>
+              <a href="author.html#109">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

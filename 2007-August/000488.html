@@ -1,0 +1,110 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r356 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r356%20-%20freenx-server/trunk&In-Reply-To=%3C200708031849.l73In2Av001013%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000487.html">
+   <LINK REL="Next"  HREF="000489.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r356 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r356%20-%20freenx-server/trunk&In-Reply-To=%3C200708031849.l73In2Av001013%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r356 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Fri Aug  3 20:49:02 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000487.html">[Freenx-cvs] r355 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000489.html">[Freenx-cvs] r357 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#488">[ date ]</a>
+              <a href="thread.html#488">[ thread ]</a>
+              <a href="subject.html#488">[ subject ]</a>
+              <a href="author.html#488">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-08-03 20:49:01 +0200 (Fri, 03 Aug 2007)
+New Revision: 356
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxclient
+Log:
+Changes the wording slightly in two of the dialogs that nxclient displays to prevent confusion over whether they refer to the dialog box or the local nx client window. - Stephen Shirley (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">diamond at google.com</A>)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-08-03 18:46:06 UTC (rev 355)
++++ freenx-server/trunk/ChangeLog	2007-08-03 18:49:01 UTC (rev 356)
+@@ -3,6 +3,8 @@
+ 	  with freenx and the commercial client. (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">diamond at google.com</A>)
+ 	* Added invalidating of NSCD cache after group and user add.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">diamond at google.com</A>)
++	* Added better wording with less misunderstanding to dialog of 
++	  nxclient for Suspend/Terminate/Close case.
+ 
+ 07.07.2007 FreeNX 0.7.0 &quot;Jornade SPL Edition VI+1&quot;
+ 	* Fixed the printing support for CUPS 1.2.
+
+Modified: freenx-server/trunk/nxclient
+===================================================================
+--- freenx-server/trunk/nxclient	2007-08-03 18:46:06 UTC (rev 355)
++++ freenx-server/trunk/nxclient	2007-08-03 18:49:01 UTC (rev 356)
+@@ -216,7 +216,7 @@
+ 
+ xdialog_yesnosuspend()
+ {
+-	$DIALOG --title &quot;$DIALOG_CAPTION&quot; --buttons-style text --ok-label &quot;Suspend&quot; --cancel-label &quot;Terminate&quot; --yesno &quot;$DIALOG_MESSAGE Close window to cancel.&quot; 400x150
++	$DIALOG --title &quot;$DIALOG_CAPTION&quot; --buttons-style text --ok-label &quot;Suspend&quot; --cancel-label &quot;Terminate&quot; --yesno &quot;$DIALOG_MESSAGE Close this dialog to cancel.&quot; 400x150
+ 	RC=$?
+ 	[ $RC -eq 0 ] &amp;&amp; return 3
+ 	[ $RC -eq 1 ] &amp;&amp; return 2
+@@ -238,7 +238,7 @@
+ 
+ xdialog_printer_ask()
+ {
+-	$DIALOG --title &quot;$DIALOG_CAPTION&quot; --buttons-style text --ok-label &quot;Ok&quot; --cancel-label &quot;Configure&quot; --yesno &quot;$DIALOG_MESSAGE\n\nClose window to cancel.&quot; 400x250
++	$DIALOG --title &quot;$DIALOG_CAPTION&quot; --buttons-style text --ok-label &quot;Ok&quot; --cancel-label &quot;Configure&quot; --yesno &quot;$DIALOG_MESSAGE\n\nClose this dialog to cancel.&quot; 400x250
+ 	RC=$?
+ 	[ $RC -eq 255 ] &amp;&amp; return 2
+ 	return $RC
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000487.html">[Freenx-cvs] r355 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000489.html">[Freenx-cvs] r357 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#488">[ date ]</a>
+              <a href="thread.html#488">[ thread ]</a>
+              <a href="subject.html#488">[ subject ]</a>
+              <a href="author.html#488">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

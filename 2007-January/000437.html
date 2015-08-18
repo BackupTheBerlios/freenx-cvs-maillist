@@ -1,0 +1,252 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r304 - in nx-utils: . nxfastkde
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r304%20-%20in%20nx-utils%3A%20.%20nxfastkde&In-Reply-To=%3C200701260341.l0Q3fCJa020066%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000436.html">
+   <LINK REL="Next"  HREF="000438.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r304 - in nx-utils: . nxfastkde</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r304%20-%20in%20nx-utils%3A%20.%20nxfastkde&In-Reply-To=%3C200701260341.l0Q3fCJa020066%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r304 - in nx-utils: . nxfastkde">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Fri Jan 26 04:41:12 CET 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000436.html">[Freenx-cvs] r303 - nx-utils/nxfish
+</A></li>
+        <LI>Next message: <A HREF="000438.html">[Freenx-cvs] r305 - nx-utils/nxfastkde
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#437">[ date ]</a>
+              <a href="thread.html#437">[ thread ]</a>
+              <a href="subject.html#437">[ subject ]</a>
+              <a href="author.html#437">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-01-26 04:41:12 +0100 (Fri, 26 Jan 2007)
+New Revision: 304
+
+Added:
+   nx-utils/nxfastkde/
+   nx-utils/nxfastkde/README
+   nx-utils/nxfastkde/kdeglobals
+   nx-utils/nxfastkde/kdesktoprc
+   nx-utils/nxfastkde/kdesktoprc.fnxwp
+   nx-utils/nxfastkde/kickerrc
+   nx-utils/nxfastkde/konqiconviewrc
+   nx-utils/nxfastkde/konquerorrc
+   nx-utils/nxfastkde/kwin.eventsrc
+   nx-utils/nxfastkde/kwinrc
+Log:
+Added first experimental profile for a fast NX KDE profile.
+
+It is almost automatically created by comparing what kpersonalizer disabled from fast CPU settings to slow CPU settings.
+
+
+
+Added: nx-utils/nxfastkde/README
+===================================================================
+--- nx-utils/nxfastkde/README	2007-01-26 02:47:48 UTC (rev 303)
++++ nx-utils/nxfastkde/README	2007-01-26 03:41:12 UTC (rev 304)
+@@ -0,0 +1,3 @@
++This config files are a try to create a fast NX profile for KDE. It should be usable via KDE's kiosk functions.
++
++Fabian
+
+Added: nx-utils/nxfastkde/kdeglobals
+===================================================================
+--- nx-utils/nxfastkde/kdeglobals	2007-01-26 02:47:48 UTC (rev 303)
++++ nx-utils/nxfastkde/kdeglobals	2007-01-26 03:41:12 UTC (rev 304)
+@@ -0,0 +1,14 @@
++[DesktopIcons]
++ActiveEffect[$i]=none
++Animated[$i]=false
++
++[KDE]
++EffectAnimateCombo[$i]=false
++EffectFadeMenu[$i]=false
++EffectFadeTooltip[$i]=false
++EffectsEnabled[$i]=false
++OpaqueResize[$i]=false
++ShowIconsOnPushButtons[$i]=false
++
++[PanelIcons]
++ActiveEffect[$i]=none
+
+Added: nx-utils/nxfastkde/kdesktoprc
+===================================================================
+--- nx-utils/nxfastkde/kdesktoprc	2007-01-26 02:47:48 UTC (rev 303)
++++ nx-utils/nxfastkde/kdesktoprc	2007-01-26 03:41:12 UTC (rev 304)
+@@ -0,0 +1,5 @@
++[Desktop Icons]
++Preview[$i]=
++
++[Desktop0]
++WallpaperMode[$i]=NoWallpaper
+
+Added: nx-utils/nxfastkde/kdesktoprc.fnxwp
+===================================================================
+--- nx-utils/nxfastkde/kdesktoprc.fnxwp	2007-01-26 02:47:48 UTC (rev 303)
++++ nx-utils/nxfastkde/kdesktoprc.fnxwp	2007-01-26 03:41:12 UTC (rev 304)
+@@ -0,0 +1,6 @@
++[Desktop Icons]
++Preview[$i]=
++
++[Desktop0]
++Wallpaper[$i]=FreeNX.png
++WallpaperMode[$i]=Scaled
+
+Added: nx-utils/nxfastkde/kickerrc
+===================================================================
+--- nx-utils/nxfastkde/kickerrc	2007-01-26 02:47:48 UTC (rev 303)
++++ nx-utils/nxfastkde/kickerrc	2007-01-26 03:41:12 UTC (rev 304)
+@@ -0,0 +1,5 @@
++[General]
++UseBackgroundTheme[$i]=false
++
++[buttons]
++EnableIconZoom[$i]=false
+
+Added: nx-utils/nxfastkde/konqiconviewrc
+===================================================================
+--- nx-utils/nxfastkde/konqiconviewrc	2007-01-26 02:47:48 UTC (rev 303)
++++ nx-utils/nxfastkde/konqiconviewrc	2007-01-26 03:41:12 UTC (rev 304)
+@@ -0,0 +1,2 @@
++[Settings]
++PreviewsEnabled[$i]=false
+
+Added: nx-utils/nxfastkde/konquerorrc
+===================================================================
+--- nx-utils/nxfastkde/konquerorrc	2007-01-26 02:47:48 UTC (rev 303)
++++ nx-utils/nxfastkde/konquerorrc	2007-01-26 03:41:12 UTC (rev 304)
+@@ -0,0 +1,2 @@
++[Settings]
++BgImage[$i]=
+
+Added: nx-utils/nxfastkde/kwin.eventsrc
+===================================================================
+--- nx-utils/nxfastkde/kwin.eventsrc	2007-01-26 02:47:48 UTC (rev 303)
++++ nx-utils/nxfastkde/kwin.eventsrc	2007-01-26 03:41:12 UTC (rev 304)
+@@ -0,0 +1,71 @@
++[close]
++presentation[$i]=0
++
++[deiconify]
++presentation[$i]=0
++
++[desktop1]
++presentation[$i]=0
++
++[desktop2]
++presentation[$i]=0
++
++[desktop3]
++presentation[$i]=0
++
++[desktop4]
++presentation[$i]=0
++
++[desktop5]
++presentation[$i]=0
++
++[desktop6]
++presentation[$i]=0
++
++[desktop7]
++presentation[$i]=0
++
++[desktop8]
++presentation[$i]=0
++
++[iconify]
++presentation[$i]=0
++
++[maximize]
++presentation[$i]=0
++
++[minimize]
++presentation[$i]=0
++
++[new]
++presentation[$i]=0
++
++[not_on_all_desktops]
++presentation[$i]=0
++
++[on_all_desktops]
++presentation[$i]=0
++
++[shadedown]
++presentation[$i]=0
++
++[shadeup]
++presentation[$i]=0
++
++[sticky]
++presentation[$i]=0
++
++[transdelete]
++presentation[$i]=0
++
++[transnew]
++presentation[$i]=0
++
++[unmaximize]
++presentation[$i]=0
++
++[unminimize]
++presentation[$i]=0
++
++[unsticky]
++presentation[$i]=0
+
+Added: nx-utils/nxfastkde/kwinrc
+===================================================================
+--- nx-utils/nxfastkde/kwinrc	2007-01-26 02:47:48 UTC (rev 303)
++++ nx-utils/nxfastkde/kwinrc	2007-01-26 03:41:12 UTC (rev 304)
+@@ -0,0 +1,7 @@
++[Windows]
++AnimateMinimize[$i]=false
++AnimateShade[$i]=false
++MoveMode[$i]=Transparent
++MoveResizeMaximizedWindows[$i]=false
++ResizeMode[$i]=Transparent
++ShadeHover[$i]=false
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000436.html">[Freenx-cvs] r303 - nx-utils/nxfish
+</A></li>
+	<LI>Next message: <A HREF="000438.html">[Freenx-cvs] r305 - nx-utils/nxfastkde
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#437">[ date ]</a>
+              <a href="thread.html#437">[ thread ]</a>
+              <a href="subject.html#437">[ subject ]</a>
+              <a href="author.html#437">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

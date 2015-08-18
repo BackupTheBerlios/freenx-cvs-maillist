@@ -1,0 +1,121 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r479 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r479%20-%20freenx-server/trunk&In-Reply-To=%3C200803020936.m229a98I014051%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000606.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r479 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r479%20-%20freenx-server/trunk&In-Reply-To=%3C200803020936.m229a98I014051%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r479 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Sun Mar  2 10:36:09 CET 2008</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000606.html">[Freenx-cvs] r480 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#605">[ date ]</a>
+              <a href="thread.html#605">[ thread ]</a>
+              <a href="subject.html#605">[ subject ]</a>
+              <a href="author.html#605">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-03-02 10:36:08 +0100 (Sun, 02 Mar 2008)
+New Revision: 479
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxnode
+Log:
++       * Fixed parsing of SMB port and added a fallback if mport file is empty.
++         (Patch from Gentoo Portage)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2008-02-13 04:38:51 UTC (rev 478)
++++ freenx-server/trunk/ChangeLog	2008-03-02 09:36:08 UTC (rev 479)
+@@ -28,6 +28,8 @@
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 	* Fixed the default value for ENABLE_CLIPBOARD=&quot;both&quot; instead of ' = '.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Fixed parsing of SMB port and added a fallback if mport file is empty.
++	  (Patch from Gentoo Portage)
+ 
+ 14.10.2007 FreeNX 0.7.1 &quot;Hip Hop Edition&quot;
+ 	* Fixed the issue that makes fonts look tiny and unreadable by default 
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2008-02-13 04:38:51 UTC (rev 478)
++++ freenx-server/trunk/nxnode	2008-03-02 09:36:08 UTC (rev 479)
+@@ -56,7 +56,7 @@
+ {
+ 	stringinstring &quot;&amp;$1=&quot; &quot;$CMDLINE&quot; || return 1
+ 	
+-	echo &quot;$CMDLINE&quot; |  tr &quot;&amp;&quot; &quot;\n&quot; | egrep &quot;^&quot;$1&quot;=&quot; | awk -F= '{ VAL=$2 } END { print VAL }'
++	echo &quot;$CMDLINE&quot; |  tr &quot;&amp;&quot; &quot;\n&quot; | egrep &quot;^&quot;$1&quot;=&quot; | awk -F= '{ VAL=$2 } END { print VAL }' | sed 's|%24|$|'
+ 	
+ 	return 0
+ }
+@@ -720,7 +720,7 @@
+ 		# Catch NXAGENT SMB Port (sometimes the port differs from what we got from nxserver)
+ 		#
+ 		
+-		if stringinstring &quot;Info: Listening for SMB connections on port&quot; &quot;$line&quot;
++		if stringinstring &quot;Info: Listening * SMB connections on port&quot; &quot;$line&quot;
+ 		then
+ 			SMBMOUNT_PORT=$(echo $line | cut -d&quot;'&quot; -f2)
+ 			echo &quot;$SMBMOUNT_PORT&quot; &gt;&quot;$USER_FAKE_HOME/.nx/C-$sess_id/scripts/mport&quot;
+@@ -1314,8 +1314,9 @@
+ 		sleep 1
+ 	done
+ 	# sometimes the samba port we get from nxserver is not the right one, so let's get it from nxagent
+-	port=$(cat &quot;$USER_FAKE_HOME/.nx/C-$SERVER_NAME-$display-$sessionid/scripts/mport&quot;)
+-	error=$(PASSWD=&quot;$password&quot; $COMMAND_SMBMOUNT &quot;//$computername/$share&quot; &quot;$HOME/$dir&quot; -o username=&quot;$username,ip=127.0.0.1,port=$port&quot; 2&gt;&amp;1)
++	realport=$(cat &quot;$USER_FAKE_HOME/.nx/C-$SERVER_NAME-$display-$sessionid/scripts/mport&quot;)
++	[ -n &quot;$realport&quot; ] &amp;&amp; port=$realport
++	error=$(PASSWD=&quot;$password&quot; $COMMAND_SMBMOUNT &quot;//$computername/$share&quot; &quot;$HOME/$dir&quot; -o username=&quot;$username&quot;,ip=127.0.0.1,port=$port 2&gt;&amp;1)
+ 	if [ $? -eq 0 ]
+ 	then
+ 		$PATH_BIN/nxdialog -dialog ok -caption &quot;NXServer Message&quot; -message &quot;Info: Share: '//$computername/$share' mounted on: '$HOME/$dir'&quot; -display :$display &amp;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000606.html">[Freenx-cvs] r480 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#605">[ date ]</a>
+              <a href="thread.html#605">[ thread ]</a>
+              <a href="subject.html#605">[ subject ]</a>
+              <a href="author.html#605">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,884 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - jonno modified 9 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20jonno%20modified%209%20files&In-Reply-To=%3C420FF443.mail23M1TAGXZ%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000015.html">
+   <LINK REL="Next"  HREF="000017.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - jonno modified 9 files</H1>
+    <B>jonno</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20jonno%20modified%209%20files&In-Reply-To=%3C420FF443.mail23M1TAGXZ%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - jonno modified 9 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Mon Feb 14 01:43:47 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000015.html">[Freenx-cvs] CVS: CVSROOT - fabianx modified log_accum.pl
+</A></li>
+        <LI>Next message: <A HREF="000017.html">[Freenx-cvs] CVS: freenx - fabianx modified 3 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16">[ date ]</a>
+              <a href="thread.html#16">[ thread ]</a>
+              <a href="subject.html#16">[ subject ]</a>
+              <a href="author.html#16">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      jonno
+Date:      2005-02-14 00:43:47 GMT
+Modified:  .        ChangeLog gentoo-nomachine.diff nxkeygen nxnode
+Modified:           nxserver nxsetup
+Added:     .        node.conf.sample nxloadconfig
+Removed:   .        node.conf
+Log:
+Reworked node.conf to be optional as default values are provided through nxloadconfig.
+FreeNX node.conf variables should now be 99% compatible with !M 1.4 node.conf variables, though all variables is not used yet.
+node.conf.sample includes (almost) all variables described and with default values commented out.
+CDE sessions now works
+Updated ChangeLog
+
+Revision  Changes    Path
+1.14      +6 -4      freenx/ChangeLog
+
+
+rev 1.14, prev_rev 1.13
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.13
+retrieving revision 1.14
+diff -u -r1.13 -r1.14
+--- ChangeLog	13 Feb 2005 16:39:16 -0000	1.13
++++ ChangeLog	14 Feb 2005 00:43:45 -0000	1.14
+@@ -1,14 +1,16 @@
+-27.01.2004 FreeNX 0.3.0-WIP
++14.02.2005 FreeNX 0.3.0-WIP
+ 	* Initial CVS checkin.
+ 	* Added unix-default as session type - by Kalev Lember 
+ 	  &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">kalev at smartlink.ee</A>&gt;
+ 	* Fixed nxclient loop - by &quot;Neil Wilson&quot; &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">neil at aldur.co.uk</A>&gt;.
+ 	* Several fixes by Thorsten Sandfuchs &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fux at akk.org</A>&gt;.
+-	* Config file support by Jon Severinsson &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">jonno at users.berlios.de</A>&gt;.
++	* Optional config file support (system- and user-wide)
++		- by Jon Severinsson &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">jonno at users.berlios.de</A>&gt;.
+ 	* Moved logfile to /var/log/nxserver.log.
++	* Moved nx homedir to /var/lib/nxserver/home
+ 	* Complete rewrite of authentication code
+-		* su or ssh is now supported.
+-	* Added support for user based configs like in !M AR01C00135.
++		* passdb, su or ssh is now supported.
++		- by Jon Severinsson &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">jonno at users.berlios.de</A>&gt;.
+ 	* Added NODE_AUTOSTART, EXPORT_{USERIP/SESSIONID} config file
+ 	  directives.
+ 	* Added mechanism to forward connection to commercial NoMachine 
+
+
+
+1.11      +17 -29    freenx/gentoo-nomachine.diff
+
+
+rev 1.11, prev_rev 1.10
+Index: gentoo-nomachine.diff
+===================================================================
+RCS file: /cvsroot/freenx/freenx/gentoo-nomachine.diff,v
+retrieving revision 1.10
+retrieving revision 1.11
+diff -u -r1.10 -r1.11
+--- gentoo-nomachine.diff	13 Feb 2005 16:39:16 -0000	1.10
++++ gentoo-nomachine.diff	14 Feb 2005 00:43:45 -0000	1.11
+@@ -1,34 +1,23 @@
+---- nxserver.old	2005-02-01 01:02:11.000000000 +0100
+-+++ nxserver	2005-02-01 01:04:19.000000000 +0100
+-@@ -15,7 +15,7 @@
+- #
+- 
+- # Important constants
+--NX_CONFIG_FILE=/etc/nxserver/node.conf
+-+NX_CONFIG_FILE=/usr/NX/etc/node.conf
+- 
+- # Read the config file
+- . $NX_CONFIG_FILE
+---- nxkeygen.old	2005-02-01 01:02:19.000000000 +0100
+-+++ nxkeygen	2005-02-01 01:04:39.000000000 +0100
+-@@ -52,11 +52,6 @@
++--- nxkeygen.old	2005-02-14 01:09:08.526715360 +0100
+++++ nxkeygen	2005-02-14 01:09:40.108914136 +0100
++@@ -51,11 +51,6 @@
+  		chown nx:root $x
+  	done
+  	
+ -	# copy the key to the authorized_keys2 file
+--	rm -f $NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE
+--	echo -n &quot;no-port-forwarding,no-X11-forwarding,no-agent-forwarding,command=\&quot;nxserver\&quot; &quot; &gt;$NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE
+--	cat ${NX_SERVER_KEY} &gt;&gt; $NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE
++-	rm -f $NX_KEY_DIR/$SSH_AUTHORIZED_KEYS
++-	echo -n &quot;no-port-forwarding,no-X11-forwarding,no-agent-forwarding,command=\&quot;nxserver\&quot; &quot; &gt;$NX_KEY_DIR/$SSH_AUTHORIZED_KEYS
++-	cat ${NX_SERVER_KEY} &gt;&gt; $NX_KEY_DIR/$SSH_AUTHORIZED_KEYS
+ -
+  	# now tell the user what to do
+  
+  	echo &quot;Unique key generated; your users must install&quot;
+---- node.conf.old	2005-02-01 01:02:27.000000000 +0100
+-+++ node.conf	2005-02-01 01:04:05.000000000 +0100
+-@@ -39,12 +39,12 @@
+- # Path directives
+- # These tell FreeNX where various files are to be found
++--- nxloadconf.old	2005-02-14 01:08:56.482546352 +0100
+++++ nxloadconf	2005-02-14 01:09:40.109913984 +0100
++@@ -18,16 +18,16 @@
++ NX_LICENSE=&quot;OS (GPL)&quot;
+  
++ # Where can different nx components be found
+ -NX_DIR=/usr
+ +NX_DIR=/usr/NX
+  PATH_BIN=$NX_DIR/bin
+@@ -40,11 +29,10 @@
+ +NX_SESS_DIR=$NX_DIR/var/db
+ +NX_HOME_DIR=$NX_DIR/home/nx
+  
+- # Logfile directives
+- # Before turning logging on, please make sure that NX_LOGFILE is 
+-@@ -185,4 +185,4 @@
+- NX_AUTHORIZED_KEYS_FILE=.ssh/authorized_keys2
++ # adds PATH_LIB to the startup of nxagents
++ # Should be set to 1 if PATH_LIB is not a system default library path
++-NX_NOMACHINE_WAY=&quot;0&quot;
+++NX_NOMACHINE_WAY=&quot;1&quot;
+  
+- # adds LD_LIBRARY_PATH to the startup of nxagents
+--NX_NOMACHINE_WAY=0
+-+NX_NOMACHINE_WAY=1
++ # the name of the authorized keys file for ssh
++ SSH_AUTHORIZED_KEYS=&quot;authorized_keys2&quot;
+
+
+
+1.7       +5 -6      freenx/nxkeygen
+
+
+rev 1.7, prev_rev 1.6
+Index: nxkeygen
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxkeygen,v
+retrieving revision 1.6
+retrieving revision 1.7
+diff -u -r1.6 -r1.7
+--- nxkeygen	13 Feb 2005 16:39:16 -0000	1.6
++++ nxkeygen	14 Feb 2005 00:43:46 -0000	1.7
+@@ -11,13 +11,12 @@
+ # Copyright	(c) 2004 Gentoo Foundation
+ #		Released under v2 of the GNU GPL
+ #
+-# CVS: $Id: nxkeygen,v 1.6 2005/02/13 16:39:16 fabianx Exp $
++# CVS: $Id: nxkeygen,v 1.7 2005/02/14 00:43:46 jonno Exp $
+ #
+ # ========================================================================
+ 
+ # Read the config file
+-export $(grep ^NX_CONFIG_FILE= $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxserver))
+-. $NX_CONFIG_FILE
++. $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig)
+ 
+ NX_KEY_DIR=&quot;$NX_HOME_DIR/.ssh&quot;
+ DATE=&quot;`date '+%Y%m%d-%H%M%S'`&quot;
+@@ -53,9 +52,9 @@
+ 	done
+ 	
+ 	# copy the key to the authorized_keys2 file
+-	rm -f $NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE
+-	echo -n &quot;no-port-forwarding,no-X11-forwarding,no-agent-forwarding,command=\&quot;nxserver\&quot; &quot; &gt;$NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE
+-	cat ${NX_SERVER_KEY} &gt;&gt; $NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE
++	rm -f $NX_KEY_DIR/$SSH_AUTHORIZED_KEYS
++	echo -n &quot;no-port-forwarding,no-X11-forwarding,no-agent-forwarding,command=\&quot;nxserver\&quot; &quot; &gt;$NX_KEY_DIR/$SSH_AUTHORIZED_KEYS
++	cat ${NX_SERVER_KEY} &gt;&gt; $NX_KEY_DIR/$SSH_AUTHORIZED_KEYS
+ 
+ 	# now tell the user what to do
+ 
+
+
+
+1.20      +17 -21    freenx/nxnode
+
+
+rev 1.20, prev_rev 1.19
+Index: nxnode
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxnode,v
+retrieving revision 1.19
+retrieving revision 1.20
+diff -u -r1.19 -r1.20
+--- nxnode	14 Feb 2005 00:17:20 -0000	1.19
++++ nxnode	14 Feb 2005 00:43:46 -0000	1.20
+@@ -13,14 +13,12 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxnode,v 1.19 2005/02/14 00:17:20 fabianx Exp $
++# CVS: $Id: nxnode,v 1.20 2005/02/14 00:43:46 jonno Exp $
+ #
+ # 21.06.2004: - Full reconnection support
+ 
+ # Read the config file
+-export $(grep ^NX_CONFIG_FILE= $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxserver))
+-. $NX_CONFIG_FILE
+-[ -f &quot;${NX_ETC_DIR}/${USER}.node.conf&quot; ] &amp;&amp; . &quot;${NX_ETC_DIR}/${USER}.node.conf&quot;
++. $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig) --userconf
+ 
+ echo &quot;NX&gt; 1000 NXNODE - Version $NX_VERSION $NX_LICENSE&quot;
+ 
+@@ -90,8 +88,7 @@
+ 	fi
+ 	
+ 	# remove cookie
+-	[ -z &quot;$XAUTH_COMMAND&quot; ] &amp;&amp; XAUTH_COMMAND=&quot;/usr/X11R6/bin/xauth&quot;
+-	$XAUTH_COMMAND -v source ~/.nx/C-$sess_id/scripts/authority &gt;/dev/null 2&gt;&amp;1
++	$COMMAND_XAUTH -v source ~/.nx/C-$sess_id/scripts/authority &gt;/dev/null 2&gt;&amp;1
+ 	# FIXME: What to do on errors ... ?
+ 	# TODO: Add parsing of var ...
+ 	#mv $HOME/.nx/C-$1/ $HOME/.nx/F-C-$1/
+@@ -122,12 +119,13 @@
+ 	STARTX=&quot;&quot;
+ 	case $type in
+ 		unix-kde)
+-			[ -z &quot;$START_KDE_COMMAND&quot; ] &amp;&amp; START_KDE_COMMAND=$(which startkde)
+-			STARTX=$START_KDE_COMMAND
++			STARTX=$COMMAND_START_KDE
+ 		;;
+ 		unix-gnome)
+-			[ -z &quot;$START_GNOME_COMMAND&quot; ] &amp;&amp; START_GNOME_COMMAND=$(which gnome-session)
+-			STARTX=$START_GNOME_COMMAND
++			STARTX=$COMMAND_START_GNOME
++		;;
++		unix-cde)
++			STARTX=$COMMAND_START_CDE
+ 		;;
+ 		unix-application)
+ 			STARTX=$(which $application)
+@@ -135,8 +133,8 @@
+ 		unix-default)
+ 			if [ -f &quot;$HOME/.Xclients&quot; ]; then
+ 				STARTX=&quot;$HOME/.Xclients&quot;
+-			elif [ -f &quot;/etc/X11/xdm/Xsession&quot; ]; then
+-				STARTX=&quot;/etc/X11/xdm/Xsession&quot;
++			elif [ -f &quot;$DEFAULT_X_SESSION&quot; ]; then
++				STARTX=&quot;$DEFAULT_X_SESSION&quot;
+ 			fi
+ 		;;
+ 	esac
+@@ -465,8 +463,7 @@
+ exit
+ EOF
+ 
+-	[ -z &quot;$XAUTH_COMMAND&quot; ] &amp;&amp; XAUTH_COMMAND=&quot;/usr/X11R6/bin/xauth&quot;
+-	$XAUTH_COMMAND -v source ~/.nx/C-$sess_id/scripts/authority &gt;/dev/null 2&gt;&amp;1
++	$COMMAND_XAUTH -v source ~/.nx/C-$sess_id/scripts/authority &gt;/dev/null 2&gt;&amp;1
+ 
+ cat &lt;&lt; EOF &gt;~/.nx/C-$sess_id/scripts/authority
+ remove localhost:$display
+@@ -539,8 +536,7 @@
+ 	rdir=$(getparam dir | sed 's|$(SHARES)/||g')
+ 	display=$(cd $HOME/.nx/; echo C-$HOSTNAME-*-$sessionid | cut -d&quot;-&quot; -f3)
+ 	mkdir -p $dir
+-	[ -z $SMBMOUNT_COMMAND ] &amp;&amp; SMBMOUNT_COMMAND=&quot;smbmount&quot;
+-	$SMBMOUNT_COMMAND //$computername/$rdir $HOME/$dir -o username $username ip 127.0.0.1 port $port
++	$COMMAND_SMBMOUNT //$computername/$rdir $HOME/$dir -o username $username ip 127.0.0.1 port $port
+ 	if [ $? -eq 0 ]
+ 	then
+ 		$PATH_BIN/nxclient -dialog ok -caption &quot;NXServer Message&quot; -message &quot;Info: Share: '//$computername/$rdir' mounted on: '$HOME/$dir'&quot; -noautokill -display :$display
+@@ -568,13 +564,13 @@
+ 	;;
+ 	--setkey)
+ 		mkdir -m 700 -p $HOME/.ssh
+-		if ! grep -q &quot;$(cat $NX_ETC_DIR/users.id_dsa.pub)&quot; $HOME/$NX_AUTHORIZED_KEYS_FILE 2&gt;/dev/null
++		if ! grep -q &quot;$(cat $NX_ETC_DIR/users.id_dsa.pub)&quot; $HOME/.ssh/$SSH_AUTHORIZED_KEYS 2&gt;/dev/null
+ 		then
+-			cat $NX_ETC_DIR/users.id_dsa.pub &gt;&gt; $HOME/$NX_AUTHORIZED_KEYS_FILE
+-			chmod 600 $HOME/$NX_AUTHORIZED_KEYS_FILE
+-			echo &quot;NX&gt; 716 Public key added to: $HOME/$NX_AUTHORIZED_KEYS_FILE&quot;
++			cat $NX_ETC_DIR/users.id_dsa.pub &gt;&gt; $HOME/.ssh/$SSH_AUTHORIZED_KEYS
++			chmod 600 $HOME/.ssh/$SSH_AUTHORIZED_KEYS
++			echo &quot;NX&gt; 716 Public key added to: $HOME/.ssh/$SSH_AUTHORIZED_KEYS&quot;
+ 		else
+-			echo &quot;NX&gt; 716 Public key is already present in: $HOME/$NX_AUTHORIZED_KEYS_FILE&quot;
++			echo &quot;NX&gt; 716 Public key is already present in: $HOME/.ssh/$SSH_AUTHORIZED_KEYS&quot;
+ 		fi
+ 	;;
+ 	*)
+
+
+
+1.22      +12 -17    freenx/nxserver
+
+
+rev 1.22, prev_rev 1.21
+Index: nxserver
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxserver,v
+retrieving revision 1.21
+retrieving revision 1.22
+diff -u -r1.21 -r1.22
+--- nxserver	13 Feb 2005 22:49:15 -0000	1.21
++++ nxserver	14 Feb 2005 00:43:46 -0000	1.22
+@@ -11,14 +11,11 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxserver,v 1.21 2005/02/13 22:49:15 fabianx Exp $
++# CVS: $Id: nxserver,v 1.22 2005/02/14 00:43:46 jonno Exp $
+ #
+ 
+-# Important constants
+-NX_CONFIG_FILE=/etc/nxserver/node.conf
+-
+ # Read the config file
+-. $NX_CONFIG_FILE
++. $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig)
+ 
+ # following two functions are Copyright by Klaus Knopper
+ 
+@@ -540,7 +537,8 @@
+ 
+ 			if [ &quot;$LOGIN_SUCCESS&quot; = &quot;1&quot; ]
+ 			then
+-				[ -f &quot;${NX_ETC_DIR}/${USER}.node.conf&quot; ] &amp;&amp; . &quot;${NX_ETC_DIR}/${USER}.node.conf&quot;
++				# Reread the config files (so that $USER.node.conf get sourced)
++				. $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig) --userconf
+ 				echo_x &quot;NX&gt; 103 Welcome to: $HOSTNAME user: $USER&quot;
+ 				break
+ 			else
+@@ -662,10 +660,7 @@
+ 	if [ &quot;$ACTION&quot; = &quot;start&quot; ]
+ 	then
+ 		# start nxnode
+-		SESS_DISPLAY=1000
+-				
+-		# nxnode.conf paramaters
+-		[ -n &quot;$DISPLAY_BASE&quot; ] &amp;&amp; SESS_DISPLAY=$DISPLAY_BASE
++		SESS_DISPLAY=$DISPLAY_BASE
+ 	
+ 		# stupid but working algo ...
+ 			
+@@ -854,7 +849,7 @@
+ 
+ # Policy: All functions and variables need to start with CMD_ / cmd_
+ 
+-# Needed global vars: $NX_VERSION, $NX_LICENSE, $NX_ETC_DIR, $PATH_BIN, $NX_HOME_DIR, $NX_AUTHORIZED_KEYS_FILE
++# Needed global vars: $NX_VERSION, $NX_LICENSE, $NX_ETC_DIR, $PATH_BIN, $NX_HOME_DIR, $SSH_AUTHORIZED_KEYS
+ 
+ # Needed package: passdb
+ 
+@@ -957,23 +952,23 @@
+ cmd_start()
+ {
+ 	
+-	[ -f $NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE ] &amp;&amp; cmd_abort &quot;ERROR: Service already running&quot;
+-	mv $NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE.disabled $NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE
++	[ -f $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS ] &amp;&amp; cmd_abort &quot;ERROR: Service already running&quot;
++	mv $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS.disabled $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS
+ 	echo &quot;NX&gt; 122 Service started&quot;
+ }
+ 
+ cmd_stop()
+ {
+-	[ -f $NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE ] || cmd_abort &quot;Service was already stopped&quot;
+-	mv $NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE $NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE.disabled
++	[ -f $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS ] || cmd_abort &quot;Service was already stopped&quot;
++	mv $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS.disabled
+ 	# TODO: Stop all running sessions
+ 	echo &quot;NX&gt; 123 Service stopped&quot;
+ }
+ 
+ cmd_status()
+ {
+-	[ -f $NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE ] &amp;&amp; echo &quot;NX&gt; 110 NX Server is running&quot;
+-	[ -f $NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE ] || echo &quot;NX&gt; 110 NX Server is stopped&quot;
++	[ -f $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS ] &amp;&amp; echo &quot;NX&gt; 110 NX Server is running&quot;
++	[ -f $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS ] || echo &quot;NX&gt; 110 NX Server is stopped&quot;
+ }
+ 
+ cmd_restart()
+
+
+
+1.12      +7 -10     freenx/nxsetup
+
+
+rev 1.12, prev_rev 1.11
+Index: nxsetup
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxsetup,v
+retrieving revision 1.11
+retrieving revision 1.12
+diff -u -r1.11 -r1.12
+--- nxsetup	14 Feb 2005 00:02:59 -0000	1.11
++++ nxsetup	14 Feb 2005 00:43:46 -0000	1.12
+@@ -5,7 +5,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxsetup,v 1.11 2005/02/14 00:02:59 fabianx Exp $ 
++# CVS: $Id: nxsetup,v 1.12 2005/02/14 00:43:46 jonno Exp $ 
+ #
+ 
+ HELP=&quot;no&quot;
+@@ -63,10 +63,7 @@
+ fi
+ 
+ # Read the config file
+-echo -n &quot;Searching for nxserver binary...&quot;
+-export $(grep ^NX_CONFIG_FILE= $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxserver))
+-echo &quot;done&quot;
+-. $NX_CONFIG_FILE
++. $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig)
+ 
+ # Tries to add a system user
+ useradd_nx()
+@@ -128,23 +125,23 @@
+ 		echo &quot;done&quot;
+ 	fi
+ 	
+-	echo -n &quot;Setting up known_hosts and $NX_AUTHORIZED_KEYS_FILE ...&quot;
++	echo -n &quot;Setting up known_hosts and $SSH_AUTHORIZED_KEYS ...&quot;
+ 	
+ 	SETUP_NX_KEY=&quot;no&quot;
+ 	
+ 	mkdir -p $NX_HOME_DIR/.ssh
+ 	chmod 700 $NX_HOME_DIR/ $NX_HOME_DIR/.ssh
+ 	
+-	if [ ! -f $NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE ]
++	if [ ! -f $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS ]
+ 	then
+ 		SETUP_NX_KEY=&quot;yes&quot;
+ 		if [ &quot;$SETUP_NOMACHINE_KEY&quot; = &quot;yes&quot; ]
+ 		then
+-			cat &lt;&lt; EOF &gt;$NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE
++			cat &lt;&lt; EOF &gt;$NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS
+ no-port-forwarding,no-X11-forwarding,no-agent-forwarding,command=&quot;nxserver&quot; ssh-dss AAAAB3NzaC1kc3MAAACBAJe/0DNBePG9dYLWq7cJ0SqyRf1iiZN/IbzrmBvgPTZnBa5FT/0Lcj39sRYt1paAlhchwUmwwIiSZaON5JnJOZ6jKkjWIuJ9MdTGfdvtY1aLwDMpxUVoGwEaKWOyin02IPWYSkDQb6cceuG9NfPulS9iuytdx0zIzqvGqfvudtufAAAAFQCwosRXR2QA8OSgFWSO6+kGrRJKiwAAAIEAjgvVNAYWSrnFD+cghyJbyx60AAjKtxZ0r/Pn9k94Qt2rvQoMnGgt/zU0v/y4hzg+g3JNEmO1PdHh/wDPVOxlZ6Hb5F4IQnENaAZ9uTZiFGqhBO1c8Wwjiq/MFZy3jZaidarLJvVs8EeT4mZcWxwm7nIVD4lRU2wQ2lj4aTPcepMAAACANlgcCuA4wrC+3Cic9CFkqiwO/Rn1vk8dvGuEQqFJ6f6LVfPfRTfaQU7TGVLk2CzY4dasrwxJ1f6FsT8DHTNGnxELPKRuLstGrFY/PR7KeafeFZDf+fJ3mbX5nxrld3wi5titTnX+8s4IKv29HJguPvOK/SI7cjzA+SqNfD7qEo8= <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">root at nettuno</A>
+ EOF
+ 		else
+-			# generate a new key, backup the old and copy it to $NX_AUTHORIZED_KEYS_FILE
++			# generate a new key, backup the old and copy it to $SSH_AUTHORIZED_KEYS
+ 			$PATH_BIN/nxkeygen
+ 		fi
+ 	fi
+@@ -266,7 +263,7 @@
+ 		echo &quot;         and protect it accordingly.&quot;
+ 		echo
+ 		echo &quot;         If you really want to use the NoMachine key please remove&quot;
+-		echo &quot;         '$NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE'&quot;
++		echo &quot;         '$NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS'&quot;
+ 		echo &quot;         and then run this script with the --setup-nomachine-key parameter.&quot;
+ 	fi
+ 	
+
+
+
+1.1                  freenx/node.conf.sample
+
+
+rev 1.1, prev_rev 1.0
+Index: node.conf.sample
+===================================================================
+# node.conf
+#
+# This file is provided by FreeNX. It should be placed either into
+# /etc/nxserver/node.conf (FreeNX style) or /usr/NX/etc/node.conf
+# (NoMachine NX style).
+#
+# It is mostly compatible with NoMachine node.conf.
+# The most important difference is that no spaces are allowed when assigning
+# values (eg &quot;A=value&quot; is allowed, &quot;A = value&quot; is NOT).
+# This file is sourced by bash, so you can do some fancy stuff here if you
+# want to, but be aware that it is sourced 3 times per connection.
+# If you want autostart stuff, se NODE_AUTOSTART instead!
+# 
+#
+# You surely are aware that FreeNX is based on the phantastic results that
+# the hard work by NoMachine.com has achieved. NoMachine.com released the
+# core NX libraries under the GPL. The installation of these libs are the
+# precondition for all FreeNX scripts to work. If you are installing this
+# software with the help of one of the package management tools of your
+# Linux distribution, you can assume that this dependency is taken care of
+# by the tool.
+#
+# You have questions about the inner workings of the NX technology?
+#
+# Then you are recommended to first check out the rich and very detailed
+# NoMachine documentation and their online Knowledge Base at 
+#
+#           <A HREF="http://www.nomachine.com/kb/">http://www.nomachine.com/kb/</A>
+#
+# Other sources of information are the NoMachine mailing lists 
+# (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">nxusers at nomachine.com</A> and <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">nxdevelopers at nomachine.com</A>):
+#
+#           <A HREF="http://www.nomachine.com/mailinglists.php">http://www.nomachine.com/mailinglists.php</A>
+#
+# The FreeNX (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">freenx-knx at kde.org</A>) list is here:
+#
+#           <A HREF="https://mail.kde.org/mailman/listinfo/freenx-knx">https://mail.kde.org/mailman/listinfo/freenx-knx</A>
+#
+# CVS: $Id: node.conf.sample,v 1.1 2005/02/14 00:43:46 jonno Exp $
+
+#########################################################################
+# FreeNX specific node.conf directives
+#########################################################################
+
+# Logfile directives
+# Before turning logging on, please make sure that NX_LOGFILE is 
+# writeable for the &quot;nx&quot; user
+#NX_LOGGING=0
+#NX_LOGFILE=/var/log/nxserver.log
+
+# Amount of seconds nxserver is to keep session data. The default of 2592000
+# is equivalent to 30 days. If this is 0 no session history will be kept,
+# and a negative value denotes infinity.
+#SESSION_HISTORY=2592000
+
+# Authentication directives
+# This adds the passdb to the possible authentication methods
+#ENABLE_PASSDB_AUTHENTICATION=&quot;1&quot;
+
+# This adds SSH to the possible authentication methods. For it to work sshd
+# must be set up at localhost accepting password authentication.
+#ENABLE_SSH_AUTHENTICATION=&quot;1&quot;
+
+# This adds SU to the possible authentication methods. For it to work the 
+# &quot;nx&quot; user must be in the wheel (RedHat, Fedora) or the users group (SUSE) 
+# and the user logging in must have a valid shell that accepts the -c 
+# parameter.
+#ENABLE_SU_AUTHENTICATION=&quot;0&quot;
+
+# Require all users to be in the passdb, regardless of authentication 
+# method
+#ENABLE_USER_DB=&quot;0&quot;
+
+# When set to 1 this will automatically resume started sessions
+#ENABLE_AUTORECONNECT=&quot;0&quot;
+
+# When set to 1 this will automatically resume started sessions
+# but only if an older client version is used
+#ENABLE_AUTORECONNECT_BEFORE_140=&quot;1&quot;
+
+# When set to 1 exports NXUSERIP / NXSESSIONID in nxnode
+#EXPORT_USERIP=&quot;0&quot;
+#EXPORT_SESSIONID=&quot;0&quot;
+
+# This can be set to any executable, which is started after session startup
+# like: $NODE_AUTOSTART {start|restore}
+#NODE_AUTOSTART=&quot;&quot;
+
+
+# FreeNX with ENABLE_NOMACHINE_FORWARD=&quot;1&quot; will automatically forward all
+# connections to the commercial NoMachine nxserver installed on the same
+# machine. This feature is introduced to enable the usage of FreeNX adn
+# NoMachine NX side by side on the same machine without conflicts.
+#
+# To make a connection to the FreeNX server, just use 'freenx.&lt;user&gt;' as 
+# username (where &lt;username&gt; is the existing Unix username. (You do not 
+# need to create a user named 'freenx.&lt;user&gt;'!)
+#
+# To make a connection to the NoMachine nxserver, use the unmodified
+# '&lt;user&gt;' username.
+
+#ENABLE_NOMACHINE_FORWARD=&quot;0&quot;
+#NOMACHINE_SERVER=&quot;/usr/NX/bin/nxserver&quot;
+
+# When set to 1 will start nxagent in rootless mode.
+#ENABLE_ROOTLESS_MODE=&quot;0&quot;
+
+#########################################################################
+# NoMachine node.conf compatible (almost) directives
+# All might not be implemented as of now, but will be in the near future.
+#########################################################################
+
+# The host name which is used by NX server. It's should be used if it's 
+# different than the default hostname (as returned by `hostname`)
+#SERVER_NAME=&quot;$(hostname)&quot;
+
+# Refuse the NX client connection if SSHD does not export the
+# SSH_CONNECTION and SSH_CLIENT variables in the environment
+# passed to the NX server.
+#
+# 1: Will check the remote IP and will not accept the
+# connection if it can't be determined.
+#
+# 0: Will accept the connection even if the remote IP
+# is not provided.
+#SSHD_CHECK_IP=&quot;0&quot;
+
+# The port number where local 'sshd' is listening. 
+#SSHD_PORT=22
+
+
+# The base display number from which sessions are started. 
+#DISPLAY_BASE=1000
+
+# The maximum number of contemporary sessions that can be run on FreeNX
+#SESSION_LIMIT=20
+
+# The maximum number of contemporary sessions that a single user can run
+# on FreeNX. Defaults to the value of SESSION_LIMIT.
+#SESSION_USER_LIMIT=20
+
+# The number of displays reserved for sessions, it has to be greater or equal
+# to the maximum number of contemporary sessions that a server can run. 
+#DISPLAY_LIMIT=200
+
+
+# The command binary for the default window manager. It is run when a 
+# unix 'custom' session is requested by the NX Client and an application 
+# to run is specified. By default it is set to &quot;twm&quot;. If you don't have 
+# twm in the default path or if you want to use another window manager,
+# you have to set it to the absolute file name of the command binary you 
+# want to use.
+#DEFAULT_X_WM=twm
+
+# The key that contains the name of the script that starts a KDE session. 
+# It's run when a unix 'kde' session is requested by the client.
+#COMMAND_START_KDE=startkde
+
+# The key that contains the name of the script that starts a gnome session. 
+# It's run when a unix 'gnome' session is requested by the client.
+#COMMAND_START_GNOME=gnome-session
+
+# The key that contains the name of the script that starts a CDE session. 
+# It's run when a unix 'cde' session is requested by the client.
+#COMMAND_START_CDE=cdwm
+
+# The key that contains the name of the complete path of command name 
+# 'xterm'. It is run when a unix &quot;xterm&quot; session is requested by the 
+# client.
+#COMMAND_XTERM=xterm
+
+# The key that contains the name of the complete path of command name 
+# 'xauth'.
+#COMMAND_XAUTH=/usr/X11R6/bin/xauth
+
+# The key that contains the name of the complete path of command name 
+# 'xset'. 
+#COMMAND_XSET=/usr/X11R6/bin/xset
+
+# The key that contains the name of the complete path of command name 
+# 'xmodmap'. 
+#COMMAND_XMODMAP=/usr/X11R6/bin/xmodmap
+
+# The key that contains the name of the complete path of command name 
+# 'xkbcomp'. 
+#COMMAND_XKBCOMP=/usr/X11R6/bin/xkbcomp
+
+# The keymap file for xkbcomp
+#XKBCOMP_KEYMAP_FILE=/etc/X11/xkb/keymap/xfree86
+
+# The key that contains the name of the complete path of command name 
+# 'smbmount'.
+#COMMAND_SMBMOUNT=smbmount
+
+# The key that contains the name of the complete path of command name
+# 'smbumount'.
+#COMMAND_SMBUMOUNT=smbumount
+
+
+# User for which sessions should be persistent. Either a comma-separated
+# list of usernames or the word &quot;all&quot;.
+#ENABLE_PERSISTENT_SESSION=&quot;all&quot;
+
+# Users in the ENABLE_PERSISTENT_SESSION for which persistent should be
+# disabled. Especially usefull if ENABLE_PERSISTENT_SESSION=&quot;all&quot;
+#DISABLE_PERSISTENT_SESSION=&quot;&quot;
+
+# Extra options sent to the different nx agents. See !M documentation
+# for examples of usefull parameters.
+#AGENT_EXTRA_OPTIONS_RFB=&quot;&quot;
+#AGENT_EXTRA_OPTIONS_RDP=&quot;&quot;
+#AGENT_EXTRA_OPTIONS_X=&quot;&quot;
+
+# The font server the agent will use. If set to &quot;&quot; no font server is used.
+# For this to do any good, the client has to have the same font server set
+# in /etc/X11/XF86Config
+#AGENT_FONT_SERVER=&quot;&quot;
+
+# disable or enable use of 'tcp nodelay' on proxy. Old versions of Linux 
+# kernels have problems using this option on sockets that will cause a loss 
+# of TCP connections. This option is not set by default to allow clients to 
+# specify whether to enable or disable TCP nodelay. Setting this option to 
+# the value of &quot;0&quot; NX proxy avoids using 'tcp nodelay' but it will cause a 
+# loss of interaction in sessions.
+#PROXY_TCP_NODELAY=&quot;0&quot;
+
+# Extra options to nxproxy. See !M documentation for usefull parameters.
+#PROXY_EXTRA_OPTIONS=&quot;&quot;
+
+
+
+
+1.1                  freenx/nxloadconfig
+
+
+rev 1.1, prev_rev 1.0
+Index: nxloadconfig
+===================================================================
+#!/bin/bash
+#
+# Copyright (c) 2005 by Fabian Franz &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">freenx at fabian-franz.de</A>&gt;
+#           (c) 2005 by Jon Severinsson &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">jon at severinsson.net</A>&gt;
+#
+# License: GPL, version 2
+#
+# CVS: $Id: nxloadconfig,v 1.1 2005/02/14 00:43:46 jonno Exp $
+#
+# ========================================================================
+
+#########################################################################
+# INTERNAL STUFF
+# DO NOT TOUCH unless you REALLY know what you are doing
+#########################################################################
+
+NX_VERSION=1.4.0-03-CVS
+NX_LICENSE=&quot;OS (GPL)&quot;
+
+# Where can different nx components be found
+NX_DIR=/usr
+PATH_BIN=$NX_DIR/bin
+PATH_LIB=$NX_DIR/lib
+NX_ETC_DIR=/etc/nxserver
+NX_SESS_DIR=/var/lib/nxserver/db
+NX_HOME_DIR=/var/lib/nxserver/home
+
+# adds PATH_LIB to the startup of nxagents
+# Should be set to 1 if PATH_LIB is not a system default library path
+NX_NOMACHINE_WAY=&quot;0&quot;
+
+# the name of the authorized keys file for ssh
+SSH_AUTHORIZED_KEYS=&quot;authorized_keys2&quot;
+
+#########################################################################
+# Default Values
+# DO NOT EVER TOUCH THIS, edit $NX_ETC_DIR/node.conf instead
+#########################################################################
+
+NX_LOGGING=0
+NX_LOGFILE=/var/log/nxserver.log
+SESSION_HISTORY=2592000
+
+ENABLE_PASSDB_AUTHENTICATION=&quot;1&quot;
+ENABLE_SSH_AUTHENTICATION=&quot;1&quot;
+ENABLE_SU_AUTHENTICATION=&quot;0&quot;
+ENABLE_USER_DB=&quot;0&quot;
+
+ENABLE_AUTORECONNECT=&quot;0&quot;
+ENABLE_AUTORECONNECT_BEFORE_140=&quot;1&quot;
+
+EXPORT_USERIP=&quot;0&quot;
+EXPORT_SESSIONID=&quot;0&quot;
+NODE_AUTOSTART=&quot;&quot;
+
+ENABLE_NOMACHINE_FORWARD=&quot;0&quot;
+NOMACHINE_SERVER=&quot;/usr/NX/bin/nxserver&quot;
+
+ENABLE_ROOTLESS_MODE=&quot;0&quot;
+
+SSHD_CHECK_IP=&quot;0&quot;
+SSHD_PORT=22
+
+DISPLAY_BASE=1000
+SESSION_LIMIT=20
+DISPLAY_LIMIT=200
+
+DEFAULT_X_WM=twm
+DEFAULT_X_SESSION=/etc/X11/xdm/Xsession
+COMMAND_START_KDE=startkde
+COMMAND_START_GNOME=gnome-session
+COMMAND_START_CDE=cdwm
+COMMAND_XTERM=xterm
+COMMAND_XAUTH=/usr/X11R6/bin/xauth
+COMMAND_XSET=/usr/X11R6/bin/xset
+COMMAND_XMODMAP=/usr/X11R6/bin/xmodmap
+COMMAND_XKBCOMP=/usr/X11R6/bin/xkbcomp
+XKBCOMP_KEYMAP_FILE=/etc/X11/xkb/keymap/xfree86
+COMMAND_SMBMOUNT=smbmount
+COMMAND_SMBUMOUNT=smbumount
+
+ENABLE_PERSISTENT_SESSION=&quot;all&quot;
+DISABLE_PERSISTENT_SESSION=&quot;&quot; 
+
+AGENT_EXTRA_OPTIONS_RFB=&quot;&quot;
+AGENT_EXTRA_OPTIONS_RDP=&quot;&quot;
+AGENT_EXTRA_OPTIONS_X=&quot;&quot;
+AGENT_FONT_SERVER=&quot;&quot;
+
+PROXY_TCP_NODELAY=&quot;0&quot;
+PROXY_EXTRA_OPTIONS=&quot;&quot;
+
+CUPS_SUPPORT=&quot;0&quot;
+CUPS_BACKEND=&quot;&quot;
+CUPS_BIN=&quot;&quot;
+CUPS_SBIN=&quot;&quot;
+
+#########################################################################
+# Values that will be calculated
+#########################################################################
+
+SERVER_NAME=&quot;&quot;
+SESSION_USER_LIMIT=&quot;&quot;
+AGENT_LIBRARY_PATH=&quot;&quot;
+PROXY_LIBRARY_PATH=&quot;&quot;
+APPLICATION_LIBRARY_PATH=&quot;&quot;
+APPLICATION_LIBRARY_PRELOAD=&quot;&quot;
+
+#########################################################################
+# node.conf file evaluation
+#########################################################################
+
+[ -e $NX_ETC_DIR/node.conf ] &amp;&amp; . $NX_ETC_DIR/node.conf
+[ &quot;$1&quot; = &quot;--userconf&quot; -a -e $NX_ETC_DIR/$USER.node.conf ] &amp;&amp; . $NX_ETC_DIR/$USER.node.conf
+
+#########################################################################
+# Calculated values
+#########################################################################
+
+[ -z &quot;$SERVER_NAME&quot; ] &amp;&amp; SERVER_NAME=$(hostname)
+[ -z &quot;$SESSION_USER_LIMIT&quot; ] &amp;&amp; SESSION_USER_LIMIT=$SESSION_LIMIT
+
+[ -z &quot;$AGENT_LIBRARY_PATH&quot; ] &amp;&amp; AGENT_LIBRARY_PATH=$PATH_LIB
+[ -z &quot;$PROXY_LIBRARY_PATH&quot; ] &amp;&amp; PROXY_LIBRARY_PATH=$PATH_LIB
+[ -z &quot;$APPLICATION_LIBRARY_PATH&quot; ] &amp;&amp; APPLICATION_LIBRARY_PATH=$PATH_LIB
+[ -z &quot;$APPLICATION_LIBRARY_PRELOAD&quot; ] &amp;&amp; APPLICATION_LIBRARY_PRELOAD=&quot;$APPLICATION_LIBRARY_PATH/libX11.so.6.2:$APPLICATION_LIBRARY_PATH/libXext.so.6.4:$APPLICATION_LIBRARY_PATH/libXcomp.so.1:$APPLICATION_LIBRARY_PATH/libXcompext.so.1:$APPLICATION_LIBRARY_PATH/libXrender.so.1.2&quot;
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000015.html">[Freenx-cvs] CVS: CVSROOT - fabianx modified log_accum.pl
+</A></li>
+	<LI>Next message: <A HREF="000017.html">[Freenx-cvs] CVS: freenx - fabianx modified 3 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16">[ date ]</a>
+              <a href="thread.html#16">[ thread ]</a>
+              <a href="subject.html#16">[ subject ]</a>
+              <a href="author.html#16">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

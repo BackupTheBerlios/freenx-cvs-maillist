@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r437 - qtnx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r437%20-%20qtnx&In-Reply-To=%3C200801270209.m0R29vvm008303%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000562.html">
+   <LINK REL="Next"  HREF="000564.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r437 - qtnx</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r437%20-%20qtnx&In-Reply-To=%3C200801270209.m0R29vvm008303%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r437 - qtnx">gwright at mail.berlios.de
+       </A><BR>
+    <I>Sun Jan 27 03:09:57 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000562.html">[Freenx-cvs] r436 - nxcl/lib
+</A></li>
+        <LI>Next message: <A HREF="000564.html">[Freenx-cvs] r438 - nxcl/lib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#563">[ date ]</a>
+              <a href="thread.html#563">[ thread ]</a>
+              <a href="subject.html#563">[ subject ]</a>
+              <a href="author.html#563">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2008-01-27 03:09:57 +0100 (Sun, 27 Jan 2008)
+New Revision: 437
+
+Modified:
+   qtnx/qtnxwindow.cpp
+Log:
+Cross platform depth detection
+
+
+Modified: qtnx/qtnxwindow.cpp
+===================================================================
+--- qtnx/qtnxwindow.cpp	2008-01-08 11:02:07 UTC (rev 436)
++++ qtnx/qtnxwindow.cpp	2008-01-27 02:09:57 UTC (rev 437)
+@@ -23,7 +23,6 @@
+ #include &lt;QDir&gt;
+ #include &lt;QFile&gt;
+ #include &lt;QMessageBox&gt;
+-#include &lt;QX11Info&gt;
+ 
+ using namespace nxcl;
+ using namespace std;
+@@ -209,20 +208,20 @@
+     if (config.sessionType == &quot;unix-application&quot;)
+         session.customCommand = config.customCommand;
+ 
+-    nxClient.setSessionData(&amp;session);
+-
+-    nxClient.invokeNXSSH(&quot;id.key&quot;, config.serverHost, config.encryption, &quot;&quot;,
+-            config.serverPort);
+-    processProbe-&gt;start(30);
+-
+     string username = ui_lg.username-&gt;text().toStdString();
+     string password = ui_lg.password-&gt;text().toStdString();
+ 
++    nxClient.setSessionData(&amp;session);
++
+     nxClient.setUsername(username);
+     nxClient.setPassword(password);
+     nxClient.setResolution(getWidth(), getHeight());
+ 
+     nxClient.setDepth(getDepth());
++
++    nxClient.invokeNXSSH(&quot;id.key&quot;, config.serverHost, config.encryption, &quot;&quot;,
++            config.serverPort);
++    processProbe-&gt;start(30);
+ }
+ 
+ void QtNXWindow::setDefaultData()
+@@ -251,23 +250,19 @@
+     session.terminate = false;
+ }
+ 
+-// This should be the only function that needs porting to other platforms
+ int QtNXWindow::getDepth()
+ {
+-    QX11Info info;
+-    return info.depth();
++    return qApp-&gt;desktop()-&gt;depth();
+ }
+ 
+ int QtNXWindow::getWidth()
+ {
+-    QDesktopWidget dw;
+-    return dw.screenGeometry(this).width();
++    return qApp-&gt;desktop()-&gt;screenGeometry(this).width();
+ }
+ 
+ int QtNXWindow::getHeight()
+ {
+-    QDesktopWidget dw;
+-    return dw.screenGeometry(this).height();
++    return qApp-&gt;desktop()-&gt;screenGeometry(this).height();
+ }
+ 
+ void QtNXWindow::updateStatusBar(QString message)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000562.html">[Freenx-cvs] r436 - nxcl/lib
+</A></li>
+	<LI>Next message: <A HREF="000564.html">[Freenx-cvs] r438 - nxcl/lib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#563">[ date ]</a>
+              <a href="thread.html#563">[ thread ]</a>
+              <a href="subject.html#563">[ subject ]</a>
+              <a href="author.html#563">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

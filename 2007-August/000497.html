@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r365 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r365%20-%20freenx-server/trunk&In-Reply-To=%3C200708111944.l7BJiegK021333%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000496.html">
+   <LINK REL="Next"  HREF="000498.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r365 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r365%20-%20freenx-server/trunk&In-Reply-To=%3C200708111944.l7BJiegK021333%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r365 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Sat Aug 11 21:44:40 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000496.html">[Freenx-cvs] r364 - freenx-website
+</A></li>
+        <LI>Next message: <A HREF="000498.html">[Freenx-cvs] r366 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#497">[ date ]</a>
+              <a href="thread.html#497">[ thread ]</a>
+              <a href="subject.html#497">[ subject ]</a>
+              <a href="author.html#497">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-08-11 21:44:40 +0200 (Sat, 11 Aug 2007)
+New Revision: 365
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxserver
+Log:
+* Added &quot;host&quot; output to --list to see which user is connected to
+  which server in case of loadbalancing.
+  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>, Bastian Kames &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">kames at ibg-monforts.de</A>&gt; 
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-08-11 18:00:57 UTC (rev 364)
++++ freenx-server/trunk/ChangeLog	2007-08-11 19:44:40 UTC (rev 365)
+@@ -18,6 +18,9 @@
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">puterguy at bat.berlios.de</A>)
+ 	* Added support for mount.cifs additionally to the deprecated
+ 	  smbmount. (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">puterguy at bat.berlios.de</A>)
++	* Added &quot;host&quot; output to --list to see which user is connected to
++	  which server in case of loadbalancing.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>, Bastian Kames &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">kames at ibg-monforts.de</A>&gt;)
+ 
+ 07.07.2007 FreeNX 0.7.0 &quot;Jornade SPL Edition VI+1&quot;
+ 	* Fixed the printing support for CUPS 1.2.
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2007-08-11 18:00:57 UTC (rev 364)
++++ freenx-server/trunk/nxserver	2007-08-11 19:44:40 UTC (rev 365)
+@@ -273,15 +273,15 @@
+ {
+ 	echo &quot;NX&gt; 127 Sessions list of user '$1'&quot;
+ 	echo
+-	echo &quot;Display Username        Remote IP       Session ID&quot;
+-	echo &quot;------- --------------- --------------- --------------------------------&quot;
++	echo &quot;Server     Display Username        Remote IP       Session ID&quot;
++	echo &quot;------ ------- --------------- --------------- --------------------------------&quot;
+ 	for i in $NX_SESS_DIR/running/*
+ 	do
+ 		[ -f $i ] || break
+ 		if egrep -q &quot;^userName=$1$&quot; $i
+ 		then
+ 			CMDLINE=$(session_get_cmdline $i)
+-			echo -e &quot;$(getparam display)\t$(getparam userName)\t$(getparam foreignAddress)\t$(getparam sessionId)&quot;
++			echo -e &quot;$(getparam host)\t$(getparam display)\t$(getparam userName)\t$(getparam foreignAddress)\t$(getparam sessionId)&quot;
+ 		fi
+ 	done
+ }
+@@ -324,13 +324,13 @@
+ {
+ 	echo &quot;NX&gt; 127 Sessions list:&quot;
+ 	echo
+-	echo &quot;Display Username        Remote IP       Session ID&quot;
+-	echo &quot;------- --------------- --------------- --------------------------------&quot;
++	echo &quot;Server     Display Username        Remote IP       Session ID&quot;
++	echo &quot;------ ------- --------------- --------------- --------------------------------&quot;
+ 	for i in $NX_SESS_DIR/running/*
+ 	do
+ 		[ -f $i ] || break
+ 		CMDLINE=$(session_get_cmdline $i)
+-		echo -e &quot;$(getparam display)\t$(getparam userName)\t$(getparam foreignAddress)\t$(getparam sessionId)&quot;
++		echo -e &quot;$(getparam host)\t$(getparam display)\t$(getparam userName)\t$(getparam foreignAddress)\t$(getparam sessionId)&quot;
+ 	done
+ }
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000496.html">[Freenx-cvs] r364 - freenx-website
+</A></li>
+	<LI>Next message: <A HREF="000498.html">[Freenx-cvs] r366 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#497">[ date ]</a>
+              <a href="thread.html#497">[ thread ]</a>
+              <a href="subject.html#497">[ subject ]</a>
+              <a href="author.html#497">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

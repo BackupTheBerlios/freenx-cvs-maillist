@@ -1,0 +1,3415 @@
+From freenx-cvs at berlios.de  Mon Apr  4 09:00:58 2005
+From: freenx-cvs at berlios.de (fux)
+Date: Mon, 04 Apr 2005 09:00:58 +0200
+Subject: [Freenx-cvs] CVS: freenx - fux modified nxsetup
+Message-ID: <4250E62A.mailOBC1GOQMG@lists.berlios.de>
+
+User:      fux
+Date:      2005-04-04 07:00:58 GMT
+Modified:  .        nxsetup
+Log:
+Expect handles adding new keys in known-hosts, so I think its deprecated to add the systems pub-key in the nx-users home. As on my system I don't have a openssh-pubkey, I made it optional to disable the failing copy.
+
+Revision  Changes    Path
+1.24      +10 -3     freenx/nxsetup
+
+
+rev 1.24, prev_rev 1.23
+Index: nxsetup
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxsetup,v
+retrieving revision 1.23
+retrieving revision 1.24
+diff -u -r1.23 -r1.24
+--- nxsetup	4 Apr 2005 06:45:15 -0000	1.23
++++ nxsetup	4 Apr 2005 07:00:58 -0000	1.24
+@@ -5,7 +5,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxsetup,v 1.23 2005/04/04 06:45:15 fux Exp $ 
++# CVS: $Id: nxsetup,v 1.24 2005/04/04 07:00:58 fux Exp $ 
+ #
+ 
+ HELP="no"
+@@ -16,6 +16,7 @@
+ UNINSTALL="no"
+ PURGE="no"
+ SETUP_SSH2_KEY="no"
++BUILD_KNOWN_HOSTS="yes"
+ 
+ while [ "$1" ]
+ do
+@@ -24,6 +25,7 @@
+ 		--install) INSTALL="yes"; shift ;;
+ 		--setup-nomachine-key) SETUP_NOMACHINE_KEY="yes"; shift ;;
+ 		--ssh2) SETUP_SSH2_KEY="yes"; shift;;
++		--dont-build-known-hosts) BUILD_KNOWN_HOSTS="no"; shift;;
+ 		--uid) SETUP_UID=$2; shift 2 ;;
+ 		--clean) CLEAN="yes"; shift ;;
+ 		--uninstall) UNINSTALL="yes"; shift ;;
+@@ -54,7 +56,7 @@
+ 	echo "                         client. This is not as secure, but it simplifies the "
+ 	echo "                         configuration of clients."
+ 	echo "                         Use this option at your own risk."
+-	echo "  --ssh2		       additionally create commercial pubkey-support, beware"
++	echo "  --ssh2		       Additionally create commercial pubkey-support, beware"
+ 	echo "			       own _commercial_ ssh2-key is not supported!."
+ 	echo "  --uid <number>         The nx user will be given the uid <number>."
+ 	echo "  --clean                Performs an uninstall prior to the installation"
+@@ -63,6 +65,11 @@
+ 	echo "                         keys as well. Note that node.conf will always be saved."
+ 	exit 0
+ fi
++#Undocumented
++#
++#    --dont-build-known-hosts		For system without /etc/ssh/ssh_host_key.rsa.pub and 
++#					expect should handle nx-users known-hosts keys and 
++#					
+ 
+ if [ $UID -ne 0 ]
+ then
+@@ -199,7 +206,7 @@
+ 		chmod 600 ${SSH2_HOME_DIR}/$SSH2_AUTHORIZATION ${SSH2_HOME_DIR}/$SSH2_PUBKEY
+ 	fi
+ 	
+-	if [ ! -f $NX_HOME_DIR/.ssh/known_hosts ]
++	if [ ! -f $NX_HOME_DIR/.ssh/known_hosts -a "$BUILD_KNOWN_HOSTS" = "yes" ]
+ 	then
+ 		echo -n "127.0.0.1 " > $NX_HOME_DIR/.ssh/known_hosts
+ 		cat /etc/ssh/ssh_host_rsa_key.pub >> $NX_HOME_DIR/.ssh/known_hosts
+
+
+
+
+
+
+From freenx-cvs at berlios.de  Mon Apr  4 08:45:16 2005
+From: freenx-cvs at berlios.de (fux)
+Date: Mon, 04 Apr 2005 08:45:16 +0200
+Subject: [Freenx-cvs] CVS: freenx - fux modified nxsetup
+Message-ID: <4250E27C.mailLRK1GA0IQ@lists.berlios.de>
+
+User:      fux
+Date:      2005-04-04 06:45:16 GMT
+Modified:  .        nxsetup
+Log:
+spelling...
+
+Revision  Changes    Path
+1.23      +3 -3      freenx/nxsetup
+
+
+rev 1.23, prev_rev 1.22
+Index: nxsetup
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxsetup,v
+retrieving revision 1.22
+retrieving revision 1.23
+diff -u -r1.22 -r1.23
+--- nxsetup	31 Mar 2005 08:17:56 -0000	1.22
++++ nxsetup	4 Apr 2005 06:45:15 -0000	1.23
+@@ -5,7 +5,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxsetup,v 1.22 2005/03/31 08:17:56 fux Exp $ 
++# CVS: $Id: nxsetup,v 1.23 2005/04/04 06:45:15 fux Exp $ 
+ #
+ 
+ HELP="no"
+@@ -235,7 +235,7 @@
+ 	
+ 	if [ -e "$NX_LOGFILE" ] 
+ 	then
+-		echo -n "Removing loggfile ..."
++		echo -n "Removing logfile ..."
+ 		rm -f "$NX_LOGFILE" 2>/dev/null
+ 		rmdir -p $(dirname "$NX_LOGFILE") 2>/dev/null
+ 		echo "done"
+@@ -287,7 +287,7 @@
+ 		then
+ 			echo "  Both SSH and SU authentication is enabled."
+ 			echo "  This does work, but is redundant."
+-			echo "  Please check if this is realy what you intended."
++			echo "  Please check if this is really what you intended."
+ 		elif [ "$ENABLE_SSH_AUTHENTICATION" = "1" ]
+ 		then
+ 			echo "  PAM authentication will be done through SSH."
+
+
+
+
+
+
+From freenx-cvs at berlios.de  Sat Apr  9 21:15:43 2005
+From: freenx-cvs at berlios.de (fux)
+Date: Sat, 09 Apr 2005 21:15:43 +0200
+Subject: [Freenx-cvs] CVS: freenx - fux modified nxsetup
+Message-ID: <425829DF.mail8ME1BXXYZ@lists.berlios.de>
+
+User:      fux
+Date:      2005-04-09 19:15:43 GMT
+Modified:  .        nxsetup
+Log:
+stupid little fault, don't know why I didn't ran over it by testing...
+
+Revision  Changes    Path
+1.25      +2 -2      freenx/nxsetup
+
+
+rev 1.25, prev_rev 1.24
+Index: nxsetup
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxsetup,v
+retrieving revision 1.24
+retrieving revision 1.25
+diff -u -r1.24 -r1.25
+--- nxsetup	4 Apr 2005 07:00:58 -0000	1.24
++++ nxsetup	9 Apr 2005 19:15:43 -0000	1.25
+@@ -5,7 +5,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxsetup,v 1.24 2005/04/04 07:00:58 fux Exp $ 
++# CVS: $Id: nxsetup,v 1.25 2005/04/09 19:15:43 fux Exp $ 
+ #
+ 
+ HELP="no"
+@@ -41,7 +41,7 @@
+ [ "$INSTALL" = "yes" -a "$CLEAN" = "no" -a "$PURGE" = "yes" ] && HELP="yes"
+ [ "$UNINSTALL" = "yes" ] && [ "$SETUP_NOMACHINE_KEY" = "yes" -o -n "$SETUP_UID" -o "$CLEAN" = "yes" ] && HELP="yes"
+ [ "$UNINSTALL" = "yes" -a "$CLEAN" = "yes" ] && HELP="yes"
+-[ "$SETUP_SSH2_KEY" = "yes" -a "$SETUP_NOMACHINE_KEY" = "no" ] && HELP=yes"
++[ "$SETUP_SSH2_KEY" = "yes" -a "$SETUP_NOMACHINE_KEY" = "no" ] && HELP="yes"
+ 
+ if [ "$HELP" = "yes" ]
+ then
+
+
+
+
+
+
+From freenx-cvs at berlios.de  Sat Apr 23 14:56:55 2005
+From: freenx-cvs at berlios.de (jonno)
+Date: Sat, 23 Apr 2005 14:56:55 +0200
+Subject: [Freenx-cvs] CVS: freenx - jonno modified 3 files
+Message-ID: <426A4617.mailIPT1TOXRC@lists.berlios.de>
+
+User:      jonno
+Date:      2005-04-23 12:56:54 GMT
+Modified:  .        node.conf.sample nxloadconfig nxnode
+Log:
+FR #717: Support for .Xclients / .xinitrc / .Xsession is now configureable in node.conf.
+Fixed some spelling errors in node.conf.sample
+
+Revision  Changes    Path
+1.19      +13 -3     freenx/node.conf.sample
+
+
+rev 1.19, prev_rev 1.18
+Index: node.conf.sample
+===================================================================
+RCS file: /cvsroot/freenx/freenx/node.conf.sample,v
+retrieving revision 1.18
+retrieving revision 1.19
+diff -u -r1.18 -r1.19
+--- node.conf.sample	17 Mar 2005 23:21:14 -0000	1.18
++++ node.conf.sample	23 Apr 2005 12:56:54 -0000	1.19
+@@ -37,7 +37,7 @@
+ #
+ #           https://mail.kde.org/mailman/listinfo/freenx-knx
+ #
+-# CVS: $Id: node.conf.sample,v 1.18 2005/03/17 23:21:14 fux Exp $
++# CVS: $Id: node.conf.sample,v 1.19 2005/04/23 12:56:54 jonno Exp $
+ 
+ #########################################################################
+ # FreeNX specific node.conf directives
+@@ -59,7 +59,7 @@
+ 
+ # This directive controls if the temporary session directory 
+ # ($HOME/.nx/C-<hostname>-<display>-<session_id>) should be kept after a 
+-# session has ended. A successfullty terminated session will be saved as 
++# session has ended. A successfully terminated session will be saved as 
+ # T-C-<hostname>-<display>-<session_id> while a failed session will be saved 
+ # as F-C-<hostname>-<display>-<session_id>.
+ #SESSION_LOG_CLEAN=0
+@@ -185,7 +185,7 @@
+ # USER_FAKE_HOME is the base directory for the .nx directory. Use this
+ # parameter instead of the users home directory if $HOME is on a NFS share.
+ # Note that this directory must be unique for every user! To accomplish this 
+-# it is recomended to include $USER in the path.
++# it is recommended to include $USER in the path.
+ #USER_FAKE_HOME=$HOME
+ 
+ # Add the nx libraries to LD_LIBRARY_PATH before starting nx agents.
+@@ -248,6 +248,16 @@
+ #ENABLE_DEFAULT_X_WM="0"
+ #ENABLE_DEFAULT_X_WM_KILL="0"
+ #DEFAULT_X_WM=twm
++
++# When a 'unix-default' session is requested by the client the user's X startup
++# script will be run if pressent and executable, otherwise the default X 
++# session will be run.
++# Depending on distribution USER_X_STARTUP_SCRIPT might be .Xclients, .xinitrc
++# and .Xsession
++# Depending on distribution DEFAULT_X_SESSION might be /etc/X11/xdm/Xsession,
++# /etc/X11/Sessions/Xsession or /etc/X11/xinit/xinitrc
++#USER_X_STARTUP_SCRIPT=.Xclients
++#DEFAULT_X_SESSION=/etc/X11/xdm/Xsession
+ 
+ # The key that contains the name of the script that starts a KDE session. 
+ # It's run when a unix 'kde' session is requested by the client.
+
+
+
+1.24      +2 -1      freenx/nxloadconfig
+
+
+rev 1.24, prev_rev 1.23
+Index: nxloadconfig
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxloadconfig,v
+retrieving revision 1.23
+retrieving revision 1.24
+diff -u -r1.23 -r1.24
+--- nxloadconfig	17 Mar 2005 23:21:14 -0000	1.23
++++ nxloadconfig	23 Apr 2005 12:56:54 -0000	1.24
+@@ -5,7 +5,7 @@
+ #
+ # License: GPL, version 2
+ #
+-# CVS: $Id: nxloadconfig,v 1.23 2005/03/17 23:21:14 fux Exp $
++# CVS: $Id: nxloadconfig,v 1.24 2005/04/23 12:56:54 jonno Exp $
+ #
+ # ========================================================================
+ 
+@@ -128,6 +128,7 @@
+ DISPLAY_LIMIT=200
+ 
+ DEFAULT_X_WM=twm
++USER_X_STARTUP_SCRIPT=.Xclients
+ DEFAULT_X_SESSION=/etc/X11/xdm/Xsession
+ COMMAND_START_KDE=startkde
+ COMMAND_START_GNOME=gnome-session
+
+
+
+1.51      +3 -3      freenx/nxnode
+
+
+rev 1.51, prev_rev 1.50
+Index: nxnode
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxnode,v
+retrieving revision 1.50
+retrieving revision 1.51
+diff -u -r1.50 -r1.51
+--- nxnode	17 Mar 2005 00:00:20 -0000	1.50
++++ nxnode	23 Apr 2005 12:56:54 -0000	1.51
+@@ -13,7 +13,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxnode,v 1.50 2005/03/17 00:00:20 fux Exp $
++# CVS: $Id: nxnode,v 1.51 2005/04/23 12:56:54 jonno Exp $
+ #
+ # 21.06.2004: - Full reconnection support
+ 
+@@ -155,8 +155,8 @@
+ 			STARTX=$application
+ 		;;
+ 		unix-default)
+-			if [ -x "$HOME/.Xclients" ]; then
+-				STARTX="$HOME/.Xclients"
++			if [ -x "$HOME/$USER_X_STARTUP_SCRIPT" ]; then
++				STARTX="$HOME/$USER_X_STARTUP_SCRIPT"
+ 			elif which "$DEFAULT_X_SESSION" >/dev/null 2>&1 ; then
+ 				STARTX="$DEFAULT_X_SESSION"
+ 			fi
+
+
+
+
+
+
+From freenx-cvs at berlios.de  Sun Apr 24 17:12:14 2005
+From: freenx-cvs at berlios.de (fabianx)
+Date: Sun, 24 Apr 2005 17:12:14 +0200
+Subject: [Freenx-cvs] CVS: freenx - fabianx modified nxserver
+Message-ID: <426BB74E.mailJ4P1VU0OO@lists.berlios.de>
+
+User:      fabianx
+Date:      2005-04-24 15:12:14 GMT
+Modified:  .        nxserver
+Log:
+Fix possible cornercase where the "Bye" is sent to the remote proxy instead of nxclient. (stdout -> stderr)
+
+Revision  Changes    Path
+1.48      +3 -3      freenx/nxserver
+
+
+rev 1.48, prev_rev 1.47
+Index: nxserver
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxserver,v
+retrieving revision 1.47
+retrieving revision 1.48
+diff -u -r1.47 -r1.48
+--- nxserver	21 Mar 2005 12:50:36 -0000	1.47
++++ nxserver	24 Apr 2005 15:12:13 -0000	1.48
+@@ -11,7 +11,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxserver,v 1.47 2005/03/21 12:50:36 jonno Exp $
++# CVS: $Id: nxserver,v 1.48 2005/04/24 15:12:13 fabianx Exp $
+ #
+ 
+ # Read the config file
+@@ -872,8 +872,8 @@
+ 			exit 0
+ 		;;
+ 		bye|BYE)
+-			echo_x "Bye"
+-			echo_x "NX> 999 Bye"
++			echo_x "Bye" 1>&2
++			echo_x "NX> 999 Bye" 1>&2
+ 			if [ "$ENCRYPTION" = "1" ] 
+ 			then 
+ 				let PROXY_DISPLAY=$SESS_DISPLAY+4000
+
+
+
+
+
+
+From freenx-cvs at berlios.de  Sun Apr 24 17:51:54 2005
+From: freenx-cvs at berlios.de (fabianx)
+Date: Sun, 24 Apr 2005 17:51:54 +0200
+Subject: [Freenx-cvs] CVS: freenx - fabianx modified 4 files
+Message-ID: <426BC09A.mailKG211LJY4@lists.berlios.de>
+
+User:      fabianx
+Date:      2005-04-24 15:51:54 GMT
+Modified:  .        ChangeLog node.conf.sample nxloadconfig nxserver
+Log:
+Added enforcing of encryption on the server.
+
+New configfile directive: ENABLE_FORCE_ENCRYPTION.
+
+Revision  Changes    Path
+1.45      +2 -0      freenx/ChangeLog
+
+
+rev 1.45, prev_rev 1.44
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.44
+retrieving revision 1.45
+diff -u -r1.44 -r1.45
+--- ChangeLog	31 Mar 2005 08:17:56 -0000	1.44
++++ ChangeLog	24 Apr 2005 15:51:54 -0000	1.45
+@@ -21,6 +21,8 @@
+ 	* Added NX_LOG_LEVEL instead of NX_LOGGING, allowing less verbose logfile.
+ 	* Added SESSION_LOG_CLEAN for configurable removal of the temporary session directory.
+ 	* Added "--ssh2" cmdline switch for commercial ssh2-server support in nxsetup
++	* Added ENABLE_FORCE_ENCRYPTION to enforce the usage of encryption on 
++	  the server.
+ 
+ XX.03.2005 FreeNX 0.3.1-CVS
+ 	* Fixed keyboard mapping problems.
+
+
+
+1.20      +5 -1      freenx/node.conf.sample
+
+
+rev 1.20, prev_rev 1.19
+Index: node.conf.sample
+===================================================================
+RCS file: /cvsroot/freenx/freenx/node.conf.sample,v
+retrieving revision 1.19
+retrieving revision 1.20
+diff -u -r1.19 -r1.20
+--- node.conf.sample	23 Apr 2005 12:56:54 -0000	1.19
++++ node.conf.sample	24 Apr 2005 15:51:54 -0000	1.20
+@@ -37,7 +37,7 @@
+ #
+ #           https://mail.kde.org/mailman/listinfo/freenx-knx
+ #
+-# CVS: $Id: node.conf.sample,v 1.19 2005/04/23 12:56:54 jonno Exp $
++# CVS: $Id: node.conf.sample,v 1.20 2005/04/24 15:51:54 fabianx Exp $
+ 
+ #########################################################################
+ # FreeNX specific node.conf directives
+@@ -192,6 +192,10 @@
+ # WARNING: This will NOT (and should not) affect applications. ONLY Disable this
+ #          if the nx libraries are in a standard system path (such as /usr/lib)!
+ #SET_LD_LIBRARY_PATH="1"
++
++# If enabled forces the user to use encryption. This will bail out 
++# if the user does not have encryption enabled.
++#ENABLE_FORCE_ENCRYPTION="0"
+ 
+ #########################################################################
+ # NoMachine node.conf compatible (almost) directives
+
+
+
+1.25      +5 -1      freenx/nxloadconfig
+
+
+rev 1.25, prev_rev 1.24
+Index: nxloadconfig
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxloadconfig,v
+retrieving revision 1.24
+retrieving revision 1.25
+diff -u -r1.24 -r1.25
+--- nxloadconfig	23 Apr 2005 12:56:54 -0000	1.24
++++ nxloadconfig	24 Apr 2005 15:51:54 -0000	1.25
+@@ -5,7 +5,7 @@
+ #
+ # License: GPL, version 2
+ #
+-# CVS: $Id: nxloadconfig,v 1.24 2005/04/23 12:56:54 jonno Exp $
++# CVS: $Id: nxloadconfig,v 1.25 2005/04/24 15:51:54 fabianx Exp $
+ #
+ # ========================================================================
+ 
+@@ -113,6 +113,10 @@
+ COMMAND_SESSREG="sessreg"
+ 
+ SET_LD_LIBRARY_PATH="1"
++
++ENABLE_FORCE_ENCRYPTION="0"
++
++# FreeNX + NoMachine mixed section
+ 
+ # see below for DEFAULT_X_WM directive
+ ENABLE_DEFAULT_X_WM="0"
+
+
+
+1.49      +9 -3      freenx/nxserver
+
+
+rev 1.49, prev_rev 1.48
+Index: nxserver
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxserver,v
+retrieving revision 1.48
+retrieving revision 1.49
+diff -u -r1.48 -r1.49
+--- nxserver	24 Apr 2005 15:12:13 -0000	1.48
++++ nxserver	24 Apr 2005 15:51:54 -0000	1.49
+@@ -11,7 +11,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxserver,v 1.48 2005/04/24 15:12:13 fabianx Exp $
++# CVS: $Id: nxserver,v 1.49 2005/04/24 15:51:54 fabianx Exp $
+ #
+ 
+ # Read the config file
+@@ -771,6 +771,14 @@
+ 			log 2 "Warning: Please set SSHD_CHECK_IP=1 if you want to refuse the connection."
+ 		fi
+ 	fi
++	
++	export ENCRYPTION=$(getparam encryption)
++	
++	if [ "$ENABLE_FORCE_ENCRYPTION" = "1" -a "$ENCRYPTION" != "1" ]
++	then
++			echo_x "NX> 504 Unencrypted sessions are not allowed."
++			return 1
++	fi
+ 
+ 	# check if there is a suspended session, which we could resume
+ 	if [ "$ENABLE_AUTORECONNECT" = "1" -a "$ACTION" = "start" ]
+@@ -826,11 +834,9 @@
+ 		# now update the session listing
+ 		CMDLINE="a=b&$FULL_PARAMS"
+ 		session_add $uniqueid "sessionName=$(getparam session)&display=$(getparam display)&status=Running&startTime=$(date +%s)&foreignAddress=$(getparam userip)&type=$(getparam type)&sessionId=$uniqueid&creationTime=$(date +%s)&userName=$USER&serverPid=$SERVER_PID&screeninfo=$(getparam screeninfo)&geometry=$(getparam geometry)"
+-		export ENCRYPTION=$(getparam encryption)
+ 	else
+ 		uniqueid=$(getparam restore)
+ 		[ -z "$uniqueid" ] && uniqueid=$(getparam id) # 1.4.0-5 compatibility
+-		export ENCRYPTION=$(getparam encryption)
+ 		session_change "$uniqueid" "foreignAddress" "$USERIP"
+ 
+ 		CMDLINE=$(session_get "$uniqueid")
+
+
+
+
+
+
+From freenx-cvs at berlios.de  Sun Apr 24 18:03:37 2005
+From: freenx-cvs at berlios.de (fabianx)
+Date: Sun, 24 Apr 2005 18:03:37 +0200
+Subject: [Freenx-cvs] CVS: freenx - fabianx modified ChangeLog
+Message-ID: <426BC359.mailKTO1CCWEL@lists.berlios.de>
+
+User:      fabianx
+Date:      2005-04-24 16:03:37 GMT
+Modified:  .        ChangeLog
+Log:
+Cleaned up + word-wrapped the ChangeLog.
+
+Revision  Changes    Path
+1.46      +12 -6     freenx/ChangeLog
+
+
+rev 1.46, prev_rev 1.45
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.45
+retrieving revision 1.46
+diff -u -r1.45 -r1.46
+--- ChangeLog	24 Apr 2005 15:51:54 -0000	1.45
++++ ChangeLog	24 Apr 2005 16:03:37 -0000	1.46
+@@ -3,24 +3,30 @@
+ 	* Added initial support for filesharing via samba.
+ 	* Improvements to be more node.conf compatible.
+ 	* Added COMMAND_NETCAT, COMMAND_SSH & COMMAND_SSH_KEYGEN directive
+-	* Added support for 'nxloadconfig --check' to validate node.conf settings
++	* Added support for 'nxloadconfig --check' to validate node.conf 
++	  settings
+ 	* Added initial support for sound (esd/artsd).
+ 	* Added optional support for utmp/wtmp/lastlog database.
+ 	* Removed support for OSS components prior version 1.4.0 in nxnode.
+ 	  Added -option option to nxagent/nxdesktop/nxviewer.
+ 	* Added forwarding to commercial server via destination port.
+ 	* Added more compatible getparam function
+-	* Sets LD_PRELOAD for applications and LD_LIBRARY_PATH for nxagent/nxproxy by default.
++	* Sets LD_PRELOAD for applications and LD_LIBRARY_PATH for 
++	  nxagent/nxproxy by default.
+ 		- SET_LD_LIBRARY_PATH replaces NX_NOMACHINE_WAY and is 
+ 		  enabled by default, as it is now safe to do so
+ 	* Implemented SSHD_CHECK_IP directive.
+-	* Added the SESSION_HISTORY directive. Session history will by default be kept for 30 days.
++	* Added the SESSION_HISTORY directive. Session history will by default 
++	  be kept for 30 days.
+ 	* Implemented DEFAULT_X_WM for unix-application virtual desktop mode.
+ 	* Implemented SESSION_LIMIT and SESSION_USER_LIMIT.
+ 	* Fixed nxviewer commandline for geometry and fullscreen-support
+-	* Added NX_LOG_LEVEL instead of NX_LOGGING, allowing less verbose logfile.
+-	* Added SESSION_LOG_CLEAN for configurable removal of the temporary session directory.
+-	* Added "--ssh2" cmdline switch for commercial ssh2-server support in nxsetup
++	* Added NX_LOG_LEVEL instead of NX_LOGGING, allowing less verbose 
++	  logfile.
++	* Added SESSION_LOG_CLEAN for configurable removal of the temporary 
++	  session directory.
++	* Added "--ssh2" cmdline switch for commercial ssh2-server support 
++	  in nxsetup.
+ 	* Added ENABLE_FORCE_ENCRYPTION to enforce the usage of encryption on 
+ 	  the server.
+ 
+
+
+
+
+
+
+From freenx-cvs at berlios.de  Sun Apr 24 20:01:14 2005
+From: freenx-cvs at berlios.de (jonno)
+Date: Sun, 24 Apr 2005 20:01:14 +0200
+Subject: [Freenx-cvs] CVS: freenx - jonno modified 2 files
+Message-ID: <426BDEEA.mail4UK1FRYLG@lists.berlios.de>
+
+User:      jonno
+Date:      2005-04-24 18:01:14 GMT
+Modified:  .        node.conf.sample nxloadconfig
+Log:
+FR #848: node.conf.sample cleanup and rearange.
+
+Revision  Changes    Path
+1.21      +164 -164  freenx/node.conf.sample
+
+
+rev 1.21, prev_rev 1.20
+Index: node.conf.sample
+===================================================================
+RCS file: /cvsroot/freenx/freenx/node.conf.sample,v
+retrieving revision 1.20
+retrieving revision 1.21
+diff -u -r1.20 -r1.21
+--- node.conf.sample	24 Apr 2005 15:51:54 -0000	1.20
++++ node.conf.sample	24 Apr 2005 18:01:14 -0000	1.21
+@@ -37,37 +37,23 @@
+ #
+ #           https://mail.kde.org/mailman/listinfo/freenx-knx
+ #
+-# CVS: $Id: node.conf.sample,v 1.20 2005/04/24 15:51:54 fabianx Exp $
++# CVS: $Id: node.conf.sample,v 1.21 2005/04/24 18:01:14 jonno Exp $
+ 
+ #########################################################################
+-# FreeNX specific node.conf directives
++# General FreeNX directives
+ #########################################################################
+ 
+-# This directives controls the verbosity of the server-wide log.
+-# 0: No Logging, 
+-# 1: Errors
+-# 2: Warnings
+-# 3: Important information
+-# 4: Server - Client communication
+-# 5: Information
+-# 6: Debugging information
+-#NX_LOG_LEVEL=0
++# The host name which is used by NX server. It's should be used if it's
++# different than the default hostname (as returned by `hostname`)
++#SERVER_NAME="$(hostname)"
+ 
+-# Before turning logging on, please make sure that NX_LOGFILE is 
+-# writeable for the "nx" user
+-#NX_LOGFILE=/var/log/nxserver.log
++# The port number where local 'sshd' is listening.
++#SSHD_PORT=22
+ 
+-# This directive controls if the temporary session directory 
+-# ($HOME/.nx/C-<hostname>-<display>-<session_id>) should be kept after a 
+-# session has ended. A successfully terminated session will be saved as 
+-# T-C-<hostname>-<display>-<session_id> while a failed session will be saved 
+-# as F-C-<hostname>-<display>-<session_id>.
+-#SESSION_LOG_CLEAN=0
+ 
+-# Amount of seconds nxserver is to keep session history. The default of 2592000
+-# is equivalent to 30 days. If this is 0 no session history will be kept,
+-# and a negative value denotes infinity.
+-#SESSION_HISTORY=2592000
++#########################################################################
++# Authentication / Security directives
++#########################################################################
+ 
+ # Authentication directives
+ # This adds the passdb to the possible authentication methods
+@@ -78,35 +64,97 @@
+ #ENABLE_SSH_AUTHENTICATION="1"
+ 
+ # This adds SU to the possible authentication methods. For it to work the 
+-# "nx" user must be in the wheel (RedHat, Fedora) or the users group (SUSE) 
+-# and the user logging in must have a valid shell that accepts the -c 
++# "nx" user must be in the wheel (RedHat, Fedora) or the users group (SUSE)
++# and the user logging in must have a valid shell that accepts the -c
+ # parameter.
+ #ENABLE_SU_AUTHENTICATION="0"
+ 
+-# Require all users to be in the passdb, regardless of authentication 
+-# method
++# Require all users to be in the passdb, regardless of authentication method
+ #ENABLE_USER_DB="0"
+ 
+-# When set to 1 this will automatically resume started sessions
+-#ENABLE_AUTORECONNECT="0"
+ 
+-# When set to 1 this will automatically resume started sessions
+-# but only if an older client version is used
+-#ENABLE_AUTORECONNECT_BEFORE_140="1"
++# If enabled forces the user to use encryption. This will bail out
++# if the user does not have encryption enabled.
++#ENABLE_FORCE_ENCRYPTION="0"
+ 
+-# When set to 1 exports NXUSERIP / NXSESSIONID in nxnode
+-#EXPORT_USERIP="0"
+-#EXPORT_SESSIONID="0"
++# Refuse the NX client connection if SSHD does not export the
++# SSH_CONNECTION and SSH_CLIENT variables in the environment
++# passed to the NX server.
++# 1: Will check the remote IP and will not accept the
++#    connection if it can't be determined.
++# 0: Will accept the connection even if the remote IP
++#    is not provided.
++#SSHD_CHECK_IP="0"
+ 
+-# This can be set to any executable, which is started after session startup
+-# like: $NODE_AUTOSTART {start|restore}
+-#NODE_AUTOSTART=""
++
++#########################################################################
++# Limitations
++#########################################################################
++
++# The base display number from which sessions are started.
++#DISPLAY_BASE=1000
++
++# The maximum number of contemporary sessions that can be run on FreeNX
++#SESSION_LIMIT=200
++
++# The maximum number of contemporary sessions that a single user can run
++# on FreeNX. Defaults to the value of SESSION_LIMIT.
++#SESSION_USER_LIMIT=200
++
++# The number of displays reserved for sessions, it has to be greater or equal
++# to the maximum number of contemporary sessions that a server can run.
++#DISPLAY_LIMIT=200
++
++
++# User for which sessions should be persistent. Either the keyword "all" or a
++# comma-separated list of usernames or groups in the @groupname syntax.
++#ENABLE_PERSISTENT_SESSION="all"
++
++# Users and groups for whom persistent sessions should be disabled.
++# Especially useful if ENABLE_PERSISTENT_SESSION="all"
++#DISABLE_PERSISTENT_SESSION=""
++
++
++#########################################################################
++# Logging directives
++#########################################################################
++
++# This directives controls the verbosity of the server-wide log.
++# 0: No Logging
++# 1: Errors
++# 2: Warnings
++# 3: Important information
++# 4: Server - Client communication
++# 5: Information
++# 6: Debugging information
++#NX_LOG_LEVEL=0
++
++# Before turning logging on, please make sure that NX_LOGFILE is
++# writeable for the "nx" user
++#NX_LOGFILE=/var/log/nxserver.log
++
++# This directive controls if the temporary session directory
++# ($HOME/.nx/C-<hostname>-<display>-<session_id>) should be kept after a
++# session has ended. A successfully terminated session will be saved as
++# T-C-<hostname>-<display>-<session_id> while a failed session will be saved
++# as F-C-<hostname>-<display>-<session_id>.
++#SESSION_LOG_CLEAN=0
++
++# Amount of seconds nxserver is to keep session history. The default of 2592000
++# is equivalent to 30 days. If this is 0 no session history will be kept
++# and a negative value denotes infinity.
++#SESSION_HISTORY=2592000
++
++
++#########################################################################
++# Forwarding directives
++#########################################################################
+ 
+ # FreeNX with ENABLE_SERVER_FORWARD="1" will automatically forward all
+-# connections to the host specified in SERVER_FORWARD_HOST with the 
++# connections to the host specified in SERVER_FORWARD_HOST with the
+ # secret key SERVER_FORWARD_KEY.
+ #
+-# This allows to have a "chain" of NX Servers. Note that you will need to 
++# This allows to have a "chain" of NX Servers. Note that you will need to
+ # use "SSL encryption" for all connections.
+ 
+ #ENABLE_SERVER_FORWARD="0"
+@@ -114,6 +162,7 @@
+ #SERVER_FORWARD_PORT=22
+ #SERVER_FORWARD_KEY="/usr/NX/share/client.id_dsa.key"
+ 
++
+ # FreeNX with ENABLE_NOMACHINE_FORWARD_USER="1" will automatically forward all
+ # connections to the commercial NoMachine nxserver installed on the same
+ # machine. This feature is introduced to enable the usage of FreeNX and
+@@ -130,131 +179,76 @@
+ #NOMACHINE_SERVER="/usr/NX/bin/nxserver"
+ #NOMACHINE_NX_HOME_DIR="/usr/NX/home/nx"
+ 
+-# To just forward connections to the NoMachine server, which connect to a 
++
++# To just forward connections to the NoMachine server, which connect to a
+ # certain port enable the following two directives.
+ # 
+-# Note: You need to let SSHD listen to several ports to make use of this 
++# Note: You need to let SSHD listen to several ports to make use of this
+ #       directive.
+ 
+ #ENABLE_NOMACHINE_FORWARD_PORT="0"
+ #NOMACHINE_FORWARD_PORT="22"
+ 
+-# When set to 1 will start nxagent in rootless mode.
+-#ENABLE_ROOTLESS_MODE="0"
+ 
+-# FreeNX with ENABLE_ESD_PRELOAD="1" will automatically try to setup 
++#########################################################################
++# Services directives
++#########################################################################
++
++# FreeNX with ENABLE_ESD_PRELOAD="1" will automatically try to setup
+ # the sound with the help of the esd media helper.
+ #
+ # Currently ESD will be used just by the Windows NX Client.
+ #
+-# Be sure that $ESD_BIN_PRELOAD is in your path, does exist and work 
++# Be sure that $ESD_BIN_PRELOAD is in your path, does exist and work
+ # before enabling this directive.
+ 
+ #ENABLE_ESD_PRELOAD="0"
+ #ESD_BIN_PRELOAD="esddsp"
+ 
+-# FreeNX with ENABLE_ARTSD_PRELOAD="1" will automatically try to setup 
++# FreeNX with ENABLE_ARTSD_PRELOAD="1" will automatically try to setup
+ # the sound with the help of the artsd media helper.
+ #
+ # Currently ARTSD will be used just by the Linux NX Client.
+ #
+-# Be sure that $ARTSD_BIN_PRELOAD is in your path, does exist and work 
++# Be sure that $ARTSD_BIN_PRELOAD is in your path, does exist and work
+ # before enabling this directive.
+ 
+ #ENABLE_ARTSD_PRELOAD="0"
+ #ARTSD_BIN_PRELOAD="artsdsp"
+ 
+-# The key that contains the name of the complete path of the 'netcat' command. 
+-#COMMAND_NETCAT=netcat
+-
+-# The key that contains the name of the complete path of the 'ssh' and 
+-# 'ssh-keygen' command. 
+-#COMMAND_SSH=ssh
+-#COMMAND_SSH_KEYGEN=ssh-keygen
+-
+-# If enabled writes entries via the COMMAND_SESSREG program 
+-# into utmp/wtmp/lastlog database.
+-#
+-# Note: You have to make sure that you add the nx user to the 
+-#       utmp or tty group or how its called on your system
+-#       before this directive works.
+ 
+-#ENABLE_USESSION="0"
+-#COMMAND_SESSREG="sessreg"
++#########################################################################
++# Path directives
++#########################################################################
+ 
+ # USER_FAKE_HOME is the base directory for the .nx directory. Use this
+ # parameter instead of the users home directory if $HOME is on a NFS share.
+-# Note that this directory must be unique for every user! To accomplish this 
++# Note that this directory must be unique for every user! To accomplish this
+ # it is recommended to include $USER in the path.
+ #USER_FAKE_HOME=$HOME
+ 
+ # Add the nx libraries to LD_LIBRARY_PATH before starting nx agents.
+-# WARNING: This will NOT (and should not) affect applications. ONLY Disable this
+-#          if the nx libraries are in a standard system path (such as /usr/lib)!
++# WARNING: This will NOT (and should not) affect applications. ONLY Disable
++# this if the nx libraries are in a standard system path (such as /usr/lib)!
+ #SET_LD_LIBRARY_PATH="1"
+ 
+-# If enabled forces the user to use encryption. This will bail out 
+-# if the user does not have encryption enabled.
+-#ENABLE_FORCE_ENCRYPTION="0"
+-
+-#########################################################################
+-# NoMachine node.conf compatible (almost) directives
+-# All might not be implemented as of now, but will be in the near future.
+-#########################################################################
+-
+-# The host name which is used by NX server. It's should be used if it's 
+-# different than the default hostname (as returned by `hostname`)
+-#SERVER_NAME="$(hostname)"
+-
+-# Refuse the NX client connection if SSHD does not export the
+-# SSH_CONNECTION and SSH_CLIENT variables in the environment
+-# passed to the NX server.
+-#
+-# 1: Will check the remote IP and will not accept the
+-# connection if it can't be determined.
+-#
+-# 0: Will accept the connection even if the remote IP
+-# is not provided.
+-#SSHD_CHECK_IP="0"
+-
+-# The port number where local 'sshd' is listening. 
+-#SSHD_PORT=22
+-
+-
+-# The base display number from which sessions are started. 
+-#DISPLAY_BASE=1000
+-
+-# The maximum number of contemporary sessions that can be run on FreeNX
+-#SESSION_LIMIT=200
+-
+-# The maximum number of contemporary sessions that a single user can run
+-# on FreeNX. Defaults to the value of SESSION_LIMIT.
+-#SESSION_USER_LIMIT=200
+-
+-# The number of displays reserved for sessions, it has to be greater or equal
+-# to the maximum number of contemporary sessions that a server can run. 
+-#DISPLAY_LIMIT=200
+ 
+-
+-# The command binary for the default window manager. It is run when a 
+-# unix 'custom' session is requested by the NX Client and an application 
+-# to run is specified. By default it is set to "twm". If you don't have 
++# The command binary for the default window manager. It is run when a
++# 'unix-custom' session is requested by the NX Client and an application
++# to run is specified. By default it is set to "twm". If you don't have
+ # twm in the default path or if you want to use another window manager,
+-# you have to set it to the absolute file name of the command binary you 
++# you have to set it to the absolute file name of the command binary you
+ # want to use.
+-
+ # FreeNX: To enable this feature set ENABLE_DEFAULT_X_WM="1"
+-#         
+ #         If ENABLE_DEFAULT_X_WM_KILL is set the WM is terminated
+-#         after the started application finishes. Else FreeNX will 
+-#         wait for the window manager to complete. 
+-
++#         after the started application finishes. Else FreeNX will
++#         wait for the window manager to complete.
+ #ENABLE_DEFAULT_X_WM="0"
+ #ENABLE_DEFAULT_X_WM_KILL="0"
+ #DEFAULT_X_WM=twm
+ 
+ # When a 'unix-default' session is requested by the client the user's X startup
+-# script will be run if pressent and executable, otherwise the default X 
++# script will be run if pressent and executable, otherwise the default X
+ # session will be run.
+ # Depending on distribution USER_X_STARTUP_SCRIPT might be .Xclients, .xinitrc
+ # and .Xsession
+@@ -263,66 +257,73 @@
+ #USER_X_STARTUP_SCRIPT=.Xclients
+ #DEFAULT_X_SESSION=/etc/X11/xdm/Xsession
+ 
+-# The key that contains the name of the script that starts a KDE session. 
+-# It's run when a unix 'kde' session is requested by the client.
++# The key that contains the name of the script that starts a KDE session.
++# It's run when a 'unix-kde' session is requested by the client.
+ #COMMAND_START_KDE=startkde
+ 
+-# The key that contains the name of the script that starts a gnome session. 
+-# It's run when a unix 'gnome' session is requested by the client.
++# The key that contains the name of the script that starts a gnome session.
++# It's run when a 'unix-gnome' session is requested by the client.
+ #COMMAND_START_GNOME=gnome-session
+ 
+-# The key that contains the name of the script that starts a CDE session. 
+-# It's run when a unix 'cde' session is requested by the client.
++# The key that contains the name of the script that starts a CDE session.
++# It's run when a 'unix-cde' session is requested by the client.
+ #COMMAND_START_CDE=cdwm
+ 
+-# The key that contains the name of the complete path of command name 
+-# 'xterm'. It is run when a unix "xterm" session is requested by the 
++# The key that contains the name of the complete path of command name
++# 'xterm'. It is run when a unix "xterm" session is requested by the
+ # client.
+ #COMMAND_XTERM=xterm
+ 
+-# The key that contains the name of the complete path of command name 
++# The key that contains the name of the complete path of command name
+ # 'xauth'.
+ #COMMAND_XAUTH=/usr/X11R6/bin/xauth
+ 
+-# The key that contains the name of the complete path of command name 
+-# 'xset'. 
+-# FreeNX: This key is not used in the FreeNX project.
+-
+-#COMMAND_XSET=/usr/X11R6/bin/xset
++# The key that contains the name of the complete path of command name
++# 'smbmount'.
++#COMMAND_SMBMOUNT=smbmount
+ 
+-# The key that contains the name of the complete path of command name 
+-# 'xmodmap'. 
+-# FreeNX: This key is not used in the FreeNX project.
++# The key that contains the name of the complete path of command name
++# 'smbumount'.
++#COMMAND_SMBUMOUNT=smbumount
+ 
+-#COMMAND_XMODMAP=/usr/X11R6/bin/xmodmap
++# The key that contains the name of the complete path of the 'netcat' command.
++#COMMAND_NETCAT=netcat
+ 
+-# The key that contains the name of the complete path of command name 
+-# 'xkbcomp'. 
+-# FreeNX: This key is not used in the FreeNX project.
++# The key that contains the name of the complete path of the 'ssh' and
++# 'ssh-keygen' command.
++#COMMAND_SSH=ssh
++#COMMAND_SSH_KEYGEN=ssh-keygen
+ 
+-#COMMAND_XKBCOMP=/usr/X11R6/bin/xkbcomp
+ 
+-# The keymap file for xkbcomp
+-# FreeNX: This key is not used in the FreeNX project.
++#########################################################################
++# Misc directives
++#########################################################################
+ 
+-#XKBCOMP_KEYMAP_FILE=/etc/X11/xkb/keymap/xfree86
++# When set to 1 this will automatically resume started sessions
++#ENABLE_AUTORECONNECT="0"
+ 
+-# The key that contains the name of the complete path of command name 
+-# 'smbmount'.
+-#COMMAND_SMBMOUNT=smbmount
++# When set to 1 this will automatically resume started sessions
++# but only if an older client version is used
++#ENABLE_AUTORECONNECT_BEFORE_140="1"
+ 
+-# The key that contains the name of the complete path of command name
+-# 'smbumount'.
+-#COMMAND_SMBUMOUNT=smbumount
++# When set to 1 exports NXUSERIP / NXSESSIONID in nxnode
++#EXPORT_USERIP="0"
++#EXPORT_SESSIONID="0"
+ 
++# This can be set to any executable, which is started after session startup
++# like: $NODE_AUTOSTART {start|restore}
++#NODE_AUTOSTART=""
+ 
+-# User for which sessions should be persistent. Either the keyword "all" or a
+-# comma-separated list of usernames or groups in the @groupname syntax.
+-#ENABLE_PERSISTENT_SESSION="all"
++# When set to 1 will start nxagent in rootless mode.
++#ENABLE_ROOTLESS_MODE="0"
+ 
+-# Users and groups for whom persistent sessions should be disabled. 
+-# Especially useful if ENABLE_PERSISTENT_SESSION="all"
+-#DISABLE_PERSISTENT_SESSION=""
++# If enabled writes entries via the COMMAND_SESSREG program
++# into utmp/wtmp/lastlog database.
++# Note: You have to make sure that you add the nx user to the
++#       utmp or tty group or how its called on your system
++#       before this directive works.
++#ENABLE_USESSION="0"
++#COMMAND_SESSREG="sessreg"
+ 
+ # Extra options sent to the different nx agents. See !M documentation
+ # for examples of useful parameters.
+@@ -335,14 +336,13 @@
+ # in /etc/X11/XF86Config
+ #AGENT_FONT_SERVER=""
+ 
+-# disable or enable use of 'tcp nodelay' on proxy. Old versions of Linux 
+-# kernels have problems using this option on sockets that will cause a loss 
+-# of TCP connections. This option is not set by default to allow clients to 
+-# specify whether to enable or disable TCP nodelay. Setting this option to 
+-# the value of "0" NX proxy avoids using 'tcp nodelay' but it will cause a 
++# Disable or enable use of 'tcp nodelay' on proxy. Old versions of Linux
++# kernels have problems using this option on sockets that will cause a loss
++# of TCP connections. This option is not set by default to allow clients to
++# specify whether to enable or disable TCP nodelay. Setting this option to
++# the value of "0" NX proxy avoids using 'tcp nodelay' but it will cause a
+ # loss of interaction in sessions.
+ #PROXY_TCP_NODELAY="0"
+ 
+ # Extra options to nxproxy. See !M documentation for useful parameters.
+-#PROXY_EXTRA_OPTIONS=""
+-
++#PROXY_EXTRA_OPTIONS=""
+\ No newline at end of file
+
+
+
+1.26      +180 -165  freenx/nxloadconfig
+
+
+rev 1.26, prev_rev 1.25
+Index: nxloadconfig
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxloadconfig,v
+retrieving revision 1.25
+retrieving revision 1.26
+diff -u -r1.25 -r1.26
+--- nxloadconfig	24 Apr 2005 15:51:54 -0000	1.25
++++ nxloadconfig	24 Apr 2005 18:01:14 -0000	1.26
+@@ -1,17 +1,17 @@
+ #!/bin/bash
+ #
+ # Copyright (c) 2005 by Fabian Franz <freenx at fabian-franz.de>
+-#           (c) 2005 by Jon Severinsson <jon at severinsson.net>
++#           (c) 2005 by Jon Severinsson <jonno at users.berlios.de>
+ #
+ # License: GPL, version 2
+ #
+-# CVS: $Id: nxloadconfig,v 1.25 2005/04/24 15:51:54 fabianx Exp $
++# CVS: $Id: nxloadconfig,v 1.26 2005/04/24 18:01:14 jonno Exp $
+ #
+ # ========================================================================
+ 
+ #########################################################################
+ # Commandline support for --help, --check and --userconf
+-#######################################################################
++#########################################################################
+ 
+ HELP="no"
+ CHECK="no"
+@@ -60,30 +60,57 @@
+ NX_SESS_DIR=/var/lib/nxserver/db
+ NX_HOME_DIR=/var/lib/nxserver/home
+ 
++# Advanced users ONLY
++AGENT_LIBRARY_PATH="" #Calculated
++PROXY_LIBRARY_PATH="" #Calculated
++APPLICATION_LIBRARY_PATH="" #Calculated
++APPLICATION_LIBRARY_PRELOAD="" #Calculated
++
+ # the name of the authorized keys file for ssh
+ SSH_AUTHORIZED_KEYS="authorized_keys2"
+ 
+ #########################################################################
+ # Default Values
+-# DO NOT EVER TOUCH THIS, edit $NX_ETC_DIR/node.conf instead
++# A user should NEVER touch this, edit $NX_ETC_DIR/node.conf instead
+ #########################################################################
+ 
+-NX_LOG_LEVEL=0
+-NX_LOGFILE=/var/log/nxserver.log
+-SESSION_LOG_CLEAN=1
+-SESSION_HISTORY=2592000
++# General FreeNX directives
++
++SERVER_NAME="$(hostname)"
++SSHD_PORT=22
++
++
++# Authentication / Security directives
+ 
+ ENABLE_PASSDB_AUTHENTICATION="1"
+ ENABLE_SSH_AUTHENTICATION="1"
+ ENABLE_SU_AUTHENTICATION="0"
+ ENABLE_USER_DB="0"
+ 
+-ENABLE_AUTORECONNECT="0"
+-ENABLE_AUTORECONNECT_BEFORE_140="1"
++ENABLE_FORCE_ENCRYPTION="0"
++SSHD_CHECK_IP="0"
++
++
++# Limitations
++
++DISPLAY_BASE=1000
++SESSION_LIMIT=200
++SESSION_USER_LIMIT="" #Calculated
++DISPLAY_LIMIT=200
++
++ENABLE_PERSISTENT_SESSION="all"
++DISABLE_PERSISTENT_SESSION=""
++
++
++# Logging directives
++
++NX_LOG_LEVEL=0
++NX_LOGFILE=/var/log/nxserver.log
++SESSION_LOG_CLEAN=1
++SESSION_HISTORY=2592000
+ 
+-EXPORT_USERIP="0"
+-EXPORT_SESSIONID="0"
+-NODE_AUTOSTART=""
++
++# Forwarding directives
+ 
+ ENABLE_SERVER_FORWARD="0"
+ SERVER_FORWARD_HOST=""
+@@ -97,40 +124,22 @@
+ ENABLE_NOMACHINE_FORWARD_PORT="0"
+ NOMACHINE_FORWARD_PORT="22"
+ 
+-ENABLE_ROOTLESS_MODE="0"
++
++# Services directives
+ 
+ ENABLE_ESD_PRELOAD="0"
+ ESD_BIN_PRELOAD="esddsp"
+-
+ ENABLE_ARTSD_PRELOAD="0"
+ ARTSD_BIN_PRELOAD="artsdsp"
+ 
+-COMMAND_NETCAT=netcat
+-COMMAND_SSH=ssh
+-COMMAND_SSH_KEYGEN=ssh-keygen
+ 
+-ENABLE_USESSION="0"
+-COMMAND_SESSREG="sessreg"
++# Path directives
+ 
++USER_FAKE_HOME="" #Calculated
+ SET_LD_LIBRARY_PATH="1"
+ 
+-ENABLE_FORCE_ENCRYPTION="0"
+-
+-# FreeNX + NoMachine mixed section
+-
+-# see below for DEFAULT_X_WM directive
+ ENABLE_DEFAULT_X_WM="0"
+ ENABLE_DEFAULT_X_WM_KILL="0"
+-
+-# NoMachine node.conf compatible vars
+-
+-SSHD_CHECK_IP="0"
+-SSHD_PORT=22
+-
+-DISPLAY_BASE=1000
+-SESSION_LIMIT=200
+-DISPLAY_LIMIT=200
+-
+ DEFAULT_X_WM=twm
+ USER_X_STARTUP_SCRIPT=.Xclients
+ DEFAULT_X_SESSION=/etc/X11/xdm/Xsession
+@@ -139,40 +148,30 @@
+ COMMAND_START_CDE=cdwm
+ COMMAND_XTERM=xterm
+ COMMAND_XAUTH=/usr/X11R6/bin/xauth
+-COMMAND_XSET=/usr/X11R6/bin/xset
+-COMMAND_XMODMAP=/usr/X11R6/bin/xmodmap
+-COMMAND_XKBCOMP=/usr/X11R6/bin/xkbcomp
+-XKBCOMP_KEYMAP_FILE=/etc/X11/xkb/keymap/xfree86
+ COMMAND_SMBMOUNT=smbmount
+ COMMAND_SMBUMOUNT=smbumount
++COMMAND_NETCAT=netcat
++COMMAND_SSH=ssh
++COMMAND_SSH_KEYGEN=ssh-keygen
+ 
+-ENABLE_PERSISTENT_SESSION="all"
+-DISABLE_PERSISTENT_SESSION="" 
+ 
++# Misc directives
++
++ENABLE_AUTORECONNECT="0"
++ENABLE_AUTORECONNECT_BEFORE_140="1"
++EXPORT_USERIP="0"
++EXPORT_SESSIONID="0"
++NODE_AUTOSTART=""
++ENABLE_ROOTLESS_MODE="0"
++ENABLE_USESSION="0"
++COMMAND_SESSREG="sessreg"
+ AGENT_EXTRA_OPTIONS_RFB=""
+ AGENT_EXTRA_OPTIONS_RDP=""
+ AGENT_EXTRA_OPTIONS_X=""
+ AGENT_FONT_SERVER=""
+-
+ PROXY_TCP_NODELAY="0"
+ PROXY_EXTRA_OPTIONS=""
+ 
+-CUPS_SUPPORT="0"
+-CUPS_BACKEND=""
+-CUPS_BIN=""
+-CUPS_SBIN=""
+-
+-#########################################################################
+-# Values that will be calculated
+-#########################################################################
+-
+-SERVER_NAME=""
+-SESSION_USER_LIMIT=""
+-AGENT_LIBRARY_PATH=""
+-PROXY_LIBRARY_PATH=""
+-APPLICATION_LIBRARY_PATH=""
+-APPLICATION_LIBRARY_PRELOAD=""
+-USER_FAKE_HOME=""
+ 
+ #########################################################################
+ # node.conf file evaluation
+@@ -181,18 +180,19 @@
+ [ -e $NX_ETC_DIR/node.conf ] && . $NX_ETC_DIR/node.conf
+ [ "$USERCONF" = "yes" -a -e $NX_ETC_DIR/$USER.node.conf ] && . $NX_ETC_DIR/$USER.node.conf
+ 
++
+ #########################################################################
+ # Calculated values
+ #########################################################################
+ 
+-[ -z "$SERVER_NAME" ] && SERVER_NAME=$(hostname)
+ [ -z "$SESSION_USER_LIMIT" ] && SESSION_USER_LIMIT=$SESSION_LIMIT
++[ -z "$USER_FAKE_HOME" ] && USER_FAKE_HOME=$HOME
+ 
+ [ -z "$AGENT_LIBRARY_PATH" ] && AGENT_LIBRARY_PATH=$PATH_LIB
+ [ -z "$PROXY_LIBRARY_PATH" ] && PROXY_LIBRARY_PATH=$PATH_LIB
+ [ -z "$APPLICATION_LIBRARY_PATH" ] && APPLICATION_LIBRARY_PATH=$PATH_LIB
+ [ -z "$APPLICATION_LIBRARY_PRELOAD" ] && APPLICATION_LIBRARY_PRELOAD="$APPLICATION_LIBRARY_PATH/libX11.so.6.2:$APPLICATION_LIBRARY_PATH/libXext.so.6.4:$APPLICATION_LIBRARY_PATH/libXcomp.so.1:$APPLICATION_LIBRARY_PATH/libXcompext.so.1:$APPLICATION_LIBRARY_PATH/libXrender.so.1.2"
+-[ -z "$USER_FAKE_HOME" ] && USER_FAKE_HOME=$HOME
++
+ 
+ #########################################################################
+ # Support for --check
+@@ -203,6 +203,8 @@
+ 	ERROR="no"
+ 	WARNING="no"
+ 	
++	# Internal Stuff
++	
+ 	[ ! -d "$PATH_BIN" ] && \
+ 		ERROR="yes" && echo "Error: Invalid value \"PATH_BIN=$PATH_BIN\""
+ 	[ ! -d "$PATH_LIB" ] && \
+@@ -213,9 +215,83 @@
+ 		ERROR="yes" && echo "Error: Invalid value \"NX_SESS_DIR=$NX_SESS_DIR\""
+ 	[ ! -d "$NX_HOME_DIR" ] && \
+ 		ERROR="yes" && echo "Error: Invalid value \"NX_HOME_DIR=$NX_HOME_DIR\""
++
++	[ ! -d "$AGENT_LIBRARY_PATH" ] && \
++		ERROR="yes" && echo "Error: Invalid value \"AGENT_LIBRARY_PATH=$AGENT_LIBRARY_PATH\""
++	[ ! -d "$PROXY_LIBRARY_PATH" ] && \
++		ERROR="yes" && echo "Error: Invalid value \"PROXY_LIBRARY_PATH=$PROXY_LIBRARY_PATH\""
++	[ ! -d "$APPLICATION_LIBRARY_PATH" ] && \
++		ERROR="yes" && echo "Error: Invalid value \"APPLICATION_LIBRARY_PATH=$APPLICATION_LIBRARY_PATH\""
++	
++	OLD_IFS=$IFS
++	IFS=":"
++	for LIBRARY in $APPLICATION_LIBRARY_PRELOAD; do
++		[ ! -e $LIBRARY ] && \
++			ERROR="yes" && echo "Error: Invalid value \"APPLICATION_LIBRARY_PRELOAD=$APPLICATION_LIBRARY_PRELOAD\"" && break ;
++	done
++	IFS=$OLD_IFS
+ 	
+ 	[ -z "$SSH_AUTHORIZED_KEYS" ] && \
+-		ERROR="yes" && echo "Error: Invalid value \"SSH_AUTHORIZED_KEYS=$SSH_AUTHORIZED_KEYS\"" 
++		ERROR="yes" && echo "Error: Invalid value \"SSH_AUTHORIZED_KEYS=$SSH_AUTHORIZED_KEYS\""
++	
++	
++	# General FreeNX directives
++	
++	[ -z "$SERVER_NAME" ] && \
++		ERROR="yes" && echo "Error: Invalid value \"SERVER_NAME=$SERVER_NAME\""
++	[ -z $(echo "$SSHD_PORT" | egrep "^[1-9][0-9]{0,4}$") ] && \
++		ERROR="yes" && echo "Error: Invalid value \"SSHD_PORT=$SSHD_PORT\""
++	
++	
++	# Authentication / Security directives
++	
++	[ -z $(echo "$ENABLE_PASSDB_AUTHENTICATION" | egrep "^[0|1]$") ] && \
++		ERROR="yes" && echo "Error: Invalid value \"ENABLE_PASSDB_AUTHENTICATION=$ENABLE_PASSDB_AUTHENTICATION\""
++	[ -z $(echo "$ENABLE_SSH_AUTHENTICATION" | egrep "^[0|1]$") ] && \
++		ERROR="yes" && echo "Error: Invalid value \"ENABLE_SSH_AUTHENTICATION=$ENABLE_SSH_AUTHENTICATION:\""
++	[ -z $(echo "$ENABLE_SU_AUTHENTICATION" | egrep "^[0|1]$") ] && \
++		ERROR="yes" && echo "Error: Invalid value \"ENABLE_SU_AUTHENTICATION=$NENABLE_SU_AUTHENTICATION\""
++	[ -z $(echo "$ENABLE_USER_DB" | egrep "^[0|1]$") ] && \
++		ERROR="yes" && echo "Error: Invalid value \"ENABLE_USER_DB=$ENABLE_USER_DB\""
++	
++	[ -z $(echo "$ENABLE_FORCE_ENCRYPTION" | egrep "^[0|1]$") ] && \
++		ERROR="yes" && echo "Error: Invalid value \"ENABLE_FORCE_ENCRYPTION=$ENABLE_FORCE_ENCRYPTION\""
++	[ -z $(echo "$SSHD_CHECK_IP" | egrep "^[0|1]$") ] && \
++		ERROR="yes" && echo "Error: Invalid value \"SSHD_CHECK_IP=$SSHD_CHECK_IP\""
++	
++	
++	# Limitations
++	
++	[ -z $(echo "$DISPLAY_BASE" | egrep "^[1-9][0-9]{0,4}$") ] && \
++		ERROR="yes" && echo "Error: Invalid value \"DISPLAY_BASE=$DISPLAY_BASE\""
++	[ -z $(echo "$SESSION_LIMIT" | egrep "^[1-9][0-9]{0,4}$") ] &&  \
++		ERROR="yes" && echo "Error: Invalid value \"SESSION_LIMIT=$SESSION_LIMIT\""
++	[ -z $(echo "$SESSION_USER_LIMIT" | egrep "^[1-9][0-9]{0,4}$") -o $SESSION_USER_LIMIT -gt $SESSION_LIMIT ] && \
++		ERROR="yes" && echo "Error: Invalid value \"SESSION_USER_LIMIT=$SESSION_USER_LIMIT\""
++	[ -z $(echo "$DISPLAY_LIMIT" | egrep "^[1-9][0-9]{0,4}$") -o $DISPLAY_LIMIT -lt $SESSION_LIMIT ] && \
++		ERROR="yes" && echo "Error: Invalid value \"DISPLAY_LIMIT=$DISPLAY_LIMIT\""
++	
++	OLD_IFS=$IFS
++	IFS=","
++	if [ "$ENABLE_PERSISTENT_SESSION" != "all" ]
++	then
++		for USERNAME in $ENABLE_PERSISTENT_SESSION; do
++			[ "${USERNAME:0:1}" != "@" ] && [ -z $(getent passwd | egrep "^$USERNAME:") ] && \
++				ERROR="yes" && echo "Error: Invalid value \"ENABLE_PERSISTENT_SESSION=$ENABLE_PERSISTENT_SESSION\"" && break ;
++			[ "${USERNAME:0:1}" = "@" ] && [ -z $(getent group | egrep "^${USERNAME:1}:") ] && \
++				ERROR="yes" && echo "Error: Invalid value \"ENABLE_PERSISTENT_SESSION=$ENABLE_PERSISTENT_SESSION\"" && break ;
++		done
++	fi
++	for USERNAME in $DISABLE_PERSISTENT_SESSION; do
++		[ "${USERNAME:0:1}" != "@" ] && [ -z $(getent passwd | egrep "^$USERNAME:") ] && \
++			ERROR="yes" && echo "Error: Invalid value \"DISABLE_PERSISTENT_SESSION=$DISABLE_PERSISTENT_SESSION\"" && break ;
++		[ "${USERNAME:0:1}" = "@" ] && [ -z $(getent group | egrep "^${USERNAME:1}:") ] && \
++			ERROR="yes" && echo "Error: Invalid value \"DISABLE_PERSISTENT_SESSION=$DISABLE_PERSISTENT_SESSION\"" && break ;
++	done
++	IFS=$OLD_IFS
++	
++	
++	# Logging directives
+ 	
+ 	[ -z $(echo "$NX_LOG_LEVEL" | egrep "^[0-6]$") ] && \
+ 		ERROR="yes" && echo "Error: Invalid value \"NX_LOG_LEVEL=$NX_LOG_LEVEL\""
+@@ -228,27 +304,8 @@
+ 	[ -z $(echo "$SESSION_HISTORY" | egrep "^-?[0-9]+$") ] && \
+ 		ERROR="yes" && echo "Error: Invalid value \"SESSION_HISTORY=$SESSION_HISTORY\""
+ 	
+-	[ -z $(echo "$ENABLE_PASSDB_AUTHENTICATION" | egrep "^[0|1]$") ] && \
+-		ERROR="yes" && echo "Error: Invalid value \"ENABLE_PASSDB_AUTHENTICATION=$ENABLE_PASSDB_AUTHENTICATION\""
+-	[ -z $(echo "$ENABLE_SSH_AUTHENTICATION" | egrep "^[0|1]$") ] && \
+-		ERROR="yes" && echo "Error: Invalid value \"ENABLE_SSH_AUTHENTICATION=$ENABLE_SSH_AUTHENTICATION:\""
+-	[ -z $(echo "$ENABLE_SU_AUTHENTICATION" | egrep "^[0|1]$") ] && \
+-		ERROR="yes" && echo "Error: Invalid value \"ENABLE_SU_AUTHENTICATION=$NENABLE_SU_AUTHENTICATION\""
+-	[ -z $(echo "$ENABLE_USER_DB" | egrep "^[0|1]$") ] && \
+-		ERROR="yes" && echo "Error: Invalid value \"ENABLE_USER_DB=$ENABLE_USER_DB\""
+-	
+-	[ -z $(echo "$ENABLE_AUTORECONNECT" | egrep "^[0|1]$") ] && \
+-		ERROR="yes" && echo "Error: Invalid value \"ENABLE_AUTORECONNECT=$ENABLE_AUTORECONNECT\""
+-	[ -z $(echo "$ENABLE_AUTORECONNECT_BEFORE_140" | egrep "^[0|1]$") ] && \
+-		ERROR="yes" && echo "Error: Invalid value \"ENABLE_AUTORECONNECT_BEFORE_140=$ENABLE_AUTORECONNECT_BEFORE_140\""
+ 	
+-	[ -z $(echo "$EXPORT_USERIP" | egrep "^[0|1]$") ] && \
+-		ERROR="yes" && echo "Error: Invalid value \"EXPORT_USERIP=$EXPORT_USERIP\""
+-	[ -z $(echo "$EXPORT_SESSIONID" | egrep "^[0|1]$") ] && \
+-		ERROR="yes" && echo "Error: Invalid value \"EXPORT_SESSIONID=$EXPORT_SESSIONID\""
+-	[ -n "$NODE_AUTOSTART" ] && ! which "$NODE_AUTOSTART" >/dev/null 2>&1 && \
+-		WARNING="yes" && echo "Warning: Invalid value \"NODE_AUTOSTART=$NODE_AUTOSTART\"" \
+-					  && echo "         No autostart will be performed."
++	# Forwarding directives
+ 	
+ 	[ -z $(echo "$ENABLE_SERVER_FORWARD" | egrep "^[0|1]$") ] && \
+ 		ERROR="yes" && echo "Error: Invalid value \"ENABLE_SERVER_FORWARD=$ENABLE_SERVER_FORWARD\""
+@@ -273,8 +330,8 @@
+ 	[ "$ENABLE_NOMACHINE_FORWARD_PORT" = "1" -a -z $(echo "$NOMACHINE_FORWARD_PORT" | egrep "^[1-9][0-9]{0,4}$") ] && \
+ 		ERROR="yes" && echo "Error: Invalid value \"NOMACHINE_FORWARD_PORT=$NOMACHINE_FORWARD_PORT\""
+ 	
+-	[ -z $(echo "$ENABLE_ROOTLESS_MODE" | egrep "^[0|1]$") ] && \
+-		ERROR="yes" && echo "Error: Invalid value \"ENABLE_ROOTLESS_MODE=$ENABLE_ROOTLESS_MODE\""
++	
++	# Services directives
+ 	
+ 	[ -z $(echo "$ENABLE_ESD_PRELOAD" | egrep "^[0|1]$") ] && \
+ 		ERROR="yes" && echo "Error: Invalid value \"ENABLE_ESD_PRELOAD=$ENABLE_ESD_PRELOAD\""
+@@ -288,43 +345,22 @@
+ 		WARNING="yes" && echo "Warning: Invalid value \"ARTSD_BIN_PRELOAD=$ARTSD_BIN_PRELOAD\"" \
+ 					  && echo "         No arts preload will be performed."
+ 	
+-	! which "$COMMAND_NETCAT" >/dev/null 2>&1 && \
+-		ERROR="yes" && echo "Error: Invalid value \"COMMAND_NETCAT=$COMMAND_NETCAT\""
+-
+-	! which "$COMMAND_SSH" >/dev/null 2>&1 && \
+-		ERROR="yes" && echo "Error: Invalid value \"COMMAND_SSH=$COMMAND_SSH\""
+-
+-	! which "$COMMAND_SSH_KEYGEN" >/dev/null 2>&1 && \
+-		ERROR="yes" && echo "Error: Invalid value \"COMMAND_SSH_KEYGEN=$COMMAND_SSH_KEYGEN\""
+ 	
+-	[ -z $(echo "$ENABLE_USESSION" | egrep "^[0|1]$") ] && \
+-		ERROR="yes" && echo "Error: Invalid value \"ENABLE_USESSION=$ENABLE_USESSION\""
+-	[ "$ENABLE_USESSION" = "1" ] && ! which "$COMMAND_SESSREG" >/dev/null 2>&1 && \
+-		WARNING="yes" && echo "Warning: Invalid value \"COMMAND_SESSREG=$COMMAND_SESSREG\"" \
+-					  && echo "         Logged in users will not be registered with sessreg."
++	# Path directives
+ 	
+ 	[ ! -d "$USER_FAKE_HOME" ] && \
+ 		ERROR="yes" && echo "Error: Invalid value \"USER_FAKE_HOME=$USER_FAKE_HOME\""
++	[ -z $(echo "$SET_LD_LIBRARY_PATH" | egrep "^[0|1]$") ] && \
++		ERROR="yes" && echo "Error: Invalid value \"SET_LD_LIBRARY_PATH=$SET_LD_LIBRARY_PATH\""
+ 	
+-	[ -z "$SERVER_NAME" ] && \
+-		ERROR="yes" && echo "Error: Invalid value \"SERVER_NAME=$SERVER_NAME\"" 
+-	
+-	[ -z $(echo "$SSHD_CHECK_IP" | egrep "^[0|1]$") ] && \
+-		ERROR="yes" && echo "Error: Invalid value \"SSHD_CHECK_IP=$SSHD_CHECK_IP\""
+-	[ -z $(echo "$SSHD_PORT" | egrep "^[1-9][0-9]{0,4}$") ] && \
+-		ERROR="yes" && echo "Error: Invalid value \"SSHD_PORT=$SSHD_PORT\""
+-	
+-	[ -z $(echo "$DISPLAY_BASE" | egrep "^[1-9][0-9]{0,4}$") ] && \
+-		ERROR="yes" && echo "Error: Invalid value \"DISPLAY_BASE=$DISPLAY_BASE\""
+-	[ -z $(echo "$SESSION_LIMIT" | egrep "^[1-9][0-9]{0,4}$") ] &&  \
+-		ERROR="yes" && echo "Error: Invalid value \"SESSION_LIMIT=$SESSION_LIMIT\""
+-	[ -z $(echo "$SESSION_USER_LIMIT" | egrep "^[1-9][0-9]{0,4}$") -o $SESSION_USER_LIMIT -gt $SESSION_LIMIT ] && \
+-		ERROR="yes" && echo "Error: Invalid value \"SESSION_USER_LIMIT=$SESSION_USER_LIMIT\""
+-	[ -z $(echo "$DISPLAY_LIMIT" | egrep "^[1-9][0-9]{0,4}$") -o $DISPLAY_LIMIT -lt $SESSION_LIMIT ] && \
+-		ERROR="yes" && echo "Error: Invalid value \"DISPLAY_LIMIT=$DISPLAY_LIMIT\""
+-	
+-	! which "$DEFAULT_X_WM" >/dev/null 2>&1 && \
++	[ -z $(echo "$ENABLE_DEFAULT_X_WM" | egrep "^[0|1]$") ] && \
++		ERROR="yes" && echo "Error: Invalid value \"ENABLE_DEFAULT_X_WM=$ENABLE_DEFAULT_X_WM\""
++	[ "$ENABLE_DEFAULT_X_WM" = "1" -a  -z $(echo "$ENABLE_DEFAULT_X_WM_KILL" | egrep "^[0|1]$") ] && \
++		ERROR="yes" && echo "Error: Invalid value \"ENABLE_DEFAULT_X_WM_KILL=$ENABLE_DEFAULT_X_WM_KILL\""
++	[ "$ENABLE_DEFAULT_X_WM" = "1" ] && ! which "$DEFAULT_X_WM" >/dev/null 2>&1 && \
+ 		ERROR="yes" && echo "Error: Invalid value \"DEFAULT_X_WM=$DEFAULT_X_WM\""
++	[ -z "$USER_X_STARTUP_SCRIPT" ] && \
++		ERROR="yes" && echo "Error: Invalid value \"USER_X_STARTUP_SCRIPT=$USER_X_STARTUP_SCRIPT\""
+ 	! which "$DEFAULT_X_SESSION" >/dev/null 2>&1 && \
+ 		WARNING="yes" && echo "Warning: Invalid value \"DEFAULT_X_SESSION=$DEFAULT_X_SESSION\"" \
+ 					  && echo "         Users might not be able to request a default X session."
+@@ -342,18 +378,40 @@
+ 					  && echo "         Users will not be able to request an xterm session."
+ 	! which "$COMMAND_XAUTH" >/dev/null 2>&1 && \
+ 		ERROR="yes" && echo "Error: Invalid value \"COMMAND_XAUTH=$COMMAND_XAUTH\""
+-	! which "$COMMAND_XSET" >/dev/null 2>&1 && \
+-		ERROR="yes" && echo "Error: Invalid value \"COMMAND_XSET=$COMMAND_XSET\""
+-	! which "$COMMAND_XMODMAP" >/dev/null 2>&1 && \
+-		ERROR="yes" && echo "Error: Invalid value \"COMMAND_XMODMAP=$COMMAND_XMODMAP\""
+-	! which "$COMMAND_XKBCOMP" >/dev/null 2>&1 && \
+-		ERROR="yes" && echo "Error: Invalid value \"COMMAND_XKBCOMP=$COMMAND_XKBCOMP\""
+-	[ ! -e "$XKBCOMP_KEYMAP_FILE" ] && \
+-		ERROR="yes" && echo "Error: Invalid value \"XKBCOMP_KEYMAP_FILE=$XKBCOMP_KEYMAP_FILE\""
+ 	! which "$COMMAND_SMBMOUNT" >/dev/null 2>&1 && \
+ 		ERROR="yes" && echo "Error: Invalid value \"COMMAND_SMBMOUNT=$COMMAND_SMBMOUNT\""
+ 	! which "$COMMAND_SMBUMOUNT" >/dev/null 2>&1 && \
+ 		ERROR="yes" && echo "Error: Invalid value \"COMMAND_SMBUMOUNT=$COMMAND_SMBUMOUNT\""
++	! which "$COMMAND_NETCAT" >/dev/null 2>&1 && \
++		ERROR="yes" && echo "Error: Invalid value \"COMMAND_NETCAT=$COMMAND_NETCAT\""
++	! which "$COMMAND_SSH" >/dev/null 2>&1 && \
++		ERROR="yes" && echo "Error: Invalid value \"COMMAND_SSH=$COMMAND_SSH\""
++	! which "$COMMAND_SSH_KEYGEN" >/dev/null 2>&1 && \
++		ERROR="yes" && echo "Error: Invalid value \"COMMAND_SSH_KEYGEN=$COMMAND_SSH_KEYGEN\""
++
++	# Misc directives
++	
++	[ -z $(echo "$ENABLE_AUTORECONNECT" | egrep "^[0|1]$") ] && \
++		ERROR="yes" && echo "Error: Invalid value \"ENABLE_AUTORECONNECT=$ENABLE_AUTORECONNECT\""
++	[ -z $(echo "$ENABLE_AUTORECONNECT_BEFORE_140" | egrep "^[0|1]$") ] && \
++		ERROR="yes" && echo "Error: Invalid value \"ENABLE_AUTORECONNECT_BEFORE_140=$ENABLE_AUTORECONNECT_BEFORE_140\""
++	
++	[ -z $(echo "$EXPORT_USERIP" | egrep "^[0|1]$") ] && \
++		ERROR="yes" && echo "Error: Invalid value \"EXPORT_USERIP=$EXPORT_USERIP\""
++	[ -z $(echo "$EXPORT_SESSIONID" | egrep "^[0|1]$") ] && \
++		ERROR="yes" && echo "Error: Invalid value \"EXPORT_SESSIONID=$EXPORT_SESSIONID\""
++	[ -n "$NODE_AUTOSTART" ] && ! which "$NODE_AUTOSTART" >/dev/null 2>&1 && \
++		WARNING="yes" && echo "Warning: Invalid value \"NODE_AUTOSTART=$NODE_AUTOSTART\"" \
++					  && echo "         No autostart will be performed."
++
++	[ -z $(echo "$ENABLE_ROOTLESS_MODE" | egrep "^[0|1]$") ] && \
++		ERROR="yes" && echo "Error: Invalid value \"ENABLE_ROOTLESS_MODE=$ENABLE_ROOTLESS_MODE\""
++
++	[ -z $(echo "$ENABLE_USESSION" | egrep "^[0|1]$") ] && \
++		ERROR="yes" && echo "Error: Invalid value \"ENABLE_USESSION=$ENABLE_USESSION\""
++	[ "$ENABLE_USESSION" = "1" ] && ! which "$COMMAND_SESSREG" >/dev/null 2>&1 && \
++		WARNING="yes" && echo "Warning: Invalid value \"COMMAND_SESSREG=$COMMAND_SESSREG\"" \
++					  && echo "         Logged in users will not be registered with sessreg."
+ 	
+ 	#AGENT_EXTRA_OPTIONS_RFB=""
+ 	#AGENT_EXTRA_OPTIONS_RDP=""
+@@ -367,49 +425,6 @@
+ 	[ -z $(echo "$PROXY_TCP_NODELAY" | egrep "^[0|1]$") ] && \
+ 		ERROR="yes" && echo "Error: Invalid value \"PROXY_TCP_NODELAY=$PROXY_TCP_NODELAY\""
+ 	
+-	[ -z $(echo "$CUPS_SUPPORT" | egrep "^[0|1]$") ] && \
+-		ERROR="yes" && echo "Error: Invalid value \"CUPS_SUPPORT=$CUPS_SUPPORT\""
+-	# CUPS_BACKEND=""
+-		# As this isn't used yet I don't know how to realy check for it. Fix this when adding support!
+-	[ "$CUPS_SUPPORT" = "1" -a ! -d "$CUPS_BIN" ] && \
+-		ERROR="yes" && echo "Error: Invalid value \"CUPS_BIN=$CUPS_BIN\""
+-	[ "$CUPS_SUPPORT" = "1" -a ! -d "$CUPS_SBIN" ] && \
+-		ERROR="yes" && echo "Error: Invalid value \"CUPS_SBIN=$CUPS_SBIN\""
+-	
+-	[ -z $(echo "$SET_LD_LIBRARY_PATH" | egrep "^[0|1]$") ] && \
+-		ERROR="yes" && echo "Error: Invalid value \"SET_LD_LIBRARY_PATH=$SET_LD_LIBRARY_PATH\""
+-		
+-	[ ! -d "$AGENT_LIBRARY_PATH" ] && \
+-		ERROR="yes" && echo "Error: Invalid value \"AGENT_LIBRARY_PATH=$AGENT_LIBRARY_PATH\""
+-	[ ! -d "$PROXY_LIBRARY_PATH" ] && \
+-		ERROR="yes" && echo "Error: Invalid value \"PROXY_LIBRARY_PATH=$PROXY_LIBRARY_PATH\""
+-	[ ! -d "$APPLICATION_LIBRARY_PATH" ] && \
+-		ERROR="yes" && echo "Error: Invalid value \"APPLICATION_LIBRARY_PATH=$APPLICATION_LIBRARY_PATH\""
+-	
+-	OLD_IFS=$IFS
+-	IFS=","
+-	if [ "$ENABLE_PERSISTENT_SESSION" != "all" ]
+-	then
+-		for USERNAME in $ENABLE_PERSISTENT_SESSION; do
+-			[ "${USERNAME:0:1}" != "@" ] && [ -z $(getent passwd | egrep "^$USERNAME:") ] && \
+-				ERROR="yes" && echo "Error: Invalid value \"ENABLE_PERSISTENT_SESSION=$ENABLE_PERSISTENT_SESSION\"" && break ;
+-			[ "${USERNAME:0:1}" = "@" ] && [ -z $(getent group | egrep "^${USERNAME:1}:") ] && \
+-				ERROR="yes" && echo "Error: Invalid value \"ENABLE_PERSISTENT_SESSION=$ENABLE_PERSISTENT_SESSION\"" && break ;
+-		done
+-	fi
+-	for USERNAME in $DISABLE_PERSISTENT_SESSION; do
+-		[ "${USERNAME:0:1}" != "@" ] && [ -z $(getent passwd | egrep "^$USERNAME:") ] && \
+-			ERROR="yes" && echo "Error: Invalid value \"DISABLE_PERSISTENT_SESSION=$DISABLE_PERSISTENT_SESSION\"" && break ;
+-		[ "${USERNAME:0:1}" = "@" ] && [ -z $(getent group | egrep "^${USERNAME:1}:") ] && \
+-			ERROR="yes" && echo "Error: Invalid value \"DISABLE_PERSISTENT_SESSION=$DISABLE_PERSISTENT_SESSION\"" && break ;
+-	done
+-	
+-	IFS=":"
+-	for LIBRARY in $APPLICATION_LIBRARY_PRELOAD; do
+-		[ ! -e $LIBRARY ] && \
+-			ERROR="yes" && echo "Error: Invalid value \"APPLICATION_LIBRARY_PRELOAD=$APPLICATION_LIBRARY_PRELOAD\"" && break ;
+-	done
+-	IFS=$OLD_IFS
+ 	
+ 	if [ "$ERROR" = "yes" ]
+ 	then
+
+
+
+
+
+
+From freenx-cvs at berlios.de  Mon Apr 25 04:11:26 2005
+From: freenx-cvs at berlios.de (fabianx)
+Date: Mon, 25 Apr 2005 04:11:26 +0200
+Subject: [Freenx-cvs] CVS: freenx - fabianx modified 2 files
+Message-ID: <426C51CE.mail5AH11BDD3@lists.berlios.de>
+
+User:      fabianx
+Date:      2005-04-25 02:11:25 GMT
+Modified:  .        ChangeLog nxclient
+Log:
+Completed support for -printer in nxclient together with handling of drivers cache.
+
+The component now works exactly like the commercial nxclient.
+
+Revision  Changes    Path
+1.47      +2 -0      freenx/ChangeLog
+
+
+rev 1.47, prev_rev 1.46
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.46
+retrieving revision 1.47
+diff -u -r1.46 -r1.47
+--- ChangeLog	24 Apr 2005 16:03:37 -0000	1.46
++++ ChangeLog	25 Apr 2005 02:11:24 -0000	1.47
+@@ -29,6 +29,8 @@
+ 	  in nxsetup.
+ 	* Added ENABLE_FORCE_ENCRYPTION to enforce the usage of encryption on 
+ 	  the server.
++	* Added nxprint and added -printer to nxclient together with handling
++	  of drivers cache.
+ 
+ XX.03.2005 FreeNX 0.3.1-CVS
+ 	* Fixed keyboard mapping problems.
+
+
+
+1.5       +71 -12    freenx/nxclient
+
+
+rev 1.5, prev_rev 1.4
+Index: nxclient
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxclient,v
+retrieving revision 1.4
+retrieving revision 1.5
+diff -u -r1.4 -r1.5
+--- nxclient	24 Mar 2005 01:33:19 -0000	1.4
++++ nxclient	25 Apr 2005 02:11:24 -0000	1.5
+@@ -9,7 +9,7 @@
+ #       but we set it to a "good value" anyway in case 
+ #       it does check it someday.
+ #
+-# CVS: $Id: nxclient,v 1.4 2005/03/24 01:33:19 fabianx Exp $
++# CVS: $Id: nxclient,v 1.5 2005/04/25 02:11:24 fabianx Exp $
+ #
+ # ========================================================================
+ 
+@@ -73,6 +73,9 @@
+ #	set <name> <driver> <description> - sets the current driver and description for name
+ #	getvendlist - gets a list of vendors
+ #	getdrvlist <vendor> - gets a list of drivers for vendor
++#	getextdrvlist <vendor> - gets an extended list (with driver and 
++#                                description) of drivers for vendor
++#	getdesc <driver> - gets the description for driver <driver>
+ #	getlist - gets a list of drivers
+ 
+ #
+@@ -104,10 +107,17 @@
+ 			mv -f $UTILITY_DRIVERS_CACHE.tmp $UTILITY_DRIVERS_CACHE
+ 		;;
+ 		getvendlist)
+-			$UTILITY_NXPRINT -d | awk -F'|' '{ print $2 }' | uniq
++			$UTILITY_NXPRINT -d | awk -F'|' '{ print $2 }' | uniq | tr '\n' '|'
+ 		;;
+ 		getdrvlist)
+-			$UTILITY_NXPRINT -d | awk -F'|' '($2=="'$2'") { print $4 }'
++			$UTILITY_NXPRINT -d | awk -F'|' '($2=="'$2'") { print $4}' | tr '\n' '|'
++		;;
++		getextdrvlist)
++			$UTILITY_NXPRINT -d | awk -F'|' '($2=="'$2'") { print $4 "|" $3 }'
++		;;
++
++		getdesc)
++			$UTILITY_NXPRINT -d | awk -F'|' '($4=="'$2'") { print $3}'
+ 		;;
+ 		getlist)
+ 			$UTILITY_NXPRINT -d
+@@ -148,12 +158,38 @@
+ 
+ xmessage_printer_ask()
+ {
+-	$xmessage -buttons "Ok:0,Configure:1,Cancel:2" -center "$DIALOG_MESSAGE"
++	$xmessage -buttons "Ok:100,Configure:101,Cancel:102" -center "$DIALOG_MESSAGE"
++	RC=$?
++	[ $RC -lt 100 ] && return 2
++	let RC=$RC-100
++	return $RC
+ }
+ 
+-xmessage_printer()
++xmessage_printer_configure()
+ {
+-	:
++	IFS=','
++	$xmessage -buttons "$*" -center "$DIALOG_MESSAGE"
++	RC=$?
++	unset IFS
++	VENDOR=""
++	if [ $RC -gt 100 ]
++	then
++		let NR=$RC-100
++		VENDOR="${!NR}"
++	fi
++	echo "$VENDOR"
++}
++
++xmessage_printer_configure_vendor()
++{
++	IFS='|' VENDOR_LIST=( $(utility_printer getvendlist) )
++	xmessage_printer_configure "${VENDOR_LIST[@]}"
++}
++
++xmessage_printer_configure_driver()
++{
++	IFS='|' DRIVER_LIST=( $(utility_printer getdrvlist "$1") )
++	xmessage_printer_configure "${DRIVER_LIST[@]}"
+ }
+ 
+ #
+@@ -198,17 +234,26 @@
+ 
+ xdialog_printer_ask()
+ {
+-		$DIALOG --title "$DIALOG_CAPTION" --buttons-style text --ok-label "Ok" --cancel-label "Configure" --yesno "$DIALOG_MESSAGE\n\nClose window to cancel." 400x250
++	$DIALOG --title "$DIALOG_CAPTION" --buttons-style text --ok-label "Ok" --cancel-label "Configure" --yesno "$DIALOG_MESSAGE\n\nClose window to cancel." 400x250
+ 	RC=$?
+ 	[ $RC -eq 255 ] && return 2
+ 	return $RC
+ }
+ 
+-xdialog_printer()
++xdialog_printer_configure_vendor()
+ {
+-	:
++	IFS='|' VENDOR_LIST=( $(utility_printer getvendlist | sed 's/|/||off|/g') )
++	$DIALOG --stdout --title "$DIALOG_CAPTION" --radiolist "$DIALOG_MESSAGE" 0 0 6 "${VENDOR_LIST[@]}"
+ }
+ 
++# xdialog_printer_configure_driver vendor old_driver
++xdialog_printer_configure_driver()
++{
++	IFS='|' XDIALOG_LIST=( $(utility_printer getextdrvlist "$1" | sed 's/$/|off/g; /'"$2"'/ s/|off/|on/g' | tr '\n' '|') )
++	$DIALOG --stdout --title "$DIALOG_CAPTION" --radiolist "$DIALOG_MESSAGE" 0 0 6 "${XDIALOG_LIST[@]}"
++}
++
++
+ #
+ # helper functions
+ #
+@@ -225,17 +270,31 @@
+ 		DIALOG_MESSAGE=$(echo -e "Found driver for printer $DIALOG_PRINTER.\n\nOld choice was: ${PRINTER_INFORMATION[3]}.\n\nIf you want to keep the settings click on 'Ok' \n- else click on 'Configure'.") ${dialog_interface}_printer_ask
+ 		RC=$?
+ 		# bail out with exit code 2 in case the user cancelled the operation
+-		[ $RC -eq 2 ] && exit 2
++		[ $RC -eq 2 ] && echo "cancel: aborted" && exit 2
+ 		[ $RC -eq 0 ] && PRINTER_CONFIGURE="no"
+ 	fi
++	
++	VENDOR=""
++	OLD_DRIVER="${PRINTER_INFORMATION[2]}"
+ 
+ 	if [ "$PRINTER_CONFIGURE" = "yes" ]
+ 	then
+-		DIALOG_MESSAGE="Not implemented." ${dialog_interface}_ok
++		DRIVER=""
++		VENDOR=$(DIALOG_MESSAGE="Choose vendor for printer $DIALOG_PRINTER." ${dialog_interface}_printer_configure_vendor)
++		[ -n "$VENDOR" ] && DRIVER=$(DIALOG_MESSAGE="Choose driver for printer $DIALOG_PRINTER." ${dialog_interface}_printer_configure_driver "$VENDOR" "${OLD_DRIVER:-invalid}")
++		# set the new printer driver
++		if [ -n "$DRIVER" ]
++		then
++			DESC=$(utility_printer getdesc "$DRIVER")
++			utility_printer set "$DIALOG_PRINTER" "$DRIVER" "$DESC"
++		fi
++	else
++		DRIVER="$OLD_DRIVER"
+ 	fi
+ 
+ 	# echo the choosen <ppdfile> to stdout
+-	echo "${PRINTER_INFORMATION[2]}"
++	[ -n "$DRIVER" ] && echo "$DRIVER"
++	[ -z "$DRIVER" ] && echo "cancel: aborted" && exit 2
+ 			
+ 	exit 0
+ }
+
+
+
+
+
+
+From freenx-cvs at berlios.de  Mon Apr 25 08:54:19 2005
+From: freenx-cvs at berlios.de (jonno)
+Date: Mon, 25 Apr 2005 08:54:19 +0200
+Subject: [Freenx-cvs] CVS: freenx - jonno modified 2 files
+Message-ID: <426C941B.mailB81115DAV@lists.berlios.de>
+
+User:      jonno
+Date:      2005-04-25 06:54:16 GMT
+Modified:  .        node.conf.sample nxloadconfig
+Log:
+Small fix to node.conf.sample
+
+Revision  Changes    Path
+1.22      +2 -2      freenx/node.conf.sample
+
+
+rev 1.22, prev_rev 1.21
+Index: node.conf.sample
+===================================================================
+RCS file: /cvsroot/freenx/freenx/node.conf.sample,v
+retrieving revision 1.21
+retrieving revision 1.22
+diff -u -r1.21 -r1.22
+--- node.conf.sample	24 Apr 2005 18:01:14 -0000	1.21
++++ node.conf.sample	25 Apr 2005 06:54:14 -0000	1.22
+@@ -37,7 +37,7 @@
+ #
+ #           https://mail.kde.org/mailman/listinfo/freenx-knx
+ #
+-# CVS: $Id: node.conf.sample,v 1.21 2005/04/24 18:01:14 jonno Exp $
++# CVS: $Id: node.conf.sample,v 1.22 2005/04/25 06:54:14 jonno Exp $
+ 
+ #########################################################################
+ # General FreeNX directives
+@@ -88,7 +88,7 @@
+ 
+ 
+ #########################################################################
+-# Limitations
++# Restriction directives
+ #########################################################################
+ 
+ # The base display number from which sessions are started.
+
+
+
+1.27      +3 -3      freenx/nxloadconfig
+
+
+rev 1.27, prev_rev 1.26
+Index: nxloadconfig
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxloadconfig,v
+retrieving revision 1.26
+retrieving revision 1.27
+diff -u -r1.26 -r1.27
+--- nxloadconfig	24 Apr 2005 18:01:14 -0000	1.26
++++ nxloadconfig	25 Apr 2005 06:54:15 -0000	1.27
+@@ -5,7 +5,7 @@
+ #
+ # License: GPL, version 2
+ #
+-# CVS: $Id: nxloadconfig,v 1.26 2005/04/24 18:01:14 jonno Exp $
++# CVS: $Id: nxloadconfig,v 1.27 2005/04/25 06:54:15 jonno Exp $
+ #
+ # ========================================================================
+ 
+@@ -91,7 +91,7 @@
+ SSHD_CHECK_IP="0"
+ 
+ 
+-# Limitations
++# Restriction directives
+ 
+ DISPLAY_BASE=1000
+ SESSION_LIMIT=200
+@@ -260,7 +260,7 @@
+ 		ERROR="yes" && echo "Error: Invalid value \"SSHD_CHECK_IP=$SSHD_CHECK_IP\""
+ 	
+ 	
+-	# Limitations
++	# Restriction directives
+ 	
+ 	[ -z $(echo "$DISPLAY_BASE" | egrep "^[1-9][0-9]{0,4}$") ] && \
+ 		ERROR="yes" && echo "Error: Invalid value \"DISPLAY_BASE=$DISPLAY_BASE\""
+
+
+
+
+
+
+From freenx-cvs at berlios.de  Thu Apr 28 22:45:44 2005
+From: freenx-cvs at berlios.de (fux)
+Date: Thu, 28 Apr 2005 22:45:44 +0200
+Subject: [Freenx-cvs] CVS: freenx - fux modified INSTALL
+Message-ID: <42714B78.mailNN413EG13@lists.berlios.de>
+
+User:      fux
+Date:      2005-04-28 20:45:44 GMT
+Modified:  .        INSTALL
+Log:
+path missing in recommended cp-statement
+
+Revision  Changes    Path
+1.6       +2 -2      freenx/INSTALL
+
+
+rev 1.6, prev_rev 1.5
+Index: INSTALL
+===================================================================
+RCS file: /cvsroot/freenx/freenx/INSTALL,v
+retrieving revision 1.5
+retrieving revision 1.6
+diff -u -r1.5 -r1.6
+--- INSTALL	15 Mar 2005 21:12:54 -0000	1.5
++++ INSTALL	28 Apr 2005 20:45:44 -0000	1.6
+@@ -42,8 +42,8 @@
+ cp -a nx-X11/programs/Xserver/nxagent ${NXPREFIX}/bin
+ cp -a nxproxy/nxproxy ${NXPREFIX}/bin
+ cp -a nxdesktop/nxdesktop ${NXPREFIX}/bin
+-cp -a nxviewer/nxviewer ${NXPREFIX}/bin
+-cp -a nxviewer/nxpasswd ${NXPREFIX}/bin
++cp -a nxviewer/nxviewer/nxviewer ${NXPREFIX}/bin
++cp -a nxviewer/nxpasswd/nxpasswd ${NXPREFIX}/bin
+ 
+ # windows-keymaps for nxdesktop RDP-sessions and keyboard layout != us
+ cd nxdesktop
+
+
+
+
+
+
+From freenx-cvs at berlios.de  Fri Apr 29 00:39:10 2005
+From: freenx-cvs at berlios.de (fabianx)
+Date: Fri, 29 Apr 2005 00:39:10 +0200
+Subject: [Freenx-cvs] CVS: freenx - fabianx modified 4 files
+Message-ID: <4271660E.mailJAA11TFRR@lists.berlios.de>
+
+User:      fabianx
+Date:      2005-04-28 22:39:10 GMT
+Modified:  .        node.conf.sample nxloadconfig nxnode nxserver
+Log:
+Initial support for printing infrastructure.
+
+- Userspace CUPSD is almost correctly setup.
+- Printers are added correctly.
+- kdeprintrc is modified.
+- Offset 9000+Displaynr is choosen for userspace cupsd.
+
+New config file directives:
+
+	ENABLE_KDE_CUPS, KDE_PRINTRC
+
+Revision  Changes    Path
+1.23      +8 -1      freenx/node.conf.sample
+
+
+rev 1.23, prev_rev 1.22
+Index: node.conf.sample
+===================================================================
+RCS file: /cvsroot/freenx/freenx/node.conf.sample,v
+retrieving revision 1.22
+retrieving revision 1.23
+diff -u -r1.22 -r1.23
+--- node.conf.sample	25 Apr 2005 06:54:14 -0000	1.22
++++ node.conf.sample	28 Apr 2005 22:39:10 -0000	1.23
+@@ -37,7 +37,7 @@
+ #
+ #           https://mail.kde.org/mailman/listinfo/freenx-knx
+ #
+-# CVS: $Id: node.conf.sample,v 1.22 2005/04/25 06:54:14 jonno Exp $
++# CVS: $Id: node.conf.sample,v 1.23 2005/04/28 22:39:10 fabianx Exp $
+ 
+ #########################################################################
+ # General FreeNX directives
+@@ -216,6 +216,11 @@
+ #ENABLE_ARTSD_PRELOAD="0"
+ #ARTSD_BIN_PRELOAD="artsdsp"
+ 
++# FreeNX with ENABLE_KDE_CUPS="1" will automatically write 
++# $KDE_PRINTRC and put the current used port into it.
++
++#ENABLE_KDE_CUPS="0"
++#KDE_PRINTRC=".kde/share/config/kdeprintrc"
+ 
+ #########################################################################
+ # Path directives
+@@ -294,6 +299,8 @@
+ #COMMAND_SSH=ssh
+ #COMMAND_SSH_KEYGEN=ssh-keygen
+ 
++# The key that contains the name of the complete path of the 'cupsd' command.
++#COMMAND_CUPSD=/usr/sbin/cupsd
+ 
+ #########################################################################
+ # Misc directives
+
+
+
+1.28      +4 -1      freenx/nxloadconfig
+
+
+rev 1.28, prev_rev 1.27
+Index: nxloadconfig
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxloadconfig,v
+retrieving revision 1.27
+retrieving revision 1.28
+diff -u -r1.27 -r1.28
+--- nxloadconfig	25 Apr 2005 06:54:15 -0000	1.27
++++ nxloadconfig	28 Apr 2005 22:39:10 -0000	1.28
+@@ -5,7 +5,7 @@
+ #
+ # License: GPL, version 2
+ #
+-# CVS: $Id: nxloadconfig,v 1.27 2005/04/25 06:54:15 jonno Exp $
++# CVS: $Id: nxloadconfig,v 1.28 2005/04/28 22:39:10 fabianx Exp $
+ #
+ # ========================================================================
+ 
+@@ -132,6 +132,8 @@
+ ENABLE_ARTSD_PRELOAD="0"
+ ARTSD_BIN_PRELOAD="artsdsp"
+ 
++ENABLE_KDE_CUPS="0"
++KDE_PRINTRC=".kde/share/config/kdeprintrc"
+ 
+ # Path directives
+ 
+@@ -153,6 +155,7 @@
+ COMMAND_NETCAT=netcat
+ COMMAND_SSH=ssh
+ COMMAND_SSH_KEYGEN=ssh-keygen
++COMMAND_CUPSD=/usr/sbin/cupsd
+ 
+ 
+ # Misc directives
+
+
+
+1.52      +126 -5    freenx/nxnode
+
+
+rev 1.52, prev_rev 1.51
+Index: nxnode
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxnode,v
+retrieving revision 1.51
+retrieving revision 1.52
+diff -u -r1.51 -r1.52
+--- nxnode	23 Apr 2005 12:56:54 -0000	1.51
++++ nxnode	28 Apr 2005 22:39:10 -0000	1.52
+@@ -13,7 +13,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxnode,v 1.51 2005/04/23 12:56:54 jonno Exp $
++# CVS: $Id: nxnode,v 1.52 2005/04/28 22:39:10 fabianx Exp $
+ #
+ # 21.06.2004: - Full reconnection support
+ 
+@@ -294,6 +294,80 @@
+ 	[ -n "$PROXY_PID" ] && kill $PROXY_PID 2>/dev/null
+ }
+ 
++node_cupsd_stop()
++{
++	[ -e "$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd" ] || return
++	NODE_CUPSD_PID=$(cat "$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd")
++	# Check for a running userspace cupsd, look if its still active 
++	# and kill it if so
++	( [ -n "$NODE_CUPSD_PID" ] && kill -0 $NODE_CUPSD_PID && kill $NODE_CUPSD_PID && sleep 2 && kill -0 $NODE_CUPSD_PID && kill -9 $NODE_CUPSD_PID ) 2>/dev/null
++	# delete pid file
++	rm -f "$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd"
++	# remove all printers
++	echo >"$USER_FAKE_HOME/.nx/C-$sess_id/cups/printers.conf"
++}
++
++node_cupsd_setup()
++{
++	let NODE_CUPSD_PORT=$display+9000 # offset 9000 for userspace cupsd's
++	export NODE_CUPSD_PORT
++	mkdir -p "$USER_FAKE_HOME/.nx/C-$sess_id/pids/"
++	[ -e "$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd" ] && return
++	touch "$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd"
++	
++	mkdir -p $USER_FAKE_HOME/.nx/C-$sess_id/cups/spool/tmp $USER_FAKE_HOME/.nx/C-$sess_id/cups/spool/certs $USER_FAKE_HOME/.nx/C-$sess_id/cups/ppd
++	ln -sf spool/certs $USER_FAKE_HOME/.nx/C-$sess_id/cups/certs
++cat <<EOF > $USER_FAKE_HOME/.nx/C-$sess_id/cups/cupsd.conf
++AccessLog /dev/null
++ErrorLog error_log
++PageLog page_log
++LogLevel info
++TempDir $USER_FAKE_HOME/.nx/C-$sess_id/cups/spool/tmp
++RequestRoot $USER_FAKE_HOME/.nx/C-$sess_id/cups/spool
++ServerRoot $USER_FAKE_HOME/.nx/C-$sess_id/cups/
++Port $NODE_CUPSD_PORT
++Browsing Off
++ServerName localhost
++
++<Location />
++Order Deny,Allow
++Deny From All
++Allow from 127.0.0.1
++</Location>
++EOF
++	touch $USER_FAKE_HOME/.nx/C-$sess_id/cups/printers.conf $USER_FAKE_HOME/.nx/C-$sess_id/cups/classes.conf
++
++	# start cupsd
++	$COMMAND_CUPSD -f -c "$USER_FAKE_HOME/.nx/C-$sess_id/cups/cupsd.conf" &>/dev/null </dev/null &
++	CUPSD_PID=$!
++	sleep 3
++	echo $CUPSD_PID >"$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd"
++	# setup KDE
++	if [ "$ENABLE_KDE_CUPS" = "1" ]
++	then
++		if egrep -q "^Port=" "$HOME/$KDE_PRINTRC"
++		then
++			perl -pi -e "s/^Port=.*/Port=$NODE_CUPSD_PORT/g" "$HOME/$KDE_PRINTRC"
++		else
++			echo "[CUPS]" >> "$HOME/$KDE_PRINTRC"
++			echo "Port=$NODE_CUPSD_PORT" >> "$HOME/$KDE_PRINTRC"
++		fi
++	fi
++}
++
++node_cupsd_reload()
++{
++	[ -e "$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd" ] || return
++	NODE_CUPSD_PID=$(cat "$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd")
++	[ -n "$NODE_CUPSD_PID" ] && kill -0 $NODE_CUPSD_PID && kill -HUP $NODE_CUPSD_PID
++}
++
++node_cupsd_get_port()
++{
++	node_cupsd_setup
++	echo $NODE_CUPSD_PORT
++}
++
+ node_umount_smb()
+ {
+ 	[ -e "$USER_FAKE_HOME/.nx/C-$sess_id/scripts/mpoint" ] || return
+@@ -303,6 +377,13 @@
+ 	done
+ }
+ 
++node_stop_services()
++{
++	node_umount_smb
++	node_cupsd_stop
++}
++
++
+ #
+ # Monitoring the nxagent: Its also kind of a "state-machine" 
+ #                         as it has to keep track of different 
+@@ -370,8 +451,8 @@
+ 			kill $TAIL_PID 2>/dev/null
+ 			
+ 			echo "NX> 1005 Session status: suspended"
+-			# umount shares 
+-			node_umount_smb
++			# umount shares & stop printers
++			node_stop_services
+ 			break
+ 		fi
+ 
+@@ -405,8 +486,8 @@
+ 			sleep 2
+ 			kill -9 $PROXY_PID 2>/dev/null
+ 
+-			# umount shares 
+-			node_umount_smb
++			# umount shares & stop printers
++			node_stop_services
+ 
+ 			# kill the session
+ 			node_terminate_session "$sess_id"
+@@ -478,10 +559,12 @@
+ 			break
+ 		fi
+ 	done 
++	node_stop_services
+ 	# close all open file descriptors
+ 	exec 0<&-
+ 	exec 1>&-
+ 	exec 2>&-
++	exit 0
+ }
+ 
+ node_startsession()
+@@ -656,6 +739,41 @@
+ 	fi
+ }
+ 
++cmd_node_addprinter()
++{
++	sessionid=$(getparam_sessionid)
++	type=$(getparam type)
++	port=$(getparam port)
++	username=$(getparam username)
++	password=$(getparam password)
++	share=$(getparam share)
++	computername=$(getparam computername)
++	public=$(getparam public)
++	model=$(getparam model)
++	defaultPrinter=$(getparam defaultPrinter)
++	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | cut -d"-" -f3)
++	sess_id="$SERVER_NAME-$display-$sessionid"
++	# this will also setup the userspace cupsd
++	IPP_PORT=$(node_cupsd_get_port)
++	export IPP_PORT
++	if [ "$type" = "smb" ]
++	then
++		DEVICE_URI="smb://$username:$password at localhost:$port/$share"
++		NAME="$share"
++		MODEL="$model.ppd"
++	else
++		DEVICE_URI="ipp://localhost:$port/printers/$share"
++		NAME="$share"
++		MODEL="$model.ppd"
++	fi
++	
++	PUBLIC="-u allow:$USER"
++	[ "$public" == "1" ] && PUBLIC=""
++	lpadmin -p "$NAME" -E -v "$DEVICE_URI" -m "$MODEL" $PUBLIC
++	[ "$defaultPrinter" = "1" ] && lpadmin -d "$NAME"
++}
++
++
+ case "$1" in 
+ 	--startsession)
+ 		node_startsession
+@@ -671,6 +789,9 @@
+ 	;;
+ 	--smbmount)
+ 		cmd_node_smbmount >/dev/null 2>/dev/null
++	;;
++	--addprinter)
++		cmd_node_addprinter &>/dev/null </dev/null &
+ 	;;
+ 	--check)
+ 		echo "NX> 716 finished"
+
+
+
+1.50      +3 -3      freenx/nxserver
+
+
+rev 1.50, prev_rev 1.49
+Index: nxserver
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxserver,v
+retrieving revision 1.49
+retrieving revision 1.50
+diff -u -r1.49 -r1.50
+--- nxserver	24 Apr 2005 15:51:54 -0000	1.49
++++ nxserver	28 Apr 2005 22:39:10 -0000	1.50
+@@ -11,7 +11,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxserver,v 1.49 2005/04/24 15:51:54 fabianx Exp $
++# CVS: $Id: nxserver,v 1.50 2005/04/28 22:39:10 fabianx Exp $
+ #
+ 
+ # Read the config file
+@@ -978,10 +978,10 @@
+ 			server_nxnode_start --smbmount "$USER" "$PARAMS" >/dev/null 2>&1
+ 			echo_x "NX> 719 SMB filesystem: running"
+ 		;;
+-		addprintercups*)
++		addprinter*)
+ 			server_get_params $CMD
+ 			PARAMS=$SERVER_PARAMS
+-			server_nxnode_start --addprintercups "$USER" "$PARAMS" >/dev/null 2>&1
++			server_nxnode_start --addprinter "$USER" "$PARAMS" >/dev/null 2>&1
+ 		;;
+ 		*)
+ 			# disabled for 1.4.0-5 snapshot client
+
+
+
+
+
+
+From freenx-cvs at berlios.de  Fri Apr 29 00:46:56 2005
+From: freenx-cvs at berlios.de (fabianx)
+Date: Fri, 29 Apr 2005 00:46:56 +0200
+Subject: [Freenx-cvs] CVS: freenx - fabianx modified 2 files
+Message-ID: <427167E0.mail2C111KKCZ@lists.berlios.de>
+
+User:      fabianx
+Date:      2005-04-28 22:46:56 GMT
+Modified:  .        ChangeLog nxnode
+Log:
+Fixed a possible race condition with NX> being in the nxproxy options string. According to Edward Warnicke <eaw at cisco.com>, moving the 710 to the 1002 line solves the problem.
+
+I could not reproduce it, but as it does not break anything either, I just commited it.
+
+Revision  Changes    Path
+1.48      +2 -0      freenx/ChangeLog
+
+
+rev 1.48, prev_rev 1.47
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.47
+retrieving revision 1.48
+diff -u -r1.47 -r1.48
+--- ChangeLog	25 Apr 2005 02:11:24 -0000	1.47
++++ ChangeLog	28 Apr 2005 22:46:56 -0000	1.48
+@@ -31,6 +31,8 @@
+ 	  the server.
+ 	* Added nxprint and added -printer to nxclient together with handling
+ 	  of drivers cache.
++	* Fixed a possible race-condition. (reported by Edward Warnicke
++	  <eaw at cisco.com>)
+ 
+ XX.03.2005 FreeNX 0.3.1-CVS
+ 	* Fixed keyboard mapping problems.
+
+
+
+1.53      +2 -2      freenx/nxnode
+
+
+rev 1.53, prev_rev 1.52
+Index: nxnode
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxnode,v
+retrieving revision 1.52
+retrieving revision 1.53
+diff -u -r1.52 -r1.53
+--- nxnode	28 Apr 2005 22:39:10 -0000	1.52
++++ nxnode	28 Apr 2005 22:46:56 -0000	1.53
+@@ -13,7 +13,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxnode,v 1.52 2005/04/28 22:39:10 fabianx Exp $
++# CVS: $Id: nxnode,v 1.53 2005/04/28 22:46:56 fabianx Exp $
+ #
+ # 21.06.2004: - Full reconnection support
+ 
+@@ -511,6 +511,7 @@
+ 		
+ 		if stringinstring "Info: Waiting for connection from" "$line"
+ 		then
++			echo "NX> 710 Session status: running"
+ 			echo "NX> 1002 Commit"
+ 			echo "NX> 1006 Session status: running"
+ 			[ -n "$TIMEOUT_PID" ] && kill $TIMEOUT_PID 2>/dev/null
+@@ -689,7 +690,6 @@
+ NX> 706 Agent cookie: $cookie
+ NX> 704 Session cache: $type
+ NX> 707 SSL tunneling: $ssl_tunnel
+-NX> 710 Session status: running
+ EOF
+ 
+ # collection ...
+
+
+
+
+
+
+From freenx-cvs at berlios.de  Fri Apr 29 02:17:34 2005
+From: freenx-cvs at berlios.de (fux)
+Date: Fri, 29 Apr 2005 02:17:34 +0200
+Subject: [Freenx-cvs] CVS: freenx - fux modified 4 files
+Message-ID: <42717D1E.mailGPB1O7P9R@lists.berlios.de>
+
+User:      fux
+Date:      2005-04-29 00:17:33 GMT
+Modified:  .        ChangeLog node.conf.sample nxloadconfig nxserver
+Log:
+Feature Request #847 (stderror for some applications to log-file)
+
+Revision  Changes    Path
+1.49      +3 -2      freenx/ChangeLog
+
+
+rev 1.49, prev_rev 1.48
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.48
+retrieving revision 1.49
+diff -u -r1.48 -r1.49
+--- ChangeLog	28 Apr 2005 22:46:56 -0000	1.48
++++ ChangeLog	29 Apr 2005 00:17:32 -0000	1.49
+@@ -1,4 +1,4 @@
+-06.03.2005 FreeNX 0.4.0-CVS
++XX.0X.2005 FreeNX 0.4.0-CVS
+ 	* Opened the 0.4.0 branch.
+ 	* Added initial support for filesharing via samba.
+ 	* Improvements to be more node.conf compatible.
+@@ -33,8 +33,9 @@
+ 	  of drivers cache.
+ 	* Fixed a possible race-condition. (reported by Edward Warnicke
+ 	  <eaw at cisco.com>)
++	* Feature Request #847 (stderror of some applications to log-file)
+ 
+-XX.03.2005 FreeNX 0.3.1-CVS
++20.03.2005 FreeNX 0.3.1 "Bugfix Edition"
+ 	* Fixed keyboard mapping problems.
+ 	* Fixed unix-custom mode; now allowing parameters to be passed.
+ 	* Fixed password prompt detection support in nxnode-login.
+
+
+
+1.24      +3 -2      freenx/node.conf.sample
+
+
+rev 1.24, prev_rev 1.23
+Index: node.conf.sample
+===================================================================
+RCS file: /cvsroot/freenx/freenx/node.conf.sample,v
+retrieving revision 1.23
+retrieving revision 1.24
+diff -u -r1.23 -r1.24
+--- node.conf.sample	28 Apr 2005 22:39:10 -0000	1.23
++++ node.conf.sample	29 Apr 2005 00:17:33 -0000	1.24
+@@ -37,7 +37,7 @@
+ #
+ #           https://mail.kde.org/mailman/listinfo/freenx-knx
+ #
+-# CVS: $Id: node.conf.sample,v 1.23 2005/04/28 22:39:10 fabianx Exp $
++# CVS: $Id: node.conf.sample,v 1.24 2005/04/29 00:17:33 fux Exp $
+ 
+ #########################################################################
+ # General FreeNX directives
+@@ -127,6 +127,7 @@
+ # 4: Server - Client communication
+ # 5: Information
+ # 6: Debugging information
++# 7: stderror of some applications
+ #NX_LOG_LEVEL=0
+ 
+ # Before turning logging on, please make sure that NX_LOGFILE is
+@@ -352,4 +353,4 @@
+ #PROXY_TCP_NODELAY="0"
+ 
+ # Extra options to nxproxy. See !M documentation for useful parameters.
+-#PROXY_EXTRA_OPTIONS=""
+\ No newline at end of file
++#PROXY_EXTRA_OPTIONS=""
+
+
+
+1.29      +2 -2      freenx/nxloadconfig
+
+
+rev 1.29, prev_rev 1.28
+Index: nxloadconfig
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxloadconfig,v
+retrieving revision 1.28
+retrieving revision 1.29
+diff -u -r1.28 -r1.29
+--- nxloadconfig	28 Apr 2005 22:39:10 -0000	1.28
++++ nxloadconfig	29 Apr 2005 00:17:33 -0000	1.29
+@@ -5,7 +5,7 @@
+ #
+ # License: GPL, version 2
+ #
+-# CVS: $Id: nxloadconfig,v 1.28 2005/04/28 22:39:10 fabianx Exp $
++# CVS: $Id: nxloadconfig,v 1.29 2005/04/29 00:17:33 fux Exp $
+ #
+ # ========================================================================
+ 
+@@ -296,7 +296,7 @@
+ 	
+ 	# Logging directives
+ 	
+-	[ -z $(echo "$NX_LOG_LEVEL" | egrep "^[0-6]$") ] && \
++	[ -z $(echo "$NX_LOG_LEVEL" | egrep "^[0-7]$") ] && \
+ 		ERROR="yes" && echo "Error: Invalid value \"NX_LOG_LEVEL=$NX_LOG_LEVEL\""
+ 	[ "$NX_LOG_LEVEL" != "0" -a ! -e "$NX_LOGFILE" ] && \
+ 		WARNING="yes" && echo "Warning: Invalid value \"NX_LOGFILE=$NX_LOGFILE\"" \
+
+
+
+1.51      +16 -9     freenx/nxserver
+
+
+rev 1.51, prev_rev 1.50
+Index: nxserver
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxserver,v
+retrieving revision 1.50
+retrieving revision 1.51
+diff -u -r1.50 -r1.51
+--- nxserver	28 Apr 2005 22:39:10 -0000	1.50
++++ nxserver	29 Apr 2005 00:17:33 -0000	1.51
+@@ -11,7 +11,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxserver,v 1.50 2005/04/28 22:39:10 fabianx Exp $
++# CVS: $Id: nxserver,v 1.51 2005/04/29 00:17:33 fux Exp $
+ #
+ 
+ # Read the config file
+@@ -395,6 +395,7 @@
+ # 4: Server - Client communication
+ # 5: Information
+ # 6: Debugging information
++# 7: stderror-channel of some applications
+ 
+ log()
+ {
+@@ -407,6 +408,12 @@
+ 	[ "$NX_LOG_LEVEL" -ge "4" -a -w "$NX_LOGFILE" ] || exec cat -
+ }
+ 
++log_error()
++{
++	[ "$NX_LOG_LEVEL" -ge "7" -a -w "$NX_LOGFILE" ] && exec tee -a "$NX_LOGFILE"
++	[ "$NX_LOG_LEVEL" -ge "7" -a -w "$NX_LOGFILE" ] || exec cat - 
++}
++
+ echo_x()
+ {
+ 	log "4" "$@"
+@@ -568,7 +575,7 @@
+ 			then
+ 				log 6 -n "ssh "
+ 				export COMMAND_SSH			
+-				echo "$PASS" | $PATH_BIN/nxnode-login -- ssh "$USER" "$SSHD_PORT" "$PATH_BIN/nxnode" --check > /dev/null 2>/dev/null
++				echo "$PASS" | $PATH_BIN/nxnode-login -- ssh "$USER" "$SSHD_PORT" "$PATH_BIN/nxnode" --check 2>&1 >/dev/null | log_error
+ 				if [ $? -eq 0 ]
+ 				then
+ 					LOGIN_SUCCESS="1"
+@@ -580,7 +587,7 @@
+ 			if [ "$ENABLE_SU_AUTHENTICATION" = "1" -a "$LOGIN_SUCCESS" = "0" ]
+ 			then
+ 				log 6 -n "su "
+-				echo "$PASS" | $PATH_BIN/nxnode-login -- su "$USER" "" "$PATH_BIN/nxnode" --check > /dev/null 2>/dev/null
++				echo "$PASS" | $PATH_BIN/nxnode-login -- su "$USER" "" "$PATH_BIN/nxnode" --check 2>&1 >/dev/null| log_error
+ 				if [ $? -eq 0 ]
+ 				then
+ 					LOGIN_SUCCESS="1"
+@@ -651,10 +658,10 @@
+ 	if [ "$LOGIN_METHOD" = "SSH" ]
+ 	then
+ 	    export COMMAND_SSH
+-	    echo "$PASS" | $PATH_BIN/nxnode-login -- ssh "$USER" "$SSHD_PORT" "$PATH_BIN/nxnode" "$CMD" "$@" 2>&1 | log_tee
++	    echo "$PASS" | $PATH_BIN/nxnode-login -- ssh "$USER" "$SSHD_PORT" "$PATH_BIN/nxnode" "$CMD" "$@" 2>&1 >/dev/null | log_error
+ 	elif [ "$LOGIN_METHOD" = "SU" ]
+ 	then
+-	    echo "$PASS" | $PATH_BIN/nxnode-login -- su "$USER" "" "$PATH_BIN/nxnode" "$CMD" "$@" 2>&1 | log_tee
++	    echo "$PASS" | $PATH_BIN/nxnode-login -- su "$USER" "" "$PATH_BIN/nxnode" "$CMD" "$@" 2>&1 >/dev/null | log_error
+ 	else 
+ 	    echo "$@" | $COMMAND_SSH -l "$USER" 127.0.0.1 -p $SSHD_PORT -x -2 -i $NX_ETC_DIR/users.id_dsa -o 'PubkeyAuthentication yes' -o 'RSAAuthentication yes' -o 'RhostsAuthentication no' -o 'PasswordAuthentication no' -o 'RhostsRSAAuthentication no' -o 'StrictHostKeyChecking no' $PATH_BIN/nxnode "$CMD" | log_tee
+ 	fi
+@@ -664,13 +671,13 @@
+ {
+ 	[ "$ENABLE_USESSION" = "1" ] || return
+ 	
+-	$COMMAND_SESSREG -l ":$SESS_DISPLAY" -h "$USERIP" -a $USER 2>/dev/null
++	$COMMAND_SESSREG -l ":$SESS_DISPLAY" -h "$USERIP" -a $USER 2>&1 | log_error
+ }
+ 
+ server_remove_usession()
+ {
+ 	[ "$ENABLE_USESSION" = "1" ] || return
+-	$COMMAND_SESSREG -l ":$SESS_DISPLAY" -h "$USERIP" -d $USER 2>/dev/null
++	$COMMAND_SESSREG -l ":$SESS_DISPLAY" -h "$USERIP" -d $USER 2>&1 | log_error
+ }
+ 
+ server_nxnode_start_wait()
+@@ -975,13 +982,13 @@
+ 		addmount*)
+ 			server_get_params $CMD
+ 			PARAMS=$SERVER_PARAMS
+-			server_nxnode_start --smbmount "$USER" "$PARAMS" >/dev/null 2>&1
++			server_nxnode_start --smbmount "$USER" "$PARAMS" 2>&1 | log_error
+ 			echo_x "NX> 719 SMB filesystem: running"
+ 		;;
+ 		addprinter*)
+ 			server_get_params $CMD
+ 			PARAMS=$SERVER_PARAMS
+-			server_nxnode_start --addprinter "$USER" "$PARAMS" >/dev/null 2>&1
++			server_nxnode_start --addprinter "$USER" "$PARAMS" 2>&1 | log_error
+ 		;;
+ 		*)
+ 			# disabled for 1.4.0-5 snapshot client
+
+
+
+
+
+
+From freenx-cvs at berlios.de  Fri Apr 29 02:31:26 2005
+From: freenx-cvs at berlios.de (fux)
+Date: Fri, 29 Apr 2005 02:31:26 +0200
+Subject: [Freenx-cvs] CVS: freenx - fux modified nxsetup
+Message-ID: <4271805E.mailJDL117VRX@lists.berlios.de>
+
+User:      fux
+Date:      2005-04-29 00:31:24 GMT
+Modified:  .        nxsetup
+Log:
+corrected a sentence
+
+Revision  Changes    Path
+1.26      +4 -4      freenx/nxsetup
+
+
+rev 1.26, prev_rev 1.25
+Index: nxsetup
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxsetup,v
+retrieving revision 1.25
+retrieving revision 1.26
+diff -u -r1.25 -r1.26
+--- nxsetup	9 Apr 2005 19:15:43 -0000	1.25
++++ nxsetup	29 Apr 2005 00:31:23 -0000	1.26
+@@ -5,7 +5,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxsetup,v 1.25 2005/04/09 19:15:43 fux Exp $ 
++# CVS: $Id: nxsetup,v 1.26 2005/04/29 00:31:23 fux Exp $ 
+ #
+ 
+ HELP="no"
+@@ -67,9 +67,9 @@
+ fi
+ #Undocumented
+ #
+-#    --dont-build-known-hosts		For system without /etc/ssh/ssh_host_key.rsa.pub and 
+-#					expect should handle nx-users known-hosts keys and 
+-#					
++#    --dont-build-known-hosts		For system without /etc/ssh/ssh_host_key.rsa.pub and anyway
++#					expect should handle nx-users known-hosts keys so why borther
++#					in nxsetup?
+ 
+ if [ $UID -ne 0 ]
+ then
+
+
+
+
+
+
+From freenx-cvs at berlios.de  Fri Apr 29 02:37:29 2005
+From: freenx-cvs at berlios.de (fux)
+Date: Fri, 29 Apr 2005 02:37:29 +0200
+Subject: [Freenx-cvs] CVS: freenx - fux modified 2 files
+Message-ID: <427181C9.mailN1L1VJDL8@lists.berlios.de>
+
+User:      fux
+Date:      2005-04-29 00:37:29 GMT
+Modified:  .        ChangeLog nxsetup
+Log:
+worked around FR 900 - I think COMMAND_SSHD is not necessary in nxloadlconfig, it's only used in nxsetup
+
+Revision  Changes    Path
+1.50      +1 -0      freenx/ChangeLog
+
+
+rev 1.50, prev_rev 1.49
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.49
+retrieving revision 1.50
+diff -u -r1.49 -r1.50
+--- ChangeLog	29 Apr 2005 00:17:32 -0000	1.49
++++ ChangeLog	29 Apr 2005 00:37:29 -0000	1.50
+@@ -34,6 +34,7 @@
+ 	* Fixed a possible race-condition. (reported by Edward Warnicke
+ 	  <eaw at cisco.com>)
+ 	* Feature Request #847 (stderror of some applications to log-file)
++	* Feature Request #900 (Detect ssh/sshd in nxsetup)
+ 
+ 20.03.2005 FreeNX 0.3.1 "Bugfix Edition"
+ 	* Fixed keyboard mapping problems.
+
+
+
+1.27      +3 -2      freenx/nxsetup
+
+
+rev 1.27, prev_rev 1.26
+Index: nxsetup
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxsetup,v
+retrieving revision 1.26
+retrieving revision 1.27
+diff -u -r1.26 -r1.27
+--- nxsetup	29 Apr 2005 00:31:23 -0000	1.26
++++ nxsetup	29 Apr 2005 00:37:29 -0000	1.27
+@@ -5,7 +5,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxsetup,v 1.26 2005/04/29 00:31:23 fux Exp $ 
++# CVS: $Id: nxsetup,v 1.27 2005/04/29 00:37:29 fux Exp $ 
+ #
+ 
+ HELP="no"
+@@ -115,7 +115,8 @@
+ 		# Generate Host keys if they are not available, yet
+ 		[ -e /etc/ssh/ssh_host_rsa_key ] || $COMMAND_SSH_KEYGEN -q -t rsa -f /etc/ssh/ssh_host_rsa_key -C '' -N ''
+ 		[ -e /etc/ssh/ssh_host_dsa_key ] || $COMMAND_SSH_KEYGEN -q -t dsa -f /etc/ssh/ssh_host_dsa_key -C '' -N ''
+-		/etc/init.d/ssh start
++		[ -x /etc/init.d/sshd ] && /etc/init.d/sshd start
++		[ -x /etc/init.d/ssh ] && /etc/init.d/ssh start
+ 		echo "done"
+ 	fi
+ 	
+
+
+
+
+
+
+From k1pfeifle at gmx.net  Fri Apr 29 02:22:40 2005
+From: k1pfeifle at gmx.net (Kurt Pfeifle)
+Date: Fri, 29 Apr 2005 01:22:40 +0100
+Subject: [Freenx-cvs] CVS: freenx - fabianx modified 4 files
+In-Reply-To: <4271660E.mailJAA11TFRR@lists.berlios.de>
+References: <4271660E.mailJAA11TFRR@lists.berlios.de>
+Message-ID: <200504290122.40895.k1pfeifle@gmx.net>
+
+On Thursday 28 April 2005 23:39, fabianx wrote:
+> User:      fabianx
+> Date:      2005-04-28 22:39:10 GMT
+> Modified:  .        node.conf.sample nxloadconfig nxnode nxserver
+> Log:
+> Initial support for printing infrastructure.
+
+[...]
+
+> +# FreeNX with ENABLE_KDE_CUPS="1" will automatically write 
+> +# $KDE_PRINTRC and put the current used port into it.
+> +
+> +#ENABLE_KDE_CUPS="0"
+> +#KDE_PRINTRC=".kde/share/config/kdeprintrc"
+
+The "$HOME/.kde/"  path is not always the correct path. What is used by
+the running instance of KDE is held in the KDEHOME environment variable.
+
+So the correct path should be s.th. like
+
+   KDE_PRINTRC="$KDEHOME/share/config/kdeprintrc"
+
+Maybe it should be made clear in a comment that the FreeNX admin can
+find out what is used by just running "echo $KDEHOME" ?
+
+Maybe it could even be coded in a way that this variable is always used 
+transparently, and needs no configuration at all?
+
+Cheers,
+Kurt
+
+
+From freenx-cvs at berlios.de  Sat Apr 30 16:44:30 2005
+From: freenx-cvs at berlios.de (fabianx)
+Date: Sat, 30 Apr 2005 16:44:30 +0200
+Subject: [Freenx-cvs] CVS: freenx - fabianx modified 3 files
+Message-ID: <427399CE.mailKRY18SHZH@lists.berlios.de>
+
+User:      fabianx
+Date:      2005-04-30 14:44:30 GMT
+Modified:  .        node.conf.sample nxloadconfig nxnode
+Log:
+Better detection of $KDE_PRINTRC. Idea by Kurt Pfeifle.
+
+Revision  Changes    Path
+1.25      +3 -2      freenx/node.conf.sample
+
+
+rev 1.25, prev_rev 1.24
+Index: node.conf.sample
+===================================================================
+RCS file: /cvsroot/freenx/freenx/node.conf.sample,v
+retrieving revision 1.24
+retrieving revision 1.25
+diff -u -r1.24 -r1.25
+--- node.conf.sample	29 Apr 2005 00:17:33 -0000	1.24
++++ node.conf.sample	30 Apr 2005 14:44:30 -0000	1.25
+@@ -37,7 +37,7 @@
+ #
+ #           https://mail.kde.org/mailman/listinfo/freenx-knx
+ #
+-# CVS: $Id: node.conf.sample,v 1.24 2005/04/29 00:17:33 fux Exp $
++# CVS: $Id: node.conf.sample,v 1.25 2005/04/30 14:44:30 fabianx Exp $
+ 
+ #########################################################################
+ # General FreeNX directives
+@@ -219,9 +219,10 @@
+ 
+ # FreeNX with ENABLE_KDE_CUPS="1" will automatically write 
+ # $KDE_PRINTRC and put the current used port into it.
++# $KDE_PRINTRC is automatically calculated if its not set.
+ 
+ #ENABLE_KDE_CUPS="0"
+-#KDE_PRINTRC=".kde/share/config/kdeprintrc"
++#KDE_PRINTRC="$HOME/.kde/share/config/kdeprintrc"
+ 
+ #########################################################################
+ # Path directives
+
+
+
+1.30      +4 -2      freenx/nxloadconfig
+
+
+rev 1.30, prev_rev 1.29
+Index: nxloadconfig
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxloadconfig,v
+retrieving revision 1.29
+retrieving revision 1.30
+diff -u -r1.29 -r1.30
+--- nxloadconfig	29 Apr 2005 00:17:33 -0000	1.29
++++ nxloadconfig	30 Apr 2005 14:44:30 -0000	1.30
+@@ -5,7 +5,7 @@
+ #
+ # License: GPL, version 2
+ #
+-# CVS: $Id: nxloadconfig,v 1.29 2005/04/29 00:17:33 fux Exp $
++# CVS: $Id: nxloadconfig,v 1.30 2005/04/30 14:44:30 fabianx Exp $
+ #
+ # ========================================================================
+ 
+@@ -133,7 +133,7 @@
+ ARTSD_BIN_PRELOAD="artsdsp"
+ 
+ ENABLE_KDE_CUPS="0"
+-KDE_PRINTRC=".kde/share/config/kdeprintrc"
++KDE_PRINTRC="" # Calculated
+ 
+ # Path directives
+ 
+@@ -196,6 +196,8 @@
+ [ -z "$APPLICATION_LIBRARY_PATH" ] && APPLICATION_LIBRARY_PATH=$PATH_LIB
+ [ -z "$APPLICATION_LIBRARY_PRELOAD" ] && APPLICATION_LIBRARY_PRELOAD="$APPLICATION_LIBRARY_PATH/libX11.so.6.2:$APPLICATION_LIBRARY_PATH/libXext.so.6.4:$APPLICATION_LIBRARY_PATH/libXcomp.so.1:$APPLICATION_LIBRARY_PATH/libXcompext.so.1:$APPLICATION_LIBRARY_PATH/libXrender.so.1.2"
+ 
++[ -z "$KDE_PRINTRC" -a -n "$KDEHOME" ] && KDE_PRINTRC="$KDEHOME/share/config/kdeprintrc"
++[ -z "$KDE_PRINTRC" -a -z "$KDEHOME" ] && KDE_PRINTRC="$HOME/.kde/share/config/kdeprintrc"
+ 
+ #########################################################################
+ # Support for --check
+
+
+
+1.54      +5 -5      freenx/nxnode
+
+
+rev 1.54, prev_rev 1.53
+Index: nxnode
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxnode,v
+retrieving revision 1.53
+retrieving revision 1.54
+diff -u -r1.53 -r1.54
+--- nxnode	28 Apr 2005 22:46:56 -0000	1.53
++++ nxnode	30 Apr 2005 14:44:30 -0000	1.54
+@@ -13,7 +13,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxnode,v 1.53 2005/04/28 22:46:56 fabianx Exp $
++# CVS: $Id: nxnode,v 1.54 2005/04/30 14:44:30 fabianx Exp $
+ #
+ # 21.06.2004: - Full reconnection support
+ 
+@@ -345,12 +345,12 @@
+ 	# setup KDE
+ 	if [ "$ENABLE_KDE_CUPS" = "1" ]
+ 	then
+-		if egrep -q "^Port=" "$HOME/$KDE_PRINTRC"
++		if egrep -q "^Port=" "$KDE_PRINTRC"
+ 		then
+-			perl -pi -e "s/^Port=.*/Port=$NODE_CUPSD_PORT/g" "$HOME/$KDE_PRINTRC"
++			perl -pi -e "s/^Port=.*/Port=$NODE_CUPSD_PORT/g" "$KDE_PRINTRC"
+ 		else
+-			echo "[CUPS]" >> "$HOME/$KDE_PRINTRC"
+-			echo "Port=$NODE_CUPSD_PORT" >> "$HOME/$KDE_PRINTRC"
++			echo "[CUPS]" >> "$KDE_PRINTRC"
++			echo "Port=$NODE_CUPSD_PORT" >> "$KDE_PRINTRC"
+ 		fi
+ 	fi
+ }
+
+
+
+
+
+
+From freenx-cvs at berlios.de  Sat Apr 30 17:54:27 2005
+From: freenx-cvs at berlios.de (fabianx)
+Date: Sat, 30 Apr 2005 17:54:27 +0200
+Subject: [Freenx-cvs] CVS: freenx - fabianx modified nxserver
+Message-ID: <4273AA33.mailP5U11OLKF@lists.berlios.de>
+
+User:      fabianx
+Date:      2005-04-30 15:54:27 GMT
+Modified:  .        nxserver
+Log:
+Fixed broken commit by fux. Fux: Please test your changes before commiting.
+
+Revision  Changes    Path
+1.52      +5 -5      freenx/nxserver
+
+
+rev 1.52, prev_rev 1.51
+Index: nxserver
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxserver,v
+retrieving revision 1.51
+retrieving revision 1.52
+diff -u -r1.51 -r1.52
+--- nxserver	29 Apr 2005 00:17:33 -0000	1.51
++++ nxserver	30 Apr 2005 15:54:27 -0000	1.52
+@@ -11,7 +11,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxserver,v 1.51 2005/04/29 00:17:33 fux Exp $
++# CVS: $Id: nxserver,v 1.52 2005/04/30 15:54:27 fabianx Exp $
+ #
+ 
+ # Read the config file
+@@ -658,10 +658,10 @@
+ 	if [ "$LOGIN_METHOD" = "SSH" ]
+ 	then
+ 	    export COMMAND_SSH
+-	    echo "$PASS" | $PATH_BIN/nxnode-login -- ssh "$USER" "$SSHD_PORT" "$PATH_BIN/nxnode" "$CMD" "$@" 2>&1 >/dev/null | log_error
++	    echo "$PASS" | $PATH_BIN/nxnode-login -- ssh "$USER" "$SSHD_PORT" "$PATH_BIN/nxnode" "$CMD" "$@" 2>&1 | log_tee
+ 	elif [ "$LOGIN_METHOD" = "SU" ]
+ 	then
+-	    echo "$PASS" | $PATH_BIN/nxnode-login -- su "$USER" "" "$PATH_BIN/nxnode" "$CMD" "$@" 2>&1 >/dev/null | log_error
++	    echo "$PASS" | $PATH_BIN/nxnode-login -- su "$USER" "" "$PATH_BIN/nxnode" "$CMD" "$@" 2>&1 | log_tee
+ 	else 
+ 	    echo "$@" | $COMMAND_SSH -l "$USER" 127.0.0.1 -p $SSHD_PORT -x -2 -i $NX_ETC_DIR/users.id_dsa -o 'PubkeyAuthentication yes' -o 'RSAAuthentication yes' -o 'RhostsAuthentication no' -o 'PasswordAuthentication no' -o 'RhostsRSAAuthentication no' -o 'StrictHostKeyChecking no' $PATH_BIN/nxnode "$CMD" | log_tee
+ 	fi
+@@ -982,13 +982,13 @@
+ 		addmount*)
+ 			server_get_params $CMD
+ 			PARAMS=$SERVER_PARAMS
+-			server_nxnode_start --smbmount "$USER" "$PARAMS" 2>&1 | log_error
++			server_nxnode_start --smbmount "$USER" "$PARAMS" 2>&1 | log_error >/dev/null
+ 			echo_x "NX> 719 SMB filesystem: running"
+ 		;;
+ 		addprinter*)
+ 			server_get_params $CMD
+ 			PARAMS=$SERVER_PARAMS
+-			server_nxnode_start --addprinter "$USER" "$PARAMS" 2>&1 | log_error
++			server_nxnode_start --addprinter "$USER" "$PARAMS" 2>&1 | log_error >/dev/null
+ 		;;
+ 		*)
+ 			# disabled for 1.4.0-5 snapshot client
+
+
+
+
+
+
+From freenx-cvs at berlios.de  Sat Apr 30 18:24:51 2005
+From: freenx-cvs at berlios.de (fabianx)
+Date: Sat, 30 Apr 2005 18:24:51 +0200
+Subject: [Freenx-cvs] CVS: freenx - fabianx modified 4 files
+Message-ID: <4273B153.mail15T1S2Q7V@lists.berlios.de>
+
+User:      fabianx
+Date:      2005-04-30 16:24:51 GMT
+Modified:  .        ChangeLog node.conf.sample nxloadconfig nxnode
+Log:
+Finished printing support.
+
+Printing via Samba using a automatically setup userspace cupsd should now be possible. Finally.
+
+Revision  Changes    Path
+1.51      +1 -0      freenx/ChangeLog
+
+
+rev 1.51, prev_rev 1.50
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.50
+retrieving revision 1.51
+diff -u -r1.50 -r1.51
+--- ChangeLog	29 Apr 2005 00:37:29 -0000	1.50
++++ ChangeLog	30 Apr 2005 16:24:51 -0000	1.51
+@@ -35,6 +35,7 @@
+ 	  <eaw at cisco.com>)
+ 	* Feature Request #847 (stderror of some applications to log-file)
+ 	* Feature Request #900 (Detect ssh/sshd in nxsetup)
++	* Added printing support via userspace CUPSd and Samba.
+ 
+ 20.03.2005 FreeNX 0.3.1 "Bugfix Edition"
+ 	* Fixed keyboard mapping problems.
+
+
+
+1.26      +2 -1      freenx/node.conf.sample
+
+
+rev 1.26, prev_rev 1.25
+Index: node.conf.sample
+===================================================================
+RCS file: /cvsroot/freenx/freenx/node.conf.sample,v
+retrieving revision 1.25
+retrieving revision 1.26
+diff -u -r1.25 -r1.26
+--- node.conf.sample	30 Apr 2005 14:44:30 -0000	1.25
++++ node.conf.sample	30 Apr 2005 16:24:51 -0000	1.26
+@@ -37,7 +37,7 @@
+ #
+ #           https://mail.kde.org/mailman/listinfo/freenx-knx
+ #
+-# CVS: $Id: node.conf.sample,v 1.25 2005/04/30 14:44:30 fabianx Exp $
++# CVS: $Id: node.conf.sample,v 1.26 2005/04/30 16:24:51 fabianx Exp $
+ 
+ #########################################################################
+ # General FreeNX directives
+@@ -223,6 +223,7 @@
+ 
+ #ENABLE_KDE_CUPS="0"
+ #KDE_PRINTRC="$HOME/.kde/share/config/kdeprintrc"
++#CUPS_ETC="/etc/cups"
+ 
+ #########################################################################
+ # Path directives
+
+
+
+1.31      +2 -1      freenx/nxloadconfig
+
+
+rev 1.31, prev_rev 1.30
+Index: nxloadconfig
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxloadconfig,v
+retrieving revision 1.30
+retrieving revision 1.31
+diff -u -r1.30 -r1.31
+--- nxloadconfig	30 Apr 2005 14:44:30 -0000	1.30
++++ nxloadconfig	30 Apr 2005 16:24:51 -0000	1.31
+@@ -5,7 +5,7 @@
+ #
+ # License: GPL, version 2
+ #
+-# CVS: $Id: nxloadconfig,v 1.30 2005/04/30 14:44:30 fabianx Exp $
++# CVS: $Id: nxloadconfig,v 1.31 2005/04/30 16:24:51 fabianx Exp $
+ #
+ # ========================================================================
+ 
+@@ -134,6 +134,7 @@
+ 
+ ENABLE_KDE_CUPS="0"
+ KDE_PRINTRC="" # Calculated
++CUPS_ETC="/etc/cups/"
+ 
+ # Path directives
+ 
+
+
+
+1.55      +10 -6     freenx/nxnode
+
+
+rev 1.55, prev_rev 1.54
+Index: nxnode
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxnode,v
+retrieving revision 1.54
+retrieving revision 1.55
+diff -u -r1.54 -r1.55
+--- nxnode	30 Apr 2005 14:44:30 -0000	1.54
++++ nxnode	30 Apr 2005 16:24:51 -0000	1.55
+@@ -13,7 +13,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxnode,v 1.54 2005/04/30 14:44:30 fabianx Exp $
++# CVS: $Id: nxnode,v 1.55 2005/04/30 16:24:51 fabianx Exp $
+ #
+ # 21.06.2004: - Full reconnection support
+ 
+@@ -337,6 +337,9 @@
+ EOF
+ 	touch $USER_FAKE_HOME/.nx/C-$sess_id/cups/printers.conf $USER_FAKE_HOME/.nx/C-$sess_id/cups/classes.conf
+ 
++	# copy mime.* files
++	cp "$CUPS_ETC"/mime.* "$USER_FAKE_HOME/.nx/C-$sess_id/cups/"
++
+ 	# start cupsd
+ 	$COMMAND_CUPSD -f -c "$USER_FAKE_HOME/.nx/C-$sess_id/cups/cupsd.conf" &>/dev/null </dev/null &
+ 	CUPSD_PID=$!
+@@ -347,7 +350,7 @@
+ 	then
+ 		if egrep -q "^Port=" "$KDE_PRINTRC"
+ 		then
+-			perl -pi -e "s/^Port=.*/Port=$NODE_CUPSD_PORT/g" "$KDE_PRINTRC"
++			perl -pi -e 's/^Port=.*/Port='"$NODE_CUPSD_PORT"'/g' "$KDE_PRINTRC"
+ 		else
+ 			echo "[CUPS]" >> "$KDE_PRINTRC"
+ 			echo "Port=$NODE_CUPSD_PORT" >> "$KDE_PRINTRC"
+@@ -747,6 +750,7 @@
+ 	username=$(getparam username)
+ 	password=$(getparam password)
+ 	share=$(getparam share)
++	printer=$(getparam printer)
+ 	computername=$(getparam computername)
+ 	public=$(getparam public)
+ 	model=$(getparam model)
+@@ -760,12 +764,12 @@
+ 	then
+ 		DEVICE_URI="smb://$username:$password at localhost:$port/$share"
+ 		NAME="$share"
+-		MODEL="$model.ppd"
+ 	else
+-		DEVICE_URI="ipp://localhost:$port/printers/$share"
+-		NAME="$share"
+-		MODEL="$model.ppd"
++		DEVICE_URI="ipp://localhost:$port/printers/$printer"
++		NAME="$printer"
+ 	fi
++	MODEL=$($PATH_BIN/nxclient -printer "$NAME" -noautokill -display :$display)
++	[ -z "$MODEL" -o "$MODEL" = "cancel: aborted" ] && return
+ 	
+ 	PUBLIC="-u allow:$USER"
+ 	[ "$public" == "1" ] && PUBLIC=""
+
+
+
+
+
+
+From k1pfeifle at gmx.net  Sat Apr 30 18:23:33 2005
+From: k1pfeifle at gmx.net (Kurt Pfeifle)
+Date: Sat, 30 Apr 2005 17:23:33 +0100
+Subject: [Freenx-cvs] CVS: freenx - fabianx modified 3 files
+In-Reply-To: <427399CE.mailKRY18SHZH@lists.berlios.de>
+References: <427399CE.mailKRY18SHZH@lists.berlios.de>
+Message-ID: <200504301723.34176.k1pfeifle@gmx.net>
+
+On Saturday 30 April 2005 15:44, fabianx wrote:
+
+> User:      fabianx
+> Date:      2005-04-30 14:44:30 GMT
+> Modified:  .        node.conf.sample nxloadconfig nxnode
+> Log:
+> Better detection of $KDE_PRINTRC. Idea by Kurt Pfeifle.
+
+Actually, I didnt suggest it the way it is implemented here...
+
+> -# CVS: $Id: node.conf.sample,v 1.24 2005/04/29 00:17:33 fux Exp $
+> +# CVS: $Id: node.conf.sample,v 1.25 2005/04/30 14:44:30 fabianx Exp $
+>  
+>  #########################################################################
+>  # General FreeNX directives
+> @@ -219,9 +219,10 @@
+>  
+>  # FreeNX with ENABLE_KDE_CUPS="1" will automatically write 
+>  # $KDE_PRINTRC and put the current used port into it.
+> +# $KDE_PRINTRC is automatically calculated if its not set.
+>  
+>  #ENABLE_KDE_CUPS="0"
+> -#KDE_PRINTRC=".kde/share/config/kdeprintrc"
+> +#KDE_PRINTRC="$HOME/.kde/share/config/kdeprintrc"
+
+This does *NOT* change much. Especially it does not change it for me.
+It will not work in my setup! See here:
+
+  kurt at p15159004:~> ls -ld $HOME/.kde/
+  /bin/ls: /home/kurt/.kde/: No such file or directory
+
+  kurt at p15159004:~> ls -ld $KDEHOME
+  drwxr-xr-x  4 kurt kurt 99 2004-12-01 02:34 /home/kurt/.kdecvs
+
+What you actually need to use, is the KDEHOME environmant variable:
+
+  -#KDE_PRINTRC=".kde/share/config/kdeprintrc"
+  +#KDE_PRINTRC="$KDEHOME/share/config/kdeprintrc"
+
+KDEHOME does exist on each system that runs KDE. See here for more
+details:
+
+  http://developer.kde.org/documentation/tutorials/kiosk/
+  http://enterprise.kde.org/articles/kiosk-lp.php
+  http://www.kde.org/areas/sysadmin/fsh.php
+  http://i18n.kde.org/doc/admin/fsstnd.html
+
+Cheers,
+Kurt
+
+
+From FabianFranz at gmx.de  Sat Apr 30 18:45:43 2005
+From: FabianFranz at gmx.de (Fabian Franz)
+Date: Sat, 30 Apr 2005 18:45:43 +0200
+Subject: [Freenx-cvs] CVS: freenx - fabianx modified 3 files
+In-Reply-To: <200504301723.34176.k1pfeifle@gmx.net>
+References: <427399CE.mailKRY18SHZH@lists.berlios.de> <200504301723.34176.k1pfeifle@gmx.net>
+Message-ID: <200504301845.46607.FabianFranz@gmx.de>
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+Am Samstag, 30. April 2005 18:23 schrieb Kurt Pfeifle:
+> >  # FreeNX with ENABLE_KDE_CUPS="1" will automatically write
+> >  # $KDE_PRINTRC and put the current used port into it.
+> > +# $KDE_PRINTRC is automatically calculated if its not set.
+> >
+> >  #ENABLE_KDE_CUPS="0"
+> > -#KDE_PRINTRC=".kde/share/config/kdeprintrc"
+> > +#KDE_PRINTRC="$HOME/.kde/share/config/kdeprintrc"
+>
+> This does *NOT* change much. Especially it does not change it for me.
+> It will not work in my setup! See here:
+
+Yes, it does fix it for you. The config file is just a proposal. If you look 
+into nxloadconfig. It does detect if $KDEHOME is set and sets the variable 
+accordingly.
+
+Though this proposal should be updated...
+
+cu
+
+Fabian
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.2.4 (GNU/Linux)
+
+iD8DBQFCc7Y6I0lSH7CXz7MRAqy6AJ9/fUlkbwobfkF3oA89fnRvi9YkjgCff/1i
+H6P7ncjRVeaFisP+xsXZFz0=
+=UBwx
+-----END PGP SIGNATURE-----
+
+
+
+From freenx-cvs at berlios.de  Sat Apr 30 18:52:22 2005
+From: freenx-cvs at berlios.de (fabianx)
+Date: Sat, 30 Apr 2005 18:52:22 +0200
+Subject: [Freenx-cvs] CVS: freenx - fabianx modified 2 files
+Message-ID: <4273B7C6.mailOR311UQ70@lists.berlios.de>
+
+User:      fabianx
+Date:      2005-04-30 16:52:22 GMT
+Modified:  .        node.conf.sample nxnode
+Log:
+Better proposal for $KDE_PRINTRC in node.conf.sample.
+
+Checked for existance of $KDE_PRINTRC.
+
+Revision  Changes    Path
+1.27      +2 -2      freenx/node.conf.sample
+
+
+rev 1.27, prev_rev 1.26
+Index: node.conf.sample
+===================================================================
+RCS file: /cvsroot/freenx/freenx/node.conf.sample,v
+retrieving revision 1.26
+retrieving revision 1.27
+diff -u -r1.26 -r1.27
+--- node.conf.sample	30 Apr 2005 16:24:51 -0000	1.26
++++ node.conf.sample	30 Apr 2005 16:52:22 -0000	1.27
+@@ -37,7 +37,7 @@
+ #
+ #           https://mail.kde.org/mailman/listinfo/freenx-knx
+ #
+-# CVS: $Id: node.conf.sample,v 1.26 2005/04/30 16:24:51 fabianx Exp $
++# CVS: $Id: node.conf.sample,v 1.27 2005/04/30 16:52:22 fabianx Exp $
+ 
+ #########################################################################
+ # General FreeNX directives
+@@ -222,7 +222,7 @@
+ # $KDE_PRINTRC is automatically calculated if its not set.
+ 
+ #ENABLE_KDE_CUPS="0"
+-#KDE_PRINTRC="$HOME/.kde/share/config/kdeprintrc"
++#KDE_PRINTRC="$KDEHOME/share/config/kdeprintrc"
+ #CUPS_ETC="/etc/cups"
+ 
+ #########################################################################
+
+
+
+1.56      +2 -2      freenx/nxnode
+
+
+rev 1.56, prev_rev 1.55
+Index: nxnode
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxnode,v
+retrieving revision 1.55
+retrieving revision 1.56
+diff -u -r1.55 -r1.56
+--- nxnode	30 Apr 2005 16:24:51 -0000	1.55
++++ nxnode	30 Apr 2005 16:52:22 -0000	1.56
+@@ -13,7 +13,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxnode,v 1.55 2005/04/30 16:24:51 fabianx Exp $
++# CVS: $Id: nxnode,v 1.56 2005/04/30 16:52:22 fabianx Exp $
+ #
+ # 21.06.2004: - Full reconnection support
+ 
+@@ -346,7 +346,7 @@
+ 	sleep 3
+ 	echo $CUPSD_PID >"$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd"
+ 	# setup KDE
+-	if [ "$ENABLE_KDE_CUPS" = "1" ]
++	if [ "$ENABLE_KDE_CUPS" = "1" -a -e "$KDE_PRINTRC" ]
+ 	then
+ 		if egrep -q "^Port=" "$KDE_PRINTRC"
+ 		then
+
+
+
+
+
+
+From FabianFranz at gmx.de  Sat Apr 30 18:51:20 2005
+From: FabianFranz at gmx.de (Fabian Franz)
+Date: Sat, 30 Apr 2005 18:51:20 +0200
+Subject: [Freenx-cvs] CVS: freenx - fabianx modified nxserver
+In-Reply-To: <20050430164814.GH2371@mail.s126.de>
+References: <4273AA33.mailP5U11OLKF@lists.berlios.de> <20050430164814.GH2371@mail.s126.de>
+Message-ID: <200504301851.22669.FabianFranz@gmx.de>
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+Am Samstag, 30. April 2005 18:48 schrieb Thorsten Sandfuchs:
+> On Sat, Apr 30, 2005 at 05:54:27PM +0200, fabianx wrote:
+> > Fixed broken commit by fux. Fux: Please test your changes before
+> > commiting.
+>
+> well I did :)
+
+Somehow I can't believe that ;-)
+
+> Actually I didn't test the printer-support.
+
+That is ok.
+
+>
+> What was the Problem?
+>
+> > -	    echo "$PASS" | $PATH_BIN/nxnode-login -- ssh "$USER" "$SSHD_PORT"
+> > "$PATH_BIN/nxnode" "$CMD" "$@" 2>&1 >/dev/null | log_error +	    echo
+> > "$PASS" | $PATH_BIN/nxnode-login -- ssh "$USER" "$SSHD_PORT"
+> > "$PATH_BIN/nxnode" "$CMD" "$@" 2>&1 | log_tee
+>
+> I just wanted to catch the error-log, because in the previous-versions of
+> freenx the stdout of the nxnode-login was send to /dev/null and not logged,
+
+No, I did revert this line to the previous version. You did efficiently remove 
+all communication between nxnode and nxclient, which lead to not starting 
+sessions. ;-)
+
+You are mixing this up with the _login_ stage. There it was sent to /dev/null 
+and thank you for the fix there.
+
+> > -			server_nxnode_start --smbmount "$USER" "$PARAMS" 2>&1 | log_error
+> > +			server_nxnode_start --smbmount "$USER" "$PARAMS" 2>&1 | log_error
+> > >/dev/null -			server_nxnode_start --addprinter "$USER" "$PARAMS" 2>&1 |
+> > log_error +			server_nxnode_start --addprinter "$USER" "$PARAMS" 2>&1 |
+> > log_error >/dev/null
+>
+> does this work? As log_error won't produce any stdout, shouldn't it be
+
+Yes, log_error does produce on stdout whats on stdin. That was the purpose of 
+log_tee from which you derived log_error.
+
+cu
+
+Fabian
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.2.4 (GNU/Linux)
+
+iD8DBQFCc7eKI0lSH7CXz7MRAukBAJ9DwpYcFWLhKhYwOpz0ejSA6IktkwCcDsok
+Fmh/56Nm4YvODiQXm3npuDM=
+=Fv6B
+-----END PGP SIGNATURE-----
+
+
+

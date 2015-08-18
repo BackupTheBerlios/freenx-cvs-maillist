@@ -1,0 +1,84 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r269 - nxclientlib/qtnx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r269%20-%20nxclientlib/qtnx&In-Reply-To=%3C200608162221.k7GMLxon013257%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000398.html">
+   <LINK REL="Next"  HREF="000400.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r269 - nxclientlib/qtnx</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r269%20-%20nxclientlib/qtnx&In-Reply-To=%3C200608162221.k7GMLxon013257%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r269 - nxclientlib/qtnx">gwright at mail.berlios.de
+       </A><BR>
+    <I>Thu Aug 17 00:21:59 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000398.html">[Freenx-cvs] r268 - in nxclientlib: . qtnx
+</A></li>
+        <LI>Next message: <A HREF="000400.html">[Freenx-cvs] r270 - in nxclientlib: . qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#399">[ date ]</a>
+              <a href="thread.html#399">[ thread ]</a>
+              <a href="subject.html#399">[ subject ]</a>
+              <a href="author.html#399">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2006-08-17 00:21:59 +0200 (Thu, 17 Aug 2006)
+New Revision: 269
+
+Modified:
+   nxclientlib/qtnx/qtnxwindow.cpp
+Log:
+Fixes.
+
+
+Modified: nxclientlib/qtnx/qtnxwindow.cpp
+===================================================================
+--- nxclientlib/qtnx/qtnxwindow.cpp	2006-08-16 22:10:38 UTC (rev 268)
++++ nxclientlib/qtnx/qtnxwindow.cpp	2006-08-16 22:21:59 UTC (rev 269)
+@@ -148,6 +148,7 @@
+ 
+ void QtNXWindow::loadResumeDialog(QList&lt;NXResumeData&gt; data)
+ {
++	delete sessionsDialog;
+ 	sessionsDialog = new QtNXSessions(data);
+ 	sessionsDialog-&gt;show();
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000398.html">[Freenx-cvs] r268 - in nxclientlib: . qtnx
+</A></li>
+	<LI>Next message: <A HREF="000400.html">[Freenx-cvs] r270 - in nxclientlib: . qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#399">[ date ]</a>
+              <a href="thread.html#399">[ thread ]</a>
+              <a href="subject.html#399">[ subject ]</a>
+              <a href="author.html#399">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

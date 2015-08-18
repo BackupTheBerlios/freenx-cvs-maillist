@@ -1,0 +1,112 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r232 - / freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-July/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r232%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200607050206.k6526tN2007354%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000360.html">
+   <LINK REL="Next"  HREF="000362.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r232 - / freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r232%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200607050206.k6526tN2007354%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r232 - / freenx-server/trunk">fabianx at berlios.de
+       </A><BR>
+    <I>Wed Jul  5 04:06:55 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000360.html">[Freenx-cvs] r231 - / freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000362.html">[Freenx-cvs] r233 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#361">[ date ]</a>
+              <a href="thread.html#361">[ thread ]</a>
+              <a href="subject.html#361">[ subject ]</a>
+              <a href="author.html#361">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2006-07-05 04:06:44 +0200 (Wed, 05 Jul 2006)
+New Revision: 232
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxnode
+Log:
+- Added username and password to cups printers. -&gt; fixes printing via cupsd.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:250
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:252
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-07-05 02:03:45 UTC (rev 231)
++++ freenx-server/trunk/ChangeLog	2006-07-05 02:06:44 UTC (rev 232)
+@@ -9,6 +9,7 @@
+ 	  explanations.
+ 	* Added support for NX 2.0.0 style nxclient dialogs.
+ 	* Support for NX 2.0.0 backend in nxloadconfig.
++	* Fixed cups printing (added username and password).
+ 
+ 01.07.2006 FreeNX 0.5.0 &quot;UKUUG 2006 Edition&quot;
+ 	* Opened the 0.5.0 branch.
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2006-07-05 02:03:45 UTC (rev 231)
++++ freenx-server/trunk/nxnode	2006-07-05 02:06:44 UTC (rev 232)
+@@ -1175,7 +1175,7 @@
+ 		DEVICE_URI=&quot;<A HREF="smb://$username:$password@localhost:$port/$share">smb://$username:$password@localhost:$port/$share</A>&quot;
+ 		NAME=&quot;$share&quot;
+ 	else
+-		DEVICE_URI=&quot;<A HREF="ipp://localhost:$port/printers/$printer">ipp://localhost:$port/printers/$printer</A>&quot;
++		DEVICE_URI=&quot;<A HREF="ipp://$username:$password@localhost:$port/printers/$printer">ipp://$username:$password@localhost:$port/printers/$printer</A>&quot;
+ 		NAME=&quot;$printer&quot;
+ 	fi
+ 	
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000360.html">[Freenx-cvs] r231 - / freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000362.html">[Freenx-cvs] r233 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#361">[ date ]</a>
+              <a href="thread.html#361">[ thread ]</a>
+              <a href="subject.html#361">[ subject ]</a>
+              <a href="author.html#361">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

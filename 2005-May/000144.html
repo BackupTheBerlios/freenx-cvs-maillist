@@ -1,0 +1,142 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - jonno modified 2 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-May/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20jonno%20modified%202%20files&In-Reply-To=%3C4279D388.mailLLD1J3Y0X%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000143.html">
+   <LINK REL="Next"  HREF="000145.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - jonno modified 2 files</H1>
+    <B>jonno</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20jonno%20modified%202%20files&In-Reply-To=%3C4279D388.mailLLD1J3Y0X%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - jonno modified 2 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Thu May  5 10:04:24 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000143.html">[Freenx-cvs] CVS: freenx - fabianx modified ChangeLog
+</A></li>
+        <LI>Next message: <A HREF="000145.html">[Freenx-cvs] CVS: freenx - jonno modified 3 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#144">[ date ]</a>
+              <a href="thread.html#144">[ thread ]</a>
+              <a href="subject.html#144">[ subject ]</a>
+              <a href="author.html#144">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      jonno
+Date:      2005-05-05 08:04:24 GMT
+Modified:  .        nxkeygen nxsetup
+Log:
+Bug #3913: Resolved (realy simple, only changed 002 to 177 and moved one line.)
+
+Revision  Changes    Path
+1.12      +2 -2      freenx/nxkeygen
+
+
+rev 1.12, prev_rev 1.11
+Index: nxkeygen
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxkeygen,v
+retrieving revision 1.11
+retrieving revision 1.12
+diff -u -r1.11 -r1.12
+--- nxkeygen	17 Mar 2005 23:21:14 -0000	1.11
++++ nxkeygen	5 May 2005 08:04:24 -0000	1.12
+@@ -11,7 +11,7 @@
+ # Copyright	(c) 2004 Gentoo Foundation
+ #		Released under v2 of the GNU GPL
+ #
+-# CVS: $Id: nxkeygen,v 1.11 2005/03/17 23:21:14 fux Exp $
++# CVS: $Id: nxkeygen,v 1.12 2005/05/05 08:04:24 jonno Exp $
+ #
+ # ========================================================================
+ 
+@@ -26,7 +26,7 @@
+ main ()
+ {
+ 	# create a new key
+-	umask 002
++	umask 177
+ 	$COMMAND_SSH_KEYGEN -q -t dsa -N '' -f ${NX_KEY_DIR}/local.id_dsa
+ 
+ 	# backup the existing keys
+
+
+
+1.28      +2 -2      freenx/nxsetup
+
+
+rev 1.28, prev_rev 1.27
+Index: nxsetup
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxsetup,v
+retrieving revision 1.27
+retrieving revision 1.28
+diff -u -r1.27 -r1.28
+--- nxsetup	29 Apr 2005 00:37:29 -0000	1.27
++++ nxsetup	5 May 2005 08:04:24 -0000	1.28
+@@ -5,7 +5,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxsetup,v 1.27 2005/04/29 00:37:29 fux Exp $ 
++# CVS: $Id: nxsetup,v 1.28 2005/05/05 08:04:24 jonno Exp $ 
+ #
+ 
+ HELP=&quot;no&quot;
+@@ -171,6 +171,7 @@
+ 			cat &lt;&lt; EOF &gt;$NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS
+ no-port-forwarding,no-X11-forwarding,no-agent-forwarding,command=&quot;$PATH_BIN/nxserver&quot; ssh-dss AAAAB3NzaC1kc3MAAACBAJe/0DNBePG9dYLWq7cJ0SqyRf1iiZN/IbzrmBvgPTZnBa5FT/0Lcj39sRYt1paAlhchwUmwwIiSZaON5JnJOZ6jKkjWIuJ9MdTGfdvtY1aLwDMpxUVoGwEaKWOyin02IPWYSkDQb6cceuG9NfPulS9iuytdx0zIzqvGqfvudtufAAAAFQCwosRXR2QA8OSgFWSO6+kGrRJKiwAAAIEAjgvVNAYWSrnFD+cghyJbyx60AAjKtxZ0r/Pn9k94Qt2rvQoMnGgt/zU0v/y4hzg+g3JNEmO1PdHh/wDPVOxlZ6Hb5F4IQnENaAZ9uTZiFGqhBO1c8Wwjiq/MFZy3jZaidarLJvVs8EeT4mZcWxwm7nIVD4lRU2wQ2lj4aTPcepMAAACANlgcCuA4wrC+3Cic9CFkqiwO/Rn1vk8dvGuEQqFJ6f6LVfPfRTfaQU7TGVLk2CzY4dasrwxJ1f6FsT8DHTNGnxELPKRuLstGrFY/PR7KeafeFZDf+fJ3mbX5nxrld3wi5titTnX+8s4IKv29HJguPvOK/SI7cjzA+SqNfD7qEo8= <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">root at nettuno</A>
+ EOF
++			chmod 600 $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS
+ 		else
+ 			# generate a new key, backup the old and copy it to $SSH_AUTHORIZED_KEYS
+ 			$PATH_BIN/nxkeygen
+@@ -220,7 +221,6 @@
+ 	chown -R nx:root $NX_ETC_DIR
+ 	chown -R nx:root $NX_HOME_DIR
+ 	chown nx:root &quot;$NX_LOGFILE&quot;
+-	chmod 600 $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS
+ 	echo &quot;done&quot;
+ }
+ 
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000143.html">[Freenx-cvs] CVS: freenx - fabianx modified ChangeLog
+</A></li>
+	<LI>Next message: <A HREF="000145.html">[Freenx-cvs] CVS: freenx - jonno modified 3 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#144">[ date ]</a>
+              <a href="thread.html#144">[ thread ]</a>
+              <a href="subject.html#144">[ subject ]</a>
+              <a href="author.html#144">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

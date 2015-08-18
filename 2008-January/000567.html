@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r441 - nxcl
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r441%20-%20nxcl&In-Reply-To=%3C200801290035.m0T0ZaGD026630%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000566.html">
+   <LINK REL="Next"  HREF="000568.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r441 - nxcl</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r441%20-%20nxcl&In-Reply-To=%3C200801290035.m0T0ZaGD026630%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r441 - nxcl">gwright at mail.berlios.de
+       </A><BR>
+    <I>Tue Jan 29 01:35:36 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000566.html">[Freenx-cvs] r440 - nxcl
+</A></li>
+        <LI>Next message: <A HREF="000568.html">[Freenx-cvs] r442 - nxcl
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#567">[ date ]</a>
+              <a href="thread.html#567">[ thread ]</a>
+              <a href="subject.html#567">[ subject ]</a>
+              <a href="author.html#567">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2008-01-29 01:35:36 +0100 (Tue, 29 Jan 2008)
+New Revision: 441
+
+Modified:
+   nxcl/configure.ac
+Log:
+Defines for cygwin/darwin
+
+
+Modified: nxcl/configure.ac
+===================================================================
+--- nxcl/configure.ac	2008-01-29 00:28:37 UTC (rev 440)
++++ nxcl/configure.ac	2008-01-29 00:35:36 UTC (rev 441)
+@@ -99,6 +99,22 @@
+   AC_DEFINE(DEBUG, 0, Define if debugging output should be enabled)
+ fi
+ 
++dnl Do some platform checking for cygwin
++
++if test &quot;$(uname -o)&quot; = Cygwin; then
++  AC_DEFINE(NXCL_CYGWIN, 1, Define if compiling on Cygwin)
++else
++  AC_DEFINE(NXCL_CYGWIN, 0, Define if compiling on Cygwin)
++fi
++
++dnl Do some platform checking for OS X
++
++if test &quot;$(uname)&quot; = Darwin; then
++  AC_DEFINE(NXCL_DARWIN, 1, Define if compiling on Darwin)
++else
++  AC_DEFINE(NXCL_DARWIN, 0, Define if compiling on Darwin)
++fi
++
+ dnl Add in doc/Makefile to this:
+ AC_CONFIG_FILES([Makefile lib/Makefile nxcl/Makefile test/Makefile doc/Makefile nxcl.pc])
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000566.html">[Freenx-cvs] r440 - nxcl
+</A></li>
+	<LI>Next message: <A HREF="000568.html">[Freenx-cvs] r442 - nxcl
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#567">[ date ]</a>
+              <a href="thread.html#567">[ thread ]</a>
+              <a href="subject.html#567">[ subject ]</a>
+              <a href="author.html#567">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

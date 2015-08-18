@@ -1,0 +1,1035 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r336 - in freenx-server/tags: . FreeNX-0.6.1
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-July/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r336%20-%20in%20freenx-server/tags%3A%20.%20FreeNX-0.6.1&In-Reply-To=%3C200707041124.l64BOsSK016343%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000469.html">
+   <LINK REL="Next"  HREF="000470.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r336 - in freenx-server/tags: . FreeNX-0.6.1</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r336%20-%20in%20freenx-server/tags%3A%20.%20FreeNX-0.6.1&In-Reply-To=%3C200707041124.l64BOsSK016343%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r336 - in freenx-server/tags: . FreeNX-0.6.1">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Wed Jul  4 13:24:59 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000469.html">[Freenx-cvs] r335 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000470.html">[Freenx-cvs] r337 - /
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#662">[ date ]</a>
+              <a href="thread.html#662">[ thread ]</a>
+              <a href="subject.html#662">[ subject ]</a>
+              <a href="author.html#662">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-07-04 13:24:54 +0200 (Wed, 04 Jul 2007)
+New Revision: 336
+
+Added:
+   freenx-server/tags/FreeNX-0.6.1/
+   freenx-server/tags/FreeNX-0.6.1/ChangeLog
+   freenx-server/tags/FreeNX-0.6.1/nxloadconfig
+Removed:
+   freenx-server/tags/FreeNX-0.6.1/ChangeLog
+   freenx-server/tags/FreeNX-0.6.1/nxloadconfig
+Log:
+Release FreeNX 0.6.1 &quot;Jornade SPL Edition&quot;.
+
+
+
+Copied: freenx-server/tags/FreeNX-0.6.1 (from rev 334, freenx-server/trunk)
+
+Deleted: freenx-server/tags/FreeNX-0.6.1/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-05-29 15:27:07 UTC (rev 334)
++++ freenx-server/tags/FreeNX-0.6.1/ChangeLog	2007-07-04 11:24:54 UTC (rev 336)
+@@ -1,366 +0,0 @@
+-xx.xx.2007 FreeNX 0.6.1
+-	* Fixed the printing support for CUPS 1.2.
+-	  Older versions of CUPS are no longer supported.
+-	  * Note: You must do as root:
+-
+-	          cp /usr/lib/cups/backend/ipp /usr/lib/cups/backend/nxipp
+-		  chmod 755 /usr/lib/cups/backend/nxipp
+-
+-		  Or alternatively re-run nxsetup.
+-
+-	* Added foomatic support.
+-	  * Note: You might need to do: ln -s /usr/bin/foomatic-ppdfile
+-	          /usr/lib/cups/driver/
+-	* Added setting of CUPS_SERVER environment var.
+-	* Added automatic downloading of PPDs, if the client supports it.
+-	* Added configuration vars to tweak the new behaviour.
+-	* Added cups seamless support with no &quot;use this driver?&quot; dialogs at all.
+-	  * Note: You need nxcupsd-wrapper on the client side for CUPS 1.2
+-	          clients.
+-
+-	          Get it from nxutils repository.
+-
+-	* Fixed Support for &quot;Running&quot; sessions - again.
+-	* Made the NXAgent exited with exit code 1 message more verbose.
+-	* Added support for nxipp to nxnode and nxsetup.
+-	* Added nxcups-gethost script for automatic usage in KDE.
+-	* Fixed RDP/VNC sessions. No application should be started for that type. 
+-	  (Patch by Bernard Cafarelli &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">voyageur at operamail.com</A>&gt;)
+-	* Added backingstore fix for older clients from Gentoo.
+-	  (<A HREF="http://bugs.gentoo.org/show_bug.cgi?id=149298">http://bugs.gentoo.org/show_bug.cgi?id=149298</A>)
+-	* Fixed VNC sessions.
+-	* Fixed fullscreen sessions.
+-	  (Patch by Gentoo Bugtracker)
+-	* Fixed --broadcast.
+-	* Added &quot;passwd -u nx&quot; to nxsetup to fix slackware.
+-	* Fixed respecting of enconding settings in case of rootless mode.
+-	* Fixed smb mounting in case nxclient sends the wrong port. 
+-	  (Patch by Jan Lockenvitz &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">jan.lockenvitz.ext at siemens.com</A>&gt;)
+-	* Fixed loadbalancing - was still using an undocumented variable.
+-
+-23.01.2007 FreeNX 0.6.0 &quot;Juliana birthday edition&quot;
+-	* Opened the 0.6.0 branch.
+-	* Added nxnode slave mode.
+-	* General code cleanup.
+-		* Huge cleanup of nxnode.
+-	* Removed &quot;no-x11-forwarding&quot; from keys to allow client to use the
+-	  faster interactive sessions.
+-	* Fixed nxsetup automatic testing of sessions and cleared up
+-	  explanations.
+-	* Added support for NX 2.0.0 style nxclient dialogs.
+-	* Support for NX 2.0.0 backend in nxloadconfig.
+-	* Fixed cups printing (added username and password).
+-	* Fixed one more stray tail process.
+-	* Added example script for &quot;load&quot; based loadbalancing.
+-	* Fixed spaces in parameters for NX Client 2.0.0.
+-	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">ssycplkbocve at spammotel.com</A>)
+-	* Added version 2.1.0 support.
+-	* Fixed LD_LIBRARY_PRELOAD default path in nxloadconfig.
+-	* Fixed nxclient to work with 2.1.0 backend.
+-	* Added autodetection of backend.
+-
+-01.07.2006 FreeNX 0.5.0 &quot;UKUUG 2006 Edition&quot;
+-	* Opened the 0.5.0 branch.
+-	* Added load balancing.
+-	* Completely removed support for 1.4.0 backend.
+-	* Rootless mode is now the default.
+-	* Reworked nxnode / suspend on connection failure should work now.
+-	* Added support for &quot;Running&quot; sessions.
+-	* Fixed --send command. (Emmanuel Blindauer &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">freenx at mooby.net</A>&gt;)
+-	* Fixed resume with nxclient &gt;=1.5.0-106 for Windows.
+-	* Fixed rootless sessions with Windows nxclient.
+-	* Fixed keyboard issues by enabling the keybd channel.
+-	* Fixed one more stray tail process and being able to
+-	  cleanup after a hopelessly failed reconnection. (i.e. agent died)
+-	* Fixed detection of xauth / netcat. Added option to disable extra
+-	  checks.
+-	* Fixed --terminate / --suspend when hostname has a '-' in it.
+-	  (Emmanuel Blindauer &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">freenx at mooby.net</A>&gt;)
+-	* ESD_NO_SPAWN is always set when ESPEAKER is set.
+-	  (&quot;Felipe Alfaro Solana&quot; &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">felipe.alfaro at gmail.com</A>&gt;)
+-	* Added perl replacement for 'rev' function on Sun OS 5.10.
+-	* Fixed NODE_AUTOSTART to be unable to block sessions.
+-	* Fixed stale sessions introduced by the new session handling model.
+-	* Added usage of TCP NODELAY option.
+-	* Fixed loadbalancing IP issues.
+-	* Added --force-terminate to remove session info.
+-	  Fixed issue with suspend/terminate commands.
+-	* Added correct errorcode 596 instead of 504.
+-	* Implemented &quot;round-robin&quot; and &quot;load&quot; loadbalancing algorithms.
+-	  Cleaned up node.conf keys.
+-	* Fixed help for --restart.
+-	* Fixed session_running function, which fixes all remaining stale
+-	  session problems.
+-	* Removed termination of nxagent in case of rootless mode.
+-	  (Fixes kontact without --nofork)
+-	* Last minute fixes for new functions using rev.
+-	* Added experimental last minute support for NX 2.0.0 backend.
+-	  (set ENABLE_2_0_0_BACKEND=1)
+-
+-XX.XX.2006 FreeNX 0.4.5 &quot;aKademy Edition&quot;
+-	* Made nxsetup more user-friendly and hopefully finally failsafe.
+-	* Added --agent to nxnode/nxserver to allow easier debugging.
+-	* Added addgroup/groupadd to nxsetup
+-	* Added --ignore-errors support on nxsetup/nxloadconfig
+-	* Added check for expect.
+-
+-06.08.2005 FreeNX 0.4.4 &quot;UKUUG Enterprise Edition&quot;
+-	* Added ENABLE_1_5_0_BACKEND configuration directive:
+-		* Fixed fullscreen support in nxdesktop (still feels more like
+-		  'Available Area', but with Ctrl-Alt-F you can get &quot;real&quot;
+-		  fullscreen)
+-	* Added COMMAND_MD5SUM directive
+-	* Security: $USER_FAKE_HOME/.nx now gets 0700
+-	* Fixed support for CUPS forwarding.
+-	* Added secure re-transmitting to client.
+-	* Removed grep from getent to not search through the whole database.
+-	  (Suggestion by &quot;Matthew S. Harris&quot; &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">mharris at google.com</A>&gt;,
+-	                 &quot;Ed Warnicke&quot;       &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">eaw at cisco.com</A>&gt;)
+-	* Set sleeps to 60 instead of 10 seconds, removed one wrong trap.
+-	  (Suggestion by &quot;Sunil&quot; &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">funtoos at yahoo.com</A>&gt;)
+-	* Made automatic timeout configurable.
+-	  (Patch by &quot;Ed Warnicke&quot; &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">eaw at cisco.com</A>&gt;)
+-	* Made nxsetup more enterprise friendly. Added --localuser
+-	  (RedHat only) and --gid. 
+-	  (Based on a patch by &quot;Ed Warnicke&quot; &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">eaw at cisco.com</A>&gt;)
+-	* Fixed resume of multiple sessions.	
+-
+-28.07.2005 FreeNX 0.4.3 &quot;NoMachine 1.5.0 Edition&quot;
+-	* Fixed reconnection problems with !M 1.5.0 client.
+-	* Fixed reconnection problems with !M 1.5.0 backend.
+-	* Added evaluation of $NX_ETC_DIR/node.conf.d/* config files.
+-	* Fixed a possible security problem. (The client was able
+-	  to overwrite parameters set by the server)
+-	* Added ENABLE_1_5_0_BACKEND configuration directive:
+-		* Added support for fake cookie authentication with
+-		  !M 1.5.0 client and 1.5.0 backend.
+-		* Fixed nxagent termination problems with !M 1.5.0
+-		  backend.
+-		* Added RDP highcolor support for !M 1.5.0 client
+-		  with !M 1.5.0 backend.
+-	* Added secure logging - Passwords are no longer shown in log files.
+-	* Security: Certain passwords for VNC/RDP could have been visible via 
+-	  `ps aux`.
+-	* Added experimental usermode authentication scheme.
+-	  (Disabled by default)
+-
+-16.07.2005 FreeNX 0.4.2 &quot;Solaris / Bugfix / Linux Infotag Pforzheim Edition&quot;
+-	* Removed forwarding support via &quot;freenx.&lt;user&gt;&quot;, because it was
+-	  buggy.
+-	* Cleaned up lots of code.
+-		* Fixed one case of a left over file.
+-		* Removed one unnecessary usage of a temporary file.
+-	* Added exit handlers in nxserver and nxnode for more stability on 
+-	  reboot of system.
+-	* Changed nxnode to be much more stable.
+-		* Catched one additional &quot;unclean termination of nxagent&quot; 
+-		  case, which lead to &quot;zombie&quot; sessions.
+-	* Reworked reconnection support for more stability.
+-		* Added displaying of reconnection failure in
+-		  system log / client ssh log.
+-	* Added even more possibilities to catch and report session startup 
+-	  failures.
+-	* Fixed PNG and JPEG-levels pack method.
+-	* Added usage of netcat -z to check that the port is really not used by
+-	  another agent.
+-	* Added nxserver --cleanup, which terminates all running sessions.
+-	  Useful after a power outage.
+-	* Fixed nxclient invocation with non-standard installation path
+-	* Added detection of SSH2_CLIENT variable (commercial ssh)
+-	* Finally fixed problems with GNOME.
+-	* FINALLY added Solaris Support Patch.
+-
+-24.06.2005 FreeNX 0.4.1 &quot;LinuxTag Edition&quot;
+-	* Fixed a small security problem giving access to session database.
+-	* Added support for 1.5.0 OSS components. (especially rootless mode)
+-	* Fixed Filesharing over the Internet. (Thanks to <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">rogierm at users.berlios.de</A>)
+-	* Fixed Resume on Windows with non-fullscreen sessions.
+-	* Added suspend/resume support for 1.5.0 OSS components.
+-	* Fixed display of suspended sessions in nxserver --list.
+-
+-04.05.2005 FreeNX 0.4.0 &quot;SambaXP Edition&quot;
+-	* Opened the 0.4.0 branch.
+-	* Added initial support for filesharing via samba.
+-	* Improvements to be more node.conf compatible.
+-	* Added COMMAND_NETCAT, COMMAND_SSH &amp; COMMAND_SSH_KEYGEN directive
+-	* Added support for 'nxloadconfig --check' to validate node.conf 
+-	  settings
+-	* Added initial support for sound (esd/artsd).
+-	* Added optional support for utmp/wtmp/lastlog database.
+-	* Removed support for OSS components prior version 1.4.0 in nxnode.
+-	  Added -option option to nxagent/nxdesktop/nxviewer.
+-	* Added forwarding to commercial server via destination port.
+-	* Added more compatible getparam function
+-	* Sets LD_PRELOAD for applications and LD_LIBRARY_PATH for 
+-	  nxagent/nxproxy by default.
+-		- SET_LD_LIBRARY_PATH replaces NX_NOMACHINE_WAY and is 
+-		  enabled by default, as it is now safe to do so
+-	* Implemented SSHD_CHECK_IP directive.
+-	* Added the SESSION_HISTORY directive. Session history will by default 
+-	  be kept for 30 days.
+-	* Implemented DEFAULT_X_WM for unix-application virtual desktop mode.
+-	* Implemented SESSION_LIMIT and SESSION_USER_LIMIT.
+-	* Fixed nxviewer commandline for geometry and fullscreen-support
+-	* Added NX_LOG_LEVEL instead of NX_LOGGING, allowing less verbose 
+-	  logfile.
+-	* Added SESSION_LOG_CLEAN for configurable removal of the temporary 
+-	  session directory.
+-	* Added &quot;--ssh2&quot; cmdline switch for commercial ssh2-server support 
+-	  in nxsetup.
+-	* Added ENABLE_FORCE_ENCRYPTION to enforce the usage of encryption on 
+-	  the server.
+-	* Added nxprint and added -printer to nxclient together with handling
+-	  of drivers cache.
+-	* Fixed a possible race-condition. (reported by Edward Warnicke
+-	  &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">eaw at cisco.com</A>&gt;)
+-	* Feature Request #847 (stderror of some applications to log-file)
+-	* Feature Request #900 (Detect ssh/sshd in nxsetup)
+-	* Added printing support via userspace CUPSd and Samba.
+-
+-20.03.2005 FreeNX 0.3.1 &quot;Bugfix Edition&quot;
+-	* Fixed keyboard mapping problems.
+-	* Fixed unix-custom mode; now allowing parameters to be passed.
+-	* Fixed password prompt detection support in nxnode-login.
+-	* Fixed locking to prevent usage of the same display.
+-	* Fixed resume when agent is no longer there.
+-	* Fixed error message shown to user, when session startup fails.
+-	* Fixed handling of /tmp/.X*-lock files.
+-	* Fixed handling of not closed sessions in &quot;Terminating&quot; status.
+-	* Fixed resume of multiple suspended sessions.
+-
+-05.03.2005 FreeNX 0.3.0 &quot;Chemnitzer LinuxTage Edition&quot;
+-	* Initial CVS checkin.
+-	* Added unix-default as session type - by Kalev Lember 
+-	  &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">kalev at smartlink.ee</A>&gt;
+-	* Fixed nxclient loop - by &quot;Neil Wilson&quot; &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">neil at aldur.co.uk</A>&gt;.
+-	* Several fixes by Thorsten Sandfuchs &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fux at users.berlios.de</A>&gt;.
+-	* Optional config file support (system- and user-wide)
+-		- by Jon Severinsson &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">jonno at users.berlios.de</A>&gt;.
+-	* Moved logfile to /var/log/nxserver.log.
+-	* Moved nx homedir to /var/lib/nxserver/home
+-	* Complete rewrite of authentication code
+-		* passdb, su or ssh is now supported.
+-		- by Jon Severinsson &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">jonno at users.berlios.de</A>&gt;.
+-	* Added NODE_AUTOSTART, EXPORT_{USERIP/SESSIONID} config file
+-	  directives.
+-	* Added mechanism to forward connection to commercial NoMachine 
+-	  nxserver (as available from www.nomachine.com).
+-	* Added mechanism to forward connection to another nxserver. This
+-	  allows using a &quot;chain&quot; of nxservers.
+-	* Added &quot;floating window&quot; support by using rootless nxagent as
+-	  it will be standard in NX 1.5.0.
+-	* Added &quot;floating window&quot; support by just nxproxy/nxproxy connection
+-	  and added configuration directive to enable rootless mode.
+-	* Added nxsetup --uninstall and added more feature to nxsetup.
+-	  Note: You need to use nxsetup --install for installation now.
+-	* Added Disabling of port-forwarding, X11-forwarding, ... to ssh-key.
+-
+-	* Security: Fixed a security blunder. Authority file was not used 
+-	            and so basically xhost +localhost was set. (ported from
+-		    0.2.8)
+-		    
+-		    Update immediately.
+-                   
+-	* Security: Fixed two possible security problems (umask was not set
+-                   correctly; ported from 0.2.8)
+-
+-20.11.2004 FreeNX 0.2.7 &quot;Skolelinux Edition&quot;
+-	* Fix nxserver to work again with KNX-Client. ('\r' is evil)
+-	* Fix timeout in nxnode-login to allow proper session management
+-	  again.
+-	* Fixed possible race condition for the wait-file.
+-
+-11.11.2004 FreeNX 0.2.6
+-	
+-	* Security: Fixed a possible exploit in ssh-usage
+-	    (thanx to Sebastian Krahmer from the SuSE security team)
+-	* Important: Public/Private key is no longer used for PAM auth mode.
+-	
+-14.10.2004 FreeNX 0.2.5
+-	* Added Xdialog interface for nxclient and automatic usage
+-	  of commercial nxclient when available. (Thx go to Rick Stout 
+-	  &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">zipsonic at gmail.com</A>&gt;)
+-	* Added bugfix from the 0.3.0 branch for more flexible nxdesktop in
+-	  nxnode.
+-	* Added patch by Rick Stout for permission problems in nxnode.
+-	* Added patch by Rick Stout for a typo in nxkeygen.
+-	* Updated gentoo-nomachine.diff.
+-	* Updated CONTRIB to include a description of lazy-image encoding.
+-
+-11.09.2004 FreeNX 0.2.4
+-	* Added timeout to avoid having hanging tail processes.
+-	* Added &quot;locking&quot; of the display-offset if nxagent failed to start.
+-	* Fixed ssh encryption for resume on client 1.4.0-snapshot 5.
+-	* Fixed mktemp, which was non-portable to FreeBSD and Red Hat 9.
+-
+-10.09.2004 FreeNX 0.2-3
+-	* Added support for autoreconnection or autoreconnection just 
+-	  for the case when an older client version is used.
+-	  	* This makes it possible to use Reconnection with the 
+-	  	  stable version 1.3.2-7 (enabled by default)
+-	* Added instructions how to install the NoMachine sources to INSTALL
+-	* Changed $NX_DIR/bin/ssh to ssh to fix gentoo-nomachine.diff
+-	* Added nxkeygen by Stuart Herbert for easier change from the 
+-	  NoMachine key to another key afterwards.
+-	
+-	* Security: Any user was able to change the status of other sessions
+-	            in the session database by providing the correct uniqueid.
+-
+-10.09.2004 FreeNX 0.2-2
+-	* Added additional support for safe session suspend, 
+-	  autosuspend when network connection times out works now!
+-	* AuthorizedKeysFile cannot be safely determined on Gentoo;
+-	  changed it to config option now.
+-	* Added config option to completely disable passdb support.
+-	* Fixed bugs in nxclient dialog frontend.
+-	* Removed all usage of nxssh due to security concerns from SuSE. 
+-	* Fixed session management for knx client.
+-	* Added detection of failed nxagent startup.
+-	* Updated the gentoo-nomachine.diff to be not fuzzy.
+-
+-08.09.2004 FreeNX 0.2-1
+-	* Fixed support for one windows client version. 
+-	* Fixed setting of key with --adduser.
+-	  (Thanks to Stuart Herbert &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">stuart at gentoo.org</A>&gt;)
+-	* Fixed _some_ cases for AuthorizedKeysFile in sshd_config.
+-	  (Thanks to Peter Holik &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">peter at holik.at</A>&gt;)
+-
+-	* Fixed gentoo-nomachine.diff (nxnode not in path, but nxnode-login would try that)
+-	* Fixed the bug with hanging tail processes.
+-
+-07.09.2004 FreeNX 0.2-0
+-	* Reworked the whole security model in nxsetup due to requests from SuSE and Gentoo.
+-		- nxsetup does not use the NoMachine key by default. 
+-		- PAM authentication is enabled by default.
+-	
+-	* Added nxclient for compatibility with nxclient -dialog mode.
+-	
+-	* Minor changes
+-		* Added SSHD_AUTH_PORT to config vars in nxserver
+-		* Made all programs NX_ aware
+-		* Programs do now honor the setting of AuthorizedKeysFile in sshd_config
+-		* Changed nxsetup check from direct reading of passwd to getent
+-		  (Thanks to Tom Hibbert &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">tom at nsp.co.nz</A>&gt;)
+-		* Changed overall messages in nxsetup
+-	
+-	* Made a overall clean upstream package.
+-	* Added Gentoo / NoMachine compatibility diff
+-
+-06.09.2004 
+-	* Added pam authentication
+-	* Added user_db switch
+-	* moved some su - to nxnode-login
+-
+-02.09.2004 
+-	* Added support for snapshot 4 (43/66)
+-	* Fixed compatibility issue with 1.3.0 
+-	  (Used by Knoppix 3.4 and earlier)
+-	* added sane logging (LOGGING is now properly used)
+-
+-20.06.2004 
+-	* Added Protocol version 1.4.0
+-	* Cleanup
+-	* Added missing functions
+-
+-14.06.2004 
+-	* Added Protocol version 1.3.2
+
+Copied: freenx-server/tags/FreeNX-0.6.1/ChangeLog (from rev 335, freenx-server/trunk/ChangeLog)
+
+Deleted: freenx-server/tags/FreeNX-0.6.1/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2007-05-29 15:27:07 UTC (rev 334)
++++ freenx-server/tags/FreeNX-0.6.1/nxloadconfig	2007-07-04 11:24:54 UTC (rev 336)
+@@ -1,574 +0,0 @@
+-#!/bin/bash
+-#
+-# Copyright (c) 2005 by Fabian Franz &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">freenx at fabian-franz.de</A>&gt;
+-#           (c) 2005 by Jon Severinsson &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">jonno at users.berlios.de</A>&gt;
+-#
+-# License: GPL, version 2
+-#
+-# SVN: $Id$
+-#
+-# ========================================================================
+-
+-#########################################################################
+-# Commandline support for --help, --check and --userconf
+-#########################################################################
+-
+-HELP=&quot;no&quot;
+-CHECK=&quot;no&quot;
+-USERCONF=&quot;no&quot;
+-NXLCFG_IGNORE_ERRORS=&quot;no&quot;
+-
+-while [ &quot;$1&quot; ]
+-do
+-	case &quot;$1&quot; in
+-		--help) HELP=&quot;yes&quot;; shift ;;
+-		--check) CHECK=&quot;yes&quot;; shift ;;
+-		--ignore-errors) NXLCFG_IGNORE_ERRORS=&quot;yes&quot;; shift;;
+-		--userconf) USERCONF=&quot;yes&quot; ; 
+-					case &quot;$2&quot; in
+-						&quot;&quot; | --*) shift ;;
+-						*) USER=$2 ; shift 2 ;;
+-					esac ;;
+-		--) shift ; break ;;
+-		*) echo &quot;Invalid flag $1&quot; ; HELP=&quot;yes&quot;; shift ; break ;;
+-	esac
+-done
+-
+-if [ &quot;$HELP&quot; = &quot;yes&quot; ]
+-then
+-	echo &quot;nxloadconfig - Load the FreeNX configuration variables into the environment.&quot;
+-	echo &quot;Syntax: nxloadconfig --help&quot;
+-	echo &quot;        nxloadconfig [--check] [--userconf [&lt;username&gt;]]&quot;
+-	echo
+-	echo &quot;  --check                  Write errors to standard output.&quot;
+-	echo &quot;	--ignore-errors		 just warn, and don't exit with a error, if errors occure&quot;
+-	echo &quot;  --userconf [&lt;username&gt;]  Parse &lt;username&gt;.node.conf as well as node.conf.&quot;
+-	echo &quot;                           Assume current user if no username is specified.&quot;
+-	exit 0
+-fi
+-
+-#########################################################################
+-# INTERNAL STUFF
+-# DO NOT TOUCH unless you REALLY know what you are doing
+-#########################################################################
+-
+-NX_VERSION=1.5.0-61-SVN
+-NX_LICENSE=&quot;OS (GPL)&quot;
+-
+-# Where can different nx components be found
+-NX_DIR=/usr
+-PATH_BIN=$NX_DIR/bin # if you change that, be sure to also change the public keys
+-PATH_LIB=$NX_DIR/lib
+-NX_ETC_DIR=/etc/nxserver
+-NX_SESS_DIR=/var/lib/nxserver/db
+-NX_HOME_DIR=/var/lib/nxserver/home
+-
+-# Advanced users ONLY
+-AGENT_LIBRARY_PATH=&quot;&quot; #Calculated
+-PROXY_LIBRARY_PATH=&quot;&quot; #Calculated
+-APPLICATION_LIBRARY_PATH=&quot;&quot; #Calculated
+-APPLICATION_LIBRARY_PRELOAD=&quot;&quot; #Calculated
+-
+-# the name of the authorized keys file for ssh
+-SSH_AUTHORIZED_KEYS=&quot;authorized_keys2&quot;
+-
+-# retest values like xauth, netcat
+-# set to 0 if you are sure, you set the right values
+-
+-NXCONFIG_RETEST=1
+-
+-#########################################################################
+-# Default Values
+-# A user should NEVER touch this, edit $NX_ETC_DIR/node.conf instead
+-#########################################################################
+-
+-# General FreeNX directives
+-
+-SERVER_NAME=&quot;$(hostname)&quot;
+-SSHD_PORT=22
+-
+-# Authentication / Security directives
+-
+-ENABLE_USERMODE_AUTHENTICATION=&quot;0&quot;
+-ENABLE_PASSDB_AUTHENTICATION=&quot;1&quot;
+-ENABLE_SSH_AUTHENTICATION=&quot;1&quot;
+-ENABLE_SU_AUTHENTICATION=&quot;0&quot;
+-ENABLE_USER_DB=&quot;0&quot;
+-
+-ENABLE_FORCE_ENCRYPTION=&quot;0&quot;
+-SSHD_CHECK_IP=&quot;0&quot;
+-
+-
+-# Restriction directives
+-
+-DISPLAY_BASE=1000
+-SESSION_LIMIT=200
+-SESSION_USER_LIMIT=&quot;&quot; #Calculated
+-DISPLAY_LIMIT=200
+-
+-ENABLE_PERSISTENT_SESSION=&quot;all&quot;
+-DISABLE_PERSISTENT_SESSION=&quot;&quot;
+-
+-
+-# Logging directives
+-
+-NX_LOG_LEVEL=0
+-NX_LOG_SECURE=1
+-NX_LOGFILE=/var/log/nxserver.log
+-SESSION_LOG_CLEAN=1
+-SESSION_HISTORY=2592000
+-
+-
+-# Forwarding directives
+-
+-ENABLE_SERVER_FORWARD=&quot;0&quot;
+-SERVER_FORWARD_HOST=&quot;&quot;
+-SERVER_FORWARD_PORT=22
+-SERVER_FORWARD_KEY=&quot;/usr/NX/share/client.id_dsa.key&quot;
+-
+-NOMACHINE_SERVER=&quot;/usr/NX/bin/nxserver&quot;
+-NOMACHINE_NX_HOME_DIR=&quot;/usr/NX/home/nx&quot;
+-ENABLE_NOMACHINE_FORWARD_PORT=&quot;0&quot;
+-NOMACHINE_FORWARD_PORT=&quot;22&quot;
+-
+-LOAD_BALANCE_SERVERS=&quot;&quot;
+-LOAD_BALANCE_ALGORITHM=&quot;load&quot;
+-ENABLE_LOAD_BALANCE_PREFERENCE=&quot;0&quot;
+-
+-# Services directives
+-
+-ENABLE_ESD_PRELOAD=&quot;0&quot;
+-ESD_BIN_PRELOAD=&quot;esddsp&quot;
+-ENABLE_ARTSD_PRELOAD=&quot;0&quot;
+-ARTSD_BIN_PRELOAD=&quot;artsdsp&quot;
+-
+-ENABLE_KDE_CUPS=&quot;0&quot;
+-ENABLE_KDE_CUPS_DYNAMIC=&quot;0&quot;
+-KDE_PRINTRC=&quot;&quot; # Calculated
+-
+-ENABLE_CUPS_SERVER_EXPORT=&quot;1&quot;
+-ENABLE_CUPS_SEAMLESS=&quot;0&quot;
+-CUPS_SEAMLESS_DELAY=&quot;10&quot;
+-ENABLE_FOOMATIC=&quot;1&quot;
+-COMMAND_FOOMATIC=&quot;/usr/lib/cups/driver/foomatic-ppdfile&quot;
+-
+-CUPS_BACKEND=&quot;/usr/lib/cups/backend&quot;
+-CUPS_IPP_BACKEND=&quot;$CUPS_BACKEND/nxipp&quot;
+-CUPS_DEFAULT_SOCK=&quot;/var/run/cups/cups.sock&quot;
+-CUPS_ETC=&quot;/etc/cups/&quot;
+-
+-# Path directives
+-
+-USER_FAKE_HOME=&quot;&quot; #Calculated
+-SET_LD_LIBRARY_PATH=&quot;1&quot;
+-
+-DEFAULT_X_WM=&quot;&quot;
+-KILL_DEFAULT_X_WM=&quot;1&quot;
+-USER_X_STARTUP_SCRIPT=.Xclients
+-DEFAULT_X_SESSION=/etc/X11/xdm/Xsession
+-COMMAND_START_KDE=startkde
+-COMMAND_START_GNOME=gnome-session
+-COMMAND_START_CDE=cdwm
+-COMMAND_XTERM=xterm
+-COMMAND_XAUTH=/usr/X11R6/bin/xauth
+-COMMAND_SMBMOUNT=smbmount
+-COMMAND_SMBUMOUNT=smbumount
+-COMMAND_NETCAT=netcat
+-COMMAND_SSH=ssh
+-COMMAND_SSH_KEYGEN=ssh-keygen
+-COMMAND_CUPSD=/usr/sbin/cupsd
+-COMMAND_MD5SUM=md5sum
+-
+-
+-# Misc directives
+-
+-ENABLE_2_0_0_BACKEND=&quot;&quot;
+-ENABLE_AUTORECONNECT=&quot;0&quot;
+-ENABLE_AUTORECONNECT_BEFORE_140=&quot;1&quot;
+-EXPORT_USERIP=&quot;0&quot;
+-EXPORT_SESSIONID=&quot;1&quot;
+-NODE_AUTOSTART=&quot;&quot;
+-ENABLE_ROOTLESS_MODE=&quot;1&quot;
+-ENABLE_USESSION=&quot;0&quot;
+-COMMAND_SESSREG=&quot;sessreg&quot;
+-AGENT_EXTRA_OPTIONS_RFB=&quot;&quot;
+-AGENT_EXTRA_OPTIONS_RDP=&quot;&quot;
+-AGENT_EXTRA_OPTIONS_X=&quot;&quot;
+-AGENT_STARTUP_TIMEOUT=&quot;60&quot;
+-AGENT_FONT_SERVER=&quot;&quot;
+-PROXY_TCP_NODELAY=&quot;&quot;
+-PROXY_EXTRA_OPTIONS=&quot;&quot;
+-
+-############################################################################
+-# OS specific directives
+-############################################################################
+-
+-OS=&quot;$( uname -sr )&quot;
+-
+-case &quot;$OS&quot; in
+-	&quot;SunOS 5.10&quot;)
+-		DEFAULT_X_WM=cdwm
+-		DEFAULT_X_SESSION=/etc/X11/gdm/Xsession
+-		COMMAND_XTERM=/usr/openwin/bin/xterm
+-		COMMAND_XAUTH=/usr/openwin/bin/xauth
+-		COMMAND_CUPSD=/opt/sfw/cups/sbin/cupsd
+-		COMMAND_MD5SUM=gmd5sum
+-		PATH=/usr/xpg4/bin:/usr/openwin/bin:$PATH
+-		export PATH
+-		;;
+-esac
+-
+-# replace incompatible commands
+-
+-case &quot;$OS&quot; in
+-       &quot;SunOS 5.10&quot;)
+-               function which()
+-               {
+-                       [ -e &quot;$1&quot; ] &amp;&amp; echo $1 &amp;&amp; return 0
+-                       [ -z &quot;$1&quot; ] &amp;&amp; return 1
+-                       for i in  $(echo $PATH | tr &quot;:&quot; &quot;\n&quot;); do
+-                               [ -e $i/$1 ] &amp;&amp; echo $i/$1 &amp;&amp; return 0
+-                       done
+-                       return 1
+-               }
+-
+-	       function rev() {
+-		       perl -lpe'$_ = reverse'
+-	       }
+-       ;;
+-esac
+-
+-#########################################################################
+-# Retested values
+-#########################################################################
+-
+-if [ &quot;$NXCONFIG_RETEST&quot; = &quot;1&quot; ]
+-then
+-	{ ! which &quot;$COMMAND_XAUTH&quot; &amp;&amp; which xauth; } &gt;/dev/null 2&gt;&amp;1 &amp;&amp; COMMAND_XAUTH=$(which xauth)
+-	{ ! which &quot;$COMMAND_NETCAT&quot; &amp;&amp; which nc; } &gt;/dev/null 2&gt;&amp;1 &amp;&amp; COMMAND_NETCAT=$(which nc)
+-fi
+-
+-#########################################################################
+-# node.conf file evaluation
+-#########################################################################
+-
+-if [ -d $NX_ETC_DIR/node.conf.d ]
+-then
+-	for i in $NX_ETC_DIR/node.conf.d/*
+-	do
+-		[ -e $i ] &amp;&amp; . $i
+-	done
+-fi
+-
+-[ -e $NX_ETC_DIR/node.conf ] &amp;&amp; . $NX_ETC_DIR/node.conf
+-[ &quot;$USERCONF&quot; = &quot;yes&quot; -a -e $NX_ETC_DIR/$USER.node.conf ] &amp;&amp; . $NX_ETC_DIR/$USER.node.conf
+-
+-
+-#########################################################################
+-# Calculated values
+-#########################################################################
+-
+-[ -z &quot;$SESSION_USER_LIMIT&quot; ] &amp;&amp; SESSION_USER_LIMIT=$SESSION_LIMIT
+-[ -z &quot;$USER_FAKE_HOME&quot; ] &amp;&amp; USER_FAKE_HOME=$HOME
+-
+-[ -z &quot;$AGENT_LIBRARY_PATH&quot; ] &amp;&amp; AGENT_LIBRARY_PATH=$PATH_LIB
+-[ -z &quot;$PROXY_LIBRARY_PATH&quot; ] &amp;&amp; PROXY_LIBRARY_PATH=$PATH_LIB
+-[ -z &quot;$APPLICATION_LIBRARY_PATH&quot; ] &amp;&amp; APPLICATION_LIBRARY_PATH=$PATH_LIB
+-[ -z &quot;$APPLICATION_LIBRARY_PRELOAD&quot; ] &amp;&amp; APPLICATION_LIBRARY_PRELOAD=&quot;$APPLICATION_LIBRARY_PATH/libX11.so.6.2:$APPLICATION_LIBRARY_PATH/libXext.so.6.4:$APPLICATION_LIBRARY_PATH/libXcomp.so:$APPLICATION_LIBRARY_PATH/libXcompext.so.1:$APPLICATION_LIBRARY_PATH/libXrender.so.1.2&quot;
+-if [ -z &quot;$ENABLE_2_0_0_BACKEND&quot; ]
+-then
+-	ENABLE_2_0_0_BACKEND=&quot;1&quot;
+-	[ -z &quot;$(strings $PATH_BIN/nxagent | egrep 'NXAGENT - Version 2.[01].0')&quot; ] &amp;&amp; ENABLE_2_0_0_BACKEND=&quot;0&quot;
+-fi 
+-
+-[ -z &quot;$KDE_PRINTRC&quot; -a -n &quot;$KDEHOME&quot; ] &amp;&amp; KDE_PRINTRC=&quot;$KDEHOME/share/config/kdeprintrc&quot;
+-[ -z &quot;$KDE_PRINTRC&quot; ] &amp;&amp; KDE_PRINTRC=$(kde-config --localprefix)&quot;/share/config/kdeprintrc&quot;
+-[ -z &quot;$KDE_PRINTRC&quot; -o ! -r &quot;$KDE_PRINTRC&quot; ] &amp;&amp; KDE_PRINTRC=&quot;$HOME/.kde/share/config/kdeprintrc&quot;
+-
+-#########################################################################
+-# Support for --check
+-#########################################################################
+-
+-if [ &quot;$CHECK&quot; = &quot;yes&quot; ]
+-then
+-	ERROR=&quot;no&quot;
+-	WARNING=&quot;no&quot;
+-	
+-	# Internal Stuff
+-	
+-	[ ! -d &quot;$PATH_BIN&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;PATH_BIN=$PATH_BIN\&quot;&quot;
+-	# Check for NX agents ...
+-	
+-	[ ! -f &quot;$PATH_BIN/nxagent&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Could not find nxagent in $PATH_BIN. Please install some OSS components.&quot;
+-		
+-	[ ! -f &quot;$PATH_BIN/nxdesktop&quot; ] &amp;&amp; \
+-		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Could not find nxdesktop in $PATH_BIN. RDP sessions won't work.&quot;
+-		
+-	[ ! -f &quot;$PATH_BIN/nxviewer&quot; ] &amp;&amp; \
+-		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Could not find nxviewer in $PATH_BIN. VNC sessions won't work.&quot;
+-
+-	# Check for paths
+-		
+-	[ ! -d &quot;$PATH_LIB&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;PATH_LIB=$PATH_LIB\&quot;&quot;
+-	[ ! -d &quot;$NX_ETC_DIR&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;NX_ETC_DIR=$NX_ETC_DIR\&quot;&quot;
+-	[ ! -d &quot;$NX_SESS_DIR&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;NX_SESS_DIR=$NX_SESS_DIR\&quot;&quot;
+-	[ ! -d &quot;$NX_HOME_DIR&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;NX_HOME_DIR=$NX_HOME_DIR\&quot;&quot;
+-
+-	[ ! -d &quot;$AGENT_LIBRARY_PATH&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;AGENT_LIBRARY_PATH=$AGENT_LIBRARY_PATH\&quot;&quot;
+-	[ ! -d &quot;$PROXY_LIBRARY_PATH&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;PROXY_LIBRARY_PATH=$PROXY_LIBRARY_PATH\&quot;&quot;
+-	[ ! -d &quot;$APPLICATION_LIBRARY_PATH&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;APPLICATION_LIBRARY_PATH=$APPLICATION_LIBRARY_PATH\&quot;&quot;
+-	
+-	OLD_IFS=$IFS
+-	IFS=&quot;:&quot;
+-	for LIBRARY in $APPLICATION_LIBRARY_PRELOAD; do
+-		[ ! -e $LIBRARY ] &amp;&amp; \
+-			ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;APPLICATION_LIBRARY_PRELOAD=$APPLICATION_LIBRARY_PRELOAD\&quot;&quot; &amp;&amp; break ;
+-	done
+-	IFS=$OLD_IFS
+-	
+-	[ -z &quot;$SSH_AUTHORIZED_KEYS&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SSH_AUTHORIZED_KEYS=$SSH_AUTHORIZED_KEYS\&quot;&quot;
+-	
+-	
+-	# General FreeNX directives
+-	
+-	[ -z &quot;$SERVER_NAME&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SERVER_NAME=$SERVER_NAME\&quot;&quot;
+-	[ -z $(echo &quot;$SSHD_PORT&quot; | egrep &quot;^[1-9][0-9]{0,4}$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SSHD_PORT=$SSHD_PORT\&quot;&quot;
+-	
+-	
+-	# Authentication / Security directives
+-	
+-	[ -z $(echo &quot;$ENABLE_PASSDB_AUTHENTICATION&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_PASSDB_AUTHENTICATION=$ENABLE_PASSDB_AUTHENTICATION\&quot;&quot;
+-	[ -z $(echo &quot;$ENABLE_SSH_AUTHENTICATION&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_SSH_AUTHENTICATION=$ENABLE_SSH_AUTHENTICATION:\&quot;&quot;
+-	[ -z $(echo &quot;$ENABLE_SU_AUTHENTICATION&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_SU_AUTHENTICATION=$NENABLE_SU_AUTHENTICATION\&quot;&quot;
+-	[ -z $(echo &quot;$ENABLE_USER_DB&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_USER_DB=$ENABLE_USER_DB\&quot;&quot;
+-	
+-	[ -z $(echo &quot;$ENABLE_FORCE_ENCRYPTION&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_FORCE_ENCRYPTION=$ENABLE_FORCE_ENCRYPTION\&quot;&quot;
+-	[ -z $(echo &quot;$SSHD_CHECK_IP&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SSHD_CHECK_IP=$SSHD_CHECK_IP\&quot;&quot;
+-	
+-	
+-	# Restriction directives
+-	
+-	[ -z $(echo &quot;$DISPLAY_BASE&quot; | egrep &quot;^[1-9][0-9]{0,4}$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;DISPLAY_BASE=$DISPLAY_BASE\&quot;&quot;
+-	[ -z $(echo &quot;$SESSION_LIMIT&quot; | egrep &quot;^[1-9][0-9]{0,4}$&quot;) ] &amp;&amp;  \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SESSION_LIMIT=$SESSION_LIMIT\&quot;&quot;
+-	[ -z $(echo &quot;$SESSION_USER_LIMIT&quot; | egrep &quot;^[1-9][0-9]{0,4}$&quot;) -o $SESSION_USER_LIMIT -gt $SESSION_LIMIT ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SESSION_USER_LIMIT=$SESSION_USER_LIMIT\&quot;&quot;
+-	[ -z $(echo &quot;$DISPLAY_LIMIT&quot; | egrep &quot;^[1-9][0-9]{0,4}$&quot;) -o $DISPLAY_LIMIT -lt $SESSION_LIMIT ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;DISPLAY_LIMIT=$DISPLAY_LIMIT\&quot;&quot;
+-	
+-	OLD_IFS=$IFS
+-	IFS=&quot;,&quot;
+-	if [ &quot;$ENABLE_PERSISTENT_SESSION&quot; != &quot;all&quot; ]
+-	then
+-		for USERNAME in $ENABLE_PERSISTENT_SESSION; do
+-			[ &quot;${USERNAME:0:1}&quot; != &quot;@&quot; ] &amp;&amp; [ -z $(getent passwd $USERNAME) ] &amp;&amp; \
+-				ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_PERSISTENT_SESSION=$ENABLE_PERSISTENT_SESSION\&quot;&quot; &amp;&amp; break ;
+-			[ &quot;${USERNAME:0:1}&quot; = &quot;@&quot; ] &amp;&amp; [ -z $(getent group ${USERNAME:1}) ] &amp;&amp; \
+-				ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_PERSISTENT_SESSION=$ENABLE_PERSISTENT_SESSION\&quot;&quot; &amp;&amp; break ;
+-		done
+-	fi
+-	for USERNAME in $DISABLE_PERSISTENT_SESSION; do
+-		[ &quot;${USERNAME:0:1}&quot; != &quot;@&quot; ] &amp;&amp; [ -z $(getent passwd $USERNAME) ] &amp;&amp; \
+-			ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;DISABLE_PERSISTENT_SESSION=$DISABLE_PERSISTENT_SESSION\&quot;&quot; &amp;&amp; break ;
+-		[ &quot;${USERNAME:0:1}&quot; = &quot;@&quot; ] &amp;&amp; [ -z $(getent group ${USERNAME:1}) ] &amp;&amp; \
+-			ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;DISABLE_PERSISTENT_SESSION=$DISABLE_PERSISTENT_SESSION\&quot;&quot; &amp;&amp; break ;
+-	done
+-	IFS=$OLD_IFS
+-	
+-	
+-	# Logging directives
+-	
+-	[ -z $(echo &quot;$NX_LOG_LEVEL&quot; | egrep &quot;^[0-7]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;NX_LOG_LEVEL=$NX_LOG_LEVEL\&quot;&quot;
+-	[ &quot;$NX_LOG_LEVEL&quot; != &quot;0&quot; -a ! -e &quot;$NX_LOGFILE&quot; ] &amp;&amp; \
+-		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;NX_LOGFILE=$NX_LOGFILE\&quot;&quot; \
+-					  &amp;&amp; echo &quot;         No logfile will be kept.&quot;
+-		# How do I check if another user might write to a file? ( -w checks only current user)
+-	[ -z $(echo &quot;$SESSION_LOG_CLEAN&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SESSION_LOG_CLEAN=$SESSION_LOG_CLEAN\&quot;&quot;
+-	[ -z $(echo &quot;$SESSION_HISTORY&quot; | egrep &quot;^-?[0-9]+$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SESSION_HISTORY=$SESSION_HISTORY\&quot;&quot;
+-	
+-	
+-	# Forwarding directives
+-	
+-	[ -z $(echo &quot;$ENABLE_SERVER_FORWARD&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_SERVER_FORWARD=$ENABLE_SERVER_FORWARD\&quot;&quot;
+-	[ &quot;$ENABLE_SERVER_FORWARD&quot; = &quot;1&quot; -a -z &quot;$SERVER_FORWARD_HOST&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SERVER_FORWARD_HOST=$SERVER_FORWARD_HOST\&quot;&quot; 
+-		# Any ideas on how I can check for a VALID host is velcome!
+-		# In my private scripts I use 'resolveip -q' and check if output conforms to [0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}, 
+-		# but resolveip is part of mysql, and I don't think I should add that dependancy...
+-	[ &quot;$ENABLE_SERVER_FORWARD&quot; = &quot;1&quot; -a -z $(echo &quot;$SERVER_FORWARD_PORT&quot; | egrep &quot;^[1-9][0-9]{0,4}$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SERVER_FORWARD_PORT=$SERVER_FORWARD_PORT\&quot;&quot;
+-	[ &quot;$ENABLE_SERVER_FORWARD&quot; = &quot;1&quot; -a ! -e &quot;$SERVER_FORWARD_KEY&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SERVER_FORWARD_KEY=$SERVER_FORWARD_KEY\&quot;&quot;
+-	
+-	[ -z $(echo &quot;$ENABLE_NOMACHINE_FORWARD_PORT&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_NOMACHINE_FORWARD_PORT=$ENABLE_NOMACHINE_FORWARD_PORT\&quot;&quot;
+-	[ &quot;$ENABLE_NOMACHINE_FORWARD_PORT&quot; = &quot;1&quot; ] &amp;&amp; ! which &quot;$NOMACHINE_SERVER&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;NOMACHINE_SERVER=$NOMACHINE_SERVER\&quot;&quot;
+-	[ &quot;$ENABLE_NOMACHINE_FORWARD_PORT&quot; = &quot;1&quot; -a -z $(echo &quot;$NOMACHINE_FORWARD_PORT&quot; | egrep &quot;^[1-9][0-9]{0,4}$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;NOMACHINE_FORWARD_PORT=$NOMACHINE_FORWARD_PORT\&quot;&quot;
+-	
+-	# Services directives
+-	
+-	[ -z $(echo &quot;$ENABLE_ESD_PRELOAD&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_ESD_PRELOAD=$ENABLE_ESD_PRELOAD\&quot;&quot;
+-	[ &quot;$ENABLE_ESD_PRELOAD&quot; = &quot;1&quot; ] &amp;&amp; ! which &quot;$ESD_BIN_PRELOAD&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;ESD_BIN_PRELOAD=$ESD_BIN_PRELOAD\&quot;&quot; \
+-					  &amp;&amp; echo &quot;         No esd preload will be performed.&quot;
+-	
+-	[ -z $(echo &quot;$ENABLE_ARTSD_PRELOAD&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_ARTSD_PRELOAD=$ENABLE_ARTSD_PRELOAD\&quot;&quot;
+-	[ &quot;$ARTSD_BIN_PRELOAD&quot; = &quot;1&quot; ] &amp;&amp; ! which &quot;$ARTSD_BIN_PRELOAD&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;ARTSD_BIN_PRELOAD=$ARTSD_BIN_PRELOAD\&quot;&quot; \
+-					  &amp;&amp; echo &quot;         No arts preload will be performed.&quot;
+-	
+-	[ -z $(echo &quot;$ENABLE_KDE_CUPS&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_KDE_CUPS=$ENABLE_KDE_CUPS\&quot;&quot;
+-	[ &quot;$ENABLE_KDE_CUPS&quot; = &quot;1&quot; -a ! -e &quot;$KDE_PRINTRC&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;KDE_PRINTRC=$KDE_PRINTRC\&quot;&quot;
+-
+-
+-	[ &quot;$ENABLE_FOOMATIC&quot; = &quot;1&quot; ] &amp;&amp; ! which &quot;$COMMAND_FOOMATIC&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;COMMAND_FOOMATIC=$COMMAND_FOOMATIC\&quot;&quot; \
+-					  &amp;&amp; echo &quot;         Users will not be able to use foomatic.&quot;
+-	[ ! -x &quot;$CUPS_IPP_BACKEND&quot; ] &amp;&amp; \
+-		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: \&quot;$CUPS_IPP_BACKEND\&quot; is not executable.&quot; \
+-					  &amp;&amp; echo &quot;         Users will not be able to enable printing.&quot;
+-	[ ! -x &quot;$CUPS_BACKEND/smb&quot; ] &amp;&amp; \
+-		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: \&quot;$CUPS_BACKEND/smb\&quot; is not executable.&quot; \
+-					  &amp;&amp; echo &quot;         Users will not be able to enable printing.&quot;
+-	[ ! -e &quot;$CUPS_ETC/mime.types&quot; -o ! -e &quot;$CUPS_ETC/mime.convs&quot; ] &amp;&amp; \
+-		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;CUPS_ETC=$CUPS_ETC\&quot;&quot; \
+-					  &amp;&amp; echo &quot;         Users will not be able to enable printing.&quot;
+-	
+-	# Path directives
+-	
+-	[ ! -d &quot;$USER_FAKE_HOME&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;USER_FAKE_HOME=$USER_FAKE_HOME\&quot;&quot;
+-	[ -z $(echo &quot;$SET_LD_LIBRARY_PATH&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SET_LD_LIBRARY_PATH=$SET_LD_LIBRARY_PATH\&quot;&quot;
+-	
+-	[ &quot;$DEFAULT_X_WM&quot; != &quot;&quot; ] &amp;&amp; ! which &quot;$DEFAULT_X_WM&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;DEFAULT_X_WM=$DEFAULT_X_WM\&quot;&quot;
+-	[ &quot;$DEFAULT_X_WM&quot; != &quot;&quot; -a  -z $(echo &quot;$KILL_DEFAULT_X_WM&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;KILL_DEFAULT_X_WM=$KILL_DEFAULT_X_WM\&quot;&quot;
+-	[ -z &quot;$USER_X_STARTUP_SCRIPT&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;USER_X_STARTUP_SCRIPT=$USER_X_STARTUP_SCRIPT\&quot;&quot;
+-	! which &quot;$DEFAULT_X_SESSION&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;DEFAULT_X_SESSION=$DEFAULT_X_SESSION\&quot;&quot; \
+-					  &amp;&amp; echo &quot;         Users might not be able to request a default X session.&quot;
+-	! which &quot;$COMMAND_START_KDE&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;COMMAND_START_KDE=$COMMAND_START_KDE\&quot;&quot; \
+-					  &amp;&amp; echo &quot;         Users will not be able to request a KDE session.&quot;
+-	! which &quot;$COMMAND_START_GNOME&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;COMMAND_START_GNOME=$COMMAND_START_GNOME\&quot;&quot; \
+-					  &amp;&amp; echo &quot;         Users will not be able to request a Gnome session.&quot;
+-	! which &quot;$COMMAND_START_CDE&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;COMMAND_START_CDE=$COMMAND_START_CDE\&quot;&quot; \
+-					  &amp;&amp; echo &quot;         Users will not be able to request a CDE session.&quot;
+-	! which &quot;$COMMAND_XTERM&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;COMMAND_XTERM=$COMMAND_XTERM\&quot;&quot; \
+-					  &amp;&amp; echo &quot;         Users will not be able to request an xterm session.&quot;
+-	! which &quot;$COMMAND_XAUTH&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_XAUTH=$COMMAND_XAUTH\&quot;&quot;
+-	! which &quot;$COMMAND_SMBMOUNT&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;COMMAND_SMBMOUNT=$COMMAND_SMBMOUNT\&quot;. You'll not be able to use SAMBA. &quot;
+-	! which &quot;$COMMAND_SMBUMOUNT&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;COMMAND_SMBUMOUNT=$COMMAND_SMBUMOUNT\&quot;. You'll not be able to use SAMBA.&quot;
+-	! which &quot;$COMMAND_NETCAT&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_NETCAT=$COMMAND_NETCAT\&quot;&quot;
+-	! which &quot;$COMMAND_SSH&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_SSH=$COMMAND_SSH\&quot;&quot;
+-	! which &quot;$COMMAND_SSH_KEYGEN&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_SSH_KEYGEN=$COMMAND_SSH_KEYGEN\&quot;&quot;
+-	! which &quot;$COMMAND_CUPSD&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;COMMAND_CUPSD=$COMMAND_CUPSD\&quot;&quot; \
+-					  &amp;&amp; echo &quot;         Users will not be able to enable printing.&quot;
+-	[ -z &quot;$(strings $COMMAND_CUPSD | egrep 'CUPS\/1.2')&quot; ] &amp;&amp; \
+-		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid cupsd version of \&quot;$COMMAND_CUPSD\&quot;. Need version 1.2.&quot; \
+-					  &amp;&amp; echo &quot;         Users will not be able to enable printing.&quot;
+-	! which &quot;$COMMAND_MD5SUM&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_MD5SUM=$COMMAND_MD5SUM\&quot;&quot;
+-
+-	# Check for expect
+-	COMMAND_EXPECT=$(head -n1 $PATH_BIN/nxnode-login | cut -d'!' -f2)
+-	! which &quot;$COMMAND_EXPECT&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: expect necessary for $PATH_BIN/nxnode-login could not be found in '$COMMAND_EXPECT'. Please install it or change nxnode-login accordingly.&quot;
+-
+-	# Misc directives
+-	
+-	[ -z $(echo &quot;$ENABLE_AUTORECONNECT&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_AUTORECONNECT=$ENABLE_AUTORECONNECT\&quot;&quot;
+-	[ -z $(echo &quot;$ENABLE_AUTORECONNECT_BEFORE_140&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_AUTORECONNECT_BEFORE_140=$ENABLE_AUTORECONNECT_BEFORE_140\&quot;&quot;
+-	
+-	[ -z $(echo &quot;$EXPORT_USERIP&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;EXPORT_USERIP=$EXPORT_USERIP\&quot;&quot;
+-	[ -z $(echo &quot;$EXPORT_SESSIONID&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;EXPORT_SESSIONID=$EXPORT_SESSIONID\&quot;&quot;
+-	[ -n &quot;$NODE_AUTOSTART&quot; ] &amp;&amp; ! which &quot;$NODE_AUTOSTART&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;NODE_AUTOSTART=$NODE_AUTOSTART\&quot;&quot; \
+-					  &amp;&amp; echo &quot;         No autostart will be performed.&quot;
+-
+-	[ -z $(echo &quot;$ENABLE_ROOTLESS_MODE&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_ROOTLESS_MODE=$ENABLE_ROOTLESS_MODE\&quot;&quot;
+-
+-	[ -z &quot;$(strings $PATH_BIN/nxagent | egrep 'NXAGENT - Version 1.5.0|NXAGENT - Version 2.[01].0')&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Could not find 1.5.0 or 2.[01].0 version string in nxagent. NX 1.5.0 or 2.[01].0 backend is needed for this version of FreeNX.&quot;
+-		
+-	[ -z $(echo &quot;$ENABLE_USESSION&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_USESSION=$ENABLE_USESSION\&quot;&quot;
+-	[ &quot;$ENABLE_USESSION&quot; = &quot;1&quot; ] &amp;&amp; ! which &quot;$COMMAND_SESSREG&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;COMMAND_SESSREG=$COMMAND_SESSREG\&quot;&quot; \
+-					  &amp;&amp; echo &quot;         Logged in users will not be registered with sessreg.&quot;
+-	
+-	#AGENT_EXTRA_OPTIONS_RFB=&quot;&quot;
+-	#AGENT_EXTRA_OPTIONS_RDP=&quot;&quot;
+-	#AGENT_EXTRA_OPTIONS_X=&quot;&quot;
+-	#PROXY_EXTRA_OPTIONS=&quot;&quot;
+-		#Can these be checked???
+-	
+-	#AGENT_FONT_SERVER=&quot;&quot;
+-		#Any ideas on how I can check for a VALID host is velcome!
+-	
+-	#[ -z $(echo &quot;$PROXY_TCP_NODELAY&quot; | egrep &quot;^[|0|1]$&quot;) ] &amp;&amp; \
+-	#	ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;PROXY_TCP_NODELAY=$PROXY_TCP_NODELAY\&quot;&quot;
+-	
+-	
+-	if [ &quot;$ERROR&quot; = &quot;yes&quot; ]
+-	then
+-		echo
+-		echo &quot;  Errors occured during config check.&quot;
+-		echo &quot;  Please correct the configuration file.&quot;
+-		echo
+-		[ &quot;$NXLCFG_IGNORE_ERRORS&quot; = &quot;no&quot; ] &amp;&amp; exit 1 || exit 0
+-	elif [ &quot;$WARNING&quot; = &quot;yes&quot; ]
+-	then
+-		echo
+-		echo &quot;  Warnings occured during config check.&quot;
+-		echo &quot;  To enable these features please correct the configuration file.&quot;
+-		echo
+-	fi
+-fi
+
+Copied: freenx-server/tags/FreeNX-0.6.1/nxloadconfig (from rev 335, freenx-server/trunk/nxloadconfig)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000469.html">[Freenx-cvs] r335 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000470.html">[Freenx-cvs] r337 - /
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#662">[ date ]</a>
+              <a href="thread.html#662">[ thread ]</a>
+              <a href="subject.html#662">[ subject ]</a>
+              <a href="author.html#662">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

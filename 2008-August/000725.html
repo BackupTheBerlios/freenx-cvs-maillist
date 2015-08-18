@@ -1,0 +1,113 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r591 - trunk/freenx-utils/nxpublickey
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r591%20-%20trunk/freenx-utils/nxpublickey&In-Reply-To=%3C200808231355.m7NDtMuW003238%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000724.html">
+   <LINK REL="Next"  HREF="000726.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r591 - trunk/freenx-utils/nxpublickey</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r591%20-%20trunk/freenx-utils/nxpublickey&In-Reply-To=%3C200808231355.m7NDtMuW003238%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r591 - trunk/freenx-utils/nxpublickey">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Sat Aug 23 15:55:22 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000724.html">[Freenx-cvs] r590 - trunk/freenx-utils/nxpublickey
+</A></li>
+        <LI>Next message: <A HREF="000726.html">[Freenx-cvs] r592 - trunk/freenx-utils/nxpublickey
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#725">[ date ]</a>
+              <a href="thread.html#725">[ thread ]</a>
+              <a href="subject.html#725">[ subject ]</a>
+              <a href="author.html#725">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-08-23 15:55:22 +0200 (Sat, 23 Aug 2008)
+New Revision: 591
+
+Modified:
+   trunk/freenx-utils/nxpublickey/nxssh-suid-pw
+   trunk/freenx-utils/nxpublickey/nxssh-usermode-pw
+Log:
+Whooops, forgot to remove echo_x.
+
+
+
+Modified: trunk/freenx-utils/nxpublickey/nxssh-suid-pw
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-suid-pw	2008-08-23 13:52:54 UTC (rev 590)
++++ trunk/freenx-utils/nxpublickey/nxssh-suid-pw	2008-08-23 13:55:22 UTC (rev 591)
+@@ -63,11 +63,11 @@
+ 			login|LOGIN)
+ 				LOGIN_SUCCESS=&quot;0&quot;
+ 				
+-				echo_x -n &quot;NX&gt; 101 User: &quot;
++				echo -n &quot;NX&gt; 101 User: &quot;
+ 				read USER2
+-				echo_x $USER2
++				echo $USER2
+ 				
+-				echo_x -n &quot;NX&gt; 102 Password: &quot;
++				echo -n &quot;NX&gt; 102 Password: &quot;
+ 				break
+ 			;;
+ 		esac
+
+Modified: trunk/freenx-utils/nxpublickey/nxssh-usermode-pw
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-usermode-pw	2008-08-23 13:52:54 UTC (rev 590)
++++ trunk/freenx-utils/nxpublickey/nxssh-usermode-pw	2008-08-23 13:55:22 UTC (rev 591)
+@@ -63,11 +63,11 @@
+ 			login|LOGIN)
+ 				LOGIN_SUCCESS=&quot;0&quot;
+ 				
+-				echo_x -n &quot;NX&gt; 101 User: &quot;
++				echo -n &quot;NX&gt; 101 User: &quot;
+ 				read USER2
+-				echo_x $USER2
++				echo $USER2
+ 				
+-				echo_x -n &quot;NX&gt; 102 Password: &quot;
++				echo -n &quot;NX&gt; 102 Password: &quot;
+ 				break
+ 			;;
+ 		esac
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000724.html">[Freenx-cvs] r590 - trunk/freenx-utils/nxpublickey
+</A></li>
+	<LI>Next message: <A HREF="000726.html">[Freenx-cvs] r592 - trunk/freenx-utils/nxpublickey
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#725">[ date ]</a>
+              <a href="thread.html#725">[ thread ]</a>
+              <a href="subject.html#725">[ subject ]</a>
+              <a href="author.html#725">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

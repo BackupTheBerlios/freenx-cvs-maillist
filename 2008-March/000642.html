@@ -1,0 +1,170 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r518 - trunk/freenx-redesign/server/utility
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r518%20-%20trunk/freenx-redesign/server/utility&In-Reply-To=%3C200803110704.m2B74B6H019605%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000641.html">
+   <LINK REL="Next"  HREF="000643.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r518 - trunk/freenx-redesign/server/utility</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r518%20-%20trunk/freenx-redesign/server/utility&In-Reply-To=%3C200803110704.m2B74B6H019605%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r518 - trunk/freenx-redesign/server/utility">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Tue Mar 11 08:04:11 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000641.html">[Freenx-cvs] r517 - in trunk/freenx-server: . nxserver-helper
+</A></li>
+        <LI>Next message: <A HREF="000643.html">[Freenx-cvs] r519 - in trunk/freenx-server: . nxserver-helper
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#642">[ date ]</a>
+              <a href="thread.html#642">[ thread ]</a>
+              <a href="subject.html#642">[ subject ]</a>
+              <a href="author.html#642">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-03-11 08:04:10 +0100 (Tue, 11 Mar 2008)
+New Revision: 518
+
+Modified:
+   trunk/freenx-redesign/server/utility/nxserver-suid.c
+Log:
+- Fixed to drop all priviledges of previous user for user nx.
+- Added a clean environment so the server cannot be manipulated.
+
+
+
+Modified: trunk/freenx-redesign/server/utility/nxserver-suid.c
+===================================================================
+--- trunk/freenx-redesign/server/utility/nxserver-suid.c	2008-03-11 05:55:27 UTC (rev 517)
++++ trunk/freenx-redesign/server/utility/nxserver-suid.c	2008-03-11 07:04:10 UTC (rev 518)
+@@ -15,7 +15,8 @@
+  * along with this program; if not, write to the Free Software
+  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+  *
+- * Author: <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">alriddoch at google.com</A> (Alistair Riddoch)
++ * Authors: <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">alriddoch at google.com</A> (Alistair Riddoch)
++ * 	    <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">freenx at fabian-franz.de</A> (Fabian Franz)
+  */
+ 
+ #include &lt;sys/types.h&gt;
+@@ -36,7 +37,7 @@
+ 
+ #define STRING_BUFLEN 512
+ #define NXNODE_COMMAND &quot;nxnode&quot;
+-#define NXSERVER_COMMAND &quot;nxserver&quot;
++#define NXSERVER_COMMAND &quot;/usr/freenx/bin/nxserver&quot;
+ 
+ int launch_nxnode(uid_t user, int comm_fd)
+ {
+@@ -68,23 +69,61 @@
+ {
+     size_t env_string_length;
+     char * env_string;
++    char ** new_env;
+     char ** new_argv;
+     int i;
+ 
++    // Really drop the user priviledges
++    setreuid(geteuid(), geteuid());
++   
++    // Setup a clean environment.
++    new_env = calloc(5+1, sizeof(char *));
++
++    i=0;
++	
+     env_string_length = snprintf(0, 0, &quot;%s=%s&quot;,
+                                  &quot;NX_TRUSTED_USER&quot;, username);
+     env_string = malloc(env_string_length + 1);
+     assert(env_string != NULL);
+     sprintf(env_string, &quot;%s=%s&quot;, &quot;NX_TRUSTED_USER&quot;, username);
+-    putenv(env_string);
++    new_env[i++] = env_string;
+ 
+     env_string_length = snprintf(0, 0, &quot;%s=%d&quot;,
+                                  &quot;NX_COMMFD&quot;, comm_fd);
+     env_string = malloc(env_string_length + 1);
+     assert(env_string != NULL);
+     sprintf(env_string, &quot;%s=%d&quot;, &quot;NX_COMMFD&quot;, comm_fd);
+-    putenv(env_string);
++    new_env[i++] = env_string;
++    
++    env_string_length = snprintf(0, 0, &quot;%s=%s&quot;,
++                                 &quot;USER&quot;, &quot;nx&quot;);
++    env_string = malloc(env_string_length + 1);
++    assert(env_string != NULL);
++    sprintf(env_string, &quot;%s=%s&quot;, &quot;USER&quot;, &quot;nx&quot;);
++    new_env[i++] = env_string;
++    
++    if (getenv(&quot;SSH_CLIENT&quot;) != NULL)
++    {
++    	env_string_length = snprintf(0, 0, &quot;%s=%s&quot;,
++    	                             &quot;SSH_CLIENT&quot;, getenv(&quot;SSH_CLIENT&quot;));
++    	env_string = malloc(env_string_length + 1);
++    	assert(env_string != NULL);
++    	sprintf(env_string, &quot;%s=%s&quot;, &quot;SSH_CLIENT&quot;, getenv(&quot;SSH_CLIENT&quot;));
++    	new_env[i++] = env_string;
++    }
++    
++    if (getenv(&quot;SSH_CLIENT2&quot;) != NULL)
++    {
++    	env_string_length = snprintf(0, 0, &quot;%s=%s&quot;,
++    	                             &quot;SSH_CLIENT2&quot;, getenv(&quot;SSH_CLIENT2&quot;));
++    	env_string = malloc(env_string_length + 1);
++    	assert(env_string != NULL);
++    	sprintf(env_string, &quot;%s=%s&quot;, &quot;SSH_CLIENT2&quot;, getenv(&quot;SSH_CLIENT2&quot;));
++    	new_env[i++] = env_string;
++    }
+ 
++    // Setup argv array
++    
+     new_argv = calloc(argc + 1, sizeof(char *));
+     new_argv[0] = NXSERVER_COMMAND;
+ 
+@@ -92,7 +131,7 @@
+         new_argv[i] = argv[i];
+     }
+ 
+-    return execvp(NXSERVER_COMMAND, new_argv);
++    return execve(NXSERVER_COMMAND, new_argv, new_env);
+ }
+ 
+ int main(int argc, char ** argv)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000641.html">[Freenx-cvs] r517 - in trunk/freenx-server: . nxserver-helper
+</A></li>
+	<LI>Next message: <A HREF="000643.html">[Freenx-cvs] r519 - in trunk/freenx-server: . nxserver-helper
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#642">[ date ]</a>
+              <a href="thread.html#642">[ thread ]</a>
+              <a href="subject.html#642">[ subject ]</a>
+              <a href="author.html#642">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

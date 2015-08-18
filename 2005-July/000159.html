@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r68 - nx-utils/nxredir
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-July/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r68%20-%20nx-utils/nxredir&In-Reply-To=%3C200507031702.j63H2G3c010057%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000158.html">
+   <LINK REL="Next"  HREF="000160.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r68 - nx-utils/nxredir</H1>
+    <B>Fabian Franz at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r68%20-%20nx-utils/nxredir&In-Reply-To=%3C200507031702.j63H2G3c010057%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r68 - nx-utils/nxredir">fabianx at berlios.de
+       </A><BR>
+    <I>Sun Jul  3 19:02:16 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000158.html">[Freenx-cvs] r67 - in nx-utils: . nxredir
+</A></li>
+        <LI>Next message: <A HREF="000160.html">[Freenx-cvs] r69 - freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#159">[ date ]</a>
+              <a href="thread.html#159">[ thread ]</a>
+              <a href="subject.html#159">[ subject ]</a>
+              <a href="author.html#159">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2005-07-03 19:02:02 +0200 (Sun, 03 Jul 2005)
+New Revision: 68
+
+Modified:
+   nx-utils/nxredir/Makefile
+   nx-utils/nxredir/nxredir.c
+Log:
+Initial bugfixes, should work now.
+
+
+Modified: nx-utils/nxredir/Makefile
+===================================================================
+--- nx-utils/nxredir/Makefile	2005-07-03 16:43:49 UTC (rev 67)
++++ nx-utils/nxredir/Makefile	2005-07-03 17:02:02 UTC (rev 68)
+@@ -1,17 +1,17 @@
+-all: libnxredir.so.0.1
++all: libnxredir.so.0
+ 
+ CC=gcc
+ CFLAGS=-g -O2 -Wall
+ 
+-libnxredir.so.0.1: nxredir.o
+-	$(CC) -fPIC $(CFLAGS) -nostdlib -shared -o libnxredir.so.0.1 nxredir.o -ldl -lc
++libnxredir.so.0: nxredir.o
++	$(CC) -fPIC $(CFLAGS) -nostdlib -shared -o libnxredir.so.0 nxredir.o -ldl -lc
+ 
+ clean:
+-	rm -f libnxredir.so.0.1
++	rm -f libnxredir.so.0
+ 	rm -f *.o
+ 
+-install:
+-	cp -a libnxredir.so.0.1 $(DESTDIR)/usr/lib
++install: all
++	cp -a libnxredir.so.0 $(DESTDIR)/usr/lib
+ 	cp -a nxredir $(DESTDIR)/usr/bin
+ 	ldconfig
+ 
+
+Modified: nx-utils/nxredir/nxredir.c
+===================================================================
+--- nx-utils/nxredir/nxredir.c	2005-07-03 16:43:49 UTC (rev 67)
++++ nx-utils/nxredir/nxredir.c	2005-07-03 17:02:02 UTC (rev 68)
+@@ -47,23 +47,18 @@
+ 
+ int connect(CONNECT_SIGNATURE) 
+ {
+-	int cups, samba;
+-	
+ 	if (realconnect == NULL) {
+                 perror(&quot;Unresolved symbol: connect\n&quot;);
+                 return(-1);
+         }
+ 
+-	cups=atoi(getenv(&quot;NXCUPS_PORT&quot;));
+-	samba=atoi(getenv(&quot;NXSAMBA_PORT&quot;));
+-
+ 	/* CUPS */
+-	if (cups != 0 &amp;&amp; ((struct sockaddr_in*)__addr)-&gt;sin_port==htons(631))
+-		((struct sockaddr_in*)__addr)-&gt;sin_port=htons(8632);
++	if ((getenv(&quot;NXCUPS_PORT&quot;) != NULL) &amp;&amp; ((struct sockaddr_in*)__addr)-&gt;sin_port==htons(631))
++		((struct sockaddr_in*)__addr)-&gt;sin_port=htons(atoi(getenv(&quot;NXCUPS_PORT&quot;)));
+ 
+ 	/* SAMBA */
+-	if (samba != 0 &amp;&amp; (((struct sockaddr_in*)__addr)-&gt;sin_port==htons(139) || ((struct sockaddr_in*)__addr)-&gt;sin_port==htons(445)))
+-		((struct sockaddr_in*)__addr)-&gt;sin_port=htons(samba);
++	if ((getenv(&quot;NXSAMBA_PORT&quot;) != NULL) &amp;&amp; (((struct sockaddr_in*)__addr)-&gt;sin_port==htons(139) || ((struct sockaddr_in*)__addr)-&gt;sin_port==htons(445)))
++		((struct sockaddr_in*)__addr)-&gt;sin_port=htons(atoi(getenv(&quot;NXSAMBA_PORT&quot;)));
+ 
+ 	return realconnect(__fd, __addr, __len);
+ }
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000158.html">[Freenx-cvs] r67 - in nx-utils: . nxredir
+</A></li>
+	<LI>Next message: <A HREF="000160.html">[Freenx-cvs] r69 - freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#159">[ date ]</a>
+              <a href="thread.html#159">[ thread ]</a>
+              <a href="subject.html#159">[ subject ]</a>
+              <a href="author.html#159">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

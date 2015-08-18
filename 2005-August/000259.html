@@ -1,0 +1,462 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r132 - / freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r132%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200508281432.j7SEWBR8006977%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000258.html">
+   <LINK REL="Next"  HREF="000260.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r132 - / freenx-server/trunk</H1>
+    <B>Fabian Franz at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r132%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200508281432.j7SEWBR8006977%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r132 - / freenx-server/trunk">fabianx at berlios.de
+       </A><BR>
+    <I>Sun Aug 28 16:32:11 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000258.html">[Freenx-cvs] r131 - / freenx-website
+</A></li>
+        <LI>Next message: <A HREF="000260.html">[Freenx-cvs] r133 - / freenx-server/branches/FreeNX-0.4
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#259">[ date ]</a>
+              <a href="thread.html#259">[ thread ]</a>
+              <a href="subject.html#259">[ subject ]</a>
+              <a href="author.html#259">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2005-08-28 16:32:09 +0200 (Sun, 28 Aug 2005)
+New Revision: 132
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxloadconfig
+   freenx-server/trunk/nxnode
+   freenx-server/trunk/nxserver
+   freenx-server/trunk/nxsetup
+Log:
+ <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">r136 at Bluemoon</A>:  ffranz | 2005-08-28 16:28:09 +0200
+ Merged changes from 0.4-Branch. (SVN: -r115:130 / SVK: -r117:132)
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:136
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2005-08-21 05:46:51 UTC (rev 131)
++++ freenx-server/trunk/ChangeLog	2005-08-28 14:32:09 UTC (rev 132)
+@@ -2,6 +2,12 @@
+ 	* Opened the 0.5.0 branch.
+ 	* Added load balancing.
+ 
++*****.2005 FreeNX 0.4.5 ???
++	* Made nxsetup more user-friendly and hopefully finally failsafe.
++	* Added --agent to nxnode/nxserver to allow easier debugging.
++	* Added addgroup/groupadd to nxsetup
++	* Added --ignore-errors support on nxsetup/nxloadconfig
++
+ 06.08.2005 FreeNX 0.4.4 &quot;UKUUG Enterprise Edition&quot;
+ 	* Added ENABLE_1_5_0_BACKEND configuration directive:
+ 		* Fixed fullscreen support in nxdesktop (still feels more like
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2005-08-21 05:46:51 UTC (rev 131)
++++ freenx-server/trunk/nxloadconfig	2005-08-28 14:32:09 UTC (rev 132)
+@@ -16,12 +16,14 @@
+ HELP=&quot;no&quot;
+ CHECK=&quot;no&quot;
+ USERCONF=&quot;no&quot;
++NXLCFG_IGNORE_ERRORS=&quot;no&quot;
+ 
+ while [ &quot;$1&quot; ]
+ do
+ 	case &quot;$1&quot; in
+ 		--help) HELP=&quot;yes&quot;; shift ;;
+ 		--check) CHECK=&quot;yes&quot;; shift ;;
++		--ignore-errors) NXLCFG_IGNORE_ERRORS=&quot;yes&quot;; shift;;
+ 		--userconf) USERCONF=&quot;yes&quot; ; 
+ 					case &quot;$2&quot; in
+ 						&quot;&quot; | --*) shift ;;
+@@ -39,6 +41,7 @@
+ 	echo &quot;        nxloadconfig [--check] [--userconf [&lt;username&gt;]]&quot;
+ 	echo
+ 	echo &quot;  --check                  Write errors to standard output.&quot;
++	echo &quot;	--ignore-errors		 just warn, and don't exit with a error, if errors occure&quot;
+ 	echo &quot;  --userconf [&lt;username&gt;]  Parse &lt;username&gt;.node.conf as well as node.conf.&quot;
+ 	echo &quot;                           Assume current user if no username is specified.&quot;
+ 	exit 0
+@@ -260,6 +263,19 @@
+ 	
+ 	[ ! -d &quot;$PATH_BIN&quot; ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;PATH_BIN=$PATH_BIN\&quot;&quot;
++	# Check for NX agents ...
++	
++	[ ! -f &quot;$PATH_BIN/nxagent&quot; ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Could not find nxagent in $PATH_BIN. Please install some OSS components.&quot;
++		
++	[ ! -f &quot;$PATH_BIN/nxdesktop&quot; ] &amp;&amp; \
++		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Could not find nxdesktop in $PATH_BIN. RDP sessions won't work.&quot;
++		
++	[ ! -f &quot;$PATH_BIN/nxviewer&quot; ] &amp;&amp; \
++		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Could not find nxviewer in $PATH_BIN. VNC sessions won't work.&quot;
++
++	# Check for paths
++		
+ 	[ ! -d &quot;$PATH_LIB&quot; ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;PATH_LIB=$PATH_LIB\&quot;&quot;
+ 	[ ! -d &quot;$NX_ETC_DIR&quot; ] &amp;&amp; \
+@@ -469,7 +485,19 @@
+ 
+ 	[ -z $(echo &quot;$ENABLE_ROOTLESS_MODE&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_ROOTLESS_MODE=$ENABLE_ROOTLESS_MODE\&quot;&quot;
++		
++	[ -z $(echo &quot;$ENABLE_1_5_0_BACKEND&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_1_5_0_BACKEND=$ENABLE_1_5_0_BACKEND\&quot;&quot;
++		
++	[ &quot;$ENABLE_ROOTLESS_MODE&quot; = &quot;1&quot; -a &quot;$ENABLE_1_5_0_BACKEND&quot; = &quot;0&quot; ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Rootless mode can just be used with 1.5.0 backend.&quot;
+ 
++	[ &quot;$ENABLE_1_5_0_BACKEND&quot; = &quot;1&quot; -a -z &quot;$(strings $PATH_BIN/nxagent | grep 'NXAGENT - Version 1.5.0')&quot; ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Could not find 1.5.0 version string in nxagent. NX 1.5.0 backend option must be used with 1.5.0 OSS components.&quot;
++
++	[ &quot;$ENABLE_1_5_0_BACKEND&quot; = &quot;0&quot; -a -n &quot;$(strings $PATH_BIN/nxagent | grep 'NXAGENT - Version 1.5.0')&quot; ] &amp;&amp; \
++		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: 1.5.0 OSS components found, but ENABLE_1_5_0 backend option is not set.&quot;
++
+ 	[ -z $(echo &quot;$ENABLE_USESSION&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_USESSION=$ENABLE_USESSION\&quot;&quot;
+ 	[ &quot;$ENABLE_USESSION&quot; = &quot;1&quot; ] &amp;&amp; ! which &quot;$COMMAND_SESSREG&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+@@ -495,6 +523,7 @@
+ 		echo &quot;  Errors occured during config check.&quot;
+ 		echo &quot;  Please correct the configuration file.&quot;
+ 		echo
++		[ &quot;$NXLCFG_IGNORE_ERRORS&quot; = &quot;no&quot; ] &amp;&amp; exit 1 || exit 0
+ 	elif [ &quot;$WARNING&quot; = &quot;yes&quot; ]
+ 	then
+ 		echo
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2005-08-21 05:46:51 UTC (rev 131)
++++ freenx-server/trunk/nxnode	2005-08-28 14:32:09 UTC (rev 132)
+@@ -22,7 +22,7 @@
+ 
+ echo &quot;NX&gt; 1000 NXNODE - Version $NX_VERSION $NX_LICENSE&quot;
+ 
+-if [ &quot;$1&quot; != &quot;--check&quot; -a &quot;$1&quot; != &quot;--setkey&quot; ]
++if [ &quot;$1&quot; != &quot;--check&quot; -a &quot;$1&quot; != &quot;--setkey&quot; -a &quot;$1&quot; != &quot;--agent&quot; ]
+ then 
+ 	read CMDLINE
+ 
+@@ -862,6 +862,13 @@
+ 	--check)
+ 		echo &quot;NX&gt; 716 finished&quot;
+ 	;;
++	--agent)
++		echo &quot;NX&gt; 716 Starting NX Agent ...&quot;
++		shift
++		[ &quot;$SET_LD_LIBRARY_PATH&quot; = &quot;1&quot; ] &amp;&amp; export LD_LIBRARY_PATH=&quot;$AGENT_LIBRARY_PATH:$LD_LIBRARY_PATH&quot;
++		PATH=&quot;$PATH:$PATH_BIN&quot; $PATH_BIN/nxagent -name &quot;NX Agent Test - Args: $@&quot; $@
++		echo &quot;NX&gt; 716 NX Agent exited with status: $?&quot;
++	;;
+ 	--setkey)
+ 		mkdir -m 700 -p $HOME/.ssh
+ 		if ! grep -q &quot;$(cat $NX_ETC_DIR/users.id_dsa.pub)&quot; $HOME/.ssh/$SSH_AUTHORIZED_KEYS 2&gt;/dev/null
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2005-08-21 05:46:51 UTC (rev 131)
++++ freenx-server/trunk/nxserver	2005-08-28 14:32:09 UTC (rev 132)
+@@ -1403,6 +1403,7 @@
+ 
+ if [ $UID -ne 0 ]
+ then
++	[ &quot;$1&quot; = &quot;--agent&quot; ] &amp;&amp; exec $PATH_BIN/nxnode &quot;$@&quot;
+ 	[ &quot;$1&quot; != &quot;--passwd&quot; ] &amp;&amp; cmd_usage
+ 	cmd_user_passwd
+ 	exit 0
+
+Modified: freenx-server/trunk/nxsetup
+===================================================================
+--- freenx-server/trunk/nxsetup	2005-08-21 05:46:51 UTC (rev 131)
++++ freenx-server/trunk/nxsetup	2005-08-28 14:32:09 UTC (rev 132)
+@@ -22,12 +22,15 @@
+ PURGE=&quot;no&quot;
+ SETUP_SSH2_KEY=&quot;no&quot;
+ BUILD_KNOWN_HOSTS=&quot;yes&quot;
++AUTOMATIC=&quot;no&quot;
++IGNORE_ERRORS=&quot;no&quot;
+ 
+ while [ &quot;$1&quot; ]
+ do
+ 	case &quot;$1&quot; in
+ 		--help) HELP=&quot;yes&quot;; shift ;;
+ 		--install) INSTALL=&quot;yes&quot;; shift ;;
++		--ignore-errors) IGNORE_ERRORS=&quot;yes&quot;; shift;;
+ 		--setup-nomachine-key) SETUP_NOMACHINE_KEY=&quot;yes&quot;; shift ;;
+ 		--ssh2) SETUP_SSH2_KEY=&quot;yes&quot;; shift;;
+ 		--dont-build-known-hosts) BUILD_KNOWN_HOSTS=&quot;no&quot;; shift;;
+@@ -37,6 +40,7 @@
+ 		--clean) CLEAN=&quot;yes&quot;; shift ;;
+ 		--uninstall) UNINSTALL=&quot;yes&quot;; shift ;;
+ 		--purge) PURGE=&quot;yes&quot;; shift ;;
++		--auto) AUTOMATIC=&quot;yes&quot;; shift ;;
+ 		--) shift ; break ;;
+ 		*) echo &quot;Invalid flag $1&quot; ; HELP=&quot;yes&quot;; shift ; break ;;
+ 	esac
+@@ -45,12 +49,26 @@
+ #Check for invalid combinations:
+ [ &quot;$SETUP_LOCAL_USER&quot; = &quot;yes&quot; -a -z &quot;$LOCAL_USER_OPTION&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+ [ &quot;$INSTALL&quot; = &quot;yes&quot; -a &quot;$UNINSTALL&quot; = &quot;yes&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+-[ &quot;$INSTALL&quot; = &quot;no&quot; -a &quot;$UNINSTALL&quot; = &quot;no&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+ [ &quot;$INSTALL&quot; = &quot;yes&quot; -a &quot;$CLEAN&quot; = &quot;no&quot; -a &quot;$PURGE&quot; = &quot;yes&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+ [ &quot;$UNINSTALL&quot; = &quot;yes&quot; ] &amp;&amp; [ &quot;$SETUP_NOMACHINE_KEY&quot; = &quot;yes&quot; -o -n &quot;$SETUP_UID&quot; -o &quot;$CLEAN&quot; = &quot;yes&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+ [ &quot;$UNINSTALL&quot; = &quot;yes&quot; -a &quot;$CLEAN&quot; = &quot;yes&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+ [ &quot;$SETUP_SSH2_KEY&quot; = &quot;yes&quot; -a &quot;$SETUP_NOMACHINE_KEY&quot; = &quot;no&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+ 
++if [ &quot;$INSTALL&quot; = &quot;no&quot; -a &quot;$UNINSTALL&quot; = &quot;no&quot; -a &quot;$AUTOMATIC&quot; = &quot;no&quot; -a &quot;$HELP&quot; = &quot;no&quot; ]
++then
++	echo &quot;------&gt; You did select no action.&quot;
++	echo &quot;        FreeNX guesses that you want to _install_ the&quot;
++	echo &quot;        server.&quot;
++	echo &quot;        Use --help to get help contents.&quot;
++	echo &quot;&quot;
++	echo -n &quot;Do you want to abort now? [y/N] &quot;
++	read -n 1 CHOICE
++	echo
++	[ &quot;$CHOICE&quot; = &quot;y&quot; ] || INSTALL=&quot;yes&quot;
++fi
++
++[ &quot;$INSTALL&quot; = &quot;no&quot; -a &quot;$UNINSTALL&quot; = &quot;no&quot; ] &amp;&amp; HELP=&quot;yes&quot;
++
+ if [ &quot;$HELP&quot; = &quot;yes&quot; ]
+ then
+ 	echo &quot;nxsetup - Setup the FreeNX server.&quot;
+@@ -60,6 +78,7 @@
+ 	echo
+ 	echo &quot;  --help                 Displays this help message&quot;
+ 	echo &quot;  --install              Install nessesary files and add the nx user&quot;
++	echo &quot;	--ignore-errors	       check false configuration, but don't complain&quot;
+ 	echo &quot;  --setup-nomachine-key  Allow login with the key shipped with the NoMachine&quot;
+ 	echo &quot;                         client. This is not as secure, but it simplifies the &quot;
+ 	echo &quot;                         configuration of clients.&quot;
+@@ -87,6 +106,18 @@
+ 	exit 1
+ fi
+ 
++if [ &quot;$INSTALL&quot; = &quot;yes&quot; -a &quot;$AUTOMATIC&quot; = &quot;no&quot; -a &quot;$SETUP_NOMACHINE_KEY&quot; = &quot;no&quot; ]
++then
++	echo &quot;------&gt; It is recommended that you use the NoMachine key for&quot;
++	echo &quot;        easier setup. At the moment FreeNX would create a custom&quot;
++	echo &quot;        KeyPair and expect you to setup your clients manually. &quot;
++	echo &quot;&quot;
++	echo -n &quot;        Do you really want to use your own keys? [y/N] &quot;
++	read -n 1 CHOICE
++	[ &quot;$CHOICE&quot; = &quot;y&quot; ] || SETUP_NOMACHINE_KEY=&quot;yes&quot;
++fi
++
++
+ # Read the config file
+ . $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig) --
+ 
+@@ -99,6 +130,16 @@
+ 		getent passwd nx &gt;/dev/null
+ 	fi
+ }	
++nx_group_exists()
++{
++	# useradd/adduser need a valid group to add the user to
++	if [ &quot;$SETUP_LOCAL_USER&quot; = &quot;yes&quot; ]
++	then
++		egrep &quot;^nx:&quot; /etc/group &gt;/dev/null
++	else
++		getent group nx &gt;/dev/null
++	fi
++}	
+ 
+ # Tries to add a system user
+ useradd_nx()
+@@ -110,28 +151,35 @@
+ 	# Is it a debian?
+ 	if [ -f /etc/debian_version -a -z &quot;$SETUP_UID&quot; ]
+ 	then
+-		USERADD_OPTIONS=&quot;--system --home $NX_HOME_DIR --shell $PATH_BIN/nxserver&quot;
+-		[ -n &quot;$SETUP_GID&quot; ] &amp;&amp; USERADD_OPTIONS=&quot;--gid $SETUP_GID $USERADD_OPTIONS&quot;
++		USERADD_OPTIONS=&quot;--ingroup nx --system --home $NX_HOME_DIR --shell $PATH_BIN/nxserver&quot;
++		[ -n &quot;$SETUP_GID&quot; ] &amp;&amp; GROUPADD_OPTIONS=&quot;--gid $SETUP_GID&quot;
++
++		# adduser needs a valid group to add the user to
++		! nx_group_exists &amp;&amp; addgroup --system --quiet $GROUPADD_OPTIONS nx
+ 		adduser $USERADD_OPTIONS nx
++		
+ 	# no, its a &quot;normal&quot; useradd
+ 	else
+-		USERADD_OPTIONS=&quot;-d $NX_HOME_DIR -s $PATH_BIN/nxserver&quot;
+-		[ -n $SETUP_GID ] &amp;&amp; USERADD_OPTIONS=&quot;-g $SETUP_GID $USERADD_OPTIONS&quot;
++		USERADD_OPTIONS=&quot;-g nx -d $NX_HOME_DIR -s $PATH_BIN/nxserver&quot;
++		[ -n &quot;$SETUP_GID&quot; ] &amp;&amp; GROUPADD_OPTIONS=&quot;-g $SETUP_GID&quot;
++
+ 		# uid specified?
+ 		if [ -n &quot;$SETUP_UID&quot; ]
+ 		then
+ 			USERADD_OPTIONS=&quot;-u $SETUP_UID $USERADD_OPTIONS&quot;
++		
+ 		# Is it a SuSE?
+ 		elif [ -f /etc/SuSE-release ]
+ 		then
+ 			USERADD_OPTIONS=&quot;-r $USERADD_OPTIONS&quot;
+ 		fi
+-
++		
+ 		if [ &quot;$SETUP_LOCAL_USER&quot; = &quot;yes&quot; ]
+ 		then
+-			[ -n &quot;$SETUP_GID&quot; ] &amp;&amp; /usr/sbin/lgroupadd -g $SETUP_GID nx
++			! nx_group_exists &amp;&amp; lgroupadd $GROUPADD_OPTIONS nx 
+ 			luseradd $USERADD_OPTIONS nx
+ 		else
++			! nx_group_exists &amp;&amp; groupadd $GROUPADD_OPTIONS nx
+ 			useradd $USERADD_OPTIONS nx
+ 		fi
+ 
+@@ -197,7 +245,7 @@
+ 	mkdir -p $NX_HOME_DIR/.ssh
+ 	chmod 700 $NX_HOME_DIR/ $NX_HOME_DIR/.ssh
+ 	
+-	if [ ! -f $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS ]
++	if [ ! -f $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS -o &quot;$SETUP_NOMACHINE_KEY&quot; = &quot;yes&quot; ]
+ 	then
+ 		SETUP_NX_KEY=&quot;yes&quot;
+ 		if [ &quot;$SETUP_NOMACHINE_KEY&quot; = &quot;yes&quot; ]
+@@ -206,6 +254,21 @@
+ no-port-forwarding,no-X11-forwarding,no-agent-forwarding,command=&quot;$PATH_BIN/nxserver&quot; ssh-dss AAAAB3NzaC1kc3MAAACBAJe/0DNBePG9dYLWq7cJ0SqyRf1iiZN/IbzrmBvgPTZnBa5FT/0Lcj39sRYt1paAlhchwUmwwIiSZaON5JnJOZ6jKkjWIuJ9MdTGfdvtY1aLwDMpxUVoGwEaKWOyin02IPWYSkDQb6cceuG9NfPulS9iuytdx0zIzqvGqfvudtufAAAAFQCwosRXR2QA8OSgFWSO6+kGrRJKiwAAAIEAjgvVNAYWSrnFD+cghyJbyx60AAjKtxZ0r/Pn9k94Qt2rvQoMnGgt/zU0v/y4hzg+g3JNEmO1PdHh/wDPVOxlZ6Hb5F4IQnENaAZ9uTZiFGqhBO1c8Wwjiq/MFZy3jZaidarLJvVs8EeT4mZcWxwm7nIVD4lRU2wQ2lj4aTPcepMAAACANlgcCuA4wrC+3Cic9CFkqiwO/Rn1vk8dvGuEQqFJ6f6LVfPfRTfaQU7TGVLk2CzY4dasrwxJ1f6FsT8DHTNGnxELPKRuLstGrFY/PR7KeafeFZDf+fJ3mbX5nxrld3wi5titTnX+8s4IKv29HJguPvOK/SI7cjzA+SqNfD7qEo8= <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">root at nettuno</A>
+ EOF
+ 			chmod 600 $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS
++			cat &lt;&lt; EOF &gt;$NX_HOME_DIR/.ssh/client.id_dsa.key
++-----BEGIN DSA PRIVATE KEY-----
++MIIBuwIBAAKBgQCXv9AzQXjxvXWC1qu3CdEqskX9YomTfyG865gb4D02ZwWuRU/9
++C3I9/bEWLdaWgJYXIcFJsMCIkmWjjeSZyTmeoypI1iLifTHUxn3b7WNWi8AzKcVF
++aBsBGiljsop9NiD1mEpA0G+nHHrhvTXz7pUvYrsrXcdMyM6rxqn77nbbnwIVALCi
++xFdHZADw5KAVZI7r6QatEkqLAoGBAI4L1TQGFkq5xQ/nIIciW8setAAIyrcWdK/z
++5/ZPeELdq70KDJxoLf81NL/8uIc4PoNyTRJjtT3R4f8Az1TsZWeh2+ReCEJxDWgG
++fbk2YhRqoQTtXPFsI4qvzBWct42WonWqyyb1bPBHk+JmXFscJu5yFQ+JUVNsENpY
+++Gkz3HqTAoGANlgcCuA4wrC+3Cic9CFkqiwO/Rn1vk8dvGuEQqFJ6f6LVfPfRTfa
++QU7TGVLk2CzY4dasrwxJ1f6FsT8DHTNGnxELPKRuLstGrFY/PR7KeafeFZDf+fJ3
++mbX5nxrld3wi5titTnX+8s4IKv29HJguPvOK/SI7cjzA+SqNfD7qEo8CFDIm1xRf
++8xAPsSKs6yZ6j1FNklfu
++-----END DSA PRIVATE KEY-----
++EOF
++			chmod 600 $NX_HOME_DIR/.ssh/client.id_dsa.key
+ 		else
+ 			# generate a new key, backup the old and copy it to $SSH_AUTHORIZED_KEYS
+ 			$PATH_BIN/nxkeygen
+@@ -258,6 +321,49 @@
+ 	echo &quot;done&quot;
+ }
+ 
++test_nx()
++{
++	echo &quot;&quot;
++	echo &quot;----&gt; Testing your nxserver configuration ...&quot;
++	[ &quot;$IGNORE_ERRORS&quot; = &quot;yes&quot; ] &amp;&amp; $NO_ERRORS=&quot;--ignore-errors&quot;
++	. $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig) --check $NO_ERRORS
++	echo &quot;&lt;---- done&quot;
++	echo &quot;&quot;
++	echo &quot;----&gt; Testing your nxserver connection ...&quot;
++	
++	CONNECTION=&quot;&quot;
++	while read -t 3 line
++	do
++		case &quot;$line&quot; in
++			*&quot;HELLO NXSERVER - Version $NX_VERSION&quot;*)
++				CONNECTION=&quot;yes&quot;
++			;;
++			*&quot;HELLO NXSERVER - Version&quot;*)
++				echo &quot;Warning: Version Mismatch. Expected $NX_VERSION got: $line.&quot;
++				CONNECTION=&quot;yes&quot;
++			;;
++			*&quot;NX&gt; 999 Bye&quot;*)
++				break;
++			;;
++		esac
++		echo $line
++	done &lt; &lt;(echo &quot;quit&quot; | ssh -i $NX_HOME_DIR/.ssh/client.id_dsa.key -p &quot;$SSHD_PORT&quot; <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">nx at 127.0.0.1</A> -o &quot;RhostsAuthentication no&quot; -o &quot;PasswordAuthentication no&quot; -o &quot;RSAAuthentication no&quot; -o &quot;RhostsRSAAuthentication no&quot; -o &quot;PubkeyAuthentication yes&quot; -o &quot;PreferredAuthentications publickey&quot; nxserver)
++	if [ -z &quot;$CONNECTION&quot; ]
++	then
++		echo &quot;Fatal error: Could not connect to NX Server.&quot;
++		echo 
++		echo &quot;Please check your ssh setup:&quot;
++		echo &quot;&quot;
++		echo &quot;	- Make sure nx is one of the AllowUsers in sshd_config.&quot;
++		echo &quot;	- Make sure your sshd allows public key authentication.&quot;
++		echo &quot;	- Make sure your sshd is really running on port $SSHD_PORT.&quot;
++		echo &quot;	- Make sure your sshd_config AuthorizedKeysFile in sshd_config is set to $SSH_AUTHORIZED_KEYS.&quot;
++		exit 1
++	fi
++	echo &quot;&lt;--- done&quot;
++	echo &quot;&quot;
++}
++
+ uninstall_nx() 
+ {
+ 	if nx_user_exists
+@@ -316,6 +422,8 @@
+ 	[ &quot;$CLEAN&quot; = &quot;yes&quot; ] &amp;&amp; uninstall_nx
+ 	
+ 	install_nx
++
++	test_nx
+ 	
+ 	echo &quot;Ok, nxserver is ready.&quot;
+ 	echo 
+@@ -364,6 +472,8 @@
+ 		echo &quot;         Please replace /usr/NX/share/client.id_dsa.key on all clients you want&quot;
+ 		echo &quot;         to use with $NX_HOME_DIR/.ssh/client.id_dsa.key&quot;
+ 		echo &quot;         and protect it accordingly.&quot;
++		echo &quot;&quot;
++		echo &quot;         Since 1.5.0 you need to import the correct key via the GUI.&quot;
+ 		echo
+ 		echo &quot;         If you really want to use the NoMachine key please remove&quot;
+ 		echo &quot;         '$NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS'&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000258.html">[Freenx-cvs] r131 - / freenx-website
+</A></li>
+	<LI>Next message: <A HREF="000260.html">[Freenx-cvs] r133 - / freenx-server/branches/FreeNX-0.4
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#259">[ date ]</a>
+              <a href="thread.html#259">[ thread ]</a>
+              <a href="subject.html#259">[ subject ]</a>
+              <a href="author.html#259">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,98 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r478 - qtnx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r478%20-%20qtnx&In-Reply-To=%3C200802130438.m1D4cpFs004455%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000603.html">
+   
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r478 - qtnx</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r478%20-%20qtnx&In-Reply-To=%3C200802130438.m1D4cpFs004455%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r478 - qtnx">gwright at mail.berlios.de
+       </A><BR>
+    <I>Wed Feb 13 05:38:51 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000603.html">[Freenx-cvs] r477 - qtnx
+</A></li>
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#604">[ date ]</a>
+              <a href="thread.html#604">[ thread ]</a>
+              <a href="subject.html#604">[ subject ]</a>
+              <a href="author.html#604">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2008-02-13 05:38:51 +0100 (Wed, 13 Feb 2008)
+New Revision: 478
+
+Modified:
+   qtnx/qtnxwin32.pro
+   qtnx/qtnxwindow.cpp
+Log:
+Hardcode plastique style because windows xp's style freezes inexplicably
+
+
+Modified: qtnx/qtnxwin32.pro
+===================================================================
+--- qtnx/qtnxwin32.pro	2008-02-13 04:31:20 UTC (rev 477)
++++ qtnx/qtnxwin32.pro	2008-02-13 04:38:51 UTC (rev 478)
+@@ -17,3 +17,7 @@
+ QT += ui xml
+ 
+ TARGET		= qtnx
++
++QMAKE_CXXFLAGS += $$system(pkg-config --cflags nxcl)
++
++LIBS += $$system(pkg-config --libs nxcl)
+
+Modified: qtnx/qtnxwindow.cpp
+===================================================================
+--- qtnx/qtnxwindow.cpp	2008-02-13 04:31:20 UTC (rev 477)
++++ qtnx/qtnxwindow.cpp	2008-02-13 04:38:51 UTC (rev 478)
+@@ -37,6 +37,9 @@
+     sessionsDialog(NULL),
+     processProbe(new QTimer())
+ {
++#ifdef Q_CYGWIN_WIN
++    qApp-&gt;setStyle(&quot;plastique&quot;);
++#endif
+     setWindowTitle(&quot;QtNX&quot;);
+ 
+     initialiseClient();
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000603.html">[Freenx-cvs] r477 - qtnx
+</A></li>
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#604">[ date ]</a>
+              <a href="thread.html#604">[ thread ]</a>
+              <a href="subject.html#604">[ subject ]</a>
+              <a href="author.html#604">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

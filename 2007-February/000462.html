@@ -1,0 +1,127 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r328 - nxclientlib/maemonx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r328%20-%20nxclientlib/maemonx&In-Reply-To=%3C200702210731.l1L7VvgQ027393%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000461.html">
+   <LINK REL="Next"  HREF="000463.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r328 - nxclientlib/maemonx</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r328%20-%20nxclientlib/maemonx&In-Reply-To=%3C200702210731.l1L7VvgQ027393%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r328 - nxclientlib/maemonx">gwright at mail.berlios.de
+       </A><BR>
+    <I>Wed Feb 21 08:31:57 CET 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000461.html">[Freenx-cvs] r327 - nxclientlib/maemonx
+</A></li>
+        <LI>Next message: <A HREF="000463.html">[Freenx-cvs] r329 - nxclientlib/maemonx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#462">[ date ]</a>
+              <a href="thread.html#462">[ thread ]</a>
+              <a href="subject.html#462">[ subject ]</a>
+              <a href="author.html#462">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2007-02-21 08:31:57 +0100 (Wed, 21 Feb 2007)
+New Revision: 328
+
+Modified:
+   nxclientlib/maemonx/mainwindow.cpp
+Log:
+Further UI tweaks
+
+
+Modified: nxclientlib/maemonx/mainwindow.cpp
+===================================================================
+--- nxclientlib/maemonx/mainwindow.cpp	2007-02-21 07:19:09 UTC (rev 327)
++++ nxclientlib/maemonx/mainwindow.cpp	2007-02-21 07:31:57 UTC (rev 328)
+@@ -103,8 +103,8 @@
+     gtk_widget_set_size_request(username_input, 400, 30);
+     gtk_widget_set_size_request(sessions_combo, 400, 30);
+ 
+-    gtk_widget_set_size_request(config_button, 150, 50);
+-    gtk_widget_set_size_request(login_button, 150, 50);
++    gtk_widget_set_size_request(config_button, 150, 40);
++    gtk_widget_set_size_request(login_button, 150, 40);
+     gtk_widget_set_size_request(fixed_layout, 672, 220);
+     gtk_widget_set_size_request(separator, 600, 0);
+ 
+@@ -116,7 +116,7 @@
+     gtk_layout_put(GTK_LAYOUT(fixed_layout), gtk_label_new(&quot;Password:&quot;), 36, 50);
+     gtk_layout_put(GTK_LAYOUT(fixed_layout), gtk_label_new(&quot;Session:&quot;), 36, 100);
+ 
+-    gtk_layout_put(GTK_LAYOUT(fixed_layout), separator, 20, 150);
++    gtk_layout_put(GTK_LAYOUT(fixed_layout), separator, 36, 150);
+ 
+     gtk_layout_put(GTK_LAYOUT(fixed_layout), config_button, 36, 170);
+     gtk_layout_put(GTK_LAYOUT(fixed_layout), login_button, 486, 170);
+@@ -131,9 +131,9 @@
+     config_server_page = gtk_vbox_new(FALSE, 10);
+     config_desktop_page = gtk_vbox_new(FALSE, 10);
+     config_advanced_page = gtk_vbox_new(FALSE, 10);
+-    gtk_widget_set_size_request(config_server_page, 630, 200);
+-    gtk_widget_set_size_request(config_desktop_page, 630, 200);
+-    gtk_widget_set_size_request(config_advanced_page, 630, 200);
++    gtk_widget_set_size_request(config_server_page, -1, 200);
++    gtk_widget_set_size_request(config_desktop_page, -1, 200);
++    gtk_widget_set_size_request(config_advanced_page, -1, 200);
+ 
+     gtk_dialog_add_button(GTK_DIALOG(config_dialog), &quot;OK&quot;, GTK_RESPONSE_OK);
+     gtk_dialog_add_button(GTK_DIALOG(config_dialog), &quot;Cancel&quot;, GTK_RESPONSE_CANCEL);
+@@ -151,6 +151,8 @@
+     use_default_key = gtk_check_button_new_with_label(&quot;Use default NoMachine key&quot;);
+     advanced_key_settings = gtk_button_new_with_label(&quot;Set custom key&quot;);
+ 
++    gtk_widget_set_size_request(advanced_key_settings, -1, 40);
++
+     server_layout = gtk_hbox_new(FALSE, 10);
+ 
+     server_labels_layout = gtk_vbox_new(TRUE, 10);
+@@ -183,6 +185,8 @@
+ 
+     desktop_advanced = gtk_button_new_with_label(&quot;Advanced&quot;);
+ 
++    gtk_widget_set_size_request(desktop_advanced, -1, 40);
++
+     compression_type = gtk_combo_box_new_text();
+     use_render = gtk_check_button_new_with_label(&quot;Use RENDER extension&quot;);
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000461.html">[Freenx-cvs] r327 - nxclientlib/maemonx
+</A></li>
+	<LI>Next message: <A HREF="000463.html">[Freenx-cvs] r329 - nxclientlib/maemonx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#462">[ date ]</a>
+              <a href="thread.html#462">[ thread ]</a>
+              <a href="subject.html#462">[ subject ]</a>
+              <a href="author.html#462">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

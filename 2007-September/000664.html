@@ -1,0 +1,5200 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r373 - / nxcl nxcl/doc nxcl/lib nxcl/nxcl nxcl/test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-September/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r373%20-%20/%20nxcl%20nxcl/doc%20nxcl/lib%20nxcl/nxcl%20nxcl/test&In-Reply-To=%3C200709111248.l8BCmmiO017817%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000667.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r373 - / nxcl nxcl/doc nxcl/lib nxcl/nxcl nxcl/test</H1>
+    <B>sebjames at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r373%20-%20/%20nxcl%20nxcl/doc%20nxcl/lib%20nxcl/nxcl%20nxcl/test&In-Reply-To=%3C200709111248.l8BCmmiO017817%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r373 - / nxcl nxcl/doc nxcl/lib nxcl/nxcl nxcl/test">sebjames at mail.berlios.de
+       </A><BR>
+    <I>Tue Sep 11 14:49:23 CEST 2007</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000667.html">[Freenx-cvs] r374 - in nxcl: nxcl test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#664">[ date ]</a>
+              <a href="thread.html#664">[ thread ]</a>
+              <a href="subject.html#664">[ subject ]</a>
+              <a href="author.html#664">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: sebjames
+Date: 2007-09-11 14:48:46 +0200 (Tue, 11 Sep 2007)
+New Revision: 373
+
+Added:
+   nxcl/
+   nxcl/Makefile.am
+   nxcl/README
+   nxcl/configure.ac
+   nxcl/doc/
+   nxcl/doc/Doxyfile
+   nxcl/doc/Doxyfile.in
+   nxcl/doc/Makefile.am
+   nxcl/lib/
+   nxcl/lib/Makefile.am
+   nxcl/lib/i18n.h
+   nxcl/lib/notQt.cpp
+   nxcl/lib/notQt.h
+   nxcl/lib/nxclientlib.cpp
+   nxcl/lib/nxclientlib.h
+   nxcl/lib/nxclientlib_i18n.h
+   nxcl/lib/nxdata.h
+   nxcl/lib/nxsession.cpp
+   nxcl/lib/nxsession.h
+   nxcl/nxcl/
+   nxcl/nxcl/Makefile.am
+   nxcl/nxcl/main.cpp
+   nxcl/nxcl/nxcl.cpp
+   nxcl/nxcl/nxcl.h
+   nxcl/test/
+   nxcl/test/Makefile.am
+   nxcl/test/libtest.cpp
+   nxcl/test/notQttest.cpp
+   nxcl/test/nxcmd.cpp
+Log:
+Initial import of nxcl, an update to nxclientlib
+
+Added: nxcl/Makefile.am
+===================================================================
+--- nxcl/Makefile.am	2007-08-19 15:44:16 UTC (rev 372)
++++ nxcl/Makefile.am	2007-09-11 12:48:46 UTC (rev 373)
+@@ -0,0 +1,10 @@
++
++AUTOMAKE_OPTIONS = check-news dist-bzip2
++
++SUBDIRS = lib nxcl test doc
++
++CLEANFILES = *~
++
++MAINTAINERCLEANFILES = aclocal.m4 nxcl-*.tar.gz nxcl-*.tar.bz2 nxcl-*.diff
++
++INCLUDES = -I./lib
+
+Added: nxcl/README
+===================================================================
+--- nxcl/README	2007-08-19 15:44:16 UTC (rev 372)
++++ nxcl/README	2007-09-11 12:48:46 UTC (rev 373)
+@@ -0,0 +1,34 @@
++
++  nxcl: A library for building NX clients.
++
++  Seb James. July-September 2007. <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>
++
++Based on nxclientlib by George Wright, but with all dependencies on QT
++removed and the QT build system replaced with GNU autotools.
++
++doxygen is required if you want to build source documentation.
++
++The library code is in nxcl-release/lib/. 
++
++A binary, called nxcl - the &quot;nxcl dbus daemon&quot; is built in
++nxcl-release/nxcl/. nxcl links to libnxcl and can negotiate an nx
++connection.
++
++nxcl-release/test/ contains some test programs. notQtTest tests some
++of the features of the notQt classes in nxcl-release/lib/. libtest
++is a simple command line NX client linking straight to the libnxcl
++library. nxcmd is a second command line NX client, but it launches
++nxcl, then sends session data there and allows nxcl to negotiate the
++NX connection. This could be extended into quite a complete command
++line NX client.
++
++A GTK+ NX client called nxlaunch is distributed separately. Nxlaunch
++uses the nxcl daemon, though it would be quite possible to write a GTK
++client which links directly to the nxcl library. 
++
++You should study nxcmd.cpp and nxlaunch if you are interested in
++writing an NX client using a different widget system (say Windows, QT,
++Tk, etc) which uses the Nxcl dbus daemon.
++
++Look at nxcl.cpp/h if you want to write an NX client which links
++directly to libnxcl.
+
+Added: nxcl/configure.ac
+===================================================================
+--- nxcl/configure.ac	2007-08-19 15:44:16 UTC (rev 372)
++++ nxcl/configure.ac	2007-09-11 12:48:46 UTC (rev 373)
+@@ -0,0 +1,76 @@
++dnl Process this file with autoconf to produce a configure script.
++AC_PREREQ(2.59)
++AC_INIT([nxcl], [1.0], [<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>])
++AC_CONFIG_SRCDIR(nxcl/nxcl.cpp)
++AC_REVISION([$Revision: 1.3 $])
++AC_PREFIX_DEFAULT(/usr/local)
++
++AM_INIT_AUTOMAKE([1.9 foreign])
++
++AM_CONFIG_HEADER(config.h)
++AM_MAINTAINER_MODE
++
++AC_LANG_CPLUSPLUS
++
++dnl Checks for programs.
++AC_PROG_CXX
++AC_PROG_CC
++AC_PROG_INSTALL
++AC_PROG_LIBTOOL
++AC_CHECK_PROG(DOXYGEN, doxygen, doxygen, /bin/echo)
++
++dnl check for boost library
++dnl I would prefer to include boost code and compile in place and statically link.
++dnl AC_CHECK_LIB(boost_signals, LIB_BOOST_SIGNALS=&quot;-lboost_signals&quot;)
++dnl AC_SUBST(LIB_BOOST_SIGNALS)
++
++PKG_CHECK_MODULES(PACKAGE, dbus-1)
++
++dnl Checks for library functions.
++AC_HEADER_STDC
++AC_HEADER_TIME
++AC_CHECK_FUNCS(strftime gettimeofday uname)
++
++dnl Determine host system type
++AC_CANONICAL_HOST
++AC_DEFINE_UNQUOTED(HOST, &quot;$host&quot;, [The host system nxcl was configured for])
++
++dnl pkg_modules=&quot;libxml2&quot; &lt;- Check this and modify when necessary
++dnl PKG_CHECK_MODULES(PACKAGE, [$pkg_modules])
++AC_SUBST(PACKAGE_CFLAGS)
++AC_SUBST(PACKAGE_LIBS)
++
++dnl enable/disable compiler warnings (using gcc), if specified
++AC_ARG_ENABLE(warnings,
++  [  --disable-warnings      disable gcc warnings [default=no]],
++  [case &quot;${enableval}&quot; in
++    yes) nxcl_warnings=yes ;; 
++    no)  nxcl_warnings=no ;;
++    *) AC_MSG_ERROR(bad value ${enableval} for --enable-warnings) ;;
++  esac], nxcl_warnings=yes)
++AC_MSG_CHECKING(whether to use gcc verbose warnings)
++AC_MSG_RESULT($nxcl_warnings)
++if (test &quot;$nxcl_warnings&quot; = yes &amp;&amp; test &quot;$GCC&quot; = yes); then
++  CXXFLAGS=&quot;-Wall $CXXFLAGS&quot;
++fi
++
++dnl enable/disable debug logging, if specified
++AC_ARG_ENABLE(debug-output,
++  [  --enable-debug-output  enable debug output [default=no]],
++  [case &quot;${enableval}&quot; in
++    yes) nxcl_debug=yes ;;
++    no)  nxcl_debug=no ;;
++    *) AC_MSG_ERROR(bad value ${enableval} for --enable-debug-output) ;;
++  esac], nxcl_debug=no)
++AC_MSG_CHECKING(whether to enable debugging output)
++AC_MSG_RESULT($nxcl_debug)
++if test &quot;$nxcl_debug&quot; = yes; then
++  AC_DEFINE(DEBUG, 1, Define if debugging output should be enabled)
++else
++  AC_DEFINE(DEBUG, 0, Define if debugging output should be enabled)
++fi
++
++dnl Add in doc/Makefile to this:
++AC_CONFIG_FILES([Makefile lib/Makefile nxcl/Makefile test/Makefile doc/Makefile])
++
++AC_OUTPUT
+
+Added: nxcl/doc/Doxyfile
+===================================================================
+--- nxcl/doc/Doxyfile	2007-08-19 15:44:16 UTC (rev 372)
++++ nxcl/doc/Doxyfile	2007-09-11 12:48:46 UTC (rev 373)
+@@ -0,0 +1,209 @@
++# Doxyfile 1.3.6
++
++#---------------------------------------------------------------------------
++# Project related configuration options
++#---------------------------------------------------------------------------
++PROJECT_NAME           = nxcl
++PROJECT_NUMBER         = @VERSION@
++OUTPUT_DIRECTORY       = 
++OUTPUT_LANGUAGE        = English
++USE_WINDOWS_ENCODING   = NO
++BRIEF_MEMBER_DESC      = YES
++REPEAT_BRIEF           = YES
++ABBREVIATE_BRIEF       = 
++ALWAYS_DETAILED_SEC    = NO
++INLINE_INHERITED_MEMB  = NO
++FULL_PATH_NAMES        = NO
++STRIP_FROM_PATH        = 
++SHORT_NAMES            = NO
++JAVADOC_AUTOBRIEF      = NO
++MULTILINE_CPP_IS_BRIEF = NO
++DETAILS_AT_TOP         = NO
++INHERIT_DOCS           = YES
++DISTRIBUTE_GROUP_DOC   = NO
++TAB_SIZE               = 8
++ALIASES                = 
++OPTIMIZE_OUTPUT_FOR_C  = NO
++OPTIMIZE_OUTPUT_JAVA   = NO
++SUBGROUPING            = YES
++#---------------------------------------------------------------------------
++# Build related configuration options
++#---------------------------------------------------------------------------
++EXTRACT_ALL            = NO
++EXTRACT_PRIVATE        = NO
++EXTRACT_STATIC         = NO
++EXTRACT_LOCAL_CLASSES  = YES
++HIDE_UNDOC_MEMBERS     = NO
++HIDE_UNDOC_CLASSES     = NO
++HIDE_FRIEND_COMPOUNDS  = NO
++HIDE_IN_BODY_DOCS      = NO
++INTERNAL_DOCS          = NO
++CASE_SENSE_NAMES       = YES
++HIDE_SCOPE_NAMES       = NO
++SHOW_INCLUDE_FILES     = YES
++INLINE_INFO            = YES
++SORT_MEMBER_DOCS       = YES
++SORT_BRIEF_DOCS        = NO
++SORT_BY_SCOPE_NAME     = NO
++GENERATE_TODOLIST      = YES
++GENERATE_TESTLIST      = YES
++GENERATE_BUGLIST       = YES
++GENERATE_DEPRECATEDLIST= YES
++ENABLED_SECTIONS       = 
++MAX_INITIALIZER_LINES  = 30
++SHOW_USED_FILES        = YES
++#---------------------------------------------------------------------------
++# configuration options related to warning and progress messages
++#---------------------------------------------------------------------------
++QUIET                  = NO
++WARNINGS               = YES
++WARN_IF_UNDOCUMENTED   = YES
++WARN_IF_DOC_ERROR      = YES
++WARN_FORMAT            = &quot;$file:$line: $text&quot;
++WARN_LOGFILE           = 
++#---------------------------------------------------------------------------
++# configuration options related to the input files
++#---------------------------------------------------------------------------
++INPUT                  = .. ../nxcl ../lib ../test
++FILE_PATTERNS          = *.h
++RECURSIVE              = NO
++EXCLUDE                = 
++EXCLUDE_SYMLINKS       = NO
++EXCLUDE_PATTERNS       = 
++EXAMPLE_PATH           = 
++EXAMPLE_PATTERNS       = 
++EXAMPLE_RECURSIVE      = NO
++IMAGE_PATH             = images
++INPUT_FILTER           = 
++FILTER_SOURCE_FILES    = NO
++#---------------------------------------------------------------------------
++# configuration options related to source browsing
++#---------------------------------------------------------------------------
++SOURCE_BROWSER         = YES
++INLINE_SOURCES         = NO
++STRIP_CODE_COMMENTS    = YES
++REFERENCED_BY_RELATION = YES
++REFERENCES_RELATION    = YES
++VERBATIM_HEADERS       = YES
++#---------------------------------------------------------------------------
++# configuration options related to the alphabetical class index
++#---------------------------------------------------------------------------
++ALPHABETICAL_INDEX     = NO
++COLS_IN_ALPHA_INDEX    = 4
++IGNORE_PREFIX          = 
++#---------------------------------------------------------------------------
++# configuration options related to the HTML output
++#---------------------------------------------------------------------------
++GENERATE_HTML          = YES
++HTML_OUTPUT            = html
++HTML_FILE_EXTENSION    = .html
++HTML_HEADER            = 
++HTML_FOOTER            = 
++HTML_STYLESHEET        = 
++HTML_ALIGN_MEMBERS     = YES
++GENERATE_HTMLHELP      = NO
++CHM_FILE               = 
++HHC_LOCATION           = 
++GENERATE_CHI           = NO
++BINARY_TOC             = NO
++TOC_EXPAND             = NO
++DISABLE_INDEX          = NO
++ENUM_VALUES_PER_LINE   = 4
++GENERATE_TREEVIEW      = NO
++TREEVIEW_WIDTH         = 250
++#---------------------------------------------------------------------------
++# configuration options related to the LaTeX output
++#---------------------------------------------------------------------------
++GENERATE_LATEX         = NO
++LATEX_OUTPUT           = latex
++LATEX_CMD_NAME         = latex
++MAKEINDEX_CMD_NAME     = makeindex
++COMPACT_LATEX          = NO
++PAPER_TYPE             = a4wide
++EXTRA_PACKAGES         = 
++LATEX_HEADER           = 
++PDF_HYPERLINKS         = NO
++USE_PDFLATEX           = NO
++LATEX_BATCHMODE        = NO
++LATEX_HIDE_INDICES     = NO
++#---------------------------------------------------------------------------
++# configuration options related to the RTF output
++#---------------------------------------------------------------------------
++GENERATE_RTF           = NO
++RTF_OUTPUT             = rtf
++COMPACT_RTF            = NO
++RTF_HYPERLINKS         = NO
++RTF_STYLESHEET_FILE    = 
++RTF_EXTENSIONS_FILE    = 
++#---------------------------------------------------------------------------
++# configuration options related to the man page output
++#---------------------------------------------------------------------------
++GENERATE_MAN           = NO
++MAN_OUTPUT             = man
++MAN_EXTENSION          = .3
++MAN_LINKS              = NO
++#---------------------------------------------------------------------------
++# configuration options related to the XML output
++#---------------------------------------------------------------------------
++GENERATE_XML           = NO
++XML_OUTPUT             = xml
++XML_SCHEMA             = 
++XML_DTD                = 
++XML_PROGRAMLISTING     = YES
++#---------------------------------------------------------------------------
++# configuration options for the AutoGen Definitions output
++#---------------------------------------------------------------------------
++GENERATE_AUTOGEN_DEF   = NO
++#---------------------------------------------------------------------------
++# configuration options related to the Perl module output
++#---------------------------------------------------------------------------
++GENERATE_PERLMOD       = NO
++PERLMOD_LATEX          = NO
++PERLMOD_PRETTY         = YES
++PERLMOD_MAKEVAR_PREFIX = 
++#---------------------------------------------------------------------------
++# Configuration options related to the preprocessor   
++#---------------------------------------------------------------------------
++ENABLE_PREPROCESSING   = YES
++MACRO_EXPANSION        = YES
++EXPAND_ONLY_PREDEF     = YES
++SEARCH_INCLUDES        = YES
++INCLUDE_PATH           = 
++INCLUDE_FILE_PATTERNS  = 
++PREDEFINED             = DEBUG=0
++EXPAND_AS_DEFINED      = 
++SKIP_FUNCTION_MACROS   = YES
++#---------------------------------------------------------------------------
++# Configuration::additions related to external references   
++#---------------------------------------------------------------------------
++TAGFILES               = 
++GENERATE_TAGFILE       = 
++ALLEXTERNALS           = NO
++EXTERNAL_GROUPS        = YES
++PERL_PATH              = /usr/bin/perl
++#---------------------------------------------------------------------------
++# Configuration options related to the dot tool   
++#---------------------------------------------------------------------------
++CLASS_DIAGRAMS         = YES
++HIDE_UNDOC_RELATIONS   = YES
++HAVE_DOT               = NO
++CLASS_GRAPH            = YES
++COLLABORATION_GRAPH    = YES
++UML_LOOK               = NO
++TEMPLATE_RELATIONS     = NO
++INCLUDE_GRAPH          = YES
++INCLUDED_BY_GRAPH      = YES
++CALL_GRAPH             = NO
++GRAPHICAL_HIERARCHY    = YES
++DOT_IMAGE_FORMAT       = png
++DOT_PATH               = 
++DOTFILE_DIRS           = 
++MAX_DOT_GRAPH_WIDTH    = 1024
++MAX_DOT_GRAPH_HEIGHT   = 1024
++MAX_DOT_GRAPH_DEPTH    = 0
++GENERATE_LEGEND        = YES
++DOT_CLEANUP            = YES
++#---------------------------------------------------------------------------
++# Configuration::additions related to the search engine   
++#---------------------------------------------------------------------------
++SEARCHENGINE           = NO
+
+Added: nxcl/doc/Doxyfile.in
+===================================================================
+--- nxcl/doc/Doxyfile.in	2007-08-19 15:44:16 UTC (rev 372)
++++ nxcl/doc/Doxyfile.in	2007-09-11 12:48:46 UTC (rev 373)
+@@ -0,0 +1,209 @@
++# Doxyfile 1.3.6
++
++#---------------------------------------------------------------------------
++# Project related configuration options
++#---------------------------------------------------------------------------
++PROJECT_NAME           = nxcl
++PROJECT_NUMBER         = @VERSION@
++OUTPUT_DIRECTORY       = 
++OUTPUT_LANGUAGE        = English
++USE_WINDOWS_ENCODING   = NO
++BRIEF_MEMBER_DESC      = YES
++REPEAT_BRIEF           = YES
++ABBREVIATE_BRIEF       = 
++ALWAYS_DETAILED_SEC    = NO
++INLINE_INHERITED_MEMB  = NO
++FULL_PATH_NAMES        = NO
++STRIP_FROM_PATH        = 
++SHORT_NAMES            = NO
++JAVADOC_AUTOBRIEF      = NO
++MULTILINE_CPP_IS_BRIEF = NO
++DETAILS_AT_TOP         = NO
++INHERIT_DOCS           = YES
++DISTRIBUTE_GROUP_DOC   = NO
++TAB_SIZE               = 8
++ALIASES                = 
++OPTIMIZE_OUTPUT_FOR_C  = NO
++OPTIMIZE_OUTPUT_JAVA   = NO
++SUBGROUPING            = YES
++#---------------------------------------------------------------------------
++# Build related configuration options
++#---------------------------------------------------------------------------
++EXTRACT_ALL            = NO
++EXTRACT_PRIVATE        = NO
++EXTRACT_STATIC         = NO
++EXTRACT_LOCAL_CLASSES  = YES
++HIDE_UNDOC_MEMBERS     = NO
++HIDE_UNDOC_CLASSES     = NO
++HIDE_FRIEND_COMPOUNDS  = NO
++HIDE_IN_BODY_DOCS      = NO
++INTERNAL_DOCS          = NO
++CASE_SENSE_NAMES       = YES
++HIDE_SCOPE_NAMES       = NO
++SHOW_INCLUDE_FILES     = YES
++INLINE_INFO            = YES
++SORT_MEMBER_DOCS       = YES
++SORT_BRIEF_DOCS        = NO
++SORT_BY_SCOPE_NAME     = NO
++GENERATE_TODOLIST      = YES
++GENERATE_TESTLIST      = YES
++GENERATE_BUGLIST       = YES
++GENERATE_DEPRECATEDLIST= YES
++ENABLED_SECTIONS       = 
++MAX_INITIALIZER_LINES  = 30
++SHOW_USED_FILES        = YES
++#---------------------------------------------------------------------------
++# configuration options related to warning and progress messages
++#---------------------------------------------------------------------------
++QUIET                  = NO
++WARNINGS               = YES
++WARN_IF_UNDOCUMENTED   = YES
++WARN_IF_DOC_ERROR      = YES
++WARN_FORMAT            = &quot;$file:$line: $text&quot;
++WARN_LOGFILE           = 
++#---------------------------------------------------------------------------
++# configuration options related to the input files
++#---------------------------------------------------------------------------
++INPUT                  = .. ../nxcl ../lib ../test
++FILE_PATTERNS          = *.h
++RECURSIVE              = NO
++EXCLUDE                = 
++EXCLUDE_SYMLINKS       = NO
++EXCLUDE_PATTERNS       = 
++EXAMPLE_PATH           = 
++EXAMPLE_PATTERNS       = 
++EXAMPLE_RECURSIVE      = NO
++IMAGE_PATH             = images
++INPUT_FILTER           = 
++FILTER_SOURCE_FILES    = NO
++#---------------------------------------------------------------------------
++# configuration options related to source browsing
++#---------------------------------------------------------------------------
++SOURCE_BROWSER         = YES
++INLINE_SOURCES         = NO
++STRIP_CODE_COMMENTS    = YES
++REFERENCED_BY_RELATION = YES
++REFERENCES_RELATION    = YES
++VERBATIM_HEADERS       = YES
++#---------------------------------------------------------------------------
++# configuration options related to the alphabetical class index
++#---------------------------------------------------------------------------
++ALPHABETICAL_INDEX     = NO
++COLS_IN_ALPHA_INDEX    = 4
++IGNORE_PREFIX          = 
++#---------------------------------------------------------------------------
++# configuration options related to the HTML output
++#---------------------------------------------------------------------------
++GENERATE_HTML          = YES
++HTML_OUTPUT            = html
++HTML_FILE_EXTENSION    = .html
++HTML_HEADER            = 
++HTML_FOOTER            = 
++HTML_STYLESHEET        = 
++HTML_ALIGN_MEMBERS     = YES
++GENERATE_HTMLHELP      = NO
++CHM_FILE               = 
++HHC_LOCATION           = 
++GENERATE_CHI           = NO
++BINARY_TOC             = NO
++TOC_EXPAND             = NO
++DISABLE_INDEX          = NO
++ENUM_VALUES_PER_LINE   = 4
++GENERATE_TREEVIEW      = NO
++TREEVIEW_WIDTH         = 250
++#---------------------------------------------------------------------------
++# configuration options related to the LaTeX output
++#---------------------------------------------------------------------------
++GENERATE_LATEX         = NO
++LATEX_OUTPUT           = latex
++LATEX_CMD_NAME         = latex
++MAKEINDEX_CMD_NAME     = makeindex
++COMPACT_LATEX          = NO
++PAPER_TYPE             = a4wide
++EXTRA_PACKAGES         = 
++LATEX_HEADER           = 
++PDF_HYPERLINKS         = NO
++USE_PDFLATEX           = NO
++LATEX_BATCHMODE        = NO
++LATEX_HIDE_INDICES     = NO
++#---------------------------------------------------------------------------
++# configuration options related to the RTF output
++#---------------------------------------------------------------------------
++GENERATE_RTF           = NO
++RTF_OUTPUT             = rtf
++COMPACT_RTF            = NO
++RTF_HYPERLINKS         = NO
++RTF_STYLESHEET_FILE    = 
++RTF_EXTENSIONS_FILE    = 
++#---------------------------------------------------------------------------
++# configuration options related to the man page output
++#---------------------------------------------------------------------------
++GENERATE_MAN           = NO
++MAN_OUTPUT             = man
++MAN_EXTENSION          = .3
++MAN_LINKS              = NO
++#---------------------------------------------------------------------------
++# configuration options related to the XML output
++#---------------------------------------------------------------------------
++GENERATE_XML           = NO
++XML_OUTPUT             = xml
++XML_SCHEMA             = 
++XML_DTD                = 
++XML_PROGRAMLISTING     = YES
++#---------------------------------------------------------------------------
++# configuration options for the AutoGen Definitions output
++#---------------------------------------------------------------------------
++GENERATE_AUTOGEN_DEF   = NO
++#---------------------------------------------------------------------------
++# configuration options related to the Perl module output
++#---------------------------------------------------------------------------
++GENERATE_PERLMOD       = NO
++PERLMOD_LATEX          = NO
++PERLMOD_PRETTY         = YES
++PERLMOD_MAKEVAR_PREFIX = 
++#---------------------------------------------------------------------------
++# Configuration options related to the preprocessor   
++#---------------------------------------------------------------------------
++ENABLE_PREPROCESSING   = YES
++MACRO_EXPANSION        = YES
++EXPAND_ONLY_PREDEF     = YES
++SEARCH_INCLUDES        = YES
++INCLUDE_PATH           = 
++INCLUDE_FILE_PATTERNS  = 
++PREDEFINED             = DEBUG=0
++EXPAND_AS_DEFINED      = 
++SKIP_FUNCTION_MACROS   = YES
++#---------------------------------------------------------------------------
++# Configuration::additions related to external references   
++#---------------------------------------------------------------------------
++TAGFILES               = 
++GENERATE_TAGFILE       = 
++ALLEXTERNALS           = NO
++EXTERNAL_GROUPS        = YES
++PERL_PATH              = /usr/bin/perl
++#---------------------------------------------------------------------------
++# Configuration options related to the dot tool   
++#---------------------------------------------------------------------------
++CLASS_DIAGRAMS         = YES
++HIDE_UNDOC_RELATIONS   = YES
++HAVE_DOT               = NO
++CLASS_GRAPH            = YES
++COLLABORATION_GRAPH    = YES
++UML_LOOK               = NO
++TEMPLATE_RELATIONS     = NO
++INCLUDE_GRAPH          = YES
++INCLUDED_BY_GRAPH      = YES
++CALL_GRAPH             = NO
++GRAPHICAL_HIERARCHY    = YES
++DOT_IMAGE_FORMAT       = png
++DOT_PATH               = 
++DOTFILE_DIRS           = 
++MAX_DOT_GRAPH_WIDTH    = 1024
++MAX_DOT_GRAPH_HEIGHT   = 1024
++MAX_DOT_GRAPH_DEPTH    = 0
++GENERATE_LEGEND        = YES
++DOT_CLEANUP            = YES
++#---------------------------------------------------------------------------
++# Configuration::additions related to the search engine   
++#---------------------------------------------------------------------------
++SEARCHENGINE           = NO
+
+Added: nxcl/doc/Makefile.am
+===================================================================
+--- nxcl/doc/Makefile.am	2007-08-19 15:44:16 UTC (rev 372)
++++ nxcl/doc/Makefile.am	2007-09-11 12:48:46 UTC (rev 373)
+@@ -0,0 +1,31 @@
++CLEANFILES = *~
++
++DOXYFILE = Doxyfile
++
++docdir = $(prefix)/doc/$(PACKAGE)-$(VERSION)
++
++EXTRA_DIST = html
++
++SEDCMD1 = s/$$title/GNU nxcl documentation version $(VERSION)/g
++SEDCMD2 = s/$$(VERSION)/$(VERSION)/g
++
++all: html
++
++html:
++	doxygen
++
++install-data-local:
++	$(mkinstalldirs) $(DESTDIR)$(docdir)
++	@for file in $(srcdir)/html/*; do \
++		bn=&quot;`basename $$file`&quot;; \
++		echo &quot; $(INSTALL_DATA) $$file $(DESTDIR)$(docdir)/$$bn&quot;; \
++		$(INSTALL_DATA) $$file $(DESTDIR)$(docdir)/$$bn; \
++	done
++
++uninstall-local:
++	@for file in $(srcdir)/html/*; do \
++		bn=&quot;`basename $$file`&quot;; \
++		echo &quot; rm -f $(DESTDIR)$(docdir)/$$bn&quot;; \
++		rm -f $(DESTDIR)$(docdir)/$$bn; \
++	done
++
+
+Added: nxcl/lib/Makefile.am
+===================================================================
+--- nxcl/lib/Makefile.am	2007-08-19 15:44:16 UTC (rev 372)
++++ nxcl/lib/Makefile.am	2007-09-11 12:48:46 UTC (rev 373)
+@@ -0,0 +1,7 @@
++CLEANFILES = *~
++AM_CPPFLAGS = @PACKAGE_CFLAGS@  -DPACKAGE_BIN_DIR=\&quot;&quot;$(bindir)&quot;\&quot;
++INCLUDES = -I$(top_srcdir) -I$(top_builddir)
++lib_LTLIBRARIES = libnxcl.la
++libnxcl_la_SOURCES = notQt.cpp nxsession.cpp nxclientlib.cpp
++libnxcl_la_LDFLAGS = -version-info 1:0:0
++pkginclude_HEADERS = notQt.h nxsession.h nxclientlib.h nxdata.h nxclientlib_i18n.h
+
+Added: nxcl/lib/i18n.h
+===================================================================
+--- nxcl/lib/i18n.h	2007-08-19 15:44:16 UTC (rev 372)
++++ nxcl/lib/i18n.h	2007-09-11 12:48:46 UTC (rev 373)
+@@ -0,0 +1,22 @@
++#ifndef __NXCL_I18N__
++#  define __NXCL_I18N__
++#  ifdef HAVE_CONFIG_H
++#    include &lt;config.h&gt;
++#  endif
++#  ifdef ENABLE_NLS
++#    include &quot;../lib/gettext.h&quot;
++#    define _(String) gettext (String)
++#    define gettext_noop(String) String
++#    define N_(String) gettext_noop (String)
++#  else
++#    define _(String) (String)
++#    define N_(String) String
++#    define textdomain(Domain) (Domain)
++#    define gettext(String) (String)
++#    define dgettext(Domain,String) (String)
++#    define dcgettext(Domain,String,Type) (String)
++#    define bindtextdomain(Domain, Directory) (Domain) 
++#    define bind_textdomain_codeset(Domain,Codeset) (Codeset) 
++#  endif /* ENABLE_NLS */
++#endif /* __NXCL_I18N__ */
++
+
+Added: nxcl/lib/notQt.cpp
+===================================================================
+--- nxcl/lib/notQt.cpp	2007-08-19 15:44:16 UTC (rev 372)
++++ nxcl/lib/notQt.cpp	2007-09-11 12:48:46 UTC (rev 373)
+@@ -0,0 +1,469 @@
++/*!
++ * A set of QT like functionality, especially related to the starting
++ * of processes.
++ *
++ * Author: Sebastian James &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>&gt;
++ * This code is copyright (C) Embedded Software Foundry Ltd. 2007
++ *
++ * It is released under the terms of the GNU GPL version 2.
++ */
++
++#include &lt;iostream&gt;
++#include &lt;sstream&gt;
++extern &quot;C&quot; {
++#include &lt;unistd.h&gt;
++#include &lt;errno.h&gt;
++#include &lt;sys/types.h&gt;
++#include &lt;sys/wait.h&gt;
++#include &lt;sys/stat.h&gt;
++#include &lt;sys/poll.h&gt;	
++#include &lt;signal.h&gt;
++}
++#include &quot;notQt.h&quot;
++
++using namespace std;
++using namespace nxcl;
++
++/*!
++ * Implementation of the notQProcess class
++ */
++//@{
++
++// Used when dealing with pipes
++#define READING_END 0
++#define WRITING_END 1
++#define STDIN  0
++#define STDOUT 1
++#define STDERR 2
++
++// Constructor
++notQProcess::notQProcess () :
++	progName(&quot;unknown&quot;),
++	error (NOTQPROCNOERROR),
++	pid(0),
++	signalledStart(false)
++{
++	// Set up the polling structs
++	this-&gt;p = static_cast&lt;struct pollfd*&gt;(malloc (2*sizeof (struct pollfd)));	
++}
++
++// Destructor
++notQProcess::~notQProcess ()
++{
++	free (this-&gt;p);
++}
++
++void
++notQProcess::writeIn (string&amp; input)
++{
++	write (this-&gt;parentToChild[WRITING_END], input.c_str(), input.size());
++}
++
++// fork and exec a new process using execv, which takes stdin via a
++// fifo and returns output also via a fifo.
++int
++notQProcess::start (const string&amp; program, const list&lt;string&gt;&amp; args)
++{
++	char** argarray;
++	list&lt;string&gt; myargs = args;
++	list&lt;string&gt;::iterator i;
++	unsigned int j = 0;
++	int theError;
++
++	// NB: The first item in the args list should be the program name.
++	this-&gt;progName = program;
++
++	// Set up our pipes
++	if (pipe(parentToChild) == -1 || pipe(childToParent) == -1 || pipe(childErrToParent) == -1) {
++		return NOTQTPROCESS_FAILURE;
++	}
++
++	this-&gt;pid = fork();
++	switch (this-&gt;pid) {
++	case -1:
++		return NOTQTPROCESS_FAILURE;
++	case 0:
++		// This is the CHILD process
++
++		// Close unwanted ends of the pipes
++		close (parentToChild[WRITING_END]);
++		close (childToParent[READING_END]);
++		close (childErrToParent[READING_END]);
++
++		// Now all we have to do is make the writing file
++		// descriptors 0,1 or 2 and they will be used instead
++		// of stdout, stderr and stdin.
++		if ((dup2 (parentToChild[READING_END], STDIN)) == -1  ||
++		    (dup2 (childToParent[WRITING_END], STDOUT)) == -1 || 
++		    (dup2 (childErrToParent[WRITING_END], STDERR)) == -1) {
++			theError = errno;
++			cout &lt;&lt; &quot;ERROR! Couldn't get access to stdin/out/err! errno was &quot; &lt;&lt; theError &lt;&lt; endl;
++			return NOTQTPROCESS_FAILURE;	
++		}
++
++		// Allocate memory for the program arguments
++		// 1+ to allow space for NULL terminating pointer
++		argarray = static_cast&lt;char**&gt;(malloc ((1+args.size()) * sizeof (char*))); 
++		for (i=myargs.begin(); i!=myargs.end(); i++) {
++			argarray[j] = static_cast&lt;char*&gt;(malloc ( (1+(*i).size()) * sizeof (char) ));
++			snprintf (argarray[j++], 1+(*i).size(), &quot;%s&quot;, (*i).c_str());
++			dbgln(*i);
++		}
++		argarray[j] = NULL;
++
++		dbgln (&quot;About to execute '&quot; + program + &quot;' with those arguments..&quot;);
++
++		execv (program.c_str(), argarray);
++
++		// If process returns, error occurred
++		theError = errno; 
++		// This'll get picked up by parseResponse
++		cout &lt;&lt; &quot;notQProcess error: &quot; &lt;&lt; this-&gt;pid &lt;&lt; &quot; crashed. errno:&quot; &lt;&lt; theError &lt;&lt; endl;
++		
++		// This won't get picked up by the parent process.
++		this-&gt;error = NOTQPROCCRASHED;
++
++		// In this case, we close the pipes to signal to the parent that we crashed
++		close (parentToChild[READING_END]);
++		close (childToParent[WRITING_END]);
++		close (childErrToParent[WRITING_END]);
++		
++		// Child should exit now.
++		exit(-1);
++
++	default:
++		// This is the PARENT process
++
++		// Close unwanted ends of the pipes
++		close (parentToChild[READING_END]);
++		close (childToParent[WRITING_END]);
++		close (childErrToParent[WRITING_END]);
++
++		// Write to this-&gt;parentToChild[WRITING_END] to write to stdin of the child
++		// Read from this-&gt;childToParent[READING_END] to read from stdout of child
++		// Read from this-&gt;childErrToParent[READING_END] to read from stderr of child
++
++		break;
++	}
++	return NOTQTPROCESS_MAIN_APP;
++}
++
++
++// If no pid after a while, return false.
++bool
++notQProcess::waitForStarted (void)
++{
++	unsigned int i=0;
++	while (this-&gt;pid == 0 &amp;&amp; i&lt;1000) {
++		usleep (1000);
++		i++;
++	}
++	if (this-&gt;pid&gt;0) {
++		dbgln (&quot;The process started!&quot;);
++		this-&gt;callbacks-&gt;startedSignal (this-&gt;progName);
++		this-&gt;signalledStart = true;
++		return true;
++	} else {
++		this-&gt;error = NOTQPROCFAILEDTOSTART;
++		this-&gt;callbacks-&gt;errorSignal (this-&gt;error);
++		return false;
++	}
++
++}
++
++// Send a TERM signal to the process.
++void
++notQProcess::terminate (void)
++{
++	kill (this-&gt;pid, 15); // 15 is TERM
++	// Now check if the process has gone and kill it with signal 9 (KILL)
++	this-&gt;pid = 0;
++	this-&gt;error = NOTQPROCNOERROR;
++	this-&gt;signalledStart = false;
++	return;
++}
++
++// Check on this process
++void
++notQProcess::probeProcess (void)
++{
++	// Has the process started?
++	if (!this-&gt;signalledStart) {
++		if (this-&gt;pid &gt; 0) {
++			this-&gt;callbacks-&gt;startedSignal (this-&gt;progName);
++			this-&gt;signalledStart = true;
++			dbgln (&quot;notQProcess::probeProcess set signalledStart and signalled the start...&quot;);
++		}
++	}
++
++	// Check for error condition
++	if (this-&gt;error&gt;0) {
++		this-&gt;callbacks-&gt;errorSignal (this-&gt;error);
++		dbgln (&quot;have error in probeProcess, returning&quot;);
++		return;
++	}
++
++	if (this-&gt;pid == 0) {
++		// Not yet started.
++		return;
++	}
++
++	// Why can't these 4 lines go in contructor?
++	this-&gt;p[0].fd = this-&gt;childToParent[READING_END];
++	this-&gt;p[0].events = POLLIN | POLLPRI;
++	this-&gt;p[1].fd = this-&gt;childErrToParent[READING_END];
++	this-&gt;p[1].events = POLLIN | POLLPRI;
++
++	// Poll to determine if data is available
++	this-&gt;p[0].revents = 0;
++	this-&gt;p[1].revents = 0;
++
++	poll (this-&gt;p, 2, 0);
++
++	if (this-&gt;p[0].revents &amp; POLLNVAL || this-&gt;p[1].revents &amp; POLLNVAL) {
++		dbgln (&quot;notQProcess::probeProcess: pipes closed, process must have crashed&quot;);
++		this-&gt;error = NOTQPROCCRASHED;
++		this-&gt;callbacks-&gt;errorSignal (this-&gt;error);
++		return;
++	}
++
++	if (this-&gt;p[0].revents &amp; POLLIN || this-&gt;p[0].revents &amp; POLLPRI) {
++		this-&gt;callbacks-&gt;readyReadStandardOutputSignal();
++	}
++	if (this-&gt;p[1].revents &amp; POLLIN || this-&gt;p[1].revents &amp; POLLPRI) {
++		this-&gt;callbacks-&gt;readyReadStandardErrorSignal();
++	}
++
++	// Is the process running? We check last, so that we get any
++	// messages on stdout/stderr that we may wish to process, such
++	// as error messages from nxssh key authentication.
++	int theError;
++	if (this-&gt;signalledStart == true) {
++		int rtn = 0;
++		if ((rtn = waitpid (this-&gt;pid, (int *)0, WNOHANG)) == this-&gt;pid) {
++			this-&gt;callbacks-&gt;processFinishedSignal (this-&gt;progName);
++			return;
++		} else if (rtn == -1) {
++			theError = errno;
++			if (theError != 10) { // We ignore errno 10 &quot;no child&quot; as this commonly occurs
++				cerr &lt;&lt; &quot;waitpid returned errno: &quot; &lt;&lt; theError;
++			}
++		} // else rtn == 0
++	}
++
++	return;
++}
++
++// Read stdout pipe, without blocking.
++string
++notQProcess::readAllStandardOutput (void)
++{
++	string s;
++	int bytes = 0;
++	char c;
++	struct pollfd p;
++	
++	p.fd = this-&gt;childToParent[READING_END];
++	p.events = POLLIN | POLLPRI;
++	// We know we have at least one character to read, so seed revents
++	p.revents = POLLIN;
++	while (p.revents &amp; POLLIN || p.revents &amp; POLLPRI) {
++		// This read of 1 byte should never block
++		if ((bytes = read (this-&gt;childToParent[READING_END], &amp;c, 1)) == 1) {
++			s.append (1, c);
++		}
++		p.revents = 0;
++		poll (&amp;p, 1, 0);
++	}
++	return s;
++}
++
++// Read stderr pipe without blocking
++string
++notQProcess::readAllStandardError (void)
++{
++	string s;
++	int bytes = 0;
++	char c;
++	struct pollfd p;
++	
++	p.fd = this-&gt;childErrToParent[READING_END];
++	p.events = POLLIN | POLLPRI;
++	// We know we have at least one character to read, so seed revents
++	p.revents = POLLIN;
++	while (p.revents &amp; POLLIN || p.revents &amp; POLLPRI) {
++		// This read of 1 byte should never block because a poll() call tells us there is data
++		if ((bytes = read (this-&gt;childErrToParent[READING_END], &amp;c, 1)) == 1) {
++			s.append (1, c);
++		}
++		p.revents = 0;
++		poll (&amp;p, 1, 0);
++	}
++	return s;
++}
++
++//@}
++
++/*!
++ * Implementation of the notQTemporaryFile class
++ */
++//@{
++
++// Constructor
++notQTemporaryFile::notQTemporaryFile ()
++{
++}
++
++// Destructor
++notQTemporaryFile::~notQTemporaryFile ()
++{
++}
++
++void
++notQTemporaryFile::open (void)
++{
++	stringstream fn;
++	fn &lt;&lt; &quot;/tmp/notQt&quot; &lt;&lt; time(NULL);
++	this-&gt;theFileName = fn.str();
++	this-&gt;f.open (this-&gt;theFileName.c_str(), ios::in|ios::out|ios::trunc);
++}
++
++void
++notQTemporaryFile::write (string input)
++{
++	f &lt;&lt; input;
++}
++
++void
++notQTemporaryFile::close (void)
++{
++	this-&gt;f.close();
++}
++
++// getter for fileName
++string
++notQTemporaryFile::fileName (void)
++{
++	return this-&gt;theFileName;
++}
++
++//@}
++
++
++/*!
++ * Implementation of the notQtUtilities class
++ */
++//@{
++
++// Constructor
++notQtUtilities::notQtUtilities ()
++{
++}
++
++// Destructor
++notQtUtilities::~notQtUtilities ()
++{
++}
++
++string
++notQtUtilities::simplify (string&amp; input)
++{
++	string workingString;
++	unsigned int i=0, start, end;
++
++	// Find the first non-whitespace character.
++	while (input[i] != '\0' &amp;&amp; 
++	       (input[i] == ' '  || input[i] == '\t' || input[i] == '\n' || input[i] == '\r')
++	       &amp;&amp; i&lt;input.size()) {
++		i++;
++	}
++	start=i;
++
++	// Now find the last non-whitespace character.
++	i = input.size();
++	i--;
++	while ((input[i] == ' '  || input[i] == '\t' || input[i] == '\n' || input[i] == '\r')
++	       &amp;&amp; i&gt;0) {
++		i--;
++	}
++	end = ++i;
++	
++	// Copy the substring into a working string.
++	if (end&gt;start) {
++		workingString = input.substr (start, end-start);
++	} else {
++		return &quot;&quot;;
++	}
++
++	// Now we replace internal white spaces in workingString with single spaces.
++	for (i=workingString.size(); i&gt;1; --i) {
++		if ( (workingString[i] == ' '   || workingString[i] == '\t'   
++		      || workingString[i] == '\n' || workingString[i] == '\r')
++		     &amp;&amp;
++		     (workingString[i-1] == ' ' || workingString[i-1] == '\t'
++		      ||  workingString[i-1] == '\n' || workingString[i-1] == '\r') ) {
++			// ...then this is a whitespace we can remove
++			workingString.erase(i,1);
++
++		} else if ( (workingString[i] == '\t' ||  workingString[i] == '\n'
++			     || workingString[i] == '\r') 
++			    &amp;&amp;
++			    (workingString[i-1] != ' ' &amp;&amp; workingString[i-1] != '\t'
++			     &amp;&amp;  workingString[i-1] != '\n' &amp;&amp; workingString[i-1] != '\r') ) {
++			// ...then this is a non-space whitespace to be replaced
++			workingString.replace(i, 1, &quot; &quot;);
++		}
++	}
++
++	return workingString;
++}
++
++// split based on token ' '
++void
++notQtUtilities::splitString (string&amp; line, char token, vector&lt;string&gt;&amp; rtn)
++{
++	rtn.clear();
++	unsigned int i=0;
++	while (i &lt; (line.size())-1) {
++		string tstring;
++		while (line[i] &amp;&amp; line[i] != token) {
++			tstring.push_back(line[i++]);
++		}
++		rtn.push_back(tstring);
++		i++;
++	}
++	return;
++}
++
++void
++notQtUtilities::splitString (string&amp; line, char token, list&lt;string&gt;&amp; rtn)
++{
++	rtn.clear();
++	unsigned int i=0;
++	while (i &lt; (line.size())-1) {
++		string tstring;
++		while (line[i] &amp;&amp; line[i] != token) {
++			//dbgln (&quot;tstring.push_back line[i] which is '&quot; &lt;&lt; line[i] &lt;&lt; &quot;'&quot;);
++			tstring.push_back(line[i++]);
++		}
++		//dbgln (&quot;rtn.push_back() tstring which is '&quot; + tstring + &quot;'&quot;);
++		rtn.push_back(tstring);
++		i++;
++	}
++	return;
++}
++
++int
++notQtUtilities::ensureUnixNewlines (std::string&amp; input)
++{
++	int num = 0;
++
++	for (unsigned int i=0; i&lt;input.size(); i++) {
++		if (input[i] == '\r') {
++			input.erase(i,1);
++			num++;
++		}
++	}
++	
++	return num; // The number of \r characters we found in the string.
++}
+
+Added: nxcl/lib/notQt.h
+===================================================================
+--- nxcl/lib/notQt.h	2007-08-19 15:44:16 UTC (rev 372)
++++ nxcl/lib/notQt.h	2007-09-11 12:48:46 UTC (rev 373)
+@@ -0,0 +1,236 @@
++/* -*-c++-*- */
++/*
++ * Simple re-implementations of some QT-like functionality.  In
++ * particular, there's a QProcess-like (though much simplified) class,
++ * a QTemporaryFile like class and a couple of the methods that you
++ * get with QString.
++ *
++ * (C) 2007 Sebastian James, Embedded Software Foundry Ltd (U.K.).
++ *
++ * Released under the terms of the GNU General Public Licence Version 2. 
++ */
++
++#ifndef _NOTQT_H_
++#define _NOTQT_H_
++
++#include &quot;../config.h&quot;
++
++#include &lt;list&gt;
++#include &lt;vector&gt;
++#include &lt;string&gt;
++#include &lt;fstream&gt;
++extern &quot;C&quot; {
++#include &lt;sys/poll.h&gt;
++}
++#define NOTQTPROCESS_MAIN_APP 0
++#define NOTQTPROCESS_FAILURE -1
++
++// Possible errors to be generated
++#define NOTQPROCNOERROR       0
++#define NOTQPROCFAILEDTOSTART 1
++#define NOTQPROCCRASHED       2
++#define NOTQPROCTIMEDOUT      3
++#define NOTQPROCWRITEERR      4
++#define NOTQPROCREADERR       5
++#define NOTQPROCUNKNOWN       6
++
++using namespace std;
++
++#ifdef DEBUG
++extern ofstream debugLogFile;
++# define dbgln(msg)  debugLogFile &lt;&lt; __FUNCTION__ &lt;&lt; &quot;: &quot; &lt;&lt; msg &lt;&lt; endl;
++# define dbglln(msg) debugLogFile &lt;&lt; __PRETTY_FUNCTION__ &lt;&lt; &quot;: &quot; &lt;&lt; msg &lt;&lt; endl;
++# define dbg(msg)    debugLogFile &lt;&lt; msg;
++#else
++# define dbgln(msg)
++# define dbglln(msg)
++# define dbg(msg)
++#endif
++
++namespace nxcl {
++
++	/*!
++	 * A set of virtual callbacks. These should be derived in the
++	 * client code. They're called by notQProcess via the
++	 * notQProcessCallbacks* callbacks member variable.
++	 */
++	class notQProcessCallbacks
++	{
++	public:
++		notQProcessCallbacks() {}
++		virtual ~notQProcessCallbacks() {}
++		virtual void startedSignal (string) {}
++		virtual void errorSignal (int) {}
++		virtual void processFinishedSignal (string) {}
++		virtual void readyReadStandardOutputSignal (void) {}
++		virtual void readyReadStandardErrorSignal (void) {}
++	};
++
++	/*!
++	 * notQProcess is a simple replacement for the QT class QProcess.
++	 */
++	class notQProcess
++	{
++	public:
++		notQProcess();
++		~notQProcess();
++		/*!
++		 * Write \arg input to the stdin of the process.
++		 */
++		void writeIn (string&amp; input);
++		/*!
++		 * fork and exec the process.
++		 */
++		int start (const string&amp; program, const list&lt;string&gt;&amp; args);
++		/*!
++		 * Send a TERM signal to the process.
++		 */
++		void terminate (void);
++
++		/*!
++		 * poll to see if there is data on stderr or stdout
++		 * and to see if the process has exited.
++		 *
++		 * This must be called on a scheduled basis. It checks
++		 * for any stdout/stderr data and also checks whether
++		 * the process is still running.
++		 */
++		void probeProcess (void);
++
++		/*!
++		 * Accessors
++		 */
++		//@{
++		pid_t getPid (void) { return this-&gt;pid; }
++		int getError (void) { return this-&gt;error; }
++		void setError (int e) { this-&gt;error = e; }
++
++		/*!
++		 * Setter for the callbacks.
++		 */
++		void setCallbacks (notQProcessCallbacks * cb) { this-&gt;callbacks = cb; }
++		//@}
++
++		/*! 
++		 * Slots
++		 */
++		//@{
++		string readAllStandardOutput (void);
++		string readAllStandardError (void);
++		/*!
++		 * Wait for the process to get itself going. Do this
++		 * by looking at pid.  If no pid after a while,
++		 * return false.
++		 */
++		bool waitForStarted (void);
++		//@}
++	private:
++		/*!
++		 * The name of the program to execute
++		 */
++		string progName;
++		/*!
++		 * The environment and arguments of the program to execute
++		 */
++		list&lt;string&gt; environment;
++		/*!
++		 * Holds a notQProcess error, defined above. NOTQPROCNOERROR, etc.
++		 */
++		int error;
++		/*!
++		 * Process ID of the program
++		 */
++		pid_t pid;
++		/*!
++		 * Set to true if the fact that the program has been
++		 * started has been signalled using the callback
++		 * callbacks-&gt;startedSignal
++		 */
++		bool signalledStart;
++		/*!
++		 * stdin parent to child
++		 */
++		int parentToChild[2];
++		/*!
++		 * stdout child to parent
++		 */
++		int childToParent[2];
++		/*!
++		 * stderr child to parent
++		 */
++		int childErrToParent[2];
++		/*!
++		 * Used in the poll() call in probeProcess()
++		 */
++		struct pollfd * p;
++		/*!
++		 * Pointer to a callback object
++		 */
++		notQProcessCallbacks * callbacks;
++	};
++
++	/*!
++	 * A simple replacement for the QT Class QTemporaryFile.
++	 */
++	class notQTemporaryFile
++	{
++	public:
++		notQTemporaryFile();
++		~notQTemporaryFile();
++		/*!
++		 * Open a file with a (not really) random name. The
++		 * filename will be /tmp/notQtXXXXXX where XXXXXX will
++		 * be the time in seconds since the unix epoch.
++		 */
++		void open (void);
++		/*!
++		 * Write \arg input to the temporary file.
++		 */
++		void write (string input);
++		/*!
++		 * Close the temporary file's stream.
++		 */
++		void close (void);
++		/*!
++		 * A getter for the file name of the temporary file
++		 */
++		string fileName (void);
++
++	private:
++		/*!
++		 * The file name of the temporary file
++		 */
++		string theFileName;
++		/*!
++		 * The file stream for the temporary file
++		 */
++		fstream f;
++	};
++
++	/*!
++	 * A few useful utility functions.
++	 */
++	class notQtUtilities
++	{
++	public:
++		notQtUtilities();
++		~notQtUtilities();
++
++		/*! The same (more or less) as QT QString::simplified */
++		static string simplify (string&amp; input);
++		/*!
++		 * Split a string 'line' based on token, placing the portions in the vector rtn
++		 */
++		static void splitString (string&amp; line, char token, vector&lt;string&gt;&amp; rtn);
++		/*!
++		 * Split a string 'line' based on token, placing the portions in the list rtn
++		 */
++		static void splitString (string&amp; line, char token, list&lt;string&gt;&amp; rtn);
++		/*!
++		 * Run through input and replace any DOS newlines with unix newlines.
++		 */
++		static int ensureUnixNewlines (std::string&amp; input);
++	};
++
++} // namespace
++#endif
+
+Added: nxcl/lib/nxclientlib.cpp
+===================================================================
+--- nxcl/lib/nxclientlib.cpp	2007-08-19 15:44:16 UTC (rev 372)
++++ nxcl/lib/nxclientlib.cpp	2007-09-11 12:48:46 UTC (rev 373)
+@@ -0,0 +1,591 @@
++/***************************************************************************
++                               nxclientlib.cpp
++                             -------------------
++    begin                : Sat 22nd July 2006
++    modifications        : July 2007
++    copyright            : (C) 2006 by George Wright
++    modifications        : (C) 2007 Embedded Software Foundry Ltd. (U.K.)
++                         :     Author: Sebastian James
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++#include &quot;nxclientlib_i18n.h&quot;
++
++#include &quot;nxclientlib.h&quot;
++
++#include &lt;fstream&gt;
++
++extern &quot;C&quot; {
++#include &quot;errno.h&quot;
++}
++
++/*
++ * On the location of nxproxy and nxssh binaries
++ * --------------------------------------------- 
++ * We expect them to be installed in PACKAGE_BIN_DIR (See
++ * Makefile.am). So, if nxcl is installed in /usr/bin/nxcl then we
++ * call /usr/bin/nxssh and /usr/bin/nxproxy, etc etc.
++ */
++
++using namespace std;
++using namespace nxcl;
++
++// Default NoMachine certificate for FALLBACK
++string cert(&quot;-----BEGIN DSA PRIVATE KEY-----\nMIIBuwIBAAKBgQCXv9AzQXjxvXWC1qu3CdEqskX9YomTfyG865gb4D02ZwWuRU/9\nC3I9/bEWLdaWgJYXIcFJsMCIkmWjjeSZyTmeoypI1iLifTHUxn3b7WNWi8AzKcVF\naBsBGiljsop9NiD1mEpA0G+nHHrhvTXz7pUvYrsrXcdMyM6rxqn77nbbnwIVALCi\nxFdHZADw5KAVZI7r6QatEkqLAoGBAI4L1TQGFkq5xQ/nIIciW8setAAIyrcWdK/z\n5/ZPeELdq70KDJxoLf81NL/8uIc4PoNyTRJjtT3R4f8Az1TsZWeh2+ReCEJxDWgG\nfbk2YhRqoQTtXPFsI4qvzBWct42WonWqyyb1bPBHk+JmXFscJu5yFQ+JUVNsENpY\n+Gkz3HqTAoGANlgcCuA4wrC+3Cic9CFkqiwO/Rn1vk8dvGuEQqFJ6f6LVfPfRTfa\nQU7TGVLk2CzY4dasrwxJ1f6FsT8DHTNGnxELPKRuLstGrFY/PR7KeafeFZDf+fJ3\nmbX5nxrld3wi5titTnX+8s4IKv29HJguPvOK/SI7cjzA+SqNfD7qEo8CFDIm1xRf\n8xAPsSKs6yZ6j1FNklfu\n-----END DSA PRIVATE KEY-----&quot;);
++
++/*!
++ * Implementation of the NXClientLibCallbacks class
++ */
++//@{
++NXClientLibCallbacks::NXClientLibCallbacks()
++{
++}
++
++NXClientLibCallbacks::~NXClientLibCallbacks()
++{
++}
++
++void
++NXClientLibCallbacks::startedSignal (string name)
++{
++	this-&gt;parent-&gt;externalCallbacks-&gt;write(name + _(&quot; process started&quot;));
++}
++
++void
++NXClientLibCallbacks::processFinishedSignal (string name)
++{
++	this-&gt;parent-&gt;externalCallbacks-&gt;write(name + _(&quot; process exited&quot;));
++	parent-&gt;setIsFinished (true);
++}
++
++void
++NXClientLibCallbacks::errorSignal (int error)
++{
++	string message;
++	switch (error) {
++	case NOTQPROCFAILEDTOSTART:
++		message = _(&quot;The process failed to start&quot;);
++		break;
++	case NOTQPROCCRASHED:
++		message = _(&quot;The process has crashed&quot;);
++		break;
++	case NOTQPROCTIMEDOUT:
++		message = _(&quot;The process timed out&quot;);
++		break;
++	case NOTQPROCWRITEERR:
++		message = _(&quot;There was an error writing to the process&quot;);
++		break;
++	case NOTQPROCREADERR:
++		message = _(&quot;There was an error reading from the process&quot;);
++		break;
++	default:
++		message = _(&quot;There was an unknown error with the process&quot;);
++		break;
++	}
++		
++	this-&gt;parent-&gt;externalCallbacks-&gt;write (message);
++}
++
++void 
++NXClientLibCallbacks::readyReadStandardOutputSignal (void)
++{
++	this-&gt;parent-&gt;processParseStdout();
++}
++
++void 
++NXClientLibCallbacks::readyReadStandardErrorSignal (void)
++{
++	this-&gt;parent-&gt;processParseStderr();
++}
++/*!
++ * This gets called from within the NXSession object...
++ */
++void 
++NXClientLibCallbacks::noSessionsSignal (void)
++{
++	/* ...and it calls another callback function in the client code */
++	this-&gt;parent-&gt;externalCallbacks-&gt;noSessionsSignal();
++}
++void
++NXClientLibCallbacks::loginFailedSignal (void)
++{
++	this-&gt;parent-&gt;loginFailed();
++}
++void
++NXClientLibCallbacks::readyForProxySignal (void)
++{
++	this-&gt;parent-&gt;readyproxy();
++}
++void
++NXClientLibCallbacks::authenticatedSignal (void)
++{
++	this-&gt;parent-&gt;doneAuth();
++}
++void
++NXClientLibCallbacks::sessionsSignal (list&lt;NXResumeData&gt; data)
++{
++	this-&gt;parent-&gt;externalCallbacks-&gt;resumeSessionsSignal (data);
++}
++//@}
++
++/*!e
++ * Implementation of the NXClientLib class
++ */
++//@{
++NXClientLib::NXClientLib()
++{
++	isFinished = false;
++	readyForProxy = false;
++	proxyData.encrypted = false;
++	password = false;
++
++	dbgln (&quot;In NXClientLib constructor&quot;);
++
++	this-&gt;pNxsshProcess = &amp;this-&gt;nxsshProcess;
++	this-&gt;pNxproxyProcess = &amp;this-&gt;nxproxyProcess;
++
++	/* Set up callback pointers */
++	this-&gt;nxsshProcess.setCallbacks (&amp;callbacks);
++	this-&gt;nxproxyProcess.setCallbacks (&amp;callbacks);
++	this-&gt;session.setCallbacks (&amp;callbacks);
++	this-&gt;callbacks.setParent (this);
++
++	dbgln (&quot;Returning from NXClientLib constructor&quot;);
++}
++
++NXClientLib::~NXClientLib()
++{
++	dbgln (&quot;In NXClientLib destructor&quot;);
++	nxsshProcess.terminate();
++}
++
++void NXClientLib::invokeNXSSH(string publicKey, string serverHost, bool encryption, string key, int port)
++{
++	list&lt;string&gt; arguments;
++	stringstream argtmp;
++	proxyData.server = serverHost;
++
++	dbgln(&quot;invokeNXSSH called&quot;);
++
++	// We use same environment for the process as was used for the
++	// parent, so remove nxsshProcess.setEnvironment();
++
++	// Start to build the arguments for the nxssh command.
++	// notQProcess requires that argv[0] contains the program name
++	arguments.push_back (PACKAGE_BIN_DIR&quot;/nxssh&quot;);
++	
++	if (publicKey == &quot;default&quot;) {
++		usingHardcodedKey = true;
++	}
++
++	argtmp &lt;&lt; &quot;-nx&quot;;
++	arguments.push_back (argtmp.str());
++
++	argtmp.str(&quot;&quot;);
++	argtmp &lt;&lt; &quot;-p&quot; &lt;&lt; port;
++	arguments.push_back(argtmp.str());
++
++	if (publicKey == &quot;default&quot; || publicKey == &quot;supplied&quot;) {
++		if (publicKey == &quot;default&quot;) {
++			this-&gt;externalCallbacks-&gt;stderrSignal (_(&quot;WARNING: Using hardcoded NoMachine public key for &quot;
++					&quot;outer/first stage SSH encryption.&quot;));
++		}
++		
++		keyFile = new notQTemporaryFile;
++		keyFile-&gt;open();
++		
++		argtmp.str(&quot;&quot;);
++		argtmp &lt;&lt; &quot;-i&quot; &lt;&lt; keyFile-&gt;fileName();
++		arguments.push_back (argtmp.str());
++
++		if (publicKey == &quot;default&quot;) {
++			keyFile-&gt;write(cert);
++		} else {
++			keyFile-&gt;write(key);
++		}
++			
++		keyFile-&gt;close();
++	} else {
++		argtmp.str(&quot;&quot;);
++		argtmp &lt;&lt; &quot;-i&quot; &lt;&lt; publicKey;
++		arguments.push_back(argtmp.str());
++	}
++	
++	argtmp.str(&quot;&quot;);
++	argtmp &lt;&lt; &quot;nx@&quot; &lt;&lt; serverHost;
++	arguments.push_back(argtmp.str());
++
++	// These options copied from the way Nomachine's client
++	// specifies the nxssh command - they make good sense.
++	arguments.push_back (&quot;-x&quot;);
++	arguments.push_back (&quot;-2&quot;);
++	arguments.push_back (&quot;-oRhostsAuthentication no&quot;);
++	arguments.push_back (&quot;-oPasswordAuthentication no&quot;);
++	arguments.push_back (&quot;-oRSAAuthentication no&quot;);
++	arguments.push_back (&quot;-oRhostsRSAAuthentication no&quot;);
++	arguments.push_back (&quot;-oPubkeyAuthentication yes&quot;);
++
++	if (encryption == true) {
++		arguments.push_back(&quot;-B&quot;);
++		session.setEncryption (true);
++	} else {
++		session.setEncryption (false);
++	}
++
++	// -E appears in the call to nxssh for Nomachine's nxclient
++	// -version 3 but not 1.5. Is it there in 2?
++	// nxssh -E gives this message when called:
++	// NX&gt; 285 Enabling skip of SSH config files
++	// ...so there you have the meaning.
++	arguments.push_back (&quot;-E&quot;);
++	
++	this-&gt;nxsshProcess.start (PACKAGE_BIN_DIR&quot;/nxssh&quot;, arguments);
++
++	if (nxsshProcess.waitForStarted() == false) {
++		dbgln (&quot;nx ssh process didn't start :(&quot;);
++	}
++}
++
++void NXClientLib::requestConfirmation (string msg)
++{
++	this-&gt;externalCallbacks-&gt;stdoutSignal (_(&quot;This is a placeholder method to deal with sending back a yes or a no answer. &quot;
++						 &quot;For now, we just set this-&gt;session.setContinue(true);&quot;));
++	this-&gt;session.setContinue(true);
++}
++
++void NXClientLib::reset()
++{
++	this-&gt;nxsshProcess.terminate();       
++	this-&gt;isFinished = false;
++	this-&gt;proxyData.encrypted = false;
++	this-&gt;password = false;	
++	this-&gt;session.resetSession();
++}
++
++void NXClientLib::loginFailed()
++{
++	this-&gt;externalCallbacks-&gt;write (_(&quot;Got \&quot;Login Failed\&quot;&quot;));
++	this-&gt;isFinished = true;
++	this-&gt;nxsshProcess.terminate();
++}
++
++void NXClientLib::processParseStdout()
++{
++	string message = nxsshProcess.readAllStandardOutput();
++
++	this-&gt;externalCallbacks-&gt;stdoutSignal (message);
++
++	dbgln (&quot;NXClientLib::processParseStdout() called&quot;);
++
++	int response = 0;
++	// Message 211 is sent if ssh is asking to continue with an unknown host
++	if ((response = session.parseResponse(message)) == 211) {
++		this-&gt;requestConfirmation (message);
++	}
++
++	dbgln (&quot;NXClientLib::processPraseStdout(): response = &quot; &lt;&lt; response);
++
++	if (response == 100000) {
++		// A program never started.
++		this-&gt;isFinished = true;
++		return;
++	} else if (response &gt; 100000) {
++		dbgln (&quot;A process crashed or exited&quot;);
++		int pid = response - 100000;
++		if (this-&gt;nxsshProcess.getPid() == pid) {
++			this-&gt;nxsshProcess.setError(NOTQPROCCRASHED);
++			this-&gt;externalCallbacks-&gt;write (_(&quot;nxsshProcess crashed or exited&quot;));
++			this-&gt;isFinished = true;
++		} else if (this-&gt;nxproxyProcess.getPid() == pid) {
++			this-&gt;nxproxyProcess.setError(NOTQPROCCRASHED);
++			this-&gt;externalCallbacks-&gt;write (_(&quot;nxproxyProcess crashed or exited&quot;));
++			this-&gt;isFinished = true;
++		} else {
++			this-&gt;externalCallbacks-&gt;write (_(&quot;Warning: Don't know what crashed (in processParseStdout())&quot;));
++		}
++		return;
++	}
++
++	// If message 204 is picked, that's authentication failed.
++	if (response == 204) {
++		this-&gt;externalCallbacks-&gt;write (_(&quot;Got \&quot;Authentication Failed\&quot; from nxssh.\n&quot;
++						  &quot;Please check the certificate for the first SSL authentication stage,\n&quot;
++						  &quot;in which the \&quot;nx\&quot; user is authenticated.&quot;));
++		this-&gt;isFinished = true;
++		return;
++	}
++
++	// 147 is server capacity reached
++	if (response == 147) {
++		this-&gt;externalCallbacks-&gt;write (_(&quot;Got \&quot;Server Capacity Reached\&quot; from nxssh.\n&quot;));
++		dbgln (&quot;Got \&quot;Server Capacity Reached\&quot; from nxssh.&quot;);
++		this-&gt;externalCallbacks-&gt;serverCapacitySignal();
++		this-&gt;isFinished = true;
++		return;
++	}
++	
++	dbgln (&quot;NXClientLib::processParseStdout(): The message is '&quot; + message + &quot;'(msg end)&quot;);
++	dbgln (&quot;...and response is &quot; &lt;&lt; response);
++
++	notQtUtilities::ensureUnixNewlines (message);
++	list&lt;string&gt; msglist;
++	list&lt;string&gt;::iterator msgiter;
++	notQtUtilities::splitString (message, '\n', msglist);
++
++	for (msgiter = msglist.begin(); msgiter != msglist.end(); msgiter++) {
++		dbgln (&quot;NXClientLib::processParseStdout(): Processing the message '&quot; + (*msgiter) + &quot;'(end msg)&quot;);
++		// On some connections this is sent via stdout instead of stderr?
++		if (proxyData.encrypted &amp;&amp; readyForProxy &amp;&amp; ((*msgiter).find(&quot;NX&gt; 999 Bye&quot;)!=string::npos)) {
++			// This is &quot;NX&gt; 299 Switching connection to: &quot; in
++			// version 1.5.0. This was changed in nxssh version
++			// 2.0.0-8 (see the nxssh CHANGELOG).
++			string switchCommand = &quot;NX&gt; 299 Switch connection to: &quot;;
++			stringstream ss;
++			ss &lt;&lt; &quot;127.0.0.1:&quot; &lt;&lt; proxyData.port &lt;&lt; &quot; cookie: &quot; &lt;&lt; proxyData.cookie &lt;&lt; &quot;\n&quot;;
++			switchCommand += ss.str();
++			this-&gt;write(switchCommand);
++		} else if ((*msgiter).find(&quot;NX&gt; 287 Redirected I/O to channel descriptors&quot;) != string::npos) {
++			dbgln (&quot;287 message found on stdout&quot;);
++			this-&gt;externalCallbacks-&gt;write(_(&quot;The session has been started successfully&quot;));
++		}
++
++		if ((*msgiter).find(&quot;Password&quot;) != string::npos) {
++			this-&gt;externalCallbacks-&gt;write(_(&quot;Authenticating with NX server&quot;));
++			password = true;
++		}
++
++		if (!readyForProxy) {
++			string msg = session.parseSSH (*msgiter);
++			if (msg == &quot;204\n&quot; || msg == &quot;147\n&quot;) {
++				// Auth failed.
++				dbgln (&quot;NXClientLib::processParseStdout: Got auth failed or capacity reached, calling this-&gt;parseSSH.&quot;);
++				msg = this-&gt;parseSSH (*msgiter);
++			}
++			if (msg.size() &gt; 0) {
++				this-&gt;write (msg);
++			}
++		} else {
++			this-&gt;write (this-&gt;parseSSH (*msgiter));
++		}
++	}
++	return;
++}
++
++void NXClientLib::processParseStderr()
++{
++	string message = nxsshProcess.readAllStandardError();
++
++	dbgln (&quot;In NXClientLib::processParseStderr for message: '&quot; + message + &quot;'(msg end)&quot;);
++
++	this-&gt;externalCallbacks-&gt;stderrSignal (message);
++
++	// Now we need to split the message if necessary based on the \n or \r characters
++	notQtUtilities::ensureUnixNewlines (message);
++
++	list&lt;string&gt; msglist;
++	list&lt;string&gt;::iterator msgiter;
++	notQtUtilities::splitString (message, '\n', msglist);
++
++	for (msgiter=msglist.begin(); msgiter!=msglist.end(); msgiter++) {
++		dbgln (&quot;NXClientLib::processParseStderr: Processing the message '&quot; + (*msgiter) + &quot;'(end msg)&quot;);
++		if (proxyData.encrypted &amp;&amp; readyForProxy &amp;&amp; ((*msgiter).find(&quot;NX&gt; 999 Bye&quot;) != string::npos)) {
++			string switchCommand = &quot;NX&gt; 299 Switch connection to: &quot;;
++			stringstream ss;
++			ss &lt;&lt; &quot;127.0.0.1:&quot; &lt;&lt; proxyData.port &lt;&lt; &quot; cookie: &quot; &lt;&lt; proxyData.cookie &lt;&lt; &quot;\n&quot;;
++			switchCommand += ss.str();
++			this-&gt;write(switchCommand);
++
++		} else if ((*msgiter).find(&quot;NX&gt; 287 Redirected I/O to channel descriptors&quot;) != string::npos) {
++			this-&gt;externalCallbacks-&gt;write(_(&quot;The session has been started successfully&quot;));
++
++		} else if ((*msgiter).find(&quot;NX&gt; 209 Remote host identification has changed&quot;) != string::npos) {
++			this-&gt;externalCallbacks-&gt;write(_(&quot;SSH Host Key Problem&quot;));
++			this-&gt;isFinished = true;
++
++		} else if ((*msgiter).find(&quot;NX&gt; 280 Ignoring EOF on the monitored channel&quot;) != string::npos) {
++			this-&gt;externalCallbacks-&gt;write(_(&quot;Unknown problem...&quot;));
++			this-&gt;isFinished = true;
++
++		} else if ((*msgiter).find(&quot;Host key verification failed&quot;) != string::npos) {
++			this-&gt;externalCallbacks-&gt;write(_(&quot;SSH host key verification failed&quot;));
++			this-&gt;isFinished = true;			
++		}
++	}
++}
++
++void NXClientLib::write (string data)
++{
++	if (data.size() == 0) { return; }
++
++	dbgln (&quot;Writing '&quot; &lt;&lt; data &lt;&lt; &quot;' to nxssh process.&quot;);
++	
++	this-&gt;nxsshProcess.writeIn(data);
++
++	if (password) {
++		data = &quot;********&quot;;
++		password = false;
++	}
++
++	// Output this to the user via a signal - this is data going in to nxssh.
++	this-&gt;externalCallbacks-&gt;stdinSignal (data);
++}
++
++void NXClientLib::doneAuth()
++{
++	// FIXME: Don't think this is correctly removing the keyfile data.
++	if (usingHardcodedKey)
++		delete keyFile;
++}
++
++void NXClientLib::allowSSHConnect (bool auth)
++{
++	session.setContinue (auth);
++}
++
++void NXClientLib::setSessionData (NXSessionData *nxSessionData)
++{
++	session.setSessionData (nxSessionData);
++	string a = &quot;NX&gt; 105&quot;;
++	string d = session.parseSSH(a);
++	if (d.size()&gt;0) {
++		this-&gt;write(d);
++	}
++}
++
++string NXClientLib::parseSSH (string message)
++{
++	string rMessage;
++	string::size_type pos;
++	rMessage = &quot;&quot;;
++
++	dbgln (&quot;NXClientLib::parseSSH called for message '&quot; + message + &quot;'&quot;);
++
++	if ((pos = message.find(&quot;NX&gt; 700 Session id: &quot;)) != string::npos) {
++		proxyData.id = message.substr(pos+20, message.length()-pos);
++		dbgln (&quot;proxyData.id = &quot; + proxyData.id);
++	} else if ((pos = message.find(&quot;NX&gt; 705 Session display: &quot;)) != string::npos) {
++		stringstream portss;
++		int portnum;
++		portss &lt;&lt; message.substr(pos+25, message.length()-pos);
++		portss &gt;&gt; portnum;		
++		proxyData.display = portnum;
++		dbgln (&quot;proxyData.display = &quot; &lt;&lt; proxyData.display);
++		proxyData.port = portnum + 4000;
++		dbgln (&quot;proxyData.port = &quot; &lt;&lt; proxyData.port);
++	} else if ((pos = message.find(&quot;NX&gt; 706 Agent cookie: &quot;)) != string::npos) {
++		proxyData.cookie = message.substr(pos+22, message.length()-pos);
++		dbgln (&quot;proxyData.cookie = &quot; + proxyData.cookie);
++	} else if ((pos = message.find(&quot;NX&gt; 702 Proxy IP: &quot;)) != string::npos) {
++		proxyData.proxyIP = message.substr(pos+18, message.length()-pos);
++		dbgln (&quot;proxyData.proxyIP = &quot; + proxyData.proxyIP);
++	} else if (message.find(&quot;NX&gt; 707 SSL tunneling: 1&quot;) != string::npos) {
++		dbgln (&quot;Setting proxyData.encrypted to true&quot;);
++		proxyData.encrypted = true;
++	} else if (message.find(&quot;NX&gt; 147 Server capacity&quot;) != string::npos) {
++		this-&gt;externalCallbacks-&gt;write (_(&quot;Got \&quot;Server Capacity Reached\&quot; from nxssh.&quot;));
++		this-&gt;externalCallbacks-&gt;serverCapacitySignal();
++		this-&gt;isFinished = true;
++	} else if (message.find (&quot;NX&gt; 204 Authentication failed.&quot;) != string::npos) {
++		this-&gt;externalCallbacks-&gt;write (_(&quot;NX SSH Authentication Failed, finishing&quot;));
++		this-&gt;isFinished = true;
++	}
++
++	if (message.find(&quot;NX&gt; 710 Session status: running&quot;) != string::npos) {
++		invokeProxy();
++		session.wipeSessions();
++		rMessage = &quot;bye\n&quot;;
++	}
++
++	dbgln (&quot;NXClientLib::parseSSH returning&quot;);
++	return rMessage;
++}
++
++void NXClientLib::invokeProxy()
++{
++	dbgln (&quot;invokeProxy called&quot;);
++
++	this-&gt;externalCallbacks-&gt;write(_(&quot;Starting NX session&quot;));
++	
++	int e;
++	char * home;
++	home = getenv (&quot;HOME&quot;);
++	stringstream ss;
++	ss &lt;&lt; home;
++	string nxdir = ss.str();
++	nxdir += &quot;/.nx&quot;;
++	// Create the .nx directory first.
++	if (mkdir (nxdir.c_str(), 0770)) {
++		e = errno;
++		if (e != EEXIST) { // We don't mind .nx already
++				   // existing, though if there is a
++				   // _file_ called $HOME/.nx, we'll
++				   // get errors later.
++			this-&gt;externalCallbacks-&gt;write (_(&quot;Problem creating .nx directory&quot;));
++		}
++	}
++	// Now the per session directory
++	nxdir += &quot;/S-&quot; + proxyData.id;
++	if (mkdir (nxdir.c_str(), 0770)) {
++		e = errno;
++		if (e != EEXIST) { // We don't mind .nx already
++			this-&gt;externalCallbacks-&gt;write (_(&quot;Problem creating Session directory&quot;));
++		}
++	}
++
++	stringstream data;
++	if (proxyData.encrypted) {
++		data &lt;&lt; &quot;nx/nx,session=session,encryption=1,cookie=&quot; &lt;&lt; proxyData.cookie 
++		     &lt;&lt; &quot;,root=&quot; &lt;&lt; home &lt;&lt; &quot;/.nx&quot;
++		     &lt;&lt; &quot;,id=&quot; &lt;&lt; proxyData.id &lt;&lt; &quot;,listen=&quot; &lt;&lt; proxyData.port &lt;&lt; &quot;:&quot; &lt;&lt; proxyData.display &lt;&lt; &quot;\n&quot;;
++		// may also need shmem=1,shpix=1,font=1,product=...
++
++	} else {
++		// Not tested yet
++		data &lt;&lt; &quot;nx,session=session,cookie=&quot; &lt;&lt; proxyData.cookie
++		     &lt;&lt; &quot;,root=&quot; &lt;&lt; home
++		     &lt;&lt; &quot;/.nx,id=&quot; &lt;&lt; proxyData.id
++		     &lt;&lt; &quot;,connect=&quot; &lt;&lt; proxyData.server &lt;&lt; &quot;:&quot; &lt;&lt; proxyData.display &lt;&lt; &quot;\n&quot;;
++	}
++	
++	// Filename is nxdir plus &quot;/options&quot;
++	nxdir += &quot;/options&quot;;
++	std::ofstream options;
++	options.open (nxdir.c_str(), std::fstream::out);
++	options &lt;&lt; data.str();
++	options.close();
++
++	// Build arguments for the call to the nxproxy command
++	list&lt;string&gt; arguments;
++	arguments.push_back(PACKAGE_BIN_DIR&quot;/nxproxy&quot;); // argv[0] has to be the program name
++	arguments.push_back(&quot;-S&quot;);
++	ss.str(&quot;&quot;);
++	ss &lt;&lt; &quot;options=&quot; &lt;&lt; nxdir;
++	ss &lt;&lt; &quot;:&quot; &lt;&lt; proxyData.display;
++	arguments.push_back(ss.str());	
++
++	// This is of type notQProcess.
++	this-&gt;nxproxyProcess.start(PACKAGE_BIN_DIR&quot;/nxproxy&quot;, arguments);
++
++	if (nxproxyProcess.waitForStarted() == false) {
++		dbgln (&quot;nxproxy process didn't start :(&quot;);
++	}
++}
++
++bool NXClientLib::chooseResumable (int n)
++{
++	return (this-&gt;session.chooseResumable(n));
++}
++
++bool NXClientLib::terminateSession (int n)
++{
++	return (this-&gt;session.terminateSession(n));
++}
++//@}
+
+Added: nxcl/lib/nxclientlib.h
+===================================================================
+--- nxcl/lib/nxclientlib.h	2007-08-19 15:44:16 UTC (rev 372)
++++ nxcl/lib/nxclientlib.h	2007-09-11 12:48:46 UTC (rev 373)
+@@ -0,0 +1,335 @@
++/* -*-c++-*- */
++/***************************************************************************
++                                nxclientlib.h
++                             -------------------
++    begin                : Sat 22nd July 2006
++    remove QT dependency : Started June 2007
++    modifications        : June-July 2007
++    copyright            : (C) 2006 by George Wright
++    modifications        : (C) 2007 Embedded Software Foundry Ltd. (U.K.)
++                         :     Author: Sebastian James
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++#ifndef _NXCLIENTLIB_H_
++#define _NXCLIENTLIB_H_
++
++#include &lt;iostream&gt;
++#include &quot;nxsession.h&quot;
++#include &lt;list&gt;
++#include &quot;notQt.h&quot;
++
++using namespace std;
++
++namespace nxcl {
++
++	struct ProxyData {
++		string id;
++		int    display;
++		string cookie;
++		string proxyIP;
++		bool   encrypted;
++		int    port;
++		string server;
++	};
++
++	/*!
++	 * Callbacks which are to be defined by the client code of
++	 * NXClientLib objects. In the case of nxcl, that means the
++	 * code in the class Nxcl in nxcl.cpp.
++	 */
++	class NXClientLibExternalCallbacks
++	{
++	public:
++		NXClientLibExternalCallbacks () {}
++		virtual ~NXClientLibExternalCallbacks () {}
++		virtual void write (string msg) {}
++		virtual void debug (string msg) {}
++		virtual void stdoutSignal (string msg) {}
++		virtual void stderrSignal (string msg) {}
++		virtual void stdinSignal (string msg) {}
++		virtual void resumeSessionsSignal (list&lt;NXResumeData&gt;) {}
++		virtual void noSessionsSignal (void) {}
++		virtual void serverCapacitySignal (void) {}
++
++	};
++
++	/*!
++	 * Have to derive NXClientLib from an abstract base class,
++	 * NXClientLibBase, so that NXClientLibCallbacks can
++	 * hold a pointer to an NXClientLib object.
++	 *
++	 * The functions that are declared in NXClientLibBase are the
++	 * ones that we want to call via this-&gt;parent in
++	 * NXClientLibCallbacks. They're the ones that are called from
++	 * within objects of other classes (such as this-&gt;session
++	 * (NXSession) or this-&gt;nxsshProcess (notQProcess).
++	 */
++	class NXClientLibBase 
++	{
++	public:
++		NXClientLibBase() {}
++		virtual ~NXClientLibBase() {}
++
++		virtual void setIsFinished (bool status) {}
++		virtual void processParseStdout (void) {}
++		virtual void processParseStderr (void) {}
++		virtual void loginFailed (void) {}
++		virtual void readyproxy (void) {}
++		virtual void doneAuth (void) {}
++
++		/*!
++		 * External callbacks pointer is held in NXClientLibBase
++		 * because NXClientLibProcessCallbacks::parent is of
++		 * type NXClientLibBase and in NXClientLibProcessCallbacks we
++		 * refer to this-&gt;parent-&gt;externalCallbacks-&gt;write()
++		 */
++		NXClientLibExternalCallbacks * externalCallbacks;
++	};
++
++	/*!
++	 * Callbacks class. This derives from several other base
++	 * callbacks classes, defining the behaviour of the callbacks.
++	 */
++	class NXClientLibCallbacks : public notQProcessCallbacks, public NXSessionCallbacks
++	{
++	public:
++		NXClientLibCallbacks();
++		~NXClientLibCallbacks();
++		
++		/*!
++		 * The callback signals
++		 */
++		//@{
++		/*!
++		 * From notQProcess:
++		 */
++		//@{
++		void startedSignal (string name);
++		void errorSignal (int error);
++		void processFinishedSignal (string name);
++		void readyReadStandardOutputSignal (void);
++		void readyReadStandardErrorSignal (void);
++		//@}
++		/*!
++		 * From NXSession:
++		 */
++		//@{
++		void noSessionsSignal (void);
++		void loginFailedSignal (void);
++		void readyForProxySignal (void);
++		void authenticatedSignal (void);
++		void sessionsSignal (list&lt;NXResumeData&gt;);
++		//@}
++		//@}
++
++		/*!
++		 * Accessor function to set a pointer to the parent NXCLientLib object.
++		 */
++		void setParent (NXClientLibBase * p) { this-&gt;parent = p; }
++	private:
++		NXClientLibBase * parent;
++	};
++
++	class NXClientLib : public NXClientLibBase
++	{
++	public:
++		NXClientLib();
++		~NXClientLib();
++
++		/*!
++		 * Set up data and then call this-&gt;nxsshProcess.start().
++		 * 
++		 * \arg publicKey is the path to the ssh public key
++		 * file to authenticate with.  Pass &quot;default&quot; to use
++		 * the default NoMachine key.
++		 *
++		 * \arg serverHost is the hostname of the NX server to
++		 * connect to
++		 *
++		 * \arg encryption is whether to use an encrypted NX
++		 * session
++		 */
++		void invokeNXSSH (string publicKey = &quot;default&quot;, string serverHost = &quot;&quot;,
++				  bool encryption = true, string key = &quot;&quot;, int port = 22);
++
++		/*!
++		 * Overloaded to give callback data on write.
++		 * 
++		 * Writes \arg data to this-&gt;nxsshProcess stdin and also
++		 * out to the user via stdoutCallback
++		 */
++		void write (string data);
++
++		/*!
++		 * Passes \arg auth to this-&gt;session.setContinue()
++		 */
++		void allowSSHConnect (bool auth);
++
++		/*!
++		 * Set up data and then call this-&gt;nxproxyProcess.start()
++		 */
++		void invokeProxy (void);
++
++		/*!
++		 * Parse a line of output from
++		 * this-&gt;nxsshProcess. This is called when the proxy
++		 * has started, or if NX authentication
++		 * failed. Otherwise, this-&gt;session.parseSSH() is
++		 * used.
++		 */
++		string parseSSH (string message);
++
++		/*!
++		 * Read through the nx session file, and if we find a
++		 * message saying &quot;Session: Terminating session at
++		 * 'some date'&quot; we need to set isFinished to true.
++		 */
++		//void checkSession (void);
++
++		/*!
++		 * Re-set the contents of this-&gt;session.sessionData
++		 * with the nth choice.
++		 *
++		 * \return true if the nth session is resumable, false
++		 * if not, or if there is no nth session.
++		 */
++		bool chooseResumable (int n); 
++
++		/*!
++		 * Re-set the contents of this-&gt;session.sessionData
++		 * with the nth choice such that a terminate session
++		 * message will be sent to the nxserver
++		 *
++		 * \return true if the nth session is terminatable, false
++		 * if not, or if there is no nth session.
++		 */
++		bool terminateSession (int n); 
++
++		// public slots:
++		//@{
++		void doneAuth (void);
++		void loginFailed (void);
++		void finished (void) { dbgln (&quot;Finishing up on signal&quot;); this-&gt;isFinished = true; }
++		void readyproxy (void) { dbgln (&quot;ready for nxproxy&quot;); this-&gt;readyForProxy = true; }
++		void reset (void);
++		void processParseStdout (void);
++		void processParseStderr (void);
++
++		/*!
++		 * SSH requests confirmation to go ahead with
++		 * connecting (e.g. if you haven't connected to the
++		 * host before)
++		 */
++		void requestConfirmation (string msg);
++		//@}
++
++		// Accessors
++		//@{
++		/*!
++		 *  Set the username for NX to log in with
++		 */
++		void setUsername (string&amp; user) {
++			this-&gt;nxuser = user;
++			this-&gt;session.setUsername (this-&gt;nxuser); 
++		}
++		/*!
++		 *  Set the password for NX to log in with
++		 */
++		void setPassword (string&amp; pass) {
++			this-&gt;nxpass = pass;
++			this-&gt;session.setPassword (this-&gt;nxpass); 
++		}
++
++		void setResolution (int x, int y) { this-&gt;session.setResolution(x, y); }
++		void setDepth (int depth) { this-&gt;session.setDepth(depth); }
++		void setRender (bool render) { this-&gt;session.setRender(render); }
++		void setSessionData (NXSessionData *);
++		notQProcess* getNXSSHProcess (void) { return this-&gt;pNxsshProcess; }
++		notQProcess* getNXProxyProcess (void) { return this-&gt;pNxproxyProcess; }
++		bool getIsFinished (void) { return this-&gt;isFinished; }
++		bool getReadyForProxy (void) { return this-&gt;readyForProxy; }
++		NXSession* getSession (void) { return &amp;this-&gt;session; }
++		void setIsFinished (bool status) { this-&gt;isFinished = status; }
++		void setExternalCallbacks (NXClientLibExternalCallbacks * cb) { this-&gt;externalCallbacks = cb; }
++		//@}
++
++	private:
++		/*!
++		 * true if we're using the hardcoded SSL key (the
++		 * default NoMachine one). To be removed.
++		 */
++		bool usingHardcodedKey;
++		/*!
++		 * Set true when the program is ready to end, e.g if
++		 * authentication failed, nxssh failed to start amoung
++		 * other reasons.
++		 */
++		bool isFinished;
++		/*!
++		 * Set true when nxssh is ready to launch the nxproxy process.
++		 */
++		bool readyForProxy;
++		/*!
++		 * Have we said we need to enter a password?
++		 */
++		bool password;
++		
++		// FIXME: I hold the actual data, and a pointer to the
++		// data here. I tried to get rid of the pointer, and
++		// modify main.cpp in ../nxcl and that didn't work
++		// properly - I'm not sure why. I suppose I could get
++		// rid of the objects here, and then call
++		// pNxsshProcess = new notQProcess; in the
++		// constructor...
++		/*!
++		 * The nxssh process object
++		 */
++		notQProcess nxsshProcess;
++		notQProcess* pNxsshProcess;
++		/*!
++		 * The nxproxy process object
++		 */
++		notQProcess nxproxyProcess;
++		notQProcess* pNxproxyProcess;
++		/*!
++		 * A callbacks object. This holds the various callback
++		 * methods. The callback methods are defined here, but
++		 * are callable from notQProcess etc.
++		 */
++		NXClientLibCallbacks callbacks;
++		/*!
++		 * A temporary file to hold the ssl key
++		 */
++		notQTemporaryFile *keyFile;
++		/*!
++		 * The NX Session object.
++		 */
++		NXSession session;
++		/*!
++		 * A structure holding information about the
++		 * connection to be made, such as server address, port
++		 * and id.
++		 */
++		ProxyData proxyData;
++		/*!
++		 * Username for the connection
++		 */
++		string nxuser;
++		/*!
++		 * Password for the connection
++		 */
++		string nxpass;
++	};
++
++} // namespace
++#endif
+
+Added: nxcl/lib/nxclientlib_i18n.h
+===================================================================
+--- nxcl/lib/nxclientlib_i18n.h	2007-08-19 15:44:16 UTC (rev 372)
++++ nxcl/lib/nxclientlib_i18n.h	2007-09-11 12:48:46 UTC (rev 373)
+@@ -0,0 +1,30 @@
++extern &quot;C&quot; {
++#ifndef __NXCLIENTLIB_I18N__
++#  define __NXCLIENTLIB_I18N__
++
++#define _(String) (String)
++#define N_(String) String
++
++
++/*
++#  ifdef HAVE_CONFIG_H
++#    include &lt;config.h&gt;
++#  endif
++#  ifdef ENABLE_NLS
++#    include &quot;../lib/gettext.h&quot;
++#    define _(String) gettext (String)
++#    define gettext_noop(String) String
++#    define N_(String) gettext_noop (String)
++#  else
++#    define _(String) (String)
++#    define N_(String) String
++#    define textdomain(Domain) (Domain)
++#    define gettext(String) (String)
++#    define dgettext(Domain,String) (String)
++#    define dcgettext(Domain,String,Type) (String)
++#    define bindtextdomain(Domain, Directory) (Domain) 
++#    define bind_textdomain_codeset(Domain,Codeset) (Codeset) 
++#  endif
++*/
++#endif /* __NXCLIENTLIB_I18N__ */
++}
+
+Added: nxcl/lib/nxdata.h
+===================================================================
+--- nxcl/lib/nxdata.h	2007-08-19 15:44:16 UTC (rev 372)
++++ nxcl/lib/nxdata.h	2007-09-11 12:48:46 UTC (rev 373)
+@@ -0,0 +1,101 @@
++/***************************************************************************
++                                nxdata.h
++                             -------------------
++    begin                : Wednesday 9th August 2006
++    modifications        : July 2007
++    copyright            : (C) 2006 by George Wright
++    modifications        : (C) 2007 Embedded Software Foundry Ltd. (U.K.)
++                         :     Author: Sebastian James
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++#ifndef _NXDATA_H_
++#define _NXDATA_H_
++
++#include &lt;string&gt;
++
++using namespace std;
++
++namespace nxcl {
++
++	struct NXConfigData {
++		string serverHost;
++		int serverPort;
++		string sessionUser;
++		string sessionPass;
++		string sessionName;
++		string sessionType;
++		int cache;
++		int images;
++		string linkType;
++		bool render;
++		string backingstore;
++		int imageCompressionMethod;
++		int imageCompressionLevel;
++		string geometry;
++		string keyboard;
++		string kbtype;
++		bool media;
++		string agentServer;
++		string agentUser;
++		string agentPass;
++		int cups;
++		string key;
++		bool encryption;
++		bool fullscreen;
++		string customCommand;
++	};
++
++	struct NXSessionData {
++		string sessionName;
++		string sessionType;
++		int cache;
++		int images;
++		string linkType;
++		bool render;
++		string backingstore;
++		int imageCompressionMethod;
++		int imageCompressionLevel;
++		string geometry;
++		string keyboard;
++		string kbtype;
++		bool media;
++		string agentServer;
++		string agentUser;
++		string agentPass;
++		int cups;
++		string id;
++		string key;
++		bool encryption;
++		bool fullscreen;
++		string customCommand;
++		bool suspended;
++		int xRes;
++		int yRes;
++		int depth;
++		int display;
++		bool terminate;
++	};
++
++	struct NXResumeData {
++		int display;
++		string sessionType;
++		string sessionID;
++		string options;
++		int depth;
++		string screen;
++		string available;
++		string sessionName;
++	};
++
++} // namespace
++#endif
+
+Added: nxcl/lib/nxsession.cpp
+===================================================================
+--- nxcl/lib/nxsession.cpp	2007-08-19 15:44:16 UTC (rev 372)
++++ nxcl/lib/nxsession.cpp	2007-09-11 12:48:46 UTC (rev 373)
+@@ -0,0 +1,575 @@
++/***************************************************************************
++                               nxsession.h
++                             -------------------
++    begin                : Wed 26th July 2006
++    modifications        : July 2007
++    copyright            : (C) 2006 by George Wright
++    modifications        : (C) 2007 Embedded Software Foundry Ltd. (U.K.)
++                         :     Author: Sebastian James
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++ 
++// Enumerated type defining the stages through which the client goes when connecting
++enum { HELLO_NXCLIENT, ACKNOWLEDGE, SHELL_MODE, AUTH_MODE, LOGIN, LIST_SESSIONS, PARSESESSIONS, STARTSESSION, FINISHED };
++
++/*
++	0 HELLO NXCLIENT
++	1 Acknowledgement from server
++	2 SET SHELL_MODE SHELL
++	3 SET AUTH_MODE PASSWORD
++	4 login
++	5 listsession
++	6 resumesession/startsession
++*/
++
++#define CLIENT_VERSION &quot;3.0.0&quot;
++
++#include &lt;iostream&gt;
++#include &quot;nxsession.h&quot;
++#include &quot;nxclientlib.h&quot; // nxclientlib provides some signals used here.
++#include &quot;notQt.h&quot;
++
++using namespace std;
++using namespace nxcl;
++
++NXSession::NXSession()
++{
++	this-&gt;devurand_fd = -1;
++	this-&gt;stage = 0;
++	this-&gt;sessionDataSet = false;
++	this-&gt;nxUsername = &quot;nouser&quot;;
++	this-&gt;nxPassword = &quot;nopass&quot;;
++}
++
++NXSession::~NXSession()
++{
++}
++
++void NXSession::resetSession()
++{
++	this-&gt;stage = 0;
++	this-&gt;sessionDataSet = false;
++}
++
++string NXSession::parseSSH(string message)
++{
++	dbgln (&quot;NXSession::parseSSH called for: &quot; + message);
++
++	int response = parseResponse (message);
++	string returnMessage;
++	
++	if (response == 211) {
++		if (doSSH == true) {
++			returnMessage = &quot;yes&quot;;
++			doSSH = false;
++		} else
++			returnMessage = &quot;no&quot;;
++	}
++
++	if (response == 204) { // Authentication failed
++		returnMessage = &quot;204&quot;;
++	}
++	
++	if (response == 147) { // Server capacity reached
++		returnMessage = &quot;147&quot;;
++		this-&gt;stage = FINISHED;
++	}
++
++	switch (this-&gt;stage) {
++		case HELLO_NXCLIENT:
++			dbgln (&quot;HELLO_NXCLIENT stage&quot;);
++			if (message.find(&quot;HELLO NXSERVER - Version&quot;) != string::npos) {
++				this-&gt;callbacks-&gt;authenticatedSignal();
++				returnMessage = &quot;hello NXCLIENT - Version &quot;;
++				returnMessage.append(CLIENT_VERSION);
++				this-&gt;stage++;
++			}
++			break;
++		case ACKNOWLEDGE:
++			dbgln (&quot;ACKNOWLEDGE stage&quot;);
++			if (response == 105)
++				this-&gt;stage++;
++			break;
++		case SHELL_MODE:
++			dbgln (&quot;SHELL_MODE stage&quot;);
++			if (response == 105) {
++				returnMessage = &quot;SET SHELL_MODE SHELL&quot;;
++				this-&gt;stage++;
++			}
++			break;
++		case AUTH_MODE:
++			dbgln (&quot;AUTH_MODE stage&quot;);
++			if (response == 105) {
++				returnMessage = &quot;SET AUTH_MODE PASSWORD&quot;;
++				this-&gt;stage++;
++			}
++			break;
++		case LOGIN:
++			dbgln (&quot;LOGIN stage&quot;);
++			switch (response) {
++				case 105:
++					returnMessage = &quot;login&quot;;
++					break;
++				case 101:
++					returnMessage = nxUsername;
++					break;
++				case 102:
++					returnMessage = nxPassword;
++					break;
++				case 103:
++					this-&gt;stage++;
++					break;
++				case 404:
++					this-&gt;callbacks-&gt;loginFailedSignal();
++				}
++			break;
++		case LIST_SESSIONS:
++			dbgln (&quot;LIST_SESSIONS stage&quot;);
++			if (this-&gt;sessionData-&gt;terminate == true) {
++				// Wait for termination
++				dbgln (&quot;Waiting for termination&quot;);
++				if (response == 900) {
++					stringstream termsession;
++					termsession &lt;&lt; &quot;NX&gt; 900 Session id: &quot; &lt;&lt; this-&gt;sessionData-&gt;id &lt;&lt; &quot; terminated.&quot;;
++					if (message.find (termsession.str().c_str(), 0) == 0) {
++						// Session terminated.
++						this-&gt;sessionData-&gt;terminate = false;
++					} else {
++						usleep (10000);
++					}
++				}
++
++			} else if (response == 105) {
++				// Get a list of the available
++				// sessions on the server, for given
++				// user, with given status, and any
++				// type. Not sure if geometry is
++				// ignored or not.
++				stringstream ss;
++				// We want to list suspended or running sessions, with this command:
++				
++				dbgln (&quot;this-&gt;resumeSessions.size() == &quot; &lt;&lt; this-&gt;resumeSessions.size());
++				
++				if (this-&gt;sessionData-&gt;sessionType == &quot;shadow&quot;) {
++					// This is how to list shadow
++					// sessions. Run NoMachine's
++					// client and see
++					// ~/.nx/temp/(pid)/sshlog for
++					// connection details
++					ss &lt;&lt; &quot;Listsession --type=\&quot;shadow\&quot;&quot;;
++
++				} else {
++
++					ss &lt;&lt; &quot;Listsession --user=\&quot;&quot; &lt;&lt; nxUsername
++					   &lt;&lt; &quot;\&quot; --status=\&quot;suspended,running\&quot; --geometry=\&quot;&quot; 
++					   &lt;&lt; this-&gt;sessionData-&gt;xRes &lt;&lt; &quot;x&quot;
++					   &lt;&lt; this-&gt;sessionData-&gt;yRes &lt;&lt; &quot;x&quot; 
++					   &lt;&lt; this-&gt;sessionData-&gt;depth 
++					   &lt;&lt; (this-&gt;sessionData-&gt;render ? &quot;+render&quot; : &quot;&quot;) 
++						// If you leave --type blank, you can re-connect to any sessions available.
++					   &lt;&lt;  &quot;\&quot; --type=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;sessionType &lt;&lt; &quot;\&quot;&quot;;
++				}
++				
++				returnMessage = ss.str();
++				this-&gt;stage++;
++			}
++			break;
++		case PARSESESSIONS:
++			dbgln (&quot;PARSESESSIONS stage&quot;);
++
++			if ((this-&gt;sessionData-&gt;sessionType == &quot;shadow&quot; &amp;&amp; response != 105) ||
++			    (this-&gt;sessionData-&gt;sessionType != &quot;shadow&quot; &amp;&amp; response != 148)  ) {
++
++				dbgln (&quot;Building resumeSessions: resumeSessions.push_back(message);&quot;);
++				this-&gt;resumeSessions.push_back(message);
++
++			} else if ( (this-&gt;sessionData-&gt;sessionType == &quot;shadow&quot; &amp;&amp; response == 105 ) || 
++				    (this-&gt;sessionData-&gt;sessionType != &quot;shadow&quot; &amp;&amp; response == 148)  ) {
++
++				dbgln (&quot;Parsing resumeSessions: parseResumeSessions(resumeSessions);&quot;);
++				parseResumeSessions (this-&gt;resumeSessions);
++				dbgln (&quot;parseResumeSessions(resumeSessions) returned&quot;);
++				// Now, the problem we have here, is that when
++				// we return from the last 105 response, we
++				// don't then get another stdout message to
++				// act upon. So, we want to recurse back into parseSSH to get onto the STARTSESSION stage here:
++				returnMessage = this-&gt;parseSSH (message);
++			}
++			break;
++
++		case STARTSESSION:
++			dbgln (&quot;STARTSESSION stage&quot;);
++			if (response == 105 &amp;&amp; sessionDataSet) {
++
++				dbgln (&quot;response is 105 and sessionDataSet is true&quot;);;
++				int media = 0;
++				string fullscreen = &quot;&quot;;
++				if (this-&gt;sessionData-&gt;media) {
++					media = 1;
++				}
++				if (this-&gt;sessionData-&gt;fullscreen) {
++					this-&gt;sessionData-&gt;geometry = &quot;fullscreen&quot;;
++					fullscreen = &quot;+fullscreen&quot;;
++				}
++
++				if (this-&gt;sessionData-&gt;sessionType == &quot;shadow&quot; &amp;&amp; this-&gt;sessionData-&gt;terminate == false) {
++					dbgln (&quot;It's a shadow session!&quot;);
++					stringstream ss;
++					// These are the session parameters that NoMachine's client sends for resume
++					ss &lt;&lt; &quot;Attachsession &quot;
++					   &lt;&lt; &quot;--link=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;linkType &lt;&lt; &quot;\&quot; &quot;
++					   &lt;&lt; &quot;--backingstore=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;backingstore &lt;&lt; &quot;\&quot; &quot;
++					   &lt;&lt; &quot;--encryption=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;encryption &lt;&lt; &quot;\&quot; &quot;
++					   &lt;&lt; &quot;--cache=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;cache &lt;&lt; &quot;M\&quot; &quot;
++					   &lt;&lt; &quot;--images=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;images &lt;&lt; &quot;M\&quot; &quot;
++					   &lt;&lt; &quot;--shmem=\&quot;1\&quot; &quot; // probably has been autodetected from my display
++					   &lt;&lt; &quot;--shpix=\&quot;1\&quot; &quot; // probably has been autodetected from my display
++					   &lt;&lt; &quot;--strict=\&quot;0\&quot; &quot; // probably has been autodetected from my display
++					   &lt;&lt; &quot;--composite=\&quot;1\&quot; &quot; // probably has been autodetected from my display
++					   &lt;&lt; &quot;--media=\&quot;&quot; &lt;&lt; media &lt;&lt; &quot;\&quot; &quot;
++					   &lt;&lt; &quot;--session=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;sessionName &lt;&lt; &quot;\&quot; &quot;
++					   &lt;&lt; &quot;--type=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;sessionType &lt;&lt; &quot;\&quot; &quot;
++					   &lt;&lt; &quot;--client=\&quot;linux\&quot; &quot; // FIXME: This may be some other OS if you compile it on Sun, Windows, etc.
++					   &lt;&lt; &quot;--keyboard=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;keyboard &lt;&lt; &quot;\&quot; &quot;
++					   &lt;&lt; &quot;--id=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;id &lt;&lt; &quot;\&quot; &quot;
++					   &lt;&lt; &quot;--display=\&quot;0\&quot; &quot; // This may be the key?
++					   &lt;&lt; &quot;--geometry=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;geometry &lt;&lt; &quot;\&quot; &quot;;
++
++					/* These appear not to be necessary for the shadow connection, for one reason and another.
++					        // Not required:
++						&quot;\&quot; --cookie=\&quot;&quot; &lt;&lt; generateCookie() &lt;&lt;
++						// optional:
++						&quot;\&quot; --kbtype=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;kbtype &lt;&lt;
++						// optional:
++						&quot;\&quot; --nodelay=\&quot;1&quot; &lt;&lt; 
++						// These are obviously not required
++						&quot;\&quot; --agent_server=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;agentServer &lt;&lt;
++						&quot;\&quot; --agent_user=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;agentUser &lt;&lt;
++						&quot;\&quot; --agent_password=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;agentPass &lt;&lt; &quot;\&quot;&quot;;
++					*/
++
++					returnMessage = ss.str();
++					dbgln (&quot;session parameter command: &quot; + ss.str());
++					this-&gt;stage++;
++
++				} else if (this-&gt;sessionData-&gt;terminate == true) {
++					stringstream ss;
++					// These are the session parameters that NoMachine's client sends for resume
++					ss &lt;&lt; &quot;Terminate --sessionid=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;id &lt;&lt; &quot;\&quot;&quot;;
++					returnMessage = ss.str();
++					dbgln (&quot;session parameter command: &quot; + ss.str());
++					this-&gt;stage -= 2; // Back to listsessions after terminating a session.
++					// clear the list of sessions to resume
++					this-&gt;resumeSessions.clear();
++					this-&gt;runningSessions.clear();
++
++				} else if (this-&gt;sessionData-&gt;suspended) {
++					dbgln (&quot;this-&gt;sessionData-&gt;suspended is true&quot;);
++					stringstream ss;
++					// These are the session parameters that NoMachine's client sends for resume
++					ss &lt;&lt; &quot;restoresession --id=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;id &lt;&lt;
++						&quot;\&quot; --session=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;sessionName &lt;&lt;
++						&quot;\&quot; --type=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;sessionType &lt;&lt;
++						&quot;\&quot; --cache=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;cache &lt;&lt;
++						&quot;M\&quot; --images=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;images &lt;&lt;
++						&quot;M\&quot; --cookie=\&quot;&quot; &lt;&lt; generateCookie() &lt;&lt;
++						&quot;\&quot; --link=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;linkType &lt;&lt;
++						&quot;\&quot; --kbtype=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;kbtype &lt;&lt;
++						&quot;\&quot; --nodelay=\&quot;1\&quot; --encryption=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;encryption &lt;&lt;
++						&quot;\&quot; --backingstore=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;backingstore &lt;&lt;
++						&quot;\&quot; --geometry=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;geometry &lt;&lt;
++						&quot;\&quot; --media=\&quot;&quot; &lt;&lt; media &lt;&lt;
++						&quot;\&quot; --agent_server=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;agentServer &lt;&lt;
++						&quot;\&quot; --agent_user=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;agentUser &lt;&lt;
++						&quot;\&quot; --agent_password=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;agentPass &lt;&lt; &quot;\&quot;&quot;;
++					returnMessage = ss.str();
++					dbgln (&quot;session parameter command: &quot; + ss.str());
++					this-&gt;stage++;
++
++				} else { 
++					dbgln (&quot;this-&gt;sessionData-&gt;suspended is false, and it's not a shadow session.&quot;);
++					stringstream ss;
++					ss &lt;&lt; &quot;startsession --session=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;sessionName &lt;&lt;
++						&quot;\&quot; --type=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;sessionType &lt;&lt;
++						&quot;\&quot; --cache=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;cache &lt;&lt;
++						&quot;M\&quot; --images=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;images &lt;&lt;
++						&quot;M\&quot; --cookie=\&quot;&quot; &lt;&lt; generateCookie() &lt;&lt;
++						&quot;\&quot; --link=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;linkType &lt;&lt;
++						&quot;\&quot; --render=\&quot;&quot; &lt;&lt; (this-&gt;sessionData-&gt;render ? 1 : 0) &lt;&lt;
++						&quot;\&quot; --encryption=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;encryption &lt;&lt;
++						&quot;\&quot; --backingstore=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;backingstore &lt;&lt;
++						&quot;\&quot; --imagecompressionmethod=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;imageCompressionMethod &lt;&lt;
++						&quot;\&quot; --geometry=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;geometry &lt;&lt; 
++						&quot;\&quot; --screeninfo=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;xRes &lt;&lt; &quot;x&quot; &lt;&lt; this-&gt;sessionData-&gt;yRes &lt;&lt; &quot;x&quot; &lt;&lt; this-&gt;sessionData-&gt;depth &lt;&lt; 
++						(this-&gt;sessionData-&gt;render ? &quot;+render&quot; : &quot;&quot;) &lt;&lt; fullscreen &lt;&lt;
++						&quot;\&quot; --keyboard=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;keyboard &lt;&lt;
++						&quot;\&quot; --kbtype=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;kbtype &lt;&lt;
++						&quot;\&quot; --media=\&quot;&quot; &lt;&lt; media &lt;&lt;
++						&quot;\&quot; --agent_server=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;agentServer &lt;&lt;
++						&quot;\&quot; --agent_user=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;agentUser &lt;&lt;
++						&quot;\&quot; --agent_password=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;agentPass &lt;&lt; &quot;\&quot;&quot;;
++					if (this-&gt;sessionData-&gt;sessionType == &quot;unix-application&quot;) {
++						ss &lt;&lt; &quot; --application=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;customCommand &lt;&lt; &quot;\&quot;&quot;;
++					}
++					returnMessage = ss.str();
++					dbgln (&quot;session parameter command: &quot; + ss.str());
++					this-&gt;stage++;
++				}
++			} else {
++				dbgln (&quot;either response is not 105 or sessionDataSet is false.&quot;);;				
++			}
++			break;
++
++		case FINISHED:
++			dbgln (&quot;FINISHED stage. Response is &quot; &lt;&lt; response 
++			       &lt;&lt; &quot;. That should mean that session set up is complete.&quot;);
++			this-&gt;callbacks-&gt;readyForProxySignal();
++	}
++
++	dbgln (&quot;NXSession::parseSSH, about to return a message: &quot; + returnMessage);
++	if (!returnMessage.empty()) {
++		returnMessage.append(&quot;\n&quot;);
++		return returnMessage;
++	} else
++		return &quot;&quot;;
++}
++
++void NXSession::setSessionData (NXSessionData *sd)
++{
++	this-&gt;sessionData = sd;
++	this-&gt;sessionDataSet = true;
++}
++
++int NXSession::parseResponse(string message)
++{
++	string::size_type idx1, idx2;
++	int response;
++	dbgln (&quot;NXSession::parseResponse called for message:&quot; &lt;&lt; message);
++
++	if ((idx1 = message.find (&quot;notQProcess error&quot;, 0)) != string::npos) {
++		dbgln (&quot;Found notQProcess error&quot;);
++		// This means a process crashed, we're going to return a number &gt;100000 to indicate this.
++		if ( ((idx2 = message.find (&quot;crashed&quot;, 0)) != string::npos) &amp;&amp; idx2 &gt; idx1) {
++			stringstream ss;
++			ss &lt;&lt; message.substr((idx1+19), idx2-1-(idx1+19));
++			ss &gt;&gt; response; // this is the pid that crashed
++			response += 100000; // add 100000 and return this.
++			return response;
++		} else {
++			dbgln (&quot;Uh oh, didn't find \&quot;crashed\&quot;&quot;);
++		}
++	}
++
++	// Find out the server response number
++	// This will only be present in strings which contain &quot;NX&gt;&quot;
++	if (message.find(&quot;NX&gt;&quot;) != string::npos &amp;&amp; message.find(&quot;NX&gt;&quot;) == 0) {
++		idx1 = message.find(&quot;NX&gt;&quot;) + 4;
++		if ((idx2 = message.find(&quot; &quot;, idx1)) == string::npos) {
++			if ((idx2 = message.find(&quot;\n&quot;, idx1)) == string::npos) {
++				//dbgln (&quot;NXSession::parseResponse: warning: reading up to the end of message.&quot;);
++				idx2 = message.size();
++			}
++		}
++		if (idx2&gt;idx1) {
++			stringstream ss;
++			ss &lt;&lt; message.substr(idx1, idx2-idx1);
++			ss &gt;&gt; response;
++		} else {
++			response = 0;
++		}
++	} else {
++		response = 0;
++	}
++
++	dbgln (&quot;NXSession::parseResponse() returning &quot; &lt;&lt; response);
++	return response;
++}
++
++void NXSession::parseResumeSessions(list&lt;string&gt; rawdata)
++{
++	// Was: QStringList sessions, and got rawdata appended to it?
++	list&lt;string&gt; sessions;
++	list&lt;string&gt;::iterator iter, at;
++
++	dbgln (&quot;NXSession::parseResumeSessions called.&quot;);
++
++	for (iter = rawdata.begin(); iter != rawdata.end(); iter++) {
++		if (((*iter).find(&quot;-------&quot;) != string::npos) &amp;&amp; !(*iter).empty()) {
++			at = iter;
++		}
++	}
++
++	for (iter = ++at; iter != rawdata.end(); iter++) {
++		if ((!(*iter).find(&quot;NX&gt; 148&quot;) != string::npos) &amp;&amp; !(*iter).empty()) {
++			sessions.push_back(*iter);
++		}
++	}
++
++	list &lt; vector&lt;string&gt; &gt; rawsessions;
++	list &lt; vector&lt;string&gt; &gt;::iterator rsIter;
++
++	// Clean up each string in sessions[i], then push back
++	// sessions[i] onto rawsessions., except that means
++	// rawsessions is then just a list&lt;string&gt;...
++	vector&lt;string&gt; session;
++	vector&lt;string&gt;::iterator seshIter;
++	for (iter = sessions.begin(); iter != sessions.end(); iter++) {
++		session.clear();
++		/* simplify one line of list&lt;string&gt; sessions */
++		(*iter) = notQtUtilities::simplify (*iter); 
++		/* split one line of list&lt;string&gt; sessions into a vector&lt;string&gt; */
++		notQtUtilities::splitString (*iter, ' ', session); 
++		/* Add that to rawsessions */
++		rawsessions.push_back(session);
++	}
++
++	NXResumeData resData;
++	
++	for (rsIter = rawsessions.begin(); rsIter != rawsessions.end(); rsIter++) {
++		stringstream ss1, ss2;
++		int tmp;
++		dbgln (&quot;*rsIter.size() == &quot; &lt;&lt; (*rsIter).size());
++		ss1 &lt;&lt; (*rsIter)[0];
++		ss1 &gt;&gt; tmp;
++		resData.display = tmp;
++		dbgln (&quot;resData.display = &quot; &lt;&lt; resData.display);
++		resData.sessionType = (*rsIter)[1];
++		dbgln (&quot;resData.sessionType = &quot; &lt;&lt; resData.sessionType);
++		resData.sessionID = (*rsIter)[2];
++		dbgln (&quot;resData.sessionID = &quot; &lt;&lt; resData.sessionID);
++		resData.options = (*rsIter)[3];
++		dbgln (&quot;resData.options = &quot; &lt;&lt; resData.options);
++		ss2 &lt;&lt; (*rsIter)[4];
++		ss2 &gt;&gt; tmp;
++		resData.depth = tmp;
++		dbgln (&quot;resData.depth = &quot; &lt;&lt; resData.depth);
++		resData.screen = (*rsIter)[5];
++		dbgln (&quot;resData.screen = &quot; &lt;&lt; resData.screen);
++		resData.available = (*rsIter)[6];
++		dbgln (&quot;resData.available = &quot; &lt;&lt; resData.available);
++		resData.sessionName = (*rsIter)[7];
++		dbgln (&quot;resData.sessionName = &quot; &lt;&lt; resData.sessionName);
++		this-&gt;runningSessions.push_back(resData);
++	}
++
++	if (this-&gt;runningSessions.size() != 0) {
++		this-&gt;suspendedSessions = true;
++		dbgln (&quot;NXSession::parseResumeSessions(): Calling sessionsSignal.&quot;);
++		// runningSessions is a list of NXResumeData
++		this-&gt;callbacks-&gt;sessionsSignal (this-&gt;runningSessions);
++	} else {
++		dbgln (&quot;NXSession::parseResumeSessions(): Calling this-&gt;callbacks-&gt;noSessionsSignal()&quot;);
++		// In case we previously had one resumable session,
++		// which the user terminated, then we listsessions and
++		// got no resumable sessions, we need to make sure
++		// startsession is called, not restoresession. hence
++		// set sessionData-&gt;suspended to false.
++		this-&gt;sessionData-&gt;suspended = false;
++		this-&gt;callbacks-&gt;noSessionsSignal();
++	}
++	
++	dbgln (&quot;Increment stage&quot;);
++	this-&gt;stage++;
++	dbgln (&quot;NXSession::parseResumeSessions() returning.&quot;);
++}
++
++void NXSession::wipeSessions()
++{
++	while (!this-&gt;runningSessions.empty()) {
++		this-&gt;runningSessions.pop_front();
++	}
++}
++
++string NXSession::generateCookie()
++{
++	unsigned long long int int1, int2;
++	stringstream cookie;
++	
++	devurand_fd = open(&quot;/dev/urandom&quot;, O_RDONLY);
++
++	fillRand((unsigned char*)&amp;int1, sizeof(int1));
++	fillRand((unsigned char*)&amp;int2, sizeof(int2));
++	cookie &lt;&lt; int1 &lt;&lt; int2;
++	return cookie.str();
++}
++
++void NXSession::fillRand(unsigned char *buf, size_t nbytes) {
++	ssize_t r;
++	unsigned char *where = buf;
++
++	while (nbytes) {
++		while ((r = read(devurand_fd, where, nbytes)) == -1)
++		where  += r;
++		nbytes -= r;
++	}
++}
++
++bool NXSession::chooseResumable (int n)
++{
++	dbgln (&quot;NXSession::chooseResumable called.&quot;);
++	if (this-&gt;runningSessions.size() &lt;= static_cast&lt;unsigned int&gt;(n)) {
++		// No nth session to resume.
++		dbgln (&quot;No nth session to resume, return false.&quot;);
++		return false;
++	}
++
++	this-&gt;sessionDataSet = false; // Set to false while we change
++				      // contents of sessionData
++
++	list&lt;NXResumeData&gt;::iterator it = this-&gt;runningSessions.begin();
++	for (int i = 0; i&lt;n; i++) { it++; }
++
++	// If it's a shadow session, we don't want to replace &quot;shadow&quot; with X11-local
++	if (this-&gt;sessionData-&gt;sessionType != &quot;shadow&quot;) {
++		this-&gt;sessionData-&gt;sessionType = (*it).sessionType;
++	}
++	this-&gt;sessionData-&gt;display = (*it).display;
++	this-&gt;sessionData-&gt;sessionName = (*it).sessionName;
++	this-&gt;sessionData-&gt;id = (*it).sessionID;
++	stringstream geom;	
++	geom &lt;&lt; (*it).screen &lt;&lt; &quot;x&quot; &lt;&lt; (*it).display; // plus render, if necessary.
++	// FIXME: This not yet quite complete.
++	this-&gt;sessionData-&gt;geometry = geom.str(); // with depth in there too?
++	this-&gt;sessionData-&gt;suspended=true;
++
++	this-&gt;sessionDataSet = true;
++
++	dbgln (&quot;NXSession::chooseResumable returning true.&quot;);
++	return true;
++}
++
++bool NXSession::terminateSession (int n)
++{
++	dbgln (&quot;NXSession::terminateSession called.&quot;);
++	if (this-&gt;runningSessions.size() &lt;= static_cast&lt;unsigned int&gt;(n)) {
++		// No nth session to resume.
++		dbgln (&quot;No nth session to terminate, return false.&quot;);
++		return false;
++	}
++
++	this-&gt;sessionDataSet = false; // Set to false while we change
++				      // contents of sessionData
++
++	list&lt;NXResumeData&gt;::iterator it = this-&gt;runningSessions.begin();
++	for (int i = 0; i&lt;n; i++) { it++; }
++
++	this-&gt;sessionData-&gt;terminate = true;
++	this-&gt;sessionData-&gt;display = (*it).display;
++	this-&gt;sessionData-&gt;sessionName = (*it).sessionName;
++	this-&gt;sessionData-&gt;id = (*it).sessionID;
++	this-&gt;sessionData-&gt;suspended=true;
++
++	this-&gt;sessionDataSet = true;
++
++	return true;
++}
++
+
+Added: nxcl/lib/nxsession.h
+===================================================================
+--- nxcl/lib/nxsession.h	2007-08-19 15:44:16 UTC (rev 372)
++++ nxcl/lib/nxsession.h	2007-09-11 12:48:46 UTC (rev 373)
+@@ -0,0 +1,153 @@
++/* -*-c++-*- */
++/***************************************************************************
++                                 nxsession.h
++                             -------------------
++    begin                : Sat 22nd July 2006
++    modifications        : July 2007
++    copyright            : (C) 2006 by George Wright
++    modifications        : (C) 2007 Embedded Software Foundry Ltd. (U.K.)
++                         :     Author: Sebastian James
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++#ifndef _NXSESSION_H_
++#define _NXSESSION_H_
++
++#include &lt;sstream&gt;
++#include &lt;fstream&gt;
++#include &lt;fcntl.h&gt;
++#include &lt;unistd.h&gt;
++#include &quot;nxdata.h&quot;
++#include &lt;list&gt;
++
++namespace nxcl {
++
++	/*!
++	 * Virtual Callback class. These callbacks are called based on
++	 * the output which we get from the nxssh process.
++	 */
++	class NXSessionCallbacks
++	{
++	public:
++		NXSessionCallbacks() {}
++		virtual ~NXSessionCallbacks() {}
++		virtual void noSessionsSignal (void) {}
++		virtual void loginFailedSignal (void) {}
++		virtual void readyForProxySignal (void) {}
++		/*!
++		 * Emitted when the initial public key authentication
++		 * is successful 
++		 */
++		virtual void authenticatedSignal (void) {}
++		virtual void sessionsSignal (list&lt;NXResumeData&gt;) {}
++	};
++
++	/*!
++	 * This class is used to parse the output from the nxssh
++	 * session to the server.
++	 */
++	class NXSession
++	{
++	public:
++		NXSession();
++		~NXSession();
++		
++		string parseSSH (string);
++		int parseResponse (string);
++		void parseResumeSessions (list&lt;string&gt;);
++		void resetSession (void);
++		void wipeSessions (void);
++		bool chooseResumable (int n);
++		bool terminateSession (int n);
++		string generateCookie (void);
++
++		/*!
++		 * Accessors
++		 */
++		//@{
++		void setUsername (string&amp; user) { nxUsername = user; }
++		void setPassword (string&amp; pass) { nxPassword = pass; }
++		void setResolution (int x, int y) {
++			if (this-&gt;sessionDataSet) {
++				this-&gt;sessionData-&gt;xRes = x;
++				this-&gt;sessionData-&gt;yRes = y;
++			}
++		}
++		void setDepth (int d) { if (this-&gt;sessionDataSet) {this-&gt;sessionData-&gt;depth = d;} }
++		void setRender (bool isRender) { if (this-&gt;sessionDataSet) {this-&gt;sessionData-&gt;render = isRender;} }
++		void setEncryption (bool enc) { if (this-&gt;sessionDataSet) {this-&gt;sessionData-&gt;encryption = enc;} }
++
++		void setContinue (bool allow) { doSSH = allow; }
++		void setSessionData (NXSessionData*);
++		bool getSessionDataSet (void) { return this-&gt;sessionDataSet; }
++		void setCallbacks (NXSessionCallbacks * cb) { this-&gt;callbacks = cb; }
++		//@}
++		
++	private:
++		void reset (void);
++		void fillRand(unsigned char *, size_t);
++
++		/*!
++		 * This is the answer to give to the ssh server if it
++		 * asks whether we want to continue (say, if we're
++		 * connecting for the first time and we don't
++		 * necessarily trust its SSL key).
++		 */
++		bool doSSH;
++		/*!
++		 * Set to true if there are suspended sessions on the
++		 * server which are owned by nxUsername.
++		 */
++		bool suspendedSessions;
++		/*!
++		 * Set to true of sessionData has been populated
++		 */
++		bool sessionDataSet;
++		/*!
++		 * Holds the stage of the process which we have
++		 * reached as we go through the process of
++		 * authenticating with the NX Server.
++		 */
++		int stage;
++		/*!
++		 * File descriptor for the random number device
++		 */
++		int devurand_fd;
++		/*!
++		 * Holds the username for this session
++		 */
++		string nxUsername;
++		/*!
++		 * Holds the password for this session
++		 */
++		string nxPassword;
++		/*!
++		 * A list of sessions which can be resumed, as strings.
++		 */
++		list&lt;string&gt; resumeSessions;
++		/*!
++		 * A list of running sessions, held as NXResumeData
++		 * structures.
++		 */
++		list&lt;NXResumeData&gt; runningSessions;
++		/*!
++		 * Data for this session.
++		 */
++		NXSessionData *sessionData;
++		/*!
++		 * Pointer to a class containing callback methods.
++		 */
++		NXSessionCallbacks * callbacks;
++	};
++
++} // namespace
++#endif
+
+Added: nxcl/nxcl/Makefile.am
+===================================================================
+--- nxcl/nxcl/Makefile.am	2007-08-19 15:44:16 UTC (rev 372)
++++ nxcl/nxcl/Makefile.am	2007-09-11 12:48:46 UTC (rev 373)
+@@ -0,0 +1,8 @@
++AM_CPPFLAGS = @PACKAGE_CFLAGS@ -DPACKAGE_DATA_DIR=\&quot;&quot;$(datadir)&quot;\&quot; -DLOCALEDIR=\&quot;$(localedir)\&quot; -DPACKAGE_BIN_DIR=\&quot;&quot;$(bindir)&quot;\&quot;
++INCLUDES = -I../lib
++bin_PROGRAMS = nxcl
++nxcl_SOURCES = main.cpp nxcl.cpp
++# This links to X11 so that nxcl can obtain the X server's actual screen size
++nxcl_LDADD = @PACKAGE_LIBS@ $(LIBINTL) -L../lib -lnxcl -lX11
++pkginclude_HEADERS = nxcl.h
++
+
+Added: nxcl/nxcl/main.cpp
+===================================================================
+--- nxcl/nxcl/main.cpp	2007-08-19 15:44:16 UTC (rev 372)
++++ nxcl/nxcl/main.cpp	2007-09-11 12:48:46 UTC (rev 373)
+@@ -0,0 +1,114 @@
++/*
++ * nxcld: The NXCL dbus daemon.
++ *
++ * This program should be launched by a client - that might be gnxc,
++ * qtnxc, fltknxc, tknxc, emacsnxc.... etc etc you get the picture.
++ *
++ * This graphical launcher program is the place where the user can
++ * select the connection type, and enter his username and password. It
++ * launches nxcld via a dbus call (or some other way?), then transmits
++ * the settings to nxcld via dbus. nxcld then negotiates the NX
++ * connection - launching nxssh and nxproxy. nxcld will send back a
++ * list of sessions to the launching NX client (if there are
++ * multiple available sessions) and a signal to say if the connection
++ * has been launched or if an error occurred.
++ *
++ * (C) 2007 Embedded Software Foundry Ltd. (U.K.)
++ * Author: Sebastian James
++ * Email:  <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>
++ *
++ * Released under the terms of the GNU GPL version 2.
++ */
++
++#include &quot;../config.h&quot;
++#include &quot;nxclientlib.h&quot;
++#include &quot;nxcl.h&quot;
++#include &lt;fstream&gt;
++
++/* This define is required for slightly older versions of dbus as
++ * found, for example, in Ubuntu 6.06. */
++#define DBUS_API_SUBJECT_TO_CHANGE 1
++extern &quot;C&quot; {
++#include &lt;string.h&gt;
++#include &lt;dbus/dbus.h&gt;
++}
++
++using namespace nxcl;
++using namespace std;
++
++/*!
++ * Log file ofstream is a global variable, as required by nxcl.
++ */
++ofstream debugLogFile;
++
++/*!
++ * This probing routine is executed on a regular basis. It will set
++ * off suitable signals if there is stdout or stderr to be analysed
++ * from the nxssh process. It also recognises when the nxssh program
++ * has exited.
++ */
++bool probeNXCL (NXClientLib* lib);
++
++int main (int argc, char **argv)
++{
++	Nxcl nxcl;
++
++	debugLogFile.open(&quot;/tmp/nxcl.log&quot;, ios::out|ios::trunc);
++	if (!debugLogFile.is_open()) {
++		nxcl.callbacks.write (&quot;Odd, couldn't open /tmp/nxcl.log&quot;);
++	}
++
++	if (argc!=2) {
++		nxcl.callbacks.write (&quot;This program is usually executed by another program. &quot;
++				      &quot;Trying to execute it alone is probably not the right &quot;
++				      &quot;thing to do, unless you are sure it is. Provide a single &quot;
++				      &quot;argument - the identifier for the dbus messages&quot;);
++		return -1;
++	}
++
++	stringstream ss;
++	int id;
++	ss &lt;&lt; argv[1];
++	ss &gt;&gt; id;
++	nxcl.setupDbus(id);
++
++	if (-1 == (nxcl.receiveSettings())) {
++		cerr &lt;&lt; &quot;Failed to obtain server and user for the session.&quot; &lt;&lt; endl;
++		return -1;
++	}
++
++	nxcl.startTheNXConnection();
++
++	NXClientLib* c = nxcl.getNXClientLib();
++	while (probeNXCL(c) == true) {
++		usleep (30000); // 3 100ths of a second =&gt; about 30 
++                                // probes a second (a lot).
++	}
++
++	nxcl.callbacks.write (&quot;Program finished.&quot;);
++	debugLogFile.close();
++	return 0;
++}
++
++
++bool
++probeNXCL (NXClientLib* lib)
++{
++	notQProcess* p = lib-&gt;getNXSSHProcess();
++
++	if ((lib-&gt;getIsFinished()) == false) {
++		// We need to repeatedly check if there is any output to parse.
++		if (lib-&gt;getReadyForProxy() == false) {
++			//p = lib-&gt;getNXSSHProcess();
++			p-&gt;probeProcess();
++		} else {
++			//p = lib-&gt;getNXSSHProcess();
++			p-&gt;probeProcess();
++			p = lib-&gt;getNXProxyProcess();
++			p-&gt;probeProcess();
++		}
++		return true;
++	} else {
++		return false;
++	}
++}
+
+Added: nxcl/nxcl/nxcl.cpp
+===================================================================
+--- nxcl/nxcl/nxcl.cpp	2007-08-19 15:44:16 UTC (rev 372)
++++ nxcl/nxcl/nxcl.cpp	2007-09-11 12:48:46 UTC (rev 373)
+@@ -0,0 +1,627 @@
++/*
++ * nxcl: The NXCL dbus daemon.
++ *
++ * See main.cpp for general notes.
++ *
++ * This file contains the implementation of the Nxcl class used by
++ * the nxcl program.
++ *
++ * (C) 2007 Embedded Software Foundry Ltd. (U.K.)
++ * Author: Sebastian James
++ * Email:  <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>
++ *
++ * Released under the terms of the GNU GPL version 2.
++ */
++
++#include &quot;../config.h&quot;
++#include &quot;nxclientlib.h&quot;
++#include &lt;fstream&gt;
++
++#include &quot;nxcl.h&quot;
++
++/* This define is required for slightly older versions of dbus as
++ * found, for example, in Ubuntu 6.06. */
++#define DBUS_API_SUBJECT_TO_CHANGE 1
++extern &quot;C&quot; {
++#include &lt;dbus/dbus.h&gt;
++#include &lt;X11/Xlib.h&gt;
++}
++
++using namespace nxcl;
++using namespace std;
++
++
++/*!
++ * NxclCallbacks class
++ */
++//@{
++NxclCallbacks::NxclCallbacks ()
++{
++}
++NxclCallbacks::~NxclCallbacks ()
++{
++}
++void
++NxclCallbacks::write (string msg)
++{
++	cout &lt;&lt; &quot;NXCL&gt; &quot; &lt;&lt; msg &lt;&lt; endl;
++}
++void
++NxclCallbacks::debug (string msg)
++{
++#if DEBUG==1
++	cout &lt;&lt; &quot;NXCL&gt; &quot; &lt;&lt; msg &lt;&lt; endl;
++#endif
++}
++void
++NxclCallbacks::stdoutSignal (string msg)
++{
++#if DEBUG==1
++	cout &lt;&lt; &quot;nxssh-stdout-&gt;&quot; &lt;&lt; endl &lt;&lt; msg &lt;&lt; endl; 
++#endif
++}
++void
++NxclCallbacks::stderrSignal (string msg)
++{
++#if DEBUG==1
++	cout &lt;&lt; &quot;nxssh-stderr-&gt;&quot; &lt;&lt; endl &lt;&lt; msg &lt;&lt; endl; 
++#endif
++}
++void
++NxclCallbacks::stdinSignal (string msg)
++{
++#if DEBUG==1
++	cout &lt;&lt; &quot;nxssh&lt;-stdin-&quot; &lt;&lt; endl &lt;&lt; msg &lt;&lt; endl;
++#endif
++}
++void
++NxclCallbacks::resumeSessionsSignal (list&lt;NXResumeData&gt; data)
++{
++	this-&gt;parent-&gt;haveResumableSessions (data);
++}
++void
++NxclCallbacks::noSessionsSignal (void)
++{
++	this-&gt;parent-&gt;noResumableSessions();
++}
++void
++NxclCallbacks::serverCapacitySignal (void)
++{
++	this-&gt;parent-&gt;serverCapacityReached();
++}
++//@}
++
++/*!
++ * Implementation of the Nxcl class, which manages an NX session on
++ * behalf of a calling client, which communicates with this class via
++ * a dbus connection.
++ */
++//@{
++Nxcl::Nxcl ()
++{
++	this-&gt;dbusNum = 0;
++	this-&gt;initiate();
++}
++
++Nxcl::Nxcl (int n)
++{
++	this-&gt;dbusNum = n;
++	this-&gt;initiate();
++}
++
++
++Nxcl::~Nxcl ()
++{
++}
++
++void
++Nxcl::initiate (void)
++{
++	this-&gt;setSessionDefaults();
++
++	this-&gt;nxclientlib.setExternalCallbacks (&amp;callbacks);
++	this-&gt;callbacks.setParent (this);
++
++	// Get the X display information
++	Display* display;
++	display = XOpenDisplay (getenv(&quot;DISPLAY&quot;));
++	if (display == NULL) {
++		cerr &lt;&lt; &quot;Cannot connect to local X server :0\n&quot;;
++		exit (-1);
++	}
++
++	int screenNum = DefaultScreen (display);
++	this-&gt;xRes = DisplayWidth (display, screenNum);
++	this-&gt;yRes = DisplayHeight (display, screenNum);
++	dbgln (&quot;screen is &quot; &lt;&lt; xRes &lt;&lt; &quot;x&quot; &lt;&lt; yRes);
++	unsigned long wp = WhitePixel (display, screenNum);
++	unsigned long bp = BlackPixel (display, screenNum);
++	unsigned long d = wp-bp+1;
++	dbgln (&quot;wp is &quot; &lt;&lt; wp &lt;&lt; &quot; bp is &quot; &lt;&lt; bp &lt;&lt; &quot; and difference plus 1 (d) is &quot; &lt;&lt; d);
++	this-&gt;displayDepth = 0;
++	while (d &gt; 1) {
++		d = d&gt;&gt;1;
++		this-&gt;displayDepth++;
++	}
++	dbgln (&quot;displayDepth is &quot; &lt;&lt; this-&gt;displayDepth &lt;&lt; &quot; and d is now &quot; &lt;&lt; d);
++	XCloseDisplay (display);
++}
++
++void
++Nxcl::setupDbus (int id)
++{
++	this-&gt;dbusNum = id;
++	this-&gt;setupDbus();
++}
++
++void
++Nxcl::setupDbus (void)
++{
++	/* Get a connection to the session bus */
++	dbus_error_init (&amp;this-&gt;error);
++	this-&gt;conn = dbus_bus_get (DBUS_BUS_SESSION, &amp;this-&gt;error);
++	if (!this-&gt;conn) {
++		cerr &lt;&lt; &quot;Failed to connect to the D-BUS daemon: &quot; 
++		     &lt;&lt; this-&gt;error.message &lt;&lt; &quot;. Exiting.\n&quot;;
++		dbus_error_free (&amp;this-&gt;error);
++		exit (1);
++	}
++	stringstream ss;
++	ss &lt;&lt; &quot;org.freenx.nxcl.nxcl&quot; &lt;&lt; this-&gt;dbusNum;
++	this-&gt;dbusName = ss.str();
++	int ret = dbus_bus_request_name(this-&gt;conn, this-&gt;dbusName.c_str(),
++					DBUS_NAME_FLAG_REPLACE_EXISTING, 
++					&amp;this-&gt;error);
++	if (dbus_error_is_set(&amp;this-&gt;error)) { 
++		cerr &lt;&lt; &quot;Name Error (&quot; &lt;&lt; this-&gt;error.message &lt;&lt; &quot;)\n&quot;;
++		dbus_error_free(&amp;this-&gt;error); 
++	}
++	if (DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER != ret) { 
++		/* What to do if someone else is running? Try another name? Exit? */
++		this-&gt;callbacks.write (&quot;There appears to be another nxcl running, won't compete. Exiting.&quot;);
++		cout &lt;&lt; &quot;(DEBUG) ret == &quot; &lt;&lt; ret &lt;&lt; endl;
++		exit(1);
++	}
++	// Done getting connection to session bus
++
++
++	// Prepare interface - add a rule for which messages we want
++	// to see. We listen for messages from the _client_
++	// connection.
++	ss.str(&quot;&quot;);
++	ss &lt;&lt; &quot;type='signal',interface='org.freenx.nxcl.client&quot; &lt;&lt; this-&gt;dbusNum &lt;&lt; &quot;'&quot;;
++	this-&gt;dbusMatch = ss.str();
++
++	dbus_bus_add_match(this-&gt;conn, this-&gt;dbusMatch.c_str(), &amp;this-&gt;error);
++	dbus_connection_flush (this-&gt;conn);
++	if (dbus_error_is_set(&amp;this-&gt;error)) {
++		cerr &lt;&lt; &quot;Match Error (&quot; &lt;&lt; this-&gt;error.message &lt;&lt; &quot;)\n&quot;;
++		exit(1);
++	}
++
++	ss.str(&quot;&quot;);
++	ss &lt;&lt; &quot;org.freenx.nxcl.client&quot; &lt;&lt; this-&gt;dbusNum;
++	this-&gt;dbusMatchInterface = ss.str();
++	ss.str(&quot;&quot;);
++	ss &lt;&lt; &quot;org.freenx.nxcl.nxcl&quot; &lt;&lt; this-&gt;dbusNum;
++	this-&gt;dbusSendInterface = ss.str();
++
++	return;
++}
++
++
++int
++Nxcl::receiveSettings (void)
++{
++	DBusMessage * message;
++	DBusMessageIter args;
++	DBusError error;
++	char * parameter = NULL;
++	bool settings_transferred = false;
++	stringstream ss;
++	int count = 0;
++
++	this-&gt;callbacks.write (&quot;receiveSettings called&quot;);
++
++	// loop listening for signals being emitted
++	while (settings_transferred == false) {
++
++		if (dbus_error_is_set(&amp;error)) { 
++			this-&gt;callbacks.write (&quot;receiveSettings(): Got a dbus error&quot;);
++			dbus_error_free(&amp;error); 
++		}
++
++		// non blocking read of the next available message
++		dbus_connection_read_write(this-&gt;conn, 0);
++		message = dbus_connection_pop_message(this-&gt;conn);
++
++		// loop again if we haven't read a message
++		if (NULL == message) { 
++			//this-&gt;callbacks.write (&quot;receiveSettings(): No message yet, sleep a second.&quot;);
++			sleep(1);
++			continue;
++		}
++
++		// check if the message is a signal from the
++		// correct interface and with the correct name
++		this-&gt;callbacks.write (&quot;call dbus_message_is_signal()&quot;);
++		if (dbus_message_is_signal (message, this-&gt;dbusMatchInterface.c_str(), &quot;sessionConfig&quot;)) {
++
++			if (!dbus_message_iter_init(message, &amp;args)) {
++				cerr &lt;&lt; &quot;Message has no arguments!\n&quot;;
++				dbus_connection_flush (conn);
++				dbus_message_unref (message);
++				continue;
++			}
++			
++			if (DBUS_TYPE_STRING != dbus_message_iter_get_arg_type(&amp;args)) {
++				cerr &lt;&lt; &quot;First argument is not a string!\n&quot;;
++			} else {
++				dbus_message_iter_get_basic(&amp;args, &amp;parameter);
++				ss.str(&quot;&quot;);
++				ss &lt;&lt; parameter;
++				this-&gt;nxserver = ss.str();
++				count++;
++			}
++
++			// read the rest of the parameters
++			int t;
++			while (dbus_message_iter_next (&amp;args)) {
++				if (DBUS_TYPE_STRING == (t = dbus_message_iter_get_arg_type(&amp;args))) {
++					dbus_message_iter_get_basic(&amp;args, &amp;parameter);
++					//cout &lt;&lt; &quot;Arg-&quot; &lt;&lt; count &lt;&lt; &quot;: &quot; &lt;&lt; parameter &lt;&lt; endl;
++					ss.str(&quot;&quot;);
++					ss &lt;&lt; parameter;
++					switch (count) {
++					case 2:
++						this-&gt;nxuser = ss.str();
++						break;
++					case 3:
++						this-&gt;nxpass = ss.str();
++						break;
++					case 4:
++						this-&gt;sessionData.sessionName = ss.str();
++						break;
++					case 5:
++						this-&gt;sessionData.sessionType = ss.str();
++						break;
++					case 8:
++						this-&gt;sessionData.linkType = ss.str();
++						break;
++					case 10:
++						this-&gt;sessionData.backingstore = ss.str();
++						break;
++					case 13:
++						this-&gt;sessionData.geometry = ss.str();
++						break;
++					case 14:
++						this-&gt;sessionData.keyboard = ss.str();
++						break;
++					case 15:
++						this-&gt;sessionData.kbtype = ss.str();
++						break;
++					case 17:
++						this-&gt;sessionData.agentServer = ss.str();
++						break;
++					case 18:
++						this-&gt;sessionData.agentUser = ss.str();
++						break;
++					case 19:
++						this-&gt;sessionData.agentPass = ss.str();
++						break;
++					case 21:
++						this-&gt;sessionData.key = ss.str();
++						break;
++					case 24:
++						this-&gt;sessionData.customCommand = ss.str();
++						break;
++					default:
++						this-&gt;callbacks.write (&quot;ERROR: parameter type does not match its position in the message.&quot;);
++						break;
++					}
++					count++;
++				} else if (t == DBUS_TYPE_INT32) {
++					int iparam = 0;
++					dbus_message_iter_get_basic(&amp;args, &amp;iparam);
++					switch (count) {
++					case 1:
++						this-&gt;nxport = iparam;
++						break;
++					case 6:
++						this-&gt;sessionData.cache = iparam;
++						break;
++					case 7:
++						this-&gt;sessionData.images = iparam;
++						break;
++					case 9:
++						this-&gt;sessionData.render = (iparam&gt;0) ? true : false;
++						break;
++					case 11:
++						this-&gt;sessionData.imageCompressionMethod = iparam;
++						break;
++					case 12:
++						this-&gt;sessionData.imageCompressionLevel = iparam;
++						break;
++					case 16:
++						this-&gt;sessionData.media = (iparam&gt;0) ? true : false;
++						break;
++					case 20:
++						this-&gt;sessionData.cups = iparam;
++						break;
++					case 22:
++						this-&gt;sessionData.encryption = (iparam&gt;0) ? true : false;
++						break;
++					case 23:
++						this-&gt;sessionData.fullscreen = (iparam&gt;0) ? true : false;
++						break;
++					default:
++						this-&gt;callbacks.write (&quot;ERROR: parameter type does not match its position in the message.&quot;);
++						break;
++					}
++					count++;
++
++				} else {
++					this-&gt;callbacks.write (&quot;ERROR: parameter is not string or int.&quot;);
++				}
++			}
++			settings_transferred = true;			
++		} else {
++			this-&gt;callbacks.write (&quot;this message is not a signal&quot;);
++		}
++
++		// Anything else required for cleanup?
++		dbus_connection_flush (this-&gt;conn);
++
++		// free the message
++		dbus_message_unref (message);
++
++	} // while()
++	this-&gt;callbacks.write (&quot;Got the session settings over the dbus\n&quot;);
++
++	if (this-&gt;nxserver.size() == 0 || this-&gt;nxuser.size() == 0) {
++		// We need at least these to be able to connect. Leave
++		// nxpass out, in case that has been set to an empty
++		// string.
++		return -1;
++	} else {
++		return 0;
++	}
++}
++
++
++void
++Nxcl::setSessionDefaults (void)
++{
++	// Some defaults
++	this-&gt;sessionData.sessionName = &quot;default session&quot;;
++	this-&gt;sessionData.sessionType = &quot;unix-gnome&quot;;
++	this-&gt;sessionData.cache = 8;
++	this-&gt;sessionData.images = 32;
++	this-&gt;sessionData.linkType = &quot;adsl&quot;;
++	this-&gt;sessionData.render = true;
++	this-&gt;sessionData.backingstore = &quot;when_requested&quot;;
++	this-&gt;sessionData.imageCompressionMethod = 2;
++	// this-&gt;sessionData.imageCompressionLevel;
++	this-&gt;sessionData.geometry = &quot;800x600+0+0&quot;; // This'll be the size of the session
++	this-&gt;sessionData.keyboard = &quot;defkeymap&quot;;
++	this-&gt;sessionData.kbtype = &quot;pc102/defkeymap&quot;;
++	this-&gt;sessionData.media = false;
++	this-&gt;sessionData.agentServer = &quot;&quot;;
++	this-&gt;sessionData.agentUser = &quot;&quot;;
++	this-&gt;sessionData.agentPass = &quot;&quot;;
++	this-&gt;sessionData.cups = 0;
++	this-&gt;sessionData.encryption = true;
++	this-&gt;sessionData.suspended = false;
++	this-&gt;sessionData.fullscreen = false; // If true, session.geometry
++					  // is ignored
++
++	return;
++}
++
++void
++Nxcl::startTheNXConnection (void)
++{
++	// First things first; set the sessionData. FIXME: Should check if sessionData has been set.
++	this-&gt;nxclientlib.setSessionData (&amp;this-&gt;sessionData);
++
++	this-&gt;nxclientlib.setUsername (this-&gt;nxuser);
++	this-&gt;nxclientlib.setPassword (this-&gt;nxpass);
++
++	// FIXME: Need to pull in res from the dbus message or probe for it.	
++	this-&gt;nxclientlib.setResolution (this-&gt;xRes, this-&gt;yRes); 
++                                               // This is the size of
++                                               // your screen... We need
++					       // to set this from the
++					       // client, unless we can
++					       // probe within nxcl.
++	this-&gt;nxclientlib.setDepth (this-&gt;displayDepth); 
++                                               // depth gets stored
++	                                       // in NXSession
++					       // object. nxcl.setDepth
++					       // is a wrapper
++					       // around
++					       // NXSession's
++					       // setDepth method.
++
++	/* If we have session info, start up the connection */
++	if (this-&gt;sessionData.key.size() == 0) { // Shouldn't need this-&gt;sessionData.encryption here.
++		this-&gt;nxclientlib.invokeNXSSH(&quot;default&quot;,
++					      this-&gt;nxserver,
++					      this-&gt;sessionData.encryption, 
++					      &quot;&quot;, this-&gt;nxport);
++	} else {
++		this-&gt;nxclientlib.invokeNXSSH(&quot;supplied&quot;,
++					      this-&gt;nxserver,
++					      this-&gt;sessionData.encryption,
++					      this-&gt;sessionData.key, this-&gt;nxport);
++	} // Is there another case here, other than &quot;default&quot; or &quot;supplied&quot;?
++
++}
++
++void
++Nxcl::haveResumableSessions (list&lt;NXResumeData&gt; resumable)
++{
++	this-&gt;callbacks.debug (&quot;haveResumableSessions Called&quot;);
++	// Send the list to the calling client:
++	this-&gt;sendResumeList (resumable);
++	this-&gt;callbacks.debug (&quot;sent the resume list, about to receiveStartInstruction&quot;);
++	// Wait (and block) until we are told whether to resume one of
++	// the sessions or start a new one.
++	this-&gt;receiveStartInstruction();
++	this-&gt;callbacks.debug (&quot;receiveStartInstruction() returned.&quot;);
++}
++
++void
++Nxcl::noResumableSessions (void)
++{
++	this-&gt;callbacks.write (&quot;noResumableSessions Called&quot;);
++	DBusMessage *msg = dbus_message_new_signal (&quot;/org/freenx/nxcl/dbus/AvailableSession&quot;,
++						    this-&gt;dbusSendInterface.c_str(),
++						    &quot;Connecting&quot;);
++
++	dbus_connection_send (this-&gt;conn, msg, NULL);
++	dbus_message_unref (msg);
++}
++
++void
++Nxcl::sendResumeList (list&lt;NXResumeData&gt;&amp; resumable)
++{
++	this-&gt;callbacks.debug (&quot;sendResumeList called, will send on &quot; + this-&gt;dbusSendInterface + &quot; interface&quot;);
++	list&lt;NXResumeData&gt;::iterator it;
++	for (it=resumable.begin(); it!=resumable.end(); it++) {
++
++		DBusMessage *message;
++
++		/* Create a new signal &quot;AvailableSession&quot; on the
++		 * &quot;org.freenx.nxcl.nxcl&quot; interface, from the object
++		 * &quot;/org/freenx/nxcl/dbus/AvailableSession&quot;. */
++		message = dbus_message_new_signal (&quot;/org/freenx/nxcl/dbus/AvailableSession&quot;,
++						   this-&gt;dbusSendInterface.c_str(),
++						   &quot;AvailableSession&quot;);
++
++		// We have to create a const char* pointer or each
++		// string variable in the NXResumeSessions struct.
++		const char* sessionType = (*it).sessionType.c_str();
++		const char* sessionID = (*it).sessionID.c_str();
++		const char* options = (*it).options.c_str();
++		const char* screen = (*it).screen.c_str();
++		const char* available = (*it).available.c_str();
++		const char* sessionName = (*it).sessionName.c_str();
++
++		// Bundle up the available session
++		dbus_message_append_args 
++			(message,
++			 DBUS_TYPE_INT32,  &amp;(*it).display,
++			 DBUS_TYPE_STRING, &amp;sessionType,
++			 DBUS_TYPE_STRING, &amp;sessionID,
++			 DBUS_TYPE_STRING, &amp;options,
++			 DBUS_TYPE_INT32,  &amp;(*it).depth,
++			 DBUS_TYPE_STRING, &amp;screen,
++			 DBUS_TYPE_STRING, &amp;available,
++			 DBUS_TYPE_STRING, &amp;sessionName,
++			 DBUS_TYPE_INVALID);
++		dbus_connection_send (this-&gt;conn, message, NULL);
++		dbus_message_unref (message);
++	}
++
++	DBusMessage *complete = dbus_message_new_signal (&quot;/org/freenx/nxcl/dbus/AvailableSession&quot;,
++						         this-&gt;dbusSendInterface.c_str(),
++							 &quot;NoMoreAvailable&quot;);
++
++	this-&gt;callbacks.debug (&quot;About to send the finishup message&quot;);
++	dbus_connection_send (this-&gt;conn, complete, NULL);
++	this-&gt;callbacks.debug (&quot;Sent the finishup message&quot;);
++	dbus_message_unref (complete);
++}
++
++void
++Nxcl::serverCapacityReached (void)
++{
++	DBusMessage *msg = dbus_message_new_signal (&quot;/org/freenx/nxcl/dbus/AvailableSession&quot;,
++						    this-&gt;dbusSendInterface.c_str(),
++						    &quot;ServerCapacityReached&quot;);
++
++	dbus_connection_send (this-&gt;conn, msg, NULL);
++	dbus_message_unref (msg);
++}
++
++void
++Nxcl::receiveStartInstruction (void)
++{
++	DBusMessage * message;
++	DBusMessageIter args;
++	dbus_int32_t parameter = 0;
++	bool instruction_received = false;
++	stringstream ss;
++
++	this-&gt;callbacks.write (&quot;receiveStartInstruction() called&quot;);
++
++	// loop listening for signals being emitted
++	while (instruction_received == false) {
++		
++		// non blocking read of the next available message
++		dbus_connection_read_write(this-&gt;conn, 0);
++		message = dbus_connection_pop_message(this-&gt;conn);
++
++		// loop again if we haven't read a message
++		if (NULL == message) { 
++			sleep(1);
++			continue;
++		}
++
++		// check if the message is a signal from the
++		// correct interface and with the correct name
++		if (dbus_message_is_signal (message, this-&gt;dbusMatchInterface.c_str(), &quot;sessionChoice&quot;)) {
++			// read the parameters
++			if (!dbus_message_iter_init(message, &amp;args))
++				cerr &lt;&lt; &quot;Message has no arguments!\n&quot;; 
++			else if (DBUS_TYPE_INT32 != dbus_message_iter_get_arg_type(&amp;args))
++				cerr &lt;&lt; &quot;Argument is not int32!\n&quot;;
++			else {
++				dbus_message_iter_get_basic(&amp;args, &amp;parameter);
++				//ss.str(&quot;&quot;);
++				//ss &lt;&lt; parameter;
++				//this-&gt;callbacks.write (&quot;Choice: &quot; + ss.str());
++				instruction_received = true;
++				if (parameter &lt; 0) {
++					// No action, start a new connection
++				} else {
++					this-&gt;nxclientlib.chooseResumable (parameter);
++				}
++			}
++
++		} else if (dbus_message_is_signal (message, this-&gt;dbusMatchInterface.c_str(), &quot;terminateSession&quot;)) {
++			// read the parameters
++			if (!dbus_message_iter_init(message, &amp;args))
++				cerr &lt;&lt; &quot;Message has no arguments!\n&quot;; 
++			else if (DBUS_TYPE_INT32 != dbus_message_iter_get_arg_type(&amp;args))
++				cerr &lt;&lt; &quot;Argument is not int32!\n&quot;;
++			else {
++				dbus_message_iter_get_basic(&amp;args, &amp;parameter);
++				ss.str(&quot;&quot;);
++				ss &lt;&lt; parameter;
++				this-&gt;callbacks.write (&quot;Terminating: &quot; + ss.str());
++				instruction_received = true;
++				if (parameter &lt; 0) {
++					// No action, start a new connection
++				} else {
++					this-&gt;nxclientlib.terminateSession (parameter);
++				}
++			}
++		}
++		dbus_connection_flush (this-&gt;conn);
++		dbus_message_unref (message);
++	}
++
++}
++
++void
++Nxcl::requestConfirmation (string msg)
++{
++	this-&gt;callbacks.write (&quot;requestConfirmation(): This is a placeholder method &quot;
++			       &quot;to deal with sending back a yes &quot;
++			       &quot;or a no answer. For now, we just set &quot;
++			       &quot;this-&gt;nxclientlib.getSession().setContinue(true);&quot;);
++	this-&gt;nxclientlib.getSession()-&gt;setContinue (true);
++}
++//@}
+
+Added: nxcl/nxcl/nxcl.h
+===================================================================
+--- nxcl/nxcl/nxcl.h	2007-08-19 15:44:16 UTC (rev 372)
++++ nxcl/nxcl/nxcl.h	2007-09-11 12:48:46 UTC (rev 373)
+@@ -0,0 +1,316 @@
++/* -*-c++-*- */
++/*
++ * nxcl: The NXCL dbus daemon.
++ *
++ * See main.cpp for general notes.
++ *
++ * This file contains the definition of the Nxcl class used by the
++ * nxcl program.
++ *
++ * (C) 2007 Embedded Software Foundry Ltd. (U.K.)
++ * Author: Sebastian James
++ * Email:  <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>
++ *
++ * Released under the terms of the GNU GPL version 2.
++ */
++
++#ifndef _NXCL_H_
++#define _NXCL_H_ 1
++
++#include &quot;nxdata.h&quot;
++#include &quot;../lib/nxclientlib.h&quot;
++
++/* This define is required for slightly older versions of dbus as
++ * found, for example, in Ubuntu 6.06. */
++#define DBUS_API_SUBJECT_TO_CHANGE 1
++extern &quot;C&quot; {
++#include &lt;dbus/dbus.h&gt;
++}
++
++using namespace std;
++
++namespace nxcl 
++{
++
++	class NxclBase
++	{
++	public:
++		NxclBase() {}
++		virtual ~NxclBase() {}
++
++		virtual void haveResumableSessions (list&lt;NXResumeData&gt; resumeData) {}
++		virtual void noResumableSessions (void) {}
++		virtual void serverCapacityReached (void) {}
++	};
++
++	class NxclCallbacks : public NXClientLibExternalCallbacks
++	{
++	public:
++		NxclCallbacks ();
++		~NxclCallbacks ();
++
++		/*!
++		 * Send a message to the user. Here, this is
++		 * implemented as a message to stdout. It could be
++		 * (any may yet be) send on the dbus interface
++		 */
++		void write (string msg);
++		/*!
++		 * Send a debugging message out. Here that's
++		 * implemented as a message on stdout.
++		 */
++		void debug (string msg);
++		/*!
++		 * This is called when some data comes from the stdout
++		 * of the nxssh process. This implementation sends a
++		 * copy of that data to stdout of nxcl, for debugging
++		 * purposes (and only when DEBUG==1,
++		 * i.e. --enable-debug-output was given as an option
++		 * to the configure script.
++		 */
++		void stdoutSignal (string msg);
++		/*!
++		 * Outputs a copy of stderr output from the nxssh
++		 * process.
++		 */
++		void stderrSignal (string msg);
++		/*!
++		 * Outputs a copy of the stdin input sent to the nxssh
++		 * process to the stdout of nxcl for debugging
++		 * purposes.
++		 */
++		void stdinSignal (string msg);
++		/*!
++		 * Sends the list of resumable sessions (resumeData)
++		 * to the client of the nxcl program via a dbus
++		 * message.
++		 */
++		void resumeSessionsSignal (list&lt;NXResumeData&gt; resumeData);		
++		/*!
++		 * Tells nxcl that there are no suspended sessions and
++		 * that connection is proceeding with a new
++		 * connection. This fact is sent to the client of nxcl
++		 * as a dbus message.
++		 */
++		void noSessionsSignal (void);
++		/*!
++		 * This callback sends a message via dbus to the
++		 * client of the nxcl program saying &quot;the server has
++		 * no more capacity&quot;. This basically means that there
++		 * are not enough licences to allow the connection,
++		 * but it may also occur if there is any sort of RAM
++		 * limit checking in nxserver (I don't know if this is
++		 * true).
++		 */
++		void serverCapacitySignal (void);
++
++		/*!
++		 * Accessor function to set a pointer to the parent Nxcl object.
++		 */
++		void setParent (NxclBase * p) { this-&gt;parent = p; }
++	private:
++		NxclBase * parent;
++
++	};
++
++	class Nxcl : public NxclBase
++	{
++	public:
++		Nxcl();
++		Nxcl(int n);
++		~Nxcl();
++
++		// Public Methods
++		/*!
++		 * \brief Sets up a connection to the dbus daemon, based on
++		 * the member attribute \see dbusNum. 
++		 *
++		 * Sets the connection up to listen for messages on
++		 * the interface org.freenx.nxcl.clientX where X
++		 * starts at 0 and the first available number is taken
++		 * (if another nxcl is running with
++		 * org.freenx.nxcl.client0, then 1 is
++		 * chosen). Messages are sent out on the interface
++		 * org.freenx.nxcl.nxclX
++		 */
++		void setupDbus (void);
++		/*!
++		 * \brief Sets dbusNum to be \arg id, then calls \see
++		 * setupDbus().
++		 *
++		 * \param id The number to use to set up the dbus
++		 * connection (used as a suffix for interface names).
++		 */
++		void setupDbus (int id);
++		/*!
++		 * \brief Wait for a dbus message containing session settings.
++		 *
++		 * This waits for a dbus signal message called
++		 * 'sessionConfig' to come in on the listen interface,
++		 * then sets \see sessionData based on its contents.
++		 *
++		 * \return 0 if settings received ok, -1 if we didn't
++		 * receive at least the nxserver host and the nxuser
++		 * name.
++		 */
++		int receiveSettings (void);
++		/*!
++		 * \brief Set default values for \see sessionData
++		 */
++		void setSessionDefaults (void);
++		/*!
++		 * \brief Configure the \see nxclientlib object and
++		 * then call its \see invokeSSH method.
++		 *
++		 * This also calls nxclientlib.setResolution to detect
++		 * the size of your screen (that's why nxcl links to X
++		 * libraries).
++		 */
++		void startTheNXConnection (void);
++
++		// Accessors
++		//@{
++		NXClientLib* getNXClientLib (void) { return &amp;(this-&gt;nxclientlib); }
++		//@}
++
++		// Public Slots
++		//@{
++		/*!
++		 * Called by \see NxclCallbacks::resumeSessionsSignal
++		 */
++		void haveResumableSessions (list&lt;NXResumeData&gt; resumable);
++		/*!
++		 * Called by \see NxclCallbacks::noSessionsSignal
++		 */
++		void noResumableSessions (void);
++		/*!
++		 * This _should_ send a dbus message to the client of
++		 * nxcl, saying &quot;You've never connected to this
++		 * (NX)SSH server before, do you wish to
++		 * continue?&quot;
++		 *
++		 * For now, it just sets
++		 * this-&gt;nxclientlib.getSession()-&gt;setContinue (true);
++		 */
++		void requestConfirmation (string msg);
++		/*!
++		 * Called by \see NxclCallbacks::serverCapacitySignal
++		 */
++		void serverCapacityReached (void);
++		//@}
++
++		/*!
++		 * Public pointer to the callback functions
++		 */
++		NxclCallbacks callbacks;
++
++	private:
++		/*!
++		 * \brief Set up data structures, determine display height and width.
++		 *
++		 * This is called by the constructors.
++		 */
++		void initiate (void);
++		/*!
++		 * Send the resumable sessions as dbus messages. One
++		 * message (called &quot;AvailableSession&quot;) is sent for
++		 * each resumable session available on the NX
++		 * server. When they have all been sent, a message is
++		 * sent called &quot;NoMoreAvailable&quot;.
++		 *
++		 * Called by \see haveResumableSessions.
++		 *
++		 * \param resumable a list of resumable sessions to be
++		 * sent on the dbus interface.
++		 *
++		 */
++		void sendResumeList (list&lt;NXResumeData&gt;&amp; resumable);
++		/*!
++		 * Wait for a message on the dbus interface to tell us
++		 * which of the resumable sessions available on the NX
++		 * server we should start. Call
++		 * nxclientlib.chooseResumable() or
++		 * nxclientlib.terminateSession based on the contents
++		 * of the received message.
++		 *
++		 * Called by \see haveResumableSessions.
++		 */
++		void receiveStartInstruction (void);
++
++		/*!
++		 * The nxclientlib object whose methods will negotiate
++		 * the NX session.
++		 */
++		NXClientLib nxclientlib;
++		/*!
++		 * We populate this data structure before passing the
++		 * information to the nxclientlib object so it can
++		 * start up the desired connection.
++		 */
++		NXSessionData sessionData;
++		/*!
++		 * The connection to the dbus daemon.
++		 */
++		DBusConnection *conn;
++		/*!
++		 * Used when calling dbus functions.
++		 */
++		DBusError error;
++		/*!
++		 * Used to make our dbus interfaces unique. This
++		 * number is appended to the dbus interface names.
++		 */
++		int dbusNum;
++		/*!
++		 * The name to use for our connection to DBUS.
++		 */
++		string dbusName;
++		/*!
++		 * Match messages from this DBUS source.
++		 */
++		string dbusMatch;
++		/*!
++		 * The DBUS interface which we will listen to.
++		 */
++		string dbusMatchInterface;
++		/*!
++		 * The DBUS interface we'll send on.
++		 */
++		string dbusSendInterface;
++		/*!
++		 * Holds the username for the connection to the NX
++		 * Server.
++		 */
++		string nxuser;
++		/*!
++		 * Holds the password for the connection to the NX
++		 * Server.
++		 */
++		string nxpass;
++		/*!
++		 * Holds the ip/hostname of the NX Server to which we
++		 * will try to connect.
++		 */
++		string nxserver;
++		/*!
++		 * Holds the port on the NX Server to which we will
++		 * try to connect.
++		 */
++		int nxport;
++		/*!
++		 * Width of the screen in pixels.
++		 */
++		int xRes;
++		/*!
++		 * Height of the screen in pixels.
++		 */
++		int yRes;
++		/*!
++		 * Colour depth of the screen.
++		 */
++		int displayDepth;
++	};
++
++} // namespace
++
++#endif // ifndef _NXCL_H_
+
+Added: nxcl/test/Makefile.am
+===================================================================
+--- nxcl/test/Makefile.am	2007-08-19 15:44:16 UTC (rev 372)
++++ nxcl/test/Makefile.am	2007-09-11 12:48:46 UTC (rev 373)
+@@ -0,0 +1,11 @@
++AM_CPPFLAGS = @PACKAGE_CFLAGS@ -DPACKAGE_DATA_DIR=\&quot;&quot;$(datadir)&quot;\&quot; -DLOCALEDIR=\&quot;$(localedir)\&quot; -DPACKAGE_BIN_DIR=\&quot;&quot;$(bindir)&quot;\&quot;
++INCLUDES = -I../lib
++bin_PROGRAMS = libtest nxcmd notQttest
++libtest_SOURCES = libtest.cpp
++libtest_LDADD = @PACKAGE_LIBS@ $(LIBINTL) -L../lib -lnxcl
++notQttest_SOURCES = notQttest.cpp
++notQttest_LDADD = @PACKAGE_LIBS@ $(LIBINTL) -L../lib -lnxcl
++nxcmd_SOURCES = nxcmd.cpp
++nxcmd_LDADD = @PACKAGE_LIBS@ $(LIBINTL)
++#pkginclude_HEADERS = header.h
++
+
+Added: nxcl/test/libtest.cpp
+===================================================================
+--- nxcl/test/libtest.cpp	2007-08-19 15:44:16 UTC (rev 372)
++++ nxcl/test/libtest.cpp	2007-09-11 12:48:46 UTC (rev 373)
+@@ -0,0 +1,111 @@
++#include &quot;nxclientlib.h&quot;
++#include &lt;fstream&gt;
++
++using namespace nxcl;
++using namespace std;
++
++ofstream debugLogFile;
++
++// Signal handlers
++void writeOut (string msg)
++{
++	cout &lt;&lt; &quot;NXCL&gt; &quot; &lt;&lt; msg &lt;&lt; endl;
++}
++void stdinInfo (string msg)
++{
++	cout &lt;&lt; &quot;nxssh&lt;-stdin-&quot; &lt;&lt; endl &lt;&lt; msg &lt;&lt; endl;
++}
++void stdoutInfo (string msg)
++{
++	cout &lt;&lt; &quot;nxssh-stdout-&gt;&quot; &lt;&lt; endl &lt;&lt; msg &lt;&lt; endl;
++}
++void stderrInfo (string msg)
++{
++	cout &lt;&lt; &quot;nxssh-stderr-&gt;&quot; &lt;&lt; endl &lt;&lt; msg &lt;&lt; endl;
++}
++
++int main (int argc, char **argv)
++{
++	NXClientLib lib;
++	stringstream ss;
++
++	ss &lt;&lt; argv[2];
++	string un = ss.str();
++	ss.str(&quot;&quot;);
++	ss &lt;&lt; argv[3];
++	string pw = ss.str();
++	ss.str(&quot;&quot;);
++
++	if (argc!=4) {
++		cout &lt;&lt; &quot;Usage: libtest IP user pass&quot; &lt;&lt; endl;
++		return -1;
++	}
++
++	debugLogFile.open(&quot;/tmp/libtest.log&quot;, ios::out|ios::trunc);
++
++	lib.invokeNXSSH(&quot;default&quot;, argv[1], true, &quot;&quot;, 22);
++	lib.setUsername(un);
++	lib.setPassword(pw);
++	lib.setResolution(1280,1024); // This is the size of your screen
++	lib.setDepth(24);
++	lib.setRender(true);
++
++	NXSessionData theSesh;
++
++	// HARDCODED TEST CASE
++	theSesh.sessionName = &quot;TEST&quot;;
++	theSesh.sessionType = &quot;unix-gnome&quot;;
++	theSesh.cache = 8;
++	theSesh.images = 32;
++	theSesh.linkType = &quot;adsl&quot;;
++	theSesh.render = true;
++	theSesh.backingstore = &quot;when_requested&quot;;
++	theSesh.imageCompressionMethod = 2;
++	// theSesh.imageCompressionLevel;
++	theSesh.geometry = &quot;800x600+0+0&quot;; // This'll be the size of the session
++	theSesh.keyboard = &quot;defkeymap&quot;;
++	theSesh.kbtype = &quot;pc102/defkeymap&quot;;
++	theSesh.media = false;
++	theSesh.agentServer = &quot;&quot;;
++	theSesh.agentUser = &quot;&quot;;
++	theSesh.agentPass = &quot;&quot;;
++	theSesh.cups = 0;
++	theSesh.suspended = false;
++	theSesh.fullscreen = true; // If true, theSesh.geometry is ignored
++
++	lib.setSessionData(&amp;theSesh);
++
++	// Set the handler you would like to output messages to the user. We'll just use stdout for this test.
++	//lib.callbackWriteSignal.connect (&amp;writeOut);
++
++	// If you want a nice quiet session, leave these signals unconnected
++	/*
++	lib.stdinSignal.connect (&amp;stdinInfo);
++	lib.stdoutSignal.connect (&amp;stdoutInfo);
++	lib.stderrSignal.connect (&amp;stderrInfo);
++	*/
++
++	//notQProcess&amp; p = lib.getNXSSHProcess();
++	notQProcess* p;
++
++	while ((lib.getIsFinished()) == false) {
++		// We need to repeatedly check if there is any output to parse.
++		if (lib.getReadyForProxy() == false) {
++			p = lib.getNXSSHProcess();
++			p-&gt;probeProcess();
++		} else {
++			p = lib.getNXSSHProcess();
++			p-&gt;probeProcess();
++			p = lib.getNXProxyProcess();
++			p-&gt;probeProcess();
++		}
++
++		usleep (1000);
++	}
++
++	writeOut (&quot;Program finished.&quot;);
++
++	debugLogFile.close();
++
++	return 0;
++}
+
+Added: nxcl/test/notQttest.cpp
+===================================================================
+--- nxcl/test/notQttest.cpp	2007-08-19 15:44:16 UTC (rev 372)
++++ nxcl/test/notQttest.cpp	2007-09-11 12:48:46 UTC (rev 373)
+@@ -0,0 +1,141 @@
++/*
++ * notQttest.cpp - A test of some of the features in ../lib/notQt.cpp
++ *
++
++ *
++ * (C) 2007 Embedded Software Foundry Ltd. (U.K.)
++ * Author: Sebastian James
++ * Email:  <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>
++ *
++ * Released under the terms of the GNU GPL version 2.
++ */
++
++#include &lt;iostream&gt;
++#include &lt;string&gt;
++#include &lt;list&gt;
++
++#include &quot;notQt.h&quot;
++
++using namespace std;
++using namespace nxcl;
++
++ofstream debugLogFile;
++
++notQProcess p2;
++
++void processParseStdout()
++{
++	string message = p2.readAllStandardOutput();
++	cout &lt;&lt; &quot;processParseStdout called, message is: &quot; &lt;&lt; message &lt;&lt; endl;
++}
++void processParseStderr()
++{
++	string message = p2.readAllStandardError();	
++	cout &lt;&lt; &quot;processParseStderr called, message is: &quot; &lt;&lt; message &lt;&lt; endl;
++}
++
++int main()
++{
++
++	debugLogFile.open(&quot;/tmp/notQttest.log&quot;, ios::out|ios::trunc);
++
++	// Test temporary files
++	notQTemporaryFile tf;
++	tf.open();
++	tf.write (&quot;this is a temporary file, jim&quot;);
++	cout &lt;&lt; &quot;tmp filename is &quot; &lt;&lt; tf.fileName() &lt;&lt; endl;
++	tf.close();
++
++	// Test utilities
++	string tstring = &quot;\n\n  this \t  is\n a\t\t   test string    &quot;;
++	cout &lt;&lt; &quot;test string is '&quot; &lt;&lt; tstring &lt;&lt; &quot;'&quot; &lt;&lt; endl;
++	cout &lt;&lt; &quot;simplify returns '&quot; &lt;&lt; notQtUtilities::simplify (tstring) &lt;&lt; &quot;'&quot; &lt;&lt; endl;
++
++        tstring = &quot;Nowhitespaceatall&quot;;
++	cout &lt;&lt; &quot;test string is '&quot; &lt;&lt; tstring &lt;&lt; &quot;'&quot; &lt;&lt; endl;
++	cout &lt;&lt; &quot;simplify returns '&quot; &lt;&lt; notQtUtilities::simplify (tstring) &lt;&lt; &quot;'&quot; &lt;&lt; endl;
++
++	tstring = &quot;one two three\tfour&quot;;
++	vector&lt;string&gt; v;
++	notQtUtilities::splitString (tstring, ' ', v);
++	cout &lt;&lt; &quot;v.size() = &quot; &lt;&lt; v.size() &lt;&lt; endl;
++	for (unsigned int i=0; i&lt;v.size(); i++) {
++		cout &lt;&lt; &quot;v[&quot;&lt;&lt;i&lt;&lt;&quot;]='&quot; &lt;&lt; v[i] &lt;&lt; &quot;'&quot; &lt;&lt; endl;
++	}
++	/*
++	vector&lt;string&gt; v2;
++	notQtUtilities::splitString (tstring, 'h', v2);
++	cout &lt;&lt; &quot;v2.size() = &quot; &lt;&lt; v2.size() &lt;&lt; endl;
++	for (unsigned int i=0; i&lt;v2.size(); i++) {
++		cout &lt;&lt; &quot;v2[&quot;&lt;&lt;i&lt;&lt;&quot;]='&quot; &lt;&lt; v2[i] &lt;&lt; &quot;'&quot; &lt;&lt; endl;
++	}
++	*/
++
++	// Test processes to read some input
++	notQProcess p;
++	string program = &quot;/usr/bin/tee&quot;;
++	list&lt;string&gt; args;       
++	// Always push_back the program first.
++	args.push_back(program);
++	args.push_back(&quot;teeout&quot;);
++	p.start (program, args);
++	cout &lt;&lt; &quot;p.getPid=&quot; &lt;&lt; p.getPid() &lt;&lt; endl;
++	if (p.waitForStarted() == true) {
++		string data = &quot;Some input text&quot;;
++		p.writeIn (data);
++
++	} else { 
++		cout &lt;&lt; &quot;not started&quot; &lt;&lt; endl;
++		return -1;
++	}
++
++	// Test process that generates output
++	bool finished = false;
++//	program = &quot;/usr/bin/eo&quot;;
++	program = &quot;/usr/bin/tee&quot;;
++	args.clear();
++	// Always push_back the program first.
++	args.push_back(program);
++	args.push_back(&quot;hello&quot;);
++
++	// p2 is a global in this test
++
++/* FIXME: This needs to be changed, now that we got rid of boost signals.
++	p2.readyReadStandardOutputSignal.connect (&amp;processParseStdout);
++	p2.readyReadStandardErrorSignal.connect (&amp;processParseStderr);
++*/
++	p2.start (program, args);
++	cout &lt;&lt; &quot;p2.getPid=&quot; &lt;&lt; p2.getPid() &lt;&lt; endl;
++	if (p2.waitForStarted() == true) {
++		string output;
++		string errout;
++		string instring = &quot;data, data&quot;;
++		while (finished == false) {
++			p2.probeProcess();
++/* You can get the output without signals:
++			output = p2.readAllStandardOutput();
++			errout = p2.readAllStandardError();
++			if (output.size()&gt;0) {
++				cout &lt;&lt; program &lt;&lt; &quot; generated this output: &quot; &lt;&lt; output &lt;&lt; endl;
++				finished = true;
++			}
++			if (errout.size()&gt;0) {
++				cout &lt;&lt; program &lt;&lt; &quot; generated this error: &quot; &lt;&lt; errout &lt;&lt; endl;
++				finished = true;
++			}
++			cout &lt;&lt; &quot;sleeping&quot; &lt;&lt; endl;
++*/	
++			usleep (1000000);
++			p2.writeIn (instring);
++			usleep (1000000);
++		}
++
++	} else { 
++		cout &lt;&lt; &quot;not started&quot; &lt;&lt; endl;
++		return -1;
++	}
++
++	debugLogFile.close();
++
++	return 0;
++}
+
+Added: nxcl/test/nxcmd.cpp
+===================================================================
+--- nxcl/test/nxcmd.cpp	2007-08-19 15:44:16 UTC (rev 372)
++++ nxcl/test/nxcmd.cpp	2007-09-11 12:48:46 UTC (rev 373)
+@@ -0,0 +1,544 @@
++/*
++ * nxcmd: A simple command line test for the NXCL dbus daemon.
++ *
++ * See ../nxcl/main.cpp for general notes on the nxcl program.
++ *
++ * This program will fork a process and run nxcl, then it will send
++ * user, password and some settings to nxcl using a dbus
++ * connection. nxcl will then start up the NX connection for you.
++ *
++ * This is a very hacked together program, part C, part C++, but it
++ * serves its purpose of demonstrating the techniques you'll need to
++ * write a simple client to nxcl.
++ *
++ * (C) 2007 Embedded Software Foundry Ltd. (U.K.)
++ * Author: Sebastian James
++ * Email:  <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>
++ *
++ * Released under the terms of the GNU GPL version 2.
++ */
++
++#include &lt;iostream&gt;
++#include &lt;sstream&gt;
++
++extern &quot;C&quot; {
++#include &lt;stdlib.h&gt;
++#include &lt;stdio.h&gt;
++#define DBUS_API_SUBJECT_TO_CHANGE 1
++#include &lt;dbus/dbus.h&gt;
++#include &lt;unistd.h&gt;
++#include &lt;errno.h&gt;
++#include &lt;sys/types.h&gt;
++#include &lt;sys/wait.h&gt;
++#include &lt;signal.h&gt;
++}
++
++// This is the only dependency on nxcl here. If you want, all you have
++// to do is copy the NXConfigData structure out of nxdata.h and you
++// remove the dependency.
++#include &quot;../lib/nxdata.h&quot;
++
++using namespace std;
++
++// Used in receiveSession as the return value
++#define REPLY_REQUIRED  1
++#define NEW_CONNECTION  2
++#define SERVER_CAPACITY 3
++
++/*!
++ * Send all the settings in a single dbus signal.
++ */
++static int sendSettings (DBusConnection *bus, nxcl::NXConfigData&amp; cfg);
++
++/*!
++ * Listen to the dbus, waiting for a signal to say either that
++ * connection is in progress, or giving us a list of possible sessions
++ * we could connect to. Return true if nxcld requires a reply such
++ * as &quot;please resume session 1&quot;.
++ */
++static int receiveSession (DBusConnection* conn);
++
++/*!
++ * Send a signal containing the identifier for the NX session that the
++ * user would like to start.
++ */
++static int sendReply (DBusConnection *bus, int sessionNum);
++
++/*!
++ * Send a signal containing the identifier for the NX session that the
++ * user would like to terminate.
++ */
++static int terminateSession (DBusConnection *bus, int sessionNum);
++
++/*!
++ * Lazily use some globals, as this is just an example command line program.
++ */
++string dbusSendInterface;
++string dbusRecvInterface;
++string dbusMatchString;
++
++
++int
++main (int argc, char **argv)
++{
++	nxcl::NXConfigData cfg;
++	DBusConnection *conn;
++	DBusError error;
++	int ret;
++	int theError;
++	pid_t pid;
++	bool gotName = false;
++	int i = 0;
++
++	if (argc != 5) {
++		cout &lt;&lt; &quot;NXCMD&gt; Usage: nxcmd IP/DNSName user pass sessiontype\n&quot;;
++		cout &lt;&lt; &quot;NXCMD&gt; Eg:    nxcmd 192.168.0.1 me mypass unix-gnome\n&quot;;
++		return -1;
++	}
++
++	cout &lt;&lt; &quot;NXCMD&gt; Starting...\n&quot;;
++
++	/* Get a connection to the session bus */
++	dbus_error_init (&amp;error);
++	conn = dbus_bus_get (DBUS_BUS_SESSION, &amp;error);
++	if (!conn) {
++		cerr &lt;&lt; &quot;Failed to connect to the D-BUS daemon: &quot; &lt;&lt; error.message &lt;&lt; endl;
++		dbus_error_free (&amp;error);
++		return 1;
++	}
++
++	while (gotName == false) {
++
++		stringstream ss;
++		string base = &quot;org.freenx.nxcl.&quot;;
++		ss &lt;&lt; base &lt;&lt; &quot;client&quot; &lt;&lt; i;
++		dbusSendInterface = ss.str();
++
++		ss.str(&quot;&quot;);
++		ss &lt;&lt; base &lt;&lt; &quot;nxcld&quot; &lt;&lt; i;
++		dbusRecvInterface = ss.str();
++
++		ss.str(&quot;&quot;);
++		ss &lt;&lt; &quot;type='signal',interface='org.freenx.nxcl.nxcld&quot; &lt;&lt; i &lt;&lt; &quot;'&quot;;
++		dbusMatchString = ss.str();
++
++
++		// We request a name on the bus which is the same string as the send interface.
++		ret = dbus_bus_request_name (conn, dbusSendInterface.c_str(),
++					     DBUS_NAME_FLAG_REPLACE_EXISTING, 
++					     &amp;error);
++
++		if (dbus_error_is_set(&amp;error)) { 
++			cerr &lt;&lt; &quot;NXCMD&gt; Name Error (&quot; &lt;&lt; error.message &lt;&lt; &quot;)\n&quot;; 
++			dbus_error_free(&amp;error);
++		}
++
++		if (DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER != ret) {
++			cerr &lt;&lt; &quot;NXCMD&gt; Couldn't get the name; trying another\n&quot;;
++			i++;
++		} else {
++			cout &lt;&lt; &quot;NXCMD&gt; Got the name '&quot; &lt;&lt; dbusSendInterface &lt;&lt; &quot;' on the dbus\n&quot;;
++			gotName = true;
++		}
++	}
++
++	stringstream arg;
++	arg &lt;&lt; i;		
++
++	/* fork and exec the nxcld */
++	pid = fork();
++	switch (pid) {
++	case -1:
++		cerr &lt;&lt; &quot;Can't fork()!&quot; &lt;&lt; endl;
++		exit (-1);
++	case 0:
++		// This is the CHILD process
++		// Allocate memory for the program arguments
++		// 1+ to allow space for NULL terminating pointer
++		execl (PACKAGE_BIN_DIR&quot;/nxcld&quot;, &quot;nxcld&quot;, arg.str().c_str(), static_cast&lt;char*&gt;(NULL));
++		// If process returns, error occurred
++		theError = errno; 
++		// This'll get picked up by parseResponse
++		cerr &lt;&lt; &quot;NXCMD&gt; Process error: &quot; &lt;&lt; pid &lt;&lt; &quot; crashed. errno:&quot; &lt;&lt; theError &lt;&lt; endl;
++		// Child should exit now.
++		exit(-1);
++
++	default:
++		// This is the PARENT process
++		cout &lt;&lt; &quot;NXCMD&gt; forked the nxcld process; continuing.\n&quot;;
++		break;
++	}
++
++
++	/* Prepare interface - add a rule for which messages we want
++	   to see - those that are sent to us from the nxcld
++	   connection. */
++	dbus_bus_add_match(conn, dbusMatchString.c_str(), &amp;error);
++	dbus_connection_flush (conn);
++	if (dbus_error_is_set(&amp;error)) { 
++		cerr &lt;&lt; &quot;NXCMD&gt; Match Error (&quot; &lt;&lt; error.message &lt;&lt; &quot;)\n&quot;;
++		exit(1);
++	} else {
++		cout &lt;&lt; &quot;NXCMD&gt; Added match '&quot; &lt;&lt; dbusMatchString &lt;&lt; &quot;'\n&quot;;
++	}
++
++	// Crude 2 second wait to let nxcld get going before we send
++	// the settings. This _must_ be more sophisticated in your
++	// application ;)
++	sleep (2);
++
++	cout &lt;&lt; &quot;NXCMD&gt; Configure session\n&quot;;
++
++	// We now set up the config data structure. We take user, host
++	// and pass from the command line, but for the sake of
++	// simplicity, we hard-code the rest of the settings here.
++	cfg.serverHost = argv[1];
++	cfg.serverPort = 22;
++	cfg.sessionUser = argv[2];
++	cfg.sessionPass = argv[3];
++	cfg.sessionName = &quot;nxcldtest&quot;;
++	cfg.sessionType = argv[4];
++	cfg.cache = 8;
++	cfg.images = 32;
++	cfg.linkType = &quot;adsl&quot;;
++	cfg.render = true;
++	cfg.backingstore = &quot;when_requested&quot;;
++	cfg.imageCompressionMethod = 2;
++	cfg.imageCompressionLevel = 1;
++	cfg.geometry = &quot;800x600+0+0&quot;;
++	cfg.keyboard = &quot;defkeymap&quot;;
++	cfg.kbtype = &quot;pc105/defkeymap&quot;;
++	cfg.media = false;
++	cfg.agentServer = &quot;&quot;;
++	cfg.agentUser = &quot;&quot;;
++	cfg.agentPass = &quot;&quot;;
++	cfg.cups = 0;
++	cfg.encryption = true;
++	cfg.fullscreen = false; // If true, ignore cfg.geometry. 	
++	
++	cout &lt;&lt; &quot;NXCMD&gt; Sending settings\n&quot;;
++
++	// ...and then send it on dbus.
++	sendSettings (conn, cfg);
++
++	cout &lt;&lt; &quot;NXCMD&gt; Sent settings\n&quot;;
++	
++	// In real application, we'd now listen on the dbus for a list
++	// of sessions we might be able to re-connect to, or
++	// confirmation that a session is starting. Then we could return.
++	bool done = false;
++	while (false == done) {
++		if (REPLY_REQUIRED == (ret = receiveSession (conn))) {
++			// Need to send back a reply saying which connection
++			// to reconnect.
++			cout &lt;&lt; &quot;NXCMD&gt; Please choose a session. 0 for the first, etc.\nT0 to terminate the first, etc\n&quot;;
++			if (cfg.sessionType != &quot;shadow&quot;) {
++				cout &lt;&lt; &quot;Enter -1 to start a new session\n&quot;;
++			}
++			// Choose 0 for first connection, 1 for next etc, or
++			// &lt;0 for a new connection, even if there are existing
++			// sessions.
++			int connNum = 0;
++			string response;
++			cin &gt;&gt; response;
++			stringstream ss;
++			if (response[0] == 'T') {
++				ss &lt;&lt; response.substr(1);
++				ss &gt;&gt; connNum;
++				cout &lt;&lt; &quot;NXCMD&gt; Terminating session &quot; &lt;&lt; connNum &lt;&lt; endl;
++				terminateSession (conn, connNum);
++			} else {
++				ss &lt;&lt; response;
++				ss &gt;&gt; connNum;
++				sendReply (conn, connNum);
++				if (connNum &lt; 0) {
++					cout &lt;&lt; &quot;NXCMD&gt; Starting new NX session\n&quot;;			
++				} else {
++					cout &lt;&lt; &quot;NXCMD&gt; Attaching to session &quot; &lt;&lt; connNum &lt;&lt; endl;
++				}
++				done = true;
++			}
++
++		} else if (SERVER_CAPACITY == ret) {
++			// Have run out of capacity (licences) on the server.
++			done = true;
++		} else {
++			cout &lt;&lt; &quot;NXCMD&gt; Starting new NX session\n&quot;;
++			done = true;
++		}
++	}
++
++	// wait and block for nxcld process to end before exiting.
++	int status = 0;
++	wait (&amp;status);
++
++	return 0;
++}
++
++static int
++sendSettings (DBusConnection *bus, nxcl::NXConfigData&amp; cfg)
++{
++	cout &lt;&lt; &quot;NXCMD&gt; sendSettings called\n&quot;;
++
++	DBusMessage *message;
++
++	/* Create a new setting signal on the &quot;org.freenx.nxcl.client&quot;
++	 * interface, from the object &quot;/org/freenx/nxcl/dbus/settingSignal&quot;. */
++	message = dbus_message_new_signal (&quot;/org/freenx/nxcl/dbus/settingSignal&quot;,
++					   dbusSendInterface.c_str(), 
++					   &quot;sessionConfig&quot;);
++	if (NULL == message) {
++		cerr &lt;&lt; &quot;NXCMD&gt; Message Null\n&quot;;
++		return -1;
++	}
++
++	int media=0, enc=0, fs=0;
++	if (cfg.media == true) { media = 1; }
++	if (cfg.encryption == true) { enc = 1; }
++	if (cfg.fullscreen == true) { fs = 1; }
++	dbus_message_append_args 
++		(message,
++		 DBUS_TYPE_STRING, &amp;cfg.serverHost,  //0
++		 DBUS_TYPE_INT32,  &amp;cfg.serverPort,
++		 DBUS_TYPE_STRING, &amp;cfg.sessionUser, //2
++		 DBUS_TYPE_STRING, &amp;cfg.sessionPass,
++		 DBUS_TYPE_STRING, &amp;cfg.sessionName, //4
++		 DBUS_TYPE_STRING, &amp;cfg.sessionType,
++		 DBUS_TYPE_INT32,  &amp;cfg.cache,       //6
++		 DBUS_TYPE_INT32,  &amp;cfg.images,
++		 DBUS_TYPE_STRING, &amp;cfg.linkType,    //8
++		 DBUS_TYPE_INT32,  &amp;cfg.render, 
++		 DBUS_TYPE_STRING, &amp;cfg.backingstore,//10
++		 DBUS_TYPE_INT32,  &amp;cfg.imageCompressionMethod,
++		 DBUS_TYPE_INT32,  &amp;cfg.imageCompressionLevel, //12
++		 DBUS_TYPE_STRING, &amp;cfg.geometry,
++		 DBUS_TYPE_STRING, &amp;cfg.keyboard,    //14
++		 DBUS_TYPE_STRING, &amp;cfg.kbtype,
++		 DBUS_TYPE_INT32,  &amp;media,           //16
++		 DBUS_TYPE_STRING, &amp;cfg.agentServer,
++		 DBUS_TYPE_STRING, &amp;cfg.agentUser,   //18
++		 DBUS_TYPE_STRING, &amp;cfg.agentPass,
++		 DBUS_TYPE_INT32,  &amp;cfg.cups,        //20
++		 DBUS_TYPE_STRING, &amp;cfg.key,
++		 DBUS_TYPE_INT32,  &amp;enc,             //22
++		 DBUS_TYPE_INT32,  &amp;fs,
++		 DBUS_TYPE_STRING, &amp;cfg.customCommand,//24
++		 DBUS_TYPE_INVALID);
++
++	/* Send the signal */
++	if (!dbus_connection_send (bus, message, NULL)) {
++		cerr &lt;&lt; &quot;NXCMD&gt; Out Of Memory!\n&quot;; 
++		exit(1);
++	}
++
++	/* Clean up */
++	dbus_message_unref (message);
++	dbus_connection_flush (bus);
++
++	return 1;
++}
++
++static int
++sendReply (DBusConnection *bus, int sessionNum)
++{
++	DBusMessage *message;
++	DBusMessageIter args;
++
++	/* Create a new session choice signal on the &quot;org.freenx.nxcl.client&quot;
++	 * interface, from the object &quot;/org/freenx/nxcl/dbus/sessionChoice&quot;. */
++	message = dbus_message_new_signal (&quot;/org/freenx/nxcl/dbus/sessionChoice&quot;,
++					   dbusSendInterface.c_str(),
++					   &quot;sessionChoice&quot;);
++	if (NULL == message) { 
++		cerr &lt;&lt; &quot;NXCMD&gt; Message Null\n&quot;;
++		return -1;
++	}
++
++	dbus_message_iter_init_append (message, &amp;args);
++	if (!dbus_message_iter_append_basic (&amp;args,
++					     DBUS_TYPE_INT32,
++					     (const void*)&amp;sessionNum)) {
++		cerr &lt;&lt; &quot;NXCMD&gt; Out Of Memory!\n&quot;;
++		exit(1);
++	}
++
++	/* Send the signal */
++	if (!dbus_connection_send (bus, message, NULL)) {
++		cerr &lt;&lt; &quot;NXCMD&gt; Out Of Memory!\n&quot;;
++		exit(1);	  
++	}
++
++	/* Clean up */
++	dbus_message_unref (message);
++	dbus_connection_flush (bus);
++
++	return 1;
++}
++
++
++static int
++terminateSession (DBusConnection *bus, int sessionNum)
++{
++	DBusMessage *message;
++	DBusMessageIter args;
++
++	/* Create a new session choice signal on the &quot;org.freenx.nxcl.client&quot;
++	 * interface, from the object &quot;/org/freenx/nxcl/dbus/sessionChoice&quot;. */
++	message = dbus_message_new_signal (&quot;/org/freenx/nxcl/dbus/sessionChoice&quot;,
++					   dbusSendInterface.c_str(),
++					   &quot;terminateSession&quot;);
++	if (NULL == message) { 
++		cerr &lt;&lt; &quot;NXCMD&gt; Message Null\n&quot;;
++		return -1;
++	}
++
++	dbus_message_iter_init_append (message, &amp;args);
++	if (!dbus_message_iter_append_basic (&amp;args,
++					     DBUS_TYPE_INT32,
++					     (const void*)&amp;sessionNum)) {
++		cerr &lt;&lt; &quot;NXCMD&gt; Out Of Memory!\n&quot;;
++		exit(1);
++	}
++
++	/* Send the signal */
++	if (!dbus_connection_send (bus, message, NULL)) {
++		cerr &lt;&lt; &quot;NXCMD&gt; Out Of Memory!\n&quot;;
++		exit(1);	  
++	}
++
++	/* Clean up */
++	dbus_message_unref (message);
++	dbus_connection_flush (bus);
++
++	return 1;
++}
++
++
++/*
++ * Wait for and receive a message with available sessions, or a
++ * message saying there are no available sessions
++ */
++static int
++receiveSession (DBusConnection* conn)
++{
++	DBusMessage * message;
++	DBusMessageIter args;
++	DBusError error;
++	char * parameter = NULL;
++	dbus_int32_t iparam = 0, t = 0;
++	int count = 0;
++	bool sessions_obtained = false;
++	int rtn = 0;
++	stringstream ss;
++
++	cout &lt;&lt; &quot;NXCMD&gt; In receiveSession, listening to &quot; &lt;&lt; dbusRecvInterface &lt;&lt; &quot;\n&quot;;
++
++	dbus_error_init (&amp;error);
++
++	int sessionNum = 0;
++	// loop listening for signals being emitted
++	while (sessions_obtained == false) {
++		
++		if (dbus_error_is_set(&amp;error)) { 
++			cerr &lt;&lt; &quot;NXCMD&gt; Name Error (&quot; &lt;&lt; error.message &lt;&lt; &quot;)\n&quot;; 
++			dbus_error_free(&amp;error); 
++		}
++
++		count = 0;
++
++		// non blocking read of the next available message
++		dbus_connection_read_write(conn, 0);
++		message = dbus_connection_pop_message(conn);
++
++		// loop again if we haven't read a message
++		if (NULL == message) {
++			sleep (1);
++			continue;
++		}
++
++		// check if the message is a signal from the
++		// correct interface and with the correct name
++		if (dbus_message_is_signal (message,
++					    dbusRecvInterface.c_str(),
++					    &quot;AvailableSession&quot;)) {
++
++			if (!dbus_message_iter_init (message, &amp;args)) {
++				cerr &lt;&lt; &quot;NXCMD&gt; Message has no arguments!\n&quot;;
++				dbus_connection_flush (conn);
++				dbus_message_unref (message);
++				continue;
++			}
++			
++			if (DBUS_TYPE_INT32 != dbus_message_iter_get_arg_type (&amp;args)) {
++				cerr &lt;&lt; &quot;NXCMD&gt; First argument is not int32!\n&quot;;
++			} else {
++				dbus_message_iter_get_basic (&amp;args, &amp;iparam);
++				if (sessionNum == 0) {
++					cout &lt;&lt; &quot;NXCMD&gt; Available sessions:\n&quot;;
++				}
++				cout &lt;&lt; sessionNum++ &lt;&lt; &quot;: &quot; &lt;&lt; iparam;
++				count++;
++			}
++
++			// read the parameters - something like:
++			while (dbus_message_iter_next (&amp;args)) {
++				if (DBUS_TYPE_STRING == (t = dbus_message_iter_get_arg_type(&amp;args))) {
++					dbus_message_iter_get_basic(&amp;args, &amp;parameter);
++					cout &lt;&lt; &quot; &quot; &lt;&lt; parameter;
++					ss.str(&quot;&quot;);
++					ss &lt;&lt; parameter;
++					count++;
++				} else if (t == DBUS_TYPE_INT32) {
++					dbus_message_iter_get_basic (&amp;args, &amp;iparam);
++					cout &lt;&lt; &quot; &quot; &lt;&lt; iparam;
++					ss.str(&quot;&quot;);
++					ss &lt;&lt; iparam;
++					count++;
++
++				} else {
++					cerr &lt;&lt; &quot;NXCMD&gt; Error, parameter is not string or int.\n&quot;;
++				}
++				// Now we'd do something sensible with the data...
++			}
++			cout &lt;&lt; endl;
++
++		} else if (dbus_message_is_signal (message,
++						   dbusRecvInterface.c_str(),
++						   &quot;NoMoreAvailable&quot;)) {
++			sessions_obtained = true;
++			rtn = REPLY_REQUIRED;
++
++		} else if (dbus_message_is_signal (message,
++						   dbusRecvInterface.c_str(),
++						   &quot;Connecting&quot;)) {
++			sessions_obtained = true;
++			rtn = NEW_CONNECTION;
++
++		} else if (dbus_message_is_signal (message,
++						   dbusRecvInterface.c_str(),
++						   &quot;ServerCapacityReached&quot;)) {
++			sessions_obtained = true;
++			rtn = SERVER_CAPACITY;
++		} else {
++#ifdef DEBUG
++			cout &lt;&lt; &quot;NXCMD&gt; None of the above...\n&quot;;
++			if (!dbus_message_iter_init(message, &amp;args)) {
++				cerr &lt;&lt; &quot;NXCMD&gt; Message has no arguments!\n&quot;;
++				dbus_connection_flush (conn);
++				dbus_message_unref (message);
++				continue;
++			}
++			if (DBUS_TYPE_STRING == (t = dbus_message_iter_get_arg_type(&amp;args))) {
++				dbus_message_iter_get_basic(&amp;args, &amp;parameter);
++				cout &lt;&lt; &quot;NXCMD&gt; Parameter: &quot; &lt;&lt; parameter &lt;&lt; endl;
++			}
++#endif
++		}	
++
++		dbus_connection_flush (conn);
++		dbus_message_unref (message);
++
++	} // while()
++
++	return rtn;
++}
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000667.html">[Freenx-cvs] r374 - in nxcl: nxcl test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#664">[ date ]</a>
+              <a href="thread.html#664">[ thread ]</a>
+              <a href="subject.html#664">[ subject ]</a>
+              <a href="author.html#664">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

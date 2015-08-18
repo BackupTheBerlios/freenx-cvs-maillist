@@ -1,0 +1,93 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r434 - qtnx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r434%20-%20qtnx&In-Reply-To=%3C200801071226.m07CQrqe021631%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000669.html">
+   <LINK REL="Next"  HREF="000561.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r434 - qtnx</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r434%20-%20qtnx&In-Reply-To=%3C200801071226.m07CQrqe021631%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r434 - qtnx">gwright at mail.berlios.de
+       </A><BR>
+    <I>Mon Jan  7 13:26:53 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000669.html">[Freenx-cvs] r433 - nxcl/lib
+</A></li>
+        <LI>Next message: <A HREF="000561.html">[Freenx-cvs] r435 - qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#560">[ date ]</a>
+              <a href="thread.html#560">[ thread ]</a>
+              <a href="subject.html#560">[ subject ]</a>
+              <a href="author.html#560">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2008-01-07 13:26:52 +0100 (Mon, 07 Jan 2008)
+New Revision: 434
+
+Modified:
+   qtnx/qtnxwindow.cpp
+Log:
+Fix connecting to servers again...
+
+
+Modified: qtnx/qtnxwindow.cpp
+===================================================================
+--- qtnx/qtnxwindow.cpp	2008-01-07 12:10:22 UTC (rev 433)
++++ qtnx/qtnxwindow.cpp	2008-01-07 12:26:52 UTC (rev 434)
+@@ -122,7 +122,7 @@
+             updateStatusBar(&quot;Invalid authentication key&quot;);
+             break;
+         case NXCL_AUTHENTICATING:
+-            updateStatusBar(&quot;Authentication client&quot;);
++            updateStatusBar(&quot;Authenticating client&quot;);
+             break;
+         case NXCL_LOGIN_FAILED:
+             updateStatusBar(&quot;Invalid username or password&quot;);
+@@ -217,6 +217,7 @@
+     session.fullscreen = config.fullscreen;
+     session.encryption = true;
+     session.virtualDesktop = false;
++    session.terminate = false;
+ 
+     if (!config.key.empty()) {
+         key = config.key;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000669.html">[Freenx-cvs] r433 - nxcl/lib
+</A></li>
+	<LI>Next message: <A HREF="000561.html">[Freenx-cvs] r435 - qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#560">[ date ]</a>
+              <a href="thread.html#560">[ thread ]</a>
+              <a href="subject.html#560">[ subject ]</a>
+              <a href="author.html#560">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

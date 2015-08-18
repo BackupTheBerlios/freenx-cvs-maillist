@@ -1,0 +1,111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fux modified nxnode
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fux%20modified%20nxnode&In-Reply-To=%3C4238C895.mail24Z1W2YTZ%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000101.html">
+   <LINK REL="Next"  HREF="000104.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fux modified nxnode</H1>
+    <B>fux</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fux%20modified%20nxnode&In-Reply-To=%3C4238C895.mail24Z1W2YTZ%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fux modified nxnode">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Thu Mar 17 01:00:21 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000101.html">[Freenx-cvs] CVS: freenx - jonno modified 2 files
+</A></li>
+        <LI>Next message: <A HREF="000104.html">[Freenx-cvs] CVS: freenx - fux modified 7 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#103">[ date ]</a>
+              <a href="thread.html#103">[ thread ]</a>
+              <a href="subject.html#103">[ subject ]</a>
+              <a href="author.html#103">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fux
+Date:      2005-03-17 00:00:20 GMT
+Modified:  .        nxnode
+Log:
+fixed nxviewer closes BUG 3581 (keyboard-focus with -fullscreen)
+
+Revision  Changes    Path
+1.50      +3 -3      freenx/nxnode
+
+
+rev 1.50, prev_rev 1.49
+Index: nxnode
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxnode,v
+retrieving revision 1.49
+retrieving revision 1.50
+diff -u -r1.49 -r1.50
+--- nxnode	16 Mar 2005 14:02:38 -0000	1.49
++++ nxnode	17 Mar 2005 00:00:20 -0000	1.50
+@@ -13,7 +13,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxnode,v 1.49 2005/03/16 14:02:38 jonno Exp $
++# CVS: $Id: nxnode,v 1.50 2005/03/17 00:00:20 fux Exp $
+ #
+ # 21.06.2004: - Full reconnection support
+ 
+@@ -235,7 +235,7 @@
+ 	R=&quot;&quot;
+ 	[ &quot;$virtualdesktop&quot; = &quot;0&quot; ] &amp;&amp; R=&quot;-rootless&quot;
+ 	vncfullscreen=&quot;&quot;
+-	[ &quot;$geometry&quot; = &quot;fullscreen&quot; &amp;&amp; &quot;$type&quot; = &quot;vnc&quot; ] &amp;&amp; vncfullscreen=&quot;-fullscreen&quot; &amp;&amp; G=&quot;&quot;
++	[ &quot;$geometry&quot; = &quot;fullscreen&quot; -a &quot;$type&quot; = &quot;vnc&quot; ] &amp;&amp; vncfullscreen=&quot;-fullscreen&quot; &amp;&amp; G=&quot;&quot;
+ 
+ 	if [ &quot;$type&quot; = &quot;windows&quot; ]
+ 	then
+@@ -252,7 +252,7 @@
+ 		[ &quot;$SET_LD_LIBRARY_PATH&quot; = &quot;1&quot; ] &amp;&amp; export LD_LIBRARY_PATH=&quot;$AGENT_LIBRARY_PATH:$LD_LIBRARY_PATH&quot;
+ 		mkdir -p $USER_FAKE_HOME/.nx/C-$sess_id/scripts/
+ 		echo &quot;$agent_password&quot; | $PATH_BIN/nxpasswd $USER_FAKE_HOME/.nx/C-$sess_id/scripts/.passwd doit
+-		$PATH_BIN/nxviewer -encodings tight hextile copyrect raw -passwd $USER_FAKE_HOME/.nx/C-$sess_id/scripts/.passwd -name &quot;NX - $user@$SERVER_NAME:$display - $session (GPL Edition)&quot; -option &quot;$USER_FAKE_HOME/.nx/C-$sess_id/options&quot; $vncfullscreen $G  $agent_server $AGENT_EXTRA_OPTIONS_RFB 2&gt;&gt;$USER_FAKE_HOME/.nx/C-$sess_id/session &amp;
++		$PATH_BIN/nxviewer -encodings tight hextile copyrect raw -passwd $USER_FAKE_HOME/.nx/C-$sess_id/scripts/.passwd -name &quot;NX - $user@$SERVER_NAME:$display - $session (GPL Edition)&quot; -option &quot;$USER_FAKE_HOME/.nx/C-$sess_id/options&quot; $vncfullscreen $G $K $agent_server $AGENT_EXTRA_OPTIONS_RFB 2&gt;&gt;$USER_FAKE_HOME/.nx/C-$sess_id/session &amp;
+ 	elif [ -n &quot;$R&quot; -a &quot;$ENABLE_ROOTLESS_MODE&quot; != &quot;1&quot; ]
+ 	then
+ 		# nxproxy single application mode session
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000101.html">[Freenx-cvs] CVS: freenx - jonno modified 2 files
+</A></li>
+	<LI>Next message: <A HREF="000104.html">[Freenx-cvs] CVS: freenx - fux modified 7 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#103">[ date ]</a>
+              <a href="thread.html#103">[ thread ]</a>
+              <a href="subject.html#103">[ subject ]</a>
+              <a href="author.html#103">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

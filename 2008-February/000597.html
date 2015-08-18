@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r471 - qtnx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r471%20-%20qtnx&In-Reply-To=%3C200802050246.m152kCnf028513%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000596.html">
+   <LINK REL="Next"  HREF="000598.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r471 - qtnx</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r471%20-%20qtnx&In-Reply-To=%3C200802050246.m152kCnf028513%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r471 - qtnx">gwright at mail.berlios.de
+       </A><BR>
+    <I>Tue Feb  5 03:46:12 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000596.html">[Freenx-cvs] r470 - qtnx
+</A></li>
+        <LI>Next message: <A HREF="000598.html">[Freenx-cvs] r472 - nxcl/lib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#597">[ date ]</a>
+              <a href="thread.html#597">[ thread ]</a>
+              <a href="subject.html#597">[ subject ]</a>
+              <a href="author.html#597">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2008-02-05 03:46:11 +0100 (Tue, 05 Feb 2008)
+New Revision: 471
+
+Modified:
+   qtnx/qtnxwindow.cpp
+Log:
+More tweaks
+
+
+Modified: qtnx/qtnxwindow.cpp
+===================================================================
+--- qtnx/qtnxwindow.cpp	2008-02-05 02:27:58 UTC (rev 470)
++++ qtnx/qtnxwindow.cpp	2008-02-05 02:46:11 UTC (rev 471)
+@@ -156,10 +156,7 @@
+     connectionMenu-&gt;addSeparator();
+ 
+     closeWindowAction = connectionMenu-&gt;addAction(
+-            tr(&quot;Close QtNX when NX starts&quot;),
+-            this,
+-            SLOT(closeNXStarts()),
+-            QKeySequence(tr(&quot;CTRL+O&quot;)));
++            tr(&quot;Close QtNX when NX starts&quot;));
+ 
+     closeWindowAction-&gt;setCheckable(true);
+     closeWindowAction-&gt;setChecked(true);
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000596.html">[Freenx-cvs] r470 - qtnx
+</A></li>
+	<LI>Next message: <A HREF="000598.html">[Freenx-cvs] r472 - nxcl/lib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#597">[ date ]</a>
+              <a href="thread.html#597">[ thread ]</a>
+              <a href="subject.html#597">[ subject ]</a>
+              <a href="author.html#597">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

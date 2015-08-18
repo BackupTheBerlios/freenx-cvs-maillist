@@ -1,0 +1,147 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r230 - / freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-July/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r230%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200607050006.k6506quj014375%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000358.html">
+   <LINK REL="Next"  HREF="000360.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r230 - / freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r230%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200607050006.k6506quj014375%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r230 - / freenx-server/trunk">fabianx at berlios.de
+       </A><BR>
+    <I>Wed Jul  5 02:06:52 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000358.html">[Freenx-cvs] r229 - / freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000360.html">[Freenx-cvs] r231 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#359">[ date ]</a>
+              <a href="thread.html#359">[ thread ]</a>
+              <a href="subject.html#359">[ subject ]</a>
+              <a href="author.html#359">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2006-07-05 02:06:46 +0200 (Wed, 05 Jul 2006)
+New Revision: 230
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxloadconfig
+Log:
+- Support for NX 2.0.0 backend in nxloadconfig.
+
+- Removed testing of forwarding via user.
+
+- Typo
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:246
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:248
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-07-04 23:53:17 UTC (rev 229)
++++ freenx-server/trunk/ChangeLog	2006-07-05 00:06:46 UTC (rev 230)
+@@ -7,6 +7,7 @@
+ 	* Fixed nxsetup automatic testing of sessions and cleared up
+ 	  explanations.
+ 	* Added support for NX 2.0.0 style nxclient dialogs.
++	* Support for NX 2.0.0 backend in nxloadconfig.
+ 
+ 01.07.2006 FreeNX 0.5.0 &quot;UKUUG 2006 Edition&quot;
+ 	* Opened the 0.5.0 branch.
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2006-07-04 23:53:17 UTC (rev 229)
++++ freenx-server/trunk/nxloadconfig	2006-07-05 00:06:46 UTC (rev 230)
+@@ -384,7 +384,7 @@
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;NX_LOG_LEVEL=$NX_LOG_LEVEL\&quot;&quot;
+ 	[ &quot;$NX_LOG_LEVEL&quot; != &quot;0&quot; -a ! -e &quot;$NX_LOGFILE&quot; ] &amp;&amp; \
+ 		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;NX_LOGFILE=$NX_LOGFILE\&quot;&quot; \
+-					  &amp;&amp; echo &quot;         No loggfile will be kept.&quot;
++					  &amp;&amp; echo &quot;         No logfile will be kept.&quot;
+ 		# How do I check if another user might write to a file? ( -w checks only current user)
+ 	[ -z $(echo &quot;$SESSION_LOG_CLEAN&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SESSION_LOG_CLEAN=$SESSION_LOG_CLEAN\&quot;&quot;
+@@ -406,18 +406,13 @@
+ 	[ &quot;$ENABLE_SERVER_FORWARD&quot; = &quot;1&quot; -a ! -e &quot;$SERVER_FORWARD_KEY&quot; ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SERVER_FORWARD_KEY=$SERVER_FORWARD_KEY\&quot;&quot;
+ 	
+-	[ -z $(echo &quot;$ENABLE_NOMACHINE_FORWARD_USER&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_NOMACHINE_FORWARD_USER=$ENABLE_NOMACHINE_FORWARD_USER\&quot;&quot;
+ 	[ -z $(echo &quot;$ENABLE_NOMACHINE_FORWARD_PORT&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_NOMACHINE_FORWARD_PORT=$ENABLE_NOMACHINE_FORWARD_PORT\&quot;&quot;
+-	[ &quot;$ENABLE_NOMACHINE_FORWARD_USER&quot; = &quot;1&quot; -o &quot;$ENABLE_NOMACHINE_FORWARD_PORT&quot; = &quot;1&quot; ] &amp;&amp; ! which &quot;$NOMACHINE_SERVER&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++	[ &quot;$ENABLE_NOMACHINE_FORWARD_PORT&quot; = &quot;1&quot; ] &amp;&amp; ! which &quot;$NOMACHINE_SERVER&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;NOMACHINE_SERVER=$NOMACHINE_SERVER\&quot;&quot;
+-	[ &quot;$ENABLE_NOMACHINE_FORWARD_USER&quot; = &quot;1&quot; -a ! -d &quot;$NOMACHINE_NX_HOME_DIR&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;NOMACHINE_NX_HOME_DIR=$NOMACHINE_NX_HOME_DIR\&quot;&quot;
+ 	[ &quot;$ENABLE_NOMACHINE_FORWARD_PORT&quot; = &quot;1&quot; -a -z $(echo &quot;$NOMACHINE_FORWARD_PORT&quot; | egrep &quot;^[1-9][0-9]{0,4}$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;NOMACHINE_FORWARD_PORT=$NOMACHINE_FORWARD_PORT\&quot;&quot;
+ 	
+-	
+ 	# Services directives
+ 	
+ 	[ -z $(echo &quot;$ENABLE_ESD_PRELOAD&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+@@ -509,8 +504,8 @@
+ 	[ -z $(echo &quot;$ENABLE_ROOTLESS_MODE&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_ROOTLESS_MODE=$ENABLE_ROOTLESS_MODE\&quot;&quot;
+ 
+-	[ -z &quot;$(strings $PATH_BIN/nxagent | grep 'NXAGENT - Version 1.5.0')&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Could not find 1.5.0 version string in nxagent. NX 1.5.0 backend is needed for this version of FreeNX.&quot;
++	[ -z &quot;$(strings $PATH_BIN/nxagent | egrep 'NXAGENT - Version 1.5.0|NXAGENT - Version 2.0.0')&quot; ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Could not find 1.5.0 or 2.0.0 version string in nxagent. NX 1.5.0 or 2.0.0 backend is needed for this version of FreeNX.&quot;
+ 		
+ 	[ -z $(echo &quot;$ENABLE_USESSION&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_USESSION=$ENABLE_USESSION\&quot;&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000358.html">[Freenx-cvs] r229 - / freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000360.html">[Freenx-cvs] r231 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#359">[ date ]</a>
+              <a href="thread.html#359">[ thread ]</a>
+              <a href="subject.html#359">[ subject ]</a>
+              <a href="author.html#359">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

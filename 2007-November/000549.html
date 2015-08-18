@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r421 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-November/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r421%20-%20freenx-server/trunk&In-Reply-To=%3C200711091451.lA9EpHfq022415%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000548.html">
+   <LINK REL="Next"  HREF="000550.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r421 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r421%20-%20freenx-server/trunk&In-Reply-To=%3C200711091451.lA9EpHfq022415%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r421 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Fri Nov  9 15:51:17 CET 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000548.html">[Freenx-cvs] r420 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000550.html">[Freenx-cvs] r422 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#549">[ date ]</a>
+              <a href="thread.html#549">[ thread ]</a>
+              <a href="subject.html#549">[ subject ]</a>
+              <a href="author.html#549">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-11-09 15:51:17 +0100 (Fri, 09 Nov 2007)
+New Revision: 421
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxnode-login
+Log:
+* Added -o ConnectTimeout 3 to nxnode-login for test-nx case.
+(cedric briner &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">work at infomaniak.ch</A>&gt;)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-11-09 14:42:02 UTC (rev 420)
++++ freenx-server/trunk/ChangeLog	2007-11-09 14:51:17 UTC (rev 421)
+@@ -19,6 +19,8 @@
+ 	* Added nxsetup --test to test the configuration and connection to
+ 	  localhost nxserver.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Added -o ConnectTimeout 3 to nxnode-login for test-nx case.
++	  (cedric briner &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">work at infomaniak.ch</A>&gt;)
+ 
+ 14.10.2007 FreeNX 0.7.1 &quot;Hip Hop Edition&quot;
+ 	* Fixed the issue that makes fonts look tiny and unreadable by default 
+
+Modified: freenx-server/trunk/nxnode-login
+===================================================================
+--- freenx-server/trunk/nxnode-login	2007-11-09 14:42:02 UTC (rev 420)
++++ freenx-server/trunk/nxnode-login	2007-11-09 14:51:17 UTC (rev 421)
+@@ -33,7 +33,7 @@
+ 	set publickey &quot;&quot;
+ 	catch {set publickey $env(NODE_PUBLICKEY)}
+ 	
+-	set pid [spawn -noecho $command_ssh -2 -x -l &quot;$user&quot; &quot;$host&quot; -i &quot;$publickey&quot; -o &quot;RhostsAuthentication no&quot; -o &quot;PasswordAuthentication no&quot; -o &quot;RSAAuthentication no&quot; -o &quot;RhostsRSAAuthentication no&quot; -o &quot;PubkeyAuthentication yes&quot; -o &quot;PreferredAuthentications publickey&quot; -p &quot;$port&quot; &quot;$executable $command&quot; ]
++	set pid [spawn -noecho $command_ssh -2 -x -l &quot;$user&quot; &quot;$host&quot; -i &quot;$publickey&quot; -o &quot;RhostsAuthentication no&quot; -o &quot;PasswordAuthentication no&quot; -o &quot;RSAAuthentication no&quot; -o &quot;RhostsRSAAuthentication no&quot; -o &quot;PubkeyAuthentication yes&quot; -o &quot;PreferredAuthentications publickey&quot; -o &quot;ConnectTimeout 3&quot; -p &quot;$port&quot; &quot;$executable $command&quot; ]
+ 	
+ 	while {1} {
+ 		expect {
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000548.html">[Freenx-cvs] r420 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000550.html">[Freenx-cvs] r422 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#549">[ date ]</a>
+              <a href="thread.html#549">[ thread ]</a>
+              <a href="subject.html#549">[ subject ]</a>
+              <a href="author.html#549">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,98 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r291 - in nx-utils: . nxcups-wrapper
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r291%20-%20in%20nx-utils%3A%20.%20nxcups-wrapper&In-Reply-To=%3C200701241624.l0OGOliJ002757%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000420.html">
+   <LINK REL="Next"  HREF="000432.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r291 - in nx-utils: . nxcups-wrapper</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r291%20-%20in%20nx-utils%3A%20.%20nxcups-wrapper&In-Reply-To=%3C200701241624.l0OGOliJ002757%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r291 - in nx-utils: . nxcups-wrapper">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Wed Jan 24 17:24:47 CET 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000420.html">[Freenx-cvs] r290 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000432.html">[Freenx-cvs] r291 - in nx-utils: . nxcups-wrapper
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#421">[ date ]</a>
+              <a href="thread.html#421">[ thread ]</a>
+              <a href="subject.html#421">[ subject ]</a>
+              <a href="author.html#421">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-01-24 17:24:47 +0100 (Wed, 24 Jan 2007)
+New Revision: 291
+
+Added:
+   nx-utils/nxcups-wrapper/
+   nx-utils/nxcups-wrapper/nxcups-wrapper
+Log:
+Added the nxcups-wrapper.
+
+
+
+Added: nx-utils/nxcups-wrapper/nxcups-wrapper
+===================================================================
+--- nx-utils/nxcups-wrapper/nxcups-wrapper	2007-01-24 16:22:04 UTC (rev 290)
++++ nx-utils/nxcups-wrapper/nxcups-wrapper	2007-01-24 16:24:47 UTC (rev 291)
+@@ -0,0 +1,13 @@
++#!/bin/sh
++
++echo &quot;PidFile /home/info/ff/.nx/cups/cupsd.pid&quot; &gt;&gt; $NX_HOME/.nx/cups/cupsd.conf
++echo &quot;StateDir /home/info/ff/.nx/cups/&quot; &gt;&gt; $NX_HOME/.nx/cups/cupsd.conf
++
++mkdir -p $NX_HOME/.nx/cups/ppd/
++
++for i in $(lpstat -s | cut -d&quot; &quot; -f4)
++do
++	LD_LIBRARY_PATH=&quot;&quot; wget -q ${i/ipp/http}.ppd -O $NX_HOME/.nx/cups/ppd/$(basename $i)_nxdl.ppd
++done
++
++exec /usr/sbin/cupsd &quot;$@&quot;
+
+
+Property changes on: nx-utils/nxcups-wrapper/nxcups-wrapper
+___________________________________________________________________
+Name: svn:executable
+   + *
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000420.html">[Freenx-cvs] r290 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000432.html">[Freenx-cvs] r291 - in nx-utils: . nxcups-wrapper
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#421">[ date ]</a>
+              <a href="thread.html#421">[ thread ]</a>
+              <a href="subject.html#421">[ subject ]</a>
+              <a href="author.html#421">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

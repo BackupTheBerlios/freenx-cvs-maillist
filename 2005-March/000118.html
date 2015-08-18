@@ -1,0 +1,184 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fux modified 2 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fux%20modified%202%20files&In-Reply-To=%3C424BB235.mail1O81TM3J0%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000117.html">
+   
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fux modified 2 files</H1>
+    <B>fux</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fux%20modified%202%20files&In-Reply-To=%3C424BB235.mail1O81TM3J0%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fux modified 2 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Thu Mar 31 10:17:57 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000117.html">[Freenx-cvs] CVS: freenx - fux modified nxsetup
+</A></li>
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#118">[ date ]</a>
+              <a href="thread.html#118">[ thread ]</a>
+              <a href="subject.html#118">[ subject ]</a>
+              <a href="author.html#118">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fux
+Date:      2005-03-31 08:17:56 GMT
+Modified:  .        ChangeLog nxsetup
+Log:
+Added &quot;--ssh2&quot; cmdline switch for commercial ssh2-server support in nxsetup
+
+Revision  Changes    Path
+1.44      +1 -0      freenx/ChangeLog
+
+
+rev 1.44, prev_rev 1.43
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.43
+retrieving revision 1.44
+diff -u -r1.43 -r1.44
+--- ChangeLog	17 Mar 2005 23:21:14 -0000	1.43
++++ ChangeLog	31 Mar 2005 08:17:56 -0000	1.44
+@@ -20,6 +20,7 @@
+ 	* Fixed nxviewer commandline for geometry and fullscreen-support
+ 	* Added NX_LOG_LEVEL instead of NX_LOGGING, allowing less verbose logfile.
+ 	* Added SESSION_LOG_CLEAN for configurable removal of the temporary session directory.
++	* Added &quot;--ssh2&quot; cmdline switch for commercial ssh2-server support in nxsetup
+ 
+ XX.03.2005 FreeNX 0.3.1-CVS
+ 	* Fixed keyboard mapping problems.
+
+
+
+1.22      +36 -1     freenx/nxsetup
+
+
+rev 1.22, prev_rev 1.21
+Index: nxsetup
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxsetup,v
+retrieving revision 1.21
+retrieving revision 1.22
+diff -u -r1.21 -r1.22
+--- nxsetup	31 Mar 2005 07:40:11 -0000	1.21
++++ nxsetup	31 Mar 2005 08:17:56 -0000	1.22
+@@ -5,7 +5,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxsetup,v 1.21 2005/03/31 07:40:11 fux Exp $ 
++# CVS: $Id: nxsetup,v 1.22 2005/03/31 08:17:56 fux Exp $ 
+ #
+ 
+ HELP=&quot;no&quot;
+@@ -15,6 +15,7 @@
+ CLEAN=&quot;no&quot;
+ UNINSTALL=&quot;no&quot;
+ PURGE=&quot;no&quot;
++SETUP_SSH2_KEY=&quot;no&quot;
+ 
+ while [ &quot;$1&quot; ]
+ do
+@@ -22,6 +23,7 @@
+ 		--help) HELP=&quot;yes&quot;; shift ;;
+ 		--install) INSTALL=&quot;yes&quot;; shift ;;
+ 		--setup-nomachine-key) SETUP_NOMACHINE_KEY=&quot;yes&quot;; shift ;;
++		--ssh2) SETUP_SSH2_KEY=&quot;yes&quot;; shift;;
+ 		--uid) SETUP_UID=$2; shift 2 ;;
+ 		--clean) CLEAN=&quot;yes&quot;; shift ;;
+ 		--uninstall) UNINSTALL=&quot;yes&quot;; shift ;;
+@@ -37,6 +39,7 @@
+ [ &quot;$INSTALL&quot; = &quot;yes&quot; -a &quot;$CLEAN&quot; = &quot;no&quot; -a &quot;$PURGE&quot; = &quot;yes&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+ [ &quot;$UNINSTALL&quot; = &quot;yes&quot; ] &amp;&amp; [ &quot;$SETUP_NOMACHINE_KEY&quot; = &quot;yes&quot; -o -n &quot;$SETUP_UID&quot; -o &quot;$CLEAN&quot; = &quot;yes&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+ [ &quot;$UNINSTALL&quot; = &quot;yes&quot; -a &quot;$CLEAN&quot; = &quot;yes&quot; ] &amp;&amp; HELP=&quot;yes&quot;
++[ &quot;$SETUP_SSH2_KEY&quot; = &quot;yes&quot; -a &quot;$SETUP_NOMACHINE_KEY&quot; = &quot;no&quot; ] &amp;&amp; HELP=yes&quot;
+ 
+ if [ &quot;$HELP&quot; = &quot;yes&quot; ]
+ then
+@@ -51,6 +54,8 @@
+ 	echo &quot;                         client. This is not as secure, but it simplifies the &quot;
+ 	echo &quot;                         configuration of clients.&quot;
+ 	echo &quot;                         Use this option at your own risk.&quot;
++	echo &quot;  --ssh2		       additionally create commercial pubkey-support, beware&quot;
++	echo &quot;			       own _commercial_ ssh2-key is not supported!.&quot;
+ 	echo &quot;  --uid &lt;number&gt;         The nx user will be given the uid &lt;number&gt;.&quot;
+ 	echo &quot;  --clean                Performs an uninstall prior to the installation&quot;
+ 	echo &quot;  --uninstall            Remove log and session files, as well as the nx user&quot;
+@@ -162,6 +167,36 @@
+ 			# generate a new key, backup the old and copy it to $SSH_AUTHORIZED_KEYS
+ 			$PATH_BIN/nxkeygen
+ 		fi
++	fi
++
++	# commercial ssh2-server uses other authentification-files
++	# as they are more or less static, I don't integrated these variable
++	# in node.conf, you have to change them here, if you like
++	SSH2_AUTHORIZATION=&quot;authorization&quot;
++	SSH2_PUBKEY=&quot;nx_user.id.pub&quot;
++	SSH2_HOME_DIR=&quot;$NX_HOME_DIR/.ssh2&quot;
++	if [ ! -f &quot;${SSH2_HOME_DIR}/$SSH2_PUBKEY&quot; -a &quot;$SETUP_SSH2_KEY&quot; = &quot;yes&quot; -a &quot;$SETUP_NOMACHINE_KEY&quot; = &quot;yes&quot; ]
++	then
++		mkdir -p $SSH2_HOME_DIR
++		chmod 700 $SSH2_HOME_DIR
++		
++		cat &gt;  ${SSH2_HOME_DIR}/$SSH2_PUBKEY &lt;&lt;EOF
++---- BEGIN SSH2 PUBLIC KEY ----
++Comment: &quot;1024-bit DSA, converted from OpenSSH by <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">root at localhost</A>&quot;
++AAAAB3NzaC1kc3MAAACBAJe/0DNBePG9dYLWq7cJ0SqyRf1iiZN/IbzrmBvgPTZnBa5FT/
++0Lcj39sRYt1paAlhchwUmwwIiSZaON5JnJOZ6jKkjWIuJ9MdTGfdvtY1aLwDMpxUVoGwEa
++KWOyin02IPWYSkDQb6cceuG9NfPulS9iuytdx0zIzqvGqfvudtufAAAAFQCwosRXR2QA8O
++SgFWSO6+kGrRJKiwAAAIEAjgvVNAYWSrnFD+cghyJbyx60AAjKtxZ0r/Pn9k94Qt2rvQoM
++nGgt/zU0v/y4hzg+g3JNEmO1PdHh/wDPVOxlZ6Hb5F4IQnENaAZ9uTZiFGqhBO1c8Wwjiq
++/MFZy3jZaidarLJvVs8EeT4mZcWxwm7nIVD4lRU2wQ2lj4aTPcepMAAACANlgcCuA4wrC+
++3Cic9CFkqiwO/Rn1vk8dvGuEQqFJ6f6LVfPfRTfaQU7TGVLk2CzY4dasrwxJ1f6FsT8DHT
++NGnxELPKRuLstGrFY/PR7KeafeFZDf+fJ3mbX5nxrld3wi5titTnX+8s4IKv29HJguPvOK
++/SI7cjzA+SqNfD7qEo8=
++---- END SSH2 PUBLIC KEY ----
++EOF
++		echo &quot;Key $SSH2_PUBKEY&quot; &gt;&gt; ${SSH2_HOME_DIR}/$SSH2_AUTHORIZATION
++		echo &quot;Options no-port-forwarding,no-x11-forwarding,no-agent-forwarding,command=\&quot;$PATH_BIN/nxserver\&quot;&quot; &gt;&gt; ${SSH2_HOME_DIR}/$SSH2_AUTHORIZATION
++		chmod 600 ${SSH2_HOME_DIR}/$SSH2_AUTHORIZATION ${SSH2_HOME_DIR}/$SSH2_PUBKEY
+ 	fi
+ 	
+ 	if [ ! -f $NX_HOME_DIR/.ssh/known_hosts ]
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000117.html">[Freenx-cvs] CVS: freenx - fux modified nxsetup
+</A></li>
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#118">[ date ]</a>
+              <a href="thread.html#118">[ thread ]</a>
+              <a href="subject.html#118">[ subject ]</a>
+              <a href="author.html#118">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

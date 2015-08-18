@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r563 - trunk/freenx-server
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r563%20-%20trunk/freenx-server&In-Reply-To=%3C200808052226.m75MQBmV017153%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000696.html">
+   <LINK REL="Next"  HREF="000698.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r563 - trunk/freenx-server</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r563%20-%20trunk/freenx-server&In-Reply-To=%3C200808052226.m75MQBmV017153%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r563 - trunk/freenx-server">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Wed Aug  6 00:26:11 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000696.html">[Freenx-cvs] r562 - trunk/freenx-server/nx-session-launcher
+</A></li>
+        <LI>Next message: <A HREF="000698.html">[Freenx-cvs] r564 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#697">[ date ]</a>
+              <a href="thread.html#697">[ thread ]</a>
+              <a href="subject.html#697">[ subject ]</a>
+              <a href="author.html#697">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-08-06 00:26:11 +0200 (Wed, 06 Aug 2008)
+New Revision: 563
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxserver
+Log:
+* Allow passwords with '\' by changing read -s to read -r -s.
+  (Closes: #10699)
+  (Patch by <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">rpfuller at bat.berlios.de</A>, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-05 21:30:58 UTC (rev 562)
++++ trunk/freenx-server/ChangeLog	2008-08-05 22:26:11 UTC (rev 563)
+@@ -63,7 +63,11 @@
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 	* Used source instead of &quot;.&quot; for Makefile. (Closes: #13954)
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Allow passwords with '\' by changing read -s to read -r -s.
++	  (Closes: #10699)
++	  (Patch by <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">rpfuller at bat.berlios.de</A>, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
++
+ 14.03.2008 FreeNX 0.7.2 &quot;Priscilla Edition&quot;
+ 	* Opened the 0.7.2 development.
+ 	* Fixed the display of local sessions to display only 
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-05 21:30:58 UTC (rev 562)
++++ trunk/freenx-server/nxserver	2008-08-05 22:26:11 UTC (rev 563)
+@@ -727,7 +727,7 @@
+ 			echo_x -n &quot;NX&gt; 102 Password: &quot;
+ 			old_ifs=&quot;$IFS&quot;
+ 			export IFS=$'\n'
+-			read -s PASS
++			read -r -s PASS
+ 			export IFS=&quot;$old_ifs&quot;
+ 			echo_x &quot;&quot;
+ 			log 6 -n &quot;Info: Auth method: &quot;
+@@ -1499,14 +1499,14 @@
+ 		passwd)
+ 			echo_x &quot;NX&gt; 113 Changing password of user '$USER'&quot;
+ 			echo_x -n &quot;NX&gt; 102 Current password:&quot;
+-			read -s PASS
++			read -r -s PASS
+ 			ENC_PASS=$(passdb_get_crypt_pass &quot;$PASS&quot;)
+ 			REAL_PASS=$(passdb_get_pass &quot;$USER&quot;)
+ 			echo_x
+ 			if [ &quot;$ENC_PASS&quot; = &quot;$REAL_PASS&quot; ]
+ 			then
+ 				echo_x -n &quot;NX&gt; 102 Password:&quot;
+-				read -s NEW_PASS1
++				read -r -s NEW_PASS1
+ 				
+ 				if [ ${#NEW_PASS1} -lt 5 ]
+ 				then
+@@ -1516,7 +1516,7 @@
+ 
+ 				echo_x
+ 				echo_x -n &quot;NX&gt; 102 Confirm password:&quot;
+-				read -s NEW_PASS1
++				read -r -s NEW_PASS1
+ 				echo_x
+ 				if [ &quot;$NEW_PASS1&quot; = &quot;$NEW_PASS2&quot; ]
+ 				then
+@@ -1634,7 +1634,7 @@
+ 	CMD_CHUSER=$2
+ 	egrep -q &quot;^$CMD_CHUSER:&quot; $NX_ETC_DIR/passwords || cmd_abort &quot;Error: User $CMD_CHUSER not found in database.&quot;
+ 	echo -n &quot;New password: &quot;
+-	read -s CMD_NEWPASS
++	read -r -s CMD_NEWPASS
+ 	echo
+ 	CMD_ENC_PASS=$(passdb_get_crypt_pass &quot;$CMD_NEWPASS&quot;)
+ 	passdb_chpass &quot;$CMD_CHUSER&quot; &quot;$CMD_ENC_PASS&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000696.html">[Freenx-cvs] r562 - trunk/freenx-server/nx-session-launcher
+</A></li>
+	<LI>Next message: <A HREF="000698.html">[Freenx-cvs] r564 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#697">[ date ]</a>
+              <a href="thread.html#697">[ thread ]</a>
+              <a href="subject.html#697">[ subject ]</a>
+              <a href="author.html#697">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

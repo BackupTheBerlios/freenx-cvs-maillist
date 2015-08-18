@@ -1,0 +1,289 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r210 - / freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-July/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r210%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200607011703.k61H3gq4017759%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000339.html">
+   <LINK REL="Next"  HREF="000341.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r210 - / freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r210%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200607011703.k61H3gq4017759%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r210 - / freenx-server/trunk">fabianx at berlios.de
+       </A><BR>
+    <I>Sat Jul  1 19:03:42 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000339.html">[Freenx-cvs] r209 - / freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000341.html">[Freenx-cvs] r211 - / freenx-website
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#340">[ date ]</a>
+              <a href="thread.html#340">[ thread ]</a>
+              <a href="subject.html#340">[ subject ]</a>
+              <a href="author.html#340">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2006-07-01 19:03:39 +0200 (Sat, 01 Jul 2006)
+New Revision: 210
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/node.conf.sample
+   freenx-server/trunk/nxloadconfig
+   freenx-server/trunk/nxnode
+Log:
+Added experimental last minute support for NX 2.0.0 backend.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:279
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:280
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-07-01 17:03:32 UTC (rev 209)
++++ freenx-server/trunk/ChangeLog	2006-07-01 17:03:39 UTC (rev 210)
+@@ -33,6 +33,8 @@
+ 	* Removed termination of nxagent in case of rootless mode.
+ 	  (Fixes kontact without --nofork)
+ 	* Last minute fixes for new functions using rev.
++	* Added experimental last minute support for NX 2.0.0 backend.
++	  (set ENABLE_2_0_0_BACKEND=1)
+ 
+ XX.XX.2006 FreeNX 0.4.5 &quot;aKademy Edition&quot;
+ 	* Made nxsetup more user-friendly and hopefully finally failsafe.
+
+Modified: freenx-server/trunk/node.conf.sample
+===================================================================
+--- freenx-server/trunk/node.conf.sample	2006-07-01 17:03:32 UTC (rev 209)
++++ freenx-server/trunk/node.conf.sample	2006-07-01 17:03:39 UTC (rev 210)
+@@ -345,6 +345,9 @@
+ # Misc directives
+ #########################################################################
+ 
++# When you installed a 2.0.0 NX Backend, set this to 1.
++#ENABLE_2_0_0_BACKEND=&quot;0&quot;
++
+ # When set to 1 this will automatically resume started sessions
+ #ENABLE_AUTORECONNECT=&quot;0&quot;
+ 
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2006-07-01 17:03:32 UTC (rev 209)
++++ freenx-server/trunk/nxloadconfig	2006-07-01 17:03:39 UTC (rev 210)
+@@ -173,6 +173,7 @@
+ 
+ # Misc directives
+ 
++ENABLE_2_0_0_BACKEND=&quot;0&quot;
+ ENABLE_AUTORECONNECT=&quot;0&quot;
+ ENABLE_AUTORECONNECT_BEFORE_140=&quot;1&quot;
+ EXPORT_USERIP=&quot;0&quot;
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2006-07-01 17:03:32 UTC (rev 209)
++++ freenx-server/trunk/nxnode	2006-07-01 17:03:39 UTC (rev 210)
+@@ -252,7 +252,7 @@
+ 	[ -n &quot;$keyboard&quot; ] &amp;&amp; K=&quot;-keyboard $keyboard&quot;
+ 	[ -n &quot;$kbtype&quot; ] &amp;&amp; K=&quot;-kbtype $kbtype&quot;
+ 	B=&quot;&quot;
+-	[ -n &quot;$backingstore&quot; ] &amp;&amp; B=&quot;-bs $backingstore&quot;
++	[ -n &quot;$backingstore&quot; -a &quot;$ENABLE_2_0_0_BACKEND&quot; != &quot;1&quot; ] &amp;&amp; B=&quot;-bs $backingstore&quot;
+ 	G=&quot;&quot;
+ 	[ -n &quot;$geometry&quot; ] &amp;&amp; G=&quot;-geometry $geometry&quot;
+ 	R=&quot;-D&quot;
+@@ -443,8 +443,133 @@
+ #                         connection states and react differently.
+ #
+ 
+-node_start_monitor()
++node_start_monitor_2_0_0()
+ {
++	TAIL_PID=&quot;&quot;
++	SUSPEND_STATUS=&quot;$2&quot;
++	SESSION_STATUS=&quot;&quot;
++
++	while read line 
++	do
++		#
++		# Catch tail pid
++		#
++		
++		if stringinstring &quot;Info: tail -f running with pid&quot; &quot;$line&quot;
++		then
++			TAIL_PID=$(echo $line | cut -d&quot;'&quot; -f2)
++		fi
++
++		#
++		# Session messages
++		#
++
++		if stringinstring &quot;Session: Starting session at&quot; &quot;$line&quot;
++		then
++			echo &quot;NX&gt; 1009 Session status: starting&quot;
++		fi
++		
++		if stringinstring &quot;Session: Suspending session at&quot; &quot;$line&quot;
++		then
++			echo &quot;NX&gt; 1009 Session status: suspending&quot;
++		fi
++		
++		if stringinstring &quot;Session: Terminating session at&quot; &quot;$line&quot;
++		then
++			echo &quot;NX&gt; 1009 Session status: terminating&quot;
++		fi
++		
++		if stringinstring &quot;Session: Resuming session at&quot; &quot;$line&quot;
++		then
++			echo &quot;NX&gt; 1009 Session status: resuming&quot;
++		fi
++
++
++		#
++		# Session suspend
++		#
++
++		if stringinstring &quot;Session: Session suspended at&quot; &quot;$line&quot;
++		then
++			echo &quot;NX&gt; 1005 Session status: suspended&quot;
++			# umount shares &amp; stop printers
++
++			if [ &quot;$SUSPEND_STATUS&quot; = &quot;Running&quot; ]
++			then
++				node_suspend_session $sess_id
++				SUSPEND_STATUS=&quot;&quot;
++			else
++				node_stop_services
++			fi
++		fi
++
++		#
++		# Watchdog termination
++		#
++
++		if stringinstring &quot;Info: Watchdog running with pid&quot; &quot;$line&quot;
++		then
++			WATCHDOG_PID=$(echo $line | cut -d&quot;'&quot; -f2)
++		fi
++
++		if stringinstring &quot;Info: Waiting the watchdog process to complete.&quot; &quot;$line&quot;
++		then
++			# Kill the watchdog
++			kill $WATCHDOG_PID 2&gt;/dev/null
++		fi
++		
++		#
++		# Session is running
++		#
++		
++		if stringinstring &quot;Info: Waiting for connection from&quot; &quot;$line&quot;
++		then
++			echo &quot;NX&gt; 710 Session status: running&quot;
++			echo &quot;NX&gt; 1002 Commit&quot;
++			echo &quot;NX&gt; 1006 Session status: running&quot;
++		fi
++
++		#
++		# Reconnection success!
++		#
++		
++		if stringinstring &quot;Session: Session resumed at&quot; &quot;$line&quot;
++		then
++			echo &quot;NX&gt; 718 Session restore succeded&quot;
++			if [ &quot;$1&quot; = &quot;restore&quot; ]
++			then
++				kill $TAIL_PID
++				break
++			fi
++		fi
++
++		#
++		# Reconnection failure
++		#
++		
++		if stringinstring &quot;Session: Display failure detected at&quot; &quot;$line&quot;
++		then
++			echo &quot;NX&gt; 596 Error: Session $1 failed. Reason was: $line&quot;
++			if [ &quot;$1&quot; = &quot;restore&quot; ]
++			then
++				kill $TAIL_PID
++				break
++			fi
++		fi
++	done
++	
++	trap &quot;&quot; EXIT
++	
++	[ &quot;$1&quot; = &quot;restore&quot; ] ||	node_stop_services
++	# close all open file descriptors
++	exec 0&lt;&amp;-
++	exec 1&gt;&amp;-
++	exec 2&gt;&amp;-
++	exit 0
++}
++
++node_start_monitor_1_5_0()
++{
+ 	RUNNING=0
+ 	TAIL_PID=&quot;&quot;
+ 	SUSPEND_STATUS=&quot;$2&quot;
+@@ -599,6 +724,12 @@
+ 	exit 0
+ }
+ 
++node_start_monitor()
++{
++	[ &quot;$ENABLE_2_0_0_BACKEND&quot; = &quot;1&quot; ] &amp;&amp; node_start_monitor_2_0_0 &quot;$@&quot;
++	[ &quot;$ENABLE_2_0_0_BACKEND&quot; = &quot;1&quot; ] || node_start_monitor_1_5_0 &quot;$@&quot;
++}
++
+ node_startsession()
+ {
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000339.html">[Freenx-cvs] r209 - / freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000341.html">[Freenx-cvs] r211 - / freenx-website
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#340">[ date ]</a>
+              <a href="thread.html#340">[ thread ]</a>
+              <a href="subject.html#340">[ subject ]</a>
+              <a href="author.html#340">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

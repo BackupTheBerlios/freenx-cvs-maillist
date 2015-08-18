@@ -1,0 +1,2420 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r310 - in nx-utils: . univprn.drv	univprn.drv/SPLFilter-0.0.1
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r310%20-%20in%20nx-utils%3A%20.%20univprn.drv%0A%09univprn.drv/SPLFilter-0.0.1&In-Reply-To=%3C200702010122.l111MwUs011154%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000445.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r310 - in nx-utils: . univprn.drv	univprn.drv/SPLFilter-0.0.1</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r310%20-%20in%20nx-utils%3A%20.%20univprn.drv%0A%09univprn.drv/SPLFilter-0.0.1&In-Reply-To=%3C200702010122.l111MwUs011154%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r310 - in nx-utils: . univprn.drv	univprn.drv/SPLFilter-0.0.1">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Thu Feb  1 02:22:58 CET 2007</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000445.html">[Freenx-cvs] r311 - in nx-utils/univprn.drv: . SPLFilter-0.0.1 cups
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#444">[ date ]</a>
+              <a href="thread.html#444">[ thread ]</a>
+              <a href="subject.html#444">[ subject ]</a>
+              <a href="author.html#444">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-02-01 02:22:55 +0100 (Thu, 01 Feb 2007)
+New Revision: 310
+
+Added:
+   nx-utils/univprn.drv/
+   nx-utils/univprn.drv/SPLFilter-0.0.1/
+   nx-utils/univprn.drv/SPLFilter-0.0.1/ReadMe.txt
+   nx-utils/univprn.drv/SPLFilter-0.0.1/SPLFilter.cpp
+   nx-utils/univprn.drv/SPLFilter-0.0.1/SPLFilter.vcproj
+   nx-utils/univprn.drv/SPLFilter-0.0.1/fpdfdoc.h
+   nx-utils/univprn.drv/SPLFilter-0.0.1/fpdfview.def
+   nx-utils/univprn.drv/SPLFilter-0.0.1/fpdfview.h
+   nx-utils/univprn.drv/SPLFilter-0.0.1/generic.ppd
+   nx-utils/univprn.drv/SPLFilter-0.0.1/spl.h
+   nx-utils/univprn.drv/SPLFilter-0.0.1/stdafx.cpp
+   nx-utils/univprn.drv/SPLFilter-0.0.1/stdafx.h
+   nx-utils/univprn.drv/SPLFilter-0.0.1/wine-emf-bezier-impl.diff
+   nx-utils/univprn.drv/SPLFilter-0.0.1/wine-emf-path-bbox-fillpath.diff
+   nx-utils/univprn.drv/SPLFilter-0.0.1/wine-psdrv-resolution-support.diff
+Log:
+Initial import of a &quot;universal printer driver&quot; for CUPS -&gt; Win printing. (Very early stage)
+
+This is what I have so far, so I commited it.
+
+It might later be possible to use any of the free pdf libraries for windows to do the same, but for now fpdfview.dll 
+seems to be the best solution available. (small EMF files with good quality)
+
+
+
+Added: nx-utils/univprn.drv/SPLFilter-0.0.1/ReadMe.txt
+===================================================================
+--- nx-utils/univprn.drv/SPLFilter-0.0.1/ReadMe.txt	2007-01-31 21:10:57 UTC (rev 309)
++++ nx-utils/univprn.drv/SPLFilter-0.0.1/ReadMe.txt	2007-02-01 01:22:55 UTC (rev 310)
+@@ -0,0 +1,32 @@
++SPLFilter - A universal printer driver for CUPS -&gt; Windows
++----------------------------------------------------------
++
++SPLFilter is now in a very early stage and is for testing only!
++
++And it needs a commercial evaluation .DLL to function at all. 
++(fpdfview.dll)
++
++Apply *.diff patches to wine (0.9.29) and do:
++
++Have a printer called 'FF' with datatype 'raw', 
++which will revert to share/wine/generic.ppd. Or use 'FF' with some other .ppd, 
++which supports multiple Resolutions up to the dpi value you want to use.
++
++(This is needed as reference for GDI drawing functions)
++
++Usage: wine SPLFilter.exe
++
++Input file is testdoc.pdf (Use symlink)
++Output file is: test.spl (Use symlink)
++
++Then you can do:
++
++kprinter test.spl -&gt; CUPS printer with &quot;RAW&quot; smb windows printer.
++
++Hopefully the printer will print the file.
++
++cu
++
++Fabian, January 2007
++
++PS: Wine does not yet embed fonts in EMF, so you might want to try to set resolution a bit higher.
+
+Added: nx-utils/univprn.drv/SPLFilter-0.0.1/SPLFilter.cpp
+===================================================================
+--- nx-utils/univprn.drv/SPLFilter-0.0.1/SPLFilter.cpp	2007-01-31 21:10:57 UTC (rev 309)
++++ nx-utils/univprn.drv/SPLFilter-0.0.1/SPLFilter.cpp	2007-02-01 01:22:55 UTC (rev 310)
+@@ -0,0 +1,369 @@
++// SPLFilter.cpp : Generiert aus PDF Eingangsdaten, SPL/EMF Ausgangsdaten
++//
++// Copyright (c) 2007 by Fabian Franz.
++//
++// License: GPL, v2
++
++#include &lt;windows.h&gt;
++#include &quot;stdafx.h&quot;
++#include &quot;fpdfview.h&quot;
++#include &quot;spl.h&quot;
++
++// Debug?
++//#undef DEBUG
++#define DEBUG 1
++
++// Also print to some printer?
++#undef PRINT
++//#define PRINT 1
++
++// Change and embed DEV MODE structures?
++//#undef EXT_PRINT
++#define EXT_PRINT 1
++
++// Show a print dialog?
++#undef EXT_PRNDLG
++//#define EXT_PRNDLG 1
++
++// Show printer options dialog?
++#undef EXT_PRNOPTS
++//#define EXT_PRNOPTS 1
++
++/* Everything for the main loop is global, because due to a dll-imports bug we have massive stack corruption */
++
++// Variables
++
++FILE *out = NULL;
++char *fbuf = NULL;
++char buf[256];
++DWORD bufSize = 0;
++RECT   rect;
++HDC hMeta;
++HDC hDC;
++HBRUSH brush;
++FPDF_DOCUMENT pdf_doc;
++FPDF_PAGE pdf_page;
++HENHMETAFILE efile;
++int logpixelsx, logpixelsy, size_x, size_y;
++int i;
++
++// DEVMODE
++
++HANDLE hPrinter;
++DEVMODE* lpDevMode = NULL;
++
++// ErrorExit out function
++
++void ErrorExit(LPTSTR lpszFunction) 
++{ 
++    LPVOID lpMsgBuf;
++    LPVOID lpDisplayBuf;
++
++    DWORD dw = GetLastError(); 
++
++    FormatMessage(
++        FORMAT_MESSAGE_ALLOCATE_BUFFER | 
++        FORMAT_MESSAGE_FROM_SYSTEM |
++        FORMAT_MESSAGE_IGNORE_INSERTS,
++        NULL,
++        dw,
++        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
++        (LPTSTR) &amp;lpMsgBuf,
++        0, NULL );
++
++    lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT, 
++        (lstrlen((LPCTSTR)lpMsgBuf)+lstrlen((LPCTSTR)lpszFunction)+40)*sizeof(TCHAR)); 
++    fwprintf(stderr, TEXT(&quot;%s failed with error %d: %s&quot;), lpszFunction, dw, lpMsgBuf); 
++    
++    LocalFree(lpMsgBuf);
++    LocalFree(lpDisplayBuf);
++	if (out)
++		fclose(out);
++    ExitProcess(dw); 
++}
++
++// Enumeration function for the enh meta file records.
++
++int CALLBACK enum_it(
++  HDC hDC,                      // handle to DC
++  HANDLETABLE *lpHTable,        // metafile handle table
++  CONST ENHMETARECORD *lpEMFR,  // metafile record
++  int nObj,                     // count of objects
++  LPARAM lpData                 // optional data
++)
++{
++	// Okay, we need to send a StartPage() first
++
++	if (lpEMFR-&gt;iType == EMR_HEADER)
++	{
++		PENHMETAHEADER header=(PENHMETAHEADER)lpEMFR;
++
++		bufSize = header-&gt;nBytes;
++		
++		// Write &quot;Start of Page&quot; record
++		SMR smr;
++		
++		smr.iType=SRT_PAGE_EMF2;
++		smr.nSize=bufSize;
++
++		fwrite(&amp;smr, sizeof(smr), 1, out);
++
++#ifdef DEBUG
++		fprintf(stderr, &quot;header-&gt;nBytes = %d\n&quot;, header-&gt;nBytes);
++#endif
++	}
++
++	// Write EMF records
++	if (lpEMFR-&gt;iType == EMR_EXTTEXTOUTW)
++	{
++		EMREXTTEXTOUTW* emr=(PEMREXTTEXTOUTW)lpEMFR;
++
++		if (emr != NULL &amp;&amp; emr-&gt;emrtext.nChars &gt; 1)
++		{
++			wchar_t buf[16384];
++
++			if (emr == NULL || emr-&gt;emrtext.nChars &gt; 4095)
++				fprintf(stderr, &quot;Error: EMR_EXTTEXTOUTW: Too long\n&quot;);
++			else
++			{
++				memcpy(buf, (char*)emr + emr-&gt;emrtext.offString, emr-&gt;emrtext.nChars * sizeof(WCHAR));
++				buf[emr-&gt;emrtext.nChars]='\0';
++				buf[emr-&gt;emrtext.nChars+1]='\0';
++#ifdef DEBUG
++				fwprintf(stderr, L&quot;EMR_EXTTEXTOUTW (%d): %s\n&quot;, wcslen(buf), buf);
++#endif
++			}
++		}
++	}
++
++#ifdef DEBUG
++	//fprintf(stderr, &quot;Got %d with %u bytes\n&quot;, lpEMFR-&gt;iType, lpEMFR-&gt;nSize);
++#endif
++	
++	// TODO: Implement embedding of fonts
++	fwrite(lpEMFR, 1, lpEMFR-&gt;nSize, out);
++	
++	return 1;
++}
++
++int _tmain(int argc, _TCHAR* argv[])
++{
++	// Before we can do anything, we need to unlock the DLL
++	// NOTE: If you are evaluating FOXIT READER SDK, you don&#146;t need unlock the DLL,
++	// then evaluation marks will be shown with all rendered pages.
++	FPDF_UnlockDLL(&quot;license_id&quot;, &quot;unlock_code&quot;);
++
++	// first, load the document (no password specified)
++	pdf_doc = FPDF_LoadDocument(&quot;testdoc.pdf&quot;, NULL);
++
++	// error handling
++	if (pdf_doc == NULL) 
++	{
++		fprintf(stderr, &quot;ERROR - doc\n&quot;);
++		exit(1);
++	}
++
++	// Open the out file
++	
++	fopen_s(&amp;out, &quot;test.spl&quot;, &quot;wb&quot;);
++
++	// Send the StartDoc header
++	
++	wchar_t* dname = L&quot;desktop.ini - Editor&quot;;
++	wchar_t* prn = L&quot;c:\\output.prn&quot;;
++	
++	{
++
++	if (wcsnlen(dname, 255) == 255)
++		ErrorExit(L&quot;dname too long&quot;);
++	if (wcsnlen(prn, 255) == 255)
++		ErrorExit(L&quot;prn too long&quot;);
++
++	SPL_HEADER spl;
++
++	spl.SIGNATURE=SPLMETA_SIGNATURE;
++	spl.nSize=(DWORD)sizeof(spl)+wcslen(dname)*2+wcslen(prn)*2+4; // +4, because \0\0 is after dname and prn
++	spl.offDocumentName=(DWORD)sizeof(spl);
++	spl.offPort=(DWORD)sizeof(spl)+wcslen(dname)*2+2; // +2 because \0\0 is after dname
++	
++	fwrite(&amp;spl, sizeof(spl), 1, out);
++	
++	fwrite(dname, wcslen(dname)*2, 1, out);
++	fwrite(&quot;\0\0&quot;, 2, 1, out);
++
++	fwrite(prn, wcslen(prn)*2, 1, out);
++	fwrite(&quot;\0\0&quot;, 2, 1, out);
++	}
++
++	// Load the first page and calculate the bbox
++	// based on the printer margins
++
++	pdf_page = FPDF_LoadPage(pdf_doc, 0);
++	if (pdf_page == NULL)
++		ErrorExit(L&quot;FPDF_LoadPage&quot;);
++
++	double page_width, page_height;
++    
++	page_width = FPDF_GetPageWidth(pdf_page);
++    page_height = FPDF_GetPageHeight(pdf_page);
++
++#ifdef EXT_PRINT
++#ifdef EXT_PRNDLG
++	PRINTDLG pd;
++	HWND hwnd = NULL;
++
++	// Initialize PRINTDLG
++	ZeroMemory(&amp;pd, sizeof(pd));
++	pd.lStructSize = sizeof(pd);
++	pd.hwndOwner   = hwnd;
++	pd.hDevMode    = NULL;     // Don't forget to free or store hDevMode
++	pd.hDevNames   = NULL;     // Don't forget to free or store hDevNames
++	pd.Flags       = PD_USEDEVMODECOPIESANDCOLLATE | PD_RETURNDC; 
++	pd.nCopies     = 1;
++	pd.nFromPage   = 0xFFFF; 
++	pd.nToPage     = 0xFFFF; 
++	pd.nMinPage    = 1; 
++	pd.nMaxPage    = 0xFFFF; 
++	
++
++	if (PrintDlg(&amp;pd) != TRUE)
++		ErrorExit(L&quot;PrintDialog\n&quot;);
++
++	hDC = pd.hDC;
++#else
++	wchar_t* printer=L&quot;FF&quot;;
++	if (!OpenPrinter(printer, &amp;hPrinter, NULL))
++		ErrorExit(L&quot;OpenPrinter\n&quot;);
++    DWORD dwNeeded = DocumentProperties(NULL, hPrinter, printer, NULL, NULL, 0);
++    lpDevMode = (LPDEVMODE)malloc(dwNeeded);
++	
++	DocumentProperties(NULL, hPrinter, printer, lpDevMode, NULL, DM_OUT_BUFFER);
++	/* Try to set a higher print quality */
++	lpDevMode-&gt;dmPrintQuality=1200;
++	lpDevMode-&gt;dmFields|=DM_PRINTQUALITY;
++	DocumentProperties(NULL, hPrinter, printer, lpDevMode, lpDevMode, DM_IN_BUFFER | DM_OUT_BUFFER);
++#ifdef EXT_PRNOPTS
++	DocumentProperties(NULL, hPrinter, printer, lpDevMode, lpDevMode, DM_IN_BUFFER | DM_PROMPT | DM_OUT_BUFFER);
++#endif
++	hDC = CreateDC(L&quot;WINEPS.DRV&quot;, printer, NULL, lpDevMode);
++
++	ClosePrinter(&amp;hPrinter);
++#endif
++#else
++	hDC = CreateDC(L&quot;WINEPS.DRV&quot;, L&quot;FF&quot;, NULL, lpDevMode);
++#endif
++
++	
++#ifdef PRINT
++	DOCINFO doc_info;
++
++	doc_info.cbSize=sizeof(DOCINFO)+12;
++	doc_info.lpszDocName=dname;
++	doc_info.lpszOutput=prn;
++	doc_info.lpszDatatype=NULL;
++	doc_info.fwType=0;
++
++	// Start a printer job
++	StartDoc(hDC, &amp;doc_info);
++#endif
++	
++	// get number of pixels per inch (horizontally and vertically)
++	logpixelsx = GetDeviceCaps(hDC, LOGPIXELSX);
++	logpixelsy = GetDeviceCaps(hDC, LOGPIXELSY);
++	
++	// convert points into pixels
++	size_x = (int)page_width / 72 * logpixelsx;
++	size_y = (int)page_height / 72 * logpixelsy;
++
++	DWORD p_width =GetDeviceCaps(hDC, HORZSIZE)*100;
++	DWORD p_height=GetDeviceCaps(hDC, VERTSIZE)*100;
++
++	SetRect( &amp;rect, 0, 0, p_width, p_height );
++
++#ifdef DEBUG
++	//fprintf(stderr, &quot;x=%u, y=%u, pw=%u, ph=%u,sx=%u,sy=%u,lpx=%u,lpy=%u,size_x=%u,size_y=%u\n&quot;,x,y,page_width,page_height,sx,sy,logpixelsx,logpixelsy,size_x,size_y);
++#endif
++
++	// now load the pages one after another
++
++	for (i=0; i &lt; FPDF_GetPageCount(pdf_doc); i++)
++	{
++#ifdef DEBUG
++		fprintf(stderr, &quot;Load page %d/%d\n&quot;, i, FPDF_GetPageCount(pdf_doc));
++#endif
++
++		// Load the next page
++
++		pdf_page = FPDF_LoadPage(pdf_doc, i);
++		
++		if (pdf_page == NULL)
++			ErrorExit(L&quot;FPDF_LoadPage&quot;);
++	
++		fbuf=NULL;
++#ifdef DEBUG
++		sprintf_s(buf, 255, &quot;test-%d.emf&quot;, i);
++		//fbuf=buf;
++#endif
++
++		// Create a metafile to render to
++
++		hMeta = CreateEnhMetaFileA(hDC, 
++	          fbuf, 
++	          &amp;rect, &quot;SPLFilter.exe\0Created by Fabian\0\0&quot;);
++
++		if (hMeta == NULL)
++			ErrorExit(L&quot;CreateEnhMetaFileA&quot;);
++
++	 	// Call FPDF_RenderPage function to render the whole page
++		FPDF_RenderPage(hMeta, pdf_page, 0, 0, size_x, size_y, 0, 0);
++
++#ifdef PRINT
++		// Start a new printing page
++		StartPage(hDC);
++		FPDF_RenderPage(hDC, pdf_page, 0, 0, size_x, size_y, 0, 0);
++		EndPage(hDC);
++#endif
++
++		// Close PDF page
++
++		FPDF_ClosePage(pdf_page);
++
++		efile=CloseEnhMetaFile(hMeta);
++
++		if (efile == NULL)
++			ErrorExit(L&quot;CloseEnhMetaFile&quot;);
++
++		// Write EMF data - via enumeration, because we want to embed fonts later
++	    EnumEnhMetaFile(hDC, efile, enum_it, NULL, &amp;rect);
++
++		// Write EndPage() record
++		{
++		SMR_EOPAGE smr_eopage;
++		
++		smr_eopage.smrext.smr.iType=SRT_EXT_EOPAGE_VECTOR;
++		smr_eopage.smrext.smr.nSize=sizeof(smr_eopage)-sizeof(smr_eopage.smrext.smr);
++
++		/* FIXME: Need to calcualte low and high correctly */
++		smr_eopage.smrext.DistanceLow=bufSize+smr_eopage.smrext.smr.nSize;
++		smr_eopage.smrext.DistanceHigh=0;
++
++		fwrite(&amp;smr_eopage, sizeof(smr_eopage), 1, out);
++		}
++		
++		DeleteEnhMetaFile(efile);
++	}
++#ifdef PRINT
++	EndDoc(hDC);
++#endif
++
++	fclose(out);
++	out=NULL;
++	DeleteDC(hDC);
++	FPDF_CloseDocument(pdf_doc);
++
++#ifdef DEBUG
++	fprintf(stderr, &quot;SPLFilter: Conversion successful!\n&quot;);
++#endif
++	exit(0);
++}
++
+
+Added: nx-utils/univprn.drv/SPLFilter-0.0.1/SPLFilter.vcproj
+===================================================================
+--- nx-utils/univprn.drv/SPLFilter-0.0.1/SPLFilter.vcproj	2007-01-31 21:10:57 UTC (rev 309)
++++ nx-utils/univprn.drv/SPLFilter-0.0.1/SPLFilter.vcproj	2007-02-01 01:22:55 UTC (rev 310)
+@@ -0,0 +1,222 @@
++&lt;?xml version=&quot;1.0&quot; encoding=&quot;Windows-1252&quot;?&gt;
++&lt;VisualStudioProject
++	ProjectType=&quot;Visual C++&quot;
++	Version=&quot;8,00&quot;
++	Name=&quot;SPLFilter&quot;
++	ProjectGUID=&quot;{351E5640-B64A-48E8-A202-EFED4ABF8C1E}&quot;
++	RootNamespace=&quot;DLLTest&quot;
++	Keyword=&quot;Win32Proj&quot;
++	&gt;
++	&lt;Platforms&gt;
++		&lt;Platform
++			Name=&quot;Win32&quot;
++		/&gt;
++	&lt;/Platforms&gt;
++	&lt;ToolFiles&gt;
++	&lt;/ToolFiles&gt;
++	&lt;Configurations&gt;
++		&lt;Configuration
++			Name=&quot;Debug|Win32&quot;
++			OutputDirectory=&quot;$(SolutionDir)$(ConfigurationName)&quot;
++			IntermediateDirectory=&quot;$(ConfigurationName)&quot;
++			ConfigurationType=&quot;1&quot;
++			CharacterSet=&quot;1&quot;
++			&gt;
++			&lt;Tool
++				Name=&quot;VCPreBuildEventTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCCustomBuildTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCXMLDataGeneratorTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCWebServiceProxyGeneratorTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCMIDLTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCCLCompilerTool&quot;
++				Optimization=&quot;0&quot;
++				PreprocessorDefinitions=&quot;WIN32;_DEBUG;_CONSOLE&quot;
++				MinimalRebuild=&quot;true&quot;
++				BasicRuntimeChecks=&quot;3&quot;
++				RuntimeLibrary=&quot;0&quot;
++				UsePrecompiledHeader=&quot;0&quot;
++				WarningLevel=&quot;3&quot;
++				Detect64BitPortabilityProblems=&quot;true&quot;
++				DebugInformationFormat=&quot;4&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCManagedResourceCompilerTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCResourceCompilerTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCPreLinkEventTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCLinkerTool&quot;
++				AdditionalDependencies=&quot;kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib fpdfview.lib $(NoInherit)&quot;
++				LinkIncremental=&quot;2&quot;
++				DelayLoadDLLs=&quot;&quot;
++				GenerateDebugInformation=&quot;true&quot;
++				SubSystem=&quot;1&quot;
++				TargetMachine=&quot;1&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCALinkTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCManifestTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCXDCMakeTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCBscMakeTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCFxCopTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCAppVerifierTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCWebDeploymentTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCPostBuildEventTool&quot;
++			/&gt;
++		&lt;/Configuration&gt;
++		&lt;Configuration
++			Name=&quot;Release|Win32&quot;
++			OutputDirectory=&quot;$(SolutionDir)$(ConfigurationName)&quot;
++			IntermediateDirectory=&quot;$(ConfigurationName)&quot;
++			ConfigurationType=&quot;1&quot;
++			CharacterSet=&quot;1&quot;
++			WholeProgramOptimization=&quot;1&quot;
++			&gt;
++			&lt;Tool
++				Name=&quot;VCPreBuildEventTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCCustomBuildTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCXMLDataGeneratorTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCWebServiceProxyGeneratorTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCMIDLTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCCLCompilerTool&quot;
++				Optimization=&quot;0&quot;
++				WholeProgramOptimization=&quot;false&quot;
++				PreprocessorDefinitions=&quot;WIN32;NDEBUG;_CONSOLE&quot;
++				RuntimeLibrary=&quot;2&quot;
++				UsePrecompiledHeader=&quot;0&quot;
++				WarningLevel=&quot;3&quot;
++				Detect64BitPortabilityProblems=&quot;true&quot;
++				DebugInformationFormat=&quot;3&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCManagedResourceCompilerTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCResourceCompilerTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCPreLinkEventTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCLinkerTool&quot;
++				AdditionalDependencies=&quot;kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib fpdfview.lib $(NoInherit)&quot;
++				LinkIncremental=&quot;1&quot;
++				GenerateDebugInformation=&quot;true&quot;
++				SubSystem=&quot;1&quot;
++				OptimizeReferences=&quot;2&quot;
++				EnableCOMDATFolding=&quot;2&quot;
++				TargetMachine=&quot;1&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCALinkTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCManifestTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCXDCMakeTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCBscMakeTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCFxCopTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCAppVerifierTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCWebDeploymentTool&quot;
++			/&gt;
++			&lt;Tool
++				Name=&quot;VCPostBuildEventTool&quot;
++			/&gt;
++		&lt;/Configuration&gt;
++	&lt;/Configurations&gt;
++	&lt;References&gt;
++	&lt;/References&gt;
++	&lt;Files&gt;
++		&lt;Filter
++			Name=&quot;Quelldateien&quot;
++			Filter=&quot;cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx&quot;
++			UniqueIdentifier=&quot;{4FC737F1-C7A5-4376-A066-2A32D752A2FF}&quot;
++			&gt;
++			&lt;File
++				RelativePath=&quot;.\SPLFilter.cpp&quot;
++				&gt;
++			&lt;/File&gt;
++			&lt;File
++				RelativePath=&quot;.\stdafx.cpp&quot;
++				&gt;
++			&lt;/File&gt;
++		&lt;/Filter&gt;
++		&lt;Filter
++			Name=&quot;Headerdateien&quot;
++			Filter=&quot;h;hpp;hxx;hm;inl;inc;xsd&quot;
++			UniqueIdentifier=&quot;{93995380-89BD-4b04-88EB-625FBE52EBFB}&quot;
++			&gt;
++			&lt;File
++				RelativePath=&quot;.\fpdfview.h&quot;
++				&gt;
++			&lt;/File&gt;
++			&lt;File
++				RelativePath=&quot;.\spl.h&quot;
++				&gt;
++			&lt;/File&gt;
++			&lt;File
++				RelativePath=&quot;.\stdafx.h&quot;
++				&gt;
++			&lt;/File&gt;
++		&lt;/Filter&gt;
++		&lt;Filter
++			Name=&quot;Ressourcendateien&quot;
++			Filter=&quot;rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav&quot;
++			UniqueIdentifier=&quot;{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}&quot;
++			&gt;
++		&lt;/Filter&gt;
++		&lt;File
++			RelativePath=&quot;.\ReadMe.txt&quot;
++			&gt;
++		&lt;/File&gt;
++	&lt;/Files&gt;
++	&lt;Globals&gt;
++	&lt;/Globals&gt;
++&lt;/VisualStudioProject&gt;
+
+Added: nx-utils/univprn.drv/SPLFilter-0.0.1/fpdfdoc.h
+===================================================================
+--- nx-utils/univprn.drv/SPLFilter-0.0.1/fpdfdoc.h	2007-01-31 21:10:57 UTC (rev 309)
++++ nx-utils/univprn.drv/SPLFilter-0.0.1/fpdfdoc.h	2007-02-01 01:22:55 UTC (rev 310)
+@@ -0,0 +1,285 @@
++// FPDFDOC.H - Header file for FPDFDOC module - a part of Foxit Reader SDK
++// Copyright (c) 2005 Foxit Software Company, All Right Reserved.
++
++// Revision: 0.1
++// Date: 2005-10-19
++
++#ifndef _FPDFDOC_H_
++#define _FPDFDOC_H_
++
++#ifndef _FPDFVIEW_H_
++#include &quot;fpdfview.h&quot;
++#endif
++
++// Data types
++typedef void* FPDF_BOOKMARK;
++typedef void* FPDF_DEST;
++typedef void* FPDF_ACTION;
++typedef void* FPDF_LINK;
++
++typedef unsigned short FPDF_WCHAR;
++
++// Exported Functions
++#ifdef __cplusplus
++extern &quot;C&quot; {
++#endif
++
++// Function: FPDFBookmark_GetFirstChild
++//			Get first child of a bookmark item, or first top level bookmark item
++// Parameters: 
++//			document	-	Handle to the document. Returned by FPDF_LoadDocument or FPDF_LoadMemDocument
++//			bookmark	-	Handle to the current bookmark. Can be NULL if you want to get the first top level item
++// Return value:
++//			Handle to the first child or top level bookmark item. NULL if no child or top level bookmark found.
++//
++__declspec(dllimport)  FPDF_BOOKMARK STDCALL FPDFBookmark_GetFirstChild(FPDF_DOCUMENT document, FPDF_BOOKMARK bookmark);
++
++// Function: FPDFBookmark_GetNextSibling
++//			Get next bookmark item on the same level
++// Parameters: 
++//			document	-	Handle to the document. Returned by FPDF_LoadDocument or FPDF_LoadMemDocument
++//			bookmark	-	Handle to the current bookmark. Cannot be NULL.
++// Return value:
++//			Handle to the next bookmark item on the same level. NULL if this is the last bookmark on this level.
++//
++__declspec(dllimport)  FPDF_BOOKMARK STDCALL FPDFBookmark_GetNextSibling(FPDF_DOCUMENT document, FPDF_BOOKMARK bookmark);
++
++// Function: FPDFBookmark_Find
++//			Find a bookmark in the document, using the bookmark title
++// Parameters: 
++//			document	-	Handle to the document. Returned by FPDF_LoadDocument or FPDF_LoadMemDocument
++//			title		-	The Unicode string (UTF-16LE encoded) for the bookmark title. Can't be NULL.
++// Return value:
++//			Handle to the found bookmark item. NULL if the title can't be found.
++// Comments:
++//			It always returns the first found bookmark if more than one bookmarks have the same title.
++//
++__declspec(dllimport)  FPDF_BOOKMARK STDCALL FPDFBookmark_Find(FPDF_DOCUMENT document, const FPDF_WCHAR* title);
++
++// Function: FPDFBookmark_GetColorRef
++//			Get designated color of a bookmark item
++// Parameters:
++//			bookmark	-	Handle to the bookmark
++// Return value:
++//			A COLORREF value (0x00ggbbrr) for the bookmark item.
++//
++__declspec(dllimport)  unsigned long STDCALL FPDFBookmark_GetColorRef(FPDF_BOOKMARK bookmark);
++
++// Bookmark font styles
++#define PDFBOOKMARK_NORMAL			0
++#define PDFBOOKMARK_ITALIC			1
++#define PDFBOOKMARK_BOLD			2
++#define PDFBOOKMARK_BOLDITALIC		3
++
++// Function: FPDFBookmark_GetFontStyle
++//			Get designated font style for a bookmark item
++// Parameters:
++//			bookmark	-	Handle to the bookmark
++// Return value:
++//			A number indicating the font style, as defined above
++//
++__declspec(dllimport)  unsigned long STDCALL FPDFBookmark_GetFontStyle(FPDF_BOOKMARK bookmark);
++
++// Function: FPDFBookmark_GetTitle
++//			Get title of a bookmark
++// Parameters:
++//			bookmark	-	Handle to the bookmark
++//			buffer		-	A buffer for output the title. Can be NULL.
++//			buflen		-	The length of the buffer, number of bytes. Can be 0.
++// Return value:
++//			Number of bytes the title consumes, including trailing zeroes.
++// Comments:
++//			The title is always output in UTF-16LE encoding, which means the buffer can be regarded as
++//			an array of WORD (on Intel and compatible CPUs), each WORD represent the Unicode of a character.
++//			The string is followed by two bytes of zero indicating end of the string.
++//			It's up to the application to convert the Unicode string to local encoded string, if necessary.
++//
++//			The return value always indicated number of bytes required for the buffer, even when there is
++//			no buffer specified, or the buffer size is less then required. In this case, the buffer will not
++//			be modified.
++//
++__declspec(dllimport)  unsigned long STDCALL FPDFBookmark_GetTitle(FPDF_BOOKMARK bookmark, void* buffer, unsigned long buflen);
++
++// Function: FPDFBookmark_GetAction
++//			Get the action associated with a bookmark item
++// Parameters:
++//			bookmark	-	Handle to the bookmark
++// Return value:
++//			Handle to the action data. NULL if no action is associated with this bookmark. In this case, the 
++//			application should try FPDFBookmark_GetDest
++//
++__declspec(dllimport)  FPDF_ACTION STDCALL FPDFBookmark_GetAction(FPDF_BOOKMARK bookmark);
++
++// Function: FPDFBookmark_GetDest
++//			Get the destination associated with a bookmark item
++// Parameters:
++//			document	-	Handle to the document
++//			bookmark	-	Handle to the bookmark
++// Return value:
++//			Handle to the destination data. NULL if no destination is associated with this bookmark
++//
++__declspec(dllimport)  FPDF_DEST STDCALL FPDFBookmark_GetDest(FPDF_DOCUMENT document, FPDF_BOOKMARK bookmark);
++
++#define PDFACTION_UNSUPPORTED		0		// Unsupported action type
++#define PDFACTION_GOTO				1		// Go to a destination within current document
++#define PDFACTION_REMOTEGOTO		2		// Go to a destination within another document
++#define PDFACTION_URI				3		// Universal Resource Identifier, including web pages and 
++											// other Internet based resources
++#define PDFACTION_LAUNCH			4		// Launch an application or open a file
++
++// Function: FPDFAction_GetType
++//			Get type of an action
++// Parameters:
++//			action		-	Handle to the action
++// Return value:
++//			A type number as defined above.
++//
++__declspec(dllimport)  unsigned long STDCALL FPDFAction_GetType(FPDF_ACTION action);
++
++// Function: FPDFAction_GetFilePath
++//			Get file path of an remote goto action
++// Parameters:
++//			action		-	Handle to the action. Must be a RMEOTEGOTO or LAUNCH action
++//			buffer		-	A buffer for output the title. Can be NULL.
++//			buflen		-	The length of the buffer, number of bytes. Can be 0.
++// Return value:
++//			Number of bytes the file path consumes, including trailing zero.
++// Comments:
++//			The file path is output in local encoding.
++// 
++//			The return value always indicated number of bytes required for the buffer, even when there is
++//			no buffer specified, or the buffer size is less then required. In this case, the buffer will not
++//			be modified.
++//
++__declspec(dllimport)  unsigned long STDCALL FPDFAction_GetFilePath(FPDF_ACTION action, void* buffer, unsigned long buflen);
++
++// Function: FPDFAction_GetDest
++//			Get destination of an action
++// Parameters:
++//			document	-	Handle to the document.
++//			action		-	Handle to the action. It must be a GOTO or REMOTEGOTO action.
++// Return value:
++//			Handle to the destination data.
++// Comments:
++//			In case of remote goto action, the application should first use FPDFAction_GetFilePath to
++//			get file path, then load that particular document, and use its document handle to call this
++//			function.
++//
++__declspec(dllimport)  FPDF_DEST STDCALL FPDFAction_GetDest(FPDF_DOCUMENT document, FPDF_ACTION action);
++
++// Function: FPDFAction_GetURIPath
++//			Get URI path of a URI action
++// Parameters:
++//			document	-	Handle to the document.
++//			action		-	Handle to the action. Must be a URI action
++//			buffer		-	A buffer for output the title. Can be NULL.
++//			buflen		-	The length of the buffer, number of bytes. Can be 0.
++// Return value:
++//			Number of bytes the URI path consumes, including trailing zero.
++// Comments:
++//			The URI path is always encoded in 7-bit ASCII.
++// 
++//			The return value always indicated number of bytes required for the buffer, even when there is
++//			no buffer specified, or the buffer size is less then required. In this case, the buffer will not
++//			be modified.
++//
++__declspec(dllimport)  unsigned long STDCALL FPDFAction_GetURIPath(FPDF_DOCUMENT document, FPDF_ACTION action,
++													  void* buffer, unsigned long buflen);
++
++// Function: FPDFDest_GetPageIndex
++//			Get page index of a destination
++// Parameters:
++//			document	-	Handle to the document
++//			dest		-	Handle to the destination
++// Return value:
++//			The page index. Starting from 0 for the first page.
++//
++__declspec(dllimport)  unsigned long STDCALL FPDFDest_GetPageIndex(FPDF_DOCUMENT document, FPDF_DEST dest);
++
++// Zoom modes
++#define PDFZOOM_XYZ				1			// zoom level with specified offset
++#define PDFZOOM_FITPAGE			2			// fit both the width and height of the page (whichever smaller)
++#define PDFZOOM_FITHORZ			3			// fit the page width
++#define PDFZOOM_FITVERT			4			// fit the page height
++#define PDFZOOM_FITRECT			5			// fit a specific rectangle area within the window
++
++// Function: FPDFDest_GetZoomMode
++//			Get the designated zoom mode of a destination
++// Parameters:
++//			dest		-	Handle to the destination
++// Return value:
++//			The zoom mode as defined above.
++//
++__declspec(dllimport)  unsigned long STDCALL FPDFDest_GetZoomMode(FPDF_DEST dest);
++
++// Function: FPDFDest_GetZoomParam
++//			Get zoom parameters
++// Parameters:
++//			dest		-	Handle to the destination
++//			param		-	Index of the parameter, starting with zero (see comments below)
++// Return value:
++//			A float number for the zoom parameter.
++// Comments:
++//			Different zoom mode has different parameters. Here is a list:
++//			XYZ				three parameters: x, y position in the page and the zoom ratio (0 for not specified);
++//			FITPAGE			no parameters;
++//			FITHORZ			one parameter: the top margin of the page
++//			FITVERT			one parameter: the left margin of the page
++//			FITRECT			four parameters: the left, top, right, bottom margin of the fitting rectangle.
++//							Use 0-3 as parameter index for them, respectively.
++//
++__declspec(dllimport)  double STDCALL FPDFDest_GetZoomParam(FPDF_DEST dest, int param);
++
++// Function: FPDFLink_GetLinkAtPoint
++//			Find a link at specified point on a document page
++// Parameters:
++//			page		-	Handle to the document page
++//			x			-	The x coordination of the point, specified in page coordination system.
++//			y			-	The y coordination of the point, specified in page coordination system.
++// Return value:
++//			Handle to the link. NULL if no link at that point found.
++// Comments:
++//			The point coordinations are specified in page coordination system. You can convert coordinations 
++//			from screen system to page system using FPDF_DeviceToPage functions.
++//
++__declspec(dllimport)  FPDF_LINK STDCALL FPDFLink_GetLinkAtPoint(FPDF_PAGE page, double x, double y);
++
++// Function: FPDFLink_GetDest
++//			Get destination info of a link
++// Parameters:
++//			document	-	Handle to the document
++//			link		-	Handle to the link. Returned by FPDFLink_GetLinkAtPoint
++// Return value:
++//			Handle to the destination. NULL if there is no destination associated with the link, in this case
++//			the application should try FPDFLink_GetAction
++//
++__declspec(dllimport)  FPDF_DEST STDCALL FPDFLink_GetDest(FPDF_DOCUMENT document, FPDF_LINK link);
++
++// Function: FPDFLink_GetAction
++//			Get action info of a link
++// Parameters:
++//			link		-	Handle to the link.
++// Return value:
++//			Handle to the action. NULL if there is no action associated with the link.
++//
++__declspec(dllimport)  FPDF_ACTION STDCALL FPDFLink_GetAction(FPDF_LINK link);
++
++// Function: FPDF_GetThumbnail
++//			Get stored thumbnail image of a page
++// Parameters:
++//			page		-	Handle to a page.
++// Return value:
++//			Handle to a Windows bitmap storing the thumbnail. NULL if no thumbnail is stored for this page.
++// Comments:
++//			If no thumbnail is stored for a page, the application can render the page into a small bitmap for thumbnail.
++//			The application should free the image with DeleteObject WIN32 function, when it's done with the thumbnail.
++//
++//			NOTE: This function is not supported on Windows CE.
++//
++__declspec(dllimport)  HBITMAP STDCALL FPDF_GetPageThumbnail(FPDF_PAGE page);
++
++#ifdef __cplusplus
++};
++#endif
++
++#endif	// _FPDFDOC_H_
+\ No newline at end of file
+
+Added: nx-utils/univprn.drv/SPLFilter-0.0.1/fpdfview.def
+===================================================================
+--- nx-utils/univprn.drv/SPLFilter-0.0.1/fpdfview.def	2007-01-31 21:10:57 UTC (rev 309)
++++ nx-utils/univprn.drv/SPLFilter-0.0.1/fpdfview.def	2007-02-01 01:22:55 UTC (rev 310)
+@@ -0,0 +1,16 @@
++; fpdfview.def : Declares the module parameters for the DLL.
++
++LIBRARY      &quot;fpdfview&quot;
++
++EXPORTS
++        FPDF_CloseDocument @29
++        FPDF_ClosePage @30
++        FPDF_GetLastError @33
++        FPDF_GetPageCount @34
++        FPDF_GetPageHeight @35
++        FPDF_GetPageWidth @38
++        FPDF_LoadDocument @40
++        FPDF_LoadMemDocument @41
++        FPDF_LoadPage @42
++        FPDF_RenderPage @44
++        FPDF_UnlockDLL @47
+
+Added: nx-utils/univprn.drv/SPLFilter-0.0.1/fpdfview.h
+===================================================================
+--- nx-utils/univprn.drv/SPLFilter-0.0.1/fpdfview.h	2007-01-31 21:10:57 UTC (rev 309)
++++ nx-utils/univprn.drv/SPLFilter-0.0.1/fpdfview.h	2007-02-01 01:22:55 UTC (rev 310)
+@@ -0,0 +1,381 @@
++// FPDFVIEW.H - Header file for FPDFVIEW component
++// Copyright (c) 2004-2005 Foxit Software Company, All Right Reserved.
++
++// Revision: 1.4
++// Date: 2005-12-15
++
++#ifndef _FPDFVIEW_H_
++#define _FPDFVIEW_H_
++
++// Data types
++typedef void* FPDF_DOCUMENT;
++typedef void* FPDF_PAGE;
++typedef void* FPDF_BITMAP;
++
++// String types
++// FPDFSDK may use three types of strings: byte string, wide string (UTF-16LE encoded), and platform dependant string
++typedef const char* FPDF_BYTESTRING;
++
++typedef const unsigned short* FPDF_WIDESTRING;		// Foxit PDF SDK always use UTF-16LE encoding wide string,
++													// each character use 2 bytes (except surrogation), with low byte first.
++
++// For Windows programmers: for most case it's OK to treat FPDF_WIDESTRING as Windows unicode string,
++//		 however, special care needs to be taken if you expect to process Unicode larger than 0xffff.
++// For Linux/Unix programmers: most compiler/library environment uses 4 bytes for a Unicode character,
++//		you have to convert between FPDF_WIDESTRING and system wide string by yourself.
++
++#ifdef _WIN32_WCE
++typedef const unsigned short* FPDF_STRING;
++#else
++typedef const char* FPDF_STRING;
++#endif
++
++#ifdef _WIN32
++// On Windows system, functions are exported in a DLL
++#define DLLEXPORT __declspec( dllexport )
++#define STDCALL 
++//__stdcall
++#else
++#define DLLEXPORT
++#define STDCALL
++#endif
++
++// Exported Functions
++#ifdef __cplusplus
++extern &quot;C&quot; {
++#endif
++
++// Function: FPDF_UnlockDLL
++//			Unlock the DLL using license key info received from Foxit
++// Parameters: 
++//			license_id	-	A string received from Foxit identifying the SDK license
++//			unlock_code	-	A string received from Foxit for unlocking the DLL
++// Return value:
++//			None
++// Comments:
++//			For SDK evaluators, this function call is not required, then all
++//			rendered pages will come with an evaluation mark.
++//			For purchased SDK customers, this should be the first function
++//			to call before any other functions to be called.
++//
++DLLEXPORT void STDCALL FPDF_UnlockDLL(const char* license_id, const char* unlock_code);
++
++// Function: FPDF_LoadDocument
++//			Open and load a PDF document.
++// Parameters: 
++//			file_path	-	Path to the PDF file (including extension)
++//			password	-	A string used as the password for PDF file. 
++//							If no password needed, empty or NULL can be used.
++// Return value:
++//			A handle to the loaded document. If failed, NULL is returned.
++// Comments:
++//			Loaded document can be closed by FPDF_CloseDocument.
++//			If this function fails, you can use FPDF_GetLastError() to retrieve
++//			the reason why it fails.
++//
++DLLEXPORT FPDF_DOCUMENT	STDCALL FPDF_LoadDocument(FPDF_STRING file_path, 
++												  FPDF_BYTESTRING password);
++
++// Function: FPDF_LoadMemDocument
++//			Open and load a PDF document from memory.
++// Parameters: 
++//			data_buf	-	Pointer to a buffer containing the PDF document
++//			size		-	Number of bytes in the PDF document
++//			password	-	A string used as the password for PDF file. 
++//							If no password needed, empty or NULL can be used.
++// Return value:
++//			A handle to the loaded document. If failed, NULL is returned.
++// Comments:
++//			The memory buffer must remain valid when the document is open.
++//			Loaded document can be closed by FPDF_CloseDocument.
++//			If this function fails, you can use FPDF_GetLastError() to retrieve
++//			the reason why it fails.
++//
++DLLEXPORT FPDF_DOCUMENT	STDCALL FPDF_LoadMemDocument(const void* data_buf, 
++											int size, FPDF_BYTESTRING password);
++
++#define FPDF_ERR_SUCCESS		0		// no error
++#define FPDF_ERR_UNKNOWN		1		// unknown error
++#define FPDF_ERR_FILE			2		// file not found or could not be opened
++#define FPDF_ERR_FORMAT			3		// file not in PDF format or corrupted
++#define FPDF_ERR_PASSWORD		4		// password required or incorrect password
++#define FPDF_ERR_SECURITY		5		// unsupported security scheme
++#define FPDF_ERR_PAGE			6		// page not found or content error
++
++// Function: FPDF_GetLastError
++//			Get last error code when an SDK function failed
++// Parameters: 
++//			None
++// Return value:
++//			A 32-bit integer indicating error codes (defined above).
++// Comments:
++//			If the previous SDK call succeeded, the return value of this function
++//			is not defined.
++//
++DLLEXPORT unsigned long	STDCALL FPDF_GetLastError();
++
++// Function: FPDF_GetDocPermission
++//			Get file permission flags of the document.
++// Parameters: 
++//			document	-	Handle to document. Returned by FPDF_LoadDocument function.
++// Return value:
++//			A 32-bit integer indicating permission flags. Please refer to PDF Reference for
++//			detailed description. If the document is not protected, 0xffffffff will be returned.
++//
++DLLEXPORT unsigned long	STDCALL FPDF_GetDocPermissions(FPDF_DOCUMENT document);
++
++// Function: FPDF_GetPageCount
++//			Get total number of pages in a document.
++// Parameters: 
++//			document	-	Handle to document. Returned by FPDF_LoadDocument function.
++// Return value:
++//			total number of pages in the document.
++//
++DLLEXPORT int STDCALL FPDF_GetPageCount(FPDF_DOCUMENT document);
++
++// Function: FPDF_LoadPage
++//			Load a page inside a document.
++// Parameters: 
++//			document	-	Handle to document. Returned by FPDF_LoadDocument function.
++//			page_index	-	Index number of the page. 0 for the first page.
++// Return value:
++//			A handle to the loaded page. If failed, NULL is returned.
++// Comments:
++//			Loaded page can be rendered to devices using FPDF_RenderPage function.
++//			Loaded page can be closed by FPDF_CloseDocument.
++//
++DLLEXPORT FPDF_PAGE	STDCALL FPDF_LoadPage(FPDF_DOCUMENT document, int page_index);
++
++// Function: FPDF_GetPageWidth
++//			Get page width
++// Parameters:
++//			page		-	Handle to the page. Returned by FPDF_LoadPage function.
++// Return value:
++//			Page width (excluding non-displayable area) measured in points.
++//			One point is 1/72 inch (around 0.3528 mm)
++//
++DLLEXPORT double STDCALL FPDF_GetPageWidth(FPDF_PAGE page);
++
++// Function: FPDF_GetPageHeight
++//			Get page height
++// Parameters:
++//			page		-	Handle to the page. Returned by FPDF_LoadPage function.
++// Return value:
++//			Page height (excluding non-displayable area) measured in points.
++//			One point is 1/72 inch (around 0.3528 mm)
++//
++DLLEXPORT double STDCALL FPDF_GetPageHeight(FPDF_PAGE page);
++
++// Page rendering flags. They can be combined with bit OR
++#define FPDF_ANNOT			0x01		// Set if annotations are to be rendered
++#define FPDF_LCD_TEXT		0x02		// Set if using text rendering optimized for LCD display
++#define FPDF_NO_GDIPLUS		0x04		// Set if you don't want to use GDI+ (for fast rendering with poorer graphic quality)
++										// Applicable to desktop Windows systems only.
++#define FPDF_DEBUG_INFO		0x80		// Set if you want to get some debug info. 
++										// Please discuss with Foxit first if you need to collect debug info.
++
++#ifdef _WIN32
++// Function: FPDF_RenderPage
++//			Render contents in a page to a device (screen, bitmap, or printer)
++//			This function is only supported on Windows system
++// Parameters: 
++//			dc			-	Handle to device context.
++//			page		-	Handle to the page. Returned by FPDF_LoadPage function.
++//			start_x		-	Left pixel position of the display area in the device coordination
++//			start_y		-	Top pixel position of the display area in the device coordination
++//			size_x		-	Horizontal size (in pixels) for displaying the page
++//			size_y		-	Vertical size (in pixels) for displaying the page
++//			rotate		-	Page orientation: 0 (normal), 1 (rotated 90 degrees clockwise),
++//								2 (rotated 180 degrees), 3 (rotated 90 degrees counter-clockwise).
++//			flags		-	0 for normal display, or combination of flags defined above
++// Return value:
++//			None.
++//
++DLLEXPORT void STDCALL FPDF_RenderPage(HDC dc, FPDF_PAGE page, int start_x, int start_y, int size_x, int size_y,
++						int rotate, int flags);
++#endif
++
++// Function: FPDF_RenderPageBitmap
++//			Render contents in a page to a device independant bitmap
++// Parameters: 
++//			bitmap		-	Handle to the device independant bitmap (as the output buffer).
++//							Bitmap handle can be created by FPDFBitmap_Create function.
++//			page		-	Handle to the page. Returned by FPDF_LoadPage function.
++//			start_x		-	Left pixel position of the display area in the device coordination
++//			start_y		-	Top pixel position of the display area in the device coordination
++//			size_x		-	Horizontal size (in pixels) for displaying the page
++//			size_y		-	Vertical size (in pixels) for displaying the page
++//			rotate		-	Page orientation: 0 (normal), 1 (rotated 90 degrees clockwise),
++//								2 (rotated 180 degrees), 3 (rotated 90 degrees counter-clockwise).
++//			flags		-	0 for normal display, or combination of flags defined above
++// Return value:
++//			None.
++//
++DLLEXPORT void STDCALL FPDF_RenderPageBitmap(FPDF_BITMAP bitmap, FPDF_PAGE page, int start_x, int start_y, 
++						int size_x, int size_y, int rotate, int flags);
++
++// Function: FPDF_LoadDocument
++//			Close a loaded PDF page.
++// Parameters: 
++//			page		-	Handle to the loaded page
++// Return value:
++//			None.
++//
++DLLEXPORT void STDCALL FPDF_ClosePage(FPDF_PAGE page);
++
++// Function: FPDF_CloseDocument
++//			Close a loaded PDF document.
++// Parameters: 
++//			document	-	Handle to the loaded document
++// Return value:
++//			None.
++//
++DLLEXPORT void STDCALL FPDF_CloseDocument(FPDF_DOCUMENT document);
++
++// Function: FPDF_DeviceToPage
++//			Convert the screen coordinations of a point to page coordinations.
++// Parameters:
++//			page		-	Handle to the page. Returned by FPDF_LoadPage function.
++//			start_x		-	Left pixel position of the display area in the device coordination
++//			start_y		-	Top pixel position of the display area in the device coordination
++//			size_x		-	Horizontal size (in pixels) for displaying the page
++//			size_y		-	Vertical size (in pixels) for displaying the page
++//			rotate		-	Page orientation: 0 (normal), 1 (rotated 90 degrees clockwise),
++//								2 (rotated 180 degrees), 3 (rotated 90 degrees counter-clockwise).
++//			device_x	-	X value in device coordination, for the point to be converted
++//			device_y	-	Y value in device coordination, for the point to be converted
++//			page_x		-	Pointer to a double value receiving the converted X value in page coordination
++//			page_y		-	Pointer to a double value receiving the converted Y value in page coordination
++// Return value:
++//			None.
++// Comments:
++//			The page coordination system has its origin at left-bottom corner of the page, with X axis goes along
++//			the bottom side to the right, and Y axis goes along the left side upward. NOTE: this coordination system 
++//			can be altered when you zoom, scroll, or rotate a page, however, a point on the page should always have 
++//			the same coordination values in the page coordination system. 
++//
++//			The device coordination system is device dependant. For screen device, its origin is at left-top
++//			corner of the window. However this origin can be altered by Windows coordination transformation
++//			utilities. You must make sure the start_x, start_y, size_x, size_y and rotate parameters have exactly
++//			same values as you used in FPDF_RenderPage() function call.
++//
++DLLEXPORT void STDCALL FPDF_DeviceToPage(FPDF_PAGE page, int start_x, int start_y, int size_x, int size_y,
++						int rotate, int device_x, int device_y, double* page_x, double* page_y);
++
++// Function: FPDF_PageToDevice
++//			Convert the screen coordinations of a point to page coordinations.
++// Parameters:
++//			page		-	Handle to the page. Returned by FPDF_LoadPage function.
++//			start_x		-	Left pixel position of the display area in the device coordination
++//			start_y		-	Top pixel position of the display area in the device coordination
++//			size_x		-	Horizontal size (in pixels) for displaying the page
++//			size_y		-	Vertical size (in pixels) for displaying the page
++//			rotate		-	Page orientation: 0 (normal), 1 (rotated 90 degrees clockwise),
++//								2 (rotated 180 degrees), 3 (rotated 90 degrees counter-clockwise).
++//			page_x		-	X value in page coordination, for the point to be converted
++//			page_y		-	Y value in page coordination, for the point to be converted
++//			device_x	-	Point to an integer value receiving the result X value in device coordination.
++//			device_y	-	Point to an integer value receiving the result Y value in device coordination.
++// Return value:
++//			None
++// Comments:
++//			See comments of FPDF_DeviceToPage() function.
++//
++DLLEXPORT void STDCALL FPDF_PageToDevice(FPDF_PAGE page, int start_x, int start_y, int size_x, int size_y,
++						int rotate, double page_x, double page_y, int* device_x, int* device_y);
++
++// Fucntion: FPDFBitmap_Create
++//			Create a Foxit Device Independant Bitmap (FXDIB)
++// Parameters:
++//			width		-	Number of pixels in a horizontal line of the bitmap. Must be greater than 0.
++//			height		-	Number of pixels in a vertical line of the bitmap. Must be greater than 0.
++//			alpha		-	A flag indicating whether alpha channel is used. Non-zero for using alpha, zero for not using.
++// Return value:
++//			The created bitmap handle, or NULL if parameter error or out of memory.
++// Comments:
++//			An FXDIB always use 4 byte per pixel. The first byte of a pixel is always double word aligned.
++//			Each pixel contains red (R), green (G), blue (B) and optionally alpha (A) values.
++//			The byte order is BGRx (the last byte unused if no alpha channel) or BGRA.
++//			
++//			The pixels in a horizontal line (also called scan line) are stored side by side, with left most
++//			pixel stored first (with lower memory address). Each scan line uses width*4 bytes.
++//
++//			Scan lines are stored one after another, with top most scan line stored first. There is no gap
++//			between adjacent scan lines.
++//
++//			This function allocates enough memory for holding all pixels in the bitmap, but it doesn't 
++//			initialize the buffer. Applications can use FPDFBitmap_FillRect to fill the bitmap using any color.
++DLLEXPORT FPDF_BITMAP STDCALL FPDFBitmap_Create(int width, int height, int alpha);
++
++// Fucntion: FPDFBitmap_FillRect
++//			Fill a rectangle area in an FXDIB
++// Parameters:
++//			bitmap		-	The handle to the bitmap. Returned by FPDFBitmap_Create function.
++//			left		-	The left side position. Starting from 0 at the left-most pixel.
++//			top			-	The top side position. Starting from 0 at the top-most scan line.
++//			width		-	Number of pixels to be filled in each scan line.
++//			height		-	Number of scan lines to be filled.
++//			red			-	A number from 0 to 255, identifying the red intensity
++//			green		-	A number from 0 to 255, identifying the green intensity
++//			blue		-	A number from 0 to 255, identifying the blue intensity
++//			alpha		-	(Only if the alpha channeled is used when bitmap created) A number from 0 to 255,
++//							identifying the alpha value.
++// Return value:
++//			None
++// Comments:
++//			This function set the color and (optionally) alpha value in specified region of the bitmap.
++//			NOTE: If alpha channel is used, this function does NOT composite the background with the source color,
++//			instead the background will be replaced by the source color and alpha.
++//			If alpha channel is not used, the &quot;alpha&quot; parameter is ignored.
++DLLEXPORT void STDCALL FPDFBitmap_FillRect(FPDF_BITMAP bitmap, int left, int top, int width, int height, 
++									int red, int green, int blue, int alpha);
++
++// Function: FPDFBitmap_GetBuffer
++//			Get data buffer of an FXDIB
++// Parameters:
++//			bitmap		-	Handle to the bitmap. Returned by FPDFBitmap_Create function.
++// Return value:
++//			The pointer to the first byte of the bitmap buffer.
++// Comments:
++//			Applications can use this function to get the bitmap buffer pointer, then manipulate any color
++//			and/or alpha values for any pixels in the bitmap.
++DLLEXPORT void* STDCALL FPDFBitmap_GetBuffer(FPDF_BITMAP bitmap);
++
++// Function: FPDFBitmap_GetWidth
++//			Get width of an FXDIB
++// Parameters:
++//			bitmap		-	Handle to the bitmap. Returned by FPDFBitmap_Create function.
++// Return value:
++//			The number of pixels in a horizontal line of the bitmap.
++DLLEXPORT int STDCALL FPDFBitmap_GetWidth(FPDF_BITMAP bitmap);
++
++// Function: FPDFBitmap_GetHeight
++//			Get height of an FXDIB
++// Parameters:
++//			bitmap		-	Handle to the bitmap. Returned by FPDFBitmap_Create function.
++// Return value:
++//			The number of pixels in a vertical line of the bitmap.
++DLLEXPORT int STDCALL FPDFBitmap_GetHeight(FPDF_BITMAP bitmap);
++
++// Function: FPDFBitmap_Destroy
++//			Destroy an FXDIB and release all related buffers
++// Parameters:
++//			bitmap		-	Handle to the bitmap. Returned by FPDFBitmap_Create function.
++// Return value:
++//			None.
++DLLEXPORT void STDCALL FPDFBitmap_Destroy(FPDF_BITMAP bitmap);
++
++// Funcion: FPDF_SetModuleFolder
++//			Set the folder path for module files (like the FPDFCJK.BIN)
++// Parameters;
++//			module_name	-	Name of the module. Currently please use NULL (0) only
++//			folder_name	-	Name of the folder. For example: &quot;C:\\program files\\FPDFVIEW&quot;
++// Return value:
++//			None.
++DLLEXPORT void STDCALL FPDF_SetModulePath(FPDF_STRING module_name, FPDF_STRING folder_name);
++
++#ifdef __cplusplus
++};
++#endif
++
++#endif // _FPDFVIEW_H_
+
+Added: nx-utils/univprn.drv/SPLFilter-0.0.1/generic.ppd
+===================================================================
+--- nx-utils/univprn.drv/SPLFilter-0.0.1/generic.ppd	2007-01-31 21:10:57 UTC (rev 309)
++++ nx-utils/univprn.drv/SPLFilter-0.0.1/generic.ppd	2007-02-01 01:22:55 UTC (rev 310)
+@@ -0,0 +1,156 @@
++*PPD-Adobe: &quot;4.3&quot;
++*FormatVersion:	&quot;4.3&quot;
++*FileVersion:	&quot;1.2&quot;
++*LanguageVersion: English
++*LanguageEncoding: ISOLatin1
++*PCFileName:	&quot;POSTSCRIPT.PPD&quot;
++*Manufacturer:	&quot;Postscript&quot;
++*Product:	&quot;(WINE v20021009)&quot;
++*ModelName:     &quot;Generic postscript printer&quot;
++*ShortNickName: &quot;Generic postscript printer&quot;
++*NickName:      &quot;Generic postscript printer&quot;
++*PSVersion:	&quot;(3010.000) 550&quot;
++*LanguageLevel:	&quot;3&quot;
++*ColorDevice:   True
++*DefaultColorSpace: RGB
++*FileSystem:	False
++*Throughput:	&quot;8&quot;
++*LandscapeOrientation: Plus90
++*VariablePaperSize: False
++*TTRasterizer:	None
++
++*UIConstraints: *PageSize Executive *InputSlot Envelope
++*UIConstraints: *PageSize Letter *InputSlot Envelope
++*UIConstraints: *PageSize Legal *InputSlot Envelope
++*UIConstraints: *PageSize A3 *InputSlot Envelope
++*UIConstraints: *PageSize A4 *InputSlot Envelope
++*UIConstraints: *PageSize A5 *InputSlot Envelope
++*UIConstraints: *PageSize B5 *InputSlot Envelope
++
++*OpenUI *PageSize/Media Size: PickOne
++*OrderDependency: 10 AnySetup *PageSize
++*DefaultPageSize: A4
++*PageSize Letter/Letter:	&quot;&lt;&lt;/PageSize[612 792]/ImagingBBox null&gt;&gt;setpagedevice&quot;
++*PageSize Legal/Legal:		&quot;&lt;&lt;/PageSize[612 1008]/ImagingBBox null&gt;&gt;setpagedevice&quot;
++*PageSize Executive/Executive:	&quot;&lt;&lt;/PageSize[522 756]/ImagingBBox null&gt;&gt;setpagedevice&quot;
++*PageSize A3/A3:               &quot;&lt;&lt;/PageSize[842 1191]/ImagingBBox null&gt;&gt;setpagedevice&quot;
++*PageSize A4/A4:		&quot;&lt;&lt;/PageSize[595 842]/ImagingBBox null&gt;&gt;setpagedevice&quot;
++*PageSize A5/A5:		&quot;&lt;&lt;/PageSize[420 595]/ImagingBBox null&gt;&gt;setpagedevice&quot;
++*PageSize B5/B5 (JIS):		&quot;&lt;&lt;/PageSize[516 729]/ImagingBBox null&gt;&gt;setpagedevice&quot;
++*PageSize EnvISOB5/Envelope B5: &quot;&lt;&lt;/PageSize[499 709]/ImagingBBox null&gt;&gt;setpagedevice&quot;
++*PageSize Env10/Envelope #10:	&quot;&lt;&lt;/PageSize[297 684]/ImagingBBox null&gt;&gt;setpagedevice&quot;
++*PageSize EnvC5/Envelope C5:	&quot;&lt;&lt;/PageSize[459 649]/ImagingBBox null&gt;&gt;setpagedevice&quot;
++*PageSize EnvDL/Envelope DL:	&quot;&lt;&lt;/PageSize[312 624]/ImagingBBox null&gt;&gt;setpagedevice&quot;
++*PageSize EnvMonarch/Envelope Monarch: &quot;&lt;&lt;/PageSize[279 540]/ImagingBBox null&gt;&gt;setpagedevice&quot;
++*CloseUI: *PageSize
++
++*OpenUI *PageRegion: PickOne
++*OrderDependency: 10 AnySetup *PageRegion
++*DefaultPageRegion: A4
++*PageRegion Letter/Letter:	&quot;&lt;&lt;/PageSize[612 792]/ImagingBBox null&gt;&gt;setpagedevice&quot;
++*PageRegion Legal/Legal:	&quot;&lt;&lt;/PageSize[612 1008]/ImagingBBox null&gt;&gt;setpagedevice&quot;
++*PageRegion Executive/Executive: &quot;&lt;&lt;/PageSize[522 756]/ImagingBBox null&gt;&gt;setpagedevice&quot;
++*PageRegion A3/A3:             &quot;&lt;&lt;/PageSize[842 1191]/ImagingBBox null&gt;&gt;setpagedevice&quot;
++*PageRegion A4/A4:		&quot;&lt;&lt;/PageSize[595 842]/ImagingBBox null&gt;&gt;setpagedevice&quot;
++*PageRegion A5/A5:		&quot;&lt;&lt;/PageSize[421 595]/ImagingBBox null&gt;&gt;setpagedevice&quot;
++*PageRegion B5/B5 (JIS):	&quot;&lt;&lt;/PageSize[516 729]/ImagingBBox null&gt;&gt;setpagedevice&quot;
++*PageRegion EnvISOB5/Envelope B5: &quot;&lt;&lt;/PageSize[499 709]/ImagingBBox null&gt;&gt;setpagedevice&quot;
++*PageRegion Env10/Envelope #10:	&quot;&lt;&lt;/PageSize[297 684]/ImagingBBox null&gt;&gt;setpagedevice&quot;
++*PageRegion EnvC5/Envelope C5:	&quot;&lt;&lt;/PageSize[459 649]/ImagingBBox null&gt;&gt;setpagedevice&quot;
++*PageRegion EnvDL/Envelope DL:	&quot;&lt;&lt;/PageSize[312 624]/ImagingBBox null&gt;&gt;setpagedevice&quot;
++*PageRegion EnvMonarch/Envelope Monarch: &quot;&lt;&lt;/PageSize[279 540]/ImagingBBox null&gt;&gt;setpagedevice&quot;
++*CloseUI: *PageRegion
++
++*DefaultImageableArea: Letter
++*ImageableArea Letter/US Letter:	&quot;18 18 594 774&quot;
++*ImageableArea Legal/US Legal:		&quot;18 18 594 990&quot;
++*ImageableArea Executive/Executive:	&quot;18 18 504 738&quot;
++*ImageableArea A3/A3:			&quot;12 12 830 1179&quot;
++*ImageableArea A4/A4:			&quot;18 18 577 824&quot;
++*ImageableArea A5/A5:			&quot;18 36 403 559&quot;
++*ImageableArea B5/JIS B5:		&quot;18 36 498 693&quot;
++*ImageableArea EnvISOB5/B5 (ISO):	&quot;18 36 463 673&quot;
++*ImageableArea Env10/Com-10:		&quot;18 36 279 648&quot;
++*ImageableArea EnvC5/EnvC5:		&quot;18 36 441 613&quot;
++*ImageableArea EnvDL/EnvDL:		&quot;18 36 294 588&quot;
++*ImageableArea EnvMonarch/Envelope Monarch: &quot;18 36 261 504&quot;
++
++*DefaultPaperDimension: Letter
++*PaperDimension Letter/Letter:		&quot;612 792&quot;
++*PaperDimension Legal/Legal:		&quot;612 1008&quot;
++*PaperDimension Executive/Executive:	&quot;522 756&quot;
++*PaperDimension A3/A3:			&quot;842 1191&quot;
++*PaperDimension A4/A4:			&quot;595 842&quot;
++*PaperDimension A5/A5:			&quot;421 595&quot;
++*PaperDimension B5/B5 (JIS):		&quot;516 729&quot;
++*PaperDimension EnvISOB5/Envelope B5:	&quot;499 709&quot;
++*PaperDimension Env10/Envelope #10:	&quot;297 684&quot;
++*PaperDimension EnvC5/Envelope C5:	&quot;459 649&quot;
++*PaperDimension EnvDL/Envelope DL:	&quot;312 624&quot;
++*PaperDimension EnvMonarch/Envelope Monarch: &quot;279 540&quot;
++
++*OpenUI *InputSlot/Media Source: PickOne
++*OrderDependency: 10 AnySetup *InputSlot
++*DefaultInputSlot: Default
++*InputSlot Default/Default: &quot;&quot;
++*InputSlot Tray1/Tray 1: &quot;&lt;&lt;/ManualFeed false /MediaPosition 3&gt;&gt;setpagedevice&quot;
++*InputSlot Tray2/Tray 2: &quot;&lt;&lt;/ManualFeed false /MediaPosition 0&gt;&gt;setpagedevice&quot;
++*InputSlot Tray3/Tray 3: &quot;&lt;&lt;/ManualFeed false /MediaPosition 1&gt;&gt;setpagedevice&quot;
++*InputSlot Manual/Manual Feed: &quot;&lt;&lt;/ManualFeed true /MediaPosition 3&gt;&gt;setpagedevice&quot;
++*CloseUI: *InputSlot
++
++*OpenUI *Resolution/Output Resolution: PickOne
++*OrderDependency: 20 AnySetup *Resolution
++*DefaultResolution: 600dpi
++*Resolution 150dpi/150 DPI: &quot;&lt;&lt;/HWResolution[150 150]&gt;&gt;setpagedevice&quot;
++*Resolution 300dpi/300 DPI: &quot;&lt;&lt;/HWResolution[300 300]&gt;&gt;setpagedevice&quot;
++*Resolution 600dpi/600 DPI: &quot;&lt;&lt;/HWResolution[600 600]&gt;&gt;setpagedevice&quot;
++*Resolution 1200dpi/1200 DPI: &quot;&lt;&lt;/HWResolution[1200 1200]&gt;&gt;setpagedevice&quot;
++*Resolution 2400dpi/2400 DPI: &quot;&lt;&lt;/HWResolution[2400 2400]&gt;&gt;setpagedevice&quot;
++*Resolution 4800dpi/4800 DPI: &quot;&lt;&lt;/HWResolution[4800 4800]&gt;&gt;setpagedevice&quot;
++*CloseUI: *Resolution
++
++*OpenUI *Duplex/Double-Sided Printing: PickOne
++*OrderDependency: 20 AnySetup *Duplex
++*DefaultDuplex: None
++*Duplex None/Off: &quot;&lt;&lt;/Duplex false&gt;&gt;setpagedevice&quot;
++*Duplex DuplexNoTumble/Long Edge (Standard): &quot;&lt;&lt;/Duplex true/Tumble false&gt;&gt;setpagedevice&quot;
++*Duplex DuplexTumble/Short Edge (Flip): &quot;&lt;&lt;/Duplex true/Tumble true&gt;&gt;setpagedevice&quot;
++*CloseUI:       *Duplex
++
++*DefaultFont: Courier
++*Font AvantGarde-Book: Standard &quot;(001.006S)&quot; Standard ROM
++*Font AvantGarde-BookOblique: Standard &quot;(001.006S)&quot; Standard ROM
++*Font AvantGarde-Demi: Standard &quot;(001.007S)&quot; Standard ROM
++*Font AvantGarde-DemiOblique: Standard &quot;(001.007S)&quot; Standard ROM
++*Font Bookman-Demi: Standard &quot;(001.004S)&quot; Standard ROM
++*Font Bookman-DemiItalic: Standard &quot;(001.004S)&quot; Standard ROM
++*Font Bookman-Light: Standard &quot;(001.004S)&quot; Standard ROM
++*Font Bookman-LightItalic: Standard &quot;(001.004S)&quot; Standard ROM
++*Font Courier: Standard &quot;(002.004S)&quot; Standard ROM
++*Font Courier-Bold: Standard &quot;(002.004S)&quot; Standard ROM
++*Font Courier-BoldOblique: Standard &quot;(002.004S)&quot; Standard ROM
++*Font Courier-Oblique: Standard &quot;(002.004S)&quot; Standard ROM
++*Font Helvetica: Standard &quot;(001.006S)&quot; Standard ROM
++*Font Helvetica-Bold: Standard &quot;(001.007S)&quot; Standard ROM
++*Font Helvetica-BoldOblique: Standard &quot;(001.007S)&quot; Standard ROM
++*Font Helvetica-Narrow: Standard &quot;(001.006S)&quot; Standard ROM
++*Font Helvetica-Narrow-Bold: Standard &quot;(001.007S)&quot; Standard ROM
++*Font Helvetica-Narrow-BoldOblique: Standard &quot;(001.007S)&quot; Standard ROM
++*Font Helvetica-Narrow-Oblique: Standard &quot;(001.006S)&quot; Standard ROM
++*Font Helvetica-Oblique: Standard &quot;(001.006S)&quot; Standard ROM
++*Font NewCenturySchlbk-Bold: Standard &quot;(001.009S)&quot; Standard ROM
++*Font NewCenturySchlbk-BoldItalic: Standard &quot;(001.007S)&quot; Standard ROM
++*Font NewCenturySchlbk-Italic: Standard &quot;(001.006S)&quot; Standard ROM
++*Font NewCenturySchlbk-Roman: Standard &quot;(001.007S)&quot; Standard ROM
++*Font Palatino-Bold: Standard &quot;(001.005S)&quot; Standard ROM
++*Font Palatino-BoldItalic: Standard &quot;(001.005S)&quot; Standard ROM
++*Font Palatino-Italic: Standard &quot;(001.005S)&quot; Standard ROM
++*Font Palatino-Roman: Standard &quot;(001.005S)&quot; Standard ROM
++*Font Symbol: Special &quot;(001.007S)&quot; Special ROM
++*Font Times-Bold: Standard &quot;(001.007S)&quot; Standard ROM
++*Font Times-BoldItalic: Standard &quot;(001.009S)&quot; Standard ROM
++*Font Times-Italic: Standard &quot;(001.007S)&quot; Standard ROM
++*Font Times-Roman: Standard &quot;(001.007S)&quot; Standard ROM
++*Font ZapfChancery-MediumItalic: Standard &quot;(001.007S)&quot; Standard ROM
++*Font ZapfDingbats: Special &quot;(001.004S)&quot; Standard ROM
+
+Added: nx-utils/univprn.drv/SPLFilter-0.0.1/spl.h
+===================================================================
+--- nx-utils/univprn.drv/SPLFilter-0.0.1/spl.h	2007-01-31 21:10:57 UTC (rev 309)
++++ nx-utils/univprn.drv/SPLFilter-0.0.1/spl.h	2007-02-01 01:22:55 UTC (rev 310)
+@@ -0,0 +1,167 @@
++/*****************************************************************************
++ * Terms of Use
++ * Copyright &#169; Christoph Lindemann. All rights reserved.
++ *
++ * Permission is granted to copy, distribute and/or modify this document under
++ * the terms of the GNU Free Documentation License, Version 1.2 or any later 
++ * version published by the Free Software Foundation; with no Invariant 
++ * Sections, no Front-Cover Texts, and no Back-Cover Texts. A copy of the 
++ * license is included in the section entitled &quot;GNU Free Documentation 
++ * License&quot;.
++ *----------------------------------------------------------------------------
++ * History:
++ *  24-03-2004  Initial Document
++ *     Christoph Lindemann, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">christoph at lindemann.nu</A>
++ *  
++ *  24-03-2004  Release to public
++ *     Christoph Lindemann, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">christoph at lindemann.nu</A>
++ *  
++ *  10-06-2004  Added SPL_SMR_PADDING
++ *     Thanks to Fabian Franz
++ *  
++ *  11-06-2004  CORRECTED FAULTY INFORMATIONS
++ *     Christoph Lindemann, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">christoph at lindemann.nu</A>
++ *  
++ *  14-06-2004  Added some text explaining the format.
++ *     Christoph Lindemann, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">christoph at lindemann.nu</A>
++ *  
++ *  19-05-2005  Corrected typos in SMREXT definition
++ *     Thanks to Peter Wasser
++ *  
++ *  02-11-2005  Updated End-Of-Page records 0x0D and 0x0E
++ *     Thanks to Krzys
++ *
++ *  15-06-2006  Updated EMF Spool Metafile record types
++ *     Christoph Lindemann, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">christoph at lindemann.nu</A>
++ *
++ *  16-06-2006  Added information about PRESTARTPAGE record
++ *     Christoph Lindemann, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">christoph at lindemann.nu</A>
++ *
++ *****************************************************************************/
++ 
++//Spool Metafile constants
++#define SPLMETA_SIGNATURE 0x00010000 //Version 1.0 
++ 
++// Spool Metafile record types
++// Please note remarks in the corresponding struct definitions
++#define SRT_PAGE_EMF1         0x00000001 /*  1 Enhanced Meta File (EMF) NT4   */                                         
++#define SRT_FONT1             0x00000002 /*  2 Font Data                      */
++#define SRT_DEVMODE           0x00000003 /*  3 DevMode                        */
++#define SRT_FONT2             0x00000004 /*  4 Font Data                      */
++#define SRT_PRESTARTPAGE      0x00000005 /*  5 PRESTARTPAGE                   */
++#define SRT_FONT_MM           0x00000006 /*  6 Font Data (Multiple Master)    */
++#define SRT_FONT_SUB1         0x00000007 /*  7 Font Data (SubsetFont 1)       */
++#define SRT_FONT_SUB2         0x00000008 /*  8 Font Data (SubsetFont 2)       */
++#define SRT_RESERVED_9        0x00000009 /*  9                                */
++#define SRT_RESERVED_A        0x0000000A /* 10                                */ 
++#define SRT_RESERVED_B        0x0000000B /* 11                                */
++#define SRT_PAGE_EMF2         0x0000000C /* 12 Enhanced Meta File (EMF) Win2k */ 
++#define SRT_EXT_EOPAGE_RASTER 0x0000000D /* 13 Ext EndOfPage raster bitmap    */
++#define SRT_EXT_EOPAGE_VECTOR 0x0000000E /* 14 Ext EndOfPage GDI image data   */
++#define SRT_EXT_FONT1         0x0000000F /* 15 Ext Font (SRT_FONT1)           */
++#define SRT_EXT_FONT2         0x00000010 /* 16 Ext Font (SRT_FONT2)           */
++#define SRT_EXT_FONT_MM       0x00000011 /* 17 Ext Font (SRT_FONT_MM)         */
++#define SRT_EXT_FONT_SUB1     0x00000012 /* 18 Ext Font (SRT_FONT_SUB1)       */
++#define SRT_EXT_FONT_SUB2     0x00000013 /* 19 Ext Font (SRT_FONT_SUB2)       */
++#define SRT_EXT_PS_JOB_DATA   0x00000014 /* 20 PS_JOB_DATA escape data        */
++#define SRT_EXT_FONT_EMBED    0x00000015 /* 21 Font (Embeded/Ghost?)          */
++ 
++/*****************************************************************************
++ * SPL_HEADER
++ *----------------------------------------------------------------------------
++ * SPL file header for EMFSPL files
++ *****************************************************************************/
++typedef struct tagSPLHEADER { 
++    DWORD SIGNATURE; 
++    DWORD nSize;            // record size INCLUDING header 
++    DWORD offDocumentName;  // offset of Job Title from start 
++    DWORD offPort;          // offset of portname from start
++    //BYTE HeaderData[1]; 
++	//LPCTSTR lpszDocName; 
++    //LPCTSTR lpszOutput; 
++} SPL_HEADER, *PSPL_HEADER;
++ 
++/*****************************************************************************
++ * SMR - Base record
++ *----------------------------------------------------------------------------
++ * Base record type for the Spool Metafile.
++ *****************************************************************************/
++typedef struct tagSMR{ 
++    DWORD iType; // Spool metafile record type 
++    DWORD nSize; // length of the following data 
++                 // NOT INCLUDING this header 
++} SMR, *PSMR;
++ 
++/*****************************************************************************
++ * SMREXT - Extended record
++ *----------------------------------------------------------------------------
++ * Contains neg. distance to start of Data
++ *****************************************************************************/
++typedef struct tagSMREXT{ 
++    SMR smr; 
++    DWORD DistanceLow; 
++    DWORD DistanceHigh;
++} SMREXT, *PSMREXT;
++ 
++/*****************************************************************************
++ * SMRPRESTARTPAGE - PRESTARTPAGE
++ *----------------------------------------------------------------------------
++ * Written before pagedata is written to spoolfile
++ * Used as a temporary &quot;end of file&quot; indicating following data is not
++ * fully spooled yet
++ *****************************************************************************/
++typedef struct tagSMRPRESTARTPAGE{ 
++    SMR smr; 
++    DWORD Unknown1; 
++    DWORD Unknown2; //0xFFFFFFFF
++} SMRPRESTARTPAGE, *PSMRPRESTARTPAGE;
++ 
++/*****************************************************************************
++ * SMR_PAGE - EMF/Page data
++ *----------------------------------------------------------------------------
++ * EMF/Page data
++ *****************************************************************************/
++typedef struct tagSMRPAGE{ 
++    SMR smr;   // if smr.nSize == 0, this indicates EndOfFile
++    BYTE EMFData[1];
++} SMR_PAGE, *PSMR_PAGE;
++ 
++/*****************************************************************************
++ * SMR_DEVMODE - DEVMODE data
++ *----------------------------------------------------------------------------
++ * DEVMODE data
++ *****************************************************************************/
++typedef struct tagSMRDEVMODE{ 
++    SMR smr; 
++    BYTE DEVMODEData[1];
++} SMR_DEVMODE, *PSMR_DEVMODE;
++ 
++/*****************************************************************************
++ * SMR_FONT - FONT data
++ *****************************************************************************/
++typedef struct tagSMRFONT{ 
++    SMR smr; 
++    BYTE FONTData[1];
++} SMR_FONT, *PSMR_FONT;
++ 
++/*****************************************************************************
++ * SMR_EXTFONT - Extended Font Data
++ *----------------------------------------------------------------------------
++ * Contains neg. distance to start of
++ * Font Data
++ * Font data is typically embedded as
++ * GDICOMMENT in the prev EMF data
++ *****************************************************************************/
++typedef struct tagEXTFONT{ 
++    SMREXT smrext;
++} SMR_EXTFONT, *PSMR_EXTFONT;
++ 
++/*****************************************************************************
++ * SMR_EOPAGE - End of Page
++ *----------------------------------------------------------------------------
++ * Contains neg. distance to
++ * start of page record
++ *****************************************************************************/
++typedef struct tagSMREOPAGE{ 
++    SMREXT smrext; 
++} SMR_EOPAGE, *PSMR_EOPAGE;
+\ No newline at end of file
+
+Added: nx-utils/univprn.drv/SPLFilter-0.0.1/stdafx.cpp
+===================================================================
+--- nx-utils/univprn.drv/SPLFilter-0.0.1/stdafx.cpp	2007-01-31 21:10:57 UTC (rev 309)
++++ nx-utils/univprn.drv/SPLFilter-0.0.1/stdafx.cpp	2007-02-01 01:22:55 UTC (rev 310)
+@@ -0,0 +1,8 @@
++// stdafx.cpp : Quelldatei, die nur die Standard-Includes einbindet.
++// DLLTest.pch ist der vorkompilierte Header.
++// stdafx.obj enth&#228;lt die vorkompilierten Typinformationen.
++
++#include &quot;stdafx.h&quot;
++
++// TODO: Auf zus&#228;tzliche Header verweisen, die in STDAFX.H
++// und nicht in dieser Datei erforderlich sind.
+
+Added: nx-utils/univprn.drv/SPLFilter-0.0.1/stdafx.h
+===================================================================
+--- nx-utils/univprn.drv/SPLFilter-0.0.1/stdafx.h	2007-01-31 21:10:57 UTC (rev 309)
++++ nx-utils/univprn.drv/SPLFilter-0.0.1/stdafx.h	2007-02-01 01:22:55 UTC (rev 310)
+@@ -0,0 +1,15 @@
++// stdafx.h : Includedatei f&#252;r Standardsystem-Includedateien
++// oder h&#228;ufig verwendete projektspezifische Includedateien,
++// die nur in unregelm&#228;&#223;igen Abst&#228;nden ge&#228;ndert werden.
++//
++
++#pragma once
++
++
++#define WIN32_LEAN_AND_MEAN		// Selten verwendete Teile der Windows-Header nicht einbinden.
++#include &lt;stdio.h&gt;
++#include &lt;tchar.h&gt;
++
++
++
++// TODO: Hier auf zus&#228;tzliche Header, die das Programm erfordert, verweisen.
+
+Added: nx-utils/univprn.drv/SPLFilter-0.0.1/wine-emf-bezier-impl.diff
+===================================================================
+--- nx-utils/univprn.drv/SPLFilter-0.0.1/wine-emf-bezier-impl.diff	2007-01-31 21:10:57 UTC (rev 309)
++++ nx-utils/univprn.drv/SPLFilter-0.0.1/wine-emf-bezier-impl.diff	2007-02-01 01:22:55 UTC (rev 310)
+@@ -0,0 +1,231 @@
++diff -ur ../gdi32.old2/enhmfdrv/enhmetafiledrv.h ./enhmfdrv/enhmetafiledrv.h
++--- ../gdi32.old2/enhmfdrv/enhmetafiledrv.h	2007-01-28 11:33:21.000000000 +0100
+++++ ./enhmfdrv/enhmetafiledrv.h	2007-01-30 06:26:45.000000000 +0100
++@@ -61,6 +61,10 @@
++ extern BOOL     EMFDRV_Arc( PHYSDEV dev, INT left, INT top, INT right,
++                             INT bottom, INT xstart, INT ystart, INT xend,
++                             INT yend );
+++extern BOOL     EMFDRV_ArcTo( PHYSDEV dev, INT left, INT top, INT right,
+++                            INT bottom, INT xstart, INT ystart, INT xend,
+++                            INT yend );
+++
++ extern BOOL     EMFDRV_BeginPath( PHYSDEV dev );
++ extern BOOL     EMFDRV_BitBlt( PHYSDEV devDst, INT xDst, INT yDst,
++                                INT width, INT height, PHYSDEV devSrc,
++@@ -105,8 +109,11 @@
++                                     const INT* counts, UINT polys);
++ extern BOOL     EMFDRV_PolyPolyline( PHYSDEV dev, const POINT* pt,
++                                      const DWORD* counts, DWORD polys);
++-extern BOOL     EMFDRV_Polygon( PHYSDEV dev, const POINT* pt, INT count );
++ extern BOOL     EMFDRV_Polyline( PHYSDEV dev, const POINT* pt,INT count);
+++extern BOOL     EMFDRV_PolyBezier( PHYSDEV dev, const POINT* pt, DWORD count );
+++extern BOOL     EMFDRV_Polygon( PHYSDEV dev, const POINT* pt, INT count );
+++extern BOOL     EMFDRV_PolyBezierTo( PHYSDEV dev, const POINT* pt, DWORD count );
+++extern BOOL     EMFDRV_PolylineTo( PHYSDEV dev, const POINT* pt, DWORD count);
++ extern BOOL     EMFDRV_Rectangle( PHYSDEV dev, INT left, INT top,
++                                   INT right, INT bottom);
++ extern BOOL     EMFDRV_RestoreDC( PHYSDEV dev, INT level );
++diff -ur ../gdi32.old2/enhmfdrv/graphics.c ./enhmfdrv/graphics.c
++--- ../gdi32.old2/enhmfdrv/graphics.c	2007-01-09 16:42:47.000000000 +0100
+++++ ./enhmfdrv/graphics.c	2007-01-30 06:25:24.000000000 +0100
++@@ -80,7 +80,6 @@
++     return TRUE;
++ }
++ 
++-
++ /***********************************************************************
++  *           EMFDRV_ArcChordPie
++  */
++@@ -197,6 +196,16 @@
++ }
++ 
++ /***********************************************************************
+++ *           EMFDRV_Arc
+++ */
+++BOOL
+++EMFDRV_ArcTo( PHYSDEV dev, INT left, INT top, INT right, INT bottom,
+++	    INT xstart, INT ystart, INT xend, INT yend )
+++{
+++    return EMFDRV_ArcChordPie( dev, left, top, right, bottom, xstart, ystart,
+++			       xend, yend, EMR_ARCTO );
+++}
+++/***********************************************************************
++  *           EMFDRV_Pie
++  */
++ BOOL
++@@ -351,6 +360,8 @@
++ static BOOL
++ EMFDRV_Polylinegon( PHYSDEV dev, const POINT* pt, INT count, DWORD iType )
++ {
+++    EMFDRV_PDEVICE *physDev = (EMFDRV_PDEVICE *)dev;
+++    POINT tpt;
++     EMRPOLYLINE *emr;
++     DWORD size;
++     INT i;
++@@ -362,10 +373,22 @@
++     emr-&gt;emr.iType = iType;
++     emr-&gt;emr.nSize = size;
++ 
++-    emr-&gt;rclBounds.left = emr-&gt;rclBounds.right = pt[0].x;
++-    emr-&gt;rclBounds.top = emr-&gt;rclBounds.bottom = pt[0].y;
+++    if (iType == EMR_POLYLINETO || iType == EMR_POLYBEZIERTO)
+++    {
+++        i = 0;
+++        GetCurrentPositionEx(physDev-&gt;hdc, &amp;tpt);
+++        emr-&gt;rclBounds.left = emr-&gt;rclBounds.right = tpt.x;
+++        emr-&gt;rclBounds.top = emr-&gt;rclBounds.bottom = tpt.y;
+++    
+++    }
+++    else
+++    {
+++        i = 1;
+++        emr-&gt;rclBounds.left = emr-&gt;rclBounds.right = pt[0].x;
+++        emr-&gt;rclBounds.top = emr-&gt;rclBounds.bottom = pt[0].y;
+++    }
++ 
++-    for(i = 1; i &lt; count; i++) {
+++    for(; i &lt; count; i++) {
++         if(pt[i].x &lt; emr-&gt;rclBounds.left)
++ 	    emr-&gt;rclBounds.left = pt[i].x;
++ 	else if(pt[i].x &gt; emr-&gt;rclBounds.right)
++@@ -398,6 +421,8 @@
++ static BOOL
++ EMFDRV_Polylinegon16( PHYSDEV dev, const POINT* pt, INT count, DWORD iType )
++ {
+++    EMFDRV_PDEVICE *physDev = (EMFDRV_PDEVICE *)dev;
+++    POINT tpt;
++     EMRPOLYLINE16 *emr;
++     DWORD size;
++     INT i;
++@@ -416,10 +441,22 @@
++     emr-&gt;emr.iType = iType;
++     emr-&gt;emr.nSize = size;
++ 
++-    emr-&gt;rclBounds.left = emr-&gt;rclBounds.right = pt[0].x;
++-    emr-&gt;rclBounds.top = emr-&gt;rclBounds.bottom = pt[0].y;
+++    if (iType == EMR_POLYLINETO16 || iType == EMR_POLYBEZIERTO16)
+++    {
+++        i = 0;
+++        GetCurrentPositionEx(physDev-&gt;hdc, &amp;tpt);
+++        emr-&gt;rclBounds.left = emr-&gt;rclBounds.right = tpt.x;
+++        emr-&gt;rclBounds.top = emr-&gt;rclBounds.bottom = tpt.y;
+++    
+++    }
+++    else
+++    {
+++        i = 1;
+++        emr-&gt;rclBounds.left = emr-&gt;rclBounds.right = pt[0].x;
+++        emr-&gt;rclBounds.top = emr-&gt;rclBounds.bottom = pt[0].y;
+++    }
++ 
++-    for(i = 1; i &lt; count; i++) {
+++    for(; i &lt; count; i++) {
++         if(pt[i].x &lt; emr-&gt;rclBounds.left)
++ 	    emr-&gt;rclBounds.left = pt[i].x;
++ 	else if(pt[i].x &gt; emr-&gt;rclBounds.right)
++@@ -456,6 +493,21 @@
++ }
++ 
++ /**********************************************************************
+++ *          EMFDRV_PolyBezier
+++ */
+++
+++/* FIXME: The BBox could be a bit too large, but there is no easy approximation function 
+++ *        known. */
+++BOOL
+++EMFDRV_PolyBezier( PHYSDEV dev, const POINT* pt, DWORD count )
+++{
+++    if(count &lt; 4 || ((count-4) % 3) != 0) return FALSE;
+++    if( EMFDRV_Polylinegon16( dev, pt, count, EMR_POLYBEZIER16 ) )
+++        return TRUE;
+++    return EMFDRV_Polylinegon( dev, pt, count, EMR_POLYBEZIER );
+++}
+++
+++/**********************************************************************
++  *          EMFDRV_Polygon
++  */
++ BOOL
++@@ -467,6 +519,32 @@
++     return EMFDRV_Polylinegon( dev, pt, count, EMR_POLYGON );
++ }
++ 
+++/**********************************************************************
+++ *          EMFDRV_PolyBezierTo
+++ */
+++
+++/* FIXME: The BBox could be a bit too large, but there is no easy approximation function 
+++ *        known. */
+++BOOL
+++EMFDRV_PolyBezierTo( PHYSDEV dev, const POINT* pt, DWORD count )
+++{
+++    if(count &lt; 3 || (count % 3) != 0) return FALSE;
+++    if( EMFDRV_Polylinegon16( dev, pt, count, EMR_POLYBEZIERTO16 ) )
+++        return TRUE;
+++    return EMFDRV_Polylinegon( dev, pt, count, EMR_POLYBEZIERTO );
+++}
+++
+++
+++/**********************************************************************
+++ *          EMFDRV_PolylineTo
+++ */
+++BOOL
+++EMFDRV_PolylineTo( PHYSDEV dev, const POINT* pt, DWORD count )
+++{
+++    if( EMFDRV_Polylinegon16( dev, pt, count, EMR_POLYLINETO16 ) )
+++        return TRUE;
+++    return EMFDRV_Polylinegon( dev, pt, count, EMR_POLYLINETO );
+++}
++ 
++ /**********************************************************************
++  *          EMFDRV_PolyPolylinegon
++diff -ur ../gdi32.old2/enhmfdrv/init.c ./enhmfdrv/init.c
++--- ../gdi32.old2/enhmfdrv/init.c	2007-01-28 11:34:23.000000000 +0100
+++++ ./enhmfdrv/init.c	2007-01-30 06:21:02.000000000 +0100
++@@ -38,7 +38,7 @@
++     NULL,                            /* pAlphaBlend */
++     NULL,                            /* pAngleArc */
++     EMFDRV_Arc,                      /* pArc */
++-    NULL,                            /* pArcTo */
+++    EMFDRV_ArcTo,                    /* pArcTo */
++     EMFDRV_BeginPath,                /* pBeginPath */
++     EMFDRV_BitBlt,                   /* pBitBlt */
++     NULL,                            /* pChoosePixelFormat */
++@@ -92,14 +92,14 @@
++     EMFDRV_PaintRgn,                 /* pPaintRgn */
++     EMFDRV_PatBlt,                   /* pPatBlt */
++     EMFDRV_Pie,                      /* pPie */
++-    NULL,                            /* pPolyBezier */
++-    NULL,                            /* pPolyBezierTo */
+++    EMFDRV_PolyBezier,               /* pPolyBezier */
+++    EMFDRV_PolyBezierTo,             /* pPolyBezierTo */
++     NULL,                            /* pPolyDraw */
++     EMFDRV_PolyPolygon,              /* pPolyPolygon */
++     EMFDRV_PolyPolyline,             /* pPolyPolyline */
++     EMFDRV_Polygon,                  /* pPolygon */
++     EMFDRV_Polyline,                 /* pPolyline */
++-    NULL,                            /* pPolylineTo */
+++    EMFDRV_PolylineTo,               /* pPolylineTo */
++     NULL,                            /* pRealizeDefaultPalette */
++     NULL,                            /* pRealizePalette */
++     EMFDRV_Rectangle,                /* pRectangle */
++@@ -129,7 +129,7 @@
++     NULL,                            /* pSetDeviceGammaRamp */
++     EMFDRV_SetMapMode,               /* pSetMapMode */
++     EMFDRV_SetMapperFlags,           /* pSetMapperFlags */
++-    NULL,                            /* pSetPixel */
+++    EMFDRV_SetPixel,                 /* pSetPixel */
++     NULL,                            /* pSetPixelFormat */
++     EMFDRV_SetPolyFillMode,          /* pSetPolyFillMode */
++     EMFDRV_SetROP2,                  /* pSetROP2 */
++diff -ur ../gdi32.old2/gdi_private.h ./gdi_private.h
++--- ../gdi32.old2/gdi_private.h	2007-01-09 16:42:47.000000000 +0100
+++++ ./gdi_private.h	2007-01-30 06:27:04.000000000 +0100
++@@ -165,7 +165,7 @@
++     BOOL     (*pPolyPolyline)(PHYSDEV,const POINT*,const DWORD*,DWORD);
++     BOOL     (*pPolygon)(PHYSDEV,const POINT*,INT);
++     BOOL     (*pPolyline)(PHYSDEV,const POINT*,INT);
++-    BOOL     (*pPolylineTo)(PHYSDEV,const POINT*,INT);
+++    BOOL     (*pPolylineTo)(PHYSDEV,const POINT*,DWORD);
++     UINT     (*pRealizeDefaultPalette)(PHYSDEV);
++     UINT     (*pRealizePalette)(PHYSDEV,HPALETTE,BOOL);
++     BOOL     (*pRectangle)(PHYSDEV,INT,INT,INT,INT);
+
+Added: nx-utils/univprn.drv/SPLFilter-0.0.1/wine-emf-path-bbox-fillpath.diff
+===================================================================
+--- nx-utils/univprn.drv/SPLFilter-0.0.1/wine-emf-path-bbox-fillpath.diff	2007-01-31 21:10:57 UTC (rev 309)
++++ nx-utils/univprn.drv/SPLFilter-0.0.1/wine-emf-path-bbox-fillpath.diff	2007-02-01 01:22:55 UTC (rev 310)
+@@ -0,0 +1,119 @@
++diff -ur ../gdi32.old/enhmfdrv/dc.c ./enhmfdrv/dc.c
++--- ../gdi32.old/enhmfdrv/dc.c	2007-01-09 16:42:47.000000000 +0100
+++++ ./enhmfdrv/dc.c	2007-01-28 11:40:27.000000000 +0100
++@@ -188,11 +188,16 @@
++ 
++ BOOL EMFDRV_BeginPath( PHYSDEV dev )
++ {
+++    EMFDRV_PDEVICE *physDev = (EMFDRV_PDEVICE *)dev;
++     EMRBEGINPATH emr;
++ 
++     emr.emr.iType = EMR_BEGINPATH;
++     emr.emr.nSize = sizeof(emr);
++ 
+++    /* Re-initialise the bounding box */
+++    physDev-&gt;Path_rclBounds.left = 1;
+++    physDev-&gt;Path_rclBounds.right = 0;
+++
++     return EMFDRV_WriteRecord( dev, &amp;emr.emr );
++ }
++ 
++@@ -218,15 +223,12 @@
++ 
++ BOOL EMFDRV_FillPath( PHYSDEV dev )
++ {
+++    EMFDRV_PDEVICE *physDev = (EMFDRV_PDEVICE *)dev;
++     EMRFILLPATH emr;
++ 
++     emr.emr.iType = EMR_FILLPATH;
++     emr.emr.nSize = sizeof(emr);
++-    FIXME(&quot;Bounds\n&quot;);
++-    emr.rclBounds.left = 0;
++-    emr.rclBounds.top = 0;
++-    emr.rclBounds.right = 0;
++-    emr.rclBounds.bottom = 0;
+++    emr.rclBounds = physDev-&gt;Path_rclBounds;
++     return EMFDRV_WriteRecord( dev, &amp;emr.emr );
++ }
++ 
++@@ -253,29 +255,23 @@
++ 
++ BOOL EMFDRV_StrokeAndFillPath( PHYSDEV dev )
++ {
+++    EMFDRV_PDEVICE *physDev = (EMFDRV_PDEVICE *)dev;
++     EMRSTROKEANDFILLPATH emr;
++ 
++     emr.emr.iType = EMR_STROKEANDFILLPATH;
++     emr.emr.nSize = sizeof(emr);
++-    FIXME(&quot;Bounds\n&quot;);
++-    emr.rclBounds.left = 0;
++-    emr.rclBounds.top = 0;
++-    emr.rclBounds.right = 0;
++-    emr.rclBounds.bottom = 0;
+++    emr.rclBounds = physDev-&gt;Path_rclBounds;
++     return EMFDRV_WriteRecord( dev, &amp;emr.emr );
++ }
++ 
++ BOOL EMFDRV_StrokePath( PHYSDEV dev )
++ {
+++    EMFDRV_PDEVICE *physDev = (EMFDRV_PDEVICE *)dev;
++     EMRSTROKEPATH emr;
++ 
++     emr.emr.iType = EMR_STROKEPATH;
++     emr.emr.nSize = sizeof(emr);
++-    FIXME(&quot;Bounds\n&quot;);
++-    emr.rclBounds.left = 0;
++-    emr.rclBounds.top = 0;
++-    emr.rclBounds.right = 0;
++-    emr.rclBounds.bottom = 0;
+++    emr.rclBounds = physDev-&gt;Path_rclBounds;
++     return EMFDRV_WriteRecord( dev, &amp;emr.emr );
++ }
++ 
++diff -ur ../gdi32.old/enhmfdrv/enhmetafiledrv.h ./enhmfdrv/enhmetafiledrv.h
++--- ../gdi32.old/enhmfdrv/enhmetafiledrv.h	2007-01-09 16:42:47.000000000 +0100
+++++ ./enhmfdrv/enhmetafiledrv.h	2007-01-28 11:33:21.000000000 +0100
++@@ -38,6 +38,7 @@
++     UINT       handles_size, cur_handles;
++     HGDIOBJ   *handles;
++     HANDLE     hFile;              /* Handle for disk based MetaFile */
+++    RECTL      Path_rclBounds;
++     INT        horzres, vertres;
++     INT        horzsize, vertsize;
++     INT        logpixelsx, logpixelsy;
++diff -ur ../gdi32.old/enhmfdrv/init.c ./enhmfdrv/init.c
++--- ../gdi32.old/enhmfdrv/init.c	2007-01-09 16:42:47.000000000 +0100
+++++ ./enhmfdrv/init.c	2007-01-28 11:34:23.000000000 +0100
++@@ -224,6 +224,9 @@
++     RECTL *bounds = &amp;physDev-&gt;emh-&gt;rclBounds;
++     RECTL vportRect = *rect;
++ 
+++    /* We need to run the code twice ... */
+++    INT runLoop=2;
+++
++     LPtoDP(physDev-&gt;hdc, (LPPOINT)&amp;vportRect, 2);
++     
++     /* The coordinate systems may be mirrored
++@@ -241,6 +244,9 @@
++         vportRect.top = temp;
++     }
++ 
+++    do
+++    {
+++
++     if (bounds-&gt;left &gt; bounds-&gt;right)
++     {
++         /* first bounding rectangle */
++@@ -253,6 +259,12 @@
++         bounds-&gt;right  = max(bounds-&gt;right,  vportRect.right);
++         bounds-&gt;bottom = max(bounds-&gt;bottom, vportRect.bottom);
++     }
+++
+++    runLoop--;
+++    bounds=&amp;physDev-&gt;Path_rclBounds;
+++
+++    }
+++    while (runLoop &gt; 0);
++ }
++ 
++ /**********************************************************************
+
+Added: nx-utils/univprn.drv/SPLFilter-0.0.1/wine-psdrv-resolution-support.diff
+===================================================================
+--- nx-utils/univprn.drv/SPLFilter-0.0.1/wine-psdrv-resolution-support.diff	2007-01-31 21:10:57 UTC (rev 309)
++++ nx-utils/univprn.drv/SPLFilter-0.0.1/wine-psdrv-resolution-support.diff	2007-02-01 01:22:55 UTC (rev 310)
+@@ -0,0 +1,250 @@
++diff -ur ../wineps.drv.old/driver.c ./driver.c
++--- ../wineps.drv.old/driver.c	2007-01-09 16:42:47.000000000 +0100
+++++ ./driver.c	2007-02-01 01:24:49.000000000 +0100
++@@ -129,11 +129,27 @@
++ 		dm2-&gt;dmPublic.dmDefaultSource);
++ 	}
++     }
+++    if (dm2-&gt;dmPublic.dmFields &amp; DM_PRINTQUALITY ) {
+++	RESOLUTION *res;
+++
+++	for(res = pi-&gt;ppd-&gt;Resolutions; res; res = res-&gt;next) {
+++	    if(res-&gt;WinRes == dm2-&gt;dmPublic.dmPrintQuality)
+++	        break;
+++	}
+++	if(res) {
+++	    dm1-&gt;dmPublic.dmPrintQuality = dm2-&gt;dmPublic.dmPrintQuality;
+++	    dm1-&gt;dmPublic.dmFields |= DM_PRINTQUALITY;
+++	    TRACE(&quot;Changing PrintQuality to '%s'\n&quot;, res-&gt;FullName);
+++	} else {
+++	  TRACE(&quot;Trying to change to unsupported PrintQuality %d\n&quot;,
+++		dm2-&gt;dmPublic.dmPrintQuality);
+++	}
+++
+++   }
+++
++ 
++    if (dm2-&gt;dmPublic.dmFields &amp; DM_DEFAULTSOURCE )
++        dm1-&gt;dmPublic.dmDefaultSource = dm2-&gt;dmPublic.dmDefaultSource;
++-   if (dm2-&gt;dmPublic.dmFields &amp; DM_PRINTQUALITY )
++-       dm1-&gt;dmPublic.dmPrintQuality = dm2-&gt;dmPublic.dmPrintQuality;
++    if (dm2-&gt;dmPublic.dmFields &amp; DM_COLOR )
++        dm1-&gt;dmPublic.dmColor = dm2-&gt;dmPublic.dmColor;
++    if (dm2-&gt;dmPublic.dmFields &amp; DM_DUPLEX &amp;&amp; pi-&gt;ppd-&gt;DefaultDuplex &amp;&amp; pi-&gt;ppd-&gt;DefaultDuplex-&gt;WinDuplex != 0)
++@@ -531,13 +547,16 @@
++ 
++   case DC_ENUMRESOLUTIONS:
++     {
++-      LONG *lp = (LONG*)lpszOutput;
+++      RESOLUTION *res;
+++      LONG *lp = (LONG*) lpszOutput;
+++      int i = 0;
++ 
++-      if(lpszOutput != NULL) {
++-	lp[0] = (LONG)pi-&gt;ppd-&gt;DefaultResolution;
++-	lp[1] = (LONG)pi-&gt;ppd-&gt;DefaultResolution;
++-      }
++-      return 1;
+++      for(res = pi-&gt;ppd-&gt;Resolutions; res; res = res-&gt;next, i++)
+++	if(lpszOutput != NULL) {
+++		lp[i*2]=res-&gt;WinRes;
+++		lp[i*2+1]=res-&gt;WinRes;
+++	}
+++      return i;
++     }
++ 
++   /* Windows returns 9999 too */
++diff -ur ../wineps.drv.old/init.c ./init.c
++--- ../wineps.drv.old/init.c	2007-01-09 16:42:47.000000000 +0100
+++++ ./init.c	2007-02-01 01:11:40.000000000 +0100
++@@ -175,6 +175,10 @@
++     PAGESIZE *page;
++     INT width = 0, height = 0;
++ 
+++    if(physDev-&gt;Devmode-&gt;dmPublic.dmFields &amp; DM_PRINTQUALITY) {
+++    	physDev-&gt;logPixelsX=physDev-&gt;logPixelsY=physDev-&gt;Devmode-&gt;dmPublic.dmPrintQuality;
+++    }
+++
++     if(physDev-&gt;Devmode-&gt;dmPublic.dmFields &amp; DM_PAPERSIZE) {
++         for(page = physDev-&gt;pi-&gt;ppd-&gt;PageSizes; page; page = page-&gt;next) {
++ 	    if(page-&gt;WinPage == physDev-&gt;Devmode-&gt;dmPublic.u1.s1.dmPaperSize)
++@@ -255,6 +259,7 @@
++ 	  &quot;horzRes = %d, vertRes = %d\n&quot;,
++ 	  physDev-&gt;horzSize, physDev-&gt;vertSize,
++ 	  physDev-&gt;horzRes, physDev-&gt;vertRes);
+++    
++ }
++ 
++ 
++@@ -351,8 +356,8 @@
++ 
++     memcpy( physDev-&gt;Devmode, pi-&gt;Devmode, sizeof(PSDRV_DEVMODEA) );
++ 
++-    physDev-&gt;logPixelsX = physDev-&gt;pi-&gt;ppd-&gt;DefaultResolution;
++-    physDev-&gt;logPixelsY = physDev-&gt;pi-&gt;ppd-&gt;DefaultResolution;
+++    physDev-&gt;logPixelsX = physDev-&gt;pi-&gt;ppd-&gt;DefaultResolution-&gt;WinRes;
+++    physDev-&gt;logPixelsY = physDev-&gt;pi-&gt;ppd-&gt;DefaultResolution-&gt;WinRes;
++ 
++     if (output) {
++         INT len = WideCharToMultiByte( CP_ACP, 0, output, -1, NULL, 0, NULL, NULL );
++@@ -464,11 +469,12 @@
++     /* Are aspect[XY] and logPixels[XY] correct? */
++     /* Need to handle different res in x and y =&gt; fix ppd */
++     case ASPECTX:
+++    	return physDev-&gt;logPixelsX;
++     case ASPECTY:
++-        return physDev-&gt;pi-&gt;ppd-&gt;DefaultResolution;
+++        return physDev-&gt;logPixelsY;
++     case ASPECTXY:
++-        return (int)hypot( (double)physDev-&gt;pi-&gt;ppd-&gt;DefaultResolution,
++-                           (double)physDev-&gt;pi-&gt;ppd-&gt;DefaultResolution );
+++        return (int)hypot( (double)physDev-&gt;logPixelsX,
+++                           (double)physDev-&gt;logPixelsY);
++     case LOGPIXELSX:
++         return MulDiv(physDev-&gt;logPixelsX,
++ 		      physDev-&gt;Devmode-&gt;dmPublic.dmScale, 100);
++@@ -671,8 +677,13 @@
++ 
++     /* Some gimp-print ppd files don't contain a DefaultResolution line
++        set it to 300 if it's not specified */
++-    if(pi-&gt;ppd-&gt;DefaultResolution == 0)
++-        pi-&gt;ppd-&gt;DefaultResolution = 300;
+++    if(pi-&gt;ppd-&gt;DefaultResolution-&gt;WinRes == 0)
+++    {
+++        pi-&gt;ppd-&gt;DefaultResolution-&gt;Name = &quot;300dpi&quot;;
+++        pi-&gt;ppd-&gt;DefaultResolution-&gt;FullName = &quot;300 DPI&quot;;
+++        pi-&gt;ppd-&gt;DefaultResolution-&gt;InvocationString = &quot;&lt;&lt;/HWResolution[300 300]&gt;&gt;setpagedevice&quot;;
+++        pi-&gt;ppd-&gt;DefaultResolution-&gt;WinRes = 300;
+++    }
++ 
++     if(using_default_devmode) {
++         DWORD papersize;
++diff -ur ../wineps.drv.old/ppd.c ./ppd.c
++--- ../wineps.drv.old/ppd.c	2007-01-09 16:42:47.000000000 +0100
+++++ ./ppd.c	2007-02-01 01:31:52.000000000 +0100
++@@ -556,7 +556,7 @@
++     FILE *fp;
++     PPD *ppd;
++     PPDTuple tuple;
++-    char *default_pagesize = NULL, *default_duplex = NULL;
+++    char *default_pagesize = NULL, *default_duplex = NULL, *default_resolution = NULL;
++ 
++     TRACE(&quot;file '%s'\n&quot;, fname);
++ 
++@@ -603,12 +603,6 @@
++ 	    TRACE(&quot;ColorDevice = %d\n&quot;, (int)ppd-&gt;ColorDevice);
++ 	}
++ 
++-	else if((!strcmp(&quot;*DefaultResolution&quot;, tuple.key)) ||
++-		(!strcmp(&quot;*DefaultJCLResolution&quot;, tuple.key))) {
++-	    sscanf(tuple.value, &quot;%d&quot;, &amp;(ppd-&gt;DefaultResolution));
++-	    TRACE(&quot;DefaultResolution = %d\n&quot;, ppd-&gt;DefaultResolution);
++-	}
++-
++ 	else if(!strcmp(&quot;*Font&quot;, tuple.key)) {
++ 	    FONTNAME *fn;
++ 
++@@ -818,6 +812,30 @@
++ 	    TRACE(&quot;*TTRasterizer = %d\n&quot;, ppd-&gt;TTRasterizer);
++ 	}
++ 
+++	else if(!strcmp(&quot;*Resolution&quot;, tuple.key)) {
+++            RESOLUTION **res;
+++            for(res = &amp;ppd-&gt;Resolutions; *res; res = &amp;(*res)-&gt;next)
+++                ;
+++            *res = HeapAlloc(GetProcessHeap(), 0, sizeof(**res));
+++            (*res)-&gt;Name = tuple.option;
+++            (*res)-&gt;FullName = tuple.opttrans;
+++            (*res)-&gt;InvocationString = tuple.value;
+++	    sscanf(tuple.option, &quot;%d&quot;, &amp;((*res)-&gt;WinRes));
+++            (*res)-&gt;next = NULL;
+++            tuple.option = tuple.opttrans = tuple.value = NULL;
+++        }
+++
+++        else if((!strcmp(&quot;*DefaultResolution&quot;, tuple.key)) ||
+++	       (!strcmp(&quot;*DefaultJCLResolution&quot;, tuple.key))) {
+++            if(default_resolution) {
+++                WARN(&quot;Already set default resolution\n&quot;);
+++            } else {
+++                default_resolution = tuple.value;
+++                tuple.value = NULL;
+++           }
+++        }
+++
+++
++         else if(!strcmp(&quot;*Duplex&quot;, tuple.key)) {
++             DUPLEX **duplex;
++             for(duplex = &amp;ppd-&gt;Duplexes; *duplex; duplex = &amp;(*duplex)-&gt;next)
++@@ -878,6 +896,35 @@
++         TRACE(&quot;Setting DefaultPageSize to first in list\n&quot;);
++     }
++ 
+++    ppd-&gt;DefaultResolution = NULL;
+++    if(default_resolution) {
+++	RESOLUTION *res;
+++	for(res = ppd-&gt;Resolutions; res; res = res-&gt;next) {
+++            if(!strcmp(res-&gt;Name, default_resolution)) {
+++                ppd-&gt;DefaultResolution = res;
+++                TRACE(&quot;DefaultResolution: %s\n&quot;, res-&gt;Name);
+++                break;
+++            }
+++        }
+++        HeapFree(PSDRV_Heap, 0, default_resolution);
+++    }
+++   
+++    if(!ppd-&gt;DefaultResolution) {
+++        ppd-&gt;DefaultResolution = ppd-&gt;Resolutions;
+++        TRACE(&quot;Setting DefaultResolution to first in list\n&quot;);
+++    }
+++    
+++    if (!ppd-&gt;DefaultResolution)
+++    {
+++        RESOLUTION **res = &amp;ppd-&gt;Resolutions;
+++        *res = HeapAlloc(GetProcessHeap(), 0, sizeof(**res));
+++        (*res)-&gt;Name = NULL; 
+++        (*res)-&gt;FullName = NULL; 
+++        (*res)-&gt;InvocationString = NULL;
+++	(*res)-&gt;WinRes=0;
+++        TRACE(&quot;Setting DefaultResolution to dummy entry\n&quot;);
+++    } 
+++
++     ppd-&gt;DefaultDuplex = NULL;
++     if(default_duplex) {
++ 	DUPLEX *duplex;
++diff -ur ../wineps.drv.old/psdrv.h ./psdrv.h
++--- ../wineps.drv.old/psdrv.h	2007-01-09 16:42:47.000000000 +0100
+++++ ./psdrv.h	2007-02-01 01:17:31.000000000 +0100
++@@ -180,6 +180,16 @@
++     struct _tagINPUTSLOT	*next;
++ } INPUTSLOT;
++ 
+++typedef struct _tagRESOLUTION {
+++    const char			*Name;
+++    const char			*FullName;
+++    const char			*InvocationString;
+++    int				WinRes;
+++    struct _tagRESOLUTION	*next;
+++} RESOLUTION;
+++
+++
+++
++ typedef enum _RASTERIZEROPTION
++   {RO_None, RO_Accept68K, RO_Type42, RO_TrueImage} RASTERIZEROPTION;
++ 
++@@ -195,7 +205,6 @@
++     char		*NickName;
++     int			LanguageLevel;
++     BOOL		ColorDevice;
++-    int			DefaultResolution;
++     signed int		LandscapeOrientation;
++     char		*JCLBegin;
++     char		*JCLToPSInterpreter;
++@@ -207,6 +216,8 @@
++     OPTION		*InstalledOptions;
++     CONSTRAINT		*Constraints;
++     INPUTSLOT		*InputSlots;
+++    RESOLUTION		*Resolutions;
+++    RESOLUTION		*DefaultResolution;
++     RASTERIZEROPTION    TTRasterizer;
++     DUPLEX              *Duplexes;
++     DUPLEX              *DefaultDuplex;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000445.html">[Freenx-cvs] r311 - in nx-utils/univprn.drv: . SPLFilter-0.0.1 cups
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#444">[ date ]</a>
+              <a href="thread.html#444">[ thread ]</a>
+              <a href="subject.html#444">[ subject ]</a>
+              <a href="author.html#444">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,808 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r458 - nxcl/lib
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r458%20-%20nxcl/lib&In-Reply-To=%3C200802042211.m14MBldb023874%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000585.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r458 - nxcl/lib</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r458%20-%20nxcl/lib&In-Reply-To=%3C200802042211.m14MBldb023874%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r458 - nxcl/lib">gwright at mail.berlios.de
+       </A><BR>
+    <I>Mon Feb  4 23:11:47 CET 2008</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000585.html">[Freenx-cvs] r459 - nxcl/lib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#584">[ date ]</a>
+              <a href="thread.html#584">[ thread ]</a>
+              <a href="subject.html#584">[ subject ]</a>
+              <a href="author.html#584">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2008-02-04 23:11:47 +0100 (Mon, 04 Feb 2008)
+New Revision: 458
+
+Modified:
+   nxcl/lib/notQt.cpp
+Log:
+Code cleanup
+
+
+Modified: nxcl/lib/notQt.cpp
+===================================================================
+--- nxcl/lib/notQt.cpp	2008-01-30 08:00:54 UTC (rev 457)
++++ nxcl/lib/notQt.cpp	2008-02-04 22:11:47 UTC (rev 458)
+@@ -1,11 +1,11 @@
+ /***************************************************************************
+-        notQt.cpp: A set of Qt like functionality, especially related
+-                       to the starting of processes.
+-                             -------------------
+-    begin                : June 2007
+-    copyright            : (C) 2007 Embedded Software Foundry Ltd. (U.K.)
+-                         :     Author: Sebastian James
+-    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>
++          notQt.cpp: A set of Qt like functionality, especially related
++                     to the starting of processes.
++                            -------------------
++        begin                : June 2007
++        copyright            : (C) 2007 Embedded Software Foundry Ltd. (U.K.)
++                             :     Author: Sebastian James
++        email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>
+  ***************************************************************************/
+ 
+ /***************************************************************************
+@@ -49,268 +49,270 @@
+ 
+ // Constructor
+ notQProcess::notQProcess () :
+-	progName(&quot;unknown&quot;),
+-	error (NOTQPROCNOERROR),
+-	pid(0),
+-	signalledStart(false)
++    progName(&quot;unknown&quot;),
++    error (NOTQPROCNOERROR),
++    pid(0),
++    signalledStart(false)
+ {
+-	// Set up the polling structs
+-	this-&gt;p = static_cast&lt;struct pollfd*&gt;(malloc (2*sizeof (struct pollfd)));	
++    // Set up the polling structs
++    this-&gt;p = static_cast&lt;struct pollfd*&gt;(malloc (2*sizeof (struct pollfd)));	
+ }
+ 
+ // Destructor
+ notQProcess::~notQProcess ()
+ {
+-	free (this-&gt;p);
++    free (this-&gt;p);
+ }
+ 
+-void
++    void
+ notQProcess::writeIn (string&amp; input)
+ {
+-	write (this-&gt;parentToChild[WRITING_END], input.c_str(), input.size());
++    write (this-&gt;parentToChild[WRITING_END], input.c_str(), input.size());
+ }
+ 
+ // fork and exec a new process using execv, which takes stdin via a
+ // fifo and returns output also via a fifo.
+-int
++    int
+ notQProcess::start (const string&amp; program, const list&lt;string&gt;&amp; args)
+ {
+-	char** argarray;
+-	list&lt;string&gt; myargs = args;
+-	list&lt;string&gt;::iterator i;
+-	unsigned int j = 0;
+-	int theError;
++    char** argarray;
++    list&lt;string&gt; myargs = args;
++    list&lt;string&gt;::iterator i;
++    unsigned int j = 0;
++    int theError;
+ 
+-	// NB: The first item in the args list should be the program name.
+-	this-&gt;progName = program;
++    // NB: The first item in the args list should be the program name.
++    this-&gt;progName = program;
+ 
+-	// Set up our pipes
+-	if (pipe(parentToChild) == -1 || pipe(childToParent) == -1 || pipe(childErrToParent) == -1) {
+-		return NOTQTPROCESS_FAILURE;
+-	}
++    // Set up our pipes
++    if (pipe(parentToChild) == -1 || pipe(childToParent) == -1 || pipe(childErrToParent) == -1) {
++        return NOTQTPROCESS_FAILURE;
++    }
+ 
+-	this-&gt;pid = fork();
+-	switch (this-&gt;pid) {
+-	case -1:
+-		return NOTQTPROCESS_FAILURE;
+-	case 0:
+-		// This is the CHILD process
++    this-&gt;pid = fork();
+ 
+-		// Close unwanted ends of the pipes
+-		close (parentToChild[WRITING_END]);
+-		close (childToParent[READING_END]);
+-		close (childErrToParent[READING_END]);
++    switch (this-&gt;pid) {
++        case -1:
++            return NOTQTPROCESS_FAILURE;
++        case 0:
++            // This is the CHILD process
+ 
+-		// Now all we have to do is make the writing file
+-		// descriptors 0,1 or 2 and they will be used instead
+-		// of stdout, stderr and stdin.
+-		if ((dup2 (parentToChild[READING_END], STDIN)) == -1  ||
+-		    (dup2 (childToParent[WRITING_END], STDOUT)) == -1 || 
+-		    (dup2 (childErrToParent[WRITING_END], STDERR)) == -1) {
+-			theError = errno;
+-			cout &lt;&lt; &quot;ERROR! Couldn't get access to stdin/out/err! errno was &quot; &lt;&lt; theError &lt;&lt; endl;
+-			return NOTQTPROCESS_FAILURE;	
+-		}
++            // Close unwanted ends of the pipes
++            close (parentToChild[WRITING_END]);
++            close (childToParent[READING_END]);
++            close (childErrToParent[READING_END]);
+ 
+-		// Allocate memory for the program arguments
+-		// 1+ to allow space for NULL terminating pointer
+-		argarray = static_cast&lt;char**&gt;(malloc ((1+args.size()) * sizeof (char*))); 
+-		for (i=myargs.begin(); i!=myargs.end(); i++) {
+-			argarray[j] = static_cast&lt;char*&gt;(malloc ( (1+(*i).size()) * sizeof (char) ));
+-			snprintf (argarray[j++], 1+(*i).size(), &quot;%s&quot;, (*i).c_str());
+-			dbgln(*i);
+-		}
+-		argarray[j] = NULL;
++            // Now all we have to do is make the writing file
++            // descriptors 0,1 or 2 and they will be used instead
++            // of stdout, stderr and stdin.
++            if ((dup2 (parentToChild[READING_END], STDIN)) == -1  ||
++                    (dup2 (childToParent[WRITING_END], STDOUT)) == -1 || 
++                    (dup2 (childErrToParent[WRITING_END], STDERR)) == -1) {
++                theError = errno;
++                cout &lt;&lt; &quot;ERROR! Couldn't get access to stdin/out/err! errno was &quot; &lt;&lt; theError &lt;&lt; endl;
++                return NOTQTPROCESS_FAILURE;	
++            }
+ 
+-		dbgln (&quot;About to execute '&quot; + program + &quot;' with those arguments..&quot;);
++            // Allocate memory for the program arguments
++            // 1+ to allow space for NULL terminating pointer
++            argarray = static_cast&lt;char**&gt;(malloc ((1+args.size()) * sizeof (char*))); 
++            for (i=myargs.begin(); i!=myargs.end(); i++) {
++                argarray[j] = static_cast&lt;char*&gt;(malloc ( (1+(*i).size()) * sizeof (char) ));
++                snprintf (argarray[j++], 1+(*i).size(), &quot;%s&quot;, (*i).c_str());
++                dbgln(*i);
++            }
++            argarray[j] = NULL;
+ 
+-		execv (program.c_str(), argarray);
++            dbgln (&quot;About to execute '&quot; + program + &quot;' with those arguments..&quot;);
+ 
+-		// If process returns, error occurred
+-		theError = errno; 
+-		// This'll get picked up by parseResponse
+-		cout &lt;&lt; &quot;notQProcess error: &quot; &lt;&lt; this-&gt;pid &lt;&lt; &quot; crashed. errno:&quot; &lt;&lt; theError &lt;&lt; endl;
+-		
+-		// This won't get picked up by the parent process.
+-		this-&gt;error = NOTQPROCCRASHED;
++            execv (program.c_str(), argarray);
+ 
+-		// In this case, we close the pipes to signal to the parent that we crashed
+-		close (parentToChild[READING_END]);
+-		close (childToParent[WRITING_END]);
+-		close (childErrToParent[WRITING_END]);
+-		
+-		// Child should exit now.
+-		_exit(-1);
++            // If process returns, error occurred
++            theError = errno; 
++            // This'll get picked up by parseResponse
++            cout &lt;&lt; &quot;notQProcess error: &quot; &lt;&lt; this-&gt;pid &lt;&lt; &quot; crashed. errno:&quot; &lt;&lt; theError &lt;&lt; endl;
+ 
+-	default:
+-		// This is the PARENT process
++            // This won't get picked up by the parent process.
++            this-&gt;error = NOTQPROCCRASHED;
+ 
+-		// Close unwanted ends of the pipes
+-		close (parentToChild[READING_END]);
+-		close (childToParent[WRITING_END]);
+-		close (childErrToParent[WRITING_END]);
++            // In this case, we close the pipes to signal to the parent that we crashed
++            close (parentToChild[READING_END]);
++            close (childToParent[WRITING_END]);
++            close (childErrToParent[WRITING_END]);
+ 
+-		// Write to this-&gt;parentToChild[WRITING_END] to write to stdin of the child
+-		// Read from this-&gt;childToParent[READING_END] to read from stdout of child
+-		// Read from this-&gt;childErrToParent[READING_END] to read from stderr of child
++            // Child should exit now.
++            _exit(-1);
+ 
+-		break;
+-	}
+-	return NOTQTPROCESS_MAIN_APP;
++        default:
++            // This is the PARENT process
++
++            // Close unwanted ends of the pipes
++            close (parentToChild[READING_END]);
++            close (childToParent[WRITING_END]);
++            close (childErrToParent[WRITING_END]);
++
++            // Write to this-&gt;parentToChild[WRITING_END] to write to stdin of the child
++            // Read from this-&gt;childToParent[READING_END] to read from stdout of child
++            // Read from this-&gt;childErrToParent[READING_END] to read from stderr of child
++
++            break;
++    }
++    return NOTQTPROCESS_MAIN_APP;
+ }
+ 
+ 
+ // If no pid after a while, return false.
+-bool
++    bool
+ notQProcess::waitForStarted (void)
+ {
+-	unsigned int i=0;
+-	while (this-&gt;pid == 0 &amp;&amp; i&lt;1000) {
+-		usleep (1000);
+-		i++;
+-	}
+-	if (this-&gt;pid&gt;0) {
+-		dbgln (&quot;The process started!&quot;);
+-		this-&gt;callbacks-&gt;startedSignal (this-&gt;progName);
+-		this-&gt;signalledStart = true;
+-		return true;
+-	} else {
+-		this-&gt;error = NOTQPROCFAILEDTOSTART;
+-		this-&gt;callbacks-&gt;errorSignal (this-&gt;error);
+-		return false;
+-	}
++    unsigned int i=0;
++    while (this-&gt;pid == 0 &amp;&amp; i&lt;1000) {
++        usleep (1000);
++        i++;
++    }
++    if (this-&gt;pid&gt;0) {
++        dbgln (&quot;The process started!&quot;);
++        this-&gt;callbacks-&gt;startedSignal (this-&gt;progName);
++        this-&gt;signalledStart = true;
++        return true;
++    } else {
++        this-&gt;error = NOTQPROCFAILEDTOSTART;
++        this-&gt;callbacks-&gt;errorSignal (this-&gt;error);
++        return false;
++    }
+ 
+ }
+ 
+ // Send a TERM signal to the process.
+-void
++    void
+ notQProcess::terminate (void)
+ {
+-	kill (this-&gt;pid, 15); // 15 is TERM
+-	// Now check if the process has gone and kill it with signal 9 (KILL)
+-	this-&gt;pid = 0;
+-	this-&gt;error = NOTQPROCNOERROR;
+-	this-&gt;signalledStart = false;
+-	return;
++    return;
++    kill (this-&gt;pid, 15); // 15 is TERM
++    // Now check if the process has gone and kill it with signal 9 (KILL)
++    this-&gt;pid = 0;
++    this-&gt;error = NOTQPROCNOERROR;
++    this-&gt;signalledStart = false;
++    return;
+ }
+ 
+ // Check on this process
+-void
++    void
+ notQProcess::probeProcess (void)
+ {
+-	// Has the process started?
+-	if (!this-&gt;signalledStart) {
+-		if (this-&gt;pid &gt; 0) {
+-			this-&gt;callbacks-&gt;startedSignal (this-&gt;progName);
+-			this-&gt;signalledStart = true;
+-			dbgln (&quot;notQProcess::probeProcess set signalledStart and signalled the start...&quot;);
+-		}
+-	}
++    // Has the process started?
++    if (!this-&gt;signalledStart) {
++        if (this-&gt;pid &gt; 0) {
++            this-&gt;callbacks-&gt;startedSignal (this-&gt;progName);
++            this-&gt;signalledStart = true;
++            dbgln (&quot;notQProcess::probeProcess set signalledStart and signalled the start...&quot;);
++        }
++    }
+ 
+-	// Check for error condition
+-	if (this-&gt;error&gt;0) {
+-		this-&gt;callbacks-&gt;errorSignal (this-&gt;error);
+-		dbgln (&quot;have error in probeProcess, returning&quot;);
+-		return;
+-	}
++    // Check for error condition
++    if (this-&gt;error&gt;0) {
++        this-&gt;callbacks-&gt;errorSignal (this-&gt;error);
++        dbgln (&quot;have error in probeProcess, returning&quot;);
++        return;
++    }
+ 
+-	if (this-&gt;pid == 0) {
+-		// Not yet started.
+-		return;
+-	}
++    if (this-&gt;pid == 0) {
++        // Not yet started.
++        return;
++    }
+ 
+-	// Why can't these 4 lines go in contructor?
+-	this-&gt;p[0].fd = this-&gt;childToParent[READING_END];
+-	this-&gt;p[0].events = POLLIN | POLLPRI;
+-	this-&gt;p[1].fd = this-&gt;childErrToParent[READING_END];
+-	this-&gt;p[1].events = POLLIN | POLLPRI;
++    // Why can't these 4 lines go in contructor?
++    this-&gt;p[0].fd = this-&gt;childToParent[READING_END];
++    this-&gt;p[0].events = POLLIN | POLLPRI;
++    this-&gt;p[1].fd = this-&gt;childErrToParent[READING_END];
++    this-&gt;p[1].events = POLLIN | POLLPRI;
+ 
+-	// Poll to determine if data is available
+-	this-&gt;p[0].revents = 0;
+-	this-&gt;p[1].revents = 0;
++    // Poll to determine if data is available
++    this-&gt;p[0].revents = 0;
++    this-&gt;p[1].revents = 0;
+ 
+-	poll (this-&gt;p, 2, 0);
++    poll (this-&gt;p, 2, 0);
+ 
+-	if (this-&gt;p[0].revents &amp; POLLNVAL || this-&gt;p[1].revents &amp; POLLNVAL) {
+-		dbgln (&quot;notQProcess::probeProcess: pipes closed, process must have crashed&quot;);
+-		this-&gt;error = NOTQPROCCRASHED;
+-		this-&gt;callbacks-&gt;errorSignal (this-&gt;error);
+-		return;
+-	}
++    if (this-&gt;p[0].revents &amp; POLLNVAL || this-&gt;p[1].revents &amp; POLLNVAL) {
++        dbgln (&quot;notQProcess::probeProcess: pipes closed, process must have crashed&quot;);
++        this-&gt;error = NOTQPROCCRASHED;
++        this-&gt;callbacks-&gt;errorSignal (this-&gt;error);
++        return;
++    }
+ 
+-	if (this-&gt;p[0].revents &amp; POLLIN || this-&gt;p[0].revents &amp; POLLPRI) {
+-		this-&gt;callbacks-&gt;readyReadStandardOutputSignal();
+-	}
+-	if (this-&gt;p[1].revents &amp; POLLIN || this-&gt;p[1].revents &amp; POLLPRI) {
+-		this-&gt;callbacks-&gt;readyReadStandardErrorSignal();
+-	}
++    if (this-&gt;p[0].revents &amp; POLLIN || this-&gt;p[0].revents &amp; POLLPRI) {
++        this-&gt;callbacks-&gt;readyReadStandardOutputSignal();
++    }
++    if (this-&gt;p[1].revents &amp; POLLIN || this-&gt;p[1].revents &amp; POLLPRI) {
++        this-&gt;callbacks-&gt;readyReadStandardErrorSignal();
++    }
+ 
+-	// Is the process running? We check last, so that we get any
+-	// messages on stdout/stderr that we may wish to process, such
+-	// as error messages from nxssh key authentication.
+-	int theError;
+-	if (this-&gt;signalledStart == true) {
+-		int rtn = 0;
+-		if ((rtn = waitpid (this-&gt;pid, (int *)0, WNOHANG)) == this-&gt;pid) {
+-			this-&gt;callbacks-&gt;processFinishedSignal (this-&gt;progName);
+-			return;
+-		} else if (rtn == -1) {
+-			theError = errno;
+-			if (theError != 10) { // We ignore errno 10 &quot;no child&quot; as this commonly occurs
+-				cerr &lt;&lt; &quot;waitpid returned errno: &quot; &lt;&lt; theError;
+-			}
+-		} // else rtn == 0
+-	}
++    // Is the process running? We check last, so that we get any
++    // messages on stdout/stderr that we may wish to process, such
++    // as error messages from nxssh key authentication.
++    int theError;
++    if (this-&gt;signalledStart == true) {
++        int rtn = 0;
++        if ((rtn = waitpid (this-&gt;pid, (int *)0, WNOHANG)) == this-&gt;pid) {
++            this-&gt;callbacks-&gt;processFinishedSignal (this-&gt;progName);
++            return;
++        } else if (rtn == -1) {
++            theError = errno;
++            if (theError != 10) { // We ignore errno 10 &quot;no child&quot; as this commonly occurs
++                cerr &lt;&lt; &quot;waitpid returned errno: &quot; &lt;&lt; theError;
++            }
++        } // else rtn == 0
++    }
+ 
+-	return;
++    return;
+ }
+ 
+ // Read stdout pipe, without blocking.
+-string
++    string
+ notQProcess::readAllStandardOutput (void)
+ {
+-	string s;
+-	int bytes = 0;
+-	char c;
+-	struct pollfd p;
+-	
+-	p.fd = this-&gt;childToParent[READING_END];
+-	p.events = POLLIN | POLLPRI;
+-	// We know we have at least one character to read, so seed revents
+-	p.revents = POLLIN;
+-	while (p.revents &amp; POLLIN || p.revents &amp; POLLPRI) {
+-		// This read of 1 byte should never block
+-		if ((bytes = read (this-&gt;childToParent[READING_END], &amp;c, 1)) == 1) {
+-			s.append (1, c);
+-		}
+-		p.revents = 0;
+-		poll (&amp;p, 1, 0);
+-	}
+-	return s;
++    string s;
++    int bytes = 0;
++    char c;
++    struct pollfd p;
++
++    p.fd = this-&gt;childToParent[READING_END];
++    p.events = POLLIN | POLLPRI;
++    // We know we have at least one character to read, so seed revents
++    p.revents = POLLIN;
++    while (p.revents &amp; POLLIN || p.revents &amp; POLLPRI) {
++        // This read of 1 byte should never block
++        if ((bytes = read (this-&gt;childToParent[READING_END], &amp;c, 1)) == 1) {
++            s.append (1, c);
++        }
++        p.revents = 0;
++        poll (&amp;p, 1, 0);
++    }
++    return s;
+ }
+ 
+ // Read stderr pipe without blocking
+-string
++    string
+ notQProcess::readAllStandardError (void)
+ {
+-	string s;
+-	int bytes = 0;
+-	char c;
+-	struct pollfd p;
+-	
+-	p.fd = this-&gt;childErrToParent[READING_END];
+-	p.events = POLLIN | POLLPRI;
+-	// We know we have at least one character to read, so seed revents
+-	p.revents = POLLIN;
+-	while (p.revents &amp; POLLIN || p.revents &amp; POLLPRI) {
+-		// This read of 1 byte should never block because a poll() call tells us there is data
+-		if ((bytes = read (this-&gt;childErrToParent[READING_END], &amp;c, 1)) == 1) {
+-			s.append (1, c);
+-		}
+-		p.revents = 0;
+-		poll (&amp;p, 1, 0);
+-	}
+-	return s;
++    string s;
++    int bytes = 0;
++    char c;
++    struct pollfd p;
++
++    p.fd = this-&gt;childErrToParent[READING_END];
++    p.events = POLLIN | POLLPRI;
++    // We know we have at least one character to read, so seed revents
++    p.revents = POLLIN;
++    while (p.revents &amp; POLLIN || p.revents &amp; POLLPRI) {
++        // This read of 1 byte should never block because a poll() call tells us there is data
++        if ((bytes = read (this-&gt;childErrToParent[READING_END], &amp;c, 1)) == 1) {
++            s.append (1, c);
++        }
++        p.revents = 0;
++        poll (&amp;p, 1, 0);
++    }
++    return s;
+ }
+ 
+ //@}
+@@ -328,44 +330,44 @@
+ // Destructor
+ notQTemporaryFile::~notQTemporaryFile ()
+ {
+-	this-&gt;close();
++    this-&gt;close();
+ }
+ 
+-void
++    void
+ notQTemporaryFile::open (void)
+ {
+-	stringstream fn;
+-	fn &lt;&lt; &quot;/tmp/notQt&quot; &lt;&lt; time(NULL);
+-	this-&gt;theFileName = fn.str();
+-	this-&gt;f.open (this-&gt;theFileName.c_str(), ios::in|ios::out|ios::trunc);
++    stringstream fn;
++    fn &lt;&lt; &quot;/tmp/notQt&quot; &lt;&lt; time(NULL);
++    this-&gt;theFileName = fn.str();
++    this-&gt;f.open (this-&gt;theFileName.c_str(), ios::in|ios::out|ios::trunc);
+ }
+ 
+-void
++    void
+ notQTemporaryFile::write (string input)
+ {
+-	this-&gt;f &lt;&lt; input;
++    this-&gt;f &lt;&lt; input;
+ }
+ 
+-void
++    void
+ notQTemporaryFile::close (void)
+ {
+-	if (this-&gt;f.is_open()) {
+-		this-&gt;f.close();
+-	}
++    if (this-&gt;f.is_open()) {
++        this-&gt;f.close();
++    }
+ }
+ 
+ // getter for fileName
+-string
++    string
+ notQTemporaryFile::fileName (void)
+ {
+-	return this-&gt;theFileName;
++    return this-&gt;theFileName;
+ }
+ 
+-void
++    void
+ notQTemporaryFile::remove (void)
+ {
+-	this-&gt;close();
+-	unlink (this-&gt;theFileName.c_str());
++    this-&gt;close();
++    unlink (this-&gt;theFileName.c_str());
+ }
+ //@}
+ 
+@@ -385,105 +387,105 @@
+ {
+ }
+ 
+-string
++    string
+ notQtUtilities::simplify (string&amp; input)
+ {
+-	string workingString;
+-	unsigned int i=0, start, end;
++    string workingString;
++    unsigned int i=0, start, end;
+ 
+-	// Find the first non-whitespace character.
+-	while (input[i] != '\0' &amp;&amp; 
+-	       (input[i] == ' '  || input[i] == '\t' || input[i] == '\n' || input[i] == '\r')
+-	       &amp;&amp; i&lt;input.size()) {
+-		i++;
+-	}
+-	start=i;
++    // Find the first non-whitespace character.
++    while (input[i] != '\0' &amp;&amp; 
++            (input[i] == ' '  || input[i] == '\t' || input[i] == '\n' || input[i] == '\r')
++            &amp;&amp; i&lt;input.size()) {
++        i++;
++    }
++    start=i;
+ 
+-	// Now find the last non-whitespace character.
+-	i = input.size();
+-	i--;
+-	while ((input[i] == ' '  || input[i] == '\t' || input[i] == '\n' || input[i] == '\r')
+-	       &amp;&amp; i&gt;0) {
+-		i--;
+-	}
+-	end = ++i;
+-	
+-	// Copy the substring into a working string.
+-	if (end&gt;start) {
+-		workingString = input.substr (start, end-start);
+-	} else {
+-		return &quot;&quot;;
+-	}
++    // Now find the last non-whitespace character.
++    i = input.size();
++    i--;
++    while ((input[i] == ' '  || input[i] == '\t' || input[i] == '\n' || input[i] == '\r')
++            &amp;&amp; i&gt;0) {
++        i--;
++    }
++    end = ++i;
+ 
+-	// Now we replace internal white spaces in workingString with single spaces.
+-	for (i=workingString.size(); i&gt;1; --i) {
+-		if ( (workingString[i] == ' '   || workingString[i] == '\t'   
+-		      || workingString[i] == '\n' || workingString[i] == '\r')
+-		     &amp;&amp;
+-		     (workingString[i-1] == ' ' || workingString[i-1] == '\t'
+-		      ||  workingString[i-1] == '\n' || workingString[i-1] == '\r') ) {
+-			// ...then this is a whitespace we can remove
+-			workingString.erase(i,1);
++    // Copy the substring into a working string.
++    if (end&gt;start) {
++        workingString = input.substr (start, end-start);
++    } else {
++        return &quot;&quot;;
++    }
+ 
+-		} else if ( (workingString[i] == '\t' ||  workingString[i] == '\n'
+-			     || workingString[i] == '\r') 
+-			    &amp;&amp;
+-			    (workingString[i-1] != ' ' &amp;&amp; workingString[i-1] != '\t'
+-			     &amp;&amp;  workingString[i-1] != '\n' &amp;&amp; workingString[i-1] != '\r') ) {
+-			// ...then this is a non-space whitespace to be replaced
+-			workingString.replace(i, 1, &quot; &quot;);
+-		}
+-	}
++    // Now we replace internal white spaces in workingString with single spaces.
++    for (i=workingString.size(); i&gt;1; --i) {
++        if ( (workingString[i] == ' '   || workingString[i] == '\t'   
++                    || workingString[i] == '\n' || workingString[i] == '\r')
++                &amp;&amp;
++                (workingString[i-1] == ' ' || workingString[i-1] == '\t'
++                 ||  workingString[i-1] == '\n' || workingString[i-1] == '\r') ) {
++            // ...then this is a whitespace we can remove
++            workingString.erase(i,1);
+ 
+-	return workingString;
++        } else if ( (workingString[i] == '\t' ||  workingString[i] == '\n'
++                    || workingString[i] == '\r') 
++                &amp;&amp;
++                (workingString[i-1] != ' ' &amp;&amp; workingString[i-1] != '\t'
++                 &amp;&amp;  workingString[i-1] != '\n' &amp;&amp; workingString[i-1] != '\r') ) {
++            // ...then this is a non-space whitespace to be replaced
++            workingString.replace(i, 1, &quot; &quot;);
++        }
++    }
++
++    return workingString;
+ }
+ 
+ // split based on token ' '
+-void
++    void
+ notQtUtilities::splitString (string&amp; line, char token, vector&lt;string&gt;&amp; rtn)
+ {
+-	rtn.clear();
+-	unsigned int i=0;
+-	while (i &lt; (line.size())-1) {
+-		string tstring;
+-		while (line[i] &amp;&amp; line[i] != token) {
+-			tstring.push_back(line[i++]);
+-		}
+-		rtn.push_back(tstring);
+-		i++;
+-	}
+-	return;
++    rtn.clear();
++    unsigned int i=0;
++    while (i &lt; (line.size())-1) {
++        string tstring;
++        while (line[i] &amp;&amp; line[i] != token) {
++            tstring.push_back(line[i++]);
++        }
++        rtn.push_back(tstring);
++        i++;
++    }
++    return;
+ }
+ 
+-void
++    void
+ notQtUtilities::splitString (string&amp; line, char token, list&lt;string&gt;&amp; rtn)
+ {
+-	rtn.clear();
+-	unsigned int i=0;
+-	while (i &lt; (line.size())-1) {
+-		string tstring;
+-		while (line[i] &amp;&amp; line[i] != token) {
+-			//dbgln (&quot;tstring.push_back line[i] which is '&quot; &lt;&lt; line[i] &lt;&lt; &quot;'&quot;);
+-			tstring.push_back(line[i++]);
+-		}
+-		//dbgln (&quot;rtn.push_back() tstring which is '&quot; + tstring + &quot;'&quot;);
+-		rtn.push_back(tstring);
+-		i++;
+-	}
+-	return;
++    rtn.clear();
++    unsigned int i=0;
++    while (i &lt; (line.size())-1) {
++        string tstring;
++        while (line[i] &amp;&amp; line[i] != token) {
++            //dbgln (&quot;tstring.push_back line[i] which is '&quot; &lt;&lt; line[i] &lt;&lt; &quot;'&quot;);
++            tstring.push_back(line[i++]);
++        }
++        //dbgln (&quot;rtn.push_back() tstring which is '&quot; + tstring + &quot;'&quot;);
++        rtn.push_back(tstring);
++        i++;
++    }
++    return;
+ }
+ 
+-int
++    int
+ notQtUtilities::ensureUnixNewlines (std::string&amp; input)
+ {
+-	int num = 0;
++    int num = 0;
+ 
+-	for (unsigned int i=0; i&lt;input.size(); i++) {
+-		if (input[i] == '\r') {
+-			input.erase(i,1);
+-			num++;
+-		}
+-	}
+-	
+-	return num; // The number of \r characters we found in the string.
++    for (unsigned int i=0; i&lt;input.size(); i++) {
++        if (input[i] == '\r') {
++            input.erase(i,1);
++            num++;
++        }
++    }
++
++    return num; // The number of \r characters we found in the string.
+ }
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000585.html">[Freenx-cvs] r459 - nxcl/lib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#584">[ date ]</a>
+              <a href="thread.html#584">[ thread ]</a>
+              <a href="subject.html#584">[ subject ]</a>
+              <a href="author.html#584">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

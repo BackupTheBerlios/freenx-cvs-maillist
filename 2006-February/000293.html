@@ -1,0 +1,149 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r167 - freenx-server/branches/FreeNX-0.4
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r167%20-%20freenx-server/branches/FreeNX-0.4&In-Reply-To=%3C200602121331.k1CDVafp002797%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r167 - freenx-server/branches/FreeNX-0.4</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r167%20-%20freenx-server/branches/FreeNX-0.4&In-Reply-To=%3C200602121331.k1CDVafp002797%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r167 - freenx-server/branches/FreeNX-0.4">fabianx at berlios.de
+       </A><BR>
+    <I>Sun Feb 12 14:31:36 CET 2006</I>
+    <P><UL>
+        
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#293">[ date ]</a>
+              <a href="thread.html#293">[ thread ]</a>
+              <a href="subject.html#293">[ subject ]</a>
+              <a href="author.html#293">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2006-02-12 14:30:39 +0100 (Sun, 12 Feb 2006)
+New Revision: 167
+
+Modified:
+   freenx-server/branches/FreeNX-0.4/ChangeLog
+   freenx-server/branches/FreeNX-0.4/node.conf.sample
+   freenx-server/branches/FreeNX-0.4/nxloadconfig
+   freenx-server/branches/FreeNX-0.4/nxserver
+Log:
+* Security: Added timeout for first stage of authentication to prevent DOS.
+
+
+
+Modified: freenx-server/branches/FreeNX-0.4/ChangeLog
+===================================================================
+--- freenx-server/branches/FreeNX-0.4/ChangeLog	2005-09-04 20:58:11 UTC (rev 166)
++++ freenx-server/branches/FreeNX-0.4/ChangeLog	2006-02-12 13:30:39 UTC (rev 167)
+@@ -1,9 +1,10 @@
+-0?.09.2005 FreeNX 0.4.5 &quot;aKademy Edition&quot;
++xx.02.2006 FreeNX 0.4.5 &quot;Edition&quot;
+ 	* Made nxsetup more user-friendly and hopefully finally failsafe.
+ 	* Added --agent to nxnode/nxserver to allow easier debugging.
+ 	* Added addgroup/groupadd to nxsetup
+ 	* Added --ignore-errors support on nxsetup/nxloadconfig
+ 	* Added check for expect.
++	* Security: Added timeout for first stage of authentication to prevent DOS.
+ 
+ 06.08.2005 FreeNX 0.4.4 &quot;UKUUG Enterprise Edition&quot;
+ 	* Added ENABLE_1_5_0_BACKEND configuration directive:
+
+Modified: freenx-server/branches/FreeNX-0.4/node.conf.sample
+===================================================================
+--- freenx-server/branches/FreeNX-0.4/node.conf.sample	2005-09-04 20:58:11 UTC (rev 166)
++++ freenx-server/branches/FreeNX-0.4/node.conf.sample	2006-02-12 13:30:39 UTC (rev 167)
+@@ -92,7 +92,12 @@
+ #    is not provided.
+ #SSHD_CHECK_IP=&quot;0&quot;
+ 
++# If set to greater zero, nxserver will timeout after that many seconds
++# before authentication succeeds.
++#
++#NX_SERVER_TIMEOUT=&quot;10&quot;
+ 
++
+ #########################################################################
+ # Restriction directives
+ #########################################################################
+
+Modified: freenx-server/branches/FreeNX-0.4/nxloadconfig
+===================================================================
+--- freenx-server/branches/FreeNX-0.4/nxloadconfig	2005-09-04 20:58:11 UTC (rev 166)
++++ freenx-server/branches/FreeNX-0.4/nxloadconfig	2006-02-12 13:30:39 UTC (rev 167)
+@@ -92,6 +92,7 @@
+ 
+ ENABLE_FORCE_ENCRYPTION=&quot;0&quot;
+ SSHD_CHECK_IP=&quot;0&quot;
++NX_SERVER_TIMEOUT=&quot;10&quot;
+ 
+ 
+ # Restriction directives
+
+Modified: freenx-server/branches/FreeNX-0.4/nxserver
+===================================================================
+--- freenx-server/branches/FreeNX-0.4/nxserver	2005-09-04 20:58:11 UTC (rev 166)
++++ freenx-server/branches/FreeNX-0.4/nxserver	2006-02-12 13:30:39 UTC (rev 167)
+@@ -475,6 +475,15 @@
+ 
+ echo_x &quot;HELLO NXSERVER - Version $NX_VERSION $NX_LICENSE&quot;
+ 
++NX_SERVER_TPID=&quot;&quot;
++
++if [ -n &quot;$NX_SERVER_TIMEOUT&quot; -a &quot;$NX_SERVER_TIMEOUT&quot; -gt 0 ]
++then
++	(sleep &quot;$NX_SERVER_TIMEOUT&quot;; echo -e &quot;Quit\nNX&gt; 999 Bye&quot;; kill $PPID) &amp;
++	NX_SERVER_TPID=&quot;$!&quot;
++	disown $NX_SERVER_TPID
++fi
++
+ # Login stage
+ while true
+ do
+@@ -597,6 +606,8 @@
+ 	esac
+ done
+ 
++[ -n &quot;$NX_SERVER_TPID&quot; ] &amp;&amp; kill $NX_SERVER_TPID
++
+ # remove old session infos from history
+ session_cleanup
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#293">[ date ]</a>
+              <a href="thread.html#293">[ thread ]</a>
+              <a href="subject.html#293">[ subject ]</a>
+              <a href="author.html#293">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,110 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r610 - trunk/freenx-server
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r610%20-%20trunk/freenx-server&In-Reply-To=%3C200808250241.m7P2fjQG016454%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000743.html">
+   <LINK REL="Next"  HREF="000745.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r610 - trunk/freenx-server</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r610%20-%20trunk/freenx-server&In-Reply-To=%3C200808250241.m7P2fjQG016454%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r610 - trunk/freenx-server">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Mon Aug 25 04:41:45 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000743.html">[Freenx-cvs] r609 - trunk/freenx-server
+</A></li>
+        <LI>Next message: <A HREF="000745.html">[Freenx-cvs] r611 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#744">[ date ]</a>
+              <a href="thread.html#744">[ thread ]</a>
+              <a href="subject.html#744">[ subject ]</a>
+              <a href="author.html#744">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-08-25 04:41:44 +0200 (Mon, 25 Aug 2008)
+New Revision: 610
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/Makefile
+Log:
+* Fixed missing export of NX_ETC_DIR in Makefile,
+  so node.conf.sample is installed correctly.
+(<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-25 02:40:22 UTC (rev 609)
++++ trunk/freenx-server/ChangeLog	2008-08-25 02:41:44 UTC (rev 610)
+@@ -1,5 +1,8 @@
+ xx.11.2008 FreeNX 0.7.4
+ 	* Opened the 0.7.4 development.
++	* Fixed missing export of NX_ETC_DIR in Makefile,
++	  so node.conf.sample is installed correctly.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
+ 18.08.2008 FreeNX 0.7.3 &quot;Priscilla One Year Edition&quot;
+ 	* Opened the 0.7.3 development.
+
+Modified: trunk/freenx-server/Makefile
+===================================================================
+--- trunk/freenx-server/Makefile	2008-08-25 02:40:22 UTC (rev 609)
++++ trunk/freenx-server/Makefile	2008-08-25 02:41:44 UTC (rev 610)
+@@ -8,7 +8,7 @@
+ all:
+ 	cd nxviewer-passwd &amp;&amp; xmkmf &amp;&amp; make Makefiles &amp;&amp; make depend
+ 	source nxloadconfig &amp;&amp;\
+-	export PATH_BIN PATH_LIB CUPS_BACKEND NX_VERSION &amp;&amp;\
++	export PATH_BIN PATH_LIB CUPS_BACKEND NX_VERSION NX_ETC_DIR &amp;&amp;\
+ 	for i in $(SUBDIRS) ; \
+ 	do\
+ 		echo &quot;making&quot; all &quot;in $$i...&quot;; \
+@@ -44,5 +44,5 @@
+ 
+ install:
+ 	source nxloadconfig &amp;&amp;\
+-	export PATH_BIN PATH_LIB CUPS_BACKEND NX_VERSION &amp;&amp;\
++	export PATH_BIN PATH_LIB CUPS_BACKEND NX_VERSION NX_ETC_DIR &amp;&amp;\
+ 	$(MAKE) nxenv_install
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000743.html">[Freenx-cvs] r609 - trunk/freenx-server
+</A></li>
+	<LI>Next message: <A HREF="000745.html">[Freenx-cvs] r611 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#744">[ date ]</a>
+              <a href="thread.html#744">[ thread ]</a>
+              <a href="subject.html#744">[ subject ]</a>
+              <a href="author.html#744">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

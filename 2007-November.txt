@@ -1,0 +1,1097 @@
+From fabianx at mail.berlios.de  Sat Nov  3 16:10:52 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sat, 3 Nov 2007 16:10:52 +0100
+Subject: [Freenx-cvs] r414 - freenx-server/trunk
+Message-ID: <200711031510.lA3FAqiU005347@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-11-03 16:10:52 +0100 (Sat, 03 Nov 2007)
+New Revision: 414
+
+Added:
+   freenx-server/trunk/freenx-server
+Modified:
+   freenx-server/trunk/ChangeLog
+Log:
+* Added freenx-server startup script. You can make a symlink to
+  /etc/init.d/ to have it start automatically.
+  (fabianx at bat.berlios.de)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-10-30 15:17:14 UTC (rev 413)
++++ freenx-server/trunk/ChangeLog	2007-11-03 15:10:52 UTC (rev 414)
+@@ -6,6 +6,9 @@
+ 	* Fixed the issue that commercial NXClient was called with 0 parameters
+ 	  and such the "Connection Wizard" came up.
+ 	  (fabianx at bat.berlios.de)
++	* Added freenx-server startup script. You can make a symlink to
++	  /etc/init.d/ to have it start automatically.
++	  (fabianx at bat.berlios.de)
+ 
+ 14.10.2007 FreeNX 0.7.1 "Hip Hop Edition"
+ 	* Fixed the issue that makes fonts look tiny and unreadable by default 
+
+Added: freenx-server/trunk/freenx-server
+===================================================================
+--- freenx-server/trunk/freenx-server	2007-10-30 15:17:14 UTC (rev 413)
++++ freenx-server/trunk/freenx-server	2007-11-03 15:10:52 UTC (rev 414)
+@@ -0,0 +1,20 @@
++#!/bin/bash
++#
++# Sample startup script for FreeNX server
++#
++
++# Read the config file
++. $(PATH=$(cd $(dirname $0) && pwd):$PATH which nxloadconfig) --
++
++case "$1" in
++	start)
++		[ ! -d "/tmp/.X11-unix" ] && mkdir -m1755 /tmp/.X11-unix/
++		$PATH_BIN/nxserver --cleanup
++	;;
++	stop)
++		$PATH_BIN/nxserver --cleanup
++	;;	
++	*)
++		echo "Usage: $0 <start|stop>"
++	;;
++esac
+
+
+Property changes on: freenx-server/trunk/freenx-server
+___________________________________________________________________
+Name: svn:executable
+   + *
+
+
+
+From fabianx at mail.berlios.de  Sat Nov  3 16:17:22 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sat, 3 Nov 2007 16:17:22 +0100
+Subject: [Freenx-cvs] r415 - freenx-server/trunk
+Message-ID: <200711031517.lA3FHMa5005829@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-11-03 16:17:22 +0100 (Sat, 03 Nov 2007)
+New Revision: 415
+
+Modified:
+   freenx-server/trunk/freenx-server
+Log:
+Oops, forgot copyright and Id-keyword.
+
+
+
+Modified: freenx-server/trunk/freenx-server
+===================================================================
+--- freenx-server/trunk/freenx-server	2007-11-03 15:10:52 UTC (rev 414)
++++ freenx-server/trunk/freenx-server	2007-11-03 15:17:22 UTC (rev 415)
+@@ -2,6 +2,12 @@
+ #
+ # Sample startup script for FreeNX server
+ #
++# Coypright (c) 2007 by Fabian Franz <freenx at fabian-franz.de>.
++#
++# License: GNU GPL, version 2
++#
++# SVN: $Id$
++#
+ 
+ # Read the config file
+ . $(PATH=$(cd $(dirname $0) && pwd):$PATH which nxloadconfig) --
+
+
+Property changes on: freenx-server/trunk/freenx-server
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+
+
+
+From fabianx at mail.berlios.de  Sat Nov  3 16:30:10 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sat, 3 Nov 2007 16:30:10 +0100
+Subject: [Freenx-cvs] r416 - freenx-server/trunk
+Message-ID: <200711031530.lA3FUAKP006526@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-11-03 16:30:10 +0100 (Sat, 03 Nov 2007)
+New Revision: 416
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxsetup
+Log:
+* Added catching of exception after failed nscd command.
+  (fabianx at bat.berlios.de)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-11-03 15:17:22 UTC (rev 415)
++++ freenx-server/trunk/ChangeLog	2007-11-03 15:30:10 UTC (rev 416)
+@@ -9,6 +9,8 @@
+ 	* Added freenx-server startup script. You can make a symlink to
+ 	  /etc/init.d/ to have it start automatically.
+ 	  (fabianx at bat.berlios.de)
++	* Added catching of exception after failed nscd command.
++	  (fabianx at bat.berlios.de)
+ 
+ 14.10.2007 FreeNX 0.7.1 "Hip Hop Edition"
+ 	* Fixed the issue that makes fonts look tiny and unreadable by default 
+
+Modified: freenx-server/trunk/nxsetup
+===================================================================
+--- freenx-server/trunk/nxsetup	2007-11-03 15:17:22 UTC (rev 415)
++++ freenx-server/trunk/nxsetup	2007-11-03 15:30:10 UTC (rev 416)
+@@ -129,6 +129,11 @@
+ # Read the config file
+ . $(PATH=$(cd $(dirname $0) && pwd):$PATH which nxloadconfig) --
+ 
++run_nscd()
++{
++	nscd "$@" 2>/dev/null || true
++}
++
+ nx_user_exists()
+ {
+ 	if [ "$SETUP_LOCAL_USER" = "yes" ]
+@@ -164,10 +169,10 @@
+ 
+ 		# adduser needs a valid group to add the user to
+ 		! nx_group_exists && addgroup --system --quiet $GROUPADD_OPTIONS nx
+-		[ -f /etc/nscd.conf ] && { nscd --invalidate group; }
++		[ -f /etc/nscd.conf ] && { run_nscd --invalidate group; }
+ 
+ 		adduser $USERADD_OPTIONS nx
+-		[ -f /etc/nscd.conf ] && { nscd --invalidate passwd; }
++		[ -f /etc/nscd.conf ] && { run_nscd --invalidate passwd; }
+ 		
+ 	# no, its a "normal" useradd
+ 	else
+@@ -188,16 +193,16 @@
+ 		if [ "$SETUP_LOCAL_USER" = "yes" ]
+ 		then
+ 			! nx_group_exists && lgroupadd $GROUPADD_OPTIONS nx 
+-			[ -f /etc/nscd.conf ] && { nscd --invalidate group; }
++			[ -f /etc/nscd.conf ] && { run_nscd --invalidate group; }
+ 
+ 			luseradd $USERADD_OPTIONS nx
+-			[ -f /etc/nscd.conf ] && { nscd --invalidate passwd; }
++			[ -f /etc/nscd.conf ] && { run_nscd --invalidate passwd; }
+ 		else
+ 			! nx_group_exists && groupadd $GROUPADD_OPTIONS nx
+-			[ -f /etc/nscd.conf ] && { nscd --invalidate group; }
++			[ -f /etc/nscd.conf ] && { run_nscd --invalidate group; }
+ 
+ 			useradd $USERADD_OPTIONS nx
+-			[ -f /etc/nscd.conf ] && { nscd --invalidate passwd; }
++			[ -f /etc/nscd.conf ] && { run_nscd --invalidate passwd; }
+ 		fi
+ 
+ 		
+@@ -457,7 +462,7 @@
+ 	#Perform cleanup?
+ 	[ "$CLEAN" = "yes" ] && uninstall_nx
+ 	
+-	[ -f /etc/nscd.conf ] && { nscd --invalidate passwd; nscd --invalidate group; }
++	[ -f /etc/nscd.conf ] && { run_nscd --invalidate passwd; run_nscd --invalidate group; }
+ 	install_nx
+ 
+ 	[ "$AUTOMATIC" = "no" ] && test_nx
+
+
+
+From fabianx at mail.berlios.de  Fri Nov  9 02:27:12 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Fri, 9 Nov 2007 02:27:12 +0100
+Subject: [Freenx-cvs] r417 - freenx-server/trunk
+Message-ID: <200711090127.lA91RCKT018731@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-11-09 02:27:12 +0100 (Fri, 09 Nov 2007)
+New Revision: 417
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxnode
+Log:
+* Invoke curl with --proxy "" for automatic download of ppd files.
+  (Wolfgang Schweer <schweer at cityweb.de>)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-11-03 15:30:10 UTC (rev 416)
++++ freenx-server/trunk/ChangeLog	2007-11-09 01:27:12 UTC (rev 417)
+@@ -11,6 +11,8 @@
+ 	  (fabianx at bat.berlios.de)
+ 	* Added catching of exception after failed nscd command.
+ 	  (fabianx at bat.berlios.de)
++	* Invoke curl with --proxy "" for automatic download of ppd files.
++	  (Wolfgang Schweer <schweer at cityweb.de>)
+ 
+ 14.10.2007 FreeNX 0.7.1 "Hip Hop Edition"
+ 	* Fixed the issue that makes fonts look tiny and unreadable by default 
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2007-11-03 15:30:10 UTC (rev 416)
++++ freenx-server/trunk/nxnode	2007-11-09 01:27:12 UTC (rev 417)
+@@ -1372,7 +1372,7 @@
+ 		mkdir -p "$USER_FAKE_HOME/.nx/config/ppd/"
+ 		if [ "$MODEL" = "download_new" -o ! -r "$USER_FAKE_HOME/.nx/config/ppd/$printer.ppd" ]
+ 		then
+-			curl --digest -o "$USER_FAKE_HOME/.nx/config/ppd/$printer.ppd" "http://$username:$password at 127.0.0.1:$port/ppd/${printer}_nxdl.ppd" >>"$USER_FAKE_HOME/.nx/C-$sess_id/cups/curl.log" 2>&1
++			curl --proxy "" --digest -o "$USER_FAKE_HOME/.nx/config/ppd/$printer.ppd" "http://$username:$password at 127.0.0.1:$port/ppd/${printer}_nxdl.ppd" >>"$USER_FAKE_HOME/.nx/C-$sess_id/cups/curl.log" 2>&1
+ 		RC=$?
+ 		[ $RC -eq 0 -a "$ENABLE_CUPS_SEAMLESS" != "1" ] && $PATH_BIN/nxdialog --message "Download successful." -display :$display
+ 		[ $RC -ne 0 -a "$ENABLE_CUPS_SEAMLESS" != "1" ] && $PATH_BIN/nxdialog --message "Download failed. Log is: $USER_FAKE_HOME/.nx/C-$sess_id/cups/curl.log" -display :$display
+
+
+
+From fabianx at mail.berlios.de  Fri Nov  9 15:03:03 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Fri, 9 Nov 2007 15:03:03 +0100
+Subject: [Freenx-cvs] r418 - freenx-server/trunk
+Message-ID: <200711091403.lA9E33wg011304@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-11-09 15:03:03 +0100 (Fri, 09 Nov 2007)
+New Revision: 418
+
+Modified:
+   freenx-server/trunk/INSTALL
+Log:
+Added link to Mailing list archive for manually installing it to INSTALL file.
+
+
+
+Modified: freenx-server/trunk/INSTALL
+===================================================================
+--- freenx-server/trunk/INSTALL	2007-11-09 01:27:12 UTC (rev 417)
++++ freenx-server/trunk/INSTALL	2007-11-09 14:03:03 UTC (rev 418)
+@@ -24,6 +24,12 @@
+ HOWTO MANUALLY INSTALL
+ ----------------------
+ 
++The easy way:
++
++See: http://mail.kde.org/pipermail/freenx-knx/2007-October/006041.html
++
++The real way:
++
+ You must apply the gentoo-nomachine.diff and then copy the files to /usr/NX/bin and /usr/NX/lib.
+ 
+ You can use the following schema to do the install to /usr/NX/:
+
+
+
+From fabianx at mail.berlios.de  Fri Nov  9 15:19:41 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Fri, 9 Nov 2007 15:19:41 +0100
+Subject: [Freenx-cvs] r419 - freenx-server/trunk
+Message-ID: <200711091419.lA9EJfGk016879@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-11-09 15:19:41 +0100 (Fri, 09 Nov 2007)
+New Revision: 419
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxsetup
+Log:
+* Reorganized nxsetup to have a function for parsing command line
+  options.
+  (fabianx at bat.berlios.de)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-11-09 14:03:03 UTC (rev 418)
++++ freenx-server/trunk/ChangeLog	2007-11-09 14:19:41 UTC (rev 419)
+@@ -13,6 +13,9 @@
+ 	  (fabianx at bat.berlios.de)
+ 	* Invoke curl with --proxy "" for automatic download of ppd files.
+ 	  (Wolfgang Schweer <schweer at cityweb.de>)
++	* Reorganized nxsetup to have a function for parsing command line
++	  options.
++	  (fabianx at bat.berlios.de)
+ 
+ 14.10.2007 FreeNX 0.7.1 "Hip Hop Edition"
+ 	* Fixed the issue that makes fonts look tiny and unreadable by default 
+
+Modified: freenx-server/trunk/nxsetup
+===================================================================
+--- freenx-server/trunk/nxsetup	2007-11-09 14:03:03 UTC (rev 418)
++++ freenx-server/trunk/nxsetup	2007-11-09 14:19:41 UTC (rev 419)
+@@ -25,107 +25,111 @@
+ AUTOMATIC="no"
+ IGNORE_ERRORS="no"
+ 
+-while [ "$1" ]
+-do
+-	case "$1" in
+-		--help) HELP="yes"; shift ;;
+-		--install) INSTALL="yes"; shift ;;
+-		--ignore-errors) IGNORE_ERRORS="yes"; shift;;
+-		--setup-nomachine-key) SETUP_NOMACHINE_KEY="yes"; shift ;;
+-		--ssh2) SETUP_SSH2_KEY="yes"; shift;;
+-		--dont-build-known-hosts) BUILD_KNOWN_HOSTS="no"; shift;;
+-		--uid) SETUP_UID=$2; shift 2 ;;
+-		--gid) SETUP_GID=$2; shift 2 ;;
+-		--localuser) SETUP_LOCAL_USER="yes"; shift;;
+-		--clean) CLEAN="yes"; shift ;;
+-		--uninstall) UNINSTALL="yes"; shift ;;
+-		--purge) PURGE="yes"; shift ;;
+-		--auto) AUTOMATIC="yes"; shift ;;
+-		--) shift ; break ;;
+-		*) echo "Invalid flag $1" ; HELP="yes"; shift ; break ;;
+-	esac
+-done
+-
+-#Check for invalid combinations:
+-[ "$SETUP_LOCAL_USER" = "yes" -a -z "$LOCAL_USER_OPTION" ] && HELP="yes"
+-[ "$INSTALL" = "yes" -a "$UNINSTALL" = "yes" ] && HELP="yes"
+-[ "$INSTALL" = "yes" -a "$CLEAN" = "no" -a "$PURGE" = "yes" ] && HELP="yes"
+-[ "$UNINSTALL" = "yes" ] && [ "$SETUP_NOMACHINE_KEY" = "yes" -o -n "$SETUP_UID" -o "$CLEAN" = "yes" ] && HELP="yes"
+-[ "$UNINSTALL" = "yes" -a "$CLEAN" = "yes" ] && HELP="yes"
+-[ "$SETUP_SSH2_KEY" = "yes" -a "$SETUP_NOMACHINE_KEY" = "no" ] && HELP="yes"
+-
+-if [ "$INSTALL" = "no" -a "$UNINSTALL" = "no" -a "$AUTOMATIC" = "no" -a "$HELP" = "no" ]
+-then
+-	echo "------> You did select no action."
+-	echo "        FreeNX guesses that you want to _install_ the server."
+-	echo "        Type \"y\" to abort the installation at this point in time."
+-	echo "        \"N\" is the default and continues installation."
+-	echo "        Use \"${0} --help\" to get more detailed help hints."
+-	echo ""
+-	echo -n " Do you want to abort now? [y/N] "
+-	read -n 1 CHOICE
+-	echo
+-	[ "$CHOICE" = "y" ] || INSTALL="yes"
+-fi
+-
+-[ "$INSTALL" = "no" -a "$UNINSTALL" = "no" ] && HELP="yes"
+-
+-if [ "$HELP" = "yes" ]
+-then
+-	echo "nxsetup - Setup the FreeNX server."
+-	echo "Syntax: nxsetup --help"
+-	echo "        nxsetup --install [--setup-nomachine-key] [--uid <nummber>] [--clean [--purge]]"
+-	echo "        nxsetup --uninstall [--purge]"
+-	echo
+-	echo "  --help                 Display this help message."
+-	echo "  --install              Install necessary files and add the special user \"nx\"."
+-	echo "  --ignore-errors        Check for false configuration, but don't complain."
+-	echo "  --setup-nomachine-key  Allow login with the key shipped with the NoMachine"
+-	echo "                         client. This is fairly secure, and it simplifies the "
+-	echo "                         configuration of clients. (Using a custom key pair."
+-	echo "                         increases security even more, but complicates the"
+-	echo "                         configuration of clients.)"
+-	echo "                         Use this option at your own risk."
+-	echo "  --ssh2                 Create additionally commercial pubkey-support; beware:"
+-	echo "                         own _commercial_ ssh2-key is not supported!"
+-	echo "  --uid <number>         Give the uid <number> to the user \"nx\"."
+-	echo "  --gid <number>         Give the gid <number> to the user \"nx\"."
+-	[ -n "$LOCAL_USER_OPTION" ] && \
+-	echo "  --localuser            The special user \"nx\" will be created locally using"
+-	echo "                         \"luseradd\", for use in NIS and NISplus environments."
+-	echo "  --clean                Perform an uninstallation prior to installation."
+-	echo "  --uninstall            Remove log and session files, as well as the special"
+-	echo "                         user \"nx\"."
+-	echo "  --purge                Remove extra configuration files and ssh keys when"
+-	echo "                         performing a \"--uninstall\"."
+-	echo "                         Note that node.conf will always be saved."
+-	exit 0
+-fi
+-#Undocumented
+-#
+-#    --dont-build-known-hosts		For system without /etc/ssh/ssh_host_key.rsa.pub and anyway
+-#					expect should handle nx-users known-hosts keys so why borther
+-#					in nxsetup?
+-
+ if [ $UID -ne 0 ]
+ then
+ 	echo "You need to be root to use this program." 
+ 	exit 1
+ fi
+ 
+-if [ "$INSTALL" = "yes" -a "$AUTOMATIC" = "no" -a "$SETUP_NOMACHINE_KEY" = "no" ]
+-then
+-	echo "------> It is recommended that you use the NoMachine key for"
+-	echo "        easier setup. If you answer \"y\", FreeNX creates a custom"
+-	echo "        KeyPair and expects you to setup your clients manually. "
+-	echo "        \"N\" is default and uses the NoMachine key for installation."
+-	echo ""
+-	echo -n " Do you want to use your own custom KeyPair? [y/N] "
+-	read -n 1 CHOICE
+-	[ "$CHOICE" = "y" ] || SETUP_NOMACHINE_KEY="yes"
+-fi
++parse_cmdline()
++{
++	while [ "$1" ]
++	do
++		case "$1" in
++			--help) HELP="yes"; shift ;;
++			--install) INSTALL="yes"; shift ;;
++			--ignore-errors) IGNORE_ERRORS="yes"; shift;;
++			--setup-nomachine-key) SETUP_NOMACHINE_KEY="yes"; shift ;;
++			--ssh2) SETUP_SSH2_KEY="yes"; shift;;
++			--dont-build-known-hosts) BUILD_KNOWN_HOSTS="no"; shift;;
++			--uid) SETUP_UID=$2; shift 2 ;;
++			--gid) SETUP_GID=$2; shift 2 ;;
++			--localuser) SETUP_LOCAL_USER="yes"; shift;;
++			--clean) CLEAN="yes"; shift ;;
++			--uninstall) UNINSTALL="yes"; shift ;;
++			--purge) PURGE="yes"; shift ;;
++			--auto) AUTOMATIC="yes"; shift ;;
++			--) shift ; break ;;
++			*) echo "Invalid flag $1" ; HELP="yes"; shift ; break ;;
++		esac
++	done
+ 
++	#Check for invalid combinations:
++	[ "$SETUP_LOCAL_USER" = "yes" -a -z "$LOCAL_USER_OPTION" ] && HELP="yes"
++	[ "$INSTALL" = "yes" -a "$UNINSTALL" = "yes" ] && HELP="yes"
++	[ "$INSTALL" = "yes" -a "$CLEAN" = "no" -a "$PURGE" = "yes" ] && HELP="yes"
++	[ "$UNINSTALL" = "yes" ] && [ "$SETUP_NOMACHINE_KEY" = "yes" -o -n "$SETUP_UID" -o "$CLEAN" = "yes" ] && HELP="yes"
++	[ "$UNINSTALL" = "yes" -a "$CLEAN" = "yes" ] && HELP="yes"
++	[ "$SETUP_SSH2_KEY" = "yes" -a "$SETUP_NOMACHINE_KEY" = "no" ] && HELP="yes"
+ 
++	if [ "$INSTALL" = "no" -a "$UNINSTALL" = "no" -a "$AUTOMATIC" = "no" -a "$HELP" = "no" ]
++	then
++		echo "------> You did select no action."
++		echo "        FreeNX guesses that you want to _install_ the server."
++		echo "        Type \"y\" to abort the installation at this point in time."
++		echo "        \"N\" is the default and continues installation."
++		echo "        Use \"${0} --help\" to get more detailed help hints."
++		echo ""
++		echo -n " Do you want to abort now? [y/N] "
++		read -n 1 CHOICE
++		echo
++		[ "$CHOICE" = "y" ] || INSTALL="yes"
++	fi
++
++	[ "$INSTALL" = "no" -a "$UNINSTALL" = "no" ] && HELP="yes"
++
++	if [ "$HELP" = "yes" ]
++	then
++		echo "nxsetup - Setup the FreeNX server."
++		echo "Syntax: nxsetup --help"
++		echo "        nxsetup --install [--setup-nomachine-key] [--uid <nummber>] [--clean [--purge]]"
++		echo "        nxsetup --uninstall [--purge]"
++		echo
++		echo "  --help                 Display this help message."
++		echo "  --install              Install necessary files and add the special user \"nx\"."
++		echo "  --ignore-errors        Check for false configuration, but don't complain."
++		echo "  --setup-nomachine-key  Allow login with the key shipped with the NoMachine"
++		echo "                         client. This is fairly secure, and it simplifies the "
++		echo "                         configuration of clients. (Using a custom key pair."
++		echo "                         increases security even more, but complicates the"
++		echo "                         configuration of clients.)"
++		echo "                         Use this option at your own risk."
++		echo "  --ssh2                 Create additionally commercial pubkey-support; beware:"
++		echo "                         own _commercial_ ssh2-key is not supported!"
++		echo "  --uid <number>         Give the uid <number> to the user \"nx\"."
++		echo "  --gid <number>         Give the gid <number> to the user \"nx\"."
++		[ -n "$LOCAL_USER_OPTION" ] && \
++		echo "  --localuser            The special user \"nx\" will be created locally using"
++		echo "                         \"luseradd\", for use in NIS and NISplus environments."
++		echo "  --clean                Perform an uninstallation prior to installation."
++		echo "  --uninstall            Remove log and session files, as well as the special"
++		echo "                         user \"nx\"."
++		echo "  --purge                Remove extra configuration files and ssh keys when"
++		echo "                         performing a \"--uninstall\"."
++		echo "                         Note that node.conf will always be saved."
++		exit 0
++	fi
++	#Undocumented
++	#
++	#    --dont-build-known-hosts		For system without /etc/ssh/ssh_host_key.rsa.pub and anyway
++	#					expect should handle nx-users known-hosts keys so why borther
++	#					in nxsetup?
++
++	if [ "$INSTALL" = "yes" -a "$AUTOMATIC" = "no" -a "$SETUP_NOMACHINE_KEY" = "no" ]
++	then
++		echo "------> It is recommended that you use the NoMachine key for"
++		echo "        easier setup. If you answer \"y\", FreeNX creates a custom"
++		echo "        KeyPair and expects you to setup your clients manually. "
++		echo "        \"N\" is default and uses the NoMachine key for installation."
++		echo ""
++		echo -n " Do you want to use your own custom KeyPair? [y/N] "
++		read -n 1 CHOICE
++		[ "$CHOICE" = "y" ] || SETUP_NOMACHINE_KEY="yes"
++	fi
++}
++
++parse_cmdline "$@"
++
+ # Read the config file
+ . $(PATH=$(cd $(dirname $0) && pwd):$PATH which nxloadconfig) --
+ 
+
+
+
+From fabianx at mail.berlios.de  Fri Nov  9 15:42:02 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Fri, 9 Nov 2007 15:42:02 +0100
+Subject: [Freenx-cvs] r420 - freenx-server/trunk
+Message-ID: <200711091442.lA9Eg2dT021805@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-11-09 15:42:02 +0100 (Fri, 09 Nov 2007)
+New Revision: 420
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxsetup
+Log:
+* Added nxsetup --test to test the configuration and connection to
+  localhost nxserver.
+  (fabianx at bat.berlios.de)
+
+Documented --auto.
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-11-09 14:19:41 UTC (rev 419)
++++ freenx-server/trunk/ChangeLog	2007-11-09 14:42:02 UTC (rev 420)
+@@ -16,6 +16,9 @@
+ 	* Reorganized nxsetup to have a function for parsing command line
+ 	  options.
+ 	  (fabianx at bat.berlios.de)
++	* Added nxsetup --test to test the configuration and connection to
++	  localhost nxserver.
++	  (fabianx at bat.berlios.de)
+ 
+ 14.10.2007 FreeNX 0.7.1 "Hip Hop Edition"
+ 	* Fixed the issue that makes fonts look tiny and unreadable by default 
+
+Modified: freenx-server/trunk/nxsetup
+===================================================================
+--- freenx-server/trunk/nxsetup	2007-11-09 14:19:41 UTC (rev 419)
++++ freenx-server/trunk/nxsetup	2007-11-09 14:42:02 UTC (rev 420)
+@@ -49,11 +49,14 @@
+ 			--uninstall) UNINSTALL="yes"; shift ;;
+ 			--purge) PURGE="yes"; shift ;;
+ 			--auto) AUTOMATIC="yes"; shift ;;
++			--test) TEST="yes"; shift ;;
+ 			--) shift ; break ;;
+ 			*) echo "Invalid flag $1" ; HELP="yes"; shift ; break ;;
+ 		esac
+ 	done
+ 
++	[ "$TEST" = "yes" ] && return         # If we just test, we can return directly
++
+ 	#Check for invalid combinations:
+ 	[ "$SETUP_LOCAL_USER" = "yes" -a -z "$LOCAL_USER_OPTION" ] && HELP="yes"
+ 	[ "$INSTALL" = "yes" -a "$UNINSTALL" = "yes" ] && HELP="yes"
+@@ -82,10 +85,12 @@
+ 	then
+ 		echo "nxsetup - Setup the FreeNX server."
+ 		echo "Syntax: nxsetup --help"
++		echo "        nxsetup --test [--ignore-errors]"
+ 		echo "        nxsetup --install [--setup-nomachine-key] [--uid <nummber>] [--clean [--purge]]"
+ 		echo "        nxsetup --uninstall [--purge]"
+ 		echo
+ 		echo "  --help                 Display this help message."
++		echo "  --test                 Test the configuration and connection to localhost NX Server."
+ 		echo "  --install              Install necessary files and add the special user \"nx\"."
+ 		echo "  --ignore-errors        Check for false configuration, but don't complain."
+ 		echo "  --setup-nomachine-key  Allow login with the key shipped with the NoMachine"
+@@ -107,6 +112,7 @@
+ 		echo "  --purge                Remove extra configuration files and ssh keys when"
+ 		echo "                         performing a \"--uninstall\"."
+ 		echo "                         Note that node.conf will always be saved."
++		echo "  --auto                 Perform automatic installation without testing or asking."
+ 		exit 0
+ 	fi
+ 	#Undocumented
+@@ -461,6 +467,12 @@
+ 	fi
+ }
+ 
++if [ "$TEST" = "yes" ]
++then
++	test_nx
++	exit 0
++fi
++
+ if [ "$INSTALL" = "yes" ]
+ then
+ 	#Perform cleanup?
+
+
+
+From fabianx at mail.berlios.de  Fri Nov  9 15:51:17 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Fri, 9 Nov 2007 15:51:17 +0100
+Subject: [Freenx-cvs] r421 - freenx-server/trunk
+Message-ID: <200711091451.lA9EpHfq022415@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-11-09 15:51:17 +0100 (Fri, 09 Nov 2007)
+New Revision: 421
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxnode-login
+Log:
+* Added -o ConnectTimeout 3 to nxnode-login for test-nx case.
+(cedric briner <work at infomaniak.ch>)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-11-09 14:42:02 UTC (rev 420)
++++ freenx-server/trunk/ChangeLog	2007-11-09 14:51:17 UTC (rev 421)
+@@ -19,6 +19,8 @@
+ 	* Added nxsetup --test to test the configuration and connection to
+ 	  localhost nxserver.
+ 	  (fabianx at bat.berlios.de)
++	* Added -o ConnectTimeout 3 to nxnode-login for test-nx case.
++	  (cedric briner <work at infomaniak.ch>)
+ 
+ 14.10.2007 FreeNX 0.7.1 "Hip Hop Edition"
+ 	* Fixed the issue that makes fonts look tiny and unreadable by default 
+
+Modified: freenx-server/trunk/nxnode-login
+===================================================================
+--- freenx-server/trunk/nxnode-login	2007-11-09 14:42:02 UTC (rev 420)
++++ freenx-server/trunk/nxnode-login	2007-11-09 14:51:17 UTC (rev 421)
+@@ -33,7 +33,7 @@
+ 	set publickey ""
+ 	catch {set publickey $env(NODE_PUBLICKEY)}
+ 	
+-	set pid [spawn -noecho $command_ssh -2 -x -l "$user" "$host" -i "$publickey" -o "RhostsAuthentication no" -o "PasswordAuthentication no" -o "RSAAuthentication no" -o "RhostsRSAAuthentication no" -o "PubkeyAuthentication yes" -o "PreferredAuthentications publickey" -p "$port" "$executable $command" ]
++	set pid [spawn -noecho $command_ssh -2 -x -l "$user" "$host" -i "$publickey" -o "RhostsAuthentication no" -o "PasswordAuthentication no" -o "RSAAuthentication no" -o "RhostsRSAAuthentication no" -o "PubkeyAuthentication yes" -o "PreferredAuthentications publickey" -o "ConnectTimeout 3" -p "$port" "$executable $command" ]
+ 	
+ 	while {1} {
+ 		expect {
+
+
+
+From fabianx at mail.berlios.de  Fri Nov  9 15:58:10 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Fri, 9 Nov 2007 15:58:10 +0100
+Subject: [Freenx-cvs] r422 - freenx-server/trunk
+Message-ID: <200711091458.lA9EwAeL022798@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-11-09 15:58:09 +0100 (Fri, 09 Nov 2007)
+New Revision: 422
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxsetup
+Log:
+* Added more examples for "failed ssh connection to localhost" cases.
+  (cedric briner <work at infomaniak.ch>, fabianx at bat.berlios.de)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-11-09 14:51:17 UTC (rev 421)
++++ freenx-server/trunk/ChangeLog	2007-11-09 14:58:09 UTC (rev 422)
+@@ -21,6 +21,8 @@
+ 	  (fabianx at bat.berlios.de)
+ 	* Added -o ConnectTimeout 3 to nxnode-login for test-nx case.
+ 	  (cedric briner <work at infomaniak.ch>)
++	* Added more examples for "failed ssh connection to localhost" cases.
++	  (cedric briner <work at infomaniak.ch>, fabianx at bat.berlios.de)
+ 
+ 14.10.2007 FreeNX 0.7.1 "Hip Hop Edition"
+ 	* Fixed the issue that makes fonts look tiny and unreadable by default 
+
+Modified: freenx-server/trunk/nxsetup
+===================================================================
+--- freenx-server/trunk/nxsetup	2007-11-09 14:51:17 UTC (rev 421)
++++ freenx-server/trunk/nxsetup	2007-11-09 14:58:09 UTC (rev 422)
+@@ -405,10 +405,18 @@
+ 		echo ""
+ 		echo "	- Make sure \"nx\" is one of the AllowUsers in sshd_config."
+ 		echo "    (or that the line is outcommented/not there)"
++		echo "	- Make sure \"nx\" is one of the AllowGroups in sshd_config."
++		echo "    (or that the line is outcommented/not there)"
+ 		echo "	- Make sure your sshd allows public key authentication."
+ 		echo "	- Make sure your sshd is really running on port $SSHD_PORT."
+ 		echo "	- Make sure your sshd_config AuthorizedKeysFile in sshd_config is set to $SSH_AUTHORIZED_KEYS."
+ 		echo "    (this should be a filename not a pathname+filename)"
++		echo "  - Make sure you allow ssh on localhost, this could come from some"
++		echo "    restriction of:"
++		echo "      -the tcp wrapper. Then add in /etc/hosts.allow: ALL:localhost"
++		echo "      -the iptables. add to it:"
++		echo "         $ iptables -A INPUT  -i lo -j ACCEPT"
++		echo "         $ iptables -A OUTPUT -o lo -j ACCEPT"
+ 		exit 1
+ 	fi
+ 	echo "<--- done"
+
+
+
+From fabianx at mail.berlios.de  Wed Nov 14 17:39:40 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Wed, 14 Nov 2007 17:39:40 +0100
+Subject: [Freenx-cvs] r423 - freenx-server/trunk
+Message-ID: <200711141639.lAEGde1H013798@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-11-14 17:39:40 +0100 (Wed, 14 Nov 2007)
+New Revision: 423
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxdesktop_helper
+   freenx-server/trunk/nxviewer_helper
+Log:
+* Fixed helpers (desktop, viewer) to honour the AGENT_EXTRA_OPTIONS_{RDP,RFB}
+  parameters set in node.conf.
+  (fabianx at bat.berlios.de)
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-11-09 14:58:09 UTC (rev 422)
++++ freenx-server/trunk/ChangeLog	2007-11-14 16:39:40 UTC (rev 423)
+@@ -23,6 +23,9 @@
+ 	  (cedric briner <work at infomaniak.ch>)
+ 	* Added more examples for "failed ssh connection to localhost" cases.
+ 	  (cedric briner <work at infomaniak.ch>, fabianx at bat.berlios.de)
++	* Fixed helpers (desktop, viewer) to honour the AGENT_EXTRA_OPTIONS_{RDP,RFB}
++	  parameters set in node.conf.
++	  (fabianx at bat.berlios.de)
+ 
+ 14.10.2007 FreeNX 0.7.1 "Hip Hop Edition"
+ 	* Fixed the issue that makes fonts look tiny and unreadable by default 
+
+Modified: freenx-server/trunk/nxdesktop_helper
+===================================================================
+--- freenx-server/trunk/nxdesktop_helper	2007-11-09 14:58:09 UTC (rev 422)
++++ freenx-server/trunk/nxdesktop_helper	2007-11-14 16:39:40 UTC (rev 423)
+@@ -12,7 +12,7 @@
+ [ -z "$COMMAND_RDESKTOP" ] && COMMAND_RDESKTOP="rdesktop"
+ 
+ # setup commandline
+-set -- -f -u "$agent_user" -k "$agent_keyboard" -d "$agent_domain" "$agent_server"
++set -- -f -u "$agent_user" -k "$agent_keyboard" -d "$agent_domain" $AGENT_EXTRA_OPTIONS_RDP "$agent_server"
+ 
+ if [ -n "$agent_password" ]
+ then
+
+Modified: freenx-server/trunk/nxviewer_helper
+===================================================================
+--- freenx-server/trunk/nxviewer_helper	2007-11-09 14:58:09 UTC (rev 422)
++++ freenx-server/trunk/nxviewer_helper	2007-11-14 16:39:40 UTC (rev 423)
+@@ -36,4 +36,4 @@
+ 
+ # Start the vncviewer
+ 
+-exec $COMMAND_VNCVIEWER -passwd "$NXSESSION_DIRECTORY/scripts/.passwd" -fullscreen "$agent_server" $AGENT_EXTRA_OPTIONS_RFB
++exec $COMMAND_VNCVIEWER -passwd "$NXSESSION_DIRECTORY/scripts/.passwd" -fullscreen $AGENT_EXTRA_OPTIONS_RFB "$agent_server" 
+
+
+
+From fabianx at mail.berlios.de  Thu Nov 15 02:31:10 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Thu, 15 Nov 2007 02:31:10 +0100
+Subject: [Freenx-cvs] r424 - nx-utils/nxcupsd-wrapper
+Message-ID: <200711150131.lAF1VAxP013024@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-11-15 02:31:09 +0100 (Thu, 15 Nov 2007)
+New Revision: 424
+
+Modified:
+   nx-utils/nxcupsd-wrapper/nxcupsd-wrapper
+Log:
+Rewrote the wrapper to do:
+
+- Reset LD_LIBRARY_PATH, which lead to error 127 -> Report to NoMachine
+- Fix configuration to include CacheDir and StateDir
+- Automatic download of ppd files preperation.
+- Monitor the cupsd.conf and re-fix the configuration in case it was rewritten
+- Monitor signals and re-fix configuration and reload cupsd.
+
+Outstanding fixes needed by NoMachine:
+
+- Reset LD_LIBRARY_PATH
+- Include CacheDir and StateDir
+- Only one session can be used at a time with cupsd forwarding.
+- Use PID file instead of `pidof cupsd` or at least `pidof $system_cupsd`.
+
+
+
+Modified: nx-utils/nxcupsd-wrapper/nxcupsd-wrapper
+===================================================================
+--- nx-utils/nxcupsd-wrapper/nxcupsd-wrapper	2007-11-14 16:39:40 UTC (rev 423)
++++ nx-utils/nxcupsd-wrapper/nxcupsd-wrapper	2007-11-15 01:31:09 UTC (rev 424)
+@@ -1,49 +1,138 @@
+ #!/bin/sh
++#
++# nxcupsd-wrapper - Copyright (c) 2007 by Fabian Franz <freenx at fabian-franz.de>
++#
++# License: GPL
++#
+ 
+-CUPS_1_1=""
+-strings /usr/sbin/cupsd | grep -q "CUPS/1.1" && CUPS_1_1="1"
++# configuration
++SYSTEM_CUPSD="/usr/sbin/cupsd"
+ 
+-[ -f "$NX_ROOT/cups/cupsd.pid" ] && CPID=$(cat "$NX_ROOT/cups/cupsd.pid")
++# We do not want to use the NoMachine libraries for CUPS
++export LD_LIBRARY_PATH=""
+ 
+-[ -n "$CPID" ] && kill -0 $CPID && kill $CPID
++# Test if PidFile is written automatically
+ 
+-if [ -z "$CUPS_1_1" ]
+-then
+-	echo "PidFile $NX_ROOT/cups/cupsd.pid" >> $NX_ROOT/cups/cupsd.conf
+-	echo "StateDir $NX_ROOT/cups/" >> $NX_ROOT/cups/cupsd.conf
+-fi
++HAS_PIDFILE=""
++strings $SYSTEM_CUPSD | grep -q "PidFile" && HAS_PIDFILE="1"
+ 
+-mkdir -p $NX_ROOT/cups/ppd/
++#
++# Functions
++#
+ 
+-LANG=C LC_ALL=C lpstat -s | egrep "^device" | while read x x printer destination
+-do
+-	proto=$(echo $destination | cut -d: -f1)
+-	printer=$(echo $printer | cut -d: -f1)
+-	if [ $proto = "ipp" -o "$proto" = "http" ]
++# Kill old cupsd if it exists
++
++kill_old_cupsd()
++{
++	[ -f "$NX_ROOT/cups/cupsd.pid" ] && CPID=$(cat "$NX_ROOT/cups/cupsd.pid")
++	[ -n "$CPID" ] && kill -0 $CPID && kill $CPID
++}
++# Update configuration
++
++update_cupsd_conf()
++{
++	# Remove PidFile information if its present
++	grep -q PidFile "$NX_ROOT/cups/cupsd.conf" && perl -pi -e 's/PidFile.*//' "$NX_ROOT/cups/cupsd.conf"
++
++	[ -n "$HAS_PIDFILE" ] && echo "PidFile $NX_ROOT/cups/cupsd-real.pid" >> $NX_ROOT/cups/cupsd.conf
++	echo "StateDir $NX_ROOT/cups/certs" >> $NX_ROOT/cups/cupsd.conf
++	echo "CacheDir $NX_ROOT/cups/cache" >> $NX_ROOT/cups/cupsd.conf
++	mkdir -p $NX_ROOT/cups/cache
++}
++
++prepare_automatic_download()
++{
++	# Prepare automatic download of cupsd files
++
++	mkdir -p $NX_ROOT/cups/ppd/
++
++	LANG=C LC_ALL=C lpstat -s | egrep "^device" | while read x x printer destination
++	do
++		proto=$(echo $destination | cut -d: -f1)
++		printer=$(echo $printer | cut -d: -f1)
++		if [ $proto = "ipp" -o "$proto" = "http" ]
++		then
++			# get it from remote printer
++			wget -q -t 1 -T 1 ${destination/ipp/http}.ppd -O "$NX_ROOT/cups/ppd/${printer}_nxdl.ppd"
++		else
++			# get it from local host
++			[ -z "$IPP_PORT" ] && IPP_PORT=631
++			wget -q -t 1 -T 1 "http://127.0.0.1:$IPP_PORT/printers/$printer.ppd" -O "$NX_ROOT/cups/ppd/${printer}_nxdl.ppd"
++		fi
++	done
++}
++
++# Start the system cupsd
++
++start_cupsd_without_pidfile()
++{
++	$SYSTEM_CUPSD -f "$@" &
++	CPID=$!
++	echo "$CPID" >"$NX_ROOT/cups/cupsd-real.pid"
++	trap "" SIGHUP
++	trap "kill $CPID; rm -f \"$NX_ROOT\"/cups/cupsd-real.pid" EXIT
++	wait $CPID
++	echo "Cupsd exited with status: $?" >> "$NX_ROOT/cups/error_log"
++	rm -f "$NX_ROOT/cups/cupsd-real.pid"
++}
++
++start_cupsd()
++{
++
++	if [ -n "$HAS_PIDFILE" ]
+ 	then
+-		# get it from remote printer
+-		LD_LIBRARY_PATH="" wget -q -t 1 -T 1 ${destination/ipp/http}.ppd -O $NX_ROOT/cups/ppd/${printer}_nxdl.ppd
++		$SYSTEM_CUPSD "$@" 
+ 	else
+-		# get it from local host
+-		[ -z "$IPP_PORT" ] && IPP_PORT=631
+-		LD_LIBRARY_PATH="" wget -q -t 1 -T 1 "http://127.0.0.1:$IPP_PORT/printers/$printer.ppd" -O $NX_ROOT/cups/ppd/${printer}_nxdl.ppd
++		start_cupsd_without_pidfile "$@" &
++		disown $!
+ 	fi
+-done
++}
+ 
+-start_cupsd_1_1()
++update_status()
+ {
+-	/usr/sbin/cupsd -f "$@" &
+-	CPID=$!
+-	echo "$CPID" >"$NX_ROOT/cups/cupsd.pid"
+-	trap "kill $CPID; rm -f $NX_ROOT/cups/cupsd.pid" EXIT
+-	wait $CPID
+-	rm -f "$NX_ROOT/cups/cupsd.pid"
++	update_cupsd_conf
++	prepare_automatic_download
+ }
+ 
+-if [ -z "$CUPS_1_1" ]
+-then
+-	exec /usr/sbin/cupsd "$@" 
+-else
+-	start_cupsd_1_1 "$@" &
+-	disown $!
+-fi
++reload_cupsd()
++{
++	echo "Reload cupsd ..."
++	update_status
++	kill -HUP $(cat "$NX_ROOT/cups/cupsd-real.pid" 2>/dev/null)
++}
++
++kill_cupsd()
++{
++	kill $(cat "$NX_ROOT/cups/cupsd-real.pid" 2>/dev/null)
++}
++
++# signal handling
++
++monitor_cupsd_internal()
++{
++	trap "reload_cupsd" SIGHUP
++	trap "kill_cupsd; rm -f \"$NX_ROOT/cups/cupsd.pid\"" EXIT
++
++	sleep 5
++	
++	while kill -0 $(cat "$NX_ROOT/cups/cupsd-real.pid" 2>/dev/null) 2>/dev/null
++	do
++		sleep 5
++		grep -q "cups/cupsd.pid" "$NX_ROOT/cups/cupsd.conf" && reload_cupsd
++	done
++}
++
++monitor_cupsd()
++{
++	monitor_cupsd_internal &
++	MPID=$!
++	disown $MPID
++	echo "$MPID" >"$NX_ROOT/cups/cupsd.pid"
++}
++
++# Main program
++
++kill_old_cupsd
++update_status
++start_cupsd "$@"
++monitor_cupsd
+
+
+
+From fabianx at mail.berlios.de  Thu Nov 15 02:45:22 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Thu, 15 Nov 2007 02:45:22 +0100
+Subject: [Freenx-cvs] r425 - nx-utils/nxcupsd-wrapper
+Message-ID: <200711150145.lAF1jMAS013837@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-11-15 02:45:22 +0100 (Thu, 15 Nov 2007)
+New Revision: 425
+
+Modified:
+   nx-utils/nxcupsd-wrapper/nxcupsd-wrapper
+Log:
+Forgot one case for rm -f cupsd.pid.
+
+
+
+Modified: nx-utils/nxcupsd-wrapper/nxcupsd-wrapper
+===================================================================
+--- nx-utils/nxcupsd-wrapper/nxcupsd-wrapper	2007-11-15 01:31:09 UTC (rev 424)
++++ nx-utils/nxcupsd-wrapper/nxcupsd-wrapper	2007-11-15 01:45:22 UTC (rev 425)
+@@ -120,6 +120,8 @@
+ 		sleep 5
+ 		grep -q "cups/cupsd.pid" "$NX_ROOT/cups/cupsd.conf" && reload_cupsd
+ 	done
++	
++	rm -f "$NX_ROOT/cups/cupsd.pid"
+ }
+ 
+ monitor_cupsd()
+
+
+
+From fabianx at mail.berlios.de  Thu Nov 15 16:17:25 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Thu, 15 Nov 2007 16:17:25 +0100
+Subject: [Freenx-cvs] r426 - freenx-server/trunk
+Message-ID: <200711151517.lAFFHP91001981@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-11-15 16:17:24 +0100 (Thu, 15 Nov 2007)
+New Revision: 426
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/node.conf.sample
+Log:
+* Fixed the default value for ENABLE_CLIPBOARD="both" instead of ' = '.
+  (fabianx at bat.berlios.de)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-11-15 01:45:22 UTC (rev 425)
++++ freenx-server/trunk/ChangeLog	2007-11-15 15:17:24 UTC (rev 426)
+@@ -26,6 +26,8 @@
+ 	* Fixed helpers (desktop, viewer) to honour the AGENT_EXTRA_OPTIONS_{RDP,RFB}
+ 	  parameters set in node.conf.
+ 	  (fabianx at bat.berlios.de)
++	* Fixed the default value for ENABLE_CLIPBOARD="both" instead of ' = '.
++	  (fabianx at bat.berlios.de)
+ 
+ 14.10.2007 FreeNX 0.7.1 "Hip Hop Edition"
+ 	* Fixed the issue that makes fonts look tiny and unreadable by default 
+
+Modified: freenx-server/trunk/node.conf.sample
+===================================================================
+--- freenx-server/trunk/node.conf.sample	2007-11-15 01:45:22 UTC (rev 425)
++++ freenx-server/trunk/node.conf.sample	2007-11-15 15:17:24 UTC (rev 426)
+@@ -150,7 +150,7 @@
+ # none:   The copy&paste operations between the client and the NX
+ #            session are never allowed.
+ #
+-#ENABLE_CLIPBOARD = "both"
++#ENABLE_CLIPBOARD="both"
+ 
+ #########################################################################
+ # Logging directives
+
+
+

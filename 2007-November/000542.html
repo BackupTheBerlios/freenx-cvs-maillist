@@ -1,0 +1,121 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r414 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-November/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r414%20-%20freenx-server/trunk&In-Reply-To=%3C200711031510.lA3FAqiU005347%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000543.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r414 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r414%20-%20freenx-server/trunk&In-Reply-To=%3C200711031510.lA3FAqiU005347%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r414 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Sat Nov  3 16:10:52 CET 2007</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000543.html">[Freenx-cvs] r415 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#542">[ date ]</a>
+              <a href="thread.html#542">[ thread ]</a>
+              <a href="subject.html#542">[ subject ]</a>
+              <a href="author.html#542">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-11-03 16:10:52 +0100 (Sat, 03 Nov 2007)
+New Revision: 414
+
+Added:
+   freenx-server/trunk/freenx-server
+Modified:
+   freenx-server/trunk/ChangeLog
+Log:
+* Added freenx-server startup script. You can make a symlink to
+  /etc/init.d/ to have it start automatically.
+  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-10-30 15:17:14 UTC (rev 413)
++++ freenx-server/trunk/ChangeLog	2007-11-03 15:10:52 UTC (rev 414)
+@@ -6,6 +6,9 @@
+ 	* Fixed the issue that commercial NXClient was called with 0 parameters
+ 	  and such the &quot;Connection Wizard&quot; came up.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Added freenx-server startup script. You can make a symlink to
++	  /etc/init.d/ to have it start automatically.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
+ 14.10.2007 FreeNX 0.7.1 &quot;Hip Hop Edition&quot;
+ 	* Fixed the issue that makes fonts look tiny and unreadable by default 
+
+Added: freenx-server/trunk/freenx-server
+===================================================================
+--- freenx-server/trunk/freenx-server	2007-10-30 15:17:14 UTC (rev 413)
++++ freenx-server/trunk/freenx-server	2007-11-03 15:10:52 UTC (rev 414)
+@@ -0,0 +1,20 @@
++#!/bin/bash
++#
++# Sample startup script for FreeNX server
++#
++
++# Read the config file
++. $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig) --
++
++case &quot;$1&quot; in
++	start)
++		[ ! -d &quot;/tmp/.X11-unix&quot; ] &amp;&amp; mkdir -m1755 /tmp/.X11-unix/
++		$PATH_BIN/nxserver --cleanup
++	;;
++	stop)
++		$PATH_BIN/nxserver --cleanup
++	;;	
++	*)
++		echo &quot;Usage: $0 &lt;start|stop&gt;&quot;
++	;;
++esac
+
+
+Property changes on: freenx-server/trunk/freenx-server
+___________________________________________________________________
+Name: svn:executable
+   + *
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000543.html">[Freenx-cvs] r415 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#542">[ date ]</a>
+              <a href="thread.html#542">[ thread ]</a>
+              <a href="subject.html#542">[ subject ]</a>
+              <a href="author.html#542">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

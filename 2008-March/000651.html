@@ -1,0 +1,197 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r527 - trunk/freenx-server
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r527%20-%20trunk/freenx-server&In-Reply-To=%3C200803141745.m2EHjeKX031445%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000650.html">
+   <LINK REL="Next"  HREF="000672.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r527 - trunk/freenx-server</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r527%20-%20trunk/freenx-server&In-Reply-To=%3C200803141745.m2EHjeKX031445%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r527 - trunk/freenx-server">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Fri Mar 14 18:45:40 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000650.html">[Freenx-cvs] r526 - trunk/freenx-server
+</A></li>
+        <LI>Next message: <A HREF="000672.html">[Freenx-cvs] r528 - in trunk/freenx-server: . nxviewer-passwd	nxviewer-passwd/include nxviewer-passwd/libvncauth	nxviewer-passwd/nxpasswd
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#651">[ date ]</a>
+              <a href="thread.html#651">[ thread ]</a>
+              <a href="subject.html#651">[ subject ]</a>
+              <a href="author.html#651">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-03-14 18:45:36 +0100 (Fri, 14 Mar 2008)
+New Revision: 527
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/INSTALL
+Log:
+* Updated documentation in INSTALL file.
+  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-03-14 15:45:09 UTC (rev 526)
++++ trunk/freenx-server/ChangeLog	2008-03-14 17:45:36 UTC (rev 527)
+@@ -87,6 +87,8 @@
+ 	* Added option to disable the showing of running sessions.
+ 	  Set ENABLE_SHOW_RUNNING_SESSIONS=&quot;0&quot; if you want that behaviour.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Updated documentation in INSTALL file.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
+ 14.10.2007 FreeNX 0.7.1 &quot;Hip Hop Edition&quot;
+ 	* Fixed the issue that makes fonts look tiny and unreadable by default 
+
+Modified: trunk/freenx-server/INSTALL
+===================================================================
+--- trunk/freenx-server/INSTALL	2008-03-14 15:45:09 UTC (rev 526)
++++ trunk/freenx-server/INSTALL	2008-03-14 17:45:36 UTC (rev 527)
+@@ -32,44 +32,77 @@
+ 
+ You must apply the gentoo-nomachine.diff and then copy the files to /usr/NX/bin and /usr/NX/lib.
+ 
+-You can use the following schema to do the install to /usr/NX/:
++Get all sources from www.nomachine.com/sources.php
+ 
+-NXPREFIX=/usr/NX
+-mkdir -p ${NXPREFIX}/lib ${NXPREFIX}/bin
++Untar all sources, install all dependencies then do:
+ 
++  $ cd nx-X11
++  $ make World
++  $ cd ..
++  $ cd nxproxy
++  $ ./configure &amp;&amp; make
++
+ # Libraries
+-cp -a nx-X11/lib/X11/libX11.so* ${NXPREFIX}/lib
+-cp -a nx-X11/lib/Xext/libXext.so* ${NXPREFIX}/lib
+-cp -a nx-X11/lib/Xrender/libXrender.so* ${NXPREFIX}/lib
+-cp -a nxcomp/libXcomp.so* ${NXPREFIX}/lib
+-cp -a nxcompext/libXcompext.so* ${NXPREFIX}/lib
+ 
++You can use the following schema to do the install to /usr/NX/:
++
++  $ NXPREFIX=/usr/NX
++  $ mkdir -p ${NXPREFIX}/lib ${NXPREFIX}/bin
++
++  $ cp -a nx-X11/lib/X11/libX11.so* ${NXPREFIX}/lib
++  $ cp -a nx-X11/lib/Xext/libXext.so* ${NXPREFIX}/lib
++  $ cp -a nx-X11/lib/Xrender/libXrender.so* ${NXPREFIX}/lib
++  $ cp -a nxcomp/libXcomp.so* ${NXPREFIX}/lib
++  $ cp -a nxcompext/libXcompext.so* ${NXPREFIX}/lib
++
+ # binaries
+-cp -a nx-X11/programs/Xserver/nxagent ${NXPREFIX}/bin
+-cp -a nxproxy/nxproxy ${NXPREFIX}/bin
+-cp -a nxdesktop/nxdesktop ${NXPREFIX}/bin
+-cp -a nxviewer/nxviewer/nxviewer ${NXPREFIX}/bin
+-cp -a nxviewer/nxpasswd/nxpasswd ${NXPREFIX}/bin
+ 
+-# windows-keymaps for nxdesktop RDP-sessions and keyboard layout != us
+-cd nxdesktop
+-make installkeymaps
++  $ cp -a nx-X11/programs/Xserver/nxagent ${NXPREFIX}/bin
++  $ cp -a nxproxy/nxproxy ${NXPREFIX}/bin
+ 
++### Now comes the FreeNX part
++
++# build binaries and libs included in FreeNX distribution
++
++  $ cd freenx-&lt;version&gt;
++
++# nxredir
++
++  $ cd nxredir
++  $ make
++  $ cd ..
++
++# nxserver-helper
++  
++  $ cd nxserver-helper
++  $ make
++  $ cd ..
++
++# nxpasswd
++
++  $ cd nxviewer-passwd
++  $ xmkmf
++  $ make World
++  $ cd ..
++
++# install binaries included in FreeNX trunk
++
++  $ cd nxredir
++  $ make install
++  $ cd ..
++  $ cp -a nxserver-helper/nxserver-helper ${NXPREFIX}/bin
++  $ cp -a nxviewer-passwd/nxpasswd/nxpasswd ${NXPREFIX}/bin
++
+ # scripts
+-cp -a freenx*/nxnode ${NXPREFIX}/bin
+-cp -a freenx*/nxserver ${NXPREFIX}/bin
+-cp -a freenx*/nxsetup ${NXPREFIX}/bin
+-cp -a freenx*/nxkeygen ${NXPREFIX}/bin
+-cp -a freenx*/nxnode-login ${NXPREFIX}/bin
+-cp -a freenx*/nxloadconfig ${NXPREFIX}/bin
+-cp -a freenx*/nxprint ${NXPREFIX}/bin
+-cp -a freenx*/nxclient ${NXPREFIX}/bin
+ 
++  $ cp nx* ${NXPREFIX}/bin
++
+ # config file
+-cp -a freenx*/node.conf.sample ${NXPREFIX}/etc/
+ 
+-You should also install the nxclient from NoMachine or also copy the nxclient program from freenx. 
++  $ cp -a freenx*/node.conf.sample ${NXPREFIX}/etc/
+ 
++You should also install the nxclient from NoMachine or install Xdialog. 
++
+ Then you need to run 'nxsetup --install' and follow the instructions given.
+ 
+ If you use 1.5.0 as backend be sure to set ENABLE_1_5_0_BACKEND to 1 in node.conf or nxloadconfig.
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000650.html">[Freenx-cvs] r526 - trunk/freenx-server
+</A></li>
+	<LI>Next message: <A HREF="000672.html">[Freenx-cvs] r528 - in trunk/freenx-server: . nxviewer-passwd	nxviewer-passwd/include nxviewer-passwd/libvncauth	nxviewer-passwd/nxpasswd
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#651">[ date ]</a>
+              <a href="thread.html#651">[ thread ]</a>
+              <a href="subject.html#651">[ subject ]</a>
+              <a href="author.html#651">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

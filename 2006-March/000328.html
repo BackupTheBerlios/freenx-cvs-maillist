@@ -1,0 +1,289 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r198 - / freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r198%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200603110042.k2B0gOhi001794%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000327.html">
+   <LINK REL="Next"  HREF="000329.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r198 - / freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r198%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200603110042.k2B0gOhi001794%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r198 - / freenx-server/trunk">fabianx at berlios.de
+       </A><BR>
+    <I>Sat Mar 11 01:42:24 CET 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000327.html">[Freenx-cvs] r197 - / freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000329.html">[Freenx-cvs] r199 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#328">[ date ]</a>
+              <a href="thread.html#328">[ thread ]</a>
+              <a href="subject.html#328">[ subject ]</a>
+              <a href="author.html#328">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2006-03-11 01:42:09 +0100 (Sat, 11 Mar 2006)
+New Revision: 198
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/node.conf.sample
+   freenx-server/trunk/nxloadconfig
+   freenx-server/trunk/nxserver
+Log:
+* Implemented &quot;round-robin&quot; and &quot;load&quot; loadbalancing algorithms.
+  Cleaned up node.conf keys. Thanks to Jonathan &quot;Arrouan&quot; ROUZAUD-CORNABAS (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">rouzaud.jonathan at gmail.com</A>) for ideas.
+		  
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:259
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:261
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-03-10 23:25:07 UTC (rev 197)
++++ freenx-server/trunk/ChangeLog	2006-03-11 00:42:09 UTC (rev 198)
+@@ -24,6 +24,8 @@
+ 	* Added --force-terminate to remove session info.
+ 	  Fixed issue with suspend/terminate commands.
+ 	* Added correct errorcode 596 instead of 504.
++	* Implemented &quot;round-robin&quot; and &quot;load&quot; loadbalancing algorithms.
++	  Cleaned up node.conf keys.
+ 
+ XX.XX.2006 FreeNX 0.4.5 &quot;aKademy Edition&quot;
+ 	* Made nxsetup more user-friendly and hopefully finally failsafe.
+
+Modified: freenx-server/trunk/node.conf.sample
+===================================================================
+--- freenx-server/trunk/node.conf.sample	2006-03-10 23:25:07 UTC (rev 197)
++++ freenx-server/trunk/node.conf.sample	2006-03-11 00:42:09 UTC (rev 198)
+@@ -200,7 +200,10 @@
+ #ENABLE_NOMACHINE_FORWARD_PORT=&quot;0&quot;
+ #NOMACHINE_FORWARD_PORT=&quot;22&quot;
+ 
+-# To do loadbalancing setup some hosts in SERVER_LOADBALANCING and
++# LOAD BALANCING
++# ==============
++#
++# To do load balancing setup some hosts in LOAD_BALANCE_SERVERS and
+ # make:
+ #
+ #   - either sure that all incoming connections are sent to the master
+@@ -210,13 +213,22 @@
+ #     (not recommended at the moment as race conditions for DISPLAYs can 
+ #      occur)
+ #
++
++#LOAD_BALANCE_SERVERS=&quot;&quot;
++
++# The following load_balance_algorithms are available at the moment:
++#
++# &quot;load&quot;, &quot;round-robin&quot;, &quot;random&quot;
++#
++
++#LOAD_BALANCE_ALGORITHM=&quot;load&quot;
++
+ # By setting ENABLE_LOADBALANCE=&quot;1&quot; you can let users choose their
+ # preferred host, while being forwarded to another server. Of course
+ # this is just a preference. The loadbalancing algorithm can completely
+ # choose to ignore the users choice.
+ 
+-#SERVER_LOADBALANCING=&quot;&quot;
+-#ENABLE_LOADBALANCE_PREFERENCE=&quot;0&quot;
++#ENABLE_LOAD_BALANCE_PREFERENCE=&quot;0&quot;
+ 
+ #########################################################################
+ # Services directives
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2006-03-10 23:25:07 UTC (rev 197)
++++ freenx-server/trunk/nxloadconfig	2006-03-11 00:42:09 UTC (rev 198)
+@@ -128,8 +128,9 @@
+ ENABLE_NOMACHINE_FORWARD_PORT=&quot;0&quot;
+ NOMACHINE_FORWARD_PORT=&quot;22&quot;
+ 
+-SERVER_LOADBALANCING=&quot;&quot;
+-ENABLE_LOADBALANCE_PREFERENCE=&quot;0&quot;
++LOAD_BALANCE_SERVERS=&quot;&quot;
++LOAD_BALANCE_ALGORITHM=&quot;load&quot;
++ENABLE_LOAD_BALANCE_PREFERENCE=&quot;0&quot;
+ 
+ # Services directives
+ 
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2006-03-10 23:25:07 UTC (rev 197)
++++ freenx-server/trunk/nxserver	2006-03-11 00:42:09 UTC (rev 198)
+@@ -841,30 +841,113 @@
+ 	return 0
+ }
+ 
+-server_loadbalance_random_rr()
++server_loadbalance_random()
+ {
+-	# Pick one based on &quot;round-robin random&quot;
+-	SERVER_HOSTS=( $SERVER_LOADBALANCING )
+-	SERVER_NR_OF_HOSTS=${#SERVER_HOSTS[@]}
+-	let SERVER_NR=(RANDOM % SERVER_NR_OF_HOSTS)
+-	SERVER_HOST_RR=${SERVER_HOSTS[$SERVER_NR]}
+-	echo $SERVER_HOST_RR
++	# Pick one based on &quot;random&quot; algorithm
++	SERVER_LB_HOSTS=( $LOAD_BALANCE_SERVERS )
++	SERVER_LB_NR_OF_HOSTS=${#SERVER_LB_HOSTS[@]}
++	let SERVER_LB_NR=(RANDOM % SERVER_LB_NR_OF_HOSTS)
++	SERVER_LB_HOST=${SERVER_LB_HOSTS[$SERVER_LB_NR]}
++	echo $SERVER_LB_HOST
+ }
+ 
++# run in subshell!
++
++server_loadbalance_round_robin()
++{
++	SERVER_LB_HOSTS=( $LOAD_BALANCE_SERVERS )
++	SERVER_LB_NR_OF_HOSTS=${#SERVER_LB_HOSTS[@]}
++	
++	# Atomic incrementation:
++
++	# Enter critical section
++	# - Create .lock file
++	
++	SERVER_LB_LOCKFILE=$(mktemp &quot;$NX_SESS_DIR/round-robin.lock.XXXXXXXXX&quot;)
++
++	trap &quot;rm -f $SERVER_LB_LOCKFILE&quot; EXIT
++	
++	i=0
++	while [ $i -lt 200 ]
++	do
++		# ln is an atomic operation
++		ln $SERVER_LB_LOCKFILE &quot;$NX_SESS_DIR/round-robin.lock&quot; &amp;&amp; break
++		LANG=C sleep 0.01
++		let i=i+1
++	done
++
++	if [ $i -ge 200 ]
++	then
++		log 1 &quot;Load-Balancing: Round-Robin failed to gain lock file in 200 tries. Falling back to random.&quot;
++		server_loadbalance_random
++		return
++	fi
++	
++	trap &quot;rm -f $SERVER_LB_LOCKFILE $NX_SESS_DIR/round-robin.lock&quot; EXIT
++
++	# Lock held
++
++	SERVER_LB_NR=$(cat $NX_SESS_DIR/round-robin 2&gt;/dev/null)
++	let SERVER_LB_NR=(SERVER_LB_NR+1) % SERVER_LB_NR_OF_HOSTS
++	echo $SERVER_LB_NR &gt;$NX_SESS_DIR/round-robin
++
++	# Exit critical section
++	rm -f &quot;$SERVER_LB_LOCKFILE $NX_SESS_DIR/round-robin.lock&quot;
++
++	trap - EXIT
++
++	SERVER_LB_HOST=${SERVER_LB_HOSTS[$SERVER_LB_NR]}
++	echo $SERVER_LB_HOST
++}
++
++server_loadbalance_load()
++{
++	SERVER_LB_MAX=0
++	SERVER_LB_HOST=&quot;&quot;
++	
++	for i in $LOAD_BALANCE_SERVERS
++	do
++		SERVER_LB_LOAD=$($NX_DIR/bin/nxcheckload $i)
++		[ -z &quot;$SERVER_LB_LOAD&quot; ] &amp;&amp; continue
++		
++		if [ $SERVER_LB_LOAD -gt $SERVER_LB_MAX ]
++		then
++			SERVER_LB_MAX=$SERVER_LB_LOAD
++			SERVER_LB_HOST=$i
++		fi
++	done
++	echo $SERVER_LB_HOST
++}
++
+ server_loadbalance()
+ {
+ 	SERVER_HOST=&quot;127.0.0.1&quot;
+ 	if [ -n &quot;$SERVER_LOADBALANCING&quot; ]
+ 	then
+ 		SERVER_HOST=&quot;&quot;
+-		if [ -n &quot;$PREFERRED_HOST&quot; -a &quot;$ENABLE_LOADBALANCE_PREFERENCE&quot; = &quot;1&quot; ]
++		if [ -n &quot;$PREFERRED_HOST&quot; -a &quot;$ENABLE_LOAD_BALANCE_PREFERENCE&quot; = &quot;1&quot; ]
+ 		then
+ 			stringinstring &quot; $PREFERRED_HOST &quot; &quot; $SERVER_LOADBALANCING &quot; &amp;&amp; SERVER_HOST=&quot;$PREFERRED_HOST&quot;
+ 		fi
++		
+ 		# Fallback if still empty
+-		[ -z &quot;$SERVER_HOST&quot; ] &amp;&amp; SERVER_HOST=$(server_loadbalance_random_rr)
++		if [ -z &quot;$SERVER_HOST&quot; ]
++		then
++			case &quot;$LOAD_BALANCE_ALGORITHM&quot; in
++				random)
++					SERVER_HOST=$(server_loadbalance_random)
++				;;
++				round-robin)
++					SERVER_HOST=$(server_loadbalance_round_robin)
++				;;
++				load)
++					SERVER_HOST=$(server_loadbalance_load)
++				;;
++			esac
++		fi
++		
++		[ -z &quot;$SERVER_HOST&quot; ] &amp;&amp; SERVER_HOST=&quot;127.0.0.1&quot;
+ 		[ -n &quot;$SERVER_HOST&quot; ] &amp;&amp; log 5 &quot;Info: Load-Balancing (if possible) to $SERVER_HOST ...&quot;
+-		[ -z &quot;$SERVER_HOST&quot; ] &amp;&amp; SERVER_HOST=&quot;127.0.0.1&quot;
+ 	fi
+ 	echo &quot;$SERVER_HOST&quot;
+ }	
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000327.html">[Freenx-cvs] r197 - / freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000329.html">[Freenx-cvs] r199 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#328">[ date ]</a>
+              <a href="thread.html#328">[ thread ]</a>
+              <a href="subject.html#328">[ subject ]</a>
+              <a href="author.html#328">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

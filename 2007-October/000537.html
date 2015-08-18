@@ -1,0 +1,270 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r409 - nxlaunch/lib
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-October/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r409%20-%20nxlaunch/lib&In-Reply-To=%3C200710170834.l9H8YLIu019798%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000536.html">
+   <LINK REL="Next"  HREF="000538.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r409 - nxlaunch/lib</H1>
+    <B>sebjames at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r409%20-%20nxlaunch/lib&In-Reply-To=%3C200710170834.l9H8YLIu019798%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r409 - nxlaunch/lib">sebjames at mail.berlios.de
+       </A><BR>
+    <I>Wed Oct 17 10:34:21 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000536.html">[Freenx-cvs] r408 - in nxcl: lib nxcl
+</A></li>
+        <LI>Next message: <A HREF="000538.html">[Freenx-cvs] r410 - nxlaunch/src
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#537">[ date ]</a>
+              <a href="thread.html#537">[ thread ]</a>
+              <a href="subject.html#537">[ subject ]</a>
+              <a href="author.html#537">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: sebjames
+Date: 2007-10-17 10:34:20 +0200 (Wed, 17 Oct 2007)
+New Revision: 409
+
+Modified:
+   nxlaunch/lib/callbacks_nx.c
+Log:
+Thanks to Austin Che for feedback, I realised that in all my calls to 
+gtk_combo_box_get_active_iter() should check its return value and if it 
+fails, manually allocate and populate the string I was about to use.
+
+
+Modified: nxlaunch/lib/callbacks_nx.c
+===================================================================
+--- nxlaunch/lib/callbacks_nx.c	2007-10-16 21:26:15 UTC (rev 408)
++++ nxlaunch/lib/callbacks_nx.c	2007-10-17 08:34:20 UTC (rev 409)
+@@ -1541,14 +1541,17 @@
+ 	GtkTextBuffer * buffer;
+ 	GtkTextIter start, end;
+ 	GtkTreeIter iter;
+-	GtkListStore * nxList;
++	GtkListStore * nxList = NULL;
+ 	gchar * str;
++	gboolean strAllocatedMan = FALSE; // True if str has been allocated manually
++	gboolean strAllocatedGtk = FALSE; // True if str has been allocated within gtk fn
+ 
+ 	/* Used to get the connection capacity hscale value */
+ 	gdouble speed;
+ 	guint speed_as_int;
+ 
+-	str = g_malloc0 (512 * sizeof (gchar));
++	// Either gtk_tree_model_get will malloc str or we manually malloc it
++	//str = g_malloc0 (512 * sizeof (gchar));
+ 
+ 	/*
+ 	 * The Network Tab.
+@@ -1639,9 +1642,20 @@
+ 	widget = glade_xml_get_widget (xml_glob, &quot;combobox_nx_desktop_session&quot;);
+ 	nxList = GTK_LIST_STORE (gtk_combo_box_get_model (GTK_COMBO_BOX (widget)));
+ 	printerr (&quot;Getting active iter for desktop session list..\n&quot;);
+-	gtk_combo_box_get_active_iter (GTK_COMBO_BOX (widget), &amp;iter);
+-	gtk_tree_model_get (GTK_TREE_MODEL (nxList), &amp;iter, PROGRAM, &amp;str, -1);
+ 
++	if (gtk_combo_box_get_active_iter (GTK_COMBO_BOX (widget), &amp;iter)) {		
++		gtk_tree_model_get (GTK_TREE_MODEL (nxList), &amp;iter, PROGRAM, &amp;str, -1);
++		strAllocatedGtk = TRUE;
++	} else {
++		if (strAllocatedMan == FALSE || strAllocatedGtk == TRUE) {
++			str = g_realloc ((gpointer)str, NX_FIELDLEN * sizeof (gchar));
++			strAllocatedMan = TRUE;
++			strAllocatedGtk = FALSE;
++		}
++		/* If we can't get the string from the tree_model, then set it manually to a default */
++		snprintf (str, 6, &quot;%s&quot;, &quot;GNOME&quot;);
++	}
++
+ 	if (strstr (str, _(&quot;KDE&quot;))) {
+ 		strncpy (nx_conn-&gt;Desktop, &quot;kde&quot;, NX_FIELDLEN);
+ 		strncpy (nx_conn-&gt;Session, &quot;unix&quot;, NX_FIELDLEN);
+@@ -1725,8 +1739,18 @@
+ 	widget = glade_xml_get_widget (xml_glob, &quot;combobox_nx_xdm_mode&quot;);
+ 	nxList = GTK_LIST_STORE (gtk_combo_box_get_model (GTK_COMBO_BOX (widget)));
+ 	printerr (&quot;Getting active iter for xdm mode..\n&quot;);
+-	gtk_combo_box_get_active_iter (GTK_COMBO_BOX (widget), &amp;iter);
+-	gtk_tree_model_get (GTK_TREE_MODEL (nxList), &amp;iter, PROGRAM, &amp;str, -1);
++	if (gtk_combo_box_get_active_iter (GTK_COMBO_BOX (widget), &amp;iter)) {		
++		gtk_tree_model_get (GTK_TREE_MODEL (nxList), &amp;iter, PROGRAM, &amp;str, -1);
++		strAllocatedGtk = TRUE;
++	} else {
++		if (strAllocatedMan == FALSE || strAllocatedGtk == TRUE) {
++			str = g_realloc ((gpointer)str, NX_FIELDLEN * sizeof (gchar));
++			strAllocatedMan = TRUE;
++			strAllocatedGtk = FALSE;
++		}
++		/* If we can't get the string from the tree_model, then set it manually to a default */
++		snprintf (str, NX_FIELDLEN, &quot;%s&quot;, _(&quot;Let NX server decide&quot;));
++	}
+ 
+ 	if (strstr (str, _(&quot;Let NX server decide&quot;))) {
+ 		strncpy (nx_conn-&gt;XdmMode, &quot;server decide&quot;, NX_FIELDLEN);
+@@ -1753,8 +1777,18 @@
+ 	widget = glade_xml_get_widget (xml_glob, &quot;combobox_nx_window_size&quot;);
+ 	nxList = GTK_LIST_STORE (gtk_combo_box_get_model (GTK_COMBO_BOX (widget)));
+ 	printerr (&quot;Getting active iter for nx window size..\n&quot;);
+-	gtk_combo_box_get_active_iter (GTK_COMBO_BOX (widget), &amp;iter);
+-	gtk_tree_model_get (GTK_TREE_MODEL (nxList), &amp;iter, PROGRAM, &amp;str, -1);
++	if (gtk_combo_box_get_active_iter (GTK_COMBO_BOX (widget), &amp;iter)) {		
++		gtk_tree_model_get (GTK_TREE_MODEL (nxList), &amp;iter, PROGRAM, &amp;str, -1);
++		strAllocatedGtk = TRUE;
++	} else {
++		if (strAllocatedMan == FALSE || strAllocatedGtk == TRUE) {
++			str = g_realloc ((gpointer)str, NX_FIELDLEN * sizeof (gchar));
++			strAllocatedMan = TRUE;
++			strAllocatedGtk = FALSE;
++		}
++		/* If we can't get the string from the tree_model, then set it manually to a default */
++		snprintf (str, NX_FIELDLEN, &quot;%s&quot;, _(&quot;Full Screen&quot;));
++	}
+ 
+ 	if (strstr (str, &quot;640 x 480&quot;)) {
+ 		nx_conn-&gt;FullScreen = FALSE;
+@@ -1805,8 +1839,18 @@
+ 	widget = glade_xml_get_widget (xml_glob, &quot;combobox_nx_image_encoding&quot;);
+ 	nxList = GTK_LIST_STORE (gtk_combo_box_get_model (GTK_COMBO_BOX (widget)));
+ 	printerr (&quot;Getting active iter for image encoding..\n&quot;);
+-	gtk_combo_box_get_active_iter (GTK_COMBO_BOX (widget), &amp;iter);
+-	gtk_tree_model_get (GTK_TREE_MODEL (nxList), &amp;iter, PROGRAM, &amp;str, -1);
++	if (gtk_combo_box_get_active_iter (GTK_COMBO_BOX (widget), &amp;iter)) {		
++		gtk_tree_model_get (GTK_TREE_MODEL (nxList), &amp;iter, PROGRAM, &amp;str, -1);
++		strAllocatedGtk = TRUE;
++	} else {
++		if (strAllocatedMan == FALSE || strAllocatedGtk == TRUE) {
++			str = g_realloc ((gpointer)str, NX_FIELDLEN * sizeof (gchar));
++			strAllocatedMan = TRUE;
++			strAllocatedGtk = FALSE;
++		}
++		/* If we can't get the string from the tree_model, then set it manually to a default */
++		snprintf (str, NX_FIELDLEN, &quot;%s&quot;, _(&quot;Default&quot;));
++	}
+ 
+ 	if (strstr (str, _(&quot;Default&quot;))) {
+ 		nx_conn-&gt;ImageEncoding = 0;
+@@ -1823,7 +1867,12 @@
+ 	widget = glade_xml_get_widget (xml_glob, &quot;spinbutton_nx_jpeg_quality&quot;);
+ 	nx_conn-&gt;JPEGQuality = gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (widget));
+ 
+-	g_free (str);
++	/*
++	 * Free up str here before using it below
++	 */
++	if (strAllocatedMan == TRUE || strAllocatedGtk == TRUE) {
++		g_free (str);
++	}
+ 
+ 	/*
+ 	 * The SSH Public Key
+@@ -2118,8 +2167,12 @@
+ 	
+ 	widget = glade_xml_get_widget (xml_glob, &quot;combobox_nx_desktop_session&quot;);
+ 	nxList = GTK_LIST_STORE (gtk_combo_box_get_model (GTK_COMBO_BOX (widget)));
+-	gtk_combo_box_get_active_iter (GTK_COMBO_BOX (widget), &amp;iter);
+-	gtk_tree_model_get (GTK_TREE_MODEL (nxList), &amp;iter, PROGRAM, &amp;str, -1);
++	if (gtk_combo_box_get_active_iter (GTK_COMBO_BOX (widget), &amp;iter)) {
++		gtk_tree_model_get (GTK_TREE_MODEL (nxList), &amp;iter, PROGRAM, &amp;str, -1);
++	} else {
++		str = g_malloc (NX_FIELDLEN * sizeof (gchar));
++		snprintf (str, NX_FIELDLEN, &quot;%s&quot;, _(&quot;GNOME&quot;));
++	}
+ 
+ 	if (strstr (str, _(&quot;KDE&quot;))) {
+ 		grey_all_xdm_settings ();
+@@ -2145,6 +2198,8 @@
+ 		grey_all_xdm_settings ();
+ 	}
+ 
++	g_free (str);
++
+ 	return rtn;
+ }
+ 
+@@ -2215,12 +2270,16 @@
+ 	GtkTreeIter iter;
+ 	GtkListStore * nxList;
+ 	gchar * str;
++	
++	//str = g_malloc0 (512 * sizeof (gchar));
+ 
+-	str = g_malloc0 (512 * sizeof (gchar));
+-
+ 	nxList = GTK_LIST_STORE (gtk_combo_box_get_model (box));
+-	gtk_combo_box_get_active_iter (box, &amp;iter);
+-	gtk_tree_model_get (GTK_TREE_MODEL (nxList), &amp;iter, PROGRAM, &amp;str, -1);
++	if (gtk_combo_box_get_active_iter (box, &amp;iter)) {
++		gtk_tree_model_get (GTK_TREE_MODEL (nxList), &amp;iter, PROGRAM, &amp;str, -1);
++	} else {
++		str = g_malloc0 (NX_FIELDLEN * sizeof (gchar));
++		snprintf (str, NX_FIELDLEN, &quot;%s&quot;, _(&quot;Full Screen&quot;));
++	}
+ 
+ 	if (strstr (str, &quot;640 x 480&quot;)) {
+ 		widget =  glade_xml_get_widget (xml_glob, &quot;spinbutton_nx_width&quot;);
+@@ -2283,11 +2342,13 @@
+ 	GtkListStore * nxList;
+ 	gchar * str;
+ 
+-	str = g_malloc0 (512 * sizeof (gchar));
+-
+ 	nxList = GTK_LIST_STORE (gtk_combo_box_get_model (box));
+-	gtk_combo_box_get_active_iter (box, &amp;iter);
+-	gtk_tree_model_get (GTK_TREE_MODEL (nxList), &amp;iter, PROGRAM, &amp;str, -1);
++	if (gtk_combo_box_get_active_iter (box, &amp;iter)) {
++		gtk_tree_model_get (GTK_TREE_MODEL (nxList), &amp;iter, PROGRAM, &amp;str, -1);
++	} else {
++		str = g_malloc0 (8 * sizeof (gchar));
++		snprintf (str, 5, &quot;%s&quot;, &quot;null&quot;);
++	}
+ 
+ 	if (strstr (str, &quot;JPEG&quot;)) {
+ 		widget =  glade_xml_get_widget (xml_glob, &quot;spinbutton_nx_jpeg_quality&quot;);
+@@ -2302,6 +2363,8 @@
+ 		gtk_widget_set_sensitive (widget, FALSE);
+ 
+ 	}
++	
++	g_free (str);
+ }
+ 
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000536.html">[Freenx-cvs] r408 - in nxcl: lib nxcl
+</A></li>
+	<LI>Next message: <A HREF="000538.html">[Freenx-cvs] r410 - nxlaunch/src
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#537">[ date ]</a>
+              <a href="thread.html#537">[ thread ]</a>
+              <a href="subject.html#537">[ subject ]</a>
+              <a href="author.html#537">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

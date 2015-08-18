@@ -1,0 +1,207 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fabianx modified 4 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%204%20files&In-Reply-To=%3C4225CB08.mailJAE11WPAE%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000029.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fabianx modified 4 files</H1>
+    <B>fabianx</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%204%20files&In-Reply-To=%3C4225CB08.mailJAE11WPAE%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fabianx modified 4 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Wed Mar  2 15:17:44 CET 2005</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000029.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28">[ date ]</a>
+              <a href="thread.html#28">[ thread ]</a>
+              <a href="subject.html#28">[ subject ]</a>
+              <a href="author.html#28">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fabianx
+Date:      2005-03-02 14:17:43 GMT
+Modified:  .        ChangeLog node.conf.sample nxloadconfig nxserver
+Log:
+Added mechanism to forward connection to another nxserver. This allows using a &quot;chain&quot; of nxservers.
+
+Added keys to nxloadconfig: ENABLE_SERVER_FORWARD, SERVER_FORWARD_HOST, SERVER_FORWARD_KEY.
+
+Revision  Changes    Path
+1.16      +2 -0      freenx/ChangeLog
+
+
+rev 1.16, prev_rev 1.15
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.15
+retrieving revision 1.16
+diff -u -r1.15 -r1.16
+--- ChangeLog	17 Feb 2005 15:59:31 -0000	1.15
++++ ChangeLog	2 Mar 2005 14:17:43 -0000	1.16
+@@ -15,6 +15,8 @@
+ 	  directives.
+ 	* Added mechanism to forward connection to commercial NoMachine 
+ 	  nxserver (as available from www.nomachine.com).
++	* Added mechanism to forward connection to another nxserver. This
++	  allows using a &quot;chain&quot; of nxservers.
+ 	* Added &quot;floating window&quot; support by using rootless nxagent as
+ 	  it will be standard in NX 1.5.0.
+ 	* Added &quot;floating window&quot; support by just nxproxy/nxproxy connection
+
+
+
+1.4       +11 -1     freenx/node.conf.sample
+
+
+rev 1.4, prev_rev 1.3
+Index: node.conf.sample
+===================================================================
+RCS file: /cvsroot/freenx/freenx/node.conf.sample,v
+retrieving revision 1.3
+retrieving revision 1.4
+diff -u -r1.3 -r1.4
+--- node.conf.sample	14 Feb 2005 10:07:43 -0000	1.3
++++ node.conf.sample	2 Mar 2005 14:17:43 -0000	1.4
+@@ -37,7 +37,7 @@
+ #
+ #           <A HREF="https://mail.kde.org/mailman/listinfo/freenx-knx">https://mail.kde.org/mailman/listinfo/freenx-knx</A>
+ #
+-# CVS: $Id: node.conf.sample,v 1.3 2005/02/14 10:07:43 pipitas Exp $
++# CVS: $Id: node.conf.sample,v 1.4 2005/03/02 14:17:43 fabianx Exp $
+ 
+ #########################################################################
+ # FreeNX specific node.conf directives
+@@ -87,6 +87,16 @@
+ # like: $NODE_AUTOSTART {start|restore}
+ #NODE_AUTOSTART=&quot;&quot;
+ 
++# FreeNX with ENABLE_SERVER_FORWARD=&quot;1&quot; will automatically forward all
++# connections to the host specified in SERVER_FORWARD_HOST with the 
++# secret key SERVER_FORWARD_KEY.
++#
++# This allows to have a &quot;chain&quot; of NX Servers. Note that you will need to 
++# use &quot;SSL encryption&quot; for all connections.
++
++#ENABLE_SERVER_FORWARD=&quot;0&quot;
++#SERVER_FORWARD_HOST=&quot;&quot;
++#SERVER_FORWARD_KEY=&quot;/usr/NX/share/client.id_dsa.key&quot;
+ 
+ # FreeNX with ENABLE_NOMACHINE_FORWARD=&quot;1&quot; will automatically forward all
+ # connections to the commercial NoMachine nxserver installed on the same
+
+
+
+1.4       +5 -1      freenx/nxloadconfig
+
+
+rev 1.4, prev_rev 1.3
+Index: nxloadconfig
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxloadconfig,v
+retrieving revision 1.3
+retrieving revision 1.4
+diff -u -r1.3 -r1.4
+--- nxloadconfig	14 Feb 2005 08:23:16 -0000	1.3
++++ nxloadconfig	2 Mar 2005 14:17:43 -0000	1.4
+@@ -5,7 +5,7 @@
+ #
+ # License: GPL, version 2
+ #
+-# CVS: $Id: nxloadconfig,v 1.3 2005/02/14 08:23:16 jonno Exp $
++# CVS: $Id: nxloadconfig,v 1.4 2005/03/02 14:17:43 fabianx Exp $
+ #
+ # ========================================================================
+ 
+@@ -52,6 +52,10 @@
+ EXPORT_USERIP=&quot;0&quot;
+ EXPORT_SESSIONID=&quot;0&quot;
+ NODE_AUTOSTART=&quot;&quot;
++
++ENABLE_SERVER_FORWARD=&quot;0&quot;
++SERVER_FORWARD_HOST=&quot;&quot;
++SERVER_FORWARD_KEY=&quot;/usr/NX/share/client.id_dsa.key&quot;
+ 
+ ENABLE_NOMACHINE_FORWARD=&quot;0&quot;
+ NOMACHINE_SERVER=&quot;/usr/NX/bin/nxserver&quot;
+
+
+
+1.24      +8 -1      freenx/nxserver
+
+
+rev 1.24, prev_rev 1.23
+Index: nxserver
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxserver,v
+retrieving revision 1.23
+retrieving revision 1.24
+diff -u -r1.23 -r1.24
+--- nxserver	14 Feb 2005 17:46:06 -0000	1.23
++++ nxserver	2 Mar 2005 14:17:43 -0000	1.24
+@@ -11,7 +11,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxserver,v 1.23 2005/02/14 17:46:06 jonno Exp $
++# CVS: $Id: nxserver,v 1.24 2005/03/02 14:17:43 fabianx Exp $
+ #
+ 
+ # Read the config file
+@@ -415,6 +415,13 @@
+ 
+ # Start!
+ log &quot;-- NX SERVER START: $@&quot;
++
++if [ &quot;$ENABLE_SERVER_FORWARD&quot; = &quot;1&quot; -a -n &quot;$SERVER_FORWARD_HOST&quot; ]
++then
++	log &quot;Forwarding connection to $SERVER_FORWARD_HOST with secret key $SERVER_FORWARD_KEY.&quot;
++	ssh -i &quot;$SERVER_FORWARD_KEY&quot; nx@&quot;$SERVER_FORWARD_HOST&quot;
++	exit 0
++fi
+ 
+ echo_x &quot;HELLO NXSERVER - Version $NX_VERSION $NX_LICENSE&quot;
+ 
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000029.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28">[ date ]</a>
+              <a href="thread.html#28">[ thread ]</a>
+              <a href="subject.html#28">[ subject ]</a>
+              <a href="author.html#28">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

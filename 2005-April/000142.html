@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fabianx modified nxserver
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-April/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%20nxserver&In-Reply-To=%3C200504301851.22669.FabianFranz%40gmx.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000138.html">
+   <LINK REL="Next"  HREF="000141.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fabianx modified nxserver</H1>
+    <B>Fabian Franz</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%20nxserver&In-Reply-To=%3C200504301851.22669.FabianFranz%40gmx.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fabianx modified nxserver">FabianFranz at gmx.de
+       </A><BR>
+    <I>Sat Apr 30 18:51:20 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000138.html">[Freenx-cvs] CVS: freenx - fabianx modified 4 files
+</A></li>
+        <LI>Next message: <A HREF="000141.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#142">[ date ]</a>
+              <a href="thread.html#142">[ thread ]</a>
+              <a href="subject.html#142">[ subject ]</a>
+              <a href="author.html#142">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+Am Samstag, 30. April 2005 18:48 schrieb Thorsten Sandfuchs:
+&gt;<i> On Sat, Apr 30, 2005 at 05:54:27PM +0200, fabianx wrote:
+</I>&gt;<i> &gt; Fixed broken commit by fux. Fux: Please test your changes before
+</I>&gt;<i> &gt; commiting.
+</I>&gt;<i>
+</I>&gt;<i> well I did :)
+</I>
+Somehow I can't believe that ;-)
+
+&gt;<i> Actually I didn't test the printer-support.
+</I>
+That is ok.
+
+&gt;<i>
+</I>&gt;<i> What was the Problem?
+</I>&gt;<i>
+</I>&gt;<i> &gt; -	    echo &quot;$PASS&quot; | $PATH_BIN/nxnode-login -- ssh &quot;$USER&quot; &quot;$SSHD_PORT&quot;
+</I>&gt;<i> &gt; &quot;$PATH_BIN/nxnode&quot; &quot;$CMD&quot; &quot;$@&quot; 2&gt;&amp;1 &gt;/dev/null | log_error +	    echo
+</I>&gt;<i> &gt; &quot;$PASS&quot; | $PATH_BIN/nxnode-login -- ssh &quot;$USER&quot; &quot;$SSHD_PORT&quot;
+</I>&gt;<i> &gt; &quot;$PATH_BIN/nxnode&quot; &quot;$CMD&quot; &quot;$@&quot; 2&gt;&amp;1 | log_tee
+</I>&gt;<i>
+</I>&gt;<i> I just wanted to catch the error-log, because in the previous-versions of
+</I>&gt;<i> freenx the stdout of the nxnode-login was send to /dev/null and not logged,
+</I>
+No, I did revert this line to the previous version. You did efficiently remove 
+all communication between nxnode and nxclient, which lead to not starting 
+sessions. ;-)
+
+You are mixing this up with the _login_ stage. There it was sent to /dev/null 
+and thank you for the fix there.
+
+&gt;<i> &gt; -			server_nxnode_start --smbmount &quot;$USER&quot; &quot;$PARAMS&quot; 2&gt;&amp;1 | log_error
+</I>&gt;<i> &gt; +			server_nxnode_start --smbmount &quot;$USER&quot; &quot;$PARAMS&quot; 2&gt;&amp;1 | log_error
+</I>&gt;<i> &gt; &gt;/dev/null -			server_nxnode_start --addprinter &quot;$USER&quot; &quot;$PARAMS&quot; 2&gt;&amp;1 |
+</I>&gt;<i> &gt; log_error +			server_nxnode_start --addprinter &quot;$USER&quot; &quot;$PARAMS&quot; 2&gt;&amp;1 |
+</I>&gt;<i> &gt; log_error &gt;/dev/null
+</I>&gt;<i>
+</I>&gt;<i> does this work? As log_error won't produce any stdout, shouldn't it be
+</I>
+Yes, log_error does produce on stdout whats on stdin. That was the purpose of 
+log_tee from which you derived log_error.
+
+cu
+
+Fabian
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.2.4 (GNU/Linux)
+
+iD8DBQFCc7eKI0lSH7CXz7MRAukBAJ9DwpYcFWLhKhYwOpz0ejSA6IktkwCcDsok
+Fmh/56Nm4YvODiQXm3npuDM=
+=Fv6B
+-----END PGP SIGNATURE-----
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000138.html">[Freenx-cvs] CVS: freenx - fabianx modified 4 files
+</A></li>
+	<LI>Next message: <A HREF="000141.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#142">[ date ]</a>
+              <a href="thread.html#142">[ thread ]</a>
+              <a href="subject.html#142">[ subject ]</a>
+              <a href="author.html#142">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

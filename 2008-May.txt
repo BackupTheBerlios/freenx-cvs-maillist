@@ -1,0 +1,267 @@
+From fabianx at mail.berlios.de  Tue May  6 15:29:58 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 6 May 2008 15:29:58 +0200
+Subject: [Freenx-cvs] r541 - trunk/freenx-server
+Message-ID: <200805061329.m46DTw94028620@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-05-06 15:29:58 +0200 (Tue, 06 May 2008)
+New Revision: 541
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxserver
+Log:
+* Added patch from 2005 to enable reconnect to 24-bit display via
+  32-bit or vice versa. Oops :)
+  (Sunil <funtoos at yahoo.com> )
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-04-15 23:38:54 UTC (rev 540)
++++ trunk/freenx-server/ChangeLog	2008-05-06 13:29:58 UTC (rev 541)
+@@ -12,6 +12,9 @@
+ 	* Finally fixed mv not working for failed or terminated
+ 	  sessions.
+ 	  (fabianx at bat.berlios.de, Terje Andersen <terander at guard.zapto.org>)
++	* Added patch from 2005 to enable reconnect to 24-bit display via
++	  32-bit or vice versa. Oops :)
++	  (Sunil <funtoos at yahoo.com> )
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-04-15 23:38:54 UTC (rev 540)
++++ trunk/freenx-server/nxserver	2008-05-06 13:29:58 UTC (rev 541)
+@@ -233,10 +233,12 @@
+ 		then
+ 			CMDLINE=$(session_get_cmdline $i)
+ 			depth=$(getparam screeninfo | cut -d "x" -f3 | cut -d "+" -f1 )
++			[ "$depth" = "32" ] && depth=24
+ 			geom=$(getparam screeninfo | cut -d "x" -f1,2) 
+ 			render=$(getparam screeninfo | cut -d "+" -f2 )
+ 			available="N/A"
+ 			udepth=$(echo $3 | cut -d "x" -f3 | cut -d "+" -f1 )
++			[ "$udepth" = "32" ] && udepth=24
+ 			urender=$(echo $3 | cut -d "+" -f2 )
+ 
+ 			mode="D"
+
+
+
+From fabianx at mail.berlios.de  Tue May  6 16:32:20 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 6 May 2008 16:32:20 +0200
+Subject: [Freenx-cvs] r542 - trunk/freenx-server
+Message-ID: <200805061432.m46EWKid003731@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-05-06 16:32:19 +0200 (Tue, 06 May 2008)
+New Revision: 542
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxloadconfig
+Log:
+* Added 3.2.0 as a backend version for nxloadconfig.
+(fabianx at bat.berlios.de)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-05-06 13:29:58 UTC (rev 541)
++++ trunk/freenx-server/ChangeLog	2008-05-06 14:32:19 UTC (rev 542)
+@@ -15,6 +15,8 @@
+ 	* Added patch from 2005 to enable reconnect to 24-bit display via
+ 	  32-bit or vice versa. Oops :)
+ 	  (Sunil <funtoos at yahoo.com> )
++	* Added 3.2.0 as a backend version for nxloadconfig.
++	  (fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxloadconfig
+===================================================================
+--- trunk/freenx-server/nxloadconfig	2008-05-06 13:29:58 UTC (rev 541)
++++ trunk/freenx-server/nxloadconfig	2008-05-06 14:32:19 UTC (rev 542)
+@@ -600,8 +600,8 @@
+ 	[ -z $(echo "$ENABLE_ROOTLESS_MODE" | egrep "^[0|1]$") ] && \
+ 		ERROR="yes" && echo "Error: Invalid value \"ENABLE_ROOTLESS_MODE=$ENABLE_ROOTLESS_MODE\""
+ 
+-	[ -z "$(strings $PATH_BIN/nxagent | egrep 'NXAGENT - Version 1.5.0|NXAGENT - Version 2.[01].0|NXAGENT - Version 3.[01].0')" ] && \
+-		ERROR="yes" && echo "Error: Could not find 1.5.0 or 2.[01].0 or 3.[01].0 version string in nxagent. NX 1.5.0 or 2.[01].0 or 3.[01].0 backend is needed for this version of FreeNX."
++	[ -z "$(strings $PATH_BIN/nxagent | egrep 'NXAGENT - Version 1.5.0|NXAGENT - Version 2.[01].0|NXAGENT - Version 3.[012].0')" ] && \
++		WARNING="yes" && echo "Error: Could not find 1.5.0 or 2.[01].0 or 3.[01].0 version string in nxagent. NX 1.5.0 or 2.[01].0 or 3.[012].0 backend is needed for this version of FreeNX."
+ 		
+ 	[ -z $(echo "$ENABLE_USESSION" | egrep "^[0|1]$") ] && \
+ 		ERROR="yes" && echo "Error: Invalid value \"ENABLE_USESSION=$ENABLE_USESSION\""
+
+
+
+From fabianx at mail.berlios.de  Tue May  6 16:40:24 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 6 May 2008 16:40:24 +0200
+Subject: [Freenx-cvs] r543 - trunk/freenx-server
+Message-ID: <200805061440.m46EeOvt004741@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-05-06 16:40:24 +0200 (Tue, 06 May 2008)
+New Revision: 543
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/node.conf.sample
+   trunk/freenx-server/nxloadconfig
+   trunk/freenx-server/nxnode
+Log:
+* Added configuration key ENABLE_SOURCE_BASH_PROFILE for toggling of
+  sourcing ~/.bash_profile.
+  (fabianx at bat.berlios.de)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-05-06 14:32:19 UTC (rev 542)
++++ trunk/freenx-server/ChangeLog	2008-05-06 14:40:24 UTC (rev 543)
+@@ -17,6 +17,9 @@
+ 	  (Sunil <funtoos at yahoo.com> )
+ 	* Added 3.2.0 as a backend version for nxloadconfig.
+ 	  (fabianx at bat.berlios.de)
++	* Added configuration key ENABLE_SOURCE_BASH_PROFILE for toggling of 
++	  sourcing ~/.bash_profile.
++	  (fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/node.conf.sample
+===================================================================
+--- trunk/freenx-server/node.conf.sample	2008-05-06 14:32:19 UTC (rev 542)
++++ trunk/freenx-server/node.conf.sample	2008-05-06 14:40:24 UTC (rev 543)
+@@ -416,6 +416,13 @@
+ #
+ #ENABLE_SAMBA_PRELOAD="0"
+ 
++# FreeNX with ENABLE_SOURCE_BASH_PROFILE="1" will source the users ~/.bash_profile
++# before application startup as we are kind of a login shell.
++#
++# With this key this behaviour can be enabled (default) or disabled.
++# 
++#ENABLE_SOURCE_BASH_PROFILE="1"
++
+ #########################################################################
+ # Path directives
+ #########################################################################
+
+Modified: trunk/freenx-server/nxloadconfig
+===================================================================
+--- trunk/freenx-server/nxloadconfig	2008-05-06 14:32:19 UTC (rev 542)
++++ trunk/freenx-server/nxloadconfig	2008-05-06 14:40:24 UTC (rev 543)
+@@ -172,6 +172,7 @@
+ 
+ SAMBA_MOUNT_SHARE_PROTOCOL="both"
+ ENABLE_SAMBA_PRELOAD="0"
++ENABLE_SOURCE_BASH_PROFILE="1"
+ 
+ # Path directives
+ 
+
+Modified: trunk/freenx-server/nxnode
+===================================================================
+--- trunk/freenx-server/nxnode	2008-05-06 14:32:19 UTC (rev 542)
++++ trunk/freenx-server/nxnode	2008-05-06 14:40:24 UTC (rev 543)
+@@ -251,7 +251,7 @@
+ 	#
+ 	
+ 	. /etc/profile
+-	[ -f ~/.bash_profile ] && . ~/.bash_profile
++	[ "$ENABLE_SOURCE_BASH_PROFILE" = "1" -a -f ~/.bash_profile ] && . ~/.bash_profile
+ 
+ 	mkdir -p "$USER_FAKE_HOME/.nx/C-$sess_id/pids/apps/"
+ 
+
+
+
+From fabianx at mail.berlios.de  Thu May 22 20:43:27 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Thu, 22 May 2008 20:43:27 +0200
+Subject: [Freenx-cvs] r544 - trunk/freenx-server
+Message-ID: <200805221843.m4MIhRRv005652@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-05-22 20:43:26 +0200 (Thu, 22 May 2008)
+New Revision: 544
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/node.conf.sample
+   trunk/freenx-server/nxloadconfig
+Log:
+* Added /usr/bin/xauth as default key and used /usr/X11R6/bin/xauth as
+  fallback.
+  (fabianx at bat.berlios.de)
+
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-05-06 14:40:24 UTC (rev 543)
++++ trunk/freenx-server/ChangeLog	2008-05-22 18:43:26 UTC (rev 544)
+@@ -20,6 +20,9 @@
+ 	* Added configuration key ENABLE_SOURCE_BASH_PROFILE for toggling of 
+ 	  sourcing ~/.bash_profile.
+ 	  (fabianx at bat.berlios.de)
++	* Added /usr/bin/xauth as default key and used /usr/X11R6/bin/xauth as
++	  fallback.
++	  (fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/node.conf.sample
+===================================================================
+--- trunk/freenx-server/node.conf.sample	2008-05-06 14:40:24 UTC (rev 543)
++++ trunk/freenx-server/node.conf.sample	2008-05-22 18:43:26 UTC (rev 544)
+@@ -476,7 +476,7 @@
+ 
+ # The key that contains the name of the complete path of command name
+ # 'xauth'.
+-#COMMAND_XAUTH=/usr/X11R6/bin/xauth
++#COMMAND_XAUTH=/usr/bin/xauth
+ 
+ # The key that contains the name of the complete path of command name
+ # 'smbmount'.
+
+Modified: trunk/freenx-server/nxloadconfig
+===================================================================
+--- trunk/freenx-server/nxloadconfig	2008-05-06 14:40:24 UTC (rev 543)
++++ trunk/freenx-server/nxloadconfig	2008-05-22 18:43:26 UTC (rev 544)
+@@ -187,7 +187,7 @@
+ COMMAND_START_GNOME=gnome-session
+ COMMAND_START_CDE=cdwm
+ COMMAND_XTERM=xterm
+-COMMAND_XAUTH=/usr/X11R6/bin/xauth
++COMMAND_XAUTH=/usr/bin/xauth
+ COMMAND_SMBMOUNT=smbmount
+ COMMAND_SMBUMOUNT=smbumount
+ COMMAND_SMBMOUNT_CIFS=/sbin/mount.cifs
+@@ -277,6 +277,8 @@
+ if [ "$NXCONFIG_RETEST" = "1" ]
+ then
+ 	{ ! mywhich "$COMMAND_XAUTH" && which xauth; } >/dev/null 2>&1 && COMMAND_XAUTH=$(which xauth)
++	# fallback to X11R6 path
++	{ ! mywhich "$COMMAND_XAUTH" && test -f /usr/X11R6/bin/xauth; } >/dev/null 2>&1 && COMMAND_XAUTH=/usr/X11R6/bin/xauth
+ 	{ ! mywhich "$COMMAND_NETCAT" && which nc; } >/dev/null 2>&1 && COMMAND_NETCAT=$(which nc)
+ 	{ ! mywhich "$COMMAND_FOOMATIC" && which foomatic-ppdfile; } >/dev/null 2>&1 && COMMAND_FOOMATIC=$(which foomatic-ppdfile)
+ 	{ ! mywhich "$PATH_BIN/nxdesktop"; } >/dev/null 2>&1 && ENABLE_EXTERNAL_NXDESKTOP="1"
+
+
+

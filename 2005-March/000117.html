@@ -1,0 +1,101 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fux modified nxsetup
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fux%20modified%20nxsetup&In-Reply-To=%3C424BA95B.mailID1CW2WH%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000116.html">
+   <LINK REL="Next"  HREF="000118.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fux modified nxsetup</H1>
+    <B>fux</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fux%20modified%20nxsetup&In-Reply-To=%3C424BA95B.mailID1CW2WH%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fux modified nxsetup">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Thu Mar 31 09:40:11 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000116.html">[Freenx-cvs] r61 - thinnx/trunk/thinnx
+</A></li>
+        <LI>Next message: <A HREF="000118.html">[Freenx-cvs] CVS: freenx - fux modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#117">[ date ]</a>
+              <a href="thread.html#117">[ thread ]</a>
+              <a href="subject.html#117">[ subject ]</a>
+              <a href="author.html#117">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fux
+Date:      2005-03-31 07:40:11 GMT
+Modified:  .        nxsetup
+Log:
+enshured correct permission on $SSH_AUTHORIZED_KEYS
+
+Revision  Changes    Path
+1.21      +2 -1      freenx/nxsetup
+
+
+rev 1.21, prev_rev 1.20
+Index: nxsetup
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxsetup,v
+retrieving revision 1.20
+retrieving revision 1.21
+diff -u -r1.20 -r1.21
+--- nxsetup	17 Mar 2005 23:21:15 -0000	1.20
++++ nxsetup	31 Mar 2005 07:40:11 -0000	1.21
+@@ -5,7 +5,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxsetup,v 1.20 2005/03/17 23:21:15 fux Exp $ 
++# CVS: $Id: nxsetup,v 1.21 2005/03/31 07:40:11 fux Exp $ 
+ #
+ 
+ HELP=&quot;no&quot;
+@@ -177,6 +177,7 @@
+ 	chown -R nx:root $NX_ETC_DIR
+ 	chown -R nx:root $NX_HOME_DIR
+ 	chown nx:root &quot;$NX_LOGFILE&quot;
++	chmod 600 $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS
+ 	echo &quot;done&quot;
+ }
+ 
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000116.html">[Freenx-cvs] r61 - thinnx/trunk/thinnx
+</A></li>
+	<LI>Next message: <A HREF="000118.html">[Freenx-cvs] CVS: freenx - fux modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#117">[ date ]</a>
+              <a href="thread.html#117">[ thread ]</a>
+              <a href="subject.html#117">[ subject ]</a>
+              <a href="author.html#117">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

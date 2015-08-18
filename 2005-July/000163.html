@@ -1,0 +1,209 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fabianx modified 2 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-July/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%202%20files&In-Reply-To=%3C42C82E6B.mailED1107DD%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000162.html">
+   <LINK REL="Next"  HREF="000164.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fabianx modified 2 files</H1>
+    <B>fabianx</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%202%20files&In-Reply-To=%3C42C82E6B.mailED1107DD%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fabianx modified 2 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Sun Jul  3 20:28:59 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000162.html">[Freenx-cvs] r71 - freenx-server
+</A></li>
+        <LI>Next message: <A HREF="000164.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#163">[ date ]</a>
+              <a href="thread.html#163">[ thread ]</a>
+              <a href="subject.html#163">[ subject ]</a>
+              <a href="author.html#163">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fabianx
+Date:      2005-07-03 18:28:59 GMT
+Modified:  .        ChangeLog nxserver
+Log:
+Removed buggy forwarding support via USER.
+
+Revision  Changes    Path
+1.59      +3 -0      freenx/ChangeLog
+
+
+rev 1.59, prev_rev 1.58
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.58
+retrieving revision 1.59
+diff -u -r1.58 -r1.59
+--- ChangeLog	25 Jun 2005 12:26:22 -0000	1.58
++++ ChangeLog	3 Jul 2005 18:28:59 -0000	1.59
+@@ -1,3 +1,6 @@
++XX.07.2005 FreeNX 0.4.2 &quot;Bugfix Edition&quot;
++	* Removed buggy forwarding support via USER.
++
+ 24.06.2005 FreeNX 0.4.1 &quot;LinuxTag Edition&quot;
+ 	* Fixed a small security problem giving access to session database.
+ 	* Added support for 1.5.0 OSS components. (especially rootless mode)
+
+
+
+1.56      +1 -67     freenx/nxserver
+
+
+rev 1.56, prev_rev 1.55
+Index: nxserver
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxserver,v
+retrieving revision 1.55
+retrieving revision 1.56
+diff -u -r1.55 -r1.56
+--- nxserver	25 Jun 2005 12:26:22 -0000	1.55
++++ nxserver	3 Jul 2005 18:28:59 -0000	1.56
+@@ -11,7 +11,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxserver,v 1.55 2005/06/25 12:26:22 fabianx Exp $
++# CVS: $Id: nxserver,v 1.56 2005/07/03 18:28:59 fabianx Exp $
+ #
+ 
+ # Read the config file
+@@ -422,51 +422,6 @@
+ 	echo &quot;$@&quot;
+ }
+ 
+-# Forward the connection to the commercial NoMachine server
+-server_forward_nomachine()
+-{
+-	set -- &quot;${RECORD_CMD[@]}&quot;
+-	
+-	# setup the FIFOs
+-	SERVER_IN=~/server.in.$$
+-	SERVER_OUT=~/server.out.$$
+-	rm -f $SERVER_IN $SERVER_OUT
+-	mkfifo $SERVER_IN $SERVER_OUT
+-	exec 3&lt;&gt;$SERVER_IN
+-	exec 4&lt;&gt;$SERVER_OUT
+-	
+-	$NOMACHINE_SERVER &lt;&amp;3 &gt;&amp;4 &amp;
+-	NX_PID=$!
+-	
+-	while true
+-	do
+-		read -n7 opcode &lt;&amp;4
+-		line=&quot;&quot;
+-		case &quot;$opcode&quot; in
+-			&quot;NX&gt; 105&quot;)
+-				echo $1 &gt;&amp;3
+-				shift
+-			;;
+-			&quot;NX&gt; 101&quot;)
+-				echo $USER &gt;&amp;3
+-				read line &lt;&amp;4
+-				break
+-			;;
+-			*)
+-				read line &lt;&amp;4
+-			;;
+-		esac
+-	done
+-	log 5 &quot;Info: Forwarding connection to NoMachine server done.&quot;
+-	cat &lt;&amp;4 &amp;
+-	CAT_PID=$!
+-	cat - &gt;&amp;3
+-	rm -f $SERVER_IN $SERVER_OUT
+-	kill $CAT_PID
+-	kill $NX_PID
+-	exit 0
+-}
+-
+ # Start!
+ log 3 &quot;-- NX SERVER START: $@&quot;
+ 
+@@ -487,8 +442,6 @@
+ 
+ echo_x &quot;HELLO NXSERVER - Version $NX_VERSION $NX_LICENSE&quot;
+ 
+-[ &quot;$ENABLE_NOMACHINE_FORWARD_USER&quot; = &quot;1&quot; ] &amp;&amp; RECORD_CMD=()
+-
+ # Login stage
+ while true
+ do
+@@ -498,9 +451,6 @@
+ 	[ &quot;$CMD&quot; = &quot;&quot; ] &amp;&amp; CMD=&quot;quit&quot;
+ 	echo_x &quot;$CMD&quot;
+ 	
+-	# record $CMD in RECORD_CMD array
+-	[ &quot;$ENABLE_NOMACHINE_FORWARD_USER&quot; = &quot;1&quot; ] &amp;&amp; RECORD_CMD=( &quot;${RECORD_CMD[@]}&quot; &quot;$CMD&quot; )
+-	
+ 	case &quot;$CMD&quot; in 
+ 		quit|QUIT)
+ 			echo_x &quot;Quit&quot;
+@@ -539,22 +489,6 @@
+ 			echo_x -n &quot;NX&gt; 101 User: &quot;
+ 			read USER
+ 			echo_x $USER
+-			
+-			# forward the connection to commercial NoMachine server?
+-			if [ &quot;$ENABLE_NOMACHINE_FORWARD_USER&quot; = &quot;1&quot; -a -n &quot;$NOMACHINE_SERVER&quot; ]
+-			then
+-				case &quot;$USER&quot; in
+-					freenx.*)
+-						log 3 &quot;Info: Not forwarding connection. FreeNX user found.&quot;
+-						USER=${USER##freenx.}
+-					;;
+-					*)
+-						log 3 &quot;Info: Forwarding connection to NoMachine server&quot;
+-						server_forward_nomachine
+-						log 1 &quot;Error: Forwarding connection to NoMachine server failed.&quot;
+-					;;
+-				esac
+-			fi
+ 			
+ 			echo_x -n &quot;NX&gt; 102 Password: &quot;
+ 			read -s PASS
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000162.html">[Freenx-cvs] r71 - freenx-server
+</A></li>
+	<LI>Next message: <A HREF="000164.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#163">[ date ]</a>
+              <a href="thread.html#163">[ thread ]</a>
+              <a href="subject.html#163">[ subject ]</a>
+              <a href="author.html#163">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,162 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fabianx modified 3 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%203%20files&In-Reply-To=%3C423260EF.mailC3E1UG97A%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000054.html">
+   <LINK REL="Next"  HREF="000056.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fabianx modified 3 files</H1>
+    <B>fabianx</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%203%20files&In-Reply-To=%3C423260EF.mailC3E1UG97A%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fabianx modified 3 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Sat Mar 12 04:24:31 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000054.html">[Freenx-cvs] CVS: freenx - fabianx modified 4 files
+</A></li>
+        <LI>Next message: <A HREF="000056.html">[Freenx-cvs] CVS: freenx - fabianx modified nxserver
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#55">[ date ]</a>
+              <a href="thread.html#55">[ thread ]</a>
+              <a href="subject.html#55">[ subject ]</a>
+              <a href="author.html#55">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fabianx
+Date:      2005-03-12 03:24:30 GMT
+Modified:  .        ChangeLog nxnode nxserver
+Log:
+Added more compatible getparam function.
+
+Revision  Changes    Path
+1.29      +1 -0      freenx/ChangeLog
+
+
+rev 1.29, prev_rev 1.28
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.28
+retrieving revision 1.29
+diff -u -r1.28 -r1.29
+--- ChangeLog	12 Mar 2005 02:49:28 -0000	1.28
++++ ChangeLog	12 Mar 2005 03:24:30 -0000	1.29
+@@ -9,6 +9,7 @@
+ 	* Removed support for OSS components prior version 1.4.0 in nxnode.
+ 	  Added -option option to nxagent/nxdesktop.
+ 	* Added forwarding to commercial server via destination port.
++	* Added more compatible getparam function
+ 
+ 11.03.2005 FreeNX 0.3.1
+ 	* Fixed keyboard mapping problems.
+
+
+
+1.35      +2 -4      freenx/nxnode
+
+
+rev 1.35, prev_rev 1.34
+Index: nxnode
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxnode,v
+retrieving revision 1.34
+retrieving revision 1.35
+diff -u -r1.34 -r1.35
+--- nxnode	12 Mar 2005 02:42:02 -0000	1.34
++++ nxnode	12 Mar 2005 03:24:30 -0000	1.35
+@@ -13,7 +13,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxnode,v 1.34 2005/03/12 02:42:02 fabianx Exp $
++# CVS: $Id: nxnode,v 1.35 2005/03/12 03:24:30 fabianx Exp $
+ #
+ # 21.06.2004: - Full reconnection support
+ 
+@@ -42,9 +42,7 @@
+ # Reread boot command line; echo last parameter's argument or return false.
+ getparam(){
+ stringinstring &quot;&amp;$1=&quot; &quot;$CMDLINE&quot; || return 1
+-result=&quot;${CMDLINE##*&amp;$1=}&quot;
+-result=&quot;${result%%[&amp;&amp;&amp;&amp;&amp;]*}&quot;
+-echo &quot;$result&quot;
++echo &quot;$CMDLINE&quot; | awk &quot;/^$1=/&quot;' { VAL=$2 } END { print VAL }' FS=&quot;=&quot; RS=&quot;(&amp;|\n)&quot;
+ return 0
+ }
+ 
+
+
+
+1.34      +2 -4      freenx/nxserver
+
+
+rev 1.34, prev_rev 1.33
+Index: nxserver
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxserver,v
+retrieving revision 1.33
+retrieving revision 1.34
+diff -u -r1.33 -r1.34
+--- nxserver	12 Mar 2005 02:49:28 -0000	1.33
++++ nxserver	12 Mar 2005 03:24:30 -0000	1.34
+@@ -11,7 +11,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxserver,v 1.33 2005/03/12 02:49:28 fabianx Exp $
++# CVS: $Id: nxserver,v 1.34 2005/03/12 03:24:30 fabianx Exp $
+ #
+ 
+ # Read the config file
+@@ -27,9 +27,7 @@
+ # Reread boot command line; echo last parameter's argument or return false.
+ getparam(){
+ stringinstring &quot;&amp;$1=&quot; &quot;$CMDLINE&quot; || return 1
+-result=&quot;${CMDLINE##*&amp;$1=}&quot;
+-result=&quot;${result%%[&amp;&amp;&amp;&amp;&amp;]*}&quot;
+-echo &quot;$result&quot;
++echo &quot;$CMDLINE&quot; | awk &quot;/^$1=/&quot;' { VAL=$2 } END { print VAL }' FS=&quot;=&quot; RS=&quot;(&amp;|\n)&quot;
+ return 0
+ }
+ 
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000054.html">[Freenx-cvs] CVS: freenx - fabianx modified 4 files
+</A></li>
+	<LI>Next message: <A HREF="000056.html">[Freenx-cvs] CVS: freenx - fabianx modified nxserver
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#55">[ date ]</a>
+              <a href="thread.html#55">[ thread ]</a>
+              <a href="subject.html#55">[ subject ]</a>
+              <a href="author.html#55">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

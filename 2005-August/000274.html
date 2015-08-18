@@ -1,0 +1,171 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r148 - freenx-website/intern/press
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r148%20-%20freenx-website/intern/press&In-Reply-To=%3C200508312006.j7VK61lG000769%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000277.html">
+   <LINK REL="Next"  HREF="000275.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r148 - freenx-website/intern/press</H1>
+    <B>Fabian Franz at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r148%20-%20freenx-website/intern/press&In-Reply-To=%3C200508312006.j7VK61lG000769%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r148 - freenx-website/intern/press">fabianx at berlios.de
+       </A><BR>
+    <I>Wed Aug 31 22:06:01 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000277.html">[Freenx-cvs] r147 - freenx-server/branches/FreeNX-0.4
+</A></li>
+        <LI>Next message: <A HREF="000275.html">[Freenx-cvs] r149 - freenx-website/intern/press
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#274">[ date ]</a>
+              <a href="thread.html#274">[ thread ]</a>
+              <a href="subject.html#274">[ subject ]</a>
+              <a href="author.html#274">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2005-08-31 22:06:00 +0200 (Wed, 31 Aug 2005)
+New Revision: 148
+
+Modified:
+   freenx-website/intern/press/akademy-release.txt
+Log:
+Backup of 2nd draft.
+
+
+Modified: freenx-website/intern/press/akademy-release.txt
+===================================================================
+--- freenx-website/intern/press/akademy-release.txt	2005-08-31 19:35:11 UTC (rev 147)
++++ freenx-website/intern/press/akademy-release.txt	2005-08-31 20:06:00 UTC (rev 148)
+@@ -17,6 +17,93 @@
+ 
+ * Easily get help for your problems
+ 
++* Better support for big corporate environments
++
++* Lots of bugfixes, more stability and improved security
++
++And last but not least:
++
++THE
++
+ * First official FreeNX background picture
+ 
+-* 
++What customers say about FreeNX at aKademy:
++
++&quot;&quot;
++
++&quot;&quot;
++
++Now let us give you some details about the new release:
++
++Easiest installation ever
++-------------------------
++
++The setup program of FreeNX 0.4.5 is now interactive, checks for a correct configuration, automatic self-tests and a help system were added.
++
++Important changes:
++
++* nxsetup is now interactive. Use --auto to disable this.
++* NoMachine key is now the default, but the user still has to confirm it.
++  [FIXME]
++* nxsetup checks for a correct configuration file. Use --ignore-errors to continue nxsetup even when the check fails.
++* If the automatic self-test fails nxsetup reminds the user of some common pitfalls.
++
++Work better, faster, and more colorful (NX 1.5.0)
++-------------------------------------------------
++
++FreeNX 0.4.5 has full support for the most important 1.5.0 features.
++
++Your virtual Desktop is now resizable. Just drag the borders and if you want to switch to/from fullscreen mode just press Ctrl+Alt+F.
++
++FreeNX 0.4.5 supports the fast single application mode. To enable this feature, set ENABLE_ROOTLESS_MODE=&quot;1&quot; in node.conf. From your client select a Unix-Custom &quot;Floating windows&quot; session and booh: You are up and running remote applications blazingly fast. 
++
++Truecolor Windows Sessions are now supported by FreeNX. Just use the 1.5.0 client and select from the Display-box &quot;Use custom settings, Modify, Allowed Colors '16M'&quot;.
++
++Use FreeNX in restricted environments
++---------------------------------
++
++Imagine the following scenario:
++
++You have a really nice remote access to a machine in your company and you would love to use FreeNX to do your everyday work. But the problem is: You do not have root access and so you can't use it. FreeNX 0.4.5 enables you do to it nevertheless.
++
++You can install FreeNX 0.4.5 in a special mode to access it directly via your user account. The only problem remaining is patching the client and setting it all up.
++
++Fux has explained this in detail in a howto available from:
++
++<A HREF="http://openfacts.berlios.de/index-en.phtml?title=FreeNX_Howto">http://openfacts.berlios.de/index-en.phtml?title=FreeNX_Howto</A>
++
++FreeNX plans to ship ready-made plug-and-play binary distributions of NX4MyHome as soon as all tests are finished.
++
++Easily get help for your problems
++---------------------------------
++
++We have several scenarios that come up over and over again. There are many different distributions all doing things a bit different. But you can't give &quot;test this&quot; and &quot;test that&quot; instructions without knowing a lot about the environment of the user.
++
++For example starting up nxagent over a ssh -X connection to test if the basic functionality works can now be done via:
++
++nxserver --agent :1000
++
++instead of:
++
++LD_LIBRARY_PATH=/where/nx/libs/live /where/nxagent/is :1000
++
++Better support for big corporate environments
++---------------------------------------------
++
++Thanks to the help of Google and Cisco employees FreeNX does now work also in environments where you have 1000ths of users.
++
++Technically speaking: getent does no longer retrieve the whole database and grep through it, but directly query for the information needed.
++
++Lots of bugfixes, more stability and improved security
++------------------------------------------------------
++
++
++
++And last but not least:
++
++THE
++
++First official FreeNX background picture
++----------------------------------------
++
++This release
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000277.html">[Freenx-cvs] r147 - freenx-server/branches/FreeNX-0.4
+</A></li>
+	<LI>Next message: <A HREF="000275.html">[Freenx-cvs] r149 - freenx-website/intern/press
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#274">[ date ]</a>
+              <a href="thread.html#274">[ thread ]</a>
+              <a href="subject.html#274">[ subject ]</a>
+              <a href="author.html#274">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

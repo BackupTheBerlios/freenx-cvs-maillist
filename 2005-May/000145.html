@@ -1,0 +1,216 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - jonno modified 3 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-May/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20jonno%20modified%203%20files&In-Reply-To=%3C4279D6B2.mailLYC1O2J2E%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000144.html">
+   <LINK REL="Next"  HREF="000146.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - jonno modified 3 files</H1>
+    <B>jonno</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20jonno%20modified%203%20files&In-Reply-To=%3C4279D6B2.mailLYC1O2J2E%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - jonno modified 3 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Thu May  5 10:17:54 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000144.html">[Freenx-cvs] CVS: freenx - jonno modified 2 files
+</A></li>
+        <LI>Next message: <A HREF="000146.html">[Freenx-cvs] CVS: freenx - jonno modified nxloadconfig
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#145">[ date ]</a>
+              <a href="thread.html#145">[ thread ]</a>
+              <a href="subject.html#145">[ subject ]</a>
+              <a href="author.html#145">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      jonno
+Date:      2005-05-05 08:17:54 GMT
+Modified:  .        node.conf.sample nxloadconfig nxnode
+Log:
+Cleaned up DEFAULT_X_WM options.
+
+Revision  Changes    Path
+1.28      +7 -13     freenx/node.conf.sample
+
+
+rev 1.28, prev_rev 1.27
+Index: node.conf.sample
+===================================================================
+RCS file: /cvsroot/freenx/freenx/node.conf.sample,v
+retrieving revision 1.27
+retrieving revision 1.28
+diff -u -r1.27 -r1.28
+--- node.conf.sample	30 Apr 2005 16:52:22 -0000	1.27
++++ node.conf.sample	5 May 2005 08:17:54 -0000	1.28
+@@ -37,7 +37,7 @@
+ #
+ #           <A HREF="https://mail.kde.org/mailman/listinfo/freenx-knx">https://mail.kde.org/mailman/listinfo/freenx-knx</A>
+ #
+-# CVS: $Id: node.conf.sample,v 1.27 2005/04/30 16:52:22 fabianx Exp $
++# CVS: $Id: node.conf.sample,v 1.28 2005/05/05 08:17:54 jonno Exp $
+ 
+ #########################################################################
+ # General FreeNX directives
+@@ -241,19 +241,13 @@
+ #SET_LD_LIBRARY_PATH=&quot;1&quot;
+ 
+ 
+-# The command binary for the default window manager. It is run when a
++# The command binary for the default window manager. If set it is run when a
+ # 'unix-custom' session is requested by the NX Client and an application
+-# to run is specified. By default it is set to &quot;twm&quot;. If you don't have
+-# twm in the default path or if you want to use another window manager,
+-# you have to set it to the absolute file name of the command binary you
+-# want to use.
+-# FreeNX: To enable this feature set ENABLE_DEFAULT_X_WM=&quot;1&quot;
+-#         If ENABLE_DEFAULT_X_WM_KILL is set the WM is terminated
+-#         after the started application finishes. Else FreeNX will
+-#         wait for the window manager to complete.
+-#ENABLE_DEFAULT_X_WM=&quot;0&quot;
+-#ENABLE_DEFAULT_X_WM_KILL=&quot;0&quot;
+-#DEFAULT_X_WM=twm
++# to run is specified. It defaults to empty (ie no WM is run).
++# If KILL_DEFAULT_X_WM is set the WM is terminated after the started 
++# application finishes. Else FreeNX will wait for the WM to complete.
++#DEFAULT_X_WM=&quot;&quot;
++#KILL_DEFAULT_X_WM=&quot;1&quot;
+ 
+ # When a 'unix-default' session is requested by the client the user's X startup
+ # script will be run if pressent and executable, otherwise the default X
+
+
+
+1.32      +6 -9      freenx/nxloadconfig
+
+
+rev 1.32, prev_rev 1.31
+Index: nxloadconfig
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxloadconfig,v
+retrieving revision 1.31
+retrieving revision 1.32
+diff -u -r1.31 -r1.32
+--- nxloadconfig	30 Apr 2005 16:24:51 -0000	1.31
++++ nxloadconfig	5 May 2005 08:17:54 -0000	1.32
+@@ -5,7 +5,7 @@
+ #
+ # License: GPL, version 2
+ #
+-# CVS: $Id: nxloadconfig,v 1.31 2005/04/30 16:24:51 fabianx Exp $
++# CVS: $Id: nxloadconfig,v 1.32 2005/05/05 08:17:54 jonno Exp $
+ #
+ # ========================================================================
+ 
+@@ -141,9 +141,8 @@
+ USER_FAKE_HOME=&quot;&quot; #Calculated
+ SET_LD_LIBRARY_PATH=&quot;1&quot;
+ 
+-ENABLE_DEFAULT_X_WM=&quot;0&quot;
+-ENABLE_DEFAULT_X_WM_KILL=&quot;0&quot;
+-DEFAULT_X_WM=twm
++DEFAULT_X_WM=&quot;&quot;
++KILL_DEFAULT_X_WM=&quot;1&quot;
+ USER_X_STARTUP_SCRIPT=.Xclients
+ DEFAULT_X_SESSION=/etc/X11/xdm/Xsession
+ COMMAND_START_KDE=startkde
+@@ -359,12 +358,10 @@
+ 	[ -z $(echo &quot;$SET_LD_LIBRARY_PATH&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SET_LD_LIBRARY_PATH=$SET_LD_LIBRARY_PATH\&quot;&quot;
+ 	
+-	[ -z $(echo &quot;$ENABLE_DEFAULT_X_WM&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_DEFAULT_X_WM=$ENABLE_DEFAULT_X_WM\&quot;&quot;
+-	[ &quot;$ENABLE_DEFAULT_X_WM&quot; = &quot;1&quot; -a  -z $(echo &quot;$ENABLE_DEFAULT_X_WM_KILL&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_DEFAULT_X_WM_KILL=$ENABLE_DEFAULT_X_WM_KILL\&quot;&quot;
+-	[ &quot;$ENABLE_DEFAULT_X_WM&quot; = &quot;1&quot; ] &amp;&amp; ! which &quot;$DEFAULT_X_WM&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++	[ &quot;$DEFAULT_X_WM&quot; != &quot;&quot; ] &amp;&amp; ! which &quot;$DEFAULT_X_WM&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;DEFAULT_X_WM=$DEFAULT_X_WM\&quot;&quot;
++	[ &quot;$DEFAULT_X_WM&quot; != &quot;&quot; -a  -z $(echo &quot;$KILL_DEFAULT_X_WM&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;KILL_DEFAULT_X_WM=$KILL_DEFAULT_X_WM\&quot;&quot;
+ 	[ -z &quot;$USER_X_STARTUP_SCRIPT&quot; ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;USER_X_STARTUP_SCRIPT=$USER_X_STARTUP_SCRIPT\&quot;&quot;
+ 	! which &quot;$DEFAULT_X_SESSION&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+
+
+
+1.57      +4 -4      freenx/nxnode
+
+
+rev 1.57, prev_rev 1.56
+Index: nxnode
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxnode,v
+retrieving revision 1.56
+retrieving revision 1.57
+diff -u -r1.56 -r1.57
+--- nxnode	30 Apr 2005 16:52:22 -0000	1.56
++++ nxnode	5 May 2005 08:17:54 -0000	1.57
+@@ -13,7 +13,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxnode,v 1.56 2005/04/30 16:52:22 fabianx Exp $
++# CVS: $Id: nxnode,v 1.57 2005/05/05 08:17:54 jonno Exp $
+ #
+ # 21.06.2004: - Full reconnection support
+ 
+@@ -192,7 +192,7 @@
+ 	fi
+ 
+ 	[ &quot;$virtualdesktop&quot; = &quot;0&quot; -a &quot;$ENABLE_ROOTLESS_MODE&quot; != &quot;1&quot; ] &amp;&amp; export LD_PRELOAD=&quot;$APPLICATION_LIBRARY_PRELOAD:$LD_PRELOAD&quot;
+-	if [ &quot;$ENABLE_DEFAULT_X_WM&quot; = &quot;1&quot; -a &quot;$virtualdesktop&quot; = &quot;1&quot; -a &quot;$type&quot; = &quot;unix-application&quot; -a -x &quot;$(find_app $DEFAULT_X_WM)&quot; ]
++	if [ &quot;$virtualdesktop&quot; = &quot;1&quot; -a &quot;$type&quot; = &quot;unix-application&quot; -a &quot;$DEFAULT_X_WM&quot; != &quot;&quot; -a -x &quot;$(find_app $DEFAULT_X_WM)&quot; ]
+ 	then
+ 		DISPLAY=unix:$display $DEFAULT_X_WM 2&gt;&gt;$USER_FAKE_HOME/.nx/C-$sess_id/session &amp;
+ 		WM_PID=$!
+@@ -205,9 +205,9 @@
+ 	if [ -n &quot;$WM_PID&quot; ]
+ 	then
+ 		# kill the WM after application is finished?
+-		[ &quot;$ENABLE_DEFAULT_X_WM_KILL&quot; = &quot;1&quot; ] &amp;&amp; kill $WM_PID 2&gt;/dev/null
++		[ &quot;$KILL_DEFAULT_X_WM&quot; = &quot;1&quot; ] &amp;&amp; kill $WM_PID 2&gt;/dev/null
+ 		# or just wait until it finishes?
+-		[ &quot;$ENABLE_DEFAULT_X_WM_KILL&quot; = &quot;1&quot; ] || wait $WM_PID
++		[ &quot;$KILL_DEFAULT_X_WM&quot; = &quot;1&quot; ] || wait $WM_PID
+ 	fi
+ 	rm -f $USER_FAKE_HOME/.nx/C-$sess_id/pids/applications
+ 	node_terminate_agent $sess_id
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000144.html">[Freenx-cvs] CVS: freenx - jonno modified 2 files
+</A></li>
+	<LI>Next message: <A HREF="000146.html">[Freenx-cvs] CVS: freenx - jonno modified nxloadconfig
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#145">[ date ]</a>
+              <a href="thread.html#145">[ thread ]</a>
+              <a href="subject.html#145">[ subject ]</a>
+              <a href="author.html#145">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r339 - freenx-redesign/server/compatibility
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-July/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r339%20-%20freenx-redesign/server/compatibility&In-Reply-To=%3C200707041242.l64CgDGm020858%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000471.html">
+   <LINK REL="Next"  HREF="000473.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r339 - freenx-redesign/server/compatibility</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r339%20-%20freenx-redesign/server/compatibility&In-Reply-To=%3C200707041242.l64CgDGm020858%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r339 - freenx-redesign/server/compatibility">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Wed Jul  4 14:42:13 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000471.html">[Freenx-cvs] r338 - in freenx-redesign: . server	server/compatibility
+</A></li>
+        <LI>Next message: <A HREF="000473.html">[Freenx-cvs] r340 - freenx-redesign/server/compatibility
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#472">[ date ]</a>
+              <a href="thread.html#472">[ thread ]</a>
+              <a href="subject.html#472">[ subject ]</a>
+              <a href="author.html#472">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-07-04 14:42:12 +0200 (Wed, 04 Jul 2007)
+New Revision: 339
+
+Modified:
+   freenx-redesign/server/compatibility/nxnode-login
+Log:
+Made nxnode-login more failsafe.
+
+
+
+Modified: freenx-redesign/server/compatibility/nxnode-login
+===================================================================
+--- freenx-redesign/server/compatibility/nxnode-login	2007-07-04 12:40:02 UTC (rev 338)
++++ freenx-redesign/server/compatibility/nxnode-login	2007-07-04 12:42:12 UTC (rev 339)
+@@ -1,27 +1,29 @@
+ #!/usr/bin/expect
+ #
+-# nxnode-login: spawns and controls ssh 
++# nxnode-login: spawns and controls ssh for backwards compatibility.
+ #
+-# Copyright (c) 2004-2006 by Fabian Franz.
++# Environment variables used:
+ #
++# @param COMMAND_SSH The to be used command for spawning ssh.
++# @param NODE_PUBLICKEY The to be used public key for test-nx mode.
++#
++# Copyright (c) 2004-2007 by Fabian Franz.
++#
+ # License: GPL, version 2
+ #
+-# SVN: $Id: nxnode-login 231 2006-07-05 02:03:45Z fabianx $
++# SVN: $Id$
+ #
+ 
+-# Syntax: nxnode-login {ssh|su|test-nx} user ssh-port executable command tosend
++# Syntax: nxnode-login {ssh|su|test-nx} user ssh-port executable parameters
+ 
+ set auth_method [lindex $argv 0]
+ set user [lindex $argv 1]
+ set port [lindex $argv 2]
+ set executable [lindex $argv 3]
+-set command [lindex $argv 4]
+-set tosend [lindex $argv 5]
+-catch {set tosend $env(NXNODE_TOSEND)}
++set parameters [lindex $argv 4]
+ set command_ssh &quot;ssh&quot;
+ catch {set command_ssh $env(COMMAND_SSH)}
+ set host &quot;127.0.0.1&quot;
+-catch {set host $env(NODE_HOSTNAME)}
+ 
+ #
+ # Special test-nx instruction for nxsetup
+@@ -33,20 +35,20 @@
+ 	set publickey &quot;&quot;
+ 	catch {set publickey $env(NODE_PUBLICKEY)}
+ 	
+-	set pid [spawn -noecho $command_ssh -2 -x -l &quot;$user&quot; &quot;$host&quot; -i &quot;$publickey&quot; -o &quot;RhostsAuthentication no&quot; -o &quot;PasswordAuthentication no&quot; -o &quot;RSAAuthentication no&quot; -o &quot;RhostsRSAAuthentication no&quot; -o &quot;PubkeyAuthentication yes&quot; -o &quot;PreferredAuthentications publickey&quot; -p &quot;$port&quot; &quot;$executable $command&quot; ]
+-	
+-	while {1} {
+-		expect {
+-			&quot;Are you sure you want to continue connecting (yes/no)?&quot; { send &quot;yes\r&quot; }
+-			&quot;Permission denied*&quot; { exit 1 }
+-			&quot;HELLO NXSERVER - Version*&quot; { 
+-				break
+-			}
++	set pid [spawn -noecho $command_ssh -2 -x -l &quot;$user&quot; &quot;$host&quot; -i &quot;$publickey&quot; -o &quot;RhostsAuthentication no&quot; -o &quot;PasswordAuthentication no&quot; -o &quot;RSAAuthentication no&quot; -o &quot;RhostsRSAAuthentication no&quot; -o &quot;PubkeyAuthentication yes&quot; -o &quot;PreferredAuthentications publickey&quot; -p &quot;$port&quot; &quot;$executable $parameters&quot; ]
++
++	set timeout 2
++	expect {
++		timeout { exit 1 }
++		eof { exit 1 }
++		&quot;Are you sure you want to continue connecting (yes/no)?&quot; { send &quot;yes\r&quot;; exp_continue }
++		&quot;Permission denied*&quot; { exit 1 }
++		&quot;HELLO NXSERVER - Version&quot; { 
++			expect &quot;NX&gt; 105&quot; { send &quot;quit\r&quot; }
++			expect &quot;NX&gt; 999 Bye&quot; { exit 0 }
+ 		}
+ 	}
+-	expect &quot;NX&gt; 105&quot; { send &quot;quit\r&quot; }
+-	expect &quot;NX&gt; 999 Bye&quot;
+-	exit 0
++	exit 1
+ }
+ 
+ #
+@@ -59,9 +61,9 @@
+ set stty_init &quot;raw icrnl -echo&quot;
+ 
+ if { &quot;$auth_method&quot;==&quot;ssh&quot; } { 
+-	set pid [spawn -noecho $command_ssh -2 -x -l &quot;$user&quot; &quot;$host&quot; -o &quot;NumberOfPasswordPrompts 1&quot; -p &quot;$port&quot; &quot;$executable $command&quot; ]
++	set pid [spawn -noecho $command_ssh -2 -x -l &quot;$user&quot; &quot;$host&quot; -o &quot;NumberOfPasswordPrompts 1&quot; -p &quot;$port&quot; &quot;$executable $parameters&quot; ]
+ } elseif { &quot;$auth_method&quot;==&quot;su&quot; } {
+-	set pid [spawn -noecho su - &quot;$user&quot; -c &quot;$executable $command&quot; ]
++	set pid [spawn -noecho su - &quot;$user&quot; -c &quot;$executable $parameters&quot; ]
+ } else {
+ 	exit 1
+ }
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000471.html">[Freenx-cvs] r338 - in freenx-redesign: . server	server/compatibility
+</A></li>
+	<LI>Next message: <A HREF="000473.html">[Freenx-cvs] r340 - freenx-redesign/server/compatibility
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#472">[ date ]</a>
+              <a href="thread.html#472">[ thread ]</a>
+              <a href="subject.html#472">[ subject ]</a>
+              <a href="author.html#472">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

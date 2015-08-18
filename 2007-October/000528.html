@@ -1,0 +1,85 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r399 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-October/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r399%20-%20freenx-server/trunk&In-Reply-To=%3C200710141805.l9EI5a5w017688%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000527.html">
+   <LINK REL="Next"  HREF="000529.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r399 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r399%20-%20freenx-server/trunk&In-Reply-To=%3C200710141805.l9EI5a5w017688%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r399 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Sun Oct 14 20:05:36 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000527.html">[Freenx-cvs] r398 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000529.html">[Freenx-cvs] r400 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#528">[ date ]</a>
+              <a href="thread.html#528">[ thread ]</a>
+              <a href="subject.html#528">[ subject ]</a>
+              <a href="author.html#528">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-10-14 20:05:36 +0200 (Sun, 14 Oct 2007)
+New Revision: 399
+
+Modified:
+   freenx-server/trunk/nxnode
+Log:
+We do no longer use unix: display style.
+
+
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2007-10-14 18:04:40 UTC (rev 398)
++++ freenx-server/trunk/nxnode	2007-10-14 18:05:36 UTC (rev 399)
+@@ -477,7 +477,6 @@
+ 		# Start x11vnc
+ 		if [ -n &quot;$mirrordisplay&quot; ]
+ 		then
+-			[ -z &quot;$mirrorhost&quot; ] &amp;&amp; mirrorhost=&quot;unix&quot;
+ 			(
+ 				unset XAUTHORITY
+ 				# Note: No &quot;-accept popup&quot; as its the same user and with that password
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000527.html">[Freenx-cvs] r398 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000529.html">[Freenx-cvs] r400 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#528">[ date ]</a>
+              <a href="thread.html#528">[ thread ]</a>
+              <a href="subject.html#528">[ subject ]</a>
+              <a href="author.html#528">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

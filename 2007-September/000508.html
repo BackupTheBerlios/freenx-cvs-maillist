@@ -1,0 +1,434 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r378 - in nxcl: lib nxcl
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-September/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r378%20-%20in%20nxcl%3A%20lib%20nxcl&In-Reply-To=%3C200709132135.l8DLZYVi029132%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000507.html">
+   <LINK REL="Next"  HREF="000509.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r378 - in nxcl: lib nxcl</H1>
+    <B>sebjames at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r378%20-%20in%20nxcl%3A%20lib%20nxcl&In-Reply-To=%3C200709132135.l8DLZYVi029132%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r378 - in nxcl: lib nxcl">sebjames at mail.berlios.de
+       </A><BR>
+    <I>Thu Sep 13 23:35:34 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000507.html">[Freenx-cvs] r377 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000509.html">[Freenx-cvs] r379 - in nxcl: lib nxcl
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#508">[ date ]</a>
+              <a href="thread.html#508">[ thread ]</a>
+              <a href="subject.html#508">[ subject ]</a>
+              <a href="author.html#508">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: sebjames
+Date: 2007-09-13 23:35:33 +0200 (Thu, 13 Sep 2007)
+New Revision: 378
+
+Modified:
+   nxcl/lib/nxclientlib.cpp
+   nxcl/lib/nxclientlib.h
+   nxcl/nxcl/nxcl.cpp
+   nxcl/nxcl/nxcl.h
+Log:
+Added error, debug callbacks to nxcl, and changed the way the callbacks 
+are implemented - now the write callbacks (and there are two now, one 
+has an extra numeric parameter for sending the NX message number) send 
+dbus messages to the frontend gui client. This allows the frontend 
+client to show progress on the connection. I still need to add a few 
+extra messages from the nxssh output through to the frontend client so 
+its progress user output can be more useful.
+
+
+Modified: nxcl/lib/nxclientlib.cpp
+===================================================================
+--- nxcl/lib/nxclientlib.cpp	2007-09-13 13:03:50 UTC (rev 377)
++++ nxcl/lib/nxclientlib.cpp	2007-09-13 21:35:33 UTC (rev 378)
+@@ -53,13 +53,13 @@
+ void
+ NXClientLibCallbacks::startedSignal (string name)
+ {
+-	this-&gt;parent-&gt;externalCallbacks-&gt;write(name + _(&quot; process started&quot;));
++	this-&gt;parent-&gt;externalCallbacks-&gt;write (name + _(&quot; process started&quot;));
+ }
+ 
+ void
+ NXClientLibCallbacks::processFinishedSignal (string name)
+ {
+-	this-&gt;parent-&gt;externalCallbacks-&gt;write(name + _(&quot; process exited&quot;));
++	this-&gt;parent-&gt;externalCallbacks-&gt;write (name + _(&quot; process exited&quot;));
+ 	parent-&gt;setIsFinished (true);
+ }
+ 
+@@ -88,7 +88,7 @@
+ 		break;
+ 	}
+ 		
+-	this-&gt;parent-&gt;externalCallbacks-&gt;write (message);
++	this-&gt;parent-&gt;externalCallbacks-&gt;error (message);
+ }
+ 
+ void 
+@@ -289,14 +289,14 @@
+ 		int pid = response - 100000;
+ 		if (this-&gt;nxsshProcess.getPid() == pid) {
+ 			this-&gt;nxsshProcess.setError(NOTQPROCCRASHED);
+-			this-&gt;externalCallbacks-&gt;write (_(&quot;nxsshProcess crashed or exited&quot;));
++			this-&gt;externalCallbacks-&gt;error (_(&quot;nxsshProcess crashed or exited&quot;));
+ 			this-&gt;isFinished = true;
+ 		} else if (this-&gt;nxproxyProcess.getPid() == pid) {
+ 			this-&gt;nxproxyProcess.setError(NOTQPROCCRASHED);
+-			this-&gt;externalCallbacks-&gt;write (_(&quot;nxproxyProcess crashed or exited&quot;));
++			this-&gt;externalCallbacks-&gt;error (_(&quot;nxproxyProcess crashed or exited&quot;));
+ 			this-&gt;isFinished = true;
+ 		} else {
+-			this-&gt;externalCallbacks-&gt;write (_(&quot;Warning: Don't know what crashed (in processParseStdout())&quot;));
++			this-&gt;externalCallbacks-&gt;error (_(&quot;Warning: Don't know what crashed (in processParseStdout())&quot;));
+ 		}
+ 		return;
+ 	}
+@@ -338,7 +338,7 @@
+ 			stringstream ss;
+ 			ss &lt;&lt; &quot;127.0.0.1:&quot; &lt;&lt; proxyData.port &lt;&lt; &quot; cookie: &quot; &lt;&lt; proxyData.cookie &lt;&lt; &quot;\n&quot;;
+ 			switchCommand += ss.str();
+-			this-&gt;write(switchCommand);
++			this-&gt;write (switchCommand);
+ 		} else if ((*msgiter).find(&quot;NX&gt; 287 Redirected I/O to channel descriptors&quot;) != string::npos) {
+ 			dbgln (&quot;287 message found on stdout&quot;);
+ 			this-&gt;externalCallbacks-&gt;write(_(&quot;The session has been started successfully&quot;));
+@@ -398,7 +398,7 @@
+ 			this-&gt;isFinished = true;
+ 
+ 		} else if ((*msgiter).find(&quot;NX&gt; 280 Ignoring EOF on the monitored channel&quot;) != string::npos) {
+-			this-&gt;externalCallbacks-&gt;write(_(&quot;Unknown problem...&quot;));
++			this-&gt;externalCallbacks-&gt;write(_(&quot;Got \&quot;NX&gt; 280 Ignoring EOF on the monitored channel\&quot; from nxssh...&quot;));
+ 			this-&gt;isFinished = true;
+ 
+ 		} else if ((*msgiter).find(&quot;Host key verification failed&quot;) != string::npos) {
+@@ -501,7 +501,7 @@
+ {
+ 	dbgln (&quot;invokeProxy called&quot;);
+ 
+-	this-&gt;externalCallbacks-&gt;write(_(&quot;Starting NX session&quot;));
++	this-&gt;externalCallbacks-&gt;write(100, _(&quot;Starting NX session&quot;));
+ 	
+ 	int e;
+ 	char * home;
+@@ -517,7 +517,7 @@
+ 				   // existing, though if there is a
+ 				   // _file_ called $HOME/.nx, we'll
+ 				   // get errors later.
+-			this-&gt;externalCallbacks-&gt;write (_(&quot;Problem creating .nx directory&quot;));
++			this-&gt;externalCallbacks-&gt;error (_(&quot;Problem creating .nx directory&quot;));
+ 		}
+ 	}
+ 	// Now the per session directory
+@@ -525,7 +525,7 @@
+ 	if (mkdir (nxdir.c_str(), 0770)) {
+ 		e = errno;
+ 		if (e != EEXIST) { // We don't mind .nx already
+-			this-&gt;externalCallbacks-&gt;write (_(&quot;Problem creating Session directory&quot;));
++			this-&gt;externalCallbacks-&gt;error (_(&quot;Problem creating Session directory&quot;));
+ 		}
+ 	}
+ 
+
+Modified: nxcl/lib/nxclientlib.h
+===================================================================
+--- nxcl/lib/nxclientlib.h	2007-09-13 13:03:50 UTC (rev 377)
++++ nxcl/lib/nxclientlib.h	2007-09-13 21:35:33 UTC (rev 378)
+@@ -53,6 +53,8 @@
+ 		NXClientLibExternalCallbacks () {}
+ 		virtual ~NXClientLibExternalCallbacks () {}
+ 		virtual void write (string msg) {}
++		virtual void write (int num, string msg) {}
++		virtual void error (string msg) {}
+ 		virtual void debug (string msg) {}
+ 		virtual void stdoutSignal (string msg) {}
+ 		virtual void stderrSignal (string msg) {}
+
+Modified: nxcl/nxcl/nxcl.cpp
+===================================================================
+--- nxcl/nxcl/nxcl.cpp	2007-09-13 13:03:50 UTC (rev 377)
++++ nxcl/nxcl/nxcl.cpp	2007-09-13 21:35:33 UTC (rev 378)
+@@ -48,13 +48,25 @@
+ void
+ NxclCallbacks::write (string msg)
+ {
+-	cout &lt;&lt; &quot;NXCL&gt; &quot; &lt;&lt; msg &lt;&lt; endl;
++//	cout &lt;&lt; &quot;NXCL&gt; &quot; &lt;&lt; msg &lt;&lt; endl;
++	this-&gt;parent-&gt;sendDbusInfoMsg (msg);
+ }
+ void
++NxclCallbacks::write (int num, string msg)
++{
++	this-&gt;parent-&gt;sendDbusInfoMsg (num, msg);
++}
++void
++NxclCallbacks::error (string msg)
++{
++	cerr &lt;&lt; &quot;NXCL_ERROR&gt; &quot; &lt;&lt; msg &lt;&lt; endl;
++	this-&gt;parent-&gt;sendDbusErrorMsg (msg);
++}
++void
+ NxclCallbacks::debug (string msg)
+ {
+ #if DEBUG==1
+-	cout &lt;&lt; &quot;NXCL&gt; &quot; &lt;&lt; msg &lt;&lt; endl;
++	cout &lt;&lt; &quot;NXCL_DBG&gt; &quot; &lt;&lt; msg &lt;&lt; endl;
+ #endif
+ }
+ void
+@@ -182,7 +194,7 @@
+ 	}
+ 	if (DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER != ret) { 
+ 		/* What to do if someone else is running? Try another name? Exit? */
+-		this-&gt;callbacks.write (&quot;There appears to be another nxcl running, won't compete. Exiting.&quot;);
++		this-&gt;callbacks.error (&quot;There appears to be another nxcl running, won't compete. Exiting.&quot;);
+ 		exit(1);
+ 	}
+ 	// Done getting connection to session bus
+@@ -230,8 +242,7 @@
+ 	while (settings_transferred == false) {
+ 
+ 		if (dbus_error_is_set(&amp;error)) { 
+-			this-&gt;callbacks.write (&quot;receiveSettings(): Got a dbus error&quot;);
+-			dbus_error_free(&amp;error); 
++			this-&gt;callbacks.error (&quot;receiveSettings(): Got a dbus error&quot;);
+ 		}
+ 
+ 		// non blocking read of the next available message
+@@ -240,7 +251,7 @@
+ 
+ 		// loop again if we haven't read a message
+ 		if (NULL == message) { 
+-			//this-&gt;callbacks.write (&quot;receiveSettings(): No message yet, sleep a second.&quot;);
++			//this-&gt;callbacks.debug (&quot;receiveSettings(): No message yet, sleep a second.&quot;);
+ 			sleep(1);
+ 			continue;
+ 		}
+@@ -319,7 +330,7 @@
+ 						this-&gt;sessionData.customCommand = ss.str();
+ 						break;
+ 					default:
+-						this-&gt;callbacks.write (&quot;ERROR: parameter type does not match its position in the message.&quot;);
++						this-&gt;callbacks.error (&quot;ERROR: parameter type does not match its position in the message.&quot;);
+ 						break;
+ 					}
+ 					count++;
+@@ -358,13 +369,13 @@
+ 						this-&gt;sessionData.fullscreen = (iparam&gt;0) ? true : false;
+ 						break;
+ 					default:
+-						this-&gt;callbacks.write (&quot;ERROR: parameter type does not match its position in the message.&quot;);
++						this-&gt;callbacks.error (&quot;ERROR: parameter type does not match its position in the message.&quot;);
+ 						break;
+ 					}
+ 					count++;
+ 
+ 				} else {
+-					this-&gt;callbacks.write (&quot;ERROR: parameter is not string or int.&quot;);
++					this-&gt;callbacks.error (&quot;ERROR: parameter is not string or int.&quot;);
+ 				}
+ 			}
+ 			settings_transferred = true;			
+@@ -448,7 +459,7 @@
+ 
+ 	/* If we have session info, start up the connection */
+ 	if (this-&gt;sessionData.key.size() == 0) { // Shouldn't need this-&gt;sessionData.encryption here.
+-		this-&gt;callbacks.write (_(&quot;No key supplied! Please fix your client to send a key via dbus!&quot;));
++		this-&gt;callbacks.error (_(&quot;No key supplied! Please fix your client to send a key via dbus!&quot;));
+ 	} else {
+ 		this-&gt;nxclientlib.invokeNXSSH(&quot;supplied&quot;,
+ 					      this-&gt;nxserver,
+@@ -539,12 +550,70 @@
+ 	DBusMessage *msg = dbus_message_new_signal (&quot;/org/freenx/nxcl/dbus/AvailableSession&quot;,
+ 						    this-&gt;dbusSendInterface.c_str(),
+ 						    &quot;ServerCapacityReached&quot;);
++	
++	dbus_connection_send (this-&gt;conn, msg, NULL);
++	dbus_message_unref (msg);
++}
+ 
++void
++Nxcl::sendDbusInfoMsg (string&amp; info)
++{
++	DBusMessage *msg = dbus_message_new_signal (&quot;/org/freenx/nxcl/dbus/SessionStatus&quot;,
++						    this-&gt;dbusSendInterface.c_str(),
++						    &quot;InfoMessage&quot;);
++
++	/* Add info to msg*/
++	const char* infoptr = info.c_str();
++
++	// Bundle up the available session
++	dbus_message_append_args (msg,
++				  DBUS_TYPE_STRING, &amp;infoptr,
++				  DBUS_TYPE_INVALID);
++
+ 	dbus_connection_send (this-&gt;conn, msg, NULL);
+ 	dbus_message_unref (msg);
+ }
+ 
+ void
++Nxcl::sendDbusInfoMsg (int num, string&amp; info)
++{
++	DBusMessage *msg = dbus_message_new_signal (&quot;/org/freenx/nxcl/dbus/SessionStatus&quot;,
++						    this-&gt;dbusSendInterface.c_str(),
++						    &quot;InfoMessage&quot;);
++
++	/* Add info to msg*/
++	const char* infoptr = info.c_str();
++
++	// Bundle up the available session
++	dbus_message_append_args (msg,
++				  DBUS_TYPE_STRING, &amp;infoptr,
++				  DBUS_TYPE_INT32, &amp;num,
++				  DBUS_TYPE_INVALID);
++
++	dbus_connection_send (this-&gt;conn, msg, NULL);
++	dbus_message_unref (msg);
++}
++
++void
++Nxcl::sendDbusErrorMsg (string&amp; errorMsg)
++{
++	DBusMessage *msg = dbus_message_new_signal (&quot;/org/freenx/nxcl/dbus/SessionStatus&quot;,
++						    this-&gt;dbusSendInterface.c_str(),
++						    &quot;ErrorMessage&quot;);
++
++	/* Add info to msg */
++	const char* errptr = errorMsg.c_str();
++
++	// Bundle up the available session
++	dbus_message_append_args (msg,
++				  DBUS_TYPE_STRING, &amp;errptr,
++				  DBUS_TYPE_INVALID);
++
++	dbus_connection_send (this-&gt;conn, msg, NULL);
++	dbus_message_unref (msg);
++}
++
++void
+ Nxcl::receiveStartInstruction (void)
+ {
+ 	DBusMessage * message;
+@@ -614,7 +683,7 @@
+ void
+ Nxcl::requestConfirmation (string msg)
+ {
+-	this-&gt;callbacks.write (&quot;requestConfirmation(): This is a placeholder method &quot;
++	this-&gt;callbacks.error (&quot;WARNING: requestConfirmation(): This is a placeholder method &quot;
+ 			       &quot;to deal with sending back a yes &quot;
+ 			       &quot;or a no answer. For now, we just set &quot;
+ 			       &quot;this-&gt;nxclientlib.getSession().setContinue(true);&quot;);
+
+Modified: nxcl/nxcl/nxcl.h
+===================================================================
+--- nxcl/nxcl/nxcl.h	2007-09-13 13:03:50 UTC (rev 377)
++++ nxcl/nxcl/nxcl.h	2007-09-13 21:35:33 UTC (rev 378)
+@@ -51,6 +51,9 @@
+ 		virtual void haveResumableSessions (list&lt;NXResumeData&gt; resumeData) {}
+ 		virtual void noResumableSessions (void) {}
+ 		virtual void serverCapacityReached (void) {}
++		virtual void sendDbusInfoMsg (string&amp;) {}
++		virtual void sendDbusInfoMsg (int, string&amp;) {}
++		virtual void sendDbusErrorMsg (string&amp;) {}
+ 	};
+ 
+ 	class NxclCallbacks : public NXClientLibExternalCallbacks
+@@ -61,11 +64,30 @@
+ 
+ 		/*!
+ 		 * Send a message to the user. Here, this is
+-		 * implemented as a message to stdout. It could be
+-		 * (any may yet be) send on the dbus interface
++		 * implemented as a message sent on the dbus interface
++		 *
++		 * \param msg The message string to be sent
+ 		 */
+ 		void write (string msg);
+ 		/*!
++		 * Send a message to the user with a message
++		 * number. Here, this is implemented as a message sent
++		 * on the dbus interface
++		 * 
++		 * \param num A message number.This is for
++		 * transferring the NoMachine NX message number
++		 * accompanying the message. This number can be used
++		 * by the frontend client to determine the progress of
++		 * the session connection.
++		 *
++		 * \param msg The message string to be sent
++		 */
++		void write (int num, string msg);
++		/*!
++		 * Write an error message to stderr.
++		 */
++		void error (string msg);
++		/*!
+ 		 * Send a debugging message out. Here that's
+ 		 * implemented as a message on stdout.
+ 		 */
+@@ -207,6 +229,23 @@
+ 		 * Called by \see NxclCallbacks::serverCapacitySignal
+ 		 */
+ 		void serverCapacityReached (void);
++		/*!
++		 * Send an informational status message - these are so
++		 * that the frontend client can show the user some
++		 * progress information in the UI.
++		 */
++		void sendDbusInfoMsg (string&amp; info);
++		/*!
++		 * Send an informational status message - these are so
++		 * that the frontend client can show the user some
++		 * progress information in the UI. This one includes
++		 * the NX message number.
++		 */
++		void sendDbusInfoMsg (int num, string&amp; info);
++		/*!
++		 * Send an error message via dbus.
++		 */
++		void sendDbusErrorMsg (string&amp; errorMsg);
+ 		//@}
+ 
+ 		/*!
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000507.html">[Freenx-cvs] r377 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000509.html">[Freenx-cvs] r379 - in nxcl: lib nxcl
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#508">[ date ]</a>
+              <a href="thread.html#508">[ thread ]</a>
+              <a href="subject.html#508">[ subject ]</a>
+              <a href="author.html#508">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

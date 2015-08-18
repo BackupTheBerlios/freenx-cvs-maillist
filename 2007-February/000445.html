@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r311 - in nx-utils/univprn.drv: . SPLFilter-0.0.1 cups
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r311%20-%20in%20nx-utils/univprn.drv%3A%20.%20SPLFilter-0.0.1%20cups&In-Reply-To=%3C200702010427.l114RPjF021820%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000444.html">
+   <LINK REL="Next"  HREF="000446.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r311 - in nx-utils/univprn.drv: . SPLFilter-0.0.1 cups</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r311%20-%20in%20nx-utils/univprn.drv%3A%20.%20SPLFilter-0.0.1%20cups&In-Reply-To=%3C200702010427.l114RPjF021820%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r311 - in nx-utils/univprn.drv: . SPLFilter-0.0.1 cups">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Thu Feb  1 05:27:25 CET 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000444.html">[Freenx-cvs] r310 - in nx-utils: . univprn.drv	univprn.drv/SPLFilter-0.0.1
+</A></li>
+        <LI>Next message: <A HREF="000446.html">[Freenx-cvs] r312 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#445">[ date ]</a>
+              <a href="thread.html#445">[ thread ]</a>
+              <a href="subject.html#445">[ subject ]</a>
+              <a href="author.html#445">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-02-01 05:27:25 +0100 (Thu, 01 Feb 2007)
+New Revision: 311
+
+Added:
+   nx-utils/univprn.drv/cups/
+   nx-utils/univprn.drv/cups/ff-uniprn-pdf.sh
+   nx-utils/univprn.drv/cups/ff-uniprn.sh
+Modified:
+   nx-utils/univprn.drv/SPLFilter-0.0.1/generic.ppd
+Log:
+Added example for usage of universal printer driver with CUPS!
+
+It works!!!
+
+Just with printer FF, but anyway ...
+
+
+
+Modified: nx-utils/univprn.drv/SPLFilter-0.0.1/generic.ppd
+===================================================================
+--- nx-utils/univprn.drv/SPLFilter-0.0.1/generic.ppd	2007-02-01 01:22:55 UTC (rev 310)
++++ nx-utils/univprn.drv/SPLFilter-0.0.1/generic.ppd	2007-02-01 04:27:25 UTC (rev 311)
+@@ -6,6 +6,8 @@
+ *PCFileName:	&quot;POSTSCRIPT.PPD&quot;
+ *Manufacturer:	&quot;Postscript&quot;
+ *Product:	&quot;(WINE v20021009)&quot;
++*cupsFilter:    &quot;application/vnd.cups-postscript 0 ff-uniprn-pdf.sh&quot;
++*cupsFilter:    &quot;application/pdf 0 ff-uniprn.sh&quot;
+ *ModelName:     &quot;Generic postscript printer&quot;
+ *ShortNickName: &quot;Generic postscript printer&quot;
+ *NickName:      &quot;Generic postscript printer&quot;
+
+Added: nx-utils/univprn.drv/cups/ff-uniprn-pdf.sh
+===================================================================
+--- nx-utils/univprn.drv/cups/ff-uniprn-pdf.sh	2007-02-01 01:22:55 UTC (rev 310)
++++ nx-utils/univprn.drv/cups/ff-uniprn-pdf.sh	2007-02-01 04:27:25 UTC (rev 311)
+@@ -0,0 +1,8 @@
++#! /bin/bash
++# see <A HREF="http://localhost:631/spm.html#WRITING_FILTERS">http://localhost:631/spm.html#WRITING_FILTERS</A>
++# debug info in /var/log/cups/error_log
++set -x
++# have the input at fd0 (stdin) in any case
++[ -n &quot;$6&quot; ] &amp;&amp; exec &lt;&quot;$6&quot;
++# prefiltering
++ps2pdf - - | /usr/lib/cups/filter/ff-uniprn.sh
+
+
+Property changes on: nx-utils/univprn.drv/cups/ff-uniprn-pdf.sh
+___________________________________________________________________
+Name: svn:executable
+   + *
+
+Added: nx-utils/univprn.drv/cups/ff-uniprn.sh
+===================================================================
+--- nx-utils/univprn.drv/cups/ff-uniprn.sh	2007-02-01 01:22:55 UTC (rev 310)
++++ nx-utils/univprn.drv/cups/ff-uniprn.sh	2007-02-01 04:27:25 UTC (rev 311)
+@@ -0,0 +1,18 @@
++#! /bin/bash
++# see <A HREF="http://localhost:631/spm.html#WRITING_FILTERS">http://localhost:631/spm.html#WRITING_FILTERS</A>
++# debug info in /var/log/cups/error_log
++set -x
++# Have some dummy Xserver like Xvnc running there
++export DISPLAY=:1.0
++# have the input at fd0 (stdin) in any case
++[ -n &quot;$6&quot; ] &amp;&amp; exec &lt;&quot;$6&quot;
++# prefiltering
++TMPDIR=$(mktemp -d /tmp/ff-uniprn.XXXXXXXXXX) || exit 1
++(
++cd $TMPDIR
++dd bs=1k of=testdoc.pdf
++LD_LIBRARY_PATH=/usr/local/lib/ wine /home/info/ff/public/SPLFilter/SPLFilter.exe
++cat test.spl
++)
++rm -rf &quot;$TMPDIR&quot;
++
+
+
+Property changes on: nx-utils/univprn.drv/cups/ff-uniprn.sh
+___________________________________________________________________
+Name: svn:executable
+   + *
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000444.html">[Freenx-cvs] r310 - in nx-utils: . univprn.drv	univprn.drv/SPLFilter-0.0.1
+</A></li>
+	<LI>Next message: <A HREF="000446.html">[Freenx-cvs] r312 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#445">[ date ]</a>
+              <a href="thread.html#445">[ thread ]</a>
+              <a href="subject.html#445">[ subject ]</a>
+              <a href="author.html#445">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

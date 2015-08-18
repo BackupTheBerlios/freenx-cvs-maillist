@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r443 - qtnx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r443%20-%20qtnx&In-Reply-To=%3C200801290054.m0T0sd2L028057%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000568.html">
+   <LINK REL="Next"  HREF="000570.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r443 - qtnx</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r443%20-%20qtnx&In-Reply-To=%3C200801290054.m0T0sd2L028057%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r443 - qtnx">gwright at mail.berlios.de
+       </A><BR>
+    <I>Tue Jan 29 01:54:39 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000568.html">[Freenx-cvs] r442 - nxcl
+</A></li>
+        <LI>Next message: <A HREF="000570.html">[Freenx-cvs] r444 - nxcl/lib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#569">[ date ]</a>
+              <a href="thread.html#569">[ thread ]</a>
+              <a href="subject.html#569">[ subject ]</a>
+              <a href="author.html#569">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2008-01-29 01:54:38 +0100 (Tue, 29 Jan 2008)
+New Revision: 443
+
+Modified:
+   qtnx/README
+Log:
+Add Win32 build documentation
+
+
+Modified: qtnx/README
+===================================================================
+--- qtnx/README	2008-01-29 00:44:28 UTC (rev 442)
++++ qtnx/README	2008-01-29 00:54:38 UTC (rev 443)
+@@ -20,21 +20,38 @@
+ (These three NX components all should be from the 3.x.x series. You can
+ obtain them from NoMachine's servers at <A HREF="http://www.nomachine.com/sources.php">http://www.nomachine.com/sources.php</A>)
+ 
+-Read the nxcl README for details of the first three packages.
++Read the nxcl README for details of the first three packages. You will not need
++to build the nxcmd daemon nor the doxygen API documentation.
+ 
+ To build QtNX you will need Qt 4.x. You need to run the following commands:
+ 
+-qmake
+-make
++$ qmake
++$ make
+ 
+-There is currently a bug in nxcl which means that qtnx (or any other
+-application linking directly) won't compile properly; simply remove
+-the line
++This will generate a qtnx binary in that directory; install it to /usr/bin
++or anywhere you want.
+ 
+-#include &quot;../config.h&quot;
++Win32 Builds
++------------
+ 
+-from notQt.h in $PREFIX/include/nxcl (normally /usr/local/include/nxcl)
+-to allow it to compile cleanly.
++In order to build on Win32, you will need a full Cygwin setup. Ensure you have
++pkg-config installed in cygwin.
+ 
+-This will generate a qtnx binary in that directory; install it to /usr/bin
+-or anywhere you want.
++Build Qt 4.3.3 as per the instructions on <A HREF="http://wiki.lyx.org/LyX/LyXOnCygwin;">http://wiki.lyx.org/LyX/LyXOnCygwin;</A>
++you will, however, need to patch Qt. Line 528 in src/corelib/codecs/qtextcodec.cpp
++should also contain an extra conditional:
++
++&amp;&amp; !defined(Q_CYGWIN_WIN)
++
++You can then build Qt without any trouble by following those instructions. 
++
++Afterwards, set QTDIR to point to wherever you installed Qt to, and set the
++PATH to point to QTDIR/bin as well:
++
++$ export QTDIR=/usr/local/src/qtwin-4.3.3
++$ export PATH=$QTDIR/bin:$PATH
++
++You can then build qtnx normally with the standard steps:
++
++$ qmake
++$ make
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000568.html">[Freenx-cvs] r442 - nxcl
+</A></li>
+	<LI>Next message: <A HREF="000570.html">[Freenx-cvs] r444 - nxcl/lib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#569">[ date ]</a>
+              <a href="thread.html#569">[ thread ]</a>
+              <a href="subject.html#569">[ subject ]</a>
+              <a href="author.html#569">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

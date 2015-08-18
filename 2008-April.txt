@@ -1,0 +1,265 @@
+From fabianx at mail.berlios.de  Tue Apr  1 22:29:54 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 1 Apr 2008 22:29:54 +0200
+Subject: [Freenx-cvs] r537 - trunk/freenx-server
+Message-ID: <200804012029.m31KTs2C030563@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-04-01 22:29:53 +0200 (Tue, 01 Apr 2008)
+New Revision: 537
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxnode
+Log:
+* Added -nolisten tcp to nxagent invocation.
+  (fabianx at bat.berlios.de, idea by  pappy- (Gentoo))
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-03-27 18:54:08 UTC (rev 536)
++++ trunk/freenx-server/ChangeLog	2008-04-01 20:29:53 UTC (rev 537)
+@@ -4,6 +4,8 @@
+ 	  to auth.log via syslog (3). This can be disabled by 
+ 	  setting ENABLE_LOG_FAILED_LOGINS="0".
+ 	  (fabianx at bat.berlios.de)
++	* Added -nolisten tcp to nxagent invocation.
++	  (fabianx at bat.berlios.de, idea by  pappy- (Gentoo))
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxnode
+===================================================================
+--- trunk/freenx-server/nxnode	2008-03-27 18:54:08 UTC (rev 536)
++++ trunk/freenx-server/nxnode	2008-04-01 20:29:53 UTC (rev 537)
+@@ -525,7 +525,7 @@
+ 		
+ 		# Start the agent
+ 		
+-		PATH="$PATH_BIN:$PATH" $PATH_BIN/nxagent $P $R -name "NX - $user@$SERVER_NAME:$display - $session (GPL Edition)" -option "$USER_FAKE_HOME/.nx/C-$sess_id/options" $K $G $B $FP $AGENT_EXTRA_OPTIONS_X :$display 2>&3 &
++		PATH="$PATH_BIN:$PATH" $PATH_BIN/nxagent $P $R -nolisten tcp -name "NX - $user@$SERVER_NAME:$display - $session (GPL Edition)" -option "$USER_FAKE_HOME/.nx/C-$sess_id/options" $K $G $B $FP $AGENT_EXTRA_OPTIONS_X :$display 2>&3 &
+ 	fi
+ 	
+ 	#
+
+
+
+From fabianx at mail.berlios.de  Sat Apr  5 13:41:58 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sat, 5 Apr 2008 13:41:58 +0200
+Subject: [Freenx-cvs] r538 - trunk/freenx-server
+Message-ID: <200804051141.m35Bfwan000226@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-04-05 13:41:57 +0200 (Sat, 05 Apr 2008)
+New Revision: 538
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/Makefile
+   trunk/freenx-server/nxacl.sample
+   trunk/freenx-server/nxcheckload.sample
+   trunk/freenx-server/nxcups-gethost
+   trunk/freenx-server/nxdesktop_helper
+   trunk/freenx-server/nxviewer_helper
+Log:
+* Used bash for all tasks as 'sh' might be not what we want
+  on standard ubuntu.
+(fabianx at bat.berlios.de, thx to tan (IRC))
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-04-01 20:29:53 UTC (rev 537)
++++ trunk/freenx-server/ChangeLog	2008-04-05 11:41:57 UTC (rev 538)
+@@ -6,6 +6,9 @@
+ 	  (fabianx at bat.berlios.de)
+ 	* Added -nolisten tcp to nxagent invocation.
+ 	  (fabianx at bat.berlios.de, idea by  pappy- (Gentoo))
++	* Used bash for all tasks as 'sh' might be not what we want
++	  on standard ubuntu.
++	  (fabianx at bat.berlios.de, thx to tan (IRC))
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/Makefile
+===================================================================
+--- trunk/freenx-server/Makefile	2008-04-01 20:29:53 UTC (rev 537)
++++ trunk/freenx-server/Makefile	2008-04-05 11:41:57 UTC (rev 538)
+@@ -12,7 +12,7 @@
+ 	done
+ 
+ install:
+-	. nxloadconfig;\
++	bash -c '. nxloadconfig;\
+ 	install -m755 -d $(DESTDIR)/$$PATH_BIN/ ;\
+ 	install -m755 -d $(DESTDIR)/$$PATH_LIB/ ;\
+ 	install -m755 -d $(DESTDIR)/$$NX_ETC_DIR/ ;\
+@@ -23,4 +23,4 @@
+ 	done;\
+ 	export PATH_BIN PATH_LIB CUPS_BACKEND NX_VERSION;\
+ 	install -m644 node.conf.sample $(DESTDIR)/$$NX_ETC_DIR/ ; \
+-	make -C nxredir install
++	make -C nxredir install'
+
+Modified: trunk/freenx-server/nxacl.sample
+===================================================================
+--- trunk/freenx-server/nxacl.sample	2008-04-01 20:29:53 UTC (rev 537)
++++ trunk/freenx-server/nxacl.sample	2008-04-05 11:41:57 UTC (rev 538)
+@@ -1,4 +1,4 @@
+-#!/bin/sh
++#!/bin/bash
+ 
+ # Syntax: getparam <param>
+ getparam()
+
+Modified: trunk/freenx-server/nxcheckload.sample
+===================================================================
+--- trunk/freenx-server/nxcheckload.sample	2008-04-01 20:29:53 UTC (rev 537)
++++ trunk/freenx-server/nxcheckload.sample	2008-04-05 11:41:57 UTC (rev 538)
+@@ -1,4 +1,4 @@
+-#!/bin/sh
++#!/bin/bash
+ #
+ # nxcheckload - sample script for calculation of the load for a node.
+ #
+
+Modified: trunk/freenx-server/nxcups-gethost
+===================================================================
+--- trunk/freenx-server/nxcups-gethost	2008-04-01 20:29:53 UTC (rev 537)
++++ trunk/freenx-server/nxcups-gethost	2008-04-05 11:41:57 UTC (rev 538)
+@@ -1,4 +1,4 @@
+-#!/bin/sh
++#!/bin/bash
+ 
+ # Read the config file
+ . $(PATH=$(cd $(dirname $0) && pwd):$PATH which nxloadconfig) --userconf
+
+Modified: trunk/freenx-server/nxdesktop_helper
+===================================================================
+--- trunk/freenx-server/nxdesktop_helper	2008-04-01 20:29:53 UTC (rev 537)
++++ trunk/freenx-server/nxdesktop_helper	2008-04-05 11:41:57 UTC (rev 538)
+@@ -1,4 +1,4 @@
+-#!/bin/sh
++#!/bin/bash
+ #
+ # nxdesktop_helper - Small helper for external rdesktop program as needed by NX 3.0.0 backend.
+ #
+
+Modified: trunk/freenx-server/nxviewer_helper
+===================================================================
+--- trunk/freenx-server/nxviewer_helper	2008-04-01 20:29:53 UTC (rev 537)
++++ trunk/freenx-server/nxviewer_helper	2008-04-05 11:41:57 UTC (rev 538)
+@@ -1,4 +1,4 @@
+-#!/bin/sh
++#!/bin/bash
+ #
+ # nxviewer_helper - Small helper for external vncviewer program as needed by NX 3.0.0 backend.
+ #
+
+
+
+From fabianx at mail.berlios.de  Tue Apr  8 16:45:47 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 8 Apr 2008 16:45:47 +0200
+Subject: [Freenx-cvs] r539 - trunk/freenx-server
+Message-ID: <200804081445.m38EjlaF013677@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-04-08 16:45:47 +0200 (Tue, 08 Apr 2008)
+New Revision: 539
+
+Modified:
+   trunk/freenx-server/Makefile
+Log:
+Changed the way the Makefile works. Now the correct shell is given at Makefile beginning.
+
+
+
+Modified: trunk/freenx-server/Makefile
+===================================================================
+--- trunk/freenx-server/Makefile	2008-04-05 11:41:57 UTC (rev 538)
++++ trunk/freenx-server/Makefile	2008-04-08 14:45:47 UTC (rev 539)
+@@ -1,5 +1,7 @@
+ .PHONY: all install
+ 
++SHELL = /bin/bash
++
+ SUBDIRS=nxredir nxviewer-passwd nxserver-helper
+ PROGRAMS=nxacl.sample nxcheckload.sample nxcups-gethost nxdesktop_helper nxdialog nxkeygen nxloadconfig nxnode nxnode-login nxprint nxserver nxserver-helper/nxserver-helper nxsetup nxviewer_helper nxviewer-passwd/nxpasswd/nxpasswd
+ 
+@@ -12,7 +14,7 @@
+ 	done
+ 
+ install:
+-	bash -c '. nxloadconfig;\
++	. nxloadconfig;\
+ 	install -m755 -d $(DESTDIR)/$$PATH_BIN/ ;\
+ 	install -m755 -d $(DESTDIR)/$$PATH_LIB/ ;\
+ 	install -m755 -d $(DESTDIR)/$$NX_ETC_DIR/ ;\
+@@ -23,4 +25,4 @@
+ 	done;\
+ 	export PATH_BIN PATH_LIB CUPS_BACKEND NX_VERSION;\
+ 	install -m644 node.conf.sample $(DESTDIR)/$$NX_ETC_DIR/ ; \
+-	make -C nxredir install'
++	make -C nxredir install
+
+
+
+From fabianx at mail.berlios.de  Wed Apr 16 01:38:55 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Wed, 16 Apr 2008 01:38:55 +0200
+Subject: [Freenx-cvs] r540 - trunk/freenx-server
+Message-ID: <200804152338.m3FNctjq022078@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-04-16 01:38:54 +0200 (Wed, 16 Apr 2008)
+New Revision: 540
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxnode
+Log:
+* Finally fixed mv not working for failed or terminated
+  sessions.
+  (fabianx at bat.berlios.de, Terje Andersen <terander at guard.zapto.org>)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-04-08 14:45:47 UTC (rev 539)
++++ trunk/freenx-server/ChangeLog	2008-04-15 23:38:54 UTC (rev 540)
+@@ -9,6 +9,9 @@
+ 	* Used bash for all tasks as 'sh' might be not what we want
+ 	  on standard ubuntu.
+ 	  (fabianx at bat.berlios.de, thx to tan (IRC))
++	* Finally fixed mv not working for failed or terminated
++	  sessions.
++	  (fabianx at bat.berlios.de, Terje Andersen <terander at guard.zapto.org>)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxnode
+===================================================================
+--- trunk/freenx-server/nxnode	2008-04-08 14:45:47 UTC (rev 539)
++++ trunk/freenx-server/nxnode	2008-04-15 23:38:54 UTC (rev 540)
+@@ -154,8 +154,8 @@
+ 	
+ 	[ "$SESSION_LOG_CLEAN" = "1" ] && rm -rf "$USER_FAKE_HOME/.nx/C-$1/"
+ 	
+-	[ "$SESSION_LOG_CLEAN" = "0" -a "$2" = "failed" ] && mv "$USER_FAKE_HOME/.nx/C-$1/" "$USER_FAKE_HOME/.nx/F-C-$1/"
+-	[ "$SESSION_LOG_CLEAN" = "0" -a "$2" != "failed" ] && mv "$USER_FAKE_HOME/.nx/C-$1/" "$USER_FAKE_HOME/.nx/T-C-$1/"
++	[ "$SESSION_LOG_CLEAN" = "0" -a "$2" = "failed" ] && mv "$USER_FAKE_HOME/.nx/C-$1/" "$USER_FAKE_HOME/.nx/F-C-$1"
++	[ "$SESSION_LOG_CLEAN" = "0" -a "$2" != "failed" ] && mv "$USER_FAKE_HOME/.nx/C-$1/" "$USER_FAKE_HOME/.nx/T-C-$1"
+ }
+ 
+ #
+
+
+

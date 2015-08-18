@@ -1,0 +1,434 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r379 - in nxcl: lib nxcl
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-September/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r379%20-%20in%20nxcl%3A%20lib%20nxcl&In-Reply-To=%3C200709152201.l8FM17Un010351%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000508.html">
+   <LINK REL="Next"  HREF="000510.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r379 - in nxcl: lib nxcl</H1>
+    <B>sebjames at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r379%20-%20in%20nxcl%3A%20lib%20nxcl&In-Reply-To=%3C200709152201.l8FM17Un010351%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r379 - in nxcl: lib nxcl">sebjames at mail.berlios.de
+       </A><BR>
+    <I>Sun Sep 16 00:01:07 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000508.html">[Freenx-cvs] r378 - in nxcl: lib nxcl
+</A></li>
+        <LI>Next message: <A HREF="000510.html">[Freenx-cvs] r380 - in nxcl: lib nxcl
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#509">[ date ]</a>
+              <a href="thread.html#509">[ thread ]</a>
+              <a href="subject.html#509">[ subject ]</a>
+              <a href="author.html#509">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: sebjames
+Date: 2007-09-16 00:01:07 +0200 (Sun, 16 Sep 2007)
+New Revision: 379
+
+Modified:
+   nxcl/lib/nxclientlib.cpp
+   nxcl/lib/nxclientlib.h
+   nxcl/lib/nxdata.h
+   nxcl/nxcl/main.cpp
+   nxcl/nxcl/nxcl.cpp
+Log:
+1) Made nxcl send out a message saying &quot;I'm alive&quot; so that frontend client can catch this, then carry on with its business in the knowledge that nxcl is there to communicate with.
+
+2) Made nxcl/nxclientlib classes chattier so that there is more progress information available to the frontend client
+
+3) Added an integer field to the &quot;write&quot; callback for use by the frontend client, so that we don't base progress reports on bits of text which might in future be translated.
+
+4) Added a few this-&gt; keywords. One day I may go through the whole thing and add _all_ this-&gt; keywords, because they're very helpful to new developers.
+
+
+
+Modified: nxcl/lib/nxclientlib.cpp
+===================================================================
+--- nxcl/lib/nxclientlib.cpp	2007-09-13 21:35:33 UTC (rev 378)
++++ nxcl/lib/nxclientlib.cpp	2007-09-15 22:01:07 UTC (rev 379)
+@@ -18,8 +18,8 @@
+  *                                                                         *
+  ***************************************************************************/
+ #include &quot;nxclientlib_i18n.h&quot;
+-
+ #include &quot;nxclientlib.h&quot;
++#include &quot;nxdata.h&quot;
+ 
+ #include &lt;fstream&gt;
+ 
+@@ -53,13 +53,13 @@
+ void
+ NXClientLibCallbacks::startedSignal (string name)
+ {
+-	this-&gt;parent-&gt;externalCallbacks-&gt;write (name + _(&quot; process started&quot;));
++	this-&gt;parent-&gt;externalCallbacks-&gt;write (NXCL_PROCESS_STARTED, name + _(&quot; process started&quot;));
+ }
+ 
+ void
+ NXClientLibCallbacks::processFinishedSignal (string name)
+ {
+-	this-&gt;parent-&gt;externalCallbacks-&gt;write (name + _(&quot; process exited&quot;));
++	this-&gt;parent-&gt;externalCallbacks-&gt;write (NXCL_PROCESS_EXITED, name + _(&quot; process exited&quot;));
+ 	parent-&gt;setIsFinished (true);
+ }
+ 
+@@ -139,10 +139,11 @@
+ //@{
+ NXClientLib::NXClientLib()
+ {
+-	isFinished = false;
+-	readyForProxy = false;
+-	proxyData.encrypted = false;
+-	password = false;
++	this-&gt;isFinished = false;
++	this-&gt;readyForProxy = false;
++	this-&gt;sessionRunning = false;
++	this-&gt;proxyData.encrypted = false;
++	this-&gt;password = false;
+ 
+ 	dbgln (&quot;In NXClientLib constructor&quot;);
+ 
+@@ -161,7 +162,7 @@
+ NXClientLib::~NXClientLib()
+ {
+ 	dbgln (&quot;In NXClientLib destructor&quot;);
+-	nxsshProcess.terminate();
++	this-&gt;nxsshProcess.terminate();
+ }
+ 
+ void NXClientLib::invokeNXSSH (string publicKey, string serverHost, bool encryption, string key, int port)
+@@ -259,7 +260,7 @@
+ 
+ void NXClientLib::loginFailed()
+ {
+-	this-&gt;externalCallbacks-&gt;write (_(&quot;Got \&quot;Login Failed\&quot;&quot;));
++	this-&gt;externalCallbacks-&gt;write (NXCL_LOGIN_FAILED, _(&quot;Got \&quot;Login Failed\&quot;&quot;));
+ 	this-&gt;isFinished = true;
+ 	this-&gt;nxsshProcess.terminate();
+ }
+@@ -303,8 +304,10 @@
+ 
+ 	// If message 204 is picked, that's authentication failed.
+ 	if (response == 204) {
+-		this-&gt;externalCallbacks-&gt;write (_(&quot;Got \&quot;Authentication Failed\&quot; from nxssh.\n&quot;
+-						  &quot;Please check the certificate for the first SSL authentication stage,\n&quot;
++		this-&gt;externalCallbacks-&gt;write (NXCL_AUTH_FAILED,
++						_(&quot;Got \&quot;Authentication Failed\&quot; from nxssh.\n&quot;
++						  &quot;Please check the certificate for the first SSL &quot;
++						  &quot;authentication stage,\n&quot;
+ 						  &quot;in which the \&quot;nx\&quot; user is authenticated.&quot;));
+ 		this-&gt;isFinished = true;
+ 		return;
+@@ -312,8 +315,6 @@
+ 
+ 	// 147 is server capacity reached
+ 	if (response == 147) {
+-		this-&gt;externalCallbacks-&gt;write (_(&quot;Got \&quot;Server Capacity Reached\&quot; from nxssh.\n&quot;));
+-		dbgln (&quot;Got \&quot;Server Capacity Reached\&quot; from nxssh.&quot;);
+ 		this-&gt;externalCallbacks-&gt;serverCapacitySignal();
+ 		this-&gt;isFinished = true;
+ 		return;
+@@ -340,13 +341,13 @@
+ 			switchCommand += ss.str();
+ 			this-&gt;write (switchCommand);
+ 		} else if ((*msgiter).find(&quot;NX&gt; 287 Redirected I/O to channel descriptors&quot;) != string::npos) {
+-			dbgln (&quot;287 message found on stdout&quot;);
+-			this-&gt;externalCallbacks-&gt;write(_(&quot;The session has been started successfully&quot;));
++			this-&gt;externalCallbacks-&gt;write(287, _(&quot;The session has been started successfully&quot;));
++			this-&gt;sessionRunning = true;
+ 		}
+ 
+ 		if ((*msgiter).find(&quot;Password&quot;) != string::npos) {
+-			this-&gt;externalCallbacks-&gt;write(_(&quot;Authenticating with NX server&quot;));
+-			password = true;
++			this-&gt;externalCallbacks-&gt;write(NXCL_AUTHENTICATING, _(&quot;Authenticating with NX server&quot;));
++			this-&gt;password = true;
+ 		}
+ 
+ 		if (!readyForProxy) {
+@@ -391,18 +392,18 @@
+ 			this-&gt;write(switchCommand);
+ 
+ 		} else if ((*msgiter).find(&quot;NX&gt; 287 Redirected I/O to channel descriptors&quot;) != string::npos) {
+-			this-&gt;externalCallbacks-&gt;write(_(&quot;The session has been started successfully&quot;));
++			this-&gt;externalCallbacks-&gt;write(287, _(&quot;The session has been started successfully&quot;));
+ 
+ 		} else if ((*msgiter).find(&quot;NX&gt; 209 Remote host identification has changed&quot;) != string::npos) {
+-			this-&gt;externalCallbacks-&gt;write(_(&quot;SSH Host Key Problem&quot;));
++			this-&gt;externalCallbacks-&gt;write(209, _(&quot;SSH Host Key Problem&quot;));
+ 			this-&gt;isFinished = true;
+ 
+ 		} else if ((*msgiter).find(&quot;NX&gt; 280 Ignoring EOF on the monitored channel&quot;) != string::npos) {
+-			this-&gt;externalCallbacks-&gt;write(_(&quot;Got \&quot;NX&gt; 280 Ignoring EOF on the monitored channel\&quot; from nxssh...&quot;));
++			this-&gt;externalCallbacks-&gt;write(280, _(&quot;Got \&quot;NX&gt; 280 Ignoring EOF on the monitored channel\&quot; from nxssh...&quot;));
+ 			this-&gt;isFinished = true;
+ 
+ 		} else if ((*msgiter).find(&quot;Host key verification failed&quot;) != string::npos) {
+-			this-&gt;externalCallbacks-&gt;write(_(&quot;SSH host key verification failed&quot;));
++			this-&gt;externalCallbacks-&gt;write(NXCL_HOST_KEY_VERIFAILED, _(&quot;SSH host key verification failed&quot;));
+ 			this-&gt;isFinished = true;			
+ 		}
+ 	}
+@@ -458,42 +459,40 @@
+ 	dbgln (&quot;NXClientLib::parseSSH called for message '&quot; + message + &quot;'&quot;);
+ 
+ 	if ((pos = message.find(&quot;NX&gt; 700 Session id: &quot;)) != string::npos) {
++		this-&gt;externalCallbacks-&gt;write (700, _(&quot;Got a session ID&quot;));
+ 		proxyData.id = message.substr(pos+20, message.length()-pos);
+-		dbgln (&quot;proxyData.id = &quot; + proxyData.id);
+ 	} else if ((pos = message.find(&quot;NX&gt; 705 Session display: &quot;)) != string::npos) {
+ 		stringstream portss;
+ 		int portnum;
+ 		portss &lt;&lt; message.substr(pos+25, message.length()-pos);
+ 		portss &gt;&gt; portnum;		
+ 		proxyData.display = portnum;
+-		dbgln (&quot;proxyData.display = &quot; &lt;&lt; proxyData.display);
+ 		proxyData.port = portnum + 4000;
+-		dbgln (&quot;proxyData.port = &quot; &lt;&lt; proxyData.port);
+ 	} else if ((pos = message.find(&quot;NX&gt; 706 Agent cookie: &quot;)) != string::npos) {
+ 		proxyData.cookie = message.substr(pos+22, message.length()-pos);
+-		dbgln (&quot;proxyData.cookie = &quot; + proxyData.cookie);
++		this-&gt;externalCallbacks-&gt;write (706, _(&quot;Got an agent cookie&quot;));
+ 	} else if ((pos = message.find(&quot;NX&gt; 702 Proxy IP: &quot;)) != string::npos) {
+ 		proxyData.proxyIP = message.substr(pos+18, message.length()-pos);
+-		dbgln (&quot;proxyData.proxyIP = &quot; + proxyData.proxyIP);
++		this-&gt;externalCallbacks-&gt;write (702, _(&quot;Got a proxy IP&quot;));
+ 	} else if (message.find(&quot;NX&gt; 707 SSL tunneling: 1&quot;) != string::npos) {
+-		dbgln (&quot;Setting proxyData.encrypted to true&quot;);
++		this-&gt;externalCallbacks-&gt;write (702, _(&quot;All data will be SSL tunnelled&quot;));
+ 		proxyData.encrypted = true;
+ 	} else if (message.find(&quot;NX&gt; 147 Server capacity&quot;) != string::npos) {
+-		this-&gt;externalCallbacks-&gt;write (_(&quot;Got \&quot;Server Capacity Reached\&quot; from nxssh.&quot;));
++		this-&gt;externalCallbacks-&gt;write (147, _(&quot;Got \&quot;Server Capacity Reached\&quot; from nxssh.&quot;));
+ 		this-&gt;externalCallbacks-&gt;serverCapacitySignal();
+ 		this-&gt;isFinished = true;
+ 	} else if (message.find (&quot;NX&gt; 204 Authentication failed.&quot;) != string::npos) {
+-		this-&gt;externalCallbacks-&gt;write (_(&quot;NX SSH Authentication Failed, finishing&quot;));
++		this-&gt;externalCallbacks-&gt;write (204, _(&quot;NX SSH Authentication Failed, finishing&quot;));
+ 		this-&gt;isFinished = true;
+ 	}
+ 
+ 	if (message.find(&quot;NX&gt; 710 Session status: running&quot;) != string::npos) {
++		this-&gt;externalCallbacks-&gt;write (710, _(&quot;Session status is \&quot;running\&quot;&quot;));
+ 		invokeProxy();
+ 		session.wipeSessions();
+ 		rMessage = &quot;bye\n&quot;;
+ 	}
+ 
+-	dbgln (&quot;NXClientLib::parseSSH returning&quot;);
+ 	return rMessage;
+ }
+ 
+@@ -501,7 +500,7 @@
+ {
+ 	dbgln (&quot;invokeProxy called&quot;);
+ 
+-	this-&gt;externalCallbacks-&gt;write(100, _(&quot;Starting NX session&quot;));
++	this-&gt;externalCallbacks-&gt;write(NXCL_INVOKE_PROXY, _(&quot;Starting NX session&quot;));
+ 	
+ 	int e;
+ 	char * home;
+
+Modified: nxcl/lib/nxclientlib.h
+===================================================================
+--- nxcl/lib/nxclientlib.h	2007-09-13 21:35:33 UTC (rev 378)
++++ nxcl/lib/nxclientlib.h	2007-09-15 22:01:07 UTC (rev 379)
+@@ -28,6 +28,7 @@
+ #include &lt;list&gt;
+ #include &quot;notQt.h&quot;
+ 
++
+ using namespace std;
+ 
+ namespace nxcl {
+@@ -269,6 +270,7 @@
+ 		NXSession* getSession (void) { return &amp;this-&gt;session; }
+ 		void setIsFinished (bool status) { this-&gt;isFinished = status; }
+ 		void setExternalCallbacks (NXClientLibExternalCallbacks * cb) { this-&gt;externalCallbacks = cb; }
++		bool getSessionRunning (void) { return this-&gt;sessionRunning; }
+ 		//@}
+ 
+ 	private:
+@@ -283,6 +285,13 @@
+ 		 */
+ 		bool readyForProxy;
+ 		/*!
++		 * Set true when the NX session is under way. This
++		 * means we can reduce the polling frequency right
++		 * down to a level which won't impact on power
++		 * consumption.
++		 */
++		bool sessionRunning;
++		/*!
+ 		 * Have we said we need to enter a password?
+ 		 */
+ 		bool password;
+
+Modified: nxcl/lib/nxdata.h
+===================================================================
+--- nxcl/lib/nxdata.h	2007-09-13 21:35:33 UTC (rev 378)
++++ nxcl/lib/nxdata.h	2007-09-15 22:01:07 UTC (rev 379)
+@@ -23,6 +23,21 @@
+ 
+ #include &lt;string&gt;
+ 
++/*!
++ * Some definitions of numbers that we can send over to the frontend
++ * client to tell it how we're getting along with the connection...
++ */
++#define NXCL_PROCESS_STARTED        1000001
++#define NXCL_PROCESS_EXITED         1000002
++#define NXCL_AUTH_FAILED            1000003
++#define NXCL_AUTHENTICATING         1000004
++#define NXCL_LOGIN_FAILED           1000005
++#define NXCL_HOST_KEY_VERIFAILED    1000006
++#define NXCL_INVOKE_PROXY           1000007
++#define NXCL_STARTING               1000008
++#define NXCL_FINISHED               1000009
++#define NXCL_ALIVE                  1000010
++
+ using namespace std;
+ 
+ namespace nxcl {
+
+Modified: nxcl/nxcl/main.cpp
+===================================================================
+--- nxcl/nxcl/main.cpp	2007-09-13 21:35:33 UTC (rev 378)
++++ nxcl/nxcl/main.cpp	2007-09-15 22:01:07 UTC (rev 379)
+@@ -31,8 +31,10 @@
+  */
+ 
+ #include &quot;../config.h&quot;
++#include &quot;nxclientlib_i18n.h&quot;
+ #include &quot;nxclientlib.h&quot;
+ #include &quot;nxcl.h&quot;
++#include &quot;nxdata.h&quot;
+ #include &lt;fstream&gt;
+ 
+ /* This define is required for slightly older versions of dbus as
+@@ -65,11 +67,11 @@
+ 
+ 	debugLogFile.open(&quot;/tmp/nxcl.log&quot;, ios::out|ios::trunc);
+ 	if (!debugLogFile.is_open()) {
+-		nxcl.callbacks.write (&quot;Odd, couldn't open /tmp/nxcl.log&quot;);
++		nxcl.callbacks.error (&quot;Odd, couldn't open /tmp/nxcl.log&quot;);
+ 	}
+ 
+ 	if (argc!=2) {
+-		nxcl.callbacks.write (&quot;This program is usually executed by another program. &quot;
++		nxcl.callbacks.error (&quot;This program is usually executed by another program. &quot;
+ 				      &quot;Trying to execute it alone is probably not the right &quot;
+ 				      &quot;thing to do, unless you are sure it is. Provide a single &quot;
+ 				      &quot;argument - the identifier for the dbus messages&quot;);
+@@ -82,20 +84,29 @@
+ 	ss &gt;&gt; id;
+ 	nxcl.setupDbus(id);
+ 
++	// Send a message to the frontend client to say we are up and running
++	nxcl.callbacks.write (NXCL_ALIVE, _(&quot;nxcl is up and running&quot;));
++
+ 	if (-1 == (nxcl.receiveSettings())) {
+ 		cerr &lt;&lt; &quot;Failed to obtain server and user for the session.&quot; &lt;&lt; endl;
+ 		return -1;
+ 	}
+ 
++	nxcl.callbacks.write (NXCL_STARTING, _(&quot;Connection is starting...&quot;));
+ 	nxcl.startTheNXConnection();
+ 
+ 	NXClientLib* c = nxcl.getNXClientLib();
+-	while (probeNXCL(c) == true) {
++	while (probeNXCL(c) == true &amp;&amp; !c-&gt;getSessionRunning()) {
+ 		usleep (30000); // 3 100ths of a second =&gt; about 30 
+-                                // probes a second (a lot).
++                                // probes a second. This will impact on power consumption.
+ 	}
+ 
+-	nxcl.callbacks.write (&quot;Program finished.&quot;);
++	// Now the process has started, reduce polling.
++	while (probeNXCL(c) == true) {
++		usleep (2000000); // poll once every 2 seconds.
++	}
++
++	nxcl.callbacks.write (NXCL_FINISHED, _(&quot;Program finished.&quot;));
+ 	debugLogFile.close();
+ 	return 0;
+ }
+
+Modified: nxcl/nxcl/nxcl.cpp
+===================================================================
+--- nxcl/nxcl/nxcl.cpp	2007-09-13 21:35:33 UTC (rev 378)
++++ nxcl/nxcl/nxcl.cpp	2007-09-15 22:01:07 UTC (rev 379)
+@@ -48,7 +48,6 @@
+ void
+ NxclCallbacks::write (string msg)
+ {
+-//	cout &lt;&lt; &quot;NXCL&gt; &quot; &lt;&lt; msg &lt;&lt; endl;
+ 	this-&gt;parent-&gt;sendDbusInfoMsg (msg);
+ }
+ void
+@@ -252,7 +251,7 @@
+ 		// loop again if we haven't read a message
+ 		if (NULL == message) { 
+ 			//this-&gt;callbacks.debug (&quot;receiveSettings(): No message yet, sleep a second.&quot;);
+-			sleep(1);
++			usleep(1000000);
+ 			continue;
+ 		}
+ 
+@@ -500,6 +499,8 @@
+ 	list&lt;NXResumeData&gt;::iterator it;
+ 	for (it=resumable.begin(); it!=resumable.end(); it++) {
+ 
++		this-&gt;callbacks.debug (&quot;Sending a session..&quot;);
++
+ 		DBusMessage *message;
+ 
+ 		/* Create a new signal &quot;AvailableSession&quot; on the
+@@ -633,7 +634,7 @@
+ 
+ 		// loop again if we haven't read a message
+ 		if (NULL == message) { 
+-			sleep(1);
++			usleep(1000000);
+ 			continue;
+ 		}
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000508.html">[Freenx-cvs] r378 - in nxcl: lib nxcl
+</A></li>
+	<LI>Next message: <A HREF="000510.html">[Freenx-cvs] r380 - in nxcl: lib nxcl
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#509">[ date ]</a>
+              <a href="thread.html#509">[ thread ]</a>
+              <a href="subject.html#509">[ subject ]</a>
+              <a href="author.html#509">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,201 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r67 - in nx-utils: . nxredir
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-July/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r67%20-%20in%20nx-utils%3A%20.%20nxredir&In-Reply-To=%3C200507031644.j63Gi4gZ028651%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000157.html">
+   <LINK REL="Next"  HREF="000159.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r67 - in nx-utils: . nxredir</H1>
+    <B>Fabian Franz at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r67%20-%20in%20nx-utils%3A%20.%20nxredir&In-Reply-To=%3C200507031644.j63Gi4gZ028651%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r67 - in nx-utils: . nxredir">fabianx at berlios.de
+       </A><BR>
+    <I>Sun Jul  3 18:44:04 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000157.html">[Freenx-cvs] r66 - / nx-utils nx-utils/nxfish
+</A></li>
+        <LI>Next message: <A HREF="000159.html">[Freenx-cvs] r68 - nx-utils/nxredir
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#158">[ date ]</a>
+              <a href="thread.html#158">[ thread ]</a>
+              <a href="subject.html#158">[ subject ]</a>
+              <a href="author.html#158">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2005-07-03 18:43:49 +0200 (Sun, 03 Jul 2005)
+New Revision: 67
+
+Added:
+   nx-utils/nxredir/
+   nx-utils/nxredir/Makefile
+   nx-utils/nxredir/nxredir
+   nx-utils/nxredir/nxredir.c
+Log:
+Initial import into CVS.
+
+
+Added: nx-utils/nxredir/Makefile
+===================================================================
+--- nx-utils/nxredir/Makefile	2005-07-03 16:08:12 UTC (rev 66)
++++ nx-utils/nxredir/Makefile	2005-07-03 16:43:49 UTC (rev 67)
+@@ -0,0 +1,18 @@
++all: libnxredir.so.0.1
++
++CC=gcc
++CFLAGS=-g -O2 -Wall
++
++libnxredir.so.0.1: nxredir.o
++	$(CC) -fPIC $(CFLAGS) -nostdlib -shared -o libnxredir.so.0.1 nxredir.o -ldl -lc
++
++clean:
++	rm -f libnxredir.so.0.1
++	rm -f *.o
++
++install:
++	cp -a libnxredir.so.0.1 $(DESTDIR)/usr/lib
++	cp -a nxredir $(DESTDIR)/usr/bin
++	ldconfig
++
++.PHONY: clean install
+
+Added: nx-utils/nxredir/nxredir
+===================================================================
+--- nx-utils/nxredir/nxredir	2005-07-03 16:08:12 UTC (rev 66)
++++ nx-utils/nxredir/nxredir	2005-07-03 16:43:49 UTC (rev 67)
+@@ -0,0 +1,16 @@
++#!/bin/sh
++
++if [ -z &quot;$NXCUPS_PORT&quot; -a -z &quot;$NXSAMBA_PORT&quot; ]
++then
++	echo &quot;nxredir: Redirect standard ports to nxproxy&quot;
++	echo &quot;&quot;
++	echo &quot;Usage: export NXCUPS_PORT='where_cups_is_running'&quot;
++	echo &quot;       export NXSAMBA_PORT='where_samba_is_running'&quot;
++	exit 0
++fi
++
++LD_PRELOAD=&quot;/usr/lib/libnxredir.so.0 $LD_PRELOAD&quot;
++export LD_PRELOAD
++
++# invoke the program with the args given
++exec &quot;$@&quot;
+
+
+Property changes on: nx-utils/nxredir/nxredir
+___________________________________________________________________
+Name: svn:executable
+   + 
+
+Added: nx-utils/nxredir/nxredir.c
+===================================================================
+--- nx-utils/nxredir/nxredir.c	2005-07-03 16:08:12 UTC (rev 66)
++++ nx-utils/nxredir/nxredir.c	2005-07-03 16:43:49 UTC (rev 67)
+@@ -0,0 +1,69 @@
++/*
++ * libnxredir - Redirect certain ports to other forwarded ports.
++ *
++ * Copyright (c) 2005 by Fabian Franz.
++ *
++ * License: GPL
++ *
++ */
++
++char *progname = &quot;libnxredir&quot;;              /* Name used in err msgs    */
++
++#define _GNU_SOURCE
++
++/* Header Files */
++#include &lt;stdio.h&gt;
++#include &lt;stdlib.h&gt;
++#include &lt;unistd.h&gt;
++#include &lt;dlfcn.h&gt;
++#include &lt;sys/types.h&gt;
++#include &lt;sys/socket.h&gt;
++#include &lt;string.h&gt;
++#include &lt;strings.h&gt;
++#include &lt;netinet/in.h&gt;
++#include &lt;arpa/inet.h&gt;
++#include &lt;sys/poll.h&gt;
++#include &lt;sys/time.h&gt;
++#include &lt;pwd.h&gt;
++#include &lt;errno.h&gt;
++#include &lt;fcntl.h&gt;
++#include &lt;stdarg.h&gt;
++
++#include &lt;sys/un.h&gt;
++
++#define CONNECT_SIGNATURE int __fd, const struct sockaddr * __addr, socklen_t __len
++
++static int (*realconnect)(CONNECT_SIGNATURE);
++
++/* Exported Function Prototypes */
++void _init(void);
++
++int connect(CONNECT_SIGNATURE);
++
++void _init(void) 
++{
++        realconnect = dlsym(RTLD_NEXT, &quot;connect&quot;);
++}
++
++int connect(CONNECT_SIGNATURE) 
++{
++	int cups, samba;
++	
++	if (realconnect == NULL) {
++                perror(&quot;Unresolved symbol: connect\n&quot;);
++                return(-1);
++        }
++
++	cups=atoi(getenv(&quot;NXCUPS_PORT&quot;));
++	samba=atoi(getenv(&quot;NXSAMBA_PORT&quot;));
++
++	/* CUPS */
++	if (cups != 0 &amp;&amp; ((struct sockaddr_in*)__addr)-&gt;sin_port==htons(631))
++		((struct sockaddr_in*)__addr)-&gt;sin_port=htons(8632);
++
++	/* SAMBA */
++	if (samba != 0 &amp;&amp; (((struct sockaddr_in*)__addr)-&gt;sin_port==htons(139) || ((struct sockaddr_in*)__addr)-&gt;sin_port==htons(445)))
++		((struct sockaddr_in*)__addr)-&gt;sin_port=htons(samba);
++
++	return realconnect(__fd, __addr, __len);
++}
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000157.html">[Freenx-cvs] r66 - / nx-utils nx-utils/nxfish
+</A></li>
+	<LI>Next message: <A HREF="000159.html">[Freenx-cvs] r68 - nx-utils/nxredir
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#158">[ date ]</a>
+              <a href="thread.html#158">[ thread ]</a>
+              <a href="subject.html#158">[ subject ]</a>
+              <a href="author.html#158">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

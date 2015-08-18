@@ -1,0 +1,5631 @@
+From fabianx at mail.berlios.de  Tue Aug  5 14:45:55 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 5 Aug 2008 14:45:55 +0200
+Subject: [Freenx-cvs] r550 - trunk/freenx-server
+Message-ID: <200808051245.m75CjtOB032335@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-05 14:45:54 +0200 (Tue, 05 Aug 2008)
+New Revision: 550
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxnode
+Log:
+* Added unix-console patch. Added default handler as unix-default with
+  a fallback to xterm,
+  (Idea by Jens Hatlak <jh at junetz.de>, fabianx at bat.berlios.de)
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-07-31 18:52:01 UTC (rev 549)
++++ trunk/freenx-server/ChangeLog	2008-08-05 12:45:54 UTC (rev 550)
+@@ -33,6 +33,9 @@
+ 	  when ENABLE_PASSDB_AUTHENTICATION="1" else a friendly error message
+ 	  is shown. This should help with users using old tutorials.
+ 	  (fabianx at bat.berlios.de)
++	* Added unix-console patch. Added default handler as unix-default with
++	  a fallback to xterm,
++	  (Idea by Jens Hatlak <jh at junetz.de>, fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxnode
+===================================================================
+--- trunk/freenx-server/nxnode	2008-07-31 18:52:01 UTC (rev 549)
++++ trunk/freenx-server/nxnode	2008-08-05 12:45:54 UTC (rev 550)
+@@ -218,11 +218,16 @@
+ 			[ "$application" = "xterm" ] && application=$COMMAND_XTERM
+ 			NODE_STARTX=$application
+ 		;;
+-		unix-default)
++		unix-console)
++			NODE_STARTX=$COMMAND_XTERM
++		;;
++		unix-default|*)
+ 			if [ -x "$HOME/$USER_X_STARTUP_SCRIPT" ]; then
+ 				NODE_STARTX="$HOME/$USER_X_STARTUP_SCRIPT"
+ 			elif which "$DEFAULT_X_SESSION" >/dev/null 2>&1 ; then
+ 				NODE_STARTX="$DEFAULT_X_SESSION"
++			else
++				NODE_STARTX=$COMMAND_XTERM
+ 			fi
+ 		;;
+ 	esac
+
+
+
+From fabianx at mail.berlios.de  Tue Aug  5 14:50:29 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 5 Aug 2008 14:50:29 +0200
+Subject: [Freenx-cvs] r551 - trunk/freenx-server
+Message-ID: <200808051250.m75CoTGU032689@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-05 14:50:28 +0200 (Tue, 05 Aug 2008)
+New Revision: 551
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxnode
+Log:
+* Fixed external rdesktop keyboards: A "$" was missing.
+  (Bug by Phil Stricker <stril at gmx.de>, fabianx at bat.berlios.de)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-05 12:45:54 UTC (rev 550)
++++ trunk/freenx-server/ChangeLog	2008-08-05 12:50:28 UTC (rev 551)
+@@ -36,6 +36,8 @@
+ 	* Added unix-console patch. Added default handler as unix-default with
+ 	  a fallback to xterm,
+ 	  (Idea by Jens Hatlak <jh at junetz.de>, fabianx at bat.berlios.de)
++	* Fixed external rdesktop keyboards: A "$" was missing.
++	  (Bug by Phil Stricker <stril at gmx.de>, fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxnode
+===================================================================
+--- trunk/freenx-server/nxnode	2008-08-05 12:45:54 UTC (rev 550)
++++ trunk/freenx-server/nxnode	2008-08-05 12:50:28 UTC (rev 551)
+@@ -1129,7 +1129,7 @@
+ 		export agent_server
+ 		export agent_domain
+ 		agent_keyboard=""
+-		[ "ENABLE_EXTERNAL_NXDESKTOP_KEYBOARD" = "1" ] && agent_keyboard=$(echo "$keyboard" | cut -d'/' -f2)
++		[ "$ENABLE_EXTERNAL_NXDESKTOP_KEYBOARD" = "1" ] && agent_keyboard=$(echo "$keyboard" | cut -d'/' -f2)
+ 		export agent_keyboard
+ 		export NXSESSION_DIRECTORY
+ 		export AGENT_EXTRA_OPTIONS_RFB
+
+
+
+From fabianx at mail.berlios.de  Tue Aug  5 14:54:29 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 5 Aug 2008 14:54:29 +0200
+Subject: [Freenx-cvs] r552 - trunk/freenx-server
+Message-ID: <200808051254.m75CsTZX000189@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-05 14:54:26 +0200 (Tue, 05 Aug 2008)
+New Revision: 552
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxdesktop_helper
+Log:
+* Added workaround for "ch" keyboard layout to nxdesktop_helper,
+  which NXClient 3.2.0 means as de-ch.
+  (Bug by Phil Stricker <stril at gmx.de>, fabianx at bat.berlios.de)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-05 12:50:28 UTC (rev 551)
++++ trunk/freenx-server/ChangeLog	2008-08-05 12:54:26 UTC (rev 552)
+@@ -38,6 +38,9 @@
+ 	  (Idea by Jens Hatlak <jh at junetz.de>, fabianx at bat.berlios.de)
+ 	* Fixed external rdesktop keyboards: A "$" was missing.
+ 	  (Bug by Phil Stricker <stril at gmx.de>, fabianx at bat.berlios.de)
++	* Added workaround for "ch" keyboard layout to nxdesktop_helper, 
++	  which NXClient 3.2.0 means as de-ch.
++	  (Bug by Phil Stricker <stril at gmx.de>, fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxdesktop_helper
+===================================================================
+--- trunk/freenx-server/nxdesktop_helper	2008-08-05 12:50:28 UTC (rev 551)
++++ trunk/freenx-server/nxdesktop_helper	2008-08-05 12:54:26 UTC (rev 552)
+@@ -11,6 +11,9 @@
+ 
+ [ -z "$COMMAND_RDESKTOP" ] && COMMAND_RDESKTOP="rdesktop"
+ 
++# Workaround for NXClient 3.2.0, sending wrong keyboard layout
++[ "$agent_keyboard" = "ch" ] && agent_keyboard="de-ch"
++
+ # setup commandline
+ set -- -f -u "$agent_user" -k "$agent_keyboard" -d "$agent_domain" $AGENT_EXTRA_OPTIONS_RDP "$agent_server"
+ 
+
+
+
+From fabianx at mail.berlios.de  Tue Aug  5 16:18:42 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 5 Aug 2008 16:18:42 +0200
+Subject: [Freenx-cvs] r553 - trunk/freenx-server
+Message-ID: <200808051418.m75EIg3o010674@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-05 16:18:41 +0200 (Tue, 05 Aug 2008)
+New Revision: 553
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/Makefile
+Log:
+* Added clean target to Makefile.
+  (Based on patch by Ubuntu FreeNX-Team, fabianx at bat.berlios.de)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-05 12:54:26 UTC (rev 552)
++++ trunk/freenx-server/ChangeLog	2008-08-05 14:18:41 UTC (rev 553)
+@@ -41,6 +41,8 @@
+ 	* Added workaround for "ch" keyboard layout to nxdesktop_helper, 
+ 	  which NXClient 3.2.0 means as de-ch.
+ 	  (Bug by Phil Stricker <stril at gmx.de>, fabianx at bat.berlios.de)
++	* Added clean target to Makefile.
++	  (Based on patch by Ubuntu FreeNX-Team, fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/Makefile
+===================================================================
+--- trunk/freenx-server/Makefile	2008-08-05 12:54:26 UTC (rev 552)
++++ trunk/freenx-server/Makefile	2008-08-05 14:18:41 UTC (rev 553)
+@@ -25,6 +25,14 @@
+ 	install -m644 node.conf.sample $(DESTDIR)/$$NX_ETC_DIR/
+ 	$(MAKE) -C nxredir install
+ 
++clean:
++	make -C nxviewer-passwd clean
++	for i in $(SUBDIRS) ; \
++	do\
++		echo "making" clean "in $$i..."; \
++	        $(MAKE) -C $$i clean || exit 1;\
++	done
++
+ install:
+ 	. nxloadconfig &&\
+ 	export PATH_BIN PATH_LIB CUPS_BACKEND NX_VERSION &&\
+
+
+
+From fabianx at mail.berlios.de  Tue Aug  5 16:31:37 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 5 Aug 2008 16:31:37 +0200
+Subject: [Freenx-cvs] r554 - trunk/freenx-server
+Message-ID: <200808051431.m75EVbTQ011608@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-05 16:31:36 +0200 (Tue, 05 Aug 2008)
+New Revision: 554
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxviewer_helper
+Log:
+* Use :0.0 if mirrorhost is 127.0.0.1 and add -localhost for
+  enhanced security. Also increase sleep timeout for slow machines.
+  (Based on Patch by Jeremy Wilkins, fabianx at bat.berlios.de)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-05 14:18:41 UTC (rev 553)
++++ trunk/freenx-server/ChangeLog	2008-08-05 14:31:36 UTC (rev 554)
+@@ -43,6 +43,9 @@
+ 	  (Bug by Phil Stricker <stril at gmx.de>, fabianx at bat.berlios.de)
+ 	* Added clean target to Makefile.
+ 	  (Based on patch by Ubuntu FreeNX-Team, fabianx at bat.berlios.de)
++	* Use :0.0 if mirrorhost is 127.0.0.1 and add -localhost for 
++	  enhanced security. Also increase sleep timeout for slow machines.
++	  (Based on Patch by Jeremy Wilkins, fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxviewer_helper
+===================================================================
+--- trunk/freenx-server/nxviewer_helper	2008-08-05 14:18:41 UTC (rev 553)
++++ trunk/freenx-server/nxviewer_helper	2008-08-05 14:31:36 UTC (rev 554)
+@@ -21,11 +21,16 @@
+ then
+ 	(
+ 		unset XAUTHORITY
++
++		# We need to set just :0.0 in case of localhost connection.
++		[ "$mirrorhost" = "127.0.0.1" ] && mirrorhost=""
++		
+ 		# Note: No "-accept popup" as its the same user and with that password
+ 		#       he could do already more than -accept popup would allow.
+-		DISPLAY="$mirrorhost:$mirrordisplay.0" $COMMAND_X11VNC -timeout 120 -once -rfbauth "$NXSESSION_DIRECTORY/scripts/.passwd" >"$NXSESSION_DIRECTORY/scripts/.vnc_port" &
++		
++		DISPLAY="$mirrorhost:$mirrordisplay.0" $COMMAND_X11VNC -localhost -timeout 120 -once -rfbauth "$NXSESSION_DIRECTORY/scripts/.passwd" >"$NXSESSION_DIRECTORY/scripts/.vnc_port" &
+ 	)
+-	sleep 1
++	sleep 2
+ 	agent_port=$(cat "$NXSESSION_DIRECTORY/scripts/.vnc_port" | egrep "^PORT=" | cut -d'=' -f 2)
+ 	[ -z "agent_port" ] && agent_port="0"
+ 	# note the :: is not a mistake, but rather a hint for nxviewer to use this as a port and not
+
+
+
+From fabianx at mail.berlios.de  Tue Aug  5 16:41:22 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 5 Aug 2008 16:41:22 +0200
+Subject: [Freenx-cvs] r555 - trunk/freenx-server
+Message-ID: <200808051441.m75EfM8g012228@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-05 16:41:22 +0200 (Tue, 05 Aug 2008)
+New Revision: 555
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxdesktop_helper
+   trunk/freenx-server/nxnode
+Log:
+* Allow RDP "Run application" sessions to work correctly.
+  (David Corral < davefury at gmail.com > & the Silice Telecom staff,
+  fabianx at bat.berlios.de)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-05 14:31:36 UTC (rev 554)
++++ trunk/freenx-server/ChangeLog	2008-08-05 14:41:22 UTC (rev 555)
+@@ -46,6 +46,9 @@
+ 	* Use :0.0 if mirrorhost is 127.0.0.1 and add -localhost for 
+ 	  enhanced security. Also increase sleep timeout for slow machines.
+ 	  (Based on Patch by Jeremy Wilkins, fabianx at bat.berlios.de)
++	* Allow RDP "Run application" sessions to work correctly.
++	  (David Corral < davefury at gmail.com > & the Silice Telecom staff,
++	   fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxdesktop_helper
+===================================================================
+--- trunk/freenx-server/nxdesktop_helper	2008-08-05 14:31:36 UTC (rev 554)
++++ trunk/freenx-server/nxdesktop_helper	2008-08-05 14:41:22 UTC (rev 555)
+@@ -14,8 +14,27 @@
+ # Workaround for NXClient 3.2.0, sending wrong keyboard layout
+ [ "$agent_keyboard" = "ch" ] && agent_keyboard="de-ch"
+ 
++# URL Decode
++url_decode()
++{
++	# Translate spaces first (they cause trouble)
++	s=$(echo $1 | tr '+' ' ')
++	s=$(echo ${s} | sed 's/%20/ /g')
++	for charno in $(echo ${s} | grep -o '%[0-9A-Fa-f]\{2\}' | tr -d '%' | uniq)
++	do
++		#... and then replace them
++		char=$(printf "\x${charno}") #this is the actual character
++		sedstr="s/%${charno}/\\${char}/g" # the char will need to be escaped
++		s=$(echo "${s}" | sed ${sedstr})
++	done
++	echo "${s}"
++}
++
++# Remove urlencoding
++windows_app=$(url_decode "$windows_app")
++
+ # setup commandline
+-set -- -f -u "$agent_user" -k "$agent_keyboard" -d "$agent_domain" $AGENT_EXTRA_OPTIONS_RDP "$agent_server"
++set -- -u "$agent_user" -k "$agent_keyboard" -d "$agent_domain" -f -s "$windows_app" $AGENT_EXTRA_OPTIONS_RDP "$agent_server"
+ 
+ if [ -n "$agent_password" ]
+ then
+
+Modified: trunk/freenx-server/nxnode
+===================================================================
+--- trunk/freenx-server/nxnode	2008-08-05 14:31:36 UTC (rev 554)
++++ trunk/freenx-server/nxnode	2008-08-05 14:41:22 UTC (rev 555)
+@@ -1128,6 +1128,7 @@
+ 		export agent_password
+ 		export agent_server
+ 		export agent_domain
++		export windows_app=$application
+ 		agent_keyboard=""
+ 		[ "$ENABLE_EXTERNAL_NXDESKTOP_KEYBOARD" = "1" ] && agent_keyboard=$(echo "$keyboard" | cut -d'/' -f2)
+ 		export agent_keyboard
+
+
+
+From fabianx at mail.berlios.de  Tue Aug  5 16:48:37 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 5 Aug 2008 16:48:37 +0200
+Subject: [Freenx-cvs] r556 - trunk/freenx-server
+Message-ID: <200808051448.m75Embvj012980@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-05 16:48:37 +0200 (Tue, 05 Aug 2008)
+New Revision: 556
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxnode
+Log:
+* Merge Xresources on startup of session.
+  (Jeremy Wilkins <wjeremy at shaw.ca>)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-05 14:41:22 UTC (rev 555)
++++ trunk/freenx-server/ChangeLog	2008-08-05 14:48:37 UTC (rev 556)
+@@ -45,10 +45,12 @@
+ 	  (Based on patch by Ubuntu FreeNX-Team, fabianx at bat.berlios.de)
+ 	* Use :0.0 if mirrorhost is 127.0.0.1 and add -localhost for 
+ 	  enhanced security. Also increase sleep timeout for slow machines.
+-	  (Based on Patch by Jeremy Wilkins, fabianx at bat.berlios.de)
++	  (Based on Patch by Jeremy Wilkins <wjeremy at shaw.ca>, fabianx at bat.berlios.de)
+ 	* Allow RDP "Run application" sessions to work correctly.
+ 	  (David Corral < davefury at gmail.com > & the Silice Telecom staff,
+ 	   fabianx at bat.berlios.de)
++	* Merge Xresources on startup of session.
++	  (Jeremy Wilkins <wjeremy at shaw.ca>)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxnode
+===================================================================
+--- trunk/freenx-server/nxnode	2008-08-05 14:41:22 UTC (rev 555)
++++ trunk/freenx-server/nxnode	2008-08-05 14:48:37 UTC (rev 556)
+@@ -326,6 +326,7 @@
+ 	fi
+ 
+ 	echo "Xft.dpi: 96" | DISPLAY=:$display xrdb -merge >>"$USER_FAKE_HOME/.nx/C-$sess_id/session" 2>&1
++	[ -d /etc/X11/Xresources ] && xrdb -display :$display -merge /etc/X11/Xresources/* >>"$USER_FAKE_HOME/.nx/C-$sess_id/session" 2>&1
+ 
+ 	#
+ 	# Startup the application
+
+
+
+From fabianx at mail.berlios.de  Tue Aug  5 19:54:33 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 5 Aug 2008 19:54:33 +0200
+Subject: [Freenx-cvs] r557 - in trunk/freenx-server: . nx-session-launcher
+Message-ID: <200808051754.m75HsXeL023589@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-05 19:54:32 +0200 (Tue, 05 Aug 2008)
+New Revision: 557
+
+Added:
+   trunk/freenx-server/nx-session-launcher/
+   trunk/freenx-server/nx-session-launcher/ConsoleKit-NX.conf
+   trunk/freenx-server/nx-session-launcher/Makefile
+   trunk/freenx-server/nx-session-launcher/nx-session-launcher
+   trunk/freenx-server/nx-session-launcher/nx-session-launcher-suid.c
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/Makefile
+Log:
+* Added nx-session-launcher from Ubuntu FreeNX-Team to use FreeNX with
+  ConsoleKit.
+  (marceloshima at gmail.com, fabianx at bat.berlios.de)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-05 14:48:37 UTC (rev 556)
++++ trunk/freenx-server/ChangeLog	2008-08-05 17:54:32 UTC (rev 557)
+@@ -51,6 +51,9 @@
+ 	   fabianx at bat.berlios.de)
+ 	* Merge Xresources on startup of session.
+ 	  (Jeremy Wilkins <wjeremy at shaw.ca>)
++	* Added nx-session-launcher from Ubuntu FreeNX-Team to use FreeNX with
++	  ConsoleKit.
++	  (marceloshima at gmail.com, fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/Makefile
+===================================================================
+--- trunk/freenx-server/Makefile	2008-08-05 14:48:37 UTC (rev 556)
++++ trunk/freenx-server/Makefile	2008-08-05 17:54:32 UTC (rev 557)
+@@ -1,12 +1,14 @@
+-.PHONY: all install
++.PHONY: all install clean
+ 
+ SHELL = /bin/bash
+ 
+-SUBDIRS=nxredir nxviewer-passwd nxserver-helper
+-PROGRAMS=nxacl.sample nxcheckload.sample nxcups-gethost nxdesktop_helper nxdialog nxkeygen nxloadconfig nxnode nxnode-login nxprint nxserver nxserver-helper/nxserver-helper nxsetup nxviewer_helper nxviewer-passwd/nxpasswd/nxpasswd
++SUBDIRS=nxredir nxviewer-passwd nxserver-helper nx-session-launcher
++PROGRAMS=nxacl.sample nxcheckload.sample nxcups-gethost nxdesktop_helper nxdialog nxkeygen nxloadconfig nxnode nxnode-login nxprint nxserver nxserver-helper/nxserver-helper nxsetup nxviewer_helper nxviewer-passwd/nxpasswd/nxpasswd nx-session-launcher/nx-session-launcher nx-session-launcher/nx-session-launcher-suid
+ 
+ all:
+ 	cd nxviewer-passwd && xmkmf && make Makefiles && make depend
++	. nxloadconfig &&\
++	export PATH_BIN PATH_LIB CUPS_BACKEND NX_VERSION &&\
+ 	for i in $(SUBDIRS) ; \
+ 	do\
+ 		echo "making" all "in $$i..."; \
+
+Added: trunk/freenx-server/nx-session-launcher/ConsoleKit-NX.conf
+===================================================================
+--- trunk/freenx-server/nx-session-launcher/ConsoleKit-NX.conf	2008-08-05 14:48:37 UTC (rev 556)
++++ trunk/freenx-server/nx-session-launcher/ConsoleKit-NX.conf	2008-08-05 17:54:32 UTC (rev 557)
+@@ -0,0 +1,26 @@
++<!DOCTYPE busconfig PUBLIC
++ "-//freedesktop//DTD D-BUS Bus Configuration 1.0//EN"
++ "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
++<busconfig>
++
++  <!-- Allow nx user to manage sessions -->
++  <policy user="nx">
++    <allow own="org.freedesktop.ConsoleKit"/>
++
++    <allow send_interface="org.freedesktop.ConsoleKit.Manager"/>
++    <allow send_interface="org.freedesktop.ConsoleKit.Seat"/>
++    <allow send_interface="org.freedesktop.ConsoleKit.Session"/>
++
++    <deny send_interface="org.freedesktop.ConsoleKit.Manager"
++           send_member="SetX11ParkingPlace"/>
++    <allow send_interface="org.freedesktop.ConsoleKit.Manager"
++           send_member="OpenConsoleWithParameters"/>
++    <allow send_interface="org.freedesktop.ConsoleKit.Session"
++           send_member="Lock"/>
++    <allow send_interface="org.freedesktop.ConsoleKit.Session"
++           send_member="Unlock"/>
++    <allow send_destination="org.freedesktop.ConsoleKit"
++           send_interface="org.freedesktop.DBus.Properties" />
++  </policy>
++
++</busconfig>
+
+Added: trunk/freenx-server/nx-session-launcher/Makefile
+===================================================================
+--- trunk/freenx-server/nx-session-launcher/Makefile	2008-08-05 14:48:37 UTC (rev 556)
++++ trunk/freenx-server/nx-session-launcher/Makefile	2008-08-05 17:54:32 UTC (rev 557)
+@@ -0,0 +1,17 @@
++.PHONY: all install
++
++CC=gcc
++CFLAGS=-g -O2 -Wall -fPIC
++
++SOURCES = nx-session-launcher-suid.c
++PROGRAMS = nx-session-launcher-suid
++
++ifneq ($(NX_VERSION),)
++CFLAGS+=-DNXSERVER_COMMAND="\"$(PATH_BIN)/nx-session-launcher\""
++endif
++
++all: $(PROGRAMS)
++
++clean:
++	rm -f $(PROGRAMS)
++
+
+Added: trunk/freenx-server/nx-session-launcher/nx-session-launcher
+===================================================================
+--- trunk/freenx-server/nx-session-launcher/nx-session-launcher	2008-08-05 14:48:37 UTC (rev 556)
++++ trunk/freenx-server/nx-session-launcher/nx-session-launcher	2008-08-05 17:54:32 UTC (rev 557)
+@@ -0,0 +1,31 @@
++#!/usr/bin/env python
++
++import os
++import gobject
++import dbus
++import sys
++
++bus = dbus.SystemBus ()
++
++manager_obj = bus.get_object ('org.freedesktop.ConsoleKit', '/org/freedesktop/ConsoleKit/Manager')
++manager = dbus.Interface (manager_obj, 'org.freedesktop.ConsoleKit.Manager')
++
++params = dbus.Array ([], signature = "(sv)")
++params.append (("unix-user", dbus.Int32 (os.getuid(), variant_level=1)))
++params.append (("session-type", dbus.String ("nx", variant_level=1)))
++params.append (("x11-display", dbus.String (os.environ['DISPLAY'], variant_level=1)))
++params.append (("is-local", dbus.Boolean (True, variant_level=1)))
++
++cookie = manager.OpenSessionWithParameters (params)
++os.environ['XDG_SESSION_COOKIE'] = cookie
++
++current_session = manager.GetSessionForCookie (cookie)
++session_obj = bus.get_object ('org.freedesktop.ConsoleKit', current_session)
++session = dbus.Interface (session_obj, 'org.freedesktop.ConsoleKit.Session')
++
++properties = dbus.Interface (session_obj, 'org.freedesktop.DBus.Properties')
++properties.Set ("org.freedesktop.DBus.Properties", "active", dbus.Boolean (True, variant_level=1))
++
++os.setreuid(os.getuid(), os.getuid())
++os.spawnvp(os.P_WAIT, sys.argv[1], [])
++
+
+Added: trunk/freenx-server/nx-session-launcher/nx-session-launcher-suid.c
+===================================================================
+--- trunk/freenx-server/nx-session-launcher/nx-session-launcher-suid.c	2008-08-05 14:48:37 UTC (rev 556)
++++ trunk/freenx-server/nx-session-launcher/nx-session-launcher-suid.c	2008-08-05 17:54:32 UTC (rev 557)
+@@ -0,0 +1,54 @@
++/*
++ * Copyright 2007 Google Inc.
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License
++ * as published by the Free Software Foundation; either version 2
++ * of the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
++ *
++ * Authors: alriddoch at google.com (Alistair Riddoch)
++ * 	    freenx at fabian-franz.de (Fabian Franz)
++ */
++
++#include <unistd.h>
++#include <stdlib.h>
++#include <stdio.h>
++
++#ifndef NXSERVER_COMMAND
++#define NXSERVER_COMMAND "/usr/bin/nx-session-launcher"
++#endif
++
++#define CK_LAUNCH_SESSION_COMMAND "/usr/bin/ck-launch-session"
++
++int main(int argc, char ** argv)
++{
++    char ** new_argv;
++    new_argv = calloc(argc + 1, sizeof(char *));
++    int i;
++
++    for (i = 1; i < argc; ++i) {
++        new_argv[i] = argv[i];
++    }
++
++    uid_t calling_uid = getuid();
++
++    if (geteuid() == calling_uid) {
++        printf("Not running suid. Executing ck-launch-session.\n");
++
++        new_argv[0] = CK_LAUNCH_SESSION_COMMAND;
++
++    }else{
++        new_argv[0] = NXSERVER_COMMAND;
++    }
++
++    return execv(new_argv[0], new_argv);
++}
+
+
+
+From fabianx at mail.berlios.de  Tue Aug  5 20:03:14 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 5 Aug 2008 20:03:14 +0200
+Subject: [Freenx-cvs] r558 - trunk/freenx-server
+Message-ID: <200808051803.m75I3EK4024353@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-05 20:03:13 +0200 (Tue, 05 Aug 2008)
+New Revision: 558
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxserver
+Log:
+* Moved logging functions to a more appropriate place.
+  (fabianx at bat.berlios.de)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-05 17:54:32 UTC (rev 557)
++++ trunk/freenx-server/ChangeLog	2008-08-05 18:03:13 UTC (rev 558)
+@@ -54,6 +54,8 @@
+ 	* Added nx-session-launcher from Ubuntu FreeNX-Team to use FreeNX with
+ 	  ConsoleKit.
+ 	  (marceloshima at gmail.com, fabianx at bat.berlios.de)
++	* Moved logging functions to a more appropriate place.
++	  (fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-05 17:54:32 UTC (rev 557)
++++ trunk/freenx-server/nxserver	2008-08-05 18:03:13 UTC (rev 558)
+@@ -31,7 +31,63 @@
+ return 0
+ }
+ 
++############### PACKAGE log.bm #######################
++#
++# Library of log functions (outsource)
++#
+ 
++# Loglevels:
++# 1: Errors
++# 2: Warnings
++# 3: Important information
++# 4: Server - Client communication
++# 5: Information
++# 6: Debugging information
++# 7: stderror-channel of some applications
++
++log()
++{
++	[ "$NX_LOG_LEVEL" -ge "$1" -a -w "$NX_LOGFILE" ] && shift && echo "$@" >> "$NX_LOGFILE"
++}
++
++# Log in a way that is secure for passwords / cookies / ...
++
++echo_secure()
++{
++	echo "$@ " | $COMMAND_PERL -pi -e 's/--cookie=".+?"/--cookie="******"/g; s/--agent_password=".+?"/agent_password="******"/g; s/--password=".+?"/password="******"/g; s/cookie=.+?&/cookie=******&/g; s/agent_password=.+?&/agent_password=******&/g; s/password=.+?&/password=******&/g;'
++}
++
++log_secure()
++{
++	if [ "$NX_LOG_SECURE" = "0" ]
++	then
++		log "$@"
++	else
++		[ "$NX_LOG_LEVEL" -ge "$1" -a -w "$NX_LOGFILE" ] && shift && echo_secure "$@" >> "$NX_LOGFILE"
++	fi
++}
++
++log_tee()
++{
++	[ "$NX_LOG_LEVEL" -ge "4" -a -w "$NX_LOGFILE" ] && exec tee -a "$NX_LOGFILE"
++	[ "$NX_LOG_LEVEL" -ge "4" -a -w "$NX_LOGFILE" ] || exec cat -
++}
++
++log_error()
++{
++	[ "$NX_LOG_LEVEL" -ge "7" -a -w "$NX_LOGFILE" ] && exec tee -a "$NX_LOGFILE"
++	[ "$NX_LOG_LEVEL" -ge "7" -a -w "$NX_LOGFILE" ] || exec cat - 
++}
++
++echo_x()
++{
++	log "4" "$@"
++	echo "$@"
++}
++
++
++
++
+ ############### PACKAGE passdb.bm #######################
+ #
+ # Library of passdb functions (outsource)
+@@ -446,56 +502,6 @@
+ 
+ setup_usermode_auth
+ 
+-# Loglevels:
+-# 1: Errors
+-# 2: Warnings
+-# 3: Important information
+-# 4: Server - Client communication
+-# 5: Information
+-# 6: Debugging information
+-# 7: stderror-channel of some applications
+-
+-log()
+-{
+-	[ "$NX_LOG_LEVEL" -ge "$1" -a -w "$NX_LOGFILE" ] && shift && echo "$@" >> "$NX_LOGFILE"
+-}
+-
+-# Log in a way that is secure for passwords / cookies / ...
+-
+-echo_secure()
+-{
+-	echo "$@ " | $COMMAND_PERL -pi -e 's/--cookie=".+?"/--cookie="******"/g; s/--agent_password=".+?"/agent_password="******"/g; s/--password=".+?"/password="******"/g; s/cookie=.+?&/cookie=******&/g; s/agent_password=.+?&/agent_password=******&/g; s/password=.+?&/password=******&/g;'
+-}
+-
+-log_secure()
+-{
+-	if [ "$NX_LOG_SECURE" = "0" ]
+-	then
+-		log "$@"
+-	else
+-		[ "$NX_LOG_LEVEL" -ge "$1" -a -w "$NX_LOGFILE" ] && shift && echo_secure "$@" >> "$NX_LOGFILE"
+-	fi
+-}
+-
+-log_tee()
+-{
+-	[ "$NX_LOG_LEVEL" -ge "4" -a -w "$NX_LOGFILE" ] && exec tee -a "$NX_LOGFILE"
+-	[ "$NX_LOG_LEVEL" -ge "4" -a -w "$NX_LOGFILE" ] || exec cat -
+-}
+-
+-log_error()
+-{
+-	[ "$NX_LOG_LEVEL" -ge "7" -a -w "$NX_LOGFILE" ] && exec tee -a "$NX_LOGFILE"
+-	[ "$NX_LOG_LEVEL" -ge "7" -a -w "$NX_LOGFILE" ] || exec cat - 
+-}
+-
+-echo_x()
+-{
+-	log "4" "$@"
+-	echo "$@"
+-}
+-
+-
+ #
+ # needed for slave mode
+ #
+
+
+
+From fabianx at mail.berlios.de  Tue Aug  5 22:20:34 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 5 Aug 2008 22:20:34 +0200
+Subject: [Freenx-cvs] r559 - trunk/freenx-server
+Message-ID: <200808052020.m75KKYdf002568@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-05 22:20:33 +0200 (Tue, 05 Aug 2008)
+New Revision: 559
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxserver
+Log:
+* Finally fixed the bug when NX Client was stopped on "Negotiating
+  link parameters" and failed session after first session suspend.
+  (fabianx at bat.berlios.de)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-05 18:03:13 UTC (rev 558)
++++ trunk/freenx-server/ChangeLog	2008-08-05 20:20:33 UTC (rev 559)
+@@ -56,6 +56,9 @@
+ 	  (marceloshima at gmail.com, fabianx at bat.berlios.de)
+ 	* Moved logging functions to a more appropriate place.
+ 	  (fabianx at bat.berlios.de)
++	* Finally fixed the bug when NX Client was stopped on "Negotiating
++	  link parameters" and failed session after first session suspend.
++	  (fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-05 18:03:13 UTC (rev 558)
++++ trunk/freenx-server/nxserver	2008-08-05 20:20:33 UTC (rev 559)
+@@ -1432,7 +1432,11 @@
+ 			if [ "$ENCRYPTION" = "1" ] 
+ 			then 
+ 				let PROXY_DISPLAY=$SESS_DISPLAY+4000
+-				exec $COMMAND_NETCAT $SERVER_HOST $PROXY_DISPLAY
++				$COMMAND_NETCAT $SERVER_HOST $PROXY_DISPLAY
++				RC=$?
++				# kill our parent sshd process
++				kill $PPID
++				exit $RC
+ 			else
+ 				echo_x "NX> 1001 Bye."
+ 			fi
+
+
+
+From fabianx at mail.berlios.de  Tue Aug  5 22:57:34 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 5 Aug 2008 22:57:34 +0200
+Subject: [Freenx-cvs] r560 - trunk/freenx-server
+Message-ID: <200808052057.m75KvYmb006519@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-05 22:57:29 +0200 (Tue, 05 Aug 2008)
+New Revision: 560
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxserver
+Log:
+* Fixed missing "fi" statement. In fact it was a missing ";;".
+  (fabianx at bat.berlios.de)
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-05 20:20:33 UTC (rev 559)
++++ trunk/freenx-server/ChangeLog	2008-08-05 20:57:29 UTC (rev 560)
+@@ -59,6 +59,8 @@
+ 	* Finally fixed the bug when NX Client was stopped on "Negotiating
+ 	  link parameters" and failed session after first session suspend.
+ 	  (fabianx at bat.berlios.de)
++	* Fixed missing "fi" statement. In fact it was a missing ";;".
++	  (fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-05 20:20:33 UTC (rev 559)
++++ trunk/freenx-server/nxserver	2008-08-05 20:57:29 UTC (rev 560)
+@@ -962,6 +962,7 @@
+ 						# closed his side of the channel and this will lead to not 
+ 						# closed sessions.
+ 						SERVER_CHANNEL=0
++					;;
+ 				esac
+ 			;;
+ 			"NX> 1004"*)
+@@ -992,9 +993,10 @@
+ 	[ -e "/tmp/.nX$SESS_DISPLAY-lock" ] && rm -f /tmp/.nX$SESS_DISPLAY-lock
+ 
+ 	nxnode_login_stop_slave
+-
+-	else # $1 = restore
+ 	
++	# $1 = restore
++	else
++	
+ 	KILL_WAIT_PID=1
+ 	SERVER_CHANNEL=1
+ 	server_nxnode_start "$@" | while read CMD
+@@ -1034,7 +1036,8 @@
+ 	
+ 	nxnode_login_stop_slave
+ 	
+-	fi # $1 = start
++	# $1 = start
++	fi
+ }
+ 
+ server_check_session_count()
+
+
+
+From fabianx at mail.berlios.de  Tue Aug  5 23:11:05 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 5 Aug 2008 23:11:05 +0200
+Subject: [Freenx-cvs] r561 - trunk/freenx-server
+Message-ID: <200808052111.m75LB5Dl007980@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-05 23:11:05 +0200 (Tue, 05 Aug 2008)
+New Revision: 561
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/Makefile
+Log:
+* Used source instead of "." for Makefile. (Closes: #13954)
+  (fabianx at bat.berlios.de)
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-05 20:57:29 UTC (rev 560)
++++ trunk/freenx-server/ChangeLog	2008-08-05 21:11:05 UTC (rev 561)
+@@ -61,6 +61,8 @@
+ 	  (fabianx at bat.berlios.de)
+ 	* Fixed missing "fi" statement. In fact it was a missing ";;".
+ 	  (fabianx at bat.berlios.de)
++	* Used source instead of "." for Makefile. (Closes: #13954)
++	  (fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/Makefile
+===================================================================
+--- trunk/freenx-server/Makefile	2008-08-05 20:57:29 UTC (rev 560)
++++ trunk/freenx-server/Makefile	2008-08-05 21:11:05 UTC (rev 561)
+@@ -7,7 +7,7 @@
+ 
+ all:
+ 	cd nxviewer-passwd && xmkmf && make Makefiles && make depend
+-	. nxloadconfig &&\
++	source nxloadconfig &&\
+ 	export PATH_BIN PATH_LIB CUPS_BACKEND NX_VERSION &&\
+ 	for i in $(SUBDIRS) ; \
+ 	do\
+@@ -36,6 +36,6 @@
+ 	done
+ 
+ install:
+-	. nxloadconfig &&\
++	source nxloadconfig &&\
+ 	export PATH_BIN PATH_LIB CUPS_BACKEND NX_VERSION &&\
+ 	$(MAKE) nxenv_install
+
+
+
+From fabianx at mail.berlios.de  Tue Aug  5 23:30:59 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 5 Aug 2008 23:30:59 +0200
+Subject: [Freenx-cvs] r562 - trunk/freenx-server/nx-session-launcher
+Message-ID: <200808052130.m75LUxta011267@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-05 23:30:58 +0200 (Tue, 05 Aug 2008)
+New Revision: 562
+
+Added:
+   trunk/freenx-server/nx-session-launcher/README
+Log:
+Added policy kit readme on how to use.
+
+
+
+Added: trunk/freenx-server/nx-session-launcher/README
+===================================================================
+--- trunk/freenx-server/nx-session-launcher/README	2008-08-05 21:11:05 UTC (rev 561)
++++ trunk/freenx-server/nx-session-launcher/README	2008-08-05 21:30:58 UTC (rev 562)
+@@ -0,0 +1,10 @@
++The unlock buttons on Users and Groups or Network are greyed out and un-accessible. Tried running from a term 'sudo users-admin' with the same results.
++
++To correct the problem follow this steps:
++ - Copy nx-session-launcher and nx-session-launcher-suid to /usr/bin
++ - Execute $ chown nx /usr/bin/nx-session-launcher-suid
++ - Execute $ chmod 4755 /usr/bin/nx-session-launcher-suid
++ - Copy ConsoleKit-NX.conf to /etc/dbus-1/system.d/
++ - Reload dbus by issuing /etc/init.d/dbus reload
++ - Edit /etc/nxserver/node.conf and change '#COMMAND_START_GNOME=gnome-session'
++     to 'COMMAND_START_GNOME=/usr/bin/nx-session-launcher-suid gnome-session'
+
+
+
+From fabianx at mail.berlios.de  Wed Aug  6 00:26:11 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Wed, 6 Aug 2008 00:26:11 +0200
+Subject: [Freenx-cvs] r563 - trunk/freenx-server
+Message-ID: <200808052226.m75MQBmV017153@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-06 00:26:11 +0200 (Wed, 06 Aug 2008)
+New Revision: 563
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxserver
+Log:
+* Allow passwords with '\' by changing read -s to read -r -s.
+  (Closes: #10699)
+  (Patch by rpfuller at bat.berlios.de, fabianx at bat.berlios.de)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-05 21:30:58 UTC (rev 562)
++++ trunk/freenx-server/ChangeLog	2008-08-05 22:26:11 UTC (rev 563)
+@@ -63,7 +63,11 @@
+ 	  (fabianx at bat.berlios.de)
+ 	* Used source instead of "." for Makefile. (Closes: #13954)
+ 	  (fabianx at bat.berlios.de)
++	* Allow passwords with '\' by changing read -s to read -r -s.
++	  (Closes: #10699)
++	  (Patch by rpfuller at bat.berlios.de, fabianx at bat.berlios.de)
+ 
++
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+ 	* Fixed the display of local sessions to display only 
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-05 21:30:58 UTC (rev 562)
++++ trunk/freenx-server/nxserver	2008-08-05 22:26:11 UTC (rev 563)
+@@ -727,7 +727,7 @@
+ 			echo_x -n "NX> 102 Password: "
+ 			old_ifs="$IFS"
+ 			export IFS=$'\n'
+-			read -s PASS
++			read -r -s PASS
+ 			export IFS="$old_ifs"
+ 			echo_x ""
+ 			log 6 -n "Info: Auth method: "
+@@ -1499,14 +1499,14 @@
+ 		passwd)
+ 			echo_x "NX> 113 Changing password of user '$USER'"
+ 			echo_x -n "NX> 102 Current password:"
+-			read -s PASS
++			read -r -s PASS
+ 			ENC_PASS=$(passdb_get_crypt_pass "$PASS")
+ 			REAL_PASS=$(passdb_get_pass "$USER")
+ 			echo_x
+ 			if [ "$ENC_PASS" = "$REAL_PASS" ]
+ 			then
+ 				echo_x -n "NX> 102 Password:"
+-				read -s NEW_PASS1
++				read -r -s NEW_PASS1
+ 				
+ 				if [ ${#NEW_PASS1} -lt 5 ]
+ 				then
+@@ -1516,7 +1516,7 @@
+ 
+ 				echo_x
+ 				echo_x -n "NX> 102 Confirm password:"
+-				read -s NEW_PASS1
++				read -r -s NEW_PASS1
+ 				echo_x
+ 				if [ "$NEW_PASS1" = "$NEW_PASS2" ]
+ 				then
+@@ -1634,7 +1634,7 @@
+ 	CMD_CHUSER=$2
+ 	egrep -q "^$CMD_CHUSER:" $NX_ETC_DIR/passwords || cmd_abort "Error: User $CMD_CHUSER not found in database."
+ 	echo -n "New password: "
+-	read -s CMD_NEWPASS
++	read -r -s CMD_NEWPASS
+ 	echo
+ 	CMD_ENC_PASS=$(passdb_get_crypt_pass "$CMD_NEWPASS")
+ 	passdb_chpass "$CMD_CHUSER" "$CMD_ENC_PASS"
+
+
+
+From fabianx at mail.berlios.de  Wed Aug  6 00:52:32 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Wed, 6 Aug 2008 00:52:32 +0200
+Subject: [Freenx-cvs] r564 - trunk/freenx-server
+Message-ID: <200808052252.m75MqWiW013551@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-06 00:52:30 +0200 (Wed, 06 Aug 2008)
+New Revision: 564
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxdesktop_helper
+Log:
+* Allow passwords with special chars by using new url_decode on
+  agent_password. (Closes: #10248)
+  (fabianx at bat.berlios.de)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-05 22:26:11 UTC (rev 563)
++++ trunk/freenx-server/ChangeLog	2008-08-05 22:52:30 UTC (rev 564)
+@@ -66,8 +66,10 @@
+ 	* Allow passwords with '\' by changing read -s to read -r -s.
+ 	  (Closes: #10699)
+ 	  (Patch by rpfuller at bat.berlios.de, fabianx at bat.berlios.de)
++	* Allow passwords with special chars by using new url_decode on
++	  agent_password. (Closes: #10248)
++	  (fabianx at bat.berlios.de)
+ 
+-
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+ 	* Fixed the display of local sessions to display only 
+
+Modified: trunk/freenx-server/nxdesktop_helper
+===================================================================
+--- trunk/freenx-server/nxdesktop_helper	2008-08-05 22:26:11 UTC (rev 563)
++++ trunk/freenx-server/nxdesktop_helper	2008-08-05 22:52:30 UTC (rev 564)
+@@ -33,6 +33,10 @@
+ # Remove urlencoding
+ windows_app=$(url_decode "$windows_app")
+ 
++# we need to do this twice as nxclient is doing this twice ... uh ...
++agent_password=$(url_decode "$agent_password")
++agent_password=$(url_decode "$agent_password")
++
+ # setup commandline
+ set -- -u "$agent_user" -k "$agent_keyboard" -d "$agent_domain" -f -s "$windows_app" $AGENT_EXTRA_OPTIONS_RDP "$agent_server"
+ 
+
+
+
+From fabianx at mail.berlios.de  Wed Aug  6 01:32:02 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Wed, 6 Aug 2008 01:32:02 +0200
+Subject: [Freenx-cvs] r565 - trunk/freenx-server
+Message-ID: <200808052332.m75NW2fn011916@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-06 01:32:01 +0200 (Wed, 06 Aug 2008)
+New Revision: 565
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxserver
+Log:
+* Fixed start/stop exit codes.
+  (Patch by Gentoo Portage, fabianx at bat.berlios.de)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-05 22:52:30 UTC (rev 564)
++++ trunk/freenx-server/ChangeLog	2008-08-05 23:32:01 UTC (rev 565)
+@@ -69,6 +69,9 @@
+ 	* Allow passwords with special chars by using new url_decode on
+ 	  agent_password. (Closes: #10248)
+ 	  (fabianx at bat.berlios.de)
++	* Fixed start/stop exit codes.
++	  (Patch by Gentoo Portage, fabianx at bat.berlios.de)
++	  
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-05 22:52:30 UTC (rev 564)
++++ trunk/freenx-server/nxserver	2008-08-05 23:32:01 UTC (rev 565)
+@@ -1613,6 +1613,13 @@
+ 	exit 1
+ }
+ 
++cmd_abort_success()
++{
++	echo "NX> 500" "$@" 1>&2
++	echo "NX> 999 Bye" 1>&2
++	exit 0
++}
++
+ cmd_user_passwd()
+ {
+ 	echo "NX> 100 NXSERVER - Version $NX_VERSION $NX_LICENSE"
+@@ -1682,14 +1689,14 @@
+ cmd_start()
+ {
+ 	
+-	[ -f $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS ] && cmd_abort "ERROR: Service already running"
++	[ -f $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS ] && cmd_abort_success "ERROR: Service already running"
+ 	mv $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS.disabled $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS
+ 	echo "NX> 122 Service started"
+ }
+ 
+ cmd_stop()
+ {
+-	[ -f $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS ] || cmd_abort "Service was already stopped"
++	[ -f $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS ] || cmd_abort_success "Service was already stopped"
+ 	mv $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS.disabled
+ 	echo "NX> 123 Service stopped"
+ }
+
+
+
+From fabianx at mail.berlios.de  Sun Aug 17 22:24:08 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sun, 17 Aug 2008 22:24:08 +0200
+Subject: [Freenx-cvs] r566 - trunk/freenx-server
+Message-ID: <200808172024.m7HKO8Al005146@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-17 22:24:08 +0200 (Sun, 17 Aug 2008)
+New Revision: 566
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxserver
+Log:
+* Finally checked for all service ports. (cups, media, samba)
+  and also checked it on the host where the load balancing actually
+  leads to.
+  (fabianx at bat.berlios.de)
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-05 23:32:01 UTC (rev 565)
++++ trunk/freenx-server/ChangeLog	2008-08-17 20:24:08 UTC (rev 566)
+@@ -71,7 +71,10 @@
+ 	  (fabianx at bat.berlios.de)
+ 	* Fixed start/stop exit codes.
+ 	  (Patch by Gentoo Portage, fabianx at bat.berlios.de)
+-	  
++	* Finally checked for all service ports. (cups, media, samba)
++	  and also checked it on the host where the load balancing actually
++	  leads to.
++	  (fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-05 23:32:01 UTC (rev 565)
++++ trunk/freenx-server/nxserver	2008-08-17 20:24:08 UTC (rev 566)
+@@ -1295,14 +1295,16 @@
+ 	then
+ 		server_check_session_count || return 1
+ 		
++		# Possibly do loadbalancing
++		
++		SERVER_HOST=$(server_loadbalance)
++		
+ 		# start nxnode
+ 		SESS_DISPLAY=$DISPLAY_BASE
+ 		let SESS_DISPLAY_LIMIT=$DISPLAY_BASE+$DISPLAY_LIMIT
+ 	
+ 		# stupid but working algo ...
+ 			
+-		# TODO: need to check for _all_ offset and ports :-/
+-			
+ 		while true
+ 		do
+ 			while [ -e /tmp/.X$SESS_DISPLAY-lock -o -e "/tmp/.nX$SESS_DISPLAY-lock"  -o -e "/tmp/.X11-unix/X$SESS_DISPLAY" ]
+@@ -1310,17 +1312,44 @@
+ 				let SESS_DISPLAY=$SESS_DISPLAY+1
+ 			done
+ 
+-			# Check if there is already an agent running on that display
++			# Check if there is already an agent running on that display on that host
+ 			let AGENT_DISPLAY=$SESS_DISPLAY+6000
+-			if $COMMAND_NETCAT -z 127.0.0.1 $AGENT_DISPLAY 2>/dev/null
++			if $COMMAND_NETCAT -z "$SERVER_HOST" $AGENT_DISPLAY 2>/dev/null
+ 			then
+-				log 2 "Warning: Stray nxagent without .X$SESS_DISPLAY-lock found on port $AGENT_DISPLAY."
++				log 2 "Warning: Stray nxagent without .nX$SESS_DISPLAY-lock found on host:port $SERVER_HOST:$AGENT_DISPLAY."
+ 				let SESS_DISPLAY=$SESS_DISPLAY+1
+ 				continue
+ 			fi
++
++			# Now check for the other enabled services
+ 			
++			let SAMBA_DISPLAY=$SESS_DISPLAY+3000
++			if [ "$(getparam 'samba')" = 1 ] && $COMMAND_NETCAT -z "$SERVER_HOST" $SAMBA_DISPLAY
++			then
++				log 2 "Warning: Skipping $SERVER_HOST:$AGENT_DISPLAY as samba port is not free."
++				let SESS_DISPLAY=$SESS_DISPLAY+1
++				continue
++			fi
++			
++			let MEDIA_DISPLAY=$SESS_DISPLAY+7000
++			if [ "$(getparam 'media')" = 1 ] && $COMMAND_NETCAT -z "$SERVER_HOST" $MEDIA_DISPLAY
++			then
++				log 2 "Warning: Skipping $SERVER_HOST:$AGENT_DISPLAY as media port is not free."
++				let SESS_DISPLAY=$SESS_DISPLAY+1
++				continue
++			fi
+ 
++			
++			let CUPS_DISPLAY=$SESS_DISPLAY+9000
++			if [ "$(getparam 'cups')" = 1 ] && $COMMAND_NETCAT -z "$SERVER_HOST" $CUPS_DISPLAY
++			then
++				log 2 "Warning: Skipping $SERVER_HOST:$AGENT_DISPLAY as cups port is not free."
++				let SESS_DISPLAY=$SESS_DISPLAY+1
++				continue
++			fi
++
+ 			SESS_LOCKFILE=$(mktemp "/tmp/.nX$SESS_DISPLAY-lock.XXXXXXXXX")
++			
+ 			# ln is an atomic operation
+ 			ln "$SESS_LOCKFILE" "/tmp/.nX$SESS_DISPLAY-lock" 2>/dev/null && break
+ 		done
+@@ -1336,10 +1365,6 @@
+ 	
+ 		uniqueid=$(echo $[$RANDOM*$RANDOM] | $COMMAND_MD5SUM | cut -d" " -f1 | tr "[a-z]" "[A-Z]")
+ 
+-		# Possibly do loadbalancing
+-		
+-		SERVER_HOST=$(server_loadbalance)
+-		
+ 		FULL_PARAMS="$PARAMS&user=$USER&userip=$USERIP&uniqueid=$uniqueid&display=$SESS_DISPLAY&host=$SERVER_HOST"
+ 		log_secure "6" "$FULL_PARAMS"
+ 
+
+
+
+From fabianx at mail.berlios.de  Sun Aug 17 22:44:12 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sun, 17 Aug 2008 22:44:12 +0200
+Subject: [Freenx-cvs] r567 - trunk/freenx-server
+Message-ID: <200808172044.m7HKiC6K006613@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-17 22:44:12 +0200 (Sun, 17 Aug 2008)
+New Revision: 567
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxnode
+Log:
+* Fixed broken fallback logic if SSH_CLIENT variables cannot be read
+  correctly.
+  (fabianx at bat.berlios.de)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-17 20:24:08 UTC (rev 566)
++++ trunk/freenx-server/ChangeLog	2008-08-17 20:44:12 UTC (rev 567)
+@@ -75,6 +75,9 @@
+ 	  and also checked it on the host where the load balancing actually
+ 	  leads to.
+ 	  (fabianx at bat.berlios.de)
++	* Fixed broken fallback logic if SSH_CLIENT variables cannot be read
++	  correctly.
++	  (fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxnode
+===================================================================
+--- trunk/freenx-server/nxnode	2008-08-17 20:24:08 UTC (rev 566)
++++ trunk/freenx-server/nxnode	2008-08-17 20:44:12 UTC (rev 567)
+@@ -1160,10 +1160,9 @@
+ 	then
+ 		# we need to use the IP of the "calling" server now
+ 		userip=$(echo $SSH_CLIENT $SSH2_CLIENT | cut -d" " -f1 | sed 's/::ffff://g')
+-
+-		# TODO: This logic is broken ... ;-)
+-		[ -z "$userip" ] && userip="127.0.0.1"
+-		[ -z "$userip" -a "$host" != "127.0.0.1" ] && userip="*"
++		# If host is the same, use 127.0.0.1, else fallback to default
++		[ -z "$userip" -a "$host" = "127.0.0.1" ] && userip="127.0.0.1"
++		[ -z "$userip" ] && userip="*"
+ 	fi
+ 	
+ 	# ok, lets make the session dir first:
+
+
+
+From fabianx at mail.berlios.de  Mon Aug 18 03:41:50 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Mon, 18 Aug 2008 03:41:50 +0200
+Subject: [Freenx-cvs] r568 - trunk/freenx-server
+Message-ID: <200808180141.m7I1foEt024070@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-18 03:41:49 +0200 (Mon, 18 Aug 2008)
+New Revision: 568
+
+Added:
+   trunk/freenx-server/nxserver-usermode
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/Makefile
+   trunk/freenx-server/nxserver
+Log:
++       * Overhauled the usermode:
++               * There are now two modes of operation.
++               - One statically setting the
++                 ENABLE_USERMODE_AUTHENTICATION key
++                 in node.conf. (old behavior)
++               - Or using nxserver-usermode as startup
++                 binary, which directly goes into the 103 stage.
++               * Fixed using commandline parameters like --cleanup
++                 for static usermode.
++               * Enabled the root commandline parameters in usermode.
++               * Fixed usage of "nx" user as normal user in usermode.
++               * Disabled slave mode and load balancing for usermode.
++               * Fixed creation of the logfile directory.
++               * Fixed nxnode usage of SSH_CLIENT using fallback mechanism.
++         (Patch by nbartos at bat.berlios.de, fabianx at bat.berlios.de)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-17 20:44:12 UTC (rev 567)
++++ trunk/freenx-server/ChangeLog	2008-08-18 01:41:49 UTC (rev 568)
+@@ -78,6 +78,21 @@
+ 	* Fixed broken fallback logic if SSH_CLIENT variables cannot be read
+ 	  correctly.
+ 	  (fabianx at bat.berlios.de)
++	* Overhauled the usermode: 
++		* There are now two modes of operation.
++	  	- One statically setting the 
++		  ENABLE_USERMODE_AUTHENTICATION key
++	  	  in node.conf. (old behavior)
++		- Or using nxserver-usermode as startup 
++		  binary, which directly goes into the 103 stage.
++		* Fixed using commandline parameters like --cleanup 
++		  for static usermode.
++		* Enabled the root commandline parameters in usermode.
++		* Fixed usage of "nx" user as normal user in usermode.
++		* Disabled slave mode and load balancing for usermode.
++		* Fixed creation of the logfile directory.
++		* Fixed nxnode usage of SSH_CLIENT using fallback mechanism.
++	  (Patch by nbartos at bat.berlios.de, fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/Makefile
+===================================================================
+--- trunk/freenx-server/Makefile	2008-08-17 20:44:12 UTC (rev 567)
++++ trunk/freenx-server/Makefile	2008-08-18 01:41:49 UTC (rev 568)
+@@ -3,7 +3,7 @@
+ SHELL = /bin/bash
+ 
+ SUBDIRS=nxredir nxviewer-passwd nxserver-helper nx-session-launcher
+-PROGRAMS=nxacl.sample nxcheckload.sample nxcups-gethost nxdesktop_helper nxdialog nxkeygen nxloadconfig nxnode nxnode-login nxprint nxserver nxserver-helper/nxserver-helper nxsetup nxviewer_helper nxviewer-passwd/nxpasswd/nxpasswd nx-session-launcher/nx-session-launcher nx-session-launcher/nx-session-launcher-suid
++PROGRAMS=nxacl.sample nxcheckload.sample nxcups-gethost nxdesktop_helper nxdialog nxkeygen nxloadconfig nxnode nxnode-login nxprint nxserver nxserver-helper/nxserver-helper nxsetup nxviewer_helper nxviewer-passwd/nxpasswd/nxpasswd nx-session-launcher/nx-session-launcher nx-session-launcher/nx-session-launcher-suid nxserver-usermode
+ 
+ all:
+ 	cd nxviewer-passwd && xmkmf && make Makefiles && make depend
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-17 20:44:12 UTC (rev 567)
++++ trunk/freenx-server/nxserver	2008-08-18 01:41:49 UTC (rev 568)
+@@ -484,24 +484,49 @@
+ # Main nxserver <-> nxclient communication module
+ #
+ 
+-if [ "$USER" = "nxfree" -o "$USER" = "nx" -o "$ENABLE_USERMODE_AUTHENTICATION" = "1" ]
+-then
++# do not run in server mode loop
++SERVER_MODE="0"
+ 
+-setup_usermode_auth()
+-{
++# For users nxfree and nx run in SERVER MODE
++[ "$USER" = "nxfree" -o "$USER" = "nx" ] && SERVER_MODE="1"
+ 
+-	[ $USER = "nxfree" -o "$USER" = "nx" ] && ENABLE_USERMODE_AUTHENTICATION="0"
++# We can override usermode via environment var
++[ "$NX_USERMODE" = "1" ] && ENABLE_USERMODE_AUTHENTICATION="1"
+ 
+-	if [ "$ENABLE_USERMODE_AUTHENTICATION" = "1" ]
+-	then
+-		export NX_SESS_DIR="$USER_FAKE_HOME/.nx/db/"
+-		export NX_LOGFILE="$USER_FAKE_HOME/.nx/temp/nxserver.log"
+-		mkdir -p $NX_SESS_DIR/{closed,running,failed}
+-	fi
+-}
++# When usermode is 1, we only run in server loop
++# if nxserver was run without any arguments or just with -c nxserver.
++if [ "$ENABLE_USERMODE_AUTHENTICATION" = "1" ]
++then 
++	# do not run in server mode loop regardless of username
++	SERVER_MODE="0"
+ 
+-setup_usermode_auth
++	[ -z "$*" -o "$*" = "-c $PATH_BIN/nxserver" ] && SERVER_MODE="1"
++	
++	# Reread the config files (so that $USER.node.conf get sourced)
++	. $(PATH=$(cd $(dirname $0) && pwd):$PATH which nxloadconfig) --userconf
++	
++	# We might need to reactivate this now
++	ENABLE_USERMODE_AUTHENTICATION="1"
++	
++	# export the necessary variables
++	export NX_SESS_DIR="$USER_FAKE_HOME/.nx/db/"
++	export NX_LOGFILE="$USER_FAKE_HOME/.nx/temp/nxserver.log"
++	mkdir -p $(dirname $NX_LOGFILE)
++	mkdir -p $NX_SESS_DIR/{closed,running,failed}
++	
++	# we are logged in already 
++	LOGIN_SUCCESS="1"
++	LOGIN_METHOD="USERMODE"
+ 
++	# we do not use SLAVE mode for usermode
++	ENABLE_SLAVE_MODE="0"
++	# we do not use loadbalancing mode for usermode
++	LOAD_BALANCE_SERVERS=""
++fi
++
++if [ "$SERVER_MODE" = "1" ]
++then
++
+ #
+ # needed for slave mode
+ #
+@@ -671,7 +696,9 @@
+ 	
+ 	# Reread the config files (so that $USER.node.conf get sourced)
+ 	. $(PATH=$(cd $(dirname $0) && pwd):$PATH which nxloadconfig) --userconf
+-	echo_x "NX> 103 Welcome to: $SERVER_NAME user: $USER"
++elif [ "$NX_USERMODE" = "1" ]
++then
++	log 3 "Info: Usermode authentication: Logged in as $USER."
+ else
+ 
+ echo_x "HELLO NXSERVER - Version $NX_VERSION $NX_LICENSE"
+@@ -721,8 +748,8 @@
+ 			LOGIN_SUCCESS="0"
+ 			
+ 			echo_x -n "NX> 101 User: "
+-			read USER
+-			echo_x $USER
++			read USER2
++			echo_x $USER2
+ 			
+ 			echo_x -n "NX> 102 Password: "
+ 			old_ifs="$IFS"
+@@ -736,10 +763,13 @@
+ 			if [ "$ENABLE_USERMODE_AUTHENTICATION" = "1" ]
+ 			then
+ 				LOGIN_SUCCESS="1"
+-				LOGIN_METHOD="USERMODE"
+-				USER=$(whoami)
++				# we have read the user config already above,
++				# so we don't get any new information here
++				break
+ 			fi
+ 
++			USER=$USER2
++
+ 			# PASSDB based auth
+ 			if [ "$ENABLE_PASSDB_AUTHENTICATION" = "1" -a "$LOGIN_SUCCESS" = "0" ]
+ 			then
+@@ -788,9 +818,6 @@
+ 			then
+ 				# Reread the config files (so that $USER.node.conf get sourced)
+ 				. $(PATH=$(cd $(dirname $0) && pwd):$PATH which nxloadconfig) --userconf
+-				setup_usermode_auth
+-
+-				echo_x "NX> 103 Welcome to: $SERVER_NAME user: $USER"
+ 				break
+ 			else
+ 				echo_x "NX> 404 ERROR: wrong password or login"
+@@ -807,6 +834,8 @@
+ 
+ fi
+ 
++echo_x "NX> 103 Welcome to: $SERVER_NAME user: $USER"
++
+ # Add the slave mode shutdown trap (just in case)
+ [ -n "$NXNODE_LOGIN_SLAVE" ] && trap nxnode_login_stop_slave EXIT
+ 
+@@ -870,6 +899,9 @@
+ 	    NXNODE_TOSEND="$@" nxnode_login "$PASS" -- su "$USER" "" "$PATH_BIN/nxnode" "$CMD" 2>&1 | log_tee
+ 	elif [ "$LOGIN_METHOD" = "USERMODE" ]
+ 	then
++	    # we need to unset SSH_* variables so that nxnode 
++	    # chooses the right accept= value.
++	    unset SSH_CLIENT SSH_CLIENT2
+ 	    echo "$@" | $PATH_BIN/nxnode "$CMD" 2>&1 | log_tee
+ 	else
+ 	    echo "$@" | $COMMAND_SSH -l "$USER" "$NODE_HOSTNAME" -p $SSHD_PORT -x -2 -i $NX_ETC_DIR/users.id_dsa -o 'PubkeyAuthentication yes' -o 'RSAAuthentication yes' -o 'RhostsAuthentication no' -o 'PasswordAuthentication no' -o 'RhostsRSAAuthentication no' -o 'StrictHostKeyChecking no' $PATH_BIN/nxnode "$CMD" | log_tee
+@@ -1902,10 +1934,10 @@
+ }
+ 
+ #
+-# user mode available functions
++# normal user available functions
+ #
+ 
+-if [ $UID -ne 0 ]
++if [ $UID -ne 0 -a "$ENABLE_USERMODE_AUTHENTICATION" != "1" ]
+ then
+ 	[ "$1" = "--agent" ] && exec $PATH_BIN/nxnode "$@"
+ 	[ "$1" != "--passwd" ] && cmd_usage
+
+Added: trunk/freenx-server/nxserver-usermode
+===================================================================
+--- trunk/freenx-server/nxserver-usermode	2008-08-17 20:44:12 UTC (rev 567)
++++ trunk/freenx-server/nxserver-usermode	2008-08-18 01:41:49 UTC (rev 568)
+@@ -0,0 +1,11 @@
++#!/bin/bash
++#
++# Small helper to startup nxserver in usermode setup.
++#
++# Copyright (c) 2008 by Fabian Franz <freenx at fabian-franz.de>
++#
++# License: GPL, version 2
++#
++
++export NX_USERMODE="1"
++exec $(dirname $0)/nxserver "$@"
+
+
+Property changes on: trunk/freenx-server/nxserver-usermode
+___________________________________________________________________
+Name: svn:executable
+   + *
+
+
+
+From fabianx at mail.berlios.de  Mon Aug 18 04:16:27 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Mon, 18 Aug 2008 04:16:27 +0200
+Subject: [Freenx-cvs] r569 - in trunk/freenx-server: . nxserver-suid
+Message-ID: <200808180216.m7I2GRPY029922@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-18 04:16:25 +0200 (Mon, 18 Aug 2008)
+New Revision: 569
+
+Added:
+   trunk/freenx-server/nxserver-suid/
+   trunk/freenx-server/nxserver-suid/Makefile
+   trunk/freenx-server/nxserver-suid/nxserver-suid.c
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/Makefile
+Log:
+* Added disabled nxserver-suid wrapper with help from Google. To
+  enable it uncomment the suid_install target in Makefile.
+  (Alistair Riddoch <alriddoch at google.com>, fabianx at bat.berlios.de)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-18 01:41:49 UTC (rev 568)
++++ trunk/freenx-server/ChangeLog	2008-08-18 02:16:25 UTC (rev 569)
+@@ -93,6 +93,9 @@
+ 		* Fixed creation of the logfile directory.
+ 		* Fixed nxnode usage of SSH_CLIENT using fallback mechanism.
+ 	  (Patch by nbartos at bat.berlios.de, fabianx at bat.berlios.de)
++	* Added disabled nxserver-suid wrapper with help from Google. To 
++	  enable it uncomment the suid_install target in Makefile.
++	  ( Alistair Riddoch <alriddoch at google.com>, fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/Makefile
+===================================================================
+--- trunk/freenx-server/Makefile	2008-08-18 01:41:49 UTC (rev 568)
++++ trunk/freenx-server/Makefile	2008-08-18 02:16:25 UTC (rev 569)
+@@ -1,9 +1,9 @@
+-.PHONY: all install clean
++.PHONY: all install clean nxenv_install suid_install
+ 
+ SHELL = /bin/bash
+ 
+-SUBDIRS=nxredir nxviewer-passwd nxserver-helper nx-session-launcher
+-PROGRAMS=nxacl.sample nxcheckload.sample nxcups-gethost nxdesktop_helper nxdialog nxkeygen nxloadconfig nxnode nxnode-login nxprint nxserver nxserver-helper/nxserver-helper nxsetup nxviewer_helper nxviewer-passwd/nxpasswd/nxpasswd nx-session-launcher/nx-session-launcher nx-session-launcher/nx-session-launcher-suid nxserver-usermode
++SUBDIRS=nxredir nxviewer-passwd nxserver-helper nxserver-suid nx-session-launcher
++PROGRAMS=nxacl.sample nxcheckload.sample nxcups-gethost nxdesktop_helper nxdialog nxkeygen nxloadconfig nxnode nxnode-login nxprint nxserver nxserver-helper/nxserver-helper nxsetup nxviewer_helper nxviewer-passwd/nxpasswd/nxpasswd nx-session-launcher/nx-session-launcher nx-session-launcher/nx-session-launcher-suid nxserver-usermode nxserver-suid/nxserver-suid
+ 
+ all:
+ 	cd nxviewer-passwd && xmkmf && make Makefiles && make depend
+@@ -15,6 +15,10 @@
+ 	        $(MAKE) -C $$i all || exit 1;\
+ 	done
+ 
++suid_install:
++	chown nx:root $(DESTDIR)/$$PATH_BIN/nxserver-suid
++	chmod 4755 $(DESTDIR)/$$PATH_BIN/nxserver-suid
++
+ nxenv_install:
+ 	install -m755 -d $(DESTDIR)/$$PATH_BIN/
+ 	install -m755 -d $(DESTDIR)/$$PATH_LIB/
+@@ -26,6 +30,9 @@
+ 	done
+ 	install -m644 node.conf.sample $(DESTDIR)/$$NX_ETC_DIR/
+ 	$(MAKE) -C nxredir install
++	# uncomment the following line to make
++	# nxserver-suid suid nx
++	#$(MAKE) suid_install
+ 
+ clean:
+ 	make -C nxviewer-passwd clean
+
+Added: trunk/freenx-server/nxserver-suid/Makefile
+===================================================================
+--- trunk/freenx-server/nxserver-suid/Makefile	2008-08-18 01:41:49 UTC (rev 568)
++++ trunk/freenx-server/nxserver-suid/Makefile	2008-08-18 02:16:25 UTC (rev 569)
+@@ -0,0 +1,12 @@
++.PHONY: all clean distclean
++
++ifneq ($(NX_VERSION),)
++CFLAGS+=-DNXSERVER_COMMAND="\"$(PATH_BIN)/nxserver\""
++CFLAGS+=-DNXNODE_COMMAND="\"$(PATH_BIN)/nxnode\""
++CFLAGS+=-DNXBIN_DIRECTORY="\"$(PATH_BIN)\""
++endif
++
++all: nxserver-suid
++
++clean distclean:
++	rm -f *.o nxserver-suid
+
+Added: trunk/freenx-server/nxserver-suid/nxserver-suid.c
+===================================================================
+--- trunk/freenx-server/nxserver-suid/nxserver-suid.c	2008-08-18 01:41:49 UTC (rev 568)
++++ trunk/freenx-server/nxserver-suid/nxserver-suid.c	2008-08-18 02:16:25 UTC (rev 569)
+@@ -0,0 +1,197 @@
++/*
++ * Copyright 2007 Google Inc.
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License
++ * as published by the Free Software Foundation; either version 2
++ * of the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
++ *
++ * Authors: alriddoch at google.com (Alistair Riddoch)
++ * 	    freenx at fabian-franz.de (Fabian Franz)
++ */
++
++#include <sys/types.h>
++#include <sys/socket.h>
++
++#include <unistd.h>
++#include <stdlib.h>
++#include <stdio.h>
++#include <pwd.h>
++#include <syslog.h>
++#include <string.h>
++#include <errno.h>
++#include <libgen.h>
++
++#include <assert.h>
++
++char * prgname = NULL;
++
++#define STRING_BUFLEN 512
++
++#ifndef NXNODE_COMMAND
++#define NXNODE_COMMAND "/usr/NX/bin/nxnode"
++#endif
++
++#ifndef NXSERVER_COMMAND
++#define NXSERVER_COMMAND "/usr/NX/bin/nxserver"
++#endif
++
++#ifndef NXBIN_DIRECTORY
++#define NXBIN_DIRECTORY "/usr/NX/bin/"
++#endif
++
++
++int launch_nxnode(uid_t user, int comm_fd)
++{
++    // This program is being run setuid, so we can now drop back to
++    // the ruid which should be the original user.
++
++    setuid(user);
++
++    if (seteuid(user) != 0) {
++        syslog(LOG_ERR, "ERROR: Unable to drop back to calling userid: %m\n");
++        return 1;
++    }
++
++    // Disassociate from the terminal connected to the client that we were
++    // invoked from.
++    setsid();
++
++    // Close stdio, and reconnected it to a socket via which we can
++    // communicate with nxserver.
++    close(STDIN_FILENO);
++    close(STDOUT_FILENO);
++    close(STDERR_FILENO);
++
++    dup2(comm_fd, STDIN_FILENO);
++    dup2(comm_fd, STDOUT_FILENO);
++    dup2(comm_fd, STDERR_FILENO);
++
++    return execlp(NXNODE_COMMAND, NXNODE_COMMAND, "--slave", NULL);
++}
++
++int launch_nxserver(const char * username, int comm_fd, int argc, char ** argv)
++{
++    size_t env_string_length;
++    char * env_string;
++    char ** new_env;
++    char ** new_argv;
++    int i;
++
++    // Really drop the user priviledges
++    setreuid(geteuid(), geteuid());
++   
++    // Setup a clean environment.
++    new_env = calloc(5+1, sizeof(char *));
++
++    i=0;
++	
++    env_string_length = snprintf(0, 0, "%s=%s",
++                                 "NX_TRUSTED_USER", username);
++    env_string = malloc(env_string_length + 1);
++    assert(env_string != NULL);
++    sprintf(env_string, "%s=%s", "NX_TRUSTED_USER", username);
++    new_env[i++] = env_string;
++
++    env_string_length = snprintf(0, 0, "%s=%d",
++                                 "NX_COMMFD", comm_fd);
++    env_string = malloc(env_string_length + 1);
++    assert(env_string != NULL);
++    sprintf(env_string, "%s=%d", "NX_COMMFD", comm_fd);
++    new_env[i++] = env_string;
++    
++    env_string_length = snprintf(0, 0, "%s=%s",
++                                 "USER", "nx");
++    env_string = malloc(env_string_length + 1);
++    assert(env_string != NULL);
++    sprintf(env_string, "%s=%s", "USER", "nx");
++    new_env[i++] = env_string;
++    
++    if (getenv("SSH_CLIENT") != NULL)
++    {
++    	env_string_length = snprintf(0, 0, "%s=%s",
++    	                             "SSH_CLIENT", getenv("SSH_CLIENT"));
++    	env_string = malloc(env_string_length + 1);
++    	assert(env_string != NULL);
++    	sprintf(env_string, "%s=%s", "SSH_CLIENT", getenv("SSH_CLIENT"));
++    	new_env[i++] = env_string;
++    }
++    
++    if (getenv("SSH_CLIENT2") != NULL)
++    {
++    	env_string_length = snprintf(0, 0, "%s=%s",
++    	                             "SSH_CLIENT2", getenv("SSH_CLIENT2"));
++    	env_string = malloc(env_string_length + 1);
++    	assert(env_string != NULL);
++    	sprintf(env_string, "%s=%s", "SSH_CLIENT2", getenv("SSH_CLIENT2"));
++    	new_env[i++] = env_string;
++    }
++
++    // Setup argv array
++    
++    new_argv = calloc(argc + 1, sizeof(char *));
++    new_argv[0] = NXSERVER_COMMAND;
++
++    for (i = 1; i < argc; ++i) {
++        new_argv[i] = argv[i];
++    }
++
++    chdir(NXBIN_DIRECTORY);
++
++    return execve(NXSERVER_COMMAND, new_argv, new_env);
++}
++
++int main(int argc, char ** argv)
++{
++    prgname = basename(strdup(argv[0]));
++
++    openlog(prgname, LOG_PID, LOG_USER);
++
++    uid_t calling_uid = getuid();
++
++    if (geteuid() == calling_uid) {
++        syslog(LOG_WARNING, "WARNING: Not running suid.\n");
++    }
++
++    struct passwd calling_user;
++    struct passwd * ret;
++    char user_string_buffer[STRING_BUFLEN];
++    errno = 0;
++
++    if (getpwuid_r(calling_uid, &calling_user, &user_string_buffer[0],
++                   STRING_BUFLEN, &ret) != 0) {
++        syslog(LOG_ERR, "ERROR: Unable to get passwd entry for calling user %d: %m\n", calling_uid);
++        return 1;
++    }
++
++    int sockets[2];
++
++    if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockets) != 0) {
++        syslog(LOG_ERR, "FATAL: Socket error: %m");
++        return 1;
++    }
++
++    pid_t child = fork();
++
++    if (child < 0) {
++        syslog(LOG_ERR, "FATAL: Fork error: %m");
++        return 1;
++    }
++
++    if (child == 0) {
++        close(sockets[1]);
++        return launch_nxnode(calling_uid, sockets[0]);
++    }
++
++    close(sockets[0]);
++    return launch_nxserver(calling_user.pw_name, sockets[1], argc, argv);
++}
+
+
+
+From fabianx at mail.berlios.de  Mon Aug 18 04:26:07 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Mon, 18 Aug 2008 04:26:07 +0200
+Subject: [Freenx-cvs] r570 - trunk/freenx-server
+Message-ID: <200808180226.m7I2Q7R7000742@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-18 04:26:05 +0200 (Mon, 18 Aug 2008)
+New Revision: 570
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/node.conf.sample
+   trunk/freenx-server/nxloadconfig
+   trunk/freenx-server/nxserver
+Log:
++       * Automatically disabled slave mode, when load balancing is activated.
++         (fabianx at bat.berlios.de)
++       * Made ENABLE_SLAVE_MODE="1" the new default as its faster
++         and more reliable. If you encounter any problems with it,
++         disable it in node.conf.
++         (fabianx at bat.berlios.de)
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-18 02:16:25 UTC (rev 569)
++++ trunk/freenx-server/ChangeLog	2008-08-18 02:26:05 UTC (rev 570)
+@@ -96,6 +96,12 @@
+ 	* Added disabled nxserver-suid wrapper with help from Google. To 
+ 	  enable it uncomment the suid_install target in Makefile.
+ 	  ( Alistair Riddoch <alriddoch at google.com>, fabianx at bat.berlios.de)
++	* Automatically disabled slave mode, when load balancing is activated.
++	  (fabianx at bat.berlios.de)
++	* Made ENABLE_SLAVE_MODE="1" the new default as its faster
++	  and more reliable. If you encounter any problems with it,
++	  disable it in node.conf.
++	  (fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/node.conf.sample
+===================================================================
+--- trunk/freenx-server/node.conf.sample	2008-08-18 02:16:25 UTC (rev 569)
++++ trunk/freenx-server/node.conf.sample	2008-08-18 02:26:05 UTC (rev 570)
+@@ -104,7 +104,7 @@
+ # For this to work the binary nxserver-helper has to be installed in 
+ # PATH_BIN.
+ #
+-#ENABLE_SLAVE_MODE="0"
++#ENABLE_SLAVE_MODE="1"
+ 
+ # If ENABLE_LOG_FAILED_LOGINS="1" then failed login attempts are logged to the system
+ # auth.log.
+
+Modified: trunk/freenx-server/nxloadconfig
+===================================================================
+--- trunk/freenx-server/nxloadconfig	2008-08-18 02:16:25 UTC (rev 569)
++++ trunk/freenx-server/nxloadconfig	2008-08-18 02:26:05 UTC (rev 570)
+@@ -98,7 +98,7 @@
+ ENABLE_FORCE_ENCRYPTION="0"
+ SSHD_CHECK_IP="0"
+ 
+-ENABLE_SLAVE_MODE="0"
++ENABLE_SLAVE_MODE="1"
+ 
+ ENABLE_LOG_FAILED_LOGINS="1"
+ 
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-18 02:16:25 UTC (rev 569)
++++ trunk/freenx-server/nxserver	2008-08-18 02:26:05 UTC (rev 570)
+@@ -658,6 +658,13 @@
+ NXNODE_LOGIN_SLAVE_ENABLED="0"
+ NXNODE_LOGIN_SLAVE=""
+ 
++# slave mode does not work with load balancing
++if [ -n "$LOAD_BALANCE_SERVERS" -a "$ENABLE_SLAVE_MODE" = "1" ]
++then
++	log 2 "Warning: Disabled slave mode. It does not work together with load balancing."
++	ENABLE_SLAVE_MODE="0"
++fi
++
+ if [ "$ENABLE_SLAVE_MODE" = "1" -a "$NXSERVER_HELPER_ACTIVE" != "1" -a -z "$NX_TRUSTED_USER" ]
+ then
+ 	export SSH_ORIGINAL_COMMAND
+
+
+
+From fabianx at mail.berlios.de  Mon Aug 18 18:29:18 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Mon, 18 Aug 2008 18:29:18 +0200
+Subject: [Freenx-cvs] r571 - trunk/freenx-server
+Message-ID: <200808181629.m7IGTIOX021298@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-18 18:29:17 +0200 (Mon, 18 Aug 2008)
+New Revision: 571
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxnode
+   trunk/freenx-server/nxserver
+Log:
+* Changed type for external agents to windows-helper or vnc-helper
+  so that those sessions can be mirrored / shadowed as well.
+  (fabianx at bat.berlios.de)
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-18 02:26:05 UTC (rev 570)
++++ trunk/freenx-server/ChangeLog	2008-08-18 16:29:17 UTC (rev 571)
+@@ -102,6 +102,9 @@
+ 	  and more reliable. If you encounter any problems with it,
+ 	  disable it in node.conf.
+ 	  (fabianx at bat.berlios.de)
++	* Changed type for external agents to windows-helper or vnc-helper
++	  so that those sessions can be mirrored / shadowed as well.
++	  (fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxnode
+===================================================================
+--- trunk/freenx-server/nxnode	2008-08-18 02:26:05 UTC (rev 570)
++++ trunk/freenx-server/nxnode	2008-08-18 16:29:17 UTC (rev 571)
+@@ -214,7 +214,7 @@
+ 		unix-cde)
+ 			NODE_STARTX=$COMMAND_START_CDE
+ 		;;
+-		unix-application)
++		unix-application|windows-helper|vnc-helper)
+ 			[ "$application" = "xterm" ] && application=$COMMAND_XTERM
+ 			NODE_STARTX=$application
+ 		;;
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-18 02:26:05 UTC (rev 570)
++++ trunk/freenx-server/nxserver	2008-08-18 16:29:17 UTC (rev 571)
+@@ -1259,7 +1259,7 @@
+ 
+ 		if [ "$ENABLE_EXTERNAL_NXDESKTOP" = "1" -a "$(getparam type)" = "windows" ]
+ 		then
+-			type="unix-application"
++			type="windows-helper"
+ 			application="$PATH_BIN/nxdesktop_helper"
+ 			PARAMS="$PARAMS&type=$type&application=$application&freenx_export_agents=1"
+ 			CMDLINE=$PARAMS
+@@ -1267,7 +1267,7 @@
+ 		 
+ 		if [ "$ENABLE_EXTERNAL_NXVIEWER" = "1" -a "$(getparam type)" = "vnc" ]
+ 		then
+-			type="unix-application"
++			type="vnc-helper"
+ 			application="$PATH_BIN/nxviewer_helper"
+ 			PARAMS="$PARAMS&type=$type&application=$application&freenx_export_agents=1"
+ 			CMDLINE=$PARAMS
+
+
+
+From fabianx at mail.berlios.de  Mon Aug 18 19:06:09 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Mon, 18 Aug 2008 19:06:09 +0200
+Subject: [Freenx-cvs] r572 - trunk/freenx-server
+Message-ID: <200808181706.m7IH69DL002588@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-18 19:06:06 +0200 (Mon, 18 Aug 2008)
+New Revision: 572
+
+Added:
+   trunk/freenx-server/nxshadowacl.sample
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/node.conf.sample
+   trunk/freenx-server/nxloadconfig
+   trunk/freenx-server/nxserver
+Log:
++       * Added nxshadowacl.sample component to be able to shadow
++         foreign sessions.
++         (fabianx at bat.berlios.de)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-18 16:29:17 UTC (rev 571)
++++ trunk/freenx-server/ChangeLog	2008-08-18 17:06:06 UTC (rev 572)
+@@ -105,6 +105,9 @@
+ 	* Changed type for external agents to windows-helper or vnc-helper
+ 	  so that those sessions can be mirrored / shadowed as well.
+ 	  (fabianx at bat.berlios.de)
++	* Added nxshadowacl.sample component to be able to shadow
++	  foreign sessions.
++	  (fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/node.conf.sample
+===================================================================
+--- trunk/freenx-server/node.conf.sample	2008-08-18 16:29:17 UTC (rev 571)
++++ trunk/freenx-server/node.conf.sample	2008-08-18 17:06:06 UTC (rev 572)
+@@ -158,6 +158,50 @@
+ #ENABLE_DESKTOP_SHARING=1
+ 
+ #
++# General shadowing / mirroring notes:
++#
++# By default shadowing is only allowed for the same user.
++#
++# If nxserver finds nxshadowacl binary, it asks it, for which users 
++# the permission is granted.
++# 
++# nxshadowacl <user>
++# 
++# Exit code:
++#
++# 0 -> Save cookie in session file for other users
++# 1 -> Do not save cookie
++#
++# Check if user is allowed to be shadowed by admin user.
++#
++# nxshadowacl <user> <admin>
++# 
++# Exit code:
++#
++# 0 -> Yes, allow shadowing and add to list
++# 1 -> No, don't allow shadowing
++# 
++
++#
++# When using NX 3.0 shadowing, this enables asking the user whether
++# he authorizes another user to shadow his session
++#
++# 0: No authorization request will be presented,
++#    and the session will be shadowed as if the user had approved.
++# 1: (default) Ask for authorization
++#
++#ENABLE_SESSION_SHADOWING_AUTHORIZATION=1
++
++# Allow session shadowing in interactive mode:
++#
++# 1: The shadowing user can interact with the shadowed session.
++#
++# 0: The shadowed session is view-only. No interaction with the
++#    shadowed session is possible.
++#
++#ENABLE_INTERACTIVE_SESSION_SHADOWING=1
++
++#
+ # Enable or disable clipboard:
+ #
+ # client:  The content copied on the client can be pasted inside the
+
+Modified: trunk/freenx-server/nxloadconfig
+===================================================================
+--- trunk/freenx-server/nxloadconfig	2008-08-18 16:29:17 UTC (rev 571)
++++ trunk/freenx-server/nxloadconfig	2008-08-18 17:06:06 UTC (rev 572)
+@@ -52,7 +52,7 @@
+ # DO NOT TOUCH unless you REALLY know what you are doing
+ #########################################################################
+ 
+-NX_VERSION=2.1.0-73-SVN
++NX_VERSION=3.2.0-73-SVN
+ NX_LICENSE="OS (GPL, using backend: %BACKEND%)"
+ 
+ # Where can different nx components be found
+@@ -115,6 +115,9 @@
+ ENABLE_MIRROR_VIA_VNC=1
+ ENABLE_DESKTOP_SHARING=1
+ 
++ENABLE_SESSION_SHADOWING_AUTHORIZATION=1
++ENABLE_INTERACTIVE_SESSION_SHADOWING=1
++
+ ENABLE_CLIPBOARD="both"
+ ENABLE_PULLDOWN_MENU="1"
+ 
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-18 16:29:17 UTC (rev 571)
++++ trunk/freenx-server/nxserver	2008-08-18 17:06:06 UTC (rev 572)
+@@ -967,6 +967,18 @@
+ 	server_nxnode_start "$@" | while read CMD
+ 	do
+ 		case "$CMD" in 
++			"NX> 706"*)
++				if [ -x "$PATH_BIN/nxshadowacl" ]
++				then
++					# check if we should save the cookie
++					$PATH_BIN/nxshadowacl "$USER"
++					if [ $? -ne 0 ]
++					then
++						SHADOW_COOKIE=$(echo $CMD | cut -d: -f2)
++						session_change "$uniqueid" "shadow_cookie" "$SHADOW_COOKIE"
++					fi
++				fi
++			;;
+ 			"NX> 1006"*|"NX> 1005"*|"NX> 1009"*)
+ 				case "$CMD" in 
+ 					*running*)
+
+Added: trunk/freenx-server/nxshadowacl.sample
+===================================================================
+--- trunk/freenx-server/nxshadowacl.sample	2008-08-18 16:29:17 UTC (rev 571)
++++ trunk/freenx-server/nxshadowacl.sample	2008-08-18 17:06:06 UTC (rev 572)
+@@ -0,0 +1,7 @@
++#!/bin/sh
++
++# Deny all sessions to be shadowed by anyone besides the same user.
++exit 1
++
++# Allow all sessions to be shadowed by anyone.
++#exit 0
+
+
+
+From fabianx at mail.berlios.de  Mon Aug 18 19:29:37 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Mon, 18 Aug 2008 19:29:37 +0200
+Subject: [Freenx-cvs] r573 - trunk/freenx-server
+Message-ID: <200808181729.m7IHTbQ8016737@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-18 19:29:37 +0200 (Mon, 18 Aug 2008)
+New Revision: 573
+
+Modified:
+   trunk/freenx-server/nxserver
+Log:
+Fixed saving of the agent cookie.
+
+
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-18 17:06:06 UTC (rev 572)
++++ trunk/freenx-server/nxserver	2008-08-18 17:29:37 UTC (rev 573)
+@@ -972,9 +972,10 @@
+ 				then
+ 					# check if we should save the cookie
+ 					$PATH_BIN/nxshadowacl "$USER"
+-					if [ $? -ne 0 ]
++					
++					if [ $? -eq 0 ]
+ 					then
+-						SHADOW_COOKIE=$(echo $CMD | cut -d: -f2)
++						SHADOW_COOKIE=$(echo $CMD | cut -d: -f2 | sed 's/ //g')
+ 						session_change "$uniqueid" "shadow_cookie" "$SHADOW_COOKIE"
+ 					fi
+ 				fi
+@@ -1423,7 +1424,7 @@
+ 		sessionRootlessMode=0
+ 		[ "$(getparam rootless)" = "1" ] && sessionRootlessMode=1
+ 		CMDLINE="a=b&$FULL_PARAMS"
+-		session_add $uniqueid "sessionName=$(getparam session)&display=$(getparam display)&status=Running&startTime=$(date +%s)&foreignAddress=$(getparam userip)&sessionRootlessMode=$sessionRootlessMode&type=$(getparam type)&sessionId=$uniqueid&creationTime=$(date +%s)&userName=$USER&serverPid=$SERVER_PID&screeninfo=$(getparam screeninfo)&geometry=$(getparam geometry)&host=$SERVER_HOST"
++		session_add $uniqueid "sessionName=$(getparam session)&display=$(getparam display)&status=Running&startTime=$(date +%s)&foreignAddress=$(getparam userip)&sessionRootlessMode=$sessionRootlessMode&type=$(getparam type)&sessionId=$uniqueid&creationTime=$(date +%s)&userName=$USER&serverPid=$SERVER_PID&screeninfo=$(getparam screeninfo)&geometry=$(getparam geometry)&host=$SERVER_HOST&shadow_cookie=none"
+ 	else
+ 		uniqueid=$(getparam restore)
+ 		[ -z "$uniqueid" ] && uniqueid=$(getparam id) # 1.4.0-5 compatibility
+
+
+
+From fabianx at mail.berlios.de  Mon Aug 18 19:36:35 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Mon, 18 Aug 2008 19:36:35 +0200
+Subject: [Freenx-cvs] r574 - trunk/freenx-server
+Message-ID: <200808181736.m7IHaZWS017201@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-18 19:36:35 +0200 (Mon, 18 Aug 2008)
+New Revision: 574
+
+Modified:
+   trunk/freenx-server/nxserver
+Log:
+Save shadow_cookie also for resumed sessions.
+
+
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-18 17:29:37 UTC (rev 573)
++++ trunk/freenx-server/nxserver	2008-08-18 17:36:35 UTC (rev 574)
+@@ -1054,6 +1054,19 @@
+ 	server_nxnode_start "$@" | while read CMD
+ 	do
+ 		case "$CMD" in 
++			"NX> 706"*)
++				if [ -x "$PATH_BIN/nxshadowacl" ]
++				then
++					# check if we should save the cookie
++					$PATH_BIN/nxshadowacl "$USER"
++					
++					if [ $? -eq 0 ]
++					then
++						SHADOW_COOKIE=$(echo $CMD | cut -d: -f2 | sed 's/ //g')
++						session_change "$uniqueid" "shadow_cookie" "$SHADOW_COOKIE"
++					fi
++				fi
++			;;
+ 			"NX> 1006"*|"NX> 1005"*|"NX> 1009"*)
+ 				case "$CMD" in 
+ 					*running*)
+
+
+
+From fabianx at mail.berlios.de  Mon Aug 18 20:20:19 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Mon, 18 Aug 2008 20:20:19 +0200
+Subject: [Freenx-cvs] r575 - trunk/freenx-server
+Message-ID: <200808181820.m7IIKJgQ022621@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-18 20:20:18 +0200 (Mon, 18 Aug 2008)
+New Revision: 575
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxnode
+   trunk/freenx-server/nxserver
+   trunk/freenx-server/nxviewer_helper
+Log:
++       * Prepared shadowing foreign users for VNC-shadowing.
++         (fabianx at bat.berlios.de)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-18 17:36:35 UTC (rev 574)
++++ trunk/freenx-server/ChangeLog	2008-08-18 18:20:18 UTC (rev 575)
+@@ -108,6 +108,8 @@
+ 	* Added nxshadowacl.sample component to be able to shadow
+ 	  foreign sessions.
+ 	  (fabianx at bat.berlios.de)
++	* Prepared shadowing foreign users for VNC-shadowing.
++	  (fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxnode
+===================================================================
+--- trunk/freenx-server/nxnode	2008-08-18 17:36:35 UTC (rev 574)
++++ trunk/freenx-server/nxnode	2008-08-18 18:20:18 UTC (rev 575)
+@@ -1116,9 +1116,14 @@
+ 	clientproto=$(getparam clientproto)
+ 	status=$(getparam status)
+ 	host=$(getparam host)
+-	mirrordisplay=$(getparam mirrordisplay)
+-	mirrorhost=$(getparam mirrorhost)
+ 	
++	# New NX 3.0 shadow mode related variables
++	shadowusername=$(getparam shadowusername)
++	shadowcookie=$(getparam shadowcookie)
++	shadowdisplay=$(getparam shadowdisplay)
++	shadowhost=$(getparam shadowhost)
++
++	
+ 	sess_id="$SERVER_NAME-$display-$uniqueid"
+ 	NXSESSION_DIRECTORY="$USER_FAKE_HOME/.nx/C-$sess_id"
+ 	
+@@ -1141,8 +1146,14 @@
+ 		export COMMAND_VNCPASSWD
+ 		export COMMAND_X11VNC
+ 		export PATH_BIN
+-		export mirrordisplay
+-		export mirrorhost
++		export shadowdisplay
++		export shadowhost
++		export shadowuser
++		export shadowcookie
++
++		export ENABLE_SESSION_SHADOWING_AUTHORIZATION
++		export ENABLE_INTERACTIVE_SESSION_SHADOWING
++
+ 		# We do not want to suspend such a session
+ 		# as RDP/RFB are both suspendable as well
+ 		ENABLE_PERSISTENT_SESSION=""
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-18 17:36:35 UTC (rev 574)
++++ trunk/freenx-server/nxserver	2008-08-18 18:20:18 UTC (rev 575)
+@@ -312,10 +312,10 @@
+ 				available="Yes"
+ 			fi
+ 			
+-			# We automatically offer VNC mirrored sessions for "remote" support
++			# We automatically offer VNC shadowed sessions for "remote" support
+ 			if [ "$4" = "vnc" -a "$ENABLE_MIRROR_VIA_VNC" = "1" ] && stringinstring "unix-" "$(getparam type)"
+ 			then
+-				printf "%-7s %-16s %32s %8s %5s %-14s %-11s %s\n" "$(getparam display)" "vnc-mirrored" "$(getparam sessionId)" "$options" "$depth" "$geom" "$available" "$(getparam sessionName) (Mirrored)" >> $TMPFILE
++				printf "%-7s %-16s %32s %8s %5s %-14s %-11s %s\n" "$(getparam display)" "vnc-shadowed" "$(getparam sessionId)" "$options" "$depth" "$geom" "$available" "$(getparam sessionName) (Mirrored)" >> $TMPFILE
+ 			else
+ 				# only unix-* sessions can be resumed, but other session types can still be terminated
+ 				stringinstring "unix-" "$4" || available="N/A"
+@@ -976,7 +976,7 @@
+ 					if [ $? -eq 0 ]
+ 					then
+ 						SHADOW_COOKIE=$(echo $CMD | cut -d: -f2 | sed 's/ //g')
+-						session_change "$uniqueid" "shadow_cookie" "$SHADOW_COOKIE"
++						session_change "$uniqueid" "shadowcookie" "$SHADOW_COOKIE"
+ 					fi
+ 				fi
+ 			;;
+@@ -1063,7 +1063,7 @@
+ 					if [ $? -eq 0 ]
+ 					then
+ 						SHADOW_COOKIE=$(echo $CMD | cut -d: -f2 | sed 's/ //g')
+-						session_change "$uniqueid" "shadow_cookie" "$SHADOW_COOKIE"
++						session_change "$uniqueid" "shadowcookie" "$SHADOW_COOKIE"
+ 					fi
+ 				fi
+ 			;;
+@@ -1247,34 +1247,38 @@
+ 	CMDLINE=$PARAMS
+ 	echo_x
+ 
+-	# special mirrored type
+-	[ "$ACTION" != "start" -a "$(getparam type)" = "vnc" ] && ACTION="mirror"
++	# special shadowed type
++	[ "$ACTION" != "start" -a "$(getparam type)" = "vnc" ] && ACTION="shadow"
+ 
+-	if [ "$ACTION" = "mirror" ]
++	if [ "$ACTION" = "shadow" ]
+ 	then
+ 		ACTION="start"
+ 		uniqueid=$(getparam restore)
+ 		[ -z "$uniqueid" ] && uniqueid=$(getparam id) # 1.4.0-5 compatibility
+ 		CMDLINE=$(session_get "$uniqueid" 2>/dev/null)
+ 
+-		mirrordisplay=$(getparam display)
+-		mirrorhost=$(getparam host)
++		shadowdisplay=$(getparam display)
++		shadowhost=$(getparam host)
++		shadowcookie=$(getparam shadowcookie)
++		shadowuser=$(getparam userName)
+ 
+-		if [ -z "$mirrordisplay"  ]
++		[ "$shadowcookie" = "none" ] && shadowcookie=""
++
++		if [ -z "$shadowdisplay"  ]
+ 		then
+ 			# check for DESKTOP_SHARING_IDS
+-			mirrordisplay=$(echo $DESKTOP_SHARING_IDS | tr ' ' '\n' | egrep "^$uniqueid=" | cut -d'=' -f2)
+-			mirrorhost="127.0.0.1"
++			shadowdisplay=$(echo $DESKTOP_SHARING_IDS | tr ' ' '\n' | egrep "^$uniqueid=" | cut -d'=' -f2)
++			shadowhost="127.0.0.1"
+ 		fi
+ 
+-		if [ -z "$mirrordisplay" ]
++		if [ -z "$shadowdisplay" ]
+ 		then
+-			echo_x "NX> 596 Could not find mirrored session $uniqueid. Session failed."
++			echo_x "NX> 596 Could not find shadowed session $uniqueid. Session failed."
+ 			echo_x "NX> 596 Sharing: $DESKTOP_SHARING_IDS"
+ 			return 1
+ 		fi
+ 
+-		PARAMS="$PARAMS&mirrordisplay=$mirrordisplay&mirrorhost=$mirrorhost"
++		PARAMS="$PARAMS&shadowdisplay=$shadowdisplay&shadowhost=$shadowhost"
+ 		CMDLINE=$PARAMS
+ 	fi
+ 	
+@@ -1356,7 +1360,7 @@
+ 	# as only $SSH_CLIENT or $SSH2_CLIENT will be set, this should work
+ 	USERIP=$(echo $SSH_CLIENT $SSH2_CLIENT | cut -d" " -f1 | sed 's/::ffff://g')
+ 	[ -z "$USERIP" ] && USERIP="*"
+-	if [ "$ACTION" = "start" -o "$ACTION" = "mirror" ]
++	if [ "$ACTION" = "start" -o "$ACTION" = "shadow" ]
+ 	then
+ 		server_check_session_count || return 1
+ 		
+@@ -1437,7 +1441,7 @@
+ 		sessionRootlessMode=0
+ 		[ "$(getparam rootless)" = "1" ] && sessionRootlessMode=1
+ 		CMDLINE="a=b&$FULL_PARAMS"
+-		session_add $uniqueid "sessionName=$(getparam session)&display=$(getparam display)&status=Running&startTime=$(date +%s)&foreignAddress=$(getparam userip)&sessionRootlessMode=$sessionRootlessMode&type=$(getparam type)&sessionId=$uniqueid&creationTime=$(date +%s)&userName=$USER&serverPid=$SERVER_PID&screeninfo=$(getparam screeninfo)&geometry=$(getparam geometry)&host=$SERVER_HOST&shadow_cookie=none"
++		session_add $uniqueid "sessionName=$(getparam session)&display=$(getparam display)&status=Running&startTime=$(date +%s)&foreignAddress=$(getparam userip)&sessionRootlessMode=$sessionRootlessMode&type=$(getparam type)&sessionId=$uniqueid&creationTime=$(date +%s)&userName=$USER&serverPid=$SERVER_PID&screeninfo=$(getparam screeninfo)&geometry=$(getparam geometry)&host=$SERVER_HOST&shadowcookie=none"
+ 	else
+ 		uniqueid=$(getparam restore)
+ 		[ -z "$uniqueid" ] && uniqueid=$(getparam id) # 1.4.0-5 compatibility
+@@ -1582,8 +1586,8 @@
+ 		restoresession*)
+ 			server_startrestore_session "resume"
+ 		;;
+-		mirrorsession*)
+-			server_startrestore_session "mirror"
++		attachsession*)
++			server_startrestore_session "shadow"
+ 		;;
+ 
+ 		passwd)
+
+Modified: trunk/freenx-server/nxviewer_helper
+===================================================================
+--- trunk/freenx-server/nxviewer_helper	2008-08-18 17:36:35 UTC (rev 574)
++++ trunk/freenx-server/nxviewer_helper	2008-08-18 18:20:18 UTC (rev 575)
+@@ -17,23 +17,35 @@
+ echo "$agent_password" | $COMMAND_VNCPASSWD "$NXSESSION_DIRECTORY/scripts/.passwd" doit
+ 
+ # Start x11vnc
+-if [ -n "$mirrordisplay" ]
++if [ -n "$shadowdisplay" ]
+ then
+ 	(
+ 		unset XAUTHORITY
+ 
+ 		# We need to set just :0.0 in case of localhost connection.
+-		[ "$mirrorhost" = "127.0.0.1" ] && mirrorhost=""
++		[ "$shadowhost" = "127.0.0.1" ] && shadowhost=""
++			
+ 		
+-		# Note: No "-accept popup" as its the same user and with that password
+-		#       he could do already more than -accept popup would allow.
++		# don't use accept popup or viewonly mode  as its the same user
++		accept=""
++		viewonly=""
+ 		
+-		DISPLAY="$mirrorhost:$mirrordisplay.0" $COMMAND_X11VNC -localhost -timeout 120 -once -rfbauth "$NXSESSION_DIRECTORY/scripts/.passwd" >"$NXSESSION_DIRECTORY/scripts/.vnc_port" &
++		# not the same user? So we have a shadow cookie, we add to xauth
++		if [ -n "$shadowcookie" ]
++		then
++			xauth add "$shadowhost:$shadowdisplay" MIT-MAGIC-COOKIE-1 "$shadowcookie"
++			[ "$ENABLE_SESSION_SHADOWING_AUTHORIZATION" = "1" ] && accept="-accept popup"
++			[ "$ENABLE_INTERACTIVE_SESSION_SHADOWING" != "1" ] && viewonly="-viewonly"
++	
++		fi
++		
++		DISPLAY="$shadowhost:$shadowdisplay" $COMMAND_X11VNC -localhost $accept $viewonly -timeout 120 -once -rfbauth "$NXSESSION_DIRECTORY/scripts/.passwd" >"$NXSESSION_DIRECTORY/scripts/.vnc_port" &
+ 	)
+ 	sleep 2
+ 	agent_port=$(cat "$NXSESSION_DIRECTORY/scripts/.vnc_port" | egrep "^PORT=" | cut -d'=' -f 2)
+ 	[ -z "agent_port" ] && agent_port="0"
+-	# note the :: is not a mistake, but rather a hint for nxviewer to use this as a port and not
++	# note the :: is not a mistake, but rather a hint for 
++	# nxviewer to use this as a port and not
+ 	# interpret it as a display.
+ 	agent_server="127.0.0.1::$agent_port"
+ 	rm -f "$NXSESSION_DIRECTORY/scripts/.vnc_port"
+
+
+
+From fabianx at mail.berlios.de  Mon Aug 18 20:34:55 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Mon, 18 Aug 2008 20:34:55 +0200
+Subject: [Freenx-cvs] r576 - trunk/freenx-server
+Message-ID: <200808181834.m7IIYttF023648@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-18 20:34:55 +0200 (Mon, 18 Aug 2008)
+New Revision: 576
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxserver
+   trunk/freenx-server/nxviewer_helper
+Log:
++       * The same user is always allowed to shadow its own sessions.
++         (fabianx at bat.berlios.de)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-18 18:20:18 UTC (rev 575)
++++ trunk/freenx-server/ChangeLog	2008-08-18 18:34:55 UTC (rev 576)
+@@ -110,6 +110,8 @@
+ 	  (fabianx at bat.berlios.de)
+ 	* Prepared shadowing foreign users for VNC-shadowing.
+ 	  (fabianx at bat.berlios.de)
++	* The same user is always allowed to shadow its own sessions.
++	  (fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-18 18:20:18 UTC (rev 575)
++++ trunk/freenx-server/nxserver	2008-08-18 18:34:55 UTC (rev 576)
+@@ -1278,7 +1278,7 @@
+ 			return 1
+ 		fi
+ 
+-		PARAMS="$PARAMS&shadowdisplay=$shadowdisplay&shadowhost=$shadowhost"
++		PARAMS="$PARAMS&shadowdisplay=$shadowdisplay&shadowhost=$shadowhost&shadowcookie=$shadowcookie&shadowuser=$shadowuser"
+ 		CMDLINE=$PARAMS
+ 	fi
+ 	
+
+Modified: trunk/freenx-server/nxviewer_helper
+===================================================================
+--- trunk/freenx-server/nxviewer_helper	2008-08-18 18:20:18 UTC (rev 575)
++++ trunk/freenx-server/nxviewer_helper	2008-08-18 18:34:55 UTC (rev 576)
+@@ -34,9 +34,11 @@
+ 		if [ -n "$shadowcookie" ]
+ 		then
+ 			xauth add "$shadowhost:$shadowdisplay" MIT-MAGIC-COOKIE-1 "$shadowcookie"
+-			[ "$ENABLE_SESSION_SHADOWING_AUTHORIZATION" = "1" ] && accept="-accept popup"
+-			[ "$ENABLE_INTERACTIVE_SESSION_SHADOWING" != "1" ] && viewonly="-viewonly"
+-	
++			if [ "$shadowuser" != "$USER" ]
++			then
++				[ "$ENABLE_SESSION_SHADOWING_AUTHORIZATION" = "1" ] && accept="-accept popup"
++				[ "$ENABLE_INTERACTIVE_SESSION_SHADOWING" != "1" ] && viewonly="-viewonly"
++			fi
+ 		fi
+ 		
+ 		DISPLAY="$shadowhost:$shadowdisplay" $COMMAND_X11VNC -localhost $accept $viewonly -timeout 120 -once -rfbauth "$NXSESSION_DIRECTORY/scripts/.passwd" >"$NXSESSION_DIRECTORY/scripts/.vnc_port" &
+
+
+
+From fabianx at mail.berlios.de  Mon Aug 18 21:04:44 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Mon, 18 Aug 2008 21:04:44 +0200
+Subject: [Freenx-cvs] r577 - trunk/freenx-server
+Message-ID: <200808181904.m7IJ4iPK027329@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-18 21:04:43 +0200 (Mon, 18 Aug 2008)
+New Revision: 577
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxserver
+Log:
++       * Added shadow support to --listsession command.
++         (fabianx at bat.berlios.de)
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-18 18:34:55 UTC (rev 576)
++++ trunk/freenx-server/ChangeLog	2008-08-18 19:04:43 UTC (rev 577)
+@@ -112,6 +112,8 @@
+ 	  (fabianx at bat.berlios.de)
+ 	* The same user is always allowed to shadow its own sessions.
+ 	  (fabianx at bat.berlios.de)
++	* Added shadow support to --listsession command.
++	  (fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-18 18:34:55 UTC (rev 576)
++++ trunk/freenx-server/nxserver	2008-08-18 19:04:43 UTC (rev 577)
+@@ -288,6 +288,20 @@
+ 		if egrep -q "^userName=$1$" $i && egrep -q "^status=$2$" $i #&& grep -q "screeninfo=$3" $i
+ 		then
+ 			CMDLINE=$(session_get_cmdline $i)
++			
++			if [ "$4" = "shadow" ]
++			then
++				if [ "$(getparam userName)" != "$USER" ]
++				then 
++					[ -z "$(getparam shadowcookie)" ] && continue
++					
++					if [ -x "$PATH_BIN/nxshadowacl" ]
++					then
++						$PATH_BIN/nxshadowacl "$(getparam userName)" "$USER" || continue
++					fi
++				fi
++			fi
++	
+ 			depth=$(getparam screeninfo | cut -d "x" -f3 | cut -d "+" -f1 )
+ 			[ "$depth" = "32" ] && depth=24
+ 			geom=$(getparam screeninfo | cut -d "x" -f1,2) 
+@@ -315,7 +329,12 @@
+ 			# We automatically offer VNC shadowed sessions for "remote" support
+ 			if [ "$4" = "vnc" -a "$ENABLE_MIRROR_VIA_VNC" = "1" ] && stringinstring "unix-" "$(getparam type)"
+ 			then
++				available=$(getparam status)
+ 				printf "%-7s %-16s %32s %8s %5s %-14s %-11s %s\n" "$(getparam display)" "vnc-shadowed" "$(getparam sessionId)" "$options" "$depth" "$geom" "$available" "$(getparam sessionName) (Mirrored)" >> $TMPFILE
++			elif [ "$4" = "shadow" ]
++			then
++				available=$(getparam status)
++				printf "%-7s %-16s %32s %8s %5s %-14s %-11s %s\n" "$(getparam display)" "$(getparam type)" "$(getparam sessionId)" "$options" "$depth" "$geom" "$available" "$(getparam sessionName) (Shadowed)" >> $TMPFILE
+ 			else
+ 				# only unix-* sessions can be resumed, but other session types can still be terminated
+ 				stringinstring "unix-" "$4" || available="N/A"
+@@ -1545,7 +1564,8 @@
+ 			server_get_params $CMD
+ 			PARAMS=$SERVER_PARAMS
+ 			CMDLINE=$PARAMS
+-			
++
++		
+ 			status=$(getparam status)
+ 
+ 			if [ "$status" = "Suspended" -a -n "$(getparam screeninfo)" ]
+@@ -1561,6 +1581,9 @@
+ 				status=$(echo $status | sed 's/,/$|^status=/g; s/suspended/Suspended/g; s/running/Running/g')
+ 				[ "$ENABLE_SHOW_RUNNING_SESSIONS" = "0" ] && status="Suspended"
+ 				session_list_user_suspended "$USER" "$status" "$(getparam geometry)" "$(getparam type)"
++			elif [ "$(getparam type)" = "shadow" ]
++			then
++				session_list_user_suspended ".*" "Running" "" "shadow"
+ 			else
+ 				session_list_user "$USER" | log_tee
+ 			fi
+
+
+
+From fabianx at mail.berlios.de  Mon Aug 18 21:18:34 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Mon, 18 Aug 2008 21:18:34 +0200
+Subject: [Freenx-cvs] r578 - trunk/freenx-server
+Message-ID: <200808181918.m7IJIYZJ028025@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-18 21:18:34 +0200 (Mon, 18 Aug 2008)
+New Revision: 578
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxnode
+Log:
++       * Added shadow mode as nxagent target.
++         (fabianx at bat.berlios.de)
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-18 19:04:43 UTC (rev 577)
++++ trunk/freenx-server/ChangeLog	2008-08-18 19:18:34 UTC (rev 578)
+@@ -114,6 +114,8 @@
+ 	  (fabianx at bat.berlios.de)
+ 	* Added shadow support to --listsession command.
+ 	  (fabianx at bat.berlios.de)
++	* Added shadow mode as nxagent target.
++	  (fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxnode
+===================================================================
+--- trunk/freenx-server/nxnode	2008-08-18 19:04:43 UTC (rev 577)
++++ trunk/freenx-server/nxnode	2008-08-18 19:18:34 UTC (rev 578)
+@@ -205,6 +205,9 @@
+ 	NODE_STARTX=""
+ 
+ 	case $1 in
++		shadow|windows|vnc)
++			:
++		;;
+ 		unix-kde)
+ 			NODE_STARTX=$COMMAND_START_KDE
+ 		;;
+@@ -529,6 +532,20 @@
+ 		FP=""
+ 		[ -n "$AGENT_FONT_SERVER" ] && FP="-fp $AGENT_FONT_SERVER"
+ 		
++		if [ "$type" = "shadow" ]
++		then
++			# Add to xauth and ask for permission
++
++        	        # not the same user? So we have a shadow cookie, we add to xauth
++                	if [ -n "$shadowcookie" ]
++                	then
++                	        xauth add "$shadowhost:$shadowdisplay" MIT-MAGIC-COOKIE-1 "$shadowcookie"
++                	fi
++
++			R="-S -shadow $shadowhost:$shadowdisplay -shadowmode $ENABLE_INTERACTIVE_SESSION_SHADOWING"
++			P="-nopersistent"
++		fi
++		
+ 		# Start the agent
+ 		
+ 		PATH="$PATH_BIN:$PATH" $PATH_BIN/nxagent $P $R -nolisten tcp -name "NX - $user@$SERVER_NAME:$display - $session (GPL Edition)" -option "$USER_FAKE_HOME/.nx/C-$sess_id/options" $K $G $B $FP $AGENT_EXTRA_OPTIONS_X :$display 2>&3 &
+
+
+
+From fabianx at mail.berlios.de  Mon Aug 18 21:19:21 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Mon, 18 Aug 2008 21:19:21 +0200
+Subject: [Freenx-cvs] r579 - trunk/freenx-server
+Message-ID: <200808181919.m7IJJLw7028084@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-18 21:19:20 +0200 (Mon, 18 Aug 2008)
+New Revision: 579
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxloadconfig
+Log:
+Released FreeNX 0.7.3 "Priscilla 1 year edition."
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-18 19:18:34 UTC (rev 578)
++++ trunk/freenx-server/ChangeLog	2008-08-18 19:19:20 UTC (rev 579)
+@@ -1,4 +1,4 @@
+-XX.06.2008 FreeNX 0.7.3
++18.08.2008 FreeNX 0.7.3
+ 	* Opened the 0.7.3 development.
+ 	* Added logging of failed authentication attempts
+ 	  to auth.log via syslog (3). This can be disabled by 
+
+Modified: trunk/freenx-server/nxloadconfig
+===================================================================
+--- trunk/freenx-server/nxloadconfig	2008-08-18 19:18:34 UTC (rev 578)
++++ trunk/freenx-server/nxloadconfig	2008-08-18 19:19:20 UTC (rev 579)
+@@ -52,7 +52,7 @@
+ # DO NOT TOUCH unless you REALLY know what you are doing
+ #########################################################################
+ 
+-NX_VERSION=3.2.0-73-SVN
++NX_VERSION=3.2.0-73
+ NX_LICENSE="OS (GPL, using backend: %BACKEND%)"
+ 
+ # Where can different nx components be found
+
+
+
+From fabianx at mail.berlios.de  Fri Aug 22 02:44:47 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Fri, 22 Aug 2008 02:44:47 +0200
+Subject: [Freenx-cvs] r580 - trunk/freenx-server
+Message-ID: <200808220044.m7M0ilAB008354@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-22 02:44:43 +0200 (Fri, 22 Aug 2008)
+New Revision: 580
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/node.conf.sample
+   trunk/freenx-server/nxloadconfig
+   trunk/freenx-server/nxnode
+   trunk/freenx-server/nxserver
+   trunk/freenx-server/nxviewer_helper
+Log:
+* Fixed shadow mode and made it usable.
+(Patch by Amin Shehata <amino7 at yahoo dot com>, fabianx at bat.berlios.de)
+
+- Put -nolisten tcp to node.conf.
+
+- Added confirmation dialog for sharing.
+
+- Removed -accept popup as that is done by nxserver.
+
+**** Really released: FreeNX 0.7.3 "Priscilla One Year Edition"
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-18 19:19:20 UTC (rev 579)
++++ trunk/freenx-server/ChangeLog	2008-08-22 00:44:43 UTC (rev 580)
+@@ -1,4 +1,4 @@
+-18.08.2008 FreeNX 0.7.3
++18.08.2008 FreeNX 0.7.3 "Priscilla One Year Edition"
+ 	* Opened the 0.7.3 development.
+ 	* Added logging of failed authentication attempts
+ 	  to auth.log via syslog (3). This can be disabled by 
+@@ -110,12 +110,12 @@
+ 	  (fabianx at bat.berlios.de)
+ 	* Prepared shadowing foreign users for VNC-shadowing.
+ 	  (fabianx at bat.berlios.de)
+-	* The same user is always allowed to shadow its own sessions.
+-	  (fabianx at bat.berlios.de)
+ 	* Added shadow support to --listsession command.
+ 	  (fabianx at bat.berlios.de)
+ 	* Added shadow mode as nxagent target.
+ 	  (fabianx at bat.berlios.de)
++	* Fixed shadow mode and made it usable.
++	  (Patch by Amin Shehata <amino7 at yahoo dot com>, fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/node.conf.sample
+===================================================================
+--- trunk/freenx-server/node.conf.sample	2008-08-18 19:19:20 UTC (rev 579)
++++ trunk/freenx-server/node.conf.sample	2008-08-22 00:44:43 UTC (rev 580)
+@@ -605,7 +605,7 @@
+ # for examples of useful parameters.
+ #AGENT_EXTRA_OPTIONS_RFB=""
+ #AGENT_EXTRA_OPTIONS_RDP=""
+-#AGENT_EXTRA_OPTIONS_X=""
++#AGENT_EXTRA_OPTIONS_X="-nolisten tcp"
+ 
+ # The number of seconds we wait for the nxagent to start before
+ # deciding startup has failed
+
+Modified: trunk/freenx-server/nxloadconfig
+===================================================================
+--- trunk/freenx-server/nxloadconfig	2008-08-18 19:19:20 UTC (rev 579)
++++ trunk/freenx-server/nxloadconfig	2008-08-22 00:44:43 UTC (rev 580)
+@@ -220,7 +220,7 @@
+ COMMAND_SESSREG="sessreg"
+ AGENT_EXTRA_OPTIONS_RFB=""
+ AGENT_EXTRA_OPTIONS_RDP=""
+-AGENT_EXTRA_OPTIONS_X=""
++AGENT_EXTRA_OPTIONS_X="-nolisten tcp"
+ AGENT_STARTUP_TIMEOUT="60"
+ AGENT_FONT_SERVER=""
+ PROXY_TCP_NODELAY=""
+
+Modified: trunk/freenx-server/nxnode
+===================================================================
+--- trunk/freenx-server/nxnode	2008-08-18 19:19:20 UTC (rev 579)
++++ trunk/freenx-server/nxnode	2008-08-22 00:44:43 UTC (rev 580)
+@@ -496,15 +496,15 @@
+ 		echo "$agent_password" | $PATH_BIN/nxpasswd "$USER_FAKE_HOME/.nx/C-$sess_id/scripts/.passwd" doit
+ 
+ 		# Start x11vnc
+-		if [ -n "$mirrordisplay" ]
++		if [ -n "$shadowdisplay" ]
+ 		then
+ 			(
+-				unset XAUTHORITY
+-				# Note: No "-accept popup" as its the same user and with that password
+-				#       he could do already more than -accept popup would allow.
+-				DISPLAY="$mirrorhost:$mirrordisplay.0" x11vnc -timeout 120 -rfbauth "$USER_FAKE_HOME/.nx/C-$sess_id/scripts/.passwd" >"$USER_FAKE_HOME/.nx/C-$sess_id/scripts/.vnc_port" 2>&3 &
++				viewonly=""
++				[ "$ENABLE_INTERACTIVE_SESSION_SHADOWING" != "1" ] && viewonly="-viewonly"
++				
++				DISPLAY="$shadowhost:$shadowdisplay" x11vnc -localhost $viewonly -timeout 120 -rfbauth "$USER_FAKE_HOME/.nx/C-$sess_id/scripts/.passwd" >"$USER_FAKE_HOME/.nx/C-$sess_id/scripts/.vnc_port" 2>&3 &
+ 			)
+-			sleep 1
++			sleep 2
+ 			agent_port=$(cat "$USER_FAKE_HOME/.nx/C-$sess_id/scripts/.vnc_port" | egrep "^PORT=" | cut -d'=' -f 2)
+ 			[ -z "agent_port" ] && agent_port="0"
+ 			# note the :: is not a mistake, but rather a hint for nxviewer to use this as a port and not 
+@@ -534,21 +534,13 @@
+ 		
+ 		if [ "$type" = "shadow" ]
+ 		then
+-			# Add to xauth and ask for permission
+-
+-        	        # not the same user? So we have a shadow cookie, we add to xauth
+-                	if [ -n "$shadowcookie" ]
+-                	then
+-                	        xauth add "$shadowhost:$shadowdisplay" MIT-MAGIC-COOKIE-1 "$shadowcookie"
+-                	fi
+-
+ 			R="-S -shadow $shadowhost:$shadowdisplay -shadowmode $ENABLE_INTERACTIVE_SESSION_SHADOWING"
+ 			P="-nopersistent"
+ 		fi
+ 		
+ 		# Start the agent
+ 		
+-		PATH="$PATH_BIN:$PATH" $PATH_BIN/nxagent $P $R -nolisten tcp -name "NX - $user@$SERVER_NAME:$display - $session (GPL Edition)" -option "$USER_FAKE_HOME/.nx/C-$sess_id/options" $K $G $B $FP $AGENT_EXTRA_OPTIONS_X :$display 2>&3 &
++		PATH="$PATH_BIN:$PATH" $PATH_BIN/nxagent $P $R -name "NX - $user@$SERVER_NAME:$display - $session (GPL Edition)" -option "$USER_FAKE_HOME/.nx/C-$sess_id/options" $K $G $B $FP $AGENT_EXTRA_OPTIONS_X :$display 2>&3 &
+ 	fi
+ 	
+ 	#
+@@ -1282,6 +1274,18 @@
+ exit
+ EOF
+ 
++	export SHADOW_XAUTHORITY="$USER_FAKE_HOME/.nx/C-$sess_id/authority"
++
++	# If we have a shadow cookie, we add it to xauth session authority file as well
++	if [ -n "$shadowcookie" ]
++	then
++		$COMMAND_XAUTH -f "$SHADOW_XAUTHORITY" add "$shadowhost:$shadowdisplay" MIT-MAGIC-COOKIE-1 "$shadowcookie"
++	elif [ -n "$shadowdisplay" ]
++	then
++		# we need to merge in the normal .Xauthority file
++		$COMMAND_XAUTH -f "$SHADOW_XAUTHORITY" merge "$HOME/.Xauthority"
++	fi
++
+ if [ "$1" = "restore" ]
+ then
+ 	echo > "$USER_FAKE_HOME/.nx/C-$sess_id/session"
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-18 19:19:20 UTC (rev 579)
++++ trunk/freenx-server/nxserver	2008-08-22 00:44:43 UTC (rev 580)
+@@ -1297,6 +1297,41 @@
+ 			return 1
+ 		fi
+ 
++		[ "$shadowhost" = "127.0.0.1" ] && shadowhost=""
++
++		# not the same user? So we have a shadow cookie, we add to xauth
++		if [ -n "$shadowcookie" -a "$ENABLE_SESSION_SHADOWING_AUTHORIZATION" = "1" ]
++		then
++			# Ask for permission first:
++			echo_x "NX> 726 Asking user for authorization to attach to session"
++			export XAUTHORITY=".Xauthority-$RANDOM-$$"
++	               	$COMMAND_XAUTH add "$shadowhost:$shadowdisplay" MIT-MAGIC-COOKIE-1 "$shadowcookie" >/dev/null 2>&1
++			PERMISSION=$(
++				$PATH_BIN/nxdialog -display $shadowhost:$shadowdisplay -dialog yesno -caption "Authorization Request" -message "Do you want to allow $USER to shadow your session?" 2>/dev/null &
++				SHADOW_DIALOG_PID=$!
++				
++				I=0
++				while kill -0 $SHADOW_DIALOG_PID 2>/dev/null
++				do
++					let I=I+1
++					[ $I -gt "$AGENT_STARTUP_TIMEOUT" ] && kill $SHADOW_DIALOG_PID 2>/dev/null
++					sleep 1
++				done
++				
++				echo "no"
++				)
++				
++			$COMMAND_XAUTH remove "$shadowhost:$shadowdisplay"
++			rm -f "$XAUTHORITY"
++
++			if [ "$PERMISSION" = "no" ]
++			then
++				# User answered NO
++				echo_x "NX> 596 Error: Authorization refused by user: $shadowuser."
++				return 1
++			fi
++		fi
++
+ 		PARAMS="$PARAMS&shadowdisplay=$shadowdisplay&shadowhost=$shadowhost&shadowcookie=$shadowcookie&shadowuser=$shadowuser"
+ 		CMDLINE=$PARAMS
+ 	fi
+
+Modified: trunk/freenx-server/nxviewer_helper
+===================================================================
+--- trunk/freenx-server/nxviewer_helper	2008-08-18 19:19:20 UTC (rev 579)
++++ trunk/freenx-server/nxviewer_helper	2008-08-22 00:44:43 UTC (rev 580)
+@@ -20,28 +20,13 @@
+ if [ -n "$shadowdisplay" ]
+ then
+ 	(
+-		unset XAUTHORITY
++		# Get correct xauthority file from environment
++		export XAUTHORITY="$SHADOW_XAUTHORITY"
+ 
+-		# We need to set just :0.0 in case of localhost connection.
+-		[ "$shadowhost" = "127.0.0.1" ] && shadowhost=""
+-			
+-		
+-		# don't use accept popup or viewonly mode  as its the same user
+-		accept=""
+ 		viewonly=""
++		[ "$ENABLE_INTERACTIVE_SESSION_SHADOWING" != "1" ] && viewonly="-viewonly"
+ 		
+-		# not the same user? So we have a shadow cookie, we add to xauth
+-		if [ -n "$shadowcookie" ]
+-		then
+-			xauth add "$shadowhost:$shadowdisplay" MIT-MAGIC-COOKIE-1 "$shadowcookie"
+-			if [ "$shadowuser" != "$USER" ]
+-			then
+-				[ "$ENABLE_SESSION_SHADOWING_AUTHORIZATION" = "1" ] && accept="-accept popup"
+-				[ "$ENABLE_INTERACTIVE_SESSION_SHADOWING" != "1" ] && viewonly="-viewonly"
+-			fi
+-		fi
+-		
+-		DISPLAY="$shadowhost:$shadowdisplay" $COMMAND_X11VNC -localhost $accept $viewonly -timeout 120 -once -rfbauth "$NXSESSION_DIRECTORY/scripts/.passwd" >"$NXSESSION_DIRECTORY/scripts/.vnc_port" &
++		DISPLAY="$shadowhost:$shadowdisplay" $COMMAND_X11VNC -localhost $viewonly -timeout 120 -once -rfbauth "$NXSESSION_DIRECTORY/scripts/.passwd" >"$NXSESSION_DIRECTORY/scripts/.vnc_port" &
+ 	)
+ 	sleep 2
+ 	agent_port=$(cat "$NXSESSION_DIRECTORY/scripts/.vnc_port" | egrep "^PORT=" | cut -d'=' -f 2)
+
+
+
+From fabianx at mail.berlios.de  Fri Aug 22 02:46:15 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Fri, 22 Aug 2008 02:46:15 +0200
+Subject: [Freenx-cvs] r581 - tags/freenx-server
+Message-ID: <200808220046.m7M0kFBS008652@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-22 02:46:14 +0200 (Fri, 22 Aug 2008)
+New Revision: 581
+
+Added:
+   tags/freenx-server/FreeNX-0.7.3/
+Log:
+Released FreeNX 0.7.3 "Priscilla One Year Edition"
+
+
+
+Copied: tags/freenx-server/FreeNX-0.7.3 (from rev 580, trunk/freenx-server)
+
+
+
+From fabianx at mail.berlios.de  Fri Aug 22 03:36:08 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Fri, 22 Aug 2008 03:36:08 +0200
+Subject: [Freenx-cvs] r582 - trunk/freenx-website
+Message-ID: <200808220136.m7M1a8T3013104@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-22 03:36:07 +0200 (Fri, 22 Aug 2008)
+New Revision: 582
+
+Modified:
+   trunk/freenx-website/home.inc
+   trunk/freenx-website/index.php
+   trunk/freenx-website/info.inc
+Log:
+Updated website for 0.7.3 release.
+
+
+
+Modified: trunk/freenx-website/home.inc
+===================================================================
+--- trunk/freenx-website/home.inc	2008-08-22 00:46:14 UTC (rev 581)
++++ trunk/freenx-website/home.inc	2008-08-22 01:36:07 UTC (rev 582)
+@@ -12,6 +12,135 @@
+ 	</h2>
+ 	<h3>
+ 		<a
++	href="">FreeNX
++	0.7.3 "Priscilla One Year Edition" Released</a>
++        - Sunday, 18/08/08 - 
++	[<a title="Download"
++	href="http://prdownload.berlios.de/freenx/freenx-0.7.3.tar.gz">Download</a>]
++	</h3>
++	<pre>
++18.08.2008 FreeNX 0.7.3 "Priscilla One Year Edition"
++        * Opened the 0.7.3 development.
++        * Added logging of failed authentication attempts
++          to auth.log via syslog (3). This can be disabled by
++          setting ENABLE_LOG_FAILED_LOGINS="0".
++          (fabianx at bat.berlios.de)
++        * Added -nolisten tcp to nxagent invocation.
++          (fabianx at bat.berlios.de, idea by  pappy- (Gentoo))
++        * Used bash for all tasks as 'sh' might be not what we want
++          on standard ubuntu.
++          (fabianx at bat.berlios.de, thx to tan (IRC))
++        * Finally fixed mv not working for failed or terminated
++          sessions.
++          (fabianx at bat.berlios.de, Terje Andersen <terander at guard.zapto.org>)
++        * Added patch from 2005 to enable reconnect to 24-bit display via
++          32-bit or vice versa. Oops :)
++          (Sunil <funtoos at yahoo.com> )
++        * Added 3.2.0 as a backend version for nxloadconfig.
++          (fabianx at bat.berlios.de)
++        * Added configuration key ENABLE_SOURCE_BASH_PROFILE for toggling of
++          sourcing ~/.bash_profile.
++          (fabianx at bat.berlios.de)
++        * Added /usr/bin/xauth as default key and used /usr/X11R6/bin/xauth as
++          fallback.
++          (fabianx at bat.berlios.de)
++        * Fixed Makefile to stop on all errors.
++          (Idea by Hai Zaar <haizaar at gmail.com>, fabianx at bat.berlios.de)
++        * Changed the default for ENABLE_PASSDB_AUTHENTICATION. If you had
++          added a user with different password via --adduser consider
++          re-activating this option in node.conf.
++          (fabianx at bat.berlios.de)
++        * Added constraints for passdb based commands. They are only available
++          when ENABLE_PASSDB_AUTHENTICATION="1" else a friendly error message
++          is shown. This should help with users using old tutorials.
++          (fabianx at bat.berlios.de)
++        * Added unix-console patch. Added default handler as unix-default with
++          a fallback to xterm,
++          (Idea by Jens Hatlak <jh at junetz.de>, fabianx at bat.berlios.de)
++        * Fixed external rdesktop keyboards: A "$" was missing.
++          (Bug by Phil Stricker <stril at gmx.de>, fabianx at bat.berlios.de)
++        * Added workaround for "ch" keyboard layout to nxdesktop_helper,
++          which NXClient 3.2.0 means as de-ch.
++          (Bug by Phil Stricker <stril at gmx.de>, fabianx at bat.berlios.de)
++        * Added clean target to Makefile.
++          (Based on patch by Ubuntu FreeNX-Team, fabianx at bat.berlios.de)
++        * Use :0.0 if mirrorhost is 127.0.0.1 and add -localhost for
++          enhanced security. Also increase sleep timeout for slow machines.
++          (Based on Patch by Jeremy Wilkins <wjeremy at shaw.ca>, fabianx at bat.berlios.de)
++        * Allow RDP "Run application" sessions to work correctly.
++          (David Corral < davefury at gmail.com > & the Silice Telecom staff,
++           fabianx at bat.berlios.de)
++        * Merge Xresources on startup of session.
++          (Jeremy Wilkins <wjeremy at shaw.ca>)
++        * Added nx-session-launcher from Ubuntu FreeNX-Team to use FreeNX with
++          ConsoleKit.
++          (marceloshima at gmail.com, fabianx at bat.berlios.de)
++        * Moved logging functions to a more appropriate place.
++          (fabianx at bat.berlios.de)
++        * Finally fixed the bug when NX Client was stopped on "Negotiating
++          link parameters" and failed session after first session suspend.
++          (fabianx at bat.berlios.de)
++        * Fixed missing "fi" statement. In fact it was a missing ";;".
++          (fabianx at bat.berlios.de)
++        * Used source instead of "." for Makefile. (Closes: #13954)
++          (fabianx at bat.berlios.de)
++        * Allow passwords with '\' by changing read -s to read -r -s.
++          (Closes: #10699)
++          (Patch by rpfuller at bat.berlios.de, fabianx at bat.berlios.de)
++        * Allow passwords with special chars by using new url_decode on
++          agent_password. (Closes: #10248)
++          (fabianx at bat.berlios.de)
++        * Fixed start/stop exit codes.
++          (Patch by Gentoo Portage, fabianx at bat.berlios.de)
++        * Finally checked for all service ports. (cups, media, samba)
++          and also checked it on the host where the load balancing actually
++          leads to.
++          (fabianx at bat.berlios.de)
++        * Fixed broken fallback logic if SSH_CLIENT variables cannot be read
++          correctly.
++          (fabianx at bat.berlios.de)
++        * Overhauled the usermode:
++                * There are now two modes of operation.
++                - One statically setting the
++                  ENABLE_USERMODE_AUTHENTICATION key
++                  in node.conf. (old behavior)
++                - Or using nxserver-usermode as startup
++                  binary, which directly goes into the 103 stage.
++                * Fixed using commandline parameters like --cleanup
++                  for static usermode.
++                * Enabled the root commandline parameters in usermode.
++                * Fixed usage of "nx" user as normal user in usermode.
++                * Disabled slave mode and load balancing for usermode.
++                * Fixed creation of the logfile directory.
++                * Fixed nxnode usage of SSH_CLIENT using fallback mechanism.
++          (Patch by nbartos at bat.berlios.de, fabianx at bat.berlios.de)
++        * Added disabled nxserver-suid wrapper with help from Google. To
++          enable it uncomment the suid_install target in Makefile.
++          ( Alistair Riddoch <alriddoch at google.com>, fabianx at bat.berlios.de)
++        * Automatically disabled slave mode, when load balancing is activated.
++          (fabianx at bat.berlios.de)
++        * Made ENABLE_SLAVE_MODE="1" the new default as its faster
++          and more reliable. If you encounter any problems with it,
++          disable it in node.conf.
++          (fabianx at bat.berlios.de)
++        * Changed type for external agents to windows-helper or vnc-helper
++          so that those sessions can be mirrored / shadowed as well.
++          (fabianx at bat.berlios.de)
++        * Added nxshadowacl.sample component to be able to shadow
++          foreign sessions.
++          (fabianx at bat.berlios.de)
++        * Prepared shadowing foreign users for VNC-shadowing.
++          (fabianx at bat.berlios.de)
++        * Added shadow support to --listsession command.
++          (fabianx at bat.berlios.de)
++        * Added shadow mode as nxagent target.
++          (fabianx at bat.berlios.de)
++        * Fixed shadow mode and made it usable.
++          (Patch by Amin Shehata <amino7 at yahoo dot com>, fabianx at bat.berlios.de)
++	</pre>
++
++	<h3>
++		<a
+ 	href="http://mail.kde.org/pipermail/freenx-knx/2007-October/005959.html">FreeNX
+ 	0.7.1 Released</a> 
+         - Sunday, 14/10/07 - 
+
+Modified: trunk/freenx-website/index.php
+===================================================================
+--- trunk/freenx-website/index.php	2008-08-22 00:46:14 UTC (rev 581)
++++ trunk/freenx-website/index.php	2008-08-22 01:36:07 UTC (rev 582)
+@@ -22,7 +22,7 @@
+ 					<h2>
+ 						FreeNX
+ 					</h2>
+-					<a href="http://openfacts.berlios.de/index-en.phtml?title=FreeNX_FAQ">
++					<a href="http://openfacts2.berlios.de/wikien/index.php/BerliosProject:FreeNX_-_FAQ">
+ 						Frequently Asked Questions (FAQ)
+ 					</a>
+ 					<a href="info.php">
+
+Modified: trunk/freenx-website/info.inc
+===================================================================
+--- trunk/freenx-website/info.inc	2008-08-22 00:46:14 UTC (rev 581)
++++ trunk/freenx-website/info.inc	2008-08-22 01:36:07 UTC (rev 582)
+@@ -26,7 +26,7 @@
+ 			General FreeNX FAQ
+ 		</dt>
+ 		<dd>
+-			<a href="http://openfacts.berlios.de/index-en.phtml?title=FreeNX_FAQ">http://openfacts.berlios.de/index-en.phtml?title=FreeNX_FAQ</a>
++			<a href="http://openfacts2.berlios.de/wikien/index.php/BerliosProject:FreeNX_-_FAQ">http://openfacts2.berlios.de/wikien/index.php/BerliosProject:FreeNX_-_FAQ</a>
+ 		</dd>
+ 		<dd>
+ 			<a href="http://www.gnomeuser.org/documents/howto/nx.html">http://www.gnomeuser.org/documents/howto/nx.html</a>
+
+
+
+From fabianx at mail.berlios.de  Fri Aug 22 03:55:54 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Fri, 22 Aug 2008 03:55:54 +0200
+Subject: [Freenx-cvs] r583 - in trunk/freenx-website: . alte_seite
+Message-ID: <200808220155.m7M1tsOG015921@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-22 03:55:53 +0200 (Fri, 22 Aug 2008)
+New Revision: 583
+
+Added:
+   trunk/freenx-website/alte_seite/
+   trunk/freenx-website/alte_seite/intel/
+   trunk/freenx-website/alte_seite/intern/
+   trunk/freenx-website/alte_seite/lwe/
+   trunk/freenx-website/alte_seite/manke/
+   trunk/freenx-website/alte_seite/nmc1.jpg
+   trunk/freenx-website/alte_seite/nxplugin-common/
+   trunk/freenx-website/alte_seite/testdrive/
+   trunk/freenx-website/alte_seite/ukuug/
+Removed:
+   trunk/freenx-website/intel/
+   trunk/freenx-website/intern/
+   trunk/freenx-website/lwe/
+   trunk/freenx-website/manke/
+   trunk/freenx-website/nmc1.jpg
+   trunk/freenx-website/nxplugin-common/
+   trunk/freenx-website/testdrive/
+   trunk/freenx-website/ukuug/
+Log:
+Moved website.
+
+
+
+Copied: trunk/freenx-website/alte_seite/intel (from rev 582, trunk/freenx-website/intel)
+
+Copied: trunk/freenx-website/alte_seite/intern (from rev 582, trunk/freenx-website/intern)
+
+Copied: trunk/freenx-website/alte_seite/lwe (from rev 582, trunk/freenx-website/lwe)
+
+Copied: trunk/freenx-website/alte_seite/manke (from rev 582, trunk/freenx-website/manke)
+
+Copied: trunk/freenx-website/alte_seite/nmc1.jpg (from rev 582, trunk/freenx-website/nmc1.jpg)
+
+Copied: trunk/freenx-website/alte_seite/nxplugin-common (from rev 582, trunk/freenx-website/nxplugin-common)
+
+Copied: trunk/freenx-website/alte_seite/testdrive (from rev 582, trunk/freenx-website/testdrive)
+
+Copied: trunk/freenx-website/alte_seite/ukuug (from rev 582, trunk/freenx-website/ukuug)
+
+Deleted: trunk/freenx-website/nmc1.jpg
+===================================================================
+(Binary files differ)
+
+
+
+From fabianx at mail.berlios.de  Fri Aug 22 04:01:43 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Fri, 22 Aug 2008 04:01:43 +0200
+Subject: [Freenx-cvs] r584 - in trunk/freenx-website: . alte_seite
+Message-ID: <200808220201.m7M21hRv020535@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-22 04:01:43 +0200 (Fri, 22 Aug 2008)
+New Revision: 584
+
+Added:
+   trunk/freenx-website/nmc1.jpg
+Removed:
+   trunk/freenx-website/alte_seite/nmc1.jpg
+Log:
+Oops, still need this.
+
+
+
+Deleted: trunk/freenx-website/alte_seite/nmc1.jpg
+===================================================================
+(Binary files differ)
+
+Copied: trunk/freenx-website/nmc1.jpg (from rev 583, trunk/freenx-website/alte_seite/nmc1.jpg)
+
+
+
+From fabianx at mail.berlios.de  Sat Aug 23 15:04:59 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sat, 23 Aug 2008 15:04:59 +0200
+Subject: [Freenx-cvs] r585 - trunk/freenx-utils/nxpublickey
+Message-ID: <200808231304.m7ND4xIe030017@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-23 15:04:59 +0200 (Sat, 23 Aug 2008)
+New Revision: 585
+
+Added:
+   trunk/freenx-utils/nxpublickey/nxssh-suid
+Log:
+Added nxshs for nxserver-suid wrapper.
+
+
+
+Copied: trunk/freenx-utils/nxpublickey/nxssh-suid (from rev 505, trunk/freenx-utils/nxpublickey/nxssh-usermode)
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-usermode	2008-03-10 22:39:31 UTC (rev 505)
++++ trunk/freenx-utils/nxpublickey/nxssh-suid	2008-08-23 13:04:59 UTC (rev 585)
+@@ -0,0 +1,32 @@
++#!/bin/bash
++#
++# Simple wrapper for nxssh for freenx-usermode.
++#
++# Copyright (c) 2005 by Fabian Franz.
++#
++# License: GPL
++#
++
++CONN=$(echo "$@" | sed 's/.*nx@//g' | cut -d" " -f1)
++
++unset NXWRAP
++case "$CONN" in *@*) NXWRAP=1 ;; esac
++
++if [ "$NXWRAP" = "1" ]
++then
++
++	cat <<EOF
++NX> 203 NXSSH running with pid: $$
++NX> 200 Connected to address: 127.0.0.1 on port: 22
++NX> 202 Authenticating user: nx
++NX> 208 Using auth method: publickey
++EOF
++	# Tell client which version to expect 
++	echo "HELLO NXSERVER - Version 3.2.0 OS (GPL Edition)"
++
++	export SSH_ASKPASS=/usr/bin/ssh-askpass
++
++	exec $(dirname $0)/nxssh.orig $CONN -x -2 -B "/usr/NX/bin/nxserver-suid"
++else
++	exec $(dirname $0)/nxssh.orig "$@"
++fi
+
+
+
+From fabianx at mail.berlios.de  Sat Aug 23 15:30:53 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sat, 23 Aug 2008 15:30:53 +0200
+Subject: [Freenx-cvs] r586 - trunk/freenx-utils/nxpublickey
+Message-ID: <200808231330.m7NDUrTj032168@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-23 15:30:53 +0200 (Sat, 23 Aug 2008)
+New Revision: 586
+
+Modified:
+   trunk/freenx-utils/nxpublickey/nxssh-suid
+Log:
+Fixed the wrapper.
+
+
+
+Modified: trunk/freenx-utils/nxpublickey/nxssh-suid
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-suid	2008-08-23 13:04:59 UTC (rev 585)
++++ trunk/freenx-utils/nxpublickey/nxssh-suid	2008-08-23 13:30:53 UTC (rev 586)
+@@ -1,8 +1,8 @@
+ #!/bin/bash
+ #
+-# Simple wrapper for nxssh for freenx-usermode.
++# Simple wrapper for nxssh for freenx suid mode.
+ #
+-# Copyright (c) 2005 by Fabian Franz.
++# Copyright (c) 2008 by Fabian Franz.
+ #
+ # License: GPL
+ #
+@@ -26,7 +26,7 @@
+ 
+ 	export SSH_ASKPASS=/usr/bin/ssh-askpass
+ 
+-	exec $(dirname $0)/nxssh.orig $CONN -x -2 -B "/usr/NX/bin/nxserver-suid"
++	exec $(dirname $0)/nxssh.orig $CONN -x -2 -B sh -c 'unset SSH_CLIENT SSH_CLIENT2; export SSH_CLIENT="127.0.0.1 56404 127.0.0.1 22"; /usr/NX/bin/nxserver-suid'
+ else
+ 	exec $(dirname $0)/nxssh.orig "$@"
+ fi
+
+
+
+From fabianx at mail.berlios.de  Sat Aug 23 15:38:07 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sat, 23 Aug 2008 15:38:07 +0200
+Subject: [Freenx-cvs] r587 - trunk/freenx-utils/nxpublickey
+Message-ID: <200808231338.m7NDc7Dk032748@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-23 15:38:07 +0200 (Sat, 23 Aug 2008)
+New Revision: 587
+
+Added:
+   trunk/freenx-utils/nxpublickey/nxssh-usermode-pw
+Log:
+Added nxssh-usermode with password from nxclient field.
+
+
+
+Copied: trunk/freenx-utils/nxpublickey/nxssh-usermode-pw (from rev 505, trunk/freenx-utils/nxpublickey/nxssh-usermode)
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-usermode	2008-03-10 22:39:31 UTC (rev 505)
++++ trunk/freenx-utils/nxpublickey/nxssh-usermode-pw	2008-08-23 13:38:07 UTC (rev 587)
+@@ -0,0 +1,80 @@
++#!/bin/bash
++#
++# Simple wrapper for nxssh for freenx-usermode.
++#
++# Copyright (c) 2005 by Fabian Franz.
++#
++# License: GPL
++#
++
++CONN=$(echo "$@" | sed 's/.*nx@//g' | cut -d" " -f1)
++
++unset NXWRAP
++case "$CONN" in *@*) NXWRAP=1 ;; esac
++
++if [ "$NXWRAP" = "1" ]
++then
++
++	cat <<EOF
++NX> 203 NXSSH running with pid: $$
++NX> 200 Connected to address: 127.0.0.1 on port: 22
++NX> 202 Authenticating user: nx
++NX> 208 Using auth method: publickey
++EOF
++
++	# Login stage
++	while true
++	do
++		echo -n "NX> 105 "
++		read CMD
++		# FIXME?
++		[ "$CMD" = "" ] && CMD="quit"
++		echo "$CMD"
++		
++		case "$CMD" in 
++			quit|QUIT)
++				echo "Quit"
++				echo "NX> 999 Bye"
++				exit 0
++			;;
++			exit|EXIT)
++				echo "Exit"
++				echo "NX> 999 Bye"
++				exit 0
++			;;
++			bye|BYE)
++				echo "Bye"
++				echo "NX> 999 Bye"
++				exit 0
++			;;
++			hello*|HELLO*)
++				PROTO=$(echo $CMD | sed 's/.*Version \(.*\)/\1/g')
++				echo "NX> 134 Accepted protocol: $PROTO"
++			;;
++			"set auth_mode*"|"SET AUTH_MODE*")
++				if [ "$CMD" = "set auth_mode password" -o "$CMD" = "SET AUTH_MODE PASSWORD" ]
++				then
++					echo "Set auth_mode: password"
++				else
++					echo "NX> 500 ERROR: unknown auth mode ''"
++				fi
++			;;
++			login|LOGIN)
++				LOGIN_SUCCESS="0"
++				
++				echo_x -n "NX> 101 User: "
++				read USER2
++				echo_x $USER2
++				
++				echo_x -n "NX> 102 Password: "
++				break
++			;;
++		esac
++	done
++
++	export SSH_ASKPASS=/usr/bin/ssh-askpass
++
++	exec $(dirname $0)/nxssh.orig -nxstdinpass $CONN -x -2 -B sh -c "~/NX4U/bin/nxserver-usermode"
++else
++	exec $(dirname $0)/nxssh.orig "$@"
++fi
+
+
+
+From fabianx at mail.berlios.de  Sat Aug 23 15:38:42 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sat, 23 Aug 2008 15:38:42 +0200
+Subject: [Freenx-cvs] r588 - trunk/freenx-utils/nxpublickey
+Message-ID: <200808231338.m7NDcgmv000084@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-23 15:38:42 +0200 (Sat, 23 Aug 2008)
+New Revision: 588
+
+Modified:
+   trunk/freenx-utils/nxpublickey/nxssh-usermode-pw
+Log:
+Forgot "hello".
+
+
+
+Modified: trunk/freenx-utils/nxpublickey/nxssh-usermode-pw
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-usermode-pw	2008-08-23 13:38:07 UTC (rev 587)
++++ trunk/freenx-utils/nxpublickey/nxssh-usermode-pw	2008-08-23 13:38:42 UTC (rev 588)
+@@ -21,7 +21,8 @@
+ NX> 202 Authenticating user: nx
+ NX> 208 Using auth method: publickey
+ EOF
+-
++	echo "HELLO NXSERVER - Version 3.2.0 OS (GPL Edition)"	
++	
+ 	# Login stage
+ 	while true
+ 	do
+
+
+
+From fabianx at mail.berlios.de  Sat Aug 23 15:49:26 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sat, 23 Aug 2008 15:49:26 +0200
+Subject: [Freenx-cvs] r589 - trunk/freenx-utils/nxpublickey
+Message-ID: <200808231349.m7NDnQXw002037@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-23 15:49:25 +0200 (Sat, 23 Aug 2008)
+New Revision: 589
+
+Modified:
+   trunk/freenx-utils/nxpublickey/nxssh-usermode-pw
+Log:
+Fixed error case.
+
+
+
+Modified: trunk/freenx-utils/nxpublickey/nxssh-usermode-pw
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-usermode-pw	2008-08-23 13:38:42 UTC (rev 588)
++++ trunk/freenx-utils/nxpublickey/nxssh-usermode-pw	2008-08-23 13:49:25 UTC (rev 589)
+@@ -1,8 +1,8 @@
+ #!/bin/bash
+ #
+-# Simple wrapper for nxssh for freenx-usermode.
++# Simple wrapper for nxssh for freenx-usermode with password from nxclient.
+ #
+-# Copyright (c) 2005 by Fabian Franz.
++# Copyright (c) 2005-2008 by Fabian Franz.
+ #
+ # License: GPL
+ #
+@@ -75,7 +75,11 @@
+ 
+ 	export SSH_ASKPASS=/usr/bin/ssh-askpass
+ 
+-	exec $(dirname $0)/nxssh.orig -nxstdinpass $CONN -x -2 -B sh -c "~/NX4U/bin/nxserver-usermode"
++	exec $(dirname $0)/nxssh.orig -nxstdinpass $CONN -x -2 -B -o "NumberOfPasswordPrompts 1" sh -c "~/NX4U/bin/nxserver-usermode" || {
++                echo "NX> 404 ERROR: wrong password or login."
++                echo "NX> 999 Bye"
++                exit 1
++             }
+ else
+ 	exec $(dirname $0)/nxssh.orig "$@"
+ fi
+
+
+
+From fabianx at mail.berlios.de  Sat Aug 23 15:52:54 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sat, 23 Aug 2008 15:52:54 +0200
+Subject: [Freenx-cvs] r590 - trunk/freenx-utils/nxpublickey
+Message-ID: <200808231352.m7NDqsmo002708@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-23 15:52:54 +0200 (Sat, 23 Aug 2008)
+New Revision: 590
+
+Added:
+   trunk/freenx-utils/nxpublickey/nxssh-suid-pw
+Log:
+Changes for suid mode.
+
+
+
+Copied: trunk/freenx-utils/nxpublickey/nxssh-suid-pw (from rev 589, trunk/freenx-utils/nxpublickey/nxssh-usermode-pw)
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-usermode-pw	2008-08-23 13:49:25 UTC (rev 589)
++++ trunk/freenx-utils/nxpublickey/nxssh-suid-pw	2008-08-23 13:52:54 UTC (rev 590)
+@@ -0,0 +1,85 @@
++#!/bin/bash
++#
++# Simple wrapper for nxssh for freenx suid mode with password from nxclient.
++#
++# Copyright (c) 2005-2008 by Fabian Franz.
++#
++# License: GPL
++#
++
++CONN=$(echo "$@" | sed 's/.*nx@//g' | cut -d" " -f1)
++
++unset NXWRAP
++case "$CONN" in *@*) NXWRAP=1 ;; esac
++
++if [ "$NXWRAP" = "1" ]
++then
++
++	cat <<EOF
++NX> 203 NXSSH running with pid: $$
++NX> 200 Connected to address: 127.0.0.1 on port: 22
++NX> 202 Authenticating user: nx
++NX> 208 Using auth method: publickey
++EOF
++	echo "HELLO NXSERVER - Version 3.2.0 OS (GPL Edition)"	
++	
++	# Login stage
++	while true
++	do
++		echo -n "NX> 105 "
++		read CMD
++		# FIXME?
++		[ "$CMD" = "" ] && CMD="quit"
++		echo "$CMD"
++		
++		case "$CMD" in 
++			quit|QUIT)
++				echo "Quit"
++				echo "NX> 999 Bye"
++				exit 0
++			;;
++			exit|EXIT)
++				echo "Exit"
++				echo "NX> 999 Bye"
++				exit 0
++			;;
++			bye|BYE)
++				echo "Bye"
++				echo "NX> 999 Bye"
++				exit 0
++			;;
++			hello*|HELLO*)
++				PROTO=$(echo $CMD | sed 's/.*Version \(.*\)/\1/g')
++				echo "NX> 134 Accepted protocol: $PROTO"
++			;;
++			"set auth_mode*"|"SET AUTH_MODE*")
++				if [ "$CMD" = "set auth_mode password" -o "$CMD" = "SET AUTH_MODE PASSWORD" ]
++				then
++					echo "Set auth_mode: password"
++				else
++					echo "NX> 500 ERROR: unknown auth mode ''"
++				fi
++			;;
++			login|LOGIN)
++				LOGIN_SUCCESS="0"
++				
++				echo_x -n "NX> 101 User: "
++				read USER2
++				echo_x $USER2
++				
++				echo_x -n "NX> 102 Password: "
++				break
++			;;
++		esac
++	done
++
++	export SSH_ASKPASS=/usr/bin/ssh-askpass
++
++	exec $(dirname $0)/nxssh.orig -nxstdinpass $CONN -x -2 -B -o "NumberOfPasswordPrompts 1" sh -c "/usr/NX/bin/nxserver-suid" || {
++                echo "NX> 404 ERROR: wrong password or login."
++                echo "NX> 999 Bye"
++                exit 1
++             }
++else
++	exec $(dirname $0)/nxssh.orig "$@"
++fi
+
+
+
+From fabianx at mail.berlios.de  Sat Aug 23 15:55:22 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sat, 23 Aug 2008 15:55:22 +0200
+Subject: [Freenx-cvs] r591 - trunk/freenx-utils/nxpublickey
+Message-ID: <200808231355.m7NDtMuW003238@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-23 15:55:22 +0200 (Sat, 23 Aug 2008)
+New Revision: 591
+
+Modified:
+   trunk/freenx-utils/nxpublickey/nxssh-suid-pw
+   trunk/freenx-utils/nxpublickey/nxssh-usermode-pw
+Log:
+Whooops, forgot to remove echo_x.
+
+
+
+Modified: trunk/freenx-utils/nxpublickey/nxssh-suid-pw
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-suid-pw	2008-08-23 13:52:54 UTC (rev 590)
++++ trunk/freenx-utils/nxpublickey/nxssh-suid-pw	2008-08-23 13:55:22 UTC (rev 591)
+@@ -63,11 +63,11 @@
+ 			login|LOGIN)
+ 				LOGIN_SUCCESS="0"
+ 				
+-				echo_x -n "NX> 101 User: "
++				echo -n "NX> 101 User: "
+ 				read USER2
+-				echo_x $USER2
++				echo $USER2
+ 				
+-				echo_x -n "NX> 102 Password: "
++				echo -n "NX> 102 Password: "
+ 				break
+ 			;;
+ 		esac
+
+Modified: trunk/freenx-utils/nxpublickey/nxssh-usermode-pw
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-usermode-pw	2008-08-23 13:52:54 UTC (rev 590)
++++ trunk/freenx-utils/nxpublickey/nxssh-usermode-pw	2008-08-23 13:55:22 UTC (rev 591)
+@@ -63,11 +63,11 @@
+ 			login|LOGIN)
+ 				LOGIN_SUCCESS="0"
+ 				
+-				echo_x -n "NX> 101 User: "
++				echo -n "NX> 101 User: "
+ 				read USER2
+-				echo_x $USER2
++				echo $USER2
+ 				
+-				echo_x -n "NX> 102 Password: "
++				echo -n "NX> 102 Password: "
+ 				break
+ 			;;
+ 		esac
+
+
+
+From fabianx at mail.berlios.de  Sat Aug 23 15:59:37 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sat, 23 Aug 2008 15:59:37 +0200
+Subject: [Freenx-cvs] r592 - trunk/freenx-utils/nxpublickey
+Message-ID: <200808231359.m7NDxbb0004066@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-23 15:59:37 +0200 (Sat, 23 Aug 2008)
+New Revision: 592
+
+Modified:
+   trunk/freenx-utils/nxpublickey/nxssh-suid-pw
+Log:
+Made wrapper always be used.
+
+
+
+Modified: trunk/freenx-utils/nxpublickey/nxssh-suid-pw
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-suid-pw	2008-08-23 13:55:22 UTC (rev 591)
++++ trunk/freenx-utils/nxpublickey/nxssh-suid-pw	2008-08-23 13:59:37 UTC (rev 592)
+@@ -1,6 +1,6 @@
+ #!/bin/bash
+ #
+-# Simple wrapper for nxssh for freenx suid mode with password from nxclient.
++# Simple always wrapper for nxssh for freenx suid mode with password from nxclient.
+ #
+ # Copyright (c) 2005-2008 by Fabian Franz.
+ #
+@@ -9,77 +9,69 @@
+ 
+ CONN=$(echo "$@" | sed 's/.*nx@//g' | cut -d" " -f1)
+ 
+-unset NXWRAP
+-case "$CONN" in *@*) NXWRAP=1 ;; esac
+-
+-if [ "$NXWRAP" = "1" ]
+-then
+-
+-	cat <<EOF
++cat <<EOF
+ NX> 203 NXSSH running with pid: $$
+ NX> 200 Connected to address: 127.0.0.1 on port: 22
+ NX> 202 Authenticating user: nx
+ NX> 208 Using auth method: publickey
+ EOF
+-	echo "HELLO NXSERVER - Version 3.2.0 OS (GPL Edition)"	
++
++echo "HELLO NXSERVER - Version 3.2.0 OS (GPL Edition)"	
++
++# Login stage
++while true
++do
++	echo -n "NX> 105 "
++	read CMD
++	# FIXME?
++	[ "$CMD" = "" ] && CMD="quit"
++	echo "$CMD"
+ 	
+-	# Login stage
+-	while true
+-	do
+-		echo -n "NX> 105 "
+-		read CMD
+-		# FIXME?
+-		[ "$CMD" = "" ] && CMD="quit"
+-		echo "$CMD"
+-		
+-		case "$CMD" in 
+-			quit|QUIT)
+-				echo "Quit"
+-				echo "NX> 999 Bye"
+-				exit 0
+-			;;
+-			exit|EXIT)
+-				echo "Exit"
+-				echo "NX> 999 Bye"
+-				exit 0
+-			;;
+-			bye|BYE)
+-				echo "Bye"
+-				echo "NX> 999 Bye"
+-				exit 0
+-			;;
+-			hello*|HELLO*)
+-				PROTO=$(echo $CMD | sed 's/.*Version \(.*\)/\1/g')
+-				echo "NX> 134 Accepted protocol: $PROTO"
+-			;;
+-			"set auth_mode*"|"SET AUTH_MODE*")
+-				if [ "$CMD" = "set auth_mode password" -o "$CMD" = "SET AUTH_MODE PASSWORD" ]
+-				then
+-					echo "Set auth_mode: password"
+-				else
+-					echo "NX> 500 ERROR: unknown auth mode ''"
+-				fi
+-			;;
+-			login|LOGIN)
+-				LOGIN_SUCCESS="0"
+-				
+-				echo -n "NX> 101 User: "
+-				read USER2
+-				echo $USER2
+-				
+-				echo -n "NX> 102 Password: "
+-				break
+-			;;
+-		esac
+-	done
++	case "$CMD" in 
++		quit|QUIT)
++			echo "Quit"
++			echo "NX> 999 Bye"
++			exit 0
++		;;
++		exit|EXIT)
++			echo "Exit"
++			echo "NX> 999 Bye"
++			exit 0
++		;;
++		bye|BYE)
++			echo "Bye"
++			echo "NX> 999 Bye"
++			exit 0
++		;;
++		hello*|HELLO*)
++			PROTO=$(echo $CMD | sed 's/.*Version \(.*\)/\1/g')
++			echo "NX> 134 Accepted protocol: $PROTO"
++		;;
++		"set auth_mode*"|"SET AUTH_MODE*")
++			if [ "$CMD" = "set auth_mode password" -o "$CMD" = "SET AUTH_MODE PASSWORD" ]
++			then
++				echo "Set auth_mode: password"
++			else
++				echo "NX> 500 ERROR: unknown auth mode ''"
++			fi
++		;;
++		login|LOGIN)
++			LOGIN_SUCCESS="0"
++			
++			echo -n "NX> 101 User: "
++			read USER2
++			echo $USER2
++			
++			echo -n "NX> 102 Password: "
++			break
++		;;
++	esac
++done
+ 
+-	export SSH_ASKPASS=/usr/bin/ssh-askpass
++export SSH_ASKPASS=/usr/bin/ssh-askpass
+ 
+-	exec $(dirname $0)/nxssh.orig -nxstdinpass $CONN -x -2 -B -o "NumberOfPasswordPrompts 1" sh -c "/usr/NX/bin/nxserver-suid" || {
+-                echo "NX> 404 ERROR: wrong password or login."
+-                echo "NX> 999 Bye"
+-                exit 1
+-             }
+-else
+-	exec $(dirname $0)/nxssh.orig "$@"
+-fi
++exec $(dirname $0)/nxssh.orig -nxstdinpass "$USER2@$CONN" -x -2 -B -o "NumberOfPasswordPrompts 1" sh -c 'unset SSH_CLIENT SSH_CLIENT2; export SSH_CLIENT="127.0.0.1 56404 127.0.0.1 22"; /usr/NX/bin/nxserver-suid' || {
++	echo "NX> 404 ERROR: wrong password or login."
++	echo "NX> 999 Bye"
++	exit 1
++     }
+
+
+
+From fabianx at mail.berlios.de  Sat Aug 23 16:14:56 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sat, 23 Aug 2008 16:14:56 +0200
+Subject: [Freenx-cvs] r593 - trunk/freenx-utils/nxpublickey
+Message-ID: <200808231414.m7NEEusn005470@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-23 16:14:56 +0200 (Sat, 23 Aug 2008)
+New Revision: 593
+
+Added:
+   trunk/freenx-utils/nxpublickey/nxssh-wrapper
+Log:
+Added the ultimate nxssh wrapper, which does always work if either usermdoe or suid are available.
+
+
+
+Copied: trunk/freenx-utils/nxpublickey/nxssh-wrapper (from rev 591, trunk/freenx-utils/nxpublickey/nxssh-usermode-pw)
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-usermode-pw	2008-08-23 13:55:22 UTC (rev 591)
++++ trunk/freenx-utils/nxpublickey/nxssh-wrapper	2008-08-23 14:14:56 UTC (rev 593)
+@@ -0,0 +1,87 @@
++#!/bin/bash
++#
++# Simple wrapper for nxssh for freenx-usermode with password from nxclient.
++#
++# Copyright (c) 2005-2008 by Fabian Franz.
++#
++# License: GPL
++#
++
++CONN=$(echo "$@" | sed 's/.*nx@//g' | cut -d" " -f1)
++
++unset NXWRAP
++case "$CONN" in *@*) NXWRAP=1 ;; esac
++
++	cat <<EOF
++NX> 203 NXSSH running with pid: $$
++NX> 200 Connected to address: 127.0.0.1 on port: 22
++NX> 202 Authenticating user: nx
++NX> 208 Using auth method: publickey
++EOF
++
++export REMOTE_COMMAND='if [ -x /usr/NX/bin/nxserver-suid -a -u /usr/NX/bin/nxserver-suid ]; then unset SSH_CLIENT SSH_CLIENT2; export SSH_CLIENT="127.0.0.1 56404 127.0.0.1 22"; /usr/NX/bin/nxserver-suid; elif [ -x ~/NX4U/bin/nxserver-usermode ]; then ~/NX4U/bin/nxserver-usermode ; else echo "NX> 404 Service not available."; fi'
++
++echo "HELLO NXSERVER - Version 3.2.0 OS (GPL Edition)"	
++
++if [ "$NXWRAP" != "1" ]
++then
++	# Login stage
++	while true
++	do
++		echo -n "NX> 105 "
++		read CMD
++		# FIXME?
++		[ "$CMD" = "" ] && CMD="quit"
++		echo "$CMD"
++		
++		case "$CMD" in 
++			quit|QUIT)
++				echo "Quit"
++				echo "NX> 999 Bye"
++				exit 0
++			;;
++			exit|EXIT)
++				echo "Exit"
++				echo "NX> 999 Bye"
++				exit 0
++			;;
++			bye|BYE)
++				echo "Bye"
++				echo "NX> 999 Bye"
++				exit 0
++			;;
++			hello*|HELLO*)
++				PROTO=$(echo $CMD | sed 's/.*Version \(.*\)/\1/g')
++				echo "NX> 134 Accepted protocol: $PROTO"
++			;;
++			"set auth_mode*"|"SET AUTH_MODE*")
++				if [ "$CMD" = "set auth_mode password" -o "$CMD" = "SET AUTH_MODE PASSWORD" ]
++				then
++					echo "Set auth_mode: password"
++				else
++					echo "NX> 500 ERROR: unknown auth mode ''"
++				fi
++			;;
++			login|LOGIN)
++				LOGIN_SUCCESS="0"
++				
++				echo -n "NX> 101 User: "
++				read USER2
++				echo $USER2
++				
++				echo -n "NX> 102 Password: "
++				break
++			;;
++		esac
++	done
++
++	exec $(dirname $0)/nxssh.orig -nxstdinpass "$USER2@$CONN" -x -2 -B -o "NumberOfPasswordPrompts 1" sh -c "$REMOTE_COMMAND" || {
++                echo "NX> 404 ERROR: wrong password or login."
++                echo "NX> 999 Bye"
++                exit 1
++             }
++else # do wrap it
++	export SSH_ASKPASS=/usr/bin/ssh-askpass
++
++	exec $(dirname $0)/nxssh.orig "$CONN" -x -2 -B sh -c "$REMOTE_COMMAND"
++fi
+
+
+
+From fabianx at mail.berlios.de  Sat Aug 23 16:19:30 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sat, 23 Aug 2008 16:19:30 +0200
+Subject: [Freenx-cvs] r594 - trunk/freenx-utils/nxpublickey
+Message-ID: <200808231419.m7NEJU2a005739@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-23 16:19:29 +0200 (Sat, 23 Aug 2008)
+New Revision: 594
+
+Modified:
+   trunk/freenx-utils/nxpublickey/nxssh-wrapper
+Log:
+Fixed wrong remote command.
+
+
+
+Modified: trunk/freenx-utils/nxpublickey/nxssh-wrapper
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-wrapper	2008-08-23 14:14:56 UTC (rev 593)
++++ trunk/freenx-utils/nxpublickey/nxssh-wrapper	2008-08-23 14:19:29 UTC (rev 594)
+@@ -75,7 +75,7 @@
+ 		esac
+ 	done
+ 
+-	exec $(dirname $0)/nxssh.orig -nxstdinpass "$USER2@$CONN" -x -2 -B -o "NumberOfPasswordPrompts 1" sh -c "$REMOTE_COMMAND" || {
++	exec $(dirname $0)/nxssh.orig -nxstdinpass "$USER2@$CONN" -x -2 -B -o "NumberOfPasswordPrompts 1" sh -c "'$REMOTE_COMMAND'" || {
+                 echo "NX> 404 ERROR: wrong password or login."
+                 echo "NX> 999 Bye"
+                 exit 1
+@@ -83,5 +83,5 @@
+ else # do wrap it
+ 	export SSH_ASKPASS=/usr/bin/ssh-askpass
+ 
+-	exec $(dirname $0)/nxssh.orig "$CONN" -x -2 -B sh -c "$REMOTE_COMMAND"
++	exec $(dirname $0)/nxssh.orig "$CONN" -x -2 -B sh -c "'$REMOTE_COMMAND'"
+ fi
+
+
+
+From fabianx at mail.berlios.de  Sat Aug 23 16:26:18 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sat, 23 Aug 2008 16:26:18 +0200
+Subject: [Freenx-cvs] r595 - trunk/freenx-utils/nxpublickey
+Message-ID: <200808231426.m7NEQIZk007725@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-23 16:26:17 +0200 (Sat, 23 Aug 2008)
+New Revision: 595
+
+Modified:
+   trunk/freenx-utils/nxpublickey/nxssh-wrapper
+Log:
+Made the variables dynamic.
+
+
+
+Modified: trunk/freenx-utils/nxpublickey/nxssh-wrapper
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-wrapper	2008-08-23 14:19:29 UTC (rev 594)
++++ trunk/freenx-utils/nxpublickey/nxssh-wrapper	2008-08-23 14:26:17 UTC (rev 595)
+@@ -7,6 +7,13 @@
+ # License: GPL
+ #
+ 
++# VARIABLES:
++
++NXSERVER_SUID="/usr/NX/bin/nxserver-suid"
++NXSERVER_USERMODE="~/NX4U/bin/nxserver-usermode"
++
++# PROGRAM
++
+ CONN=$(echo "$@" | sed 's/.*nx@//g' | cut -d" " -f1)
+ 
+ unset NXWRAP
+@@ -19,7 +26,7 @@
+ NX> 208 Using auth method: publickey
+ EOF
+ 
+-export REMOTE_COMMAND='if [ -x /usr/NX/bin/nxserver-suid -a -u /usr/NX/bin/nxserver-suid ]; then unset SSH_CLIENT SSH_CLIENT2; export SSH_CLIENT="127.0.0.1 56404 127.0.0.1 22"; /usr/NX/bin/nxserver-suid; elif [ -x ~/NX4U/bin/nxserver-usermode ]; then ~/NX4U/bin/nxserver-usermode ; else echo "NX> 404 Service not available."; fi'
++export REMOTE_COMMAND='if [ -x '"$NXSERVER_SUID"' -a -u '"$NXSERVER_SUID"' ]; then unset SSH_CLIENT SSH_CLIENT2; export SSH_CLIENT="127.0.0.1 56404 127.0.0.1 22"; '$NXSERVER_SUID'; elif [ -x '"$NXSERVER_USERMODE"' ]; then '"$NXSERVER_USERMODE"'; else echo "NX> 596 Service not available."; echo "NX> 999 Bye"; fi'
+ 
+ echo "HELLO NXSERVER - Version 3.2.0 OS (GPL Edition)"	
+ 
+
+
+
+From fabianx at mail.berlios.de  Sun Aug 24 16:50:40 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sun, 24 Aug 2008 16:50:40 +0200
+Subject: [Freenx-cvs] r596 - trunk/freenx-utils/nxpublickey
+Message-ID: <200808241450.m7OEoeGN001780@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-24 16:50:39 +0200 (Sun, 24 Aug 2008)
+New Revision: 596
+
+Modified:
+   trunk/freenx-utils/nxpublickey/nxssh-wrapper
+Log:
+- Added ultimate wrapping fucntions, so that all kidns of syntaxes can now be used.
+
+
+
+Modified: trunk/freenx-utils/nxpublickey/nxssh-wrapper
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-wrapper	2008-08-23 14:26:17 UTC (rev 595)
++++ trunk/freenx-utils/nxpublickey/nxssh-wrapper	2008-08-24 14:50:39 UTC (rev 596)
+@@ -1,7 +1,20 @@
+ #!/bin/bash
+ #
+-# Simple wrapper for nxssh for freenx-usermode with password from nxclient.
++# Ultimate wrapper for nxssh for freenx with optional password from nxclient.
+ #
++# Syntax: 
++#
++# In nxclient set:
++#
++#	hostname: [@]hostname, if the @ is set it is wrapped.
++#
++#	username: [@]user[@U|@S]
++#
++#		The first @ denotes if password should not be read / used from nxclient. (@ set = use plain ssh)
++#
++#		The second @U means only try usermode authentication.
++#		The second @S means only try suid mode authentication.
++#
+ # Copyright (c) 2005-2008 by Fabian Franz.
+ #
+ # License: GPL
+@@ -12,26 +25,27 @@
+ NXSERVER_SUID="/usr/NX/bin/nxserver-suid"
+ NXSERVER_USERMODE="~/NX4U/bin/nxserver-usermode"
+ 
++# Enable to always wrap
++#NXWRAP=1
++
+ # PROGRAM
+ 
+ CONN=$(echo "$@" | sed 's/.*nx@//g' | cut -d" " -f1)
+ 
+-unset NXWRAP
+-case "$CONN" in *@*) NXWRAP=1 ;; esac
++case "$CONN" in @*) NXWRAP=1; CONN=$(echo $CONN | cut -d'@' -f2); esac
+ 
++if [ "$NXWRAP" = "1" ]
++then
+ 	cat <<EOF
+ NX> 203 NXSSH running with pid: $$
+ NX> 200 Connected to address: 127.0.0.1 on port: 22
+ NX> 202 Authenticating user: nx
+ NX> 208 Using auth method: publickey
+ EOF
++	
+ 
+-export REMOTE_COMMAND='if [ -x '"$NXSERVER_SUID"' -a -u '"$NXSERVER_SUID"' ]; then unset SSH_CLIENT SSH_CLIENT2; export SSH_CLIENT="127.0.0.1 56404 127.0.0.1 22"; '$NXSERVER_SUID'; elif [ -x '"$NXSERVER_USERMODE"' ]; then '"$NXSERVER_USERMODE"'; else echo "NX> 596 Service not available."; echo "NX> 999 Bye"; fi'
++	echo "HELLO NXSERVER - Version 3.2.0 OS (GPL Edition)"	
+ 
+-echo "HELLO NXSERVER - Version 3.2.0 OS (GPL Edition)"	
+-
+-if [ "$NXWRAP" != "1" ]
+-then
+ 	# Login stage
+ 	while true
+ 	do
+@@ -75,20 +89,64 @@
+ 				echo -n "NX> 101 User: "
+ 				read USER2
+ 				echo $USER2
+-				
++
+ 				echo -n "NX> 102 Password: "
+ 				break
+ 			;;
+ 		esac
+ 	done
++	
++	#
++	# Check which mode to use: PW or normal ssh
++	#
++	# Syntax: [@]user
+ 
+-	exec $(dirname $0)/nxssh.orig -nxstdinpass "$USER2@$CONN" -x -2 -B -o "NumberOfPasswordPrompts 1" sh -c "'$REMOTE_COMMAND'" || {
++	# Use password for authentication
++	PWMODE="1"
++
++	case "$USER2" in 
++		"@"*)
++			# do not use password for authentication
++			PWMODE=0
++			USER2=$(echo $USER2 | cut -d'@' -f2,3)
++			
++			# So read it out from client
++			read -s PASS
++			unset PASS
++		;;
++	esac
++
++	#
++	# Check which method (suid or usermode) to use on server
++	#
++	# Syntax: user at U or user at S or user
++	# 
++	
++	case "$USER2" in 
++		*"@"*)
++			# do not use password for authentication
++			PWMODE=0
++			MODE=$(echo $USER2 | cut -d'@' -f2)
++			[ "$MODE" = "U" ] && NXSERVER_SUID=/bin/false
++			[ "$MODE" = "S" ] && NXSERVER_USERMODE=/bin/falsedoesnotexist
++			USER2=$(echo $USER2 | cut -d'@' -f1)
++		;;
++	esac
++	
++	export REMOTE_COMMAND='if [ -x '"$NXSERVER_SUID"' -a -u '"$NXSERVER_SUID"' ]; then unset SSH_CLIENT SSH_CLIENT2; export SSH_CLIENT="127.0.0.1 56404 127.0.0.1 22"; '$NXSERVER_SUID'; elif [ -x '"$NXSERVER_USERMODE"' ]; then '"$NXSERVER_USERMODE"'; else echo "NX> 596 Service not available."; echo "NX> 999 Bye"; fi'
++
++	if [ "$PWMODE" != "1" ]
++	then 
++		$(dirname $0)/nxssh.orig -nxstdinpass "$USER2@$CONN" -x -2 -B -o "NumberOfPasswordPrompts 1" sh -c "'$REMOTE_COMMAND'" || {
+                 echo "NX> 404 ERROR: wrong password or login."
+                 echo "NX> 999 Bye"
+                 exit 1
+              }
+-else # do wrap it
+-	export SSH_ASKPASS=/usr/bin/ssh-askpass
++	else
++		export SSH_ASKPASS=/usr/bin/ssh-askpass
+ 
+-	exec $(dirname $0)/nxssh.orig "$CONN" -x -2 -B sh -c "'$REMOTE_COMMAND'"
++		exec $(dirname $0)/nxssh.orig "$USER2@$CONN" -x -2 -B sh -c "'$REMOTE_COMMAND'"
++	fi
++else # do not wrap it
++	exec $(dirname $0)/nxssh.orig "$@"
+ fi
+
+
+
+From fabianx at mail.berlios.de  Sun Aug 24 17:09:14 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sun, 24 Aug 2008 17:09:14 +0200
+Subject: [Freenx-cvs] r597 - trunk/freenx-utils/nxpublickey
+Message-ID: <200808241509.m7OF9Edk004682@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-24 17:09:13 +0200 (Sun, 24 Aug 2008)
+New Revision: 597
+
+Modified:
+   trunk/freenx-utils/nxpublickey/nxssh-wrapper
+Log:
+- Bail out on errors.
+- Do not, do not set PWMODe for the second @. ;-)
+
+
+
+Modified: trunk/freenx-utils/nxpublickey/nxssh-wrapper
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-wrapper	2008-08-24 14:50:39 UTC (rev 596)
++++ trunk/freenx-utils/nxpublickey/nxssh-wrapper	2008-08-24 15:09:13 UTC (rev 597)
+@@ -43,7 +43,6 @@
+ NX> 208 Using auth method: publickey
+ EOF
+ 	
+-
+ 	echo "HELLO NXSERVER - Version 3.2.0 OS (GPL Edition)"	
+ 
+ 	# Login stage
+@@ -124,8 +123,6 @@
+ 	
+ 	case "$USER2" in 
+ 		*"@"*)
+-			# do not use password for authentication
+-			PWMODE=0
+ 			MODE=$(echo $USER2 | cut -d'@' -f2)
+ 			[ "$MODE" = "U" ] && NXSERVER_SUID=/bin/false
+ 			[ "$MODE" = "S" ] && NXSERVER_USERMODE=/bin/falsedoesnotexist
+@@ -137,16 +134,20 @@
+ 
+ 	if [ "$PWMODE" != "1" ]
+ 	then 
+-		$(dirname $0)/nxssh.orig -nxstdinpass "$USER2@$CONN" -x -2 -B -o "NumberOfPasswordPrompts 1" sh -c "'$REMOTE_COMMAND'" || {
+-                echo "NX> 404 ERROR: wrong password or login."
+-                echo "NX> 999 Bye"
+-                exit 1
+-             }
++		$(dirname $0)/nxssh.orig -nxstdinpass "$USER2@$CONN" -x -2 -B -o "NumberOfPasswordPrompts 1" sh -c "'$REMOTE_COMMAND'" 
+ 	else
+ 		export SSH_ASKPASS=/usr/bin/ssh-askpass
+ 
+-		exec $(dirname $0)/nxssh.orig "$USER2@$CONN" -x -2 -B sh -c "'$REMOTE_COMMAND'"
++		$(dirname $0)/nxssh.orig "$USER2@$CONN" -x -2 -B sh -c "'$REMOTE_COMMAND'"
+ 	fi
++
++	if [ $? -ne 0 ]
++	then
++		echo "NX> 404 ERROR: wrong password or login."
++        	echo "NX> 999 Bye"
++	        exit 1
++	fi
++
+ else # do not wrap it
+ 	exec $(dirname $0)/nxssh.orig "$@"
+ fi
+
+
+
+From fabianx at mail.berlios.de  Sun Aug 24 17:11:22 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sun, 24 Aug 2008 17:11:22 +0200
+Subject: [Freenx-cvs] r598 - trunk/freenx-utils/nxpublickey
+Message-ID: <200808241511.m7OFBMQ4004892@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-24 17:11:22 +0200 (Sun, 24 Aug 2008)
+New Revision: 598
+
+Modified:
+   trunk/freenx-utils/nxpublickey/nxssh-wrapper
+Log:
+- Ooops wrong !=.
+
+
+
+Modified: trunk/freenx-utils/nxpublickey/nxssh-wrapper
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-wrapper	2008-08-24 15:09:13 UTC (rev 597)
++++ trunk/freenx-utils/nxpublickey/nxssh-wrapper	2008-08-24 15:11:22 UTC (rev 598)
+@@ -132,7 +132,7 @@
+ 	
+ 	export REMOTE_COMMAND='if [ -x '"$NXSERVER_SUID"' -a -u '"$NXSERVER_SUID"' ]; then unset SSH_CLIENT SSH_CLIENT2; export SSH_CLIENT="127.0.0.1 56404 127.0.0.1 22"; '$NXSERVER_SUID'; elif [ -x '"$NXSERVER_USERMODE"' ]; then '"$NXSERVER_USERMODE"'; else echo "NX> 596 Service not available."; echo "NX> 999 Bye"; fi'
+ 
+-	if [ "$PWMODE" != "1" ]
++	if [ "$PWMODE" = "1" ]
+ 	then 
+ 		$(dirname $0)/nxssh.orig -nxstdinpass "$USER2@$CONN" -x -2 -B -o "NumberOfPasswordPrompts 1" sh -c "'$REMOTE_COMMAND'" 
+ 	else
+
+
+
+From fabianx at mail.berlios.de  Sun Aug 24 18:25:48 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sun, 24 Aug 2008 18:25:48 +0200
+Subject: [Freenx-cvs] r599 - trunk/freenx-utils/nxpublickey
+Message-ID: <200808241625.m7OGPm0u010749@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-24 18:25:48 +0200 (Sun, 24 Aug 2008)
+New Revision: 599
+
+Modified:
+   trunk/freenx-utils/nxpublickey/nxssh-wrapper
+Log:
+- Search for binary in path.
+
+- Be able to set binary as user@<U|S>:path-to-binary.
+
+
+
+Modified: trunk/freenx-utils/nxpublickey/nxssh-wrapper
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-wrapper	2008-08-24 15:11:22 UTC (rev 598)
++++ trunk/freenx-utils/nxpublickey/nxssh-wrapper	2008-08-24 16:25:48 UTC (rev 599)
+@@ -8,7 +8,7 @@
+ #
+ #	hostname: [@]hostname, if the @ is set it is wrapped.
+ #
+-#	username: [@]user[@U|@S]
++#	username: [@]user[@<U|S>[:path-to-binary]]
+ #
+ #		The first @ denotes if password should not be read / used from nxclient. (@ set = use plain ssh)
+ #
+@@ -22,8 +22,9 @@
+ 
+ # VARIABLES:
+ 
+-NXSERVER_SUID="/usr/NX/bin/nxserver-suid"
+-NXSERVER_USERMODE="~/NX4U/bin/nxserver-usermode"
++NXSERVER_SUID="nxserver-suid"
++NXSERVER_USERMODE="nxserver-usermode"
++NXSERVER_PATH="~/bin:~/NX4U/:/usr/NX/bin:/opt/NX/bin:/opt/NX4U/bin/:/usr/lib/nx/bin"
+ 
+ # Enable to always wrap
+ #NXWRAP=1
+@@ -124,13 +125,23 @@
+ 	case "$USER2" in 
+ 		*"@"*)
+ 			MODE=$(echo $USER2 | cut -d'@' -f2)
++			USER2=$(echo $USER2 | cut -d'@' -f1)
++
++			# Parse for : part
++			BINARY=$(echo $MODE | cut -d':' -f2)
++			MODE=$(echo $MODE | cut -d':' -f1)
++			
+ 			[ "$MODE" = "U" ] && NXSERVER_SUID=/bin/false
+ 			[ "$MODE" = "S" ] && NXSERVER_USERMODE=/bin/falsedoesnotexist
+-			USER2=$(echo $USER2 | cut -d'@' -f1)
++			
++			# Did we get a hint that another binary should be used?
++
++			[ -n "$BINARY" -a "$MODE" = "U" ] && NXSERVER_USERMODE="$BINARY $NXSERVER_USERMODE"
++			[ -n "$BINARY" -a "$MODE" = "S" ] && NXSERVER_SUID="$BINARY $NXSERVER_SUID"
+ 		;;
+ 	esac
+ 	
+-	export REMOTE_COMMAND='if [ -x '"$NXSERVER_SUID"' -a -u '"$NXSERVER_SUID"' ]; then unset SSH_CLIENT SSH_CLIENT2; export SSH_CLIENT="127.0.0.1 56404 127.0.0.1 22"; '$NXSERVER_SUID'; elif [ -x '"$NXSERVER_USERMODE"' ]; then '"$NXSERVER_USERMODE"'; else echo "NX> 596 Service not available."; echo "NX> 999 Bye"; fi'
++	export REMOTE_COMMAND='export PATH='"$NXSERVER_PATH"':"$PATH"; for i in $(which -a '"$NXSERVER_SUID"'); do if [ -x "$i" -a -u "$i" ]; then unset SSH_CLIENT SSH_CLIENT2; export SSH_CLIENT="127.0.0.1 56404 127.0.0.1 22"; exec "$i"; fi; done; for i in $(which -a '"$NXSERVER_USERMODE"'); do if [ -x "$i" -a ! -L "$i" ]; then exec "$i"; fi; done; echo "NX> 596 Service not available."; echo "NX> 999 Bye"'
+ 
+ 	if [ "$PWMODE" = "1" ]
+ 	then 
+
+
+
+From fabianx at mail.berlios.de  Sun Aug 24 18:29:29 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sun, 24 Aug 2008 18:29:29 +0200
+Subject: [Freenx-cvs] r600 - trunk/freenx-utils/nxpublickey
+Message-ID: <200808241629.m7OGTSFi010965@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-24 18:29:28 +0200 (Sun, 24 Aug 2008)
+New Revision: 600
+
+Modified:
+   trunk/freenx-utils/nxpublickey/nxssh-wrapper
+Log:
+nxserver-usermode should not be suid root.
+
+
+
+Modified: trunk/freenx-utils/nxpublickey/nxssh-wrapper
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-wrapper	2008-08-24 16:25:48 UTC (rev 599)
++++ trunk/freenx-utils/nxpublickey/nxssh-wrapper	2008-08-24 16:29:28 UTC (rev 600)
+@@ -141,7 +141,7 @@
+ 		;;
+ 	esac
+ 	
+-	export REMOTE_COMMAND='export PATH='"$NXSERVER_PATH"':"$PATH"; for i in $(which -a '"$NXSERVER_SUID"'); do if [ -x "$i" -a -u "$i" ]; then unset SSH_CLIENT SSH_CLIENT2; export SSH_CLIENT="127.0.0.1 56404 127.0.0.1 22"; exec "$i"; fi; done; for i in $(which -a '"$NXSERVER_USERMODE"'); do if [ -x "$i" -a ! -L "$i" ]; then exec "$i"; fi; done; echo "NX> 596 Service not available."; echo "NX> 999 Bye"'
++	export REMOTE_COMMAND='export PATH='"$NXSERVER_PATH"':"$PATH"; for i in $(which -a '"$NXSERVER_SUID"'); do if [ -x "$i" -a -u "$i" ]; then unset SSH_CLIENT SSH_CLIENT2; export SSH_CLIENT="127.0.0.1 56404 127.0.0.1 22"; exec "$i"; fi; done; for i in $(which -a '"$NXSERVER_USERMODE"'); do if [ -x "$i" -a ! -u "$i" -a ! -L "$i" ]; then exec "$i"; fi; done; echo "NX> 596 Service not available."; echo "NX> 999 Bye"'
+ 
+ 	if [ "$PWMODE" = "1" ]
+ 	then 
+
+
+
+From fabianx at mail.berlios.de  Mon Aug 25 00:07:56 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Mon, 25 Aug 2008 00:07:56 +0200
+Subject: [Freenx-cvs] r601 - trunk/freenx-utils/nxpublickey
+Message-ID: <200808242207.m7OM7uOe031548@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-25 00:07:55 +0200 (Mon, 25 Aug 2008)
+New Revision: 601
+
+Modified:
+   trunk/freenx-utils/nxpublickey/nxssh-wrapper
+Log:
+Added more parts to shell wrapper.
+
+
+
+Modified: trunk/freenx-utils/nxpublickey/nxssh-wrapper
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-wrapper	2008-08-24 16:29:28 UTC (rev 600)
++++ trunk/freenx-utils/nxpublickey/nxssh-wrapper	2008-08-24 22:07:55 UTC (rev 601)
+@@ -24,7 +24,7 @@
+ 
+ NXSERVER_SUID="nxserver-suid"
+ NXSERVER_USERMODE="nxserver-usermode"
+-NXSERVER_PATH="~/bin:~/NX4U/:/usr/NX/bin:/opt/NX/bin:/opt/NX4U/bin/:/usr/lib/nx/bin"
++NXSERVER_PATH="~/bin:~/NX4U/:/usr/NX/bin:/opt/NX/bin:/opt/NX4U/bin/:/usr/NX4U/bin:/usr/local/NX4U/bin:/usr/lib/nx/bin"
+ 
+ # Enable to always wrap
+ #NXWRAP=1
+
+
+
+From fabianx at mail.berlios.de  Mon Aug 25 02:20:51 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Mon, 25 Aug 2008 02:20:51 +0200
+Subject: [Freenx-cvs] r602 - trunk/freenx-utils/nxpublickey
+Message-ID: <200808250020.m7P0KplK000050@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-25 02:20:50 +0200 (Mon, 25 Aug 2008)
+New Revision: 602
+
+Modified:
+   trunk/freenx-utils/nxpublickey/nxssh-wrapper
+Log:
+Added variable for default NXSSH_ORIG command (mxssh).
+
+
+
+Modified: trunk/freenx-utils/nxpublickey/nxssh-wrapper
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-wrapper	2008-08-24 22:07:55 UTC (rev 601)
++++ trunk/freenx-utils/nxpublickey/nxssh-wrapper	2008-08-25 00:20:50 UTC (rev 602)
+@@ -26,6 +26,8 @@
+ NXSERVER_USERMODE="nxserver-usermode"
+ NXSERVER_PATH="~/bin:~/NX4U/:/usr/NX/bin:/opt/NX/bin:/opt/NX4U/bin/:/usr/NX4U/bin:/usr/local/NX4U/bin:/usr/lib/nx/bin"
+ 
++NXSSH_ORIG="mxssh"
++
+ # Enable to always wrap
+ #NXWRAP=1
+ 
+@@ -145,11 +147,11 @@
+ 
+ 	if [ "$PWMODE" = "1" ]
+ 	then 
+-		$(dirname $0)/nxssh.orig -nxstdinpass "$USER2@$CONN" -x -2 -B -o "NumberOfPasswordPrompts 1" sh -c "'$REMOTE_COMMAND'" 
++		$(dirname $0)/$NXSSH_ORIG -nxstdinpass "$USER2@$CONN" -x -2 -B -o "NumberOfPasswordPrompts 1" sh -c "'$REMOTE_COMMAND'" 
+ 	else
+ 		export SSH_ASKPASS=/usr/bin/ssh-askpass
+ 
+-		$(dirname $0)/nxssh.orig "$USER2@$CONN" -x -2 -B sh -c "'$REMOTE_COMMAND'"
++		$(dirname $0)/$NXSSH_ORIG "$USER2@$CONN" -x -2 -B sh -c "'$REMOTE_COMMAND'"
+ 	fi
+ 
+ 	if [ $? -ne 0 ]
+@@ -160,5 +162,5 @@
+ 	fi
+ 
+ else # do not wrap it
+-	exec $(dirname $0)/nxssh.orig "$@"
++	exec $(dirname $0)/$NXSSH_ORIG "$@"
+ fi
+
+
+
+From fabianx at mail.berlios.de  Mon Aug 25 02:36:08 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Mon, 25 Aug 2008 02:36:08 +0200
+Subject: [Freenx-cvs] r603 - trunk/freenx-utils/nxpublickey
+Message-ID: <200808250036.m7P0a8FL001101@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-25 02:36:06 +0200 (Mon, 25 Aug 2008)
+New Revision: 603
+
+Added:
+   trunk/freenx-utils/nxpublickey/Makefile
+   trunk/freenx-utils/nxpublickey/nxssh-4US.c
+   trunk/freenx-utils/nxpublickey/nxssh.old
+Removed:
+   trunk/freenx-utils/nxpublickey/nxssh
+Log:
+Added the ultimate nxssh wrapper converted from BASH to C and cross-compilable for windows :-).
+
+
+
+Added: trunk/freenx-utils/nxpublickey/Makefile
+===================================================================
+--- trunk/freenx-utils/nxpublickey/Makefile	2008-08-25 00:20:50 UTC (rev 602)
++++ trunk/freenx-utils/nxpublickey/Makefile	2008-08-25 00:36:06 UTC (rev 603)
+@@ -0,0 +1,13 @@
++SOURCES=nxssh-4US.c
++TARGET=nxssh
++
++all: nxssh nxssh.exe
++
++nxssh:
++	$(CC) $(CFLAGS) $(SOURCES) -o $(TARGET)
++
++nxssh.exe:
++	i586-mingw32msvc-gcc $(CFLAGS) $(SOURCES) -o $(TARGET).exe
++
++clean:
++	rm -f $(TARGET) $(TARGET).exe
+
+Deleted: trunk/freenx-utils/nxpublickey/nxssh
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh	2008-08-25 00:20:50 UTC (rev 602)
++++ trunk/freenx-utils/nxpublickey/nxssh	2008-08-25 00:36:06 UTC (rev 603)
+@@ -1,56 +0,0 @@
+-#!/bin/bash
+-#
+-# Simple wrapper for nxssh.
+-#
+-# Copyright (c) 2005 by Fabian Franz.
+-#
+-# License: GPL
+-#
+-
+-# unset them first to avoid that we forward a "secret" key to the remote host
+-unset SSH_AGENT_PID SSH_AUTH_SOCK
+-
+-NXSSH_REMOTE_HOST="$HOME/.ssh/nx/"$(echo "$@" | sed 's/.*nx@//g' | cut -d" " -f1)""
+-
+-# Are there keys for this server?
+-
+-if [ -e "$NXSSH_REMOTE_HOST" ]
+-then
+-	export SSH_AUTH_SOCK="$NXSSH_REMOTE_HOST.sock"
+-	set -- "$@" -o "ForwardAgent yes"
+-
+-	# Check if there is already an agent running for this host
+-
+-	if [ -S "$SSH_AUTH_SOCK" ]
+-	then
+-		NXSSH_AGENT="yes"
+-		# Is it still alive?
+-		ssh-add -l >/dev/null 2>/dev/null 
+-		[ $? -eq 2 ] && rm -f "$SSH_AUTH_SOCK"
+-	fi
+-
+-	# So lets start one
+-	if [ ! -S "$SSH_AUTH_SOCK" ]
+-	then
+-		ssh-agent -a "$SSH_AUTH_SOCK" >/dev/null 2>/dev/null
+-
+-		# Setup secret key(s)
+-		if [ -d "$NXSSH_REMOTE_HOST" ]
+-		then
+-		(
+-		
+-			cd $NXSSH_REMOTE_HOST; 
+-			for i in $(echo *)
+-			do
+-				[ -f $i ] || continue
+-				ssh-add "$NXSSH_REMOTE_HOST/$i" </dev/null >/dev/null 2>/dev/null
+-			done
+-		
+-		)
+-		else
+-			ssh-add "$NXSSH_REMOTE_HOST" </dev/null >/dev/null 2>/dev/null
+-		fi
+-	fi
+-fi
+-
+-exec $(dirname $0)/nxssh.orig "$@"
+
+Added: trunk/freenx-utils/nxpublickey/nxssh-4US.c
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-4US.c	2008-08-25 00:20:50 UTC (rev 602)
++++ trunk/freenx-utils/nxpublickey/nxssh-4US.c	2008-08-25 00:36:06 UTC (rev 603)
+@@ -0,0 +1,250 @@
++#include <stdio.h>
++#include <string.h>
++#include <stdlib.h>
++#include <sys/types.h>
++#include <unistd.h>
++
++#define NXSERVER_SUID "nxserver-suid"
++#define NXSERVER_USERMODE "nxserver-usermode"
++#define NXSERVER_PATH "~/bin:~/NX4U/:/usr/NX/bin:/opt/NX/bin:/opt/NX4U/bin/:/usr/NX4U/bin:/usr/local/NX4U/bin:/usr/lib/nx/bin"
++
++#ifdef _WIN32
++#define NXSSH_ORIG "mxssh.exe"
++#define DIR_SEPERATOR '\\'
++#define fork() -1
++#define wait(x) ;
++#define WEXITSTATUS(x) (x)
++#else
++#include <sys/types.h>
++#include <sys/wait.h>
++
++#define NXSSH_ORIG "mxssh"
++#define DIR_SEPERATOR '/'
++#endif
++
++#define BUF_MAX 8192
++
++char* dirname(char* str)
++{
++	char* search=strrchr(str, DIR_SEPERATOR);
++	search[0]='\0';
++	return str;
++}
++
++int main(int argc, char** argv)
++{
++	int wrapit=0;
++	int i;
++	int retcode, pid;
++	char* hostname = NULL;
++	char line[BUF_MAX+1];
++	char user[BUF_MAX+1];
++	char extra_command[BUF_MAX+1];
++	char remote_command[BUF_MAX+1];
++	char* username;
++
++	char* mode;
++	
++	int pwmode=1; // Use password for authentication
++
++	char* nxserver_suid=NXSERVER_SUID;
++	char* nxserver_usermode=NXSERVER_USERMODE;
++	
++	// Find original nxssh
++	char command[BUF_MAX+1];
++	char* dname=dirname(strdup(argv[0]));
++		
++	snprintf(command, BUF_MAX, "%s%c%s", dname, DIR_SEPERATOR, NXSSH_ORIG);
++	argv[0]=NXSSH_ORIG;
++	
++	if (getenv("NXWRAP") != NULL)
++		wrapit=atoi(getenv("NXWRAP"));
++	
++	// Search for nx@ string in arguments
++	for (i=0; i < argc; i++)
++	{
++		if (strncmp(argv[i], "nx@", 3) == 0)
++		{
++			// We need to shift the hostname and save it
++			hostname=argv[i]+3;
++			
++			if (hostname[0] == '@')
++			{
++				hostname++;
++				wrapit=1;
++			}
++			
++			break;
++		}
++	}
++
++	if (wrapit != 1)
++	{
++		execv(command, argv);
++		perror("Error: Could not execute original renamed nxssh (default: mxssh)");
++		printf("NX> 204 ERROR: wrong password or login.\n");
++		printf("NX> 999 Bye\n");
++		exit(1);
++	}
++
++	// Lets wrap it!
++	//
++
++	printf("NX> 203 NXSSH running with pid: %d\n", getpid());
++	printf("NX> 200 Connected to address: 127.0.0.1 on port: 22\n");
++	printf("NX> 202 Authenticating user: nx\n");
++	printf("NX> 208 Using auth method: publickey\n");
++
++	printf("HELLO NXSERVER - Version 3.2.0 OS (GPL Edition)\n");
++
++	// Login stage
++	while(1)
++	{
++		printf("NX> 105 ");
++
++		if (fgets(line, BUF_MAX, stdin) == NULL)
++		{
++			printf("Quit\n");
++			printf("NX> 999 Bye\n");
++			exit(0);
++		}  
++		
++		printf("%s", line);
++ 
++		if (strncmp(line, "quit", 4) == 0 || strncmp(line, "QUIT", 4) == 0)
++		{
++			printf("Quit\n");
++			printf("NX> 999 Bye\n");
++			exit(0);
++		}
++		else if (strncmp(line, "exit", 4) == 0 || strncmp(line, "EXIT", 4) == 0)
++		{
++			printf("Exit\n");
++			printf("NX> 999 Bye\n");
++			exit(0);
++		}
++		else if (strncmp(line, "bye", 3) == 0 || strncmp(line, "BYE", 3) == 0)
++		{
++			printf("Bye\n");
++			printf("NX> 999 Bye\n");
++			exit(0);
++		}
++		else if (strncmp(line, "hello", 5) == 0 || strncmp(line, "HELLO", 5) == 0)
++		{
++			printf("NX> 134 Accepted protocol: 3.2.0\n");
++		}
++		else if (strncmp(line, "set auth_mode", 13) == 0 || strncmp(line, "SET AUTH_MODE", 13) == 0)
++		{
++			printf("%s", line);
++		}
++		else if (strncmp(line, "login", 5) == 0 || strncmp(line, "LOGIN", 5) == 0)
++		{
++			printf("NX> 101 User: ");
++			fgets(user, BUF_MAX, stdin);
++
++			// Remove newline from username
++			user[strlen(user)-1]='\0';
++			username=user;
++			
++			printf("%s\n", username);
++
++			printf("NX> 102 Password: ");
++			break;
++		}
++	}
++
++	//
++	// Check which mode to use: PW or normal ssh
++	//
++	// Syntax: [@]user
++	
++	if (username[0] == '@')
++	{
++		// do not use password for authentication
++		username++;
++		pwmode=0;
++
++		// So read password from client and reset it again
++		fgets(line, BUF_MAX, stdin);
++		memset(line, 0, BUF_MAX);
++	}
++
++	//
++	// Check which method (suid or usermode) to use on server
++	//  
++	// Syntax: user[@<U|S>:command]
++	//
++	
++	if ((mode=strrchr(username, '@')) != NULL && strlen(mode) >= 2)
++	{
++		char* ucommand = NULL;
++
++		// '@' + 'U|S' + ':' + 'Command'
++		if (strlen(mode) > 3)
++			ucommand=mode+3;
++
++		if (mode[1] == 'U')
++		{
++			nxserver_suid="/bin/false";
++			
++			// Did we get a hint that another binary should be used?
++			if (ucommand)
++			{
++				snprintf(extra_command, BUF_MAX, "%s %s",  ucommand, nxserver_usermode);
++				nxserver_usermode=extra_command;
++			}
++		}
++		else if (mode[1] == 'S')
++		{
++			nxserver_usermode="/bin/falsedoesnotexist";
++			
++			// Did we get a hint that another binary should be used?
++			if (ucommand)
++			{
++				snprintf(extra_command, BUF_MAX, "%s %s",  ucommand, nxserver_suid);
++				nxserver_suid=extra_command;
++			}
++		}
++		mode[0]='\0';
++	}
++
++        snprintf(remote_command, BUF_MAX, "'export PATH=%s:\"$PATH\"; for i in $(which -a %s); do if [ -x \"$i\" -a -u \"$i\" ]; then unset SSH_CLIENT SSH_CLIENT2; export SSH_CLIENT=\"127.0.0.1 56404 127.0.0.1 22\"; exec \"$i\"; fi; done; for i in $(which -a %s); do if [ -x \"$i\" -a ! -u \"$i\" -a ! -L \"$i\" ]; then exec \"$i\"; fi; done; echo \"NX> 596 Service not available.\"; echo \"NX> 999 Bye\"'", NXSERVER_PATH, nxserver_suid, nxserver_usermode);
++
++	retcode = 0;
++
++	// Lets fork a child!
++	pid = fork();
++	
++	// Child!
++	if (pid <= 0)
++	{
++	
++		if (pwmode == 1)
++		{
++			execl(command, argv[0], "-nxstdinpass", "-l", username, hostname, "-x", "-2", "-B", "-o", "NumberOfPasswordPrompts 1", "sh", "-c", remote_command, NULL);
++			perror("Error: Could not execute original renamed nxssh (default: mxssh)");
++			exit(1);
++		}
++		else
++		{
++			execl(command, argv[0], "-l", username, hostname, "-x", "-2", "-B", "-o", "sh", "-c", remote_command, NULL);
++			perror("Error: Could not execute original renamed nxssh (default: mxssh)");
++			exit(1);
++		}
++		
++		exit(0);
++	}
++	// Child end
++
++	// Lets wait for our child
++	wait(&retcode);
++	
++	if (WEXITSTATUS(retcode) != 0)
++	{
++		printf("NX> 404 ERROR: wrong password or login.\n");
++		printf("NX> 999 Bye\n");
++		exit(1);
++	}
++
++	return 0;
++}
+
+Copied: trunk/freenx-utils/nxpublickey/nxssh.old (from rev 601, trunk/freenx-utils/nxpublickey/nxssh)
+
+
+
+From fabianx at mail.berlios.de  Mon Aug 25 02:48:57 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Mon, 25 Aug 2008 02:48:57 +0200
+Subject: [Freenx-cvs] r604 - trunk/freenx-utils/nxpublickey
+Message-ID: <200808250048.m7P0mvfC002261@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-25 02:48:57 +0200 (Mon, 25 Aug 2008)
+New Revision: 604
+
+Modified:
+   trunk/freenx-utils/nxpublickey/nxssh-4US.c
+Log:
+Ah! I need to flush the output buffers!
+
+
+
+Modified: trunk/freenx-utils/nxpublickey/nxssh-4US.c
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-4US.c	2008-08-25 00:36:06 UTC (rev 603)
++++ trunk/freenx-utils/nxpublickey/nxssh-4US.c	2008-08-25 00:48:57 UTC (rev 604)
+@@ -101,11 +101,13 @@
+ 	while(1)
+ 	{
+ 		printf("NX> 105 ");
++		fflush(stdout);
+ 
+ 		if (fgets(line, BUF_MAX, stdin) == NULL)
+ 		{
+ 			printf("Quit\n");
+ 			printf("NX> 999 Bye\n");
++			fflush(stdout);
+ 			exit(0);
+ 		}  
+ 		
+@@ -115,31 +117,37 @@
+ 		{
+ 			printf("Quit\n");
+ 			printf("NX> 999 Bye\n");
++			fflush(stdout);
+ 			exit(0);
+ 		}
+ 		else if (strncmp(line, "exit", 4) == 0 || strncmp(line, "EXIT", 4) == 0)
+ 		{
+ 			printf("Exit\n");
+ 			printf("NX> 999 Bye\n");
++			fflush(stdout);
+ 			exit(0);
+ 		}
+ 		else if (strncmp(line, "bye", 3) == 0 || strncmp(line, "BYE", 3) == 0)
+ 		{
+ 			printf("Bye\n");
+ 			printf("NX> 999 Bye\n");
++			fflush(stdout);
+ 			exit(0);
+ 		}
+ 		else if (strncmp(line, "hello", 5) == 0 || strncmp(line, "HELLO", 5) == 0)
+ 		{
+ 			printf("NX> 134 Accepted protocol: 3.2.0\n");
++			fflush(stdout);
+ 		}
+ 		else if (strncmp(line, "set auth_mode", 13) == 0 || strncmp(line, "SET AUTH_MODE", 13) == 0)
+ 		{
+ 			printf("%s", line);
++			fflush(stdout);
+ 		}
+ 		else if (strncmp(line, "login", 5) == 0 || strncmp(line, "LOGIN", 5) == 0)
+ 		{
+ 			printf("NX> 101 User: ");
++			fflush(stdout);
+ 			fgets(user, BUF_MAX, stdin);
+ 
+ 			// Remove newline from username
+@@ -149,6 +157,7 @@
+ 			printf("%s\n", username);
+ 
+ 			printf("NX> 102 Password: ");
++			fflush(stdout);
+ 			break;
+ 		}
+ 	}
+@@ -243,6 +252,7 @@
+ 	{
+ 		printf("NX> 404 ERROR: wrong password or login.\n");
+ 		printf("NX> 999 Bye\n");
++		fflush(stdout);
+ 		exit(1);
+ 	}
+ 
+
+
+
+From fabianx at mail.berlios.de  Mon Aug 25 02:52:21 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Mon, 25 Aug 2008 02:52:21 +0200
+Subject: [Freenx-cvs] r605 - trunk/freenx-utils/nxpublickey
+Message-ID: <200808250052.m7P0qL8i002531@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-25 02:52:20 +0200 (Mon, 25 Aug 2008)
+New Revision: 605
+
+Modified:
+   trunk/freenx-utils/nxpublickey/nxssh-4US.c
+Log:
+Oops, that -o was definitely too much.
+
+
+
+Modified: trunk/freenx-utils/nxpublickey/nxssh-4US.c
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-4US.c	2008-08-25 00:48:57 UTC (rev 604)
++++ trunk/freenx-utils/nxpublickey/nxssh-4US.c	2008-08-25 00:52:20 UTC (rev 605)
+@@ -236,7 +236,7 @@
+ 		}
+ 		else
+ 		{
+-			execl(command, argv[0], "-l", username, hostname, "-x", "-2", "-B", "-o", "sh", "-c", remote_command, NULL);
++			execl(command, argv[0], "-l", username, hostname, "-x", "-2", "-B", "sh", "-c", remote_command, NULL);
+ 			perror("Error: Could not execute original renamed nxssh (default: mxssh)");
+ 			exit(1);
+ 		}
+
+
+
+From fabianx at mail.berlios.de  Mon Aug 25 02:55:30 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Mon, 25 Aug 2008 02:55:30 +0200
+Subject: [Freenx-cvs] r606 - trunk/freenx-utils/nxpublickey
+Message-ID: <200808250055.m7P0tUUZ002654@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-25 02:55:30 +0200 (Mon, 25 Aug 2008)
+New Revision: 606
+
+Modified:
+   trunk/freenx-utils/nxpublickey/nxssh-4US.c
+Log:
+Added putenv for ssh-askpass.
+
+
+
+Modified: trunk/freenx-utils/nxpublickey/nxssh-4US.c
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-4US.c	2008-08-25 00:52:20 UTC (rev 605)
++++ trunk/freenx-utils/nxpublickey/nxssh-4US.c	2008-08-25 00:55:30 UTC (rev 606)
+@@ -236,6 +236,10 @@
+ 		}
+ 		else
+ 		{
++#ifndef _WIN32
++			// Need to putenv SSH_ASKPASS
++			putenv("SSH_ASKPASS=/usr/bin/ssh-askpass");
++#endif
+ 			execl(command, argv[0], "-l", username, hostname, "-x", "-2", "-B", "sh", "-c", remote_command, NULL);
+ 			perror("Error: Could not execute original renamed nxssh (default: mxssh)");
+ 			exit(1);
+
+
+
+From fabianx at mail.berlios.de  Mon Aug 25 03:23:09 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Mon, 25 Aug 2008 03:23:09 +0200
+Subject: [Freenx-cvs] r607 - trunk/freenx-utils/nxpublickey
+Message-ID: <200808250123.m7P1N9uH004398@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-25 03:23:08 +0200 (Mon, 25 Aug 2008)
+New Revision: 607
+
+Modified:
+   trunk/freenx-utils/nxpublickey/nxssh-4US.c
+   trunk/freenx-utils/nxpublickey/nxssh-wrapper
+Log:
+Only export SSH_ASKPASS if its not set already.
+
+
+
+Modified: trunk/freenx-utils/nxpublickey/nxssh-4US.c
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-4US.c	2008-08-25 00:55:30 UTC (rev 606)
++++ trunk/freenx-utils/nxpublickey/nxssh-4US.c	2008-08-25 01:23:08 UTC (rev 607)
+@@ -237,8 +237,8 @@
+ 		else
+ 		{
+ #ifndef _WIN32
+-			// Need to putenv SSH_ASKPASS
+-			putenv("SSH_ASKPASS=/usr/bin/ssh-askpass");
++			// Need to setenv SSH_ASKPASS if not already set
++			setenv("SSH_ASKPASS","/usr/bin/ssh-askpass", 0);
+ #endif
+ 			execl(command, argv[0], "-l", username, hostname, "-x", "-2", "-B", "sh", "-c", remote_command, NULL);
+ 			perror("Error: Could not execute original renamed nxssh (default: mxssh)");
+
+Modified: trunk/freenx-utils/nxpublickey/nxssh-wrapper
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-wrapper	2008-08-25 00:55:30 UTC (rev 606)
++++ trunk/freenx-utils/nxpublickey/nxssh-wrapper	2008-08-25 01:23:08 UTC (rev 607)
+@@ -149,7 +149,7 @@
+ 	then 
+ 		$(dirname $0)/$NXSSH_ORIG -nxstdinpass "$USER2@$CONN" -x -2 -B -o "NumberOfPasswordPrompts 1" sh -c "'$REMOTE_COMMAND'" 
+ 	else
+-		export SSH_ASKPASS=/usr/bin/ssh-askpass
++		[ -z "$SSH_ASKPASS" ] && export SSH_ASKPASS=/usr/bin/ssh-askpass
+ 
+ 		$(dirname $0)/$NXSSH_ORIG "$USER2@$CONN" -x -2 -B sh -c "'$REMOTE_COMMAND'"
+ 	fi
+
+
+
+From fabianx at mail.berlios.de  Mon Aug 25 04:04:01 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Mon, 25 Aug 2008 04:04:01 +0200
+Subject: [Freenx-cvs] r608 - trunk/freenx-website
+Message-ID: <200808250204.m7P241GY010871@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-25 04:04:01 +0200 (Mon, 25 Aug 2008)
+New Revision: 608
+
+Modified:
+   trunk/freenx-website/home.inc
+Log:
+Fixed wrong URI.
+
+Added right RL announcement.
+
+
+
+Modified: trunk/freenx-website/home.inc
+===================================================================
+--- trunk/freenx-website/home.inc	2008-08-25 01:23:08 UTC (rev 607)
++++ trunk/freenx-website/home.inc	2008-08-25 02:04:01 UTC (rev 608)
+@@ -12,11 +12,11 @@
+ 	</h2>
+ 	<h3>
+ 		<a
+-	href="">FreeNX
++	href="http://mail.kde.org/pipermail/freenx-knx/2008-August/007324.html">FreeNX
+ 	0.7.3 "Priscilla One Year Edition" Released</a>
+         - Sunday, 18/08/08 - 
+ 	[<a title="Download"
+-	href="http://prdownload.berlios.de/freenx/freenx-0.7.3.tar.gz">Download</a>]
++	href="http://prdownload.berlios.de/freenx/freenx-server-0.7.3.tar.gz">Download</a>]
+ 	</h3>
+ 	<pre>
+ 18.08.2008 FreeNX 0.7.3 "Priscilla One Year Edition"
+
+
+
+From fabianx at mail.berlios.de  Mon Aug 25 04:40:25 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Mon, 25 Aug 2008 04:40:25 +0200
+Subject: [Freenx-cvs] r609 - trunk/freenx-server
+Message-ID: <200808250240.m7P2ePPQ016305@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-25 04:40:22 +0200 (Mon, 25 Aug 2008)
+New Revision: 609
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxloadconfig
+Log:
+* Opened the 0.7.4 development.
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-25 02:04:01 UTC (rev 608)
++++ trunk/freenx-server/ChangeLog	2008-08-25 02:40:22 UTC (rev 609)
+@@ -1,3 +1,6 @@
++xx.11.2008 FreeNX 0.7.4
++	* Opened the 0.7.4 development.
++
+ 18.08.2008 FreeNX 0.7.3 "Priscilla One Year Edition"
+ 	* Opened the 0.7.3 development.
+ 	* Added logging of failed authentication attempts
+
+Modified: trunk/freenx-server/nxloadconfig
+===================================================================
+--- trunk/freenx-server/nxloadconfig	2008-08-25 02:04:01 UTC (rev 608)
++++ trunk/freenx-server/nxloadconfig	2008-08-25 02:40:22 UTC (rev 609)
+@@ -52,7 +52,7 @@
+ # DO NOT TOUCH unless you REALLY know what you are doing
+ #########################################################################
+ 
+-NX_VERSION=3.2.0-73
++NX_VERSION=3.2.0-74-SVN
+ NX_LICENSE="OS (GPL, using backend: %BACKEND%)"
+ 
+ # Where can different nx components be found
+
+
+
+From fabianx at mail.berlios.de  Mon Aug 25 04:41:45 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Mon, 25 Aug 2008 04:41:45 +0200
+Subject: [Freenx-cvs] r610 - trunk/freenx-server
+Message-ID: <200808250241.m7P2fjQG016454@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-25 04:41:44 +0200 (Mon, 25 Aug 2008)
+New Revision: 610
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/Makefile
+Log:
+* Fixed missing export of NX_ETC_DIR in Makefile,
+  so node.conf.sample is installed correctly.
+(fabianx at bat.berlios.de)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-25 02:40:22 UTC (rev 609)
++++ trunk/freenx-server/ChangeLog	2008-08-25 02:41:44 UTC (rev 610)
+@@ -1,5 +1,8 @@
+ xx.11.2008 FreeNX 0.7.4
+ 	* Opened the 0.7.4 development.
++	* Fixed missing export of NX_ETC_DIR in Makefile,
++	  so node.conf.sample is installed correctly.
++	  (fabianx at bat.berlios.de)
+ 
+ 18.08.2008 FreeNX 0.7.3 "Priscilla One Year Edition"
+ 	* Opened the 0.7.3 development.
+
+Modified: trunk/freenx-server/Makefile
+===================================================================
+--- trunk/freenx-server/Makefile	2008-08-25 02:40:22 UTC (rev 609)
++++ trunk/freenx-server/Makefile	2008-08-25 02:41:44 UTC (rev 610)
+@@ -8,7 +8,7 @@
+ all:
+ 	cd nxviewer-passwd && xmkmf && make Makefiles && make depend
+ 	source nxloadconfig &&\
+-	export PATH_BIN PATH_LIB CUPS_BACKEND NX_VERSION &&\
++	export PATH_BIN PATH_LIB CUPS_BACKEND NX_VERSION NX_ETC_DIR &&\
+ 	for i in $(SUBDIRS) ; \
+ 	do\
+ 		echo "making" all "in $$i..."; \
+@@ -44,5 +44,5 @@
+ 
+ install:
+ 	source nxloadconfig &&\
+-	export PATH_BIN PATH_LIB CUPS_BACKEND NX_VERSION &&\
++	export PATH_BIN PATH_LIB CUPS_BACKEND NX_VERSION NX_ETC_DIR &&\
+ 	$(MAKE) nxenv_install
+
+
+
+From fabianx at mail.berlios.de  Mon Aug 25 04:51:14 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Mon, 25 Aug 2008 04:51:14 +0200
+Subject: [Freenx-cvs] r611 - trunk/freenx-server
+Message-ID: <200808250251.m7P2pEM6016975@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-25 04:51:13 +0200 (Mon, 25 Aug 2008)
+New Revision: 611
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxserver
+Log:
+* Fixed broken round-robin load balance algorithm.
+(fabianx at bat.berlios.de)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-25 02:41:44 UTC (rev 610)
++++ trunk/freenx-server/ChangeLog	2008-08-25 02:51:13 UTC (rev 611)
+@@ -3,6 +3,8 @@
+ 	* Fixed missing export of NX_ETC_DIR in Makefile,
+ 	  so node.conf.sample is installed correctly.
+ 	  (fabianx at bat.berlios.de)
++	* Fixed broken round-robin load balance algorithm.
++	  (fabianx at bat.berlios.de)
+ 
+ 18.08.2008 FreeNX 0.7.3 "Priscilla One Year Edition"
+ 	* Opened the 0.7.3 development.
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-25 02:41:44 UTC (rev 610)
++++ trunk/freenx-server/nxserver	2008-08-25 02:51:13 UTC (rev 611)
+@@ -1192,7 +1192,7 @@
+ 	# Lock held
+ 
+ 	SERVER_LB_NR=$(cat $NX_SESS_DIR/round-robin 2>/dev/null)
+-	let SERVER_LB_NR=(SERVER_LB_NR+1) % SERVER_LB_NR_OF_HOSTS
++	let SERVER_LB_NR=(SERVER_LB_NR+1)%SERVER_LB_NR_OF_HOSTS
+ 	echo $SERVER_LB_NR >$NX_SESS_DIR/round-robin
+ 
+ 	# Exit critical section
+
+
+
+From fabianx at mail.berlios.de  Mon Aug 25 05:28:17 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Mon, 25 Aug 2008 05:28:17 +0200
+Subject: [Freenx-cvs] r612 - trunk/freenx-server
+Message-ID: <200808250328.m7P3SHT9021055@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-08-25 05:28:15 +0200 (Mon, 25 Aug 2008)
+New Revision: 612
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxserver
+Log:
+* Fixed --terminate|--suspend|--force-terminate for
+  load balancing case.
+  (fabianx at bat.berlios.de)
+* Fixed --terminate|--suspend|--force-terminate for
+  usermode case.
+  (fabianx at bat.berlios.de)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-25 02:51:13 UTC (rev 611)
++++ trunk/freenx-server/ChangeLog	2008-08-25 03:28:15 UTC (rev 612)
+@@ -5,6 +5,12 @@
+ 	  (fabianx at bat.berlios.de)
+ 	* Fixed broken round-robin load balance algorithm.
+ 	  (fabianx at bat.berlios.de)
++	* Fixed --terminate|--suspend|--force-terminate for
++	  load balancing case.
++	  (fabianx at bat.berlios.de)
++	* Fixed --terminate|--suspend|--force-terminate for
++	  usermode case.
++	  (fabianx at bat.berlios.de)
+ 
+ 18.08.2008 FreeNX 0.7.3 "Priscilla One Year Edition"
+ 	* Opened the 0.7.3 development.
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-25 02:51:13 UTC (rev 611)
++++ trunk/freenx-server/nxserver	2008-08-25 03:28:15 UTC (rev 612)
+@@ -1961,71 +1961,71 @@
+ 	session_history "$user" "$sessid"
+ }
+ 
+-cmd_terminate()
++cmd_execute()
+ {
+-	CMD_PARAMS=$(cmd_parse_3_params "$2")
+-	[ -z "$CMD_PARAMS" ] && exit 1
+-	for i in $CMD_PARAMS;
++	cmd_host="$1"
++	cmd_user="$2"
++	cmd_cmd="$3"
++
++	if [ "$ENABLE_USERMODE_AUTHENTICATION" = "1" ]
++	then
++		sh -c "$cmd_cmd"
++	elif [ "$cmd_host" = "127.0.0.1" -o "$cmd_host" = "localhost" ]
++	then
++		su - "$cmd_user" -c "$cmd_cmd"
++	else
++		ssh "$cmd_host" su - "$cmd_user" -c "'$cmd_cmd'"
++	fi
++}
++
++cmd_terminate_or_send()
++{
++	CMD="$1"
++
++	if [ "$CMD" = "--broadcast" ]
++	then
++		CMD_PARAMS=$(session_find_all)
++		[ -z "$CMD_PARAMS" ] && cmd_abort "Error: No running session could be found."
++	else
++		CMD_PARAMS=$(cmd_parse_3_params "$2")
++		[ -z "$CMD_PARAMS" ] && exit 1
++		shift
++	fi
++	shift
++
++	for i in $CMD_PARAMS
+ 	do
+ 			CMDLINE=$(session_get_cmdline $i)
+ 			cmd_sessionid=$(getparam sessionId)
++			cmd_display=$(getparam display)
+ 			cmd_user=$(getparam userName)
+ 			cmd_type=$(getparam type)
+ 			cmd_status=$(getparam status)
++			cmd_host=$(getparam host)
+ 
+ 			# is it a "good" session?
+-			case "$1" in 
++			case "$CMD" in 
+ 			--suspend)
+ 				if [ "$cmd_status" = "Running" ] && stringinstring "unix-" "$cmd_type"
+ 				then
+-					echo "sessionid=$cmd_sessionid" | su - "$cmd_user" -c "$PATH_BIN/nxnode --suspend"
++					echo "sessionid=$cmd_sessionid" | cmd_execute "$cmd_host" "$cmd_user" "$PATH_BIN/nxnode --suspend"
+ 				fi
+ 			;;
+ 			--terminate)
+-				echo "sessionid=$cmd_sessionid" | su - "$cmd_user" -c "$PATH_BIN/nxnode --terminate"
++				echo "sessionid=$cmd_sessionid" | cmd_execute "$cmd_host" "$cmd_user" "$PATH_BIN/nxnode --terminate"
+ 			;;
+ 			--force-terminate)
+-				echo "sessionid=$cmd_sessionid" | su - "$cmd_user" -c "$PATH_BIN/nxnode --terminate"
++				echo "sessionid=$cmd_sessionid" | cmd_execute "$cmd_host" "$cmd_user" "$PATH_BIN/nxnode --terminate"
+ 				session_close $cmd_sessionid
+ 			;;
+-			esac
+-	done
+-
+-}
+-
+-cmd_send()
+-{
+-	if [ "$1" = "--broadcast" ]
+-	then
+-	  CMD_PARAMS=$(session_find_all)
+-	  [ -z "$CMD_PARAMS" ] && cmd_abort "Error: No running session could be found."
+-	else
+-	  CMD_PARAMS=$(cmd_parse_3_params "$2")
+-	  [ -z "$CMD_PARAMS" ] && exit 1
+-	  shift
+-	fi
+-	shift
+-	for i in $CMD_PARAMS;
+-	do
+-			CMDLINE=$(session_get_cmdline $i)
+-			cmd_display=$(getparam display)
+-			cmd_user=$(getparam userName)
+-			cmd_type=$(getparam type)
+-			cmd_status=$(getparam status)
+-			cmd_host=$(getparam host)
+-
+-			# is it a "good" session?
+-			if [ "$cmd_status" = "Running" ] && stringinstring "unix-" "$cmd_type"
+-			then
+-				if [ "$cmd_host" = "127.0.0.1" -o "$cmd_host" = "localhost" ]
++			--send|--broadcast)
++				# is it a "good" session?
++				if [ "$cmd_status" = "Running" ] && stringinstring "unix-" "$cmd_type"
+ 				then
+-					su - "$cmd_user" -c "$PATH_BIN/nxdialog --dialog ok --caption \"NX Administrator Message\" --message \"$@\" -display \":$cmd_display\" &"
+-				else
+-					ssh $cmd_host su - "$cmd_user" -c "'$PATH_BIN/nxdialog --dialog ok --caption \"NX Administrator Message\" --message \"$@\" -display \":$cmd_display\" &'"
++					cmd_execute "$cmd_host" "$cmd_user" "$PATH_BIN/nxdialog --dialog ok --caption \"NX Administrator Message\" --message \"$@\" -display \":$cmd_display\" &"
+ 				fi
+-			fi
++			esac
+ 	done
+-	#nxnode_start --send "$CMD_PARAMS"
+ }
+ 
+ #
+@@ -2099,13 +2099,13 @@
+ 		cmd_history "$@"
+ 	;;
+ 	--terminate|--suspend|--force-terminate)
+-		cmd_terminate "$@"
++		cmd_terminate_or_send "$@"
+ 	;;
+ 	--cleanup)
+-		cmd_terminate "--force-terminate" "*"
++		cmd_terminate_or_send "--force-terminate" "*"
+ 	;;
+ 	--send|--broadcast)
+-		cmd_send "$@"
++		cmd_terminate_or_send "$@"
+ 	;;
+ 	*)
+ 		cmd_abort "Error: Function $CMD not implemented yet."
+
+
+

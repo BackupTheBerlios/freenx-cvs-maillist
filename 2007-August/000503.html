@@ -1,0 +1,412 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r371 - in freenx-redesign/server: . utility
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r371%20-%20in%20freenx-redesign/server%3A%20.%20utility&In-Reply-To=%3C200708120603.l7C63f8J021113%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000502.html">
+   <LINK REL="Next"  HREF="000504.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r371 - in freenx-redesign/server: . utility</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r371%20-%20in%20freenx-redesign/server%3A%20.%20utility&In-Reply-To=%3C200708120603.l7C63f8J021113%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r371 - in freenx-redesign/server: . utility">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Sun Aug 12 08:03:41 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000502.html">[Freenx-cvs] r370 - in freenx-server/trunk: . nxserver-helper
+</A></li>
+        <LI>Next message: <A HREF="000504.html">[Freenx-cvs] r372 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#503">[ date ]</a>
+              <a href="thread.html#503">[ thread ]</a>
+              <a href="subject.html#503">[ subject ]</a>
+              <a href="author.html#503">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-08-12 08:03:41 +0200 (Sun, 12 Aug 2007)
+New Revision: 371
+
+Added:
+   freenx-redesign/server/utility/
+   freenx-redesign/server/utility/nxloadconfig
+   freenx-redesign/server/utility/nxlog
+Log:
+Added initial versions of nxlog and nxloadconfig.
+(<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">diamond at google.com</A>)
+
+
+
+Added: freenx-redesign/server/utility/nxloadconfig
+===================================================================
+--- freenx-redesign/server/utility/nxloadconfig	2007-08-12 05:45:19 UTC (rev 370)
++++ freenx-redesign/server/utility/nxloadconfig	2007-08-12 06:03:41 UTC (rev 371)
+@@ -0,0 +1,198 @@
++#!/bin/bash
++
++# nxloadconfig - Read configuration files, setup logging
++#
++# Copyright 2007 Google Inc.
++# All Rights Reserved.
++# Author: <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">diamond at google.com</A> (Stephen Shirley)
++#
++# License: GNU GPL, version 2
++#
++# Used configuration keys:
++#
++# Used internal subfunctions:
++#
++# @sub &quot;log n&quot; log to (sys)log with loglevel n
++#
++# Used internal variables:
++#
++# Used internal components:
++#
++# @comp nxlog
++#
++# Used external programs:
++#
++# @ext getopt - parse command options (enhanced)
++#
++# Accepted protocol requests from client:
++#
++# Used protocol responses to client:
++#
++# FAQ-Questions:
++#
++# SVN: $Id$
++#
++
++# Store these for use later
++ORIG_ARGS=($@)
++SCRIPT_NAME=$(basename $0)
++SCRIPT_DIR=$(dirname $0)
++
++
++parse_args() {
++	ARGS=$(/usr/bin/getopt -n &quot;$SCRIPT_NAME&quot; -o &quot;h&quot; -l &quot;config:,help&quot; -- \
++	&quot;${ORIG_ARGS[@]}&quot; 2&gt;/dev/null)
++
++	if [ $? != 0 ]
++	then
++		# Can't grab only the error message if there's an issue, so just run it
++		# again to output the error directly.
++		/usr/bin/getopt -n &quot;$SCRIPT_NAME&quot; -o &quot;h&quot; -l &quot;config:,help&quot; -- \
++		&quot;${ORIG_ARGS[@]}&quot; &gt; /dev/null
++		exit 1
++	fi
++}
++
++
++process_args() {
++	HELP=&quot;no&quot;
++
++	while true; do
++		case &quot;$1&quot; in
++			--config) CONF_NAME=&quot;$2&quot;; shift 2 ;;
++			-h|--help) HELP=&quot;yes&quot;; shift ;;
++			--) shift; break ;;
++			*) echo &quot;$SCRIPT_NAME: error parsing cmdline&quot; &gt;&amp;2; exit 1 ;;
++		esac
++	done
++
++	[ &quot;$HELP&quot; = &quot;yes&quot; ] &amp;&amp; usage
++}
++
++
++usage() {
++	echo &quot;$SCRIPT_NAME - Load the FreeNX configuration variables into the environment.&quot;
++	echo &quot;Syntax: nxloadconfig -h|--help&quot;
++	echo &quot;        nxloadconfig [--config=name]&quot;
++	echo
++	echo &quot;  --config=name            Load $PATH_ETC/name.conf config file.&quot;
++	echo &quot;  -h,--help                Display this message.&quot;
++	exit 0
++}
++
++
++default_if_not_set() {
++	var=&quot;$1&quot;
++	default=&quot;$2&quot;
++
++	# Is the var set?
++	if ! declare -p &quot;$var&quot; &amp;&gt; /dev/null
++	then
++		# Var is not set, set it to the default now and return
++		declare &quot;$var&quot; &quot;$default&quot;
++		return 0
++	else
++		return 1
++	fi
++}
++
++
++check_dir_vars() {
++	check_dir_var PATH_BASE &quot;/usr/NX&quot;
++	check_dir_var PATH_BIN &quot;$PATH_BASE/bin&quot;
++	check_dir_var PATH_ETC &quot;$PATH_BASE/etc&quot;
++	check_dir_var PATH_LIB &quot;$PATH_BASE/lib&quot;
++}
++
++
++check_dir_var() {
++	var=&quot;$1&quot;
++	defdir=&quot;$2&quot;
++	# Gets the value of the variable named by $var
++	varval=$(eval echo \$&quot;$foo&quot;)
++
++	default_if_not_set &quot;$var&quot; &quot;$defdir&quot; &amp;&amp; return
++
++	if [ ! -d &quot;$varval&quot; ]
++	then
++		log $LOG_WARNING &quot;Invalid directory variable $var: $varval&quot;
++		declare &quot;$var&quot; &quot;$defdir&quot;
++	fi
++
++	if [ ! -d &quot;$defdir&quot; ]
++	then
++		log $LOG_ERR &quot;Invalid default directory variable $var: $defdir&quot;
++		exit 1
++	fi
++}
++
++
++check_command_vars() {
++	check_command_var COMMAND_START_KDE &quot;startkde&quot;
++	check_command_var COMMAND_START_GNOME &quot;gnome-session&quot;
++	check_command_var COMMAND_START_CDE &quot;cdwm&quot;
++	check_command_var COMMAND_XTERM &quot;xterm&quot;
++	check_command_var COMMAND_XAUTH &quot;/usr/X11R6/bin/xauth&quot;
++	check_command_var COMMAND_SMBMOUNT &quot;smbmount&quot;
++	check_command_var COMMAND_SMBUMOUNT &quot;smbumount&quot;
++	check_command_var COMMAND_NETCAT &quot;netcat&quot;
++	check_command_var COMMAND_SSH &quot;ssh&quot;
++	check_command_var COMMAND_SSH_KEYGEN &quot;ssh-keygen&quot;
++	check_command_var COMMAND_CUPSD &quot;/usr/sbin/cupsd&quot;
++	check_command_var COMMAND_MD5SUM &quot;md5sum&quot;
++}
++
++
++check_command_var() {
++	var=&quot;$1&quot;
++	defcmd=&quot;$2&quot;
++	# Gets the value of the variable named by $var
++	varval=$(eval echo \$&quot;$foo&quot;)
++
++	default_if_not_set &quot;$var&quot; &quot;$defcmd&quot; &amp;&amp; return
++
++	if [ ! -d &quot;$varval&quot; ]
++	then
++		log $LOG_WARNING &quot;Invalid directory variable $var: $varval&quot;
++		declare &quot;$var&quot; &quot;$defdir&quot;
++	fi
++
++	if [ ! -d &quot;$defdir&quot; ]
++	then
++		log $LOG_ERR &quot;Invalid default directory variable $var: $defdir&quot;
++		exit 1
++	fi
++}
++
++
++load_file() {
++	file=&quot;$1&quot;
++
++	if [ -f &quot;$file&quot; ]
++	then
++		. &quot;$file&quot;
++	else
++		echo &quot;$SCRIPT_NAME: no such file or directory: \&quot;$file\&quot;&quot; &gt;&amp;2; exit 1;
++	fi
++}
++
++parse_args
++eval set -- &quot;$ARGS&quot;
++process_args &quot;$@&quot;
++
++# Load logging fuctionality
++LOG_LEVEL=$LOG_WARNING
++load_file &quot;$SCRIPT_DIR/nxlog&quot;
++
++# Load general configuration
++load_file &quot;$PATH_ETC/general.conf&quot;
++# Load function-specific configuration
++[ -n &quot;$CONF_NAME&quot; ] &amp;&amp; load_file &quot;$PATH_ETC/$CONF_NAME.conf&quot;
++
++check_dir_vars
++check_command_vars
++
++log $LOG_DEBUG &quot;called with cmdline: ${ORIG_ARGS[@]}&quot;
++
++
++# vim: ts=8 noexpandtab sw=8 softtabstop=0
+
+
+Property changes on: freenx-redesign/server/utility/nxloadconfig
+___________________________________________________________________
+Name: svn:executable
+   + *
+Name: svn:keywords
+   + Id
+
+Added: freenx-redesign/server/utility/nxlog
+===================================================================
+--- freenx-redesign/server/utility/nxlog	2007-08-12 05:45:19 UTC (rev 370)
++++ freenx-redesign/server/utility/nxlog	2007-08-12 06:03:41 UTC (rev 371)
+@@ -0,0 +1,111 @@
++#!/bin/bash
++
++# nxlog - Provides functions for logging to syslog
++#
++# Copyright 2007 Google Inc.
++# All Rights Reserved.
++# Author: <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">diamond at google.com</A> (Stephen Shirley)
++#
++# License: GNU GPL, version 2
++#
++# Used configuration keys:
++#
++# Used internal subfunctions:
++#
++# Used internal variables:
++#
++# @var LOG_LEVEL Maximum level messages to log
++#
++# Used internal components:
++#
++# Used external programs:
++#
++# @ext logger - a shell command interface to the syslog(3) system log module
++#
++# Accepted protocol requests from client:
++#
++# Used protocol responses to client:
++#
++# FAQ-Questions:
++#
++# SVN: $Id$
++#
++
++LOG_EMERG=0
++LOG_ALERT=1
++LOG_CRIT=2
++LOG_ERR=3
++LOG_WARNING=4
++LOG_NOTICE=5
++LOG_INFO=6
++LOG_DEBUG=7
++
++
++log()
++{
++	PRIORITY=&quot;$1&quot;
++	if [ &quot;$LOG_LEVEL&quot; -ge &quot;$PRIORITY&quot; ]
++	then
++		shift
++		[ &quot;$1&quot; = &quot;-n&quot; ] &amp;&amp; shift
++		ARGS=&quot;$@&quot;
++		[ -n &quot;$ARGS&quot; ] || ARGS=&quot;No arguments supplied to log()&quot;
++		logger -p &quot;syslog.$PRIORITY&quot; -t &quot;$SCRIPT_NAME&quot; -- &quot;$ARGS&quot;
++	fi
++}
++
++
++log_tee()
++{
++	PRIORITY=&quot;$1&quot;
++	while read -r; do
++		[ -n &quot;$REPLY&quot; ] &amp;&amp; log &quot;$PRIORITY&quot; &quot;$REPLY&quot;
++		echo &quot;$REPLY&quot;
++	done
++}
++
++
++echo_x()
++{
++	echo &quot;$@&quot;
++	case &quot;$NX_LOG_PROG&quot; in
++		&quot;nxserver&quot;) prefix=&quot;(s&gt;c)&quot; ;;
++		&quot;nxnode&quot;) prefix=&quot;(n&gt;s)&quot; ;;
++		*) prefix=&quot;(?&gt;?)&quot; ;;
++	esac
++        log $LOG_INFO &quot;$prefix $@&quot;
++}
++
++
++read_x()
++{
++	read -t 10 &quot;$@&quot;
++	case &quot;$NX_LOG_PROG&quot; in
++		&quot;nxserver&quot;) prefix=&quot;(s&lt;c)&quot; ;;
++		&quot;nxnode&quot;) prefix=&quot;(n&lt;s)&quot; ;;
++		*) prefix=&quot;(?&lt;?)&quot; ;;
++	esac
++        log $LOG_INFO &quot;$prefix $REPLY&quot;
++}
++
++
++read_x_prompt() 
++{
++	echo_x -n &quot;$1&quot;
++	shift
++	read_x &quot;$@&quot;
++}
++
++
++if [ &quot;$#&quot; = &quot;0&quot; -a &quot;$SCRIPT_NAME&quot; = &quot;nxlog&quot; ]
++then
++	while read
++	do
++		log $line # no &quot;&quot; here to have it split up in different levels
++	done
++else
++	log &quot;$@&quot;
++fi
++
++
++# vim: ts=8 noexpandtab sw=8 softtabstop=0
+
+
+Property changes on: freenx-redesign/server/utility/nxlog
+___________________________________________________________________
+Name: svn:executable
+   + *
+Name: svn:keywords
+   + Id
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000502.html">[Freenx-cvs] r370 - in freenx-server/trunk: . nxserver-helper
+</A></li>
+	<LI>Next message: <A HREF="000504.html">[Freenx-cvs] r372 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#503">[ date ]</a>
+              <a href="thread.html#503">[ thread ]</a>
+              <a href="subject.html#503">[ subject ]</a>
+              <a href="author.html#503">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

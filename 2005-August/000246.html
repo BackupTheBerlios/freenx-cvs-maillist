@@ -1,0 +1,128 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r119 - freenx-server/branches/FreeNX-0.4
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r119%20-%20freenx-server/branches/FreeNX-0.4&In-Reply-To=%3C200508092342.j79Ngx8x026679%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000245.html">
+   <LINK REL="Next"  HREF="000247.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r119 - freenx-server/branches/FreeNX-0.4</H1>
+    <B>Fabian Franz at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r119%20-%20freenx-server/branches/FreeNX-0.4&In-Reply-To=%3C200508092342.j79Ngx8x026679%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r119 - freenx-server/branches/FreeNX-0.4">fabianx at berlios.de
+       </A><BR>
+    <I>Wed Aug 10 01:42:59 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000245.html">[Freenx-cvs] r118 - freenx-server/branches/FreeNX-0.4
+</A></li>
+        <LI>Next message: <A HREF="000247.html">[Freenx-cvs] r120 - freenx-server/branches/FreeNX-0.4
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#246">[ date ]</a>
+              <a href="thread.html#246">[ thread ]</a>
+              <a href="subject.html#246">[ subject ]</a>
+              <a href="author.html#246">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2005-08-10 01:42:34 +0200 (Wed, 10 Aug 2005)
+New Revision: 119
+
+Modified:
+   freenx-server/branches/FreeNX-0.4/nxsetup
+Log:
+Added interactive support if neither --install nor --uninstall are present.
+
+
+Modified: freenx-server/branches/FreeNX-0.4/nxsetup
+===================================================================
+--- freenx-server/branches/FreeNX-0.4/nxsetup	2005-08-09 23:29:49 UTC (rev 118)
++++ freenx-server/branches/FreeNX-0.4/nxsetup	2005-08-09 23:42:34 UTC (rev 119)
+@@ -47,12 +47,29 @@
+ #Check for invalid combinations:
+ [ &quot;$SETUP_LOCAL_USER&quot; = &quot;yes&quot; -a -z &quot;$LOCAL_USER_OPTION&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+ [ &quot;$INSTALL&quot; = &quot;yes&quot; -a &quot;$UNINSTALL&quot; = &quot;yes&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+-[ &quot;$INSTALL&quot; = &quot;no&quot; -a &quot;$UNINSTALL&quot; = &quot;no&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+ [ &quot;$INSTALL&quot; = &quot;yes&quot; -a &quot;$CLEAN&quot; = &quot;no&quot; -a &quot;$PURGE&quot; = &quot;yes&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+ [ &quot;$UNINSTALL&quot; = &quot;yes&quot; ] &amp;&amp; [ &quot;$SETUP_NOMACHINE_KEY&quot; = &quot;yes&quot; -o -n &quot;$SETUP_UID&quot; -o &quot;$CLEAN&quot; = &quot;yes&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+ [ &quot;$UNINSTALL&quot; = &quot;yes&quot; -a &quot;$CLEAN&quot; = &quot;yes&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+ [ &quot;$SETUP_SSH2_KEY&quot; = &quot;yes&quot; -a &quot;$SETUP_NOMACHINE_KEY&quot; = &quot;no&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+ 
++if [ &quot;$INSTALL&quot; = &quot;no&quot; -a &quot;$UNINSTALL&quot; = &quot;no&quot; ]
++then
++	if [ &quot;$AUTOMATIC&quot; = &quot;no&quot; -a &quot;$HELP&quot; = &quot;no&quot; ]
++	then
++		echo &quot;------&gt; You did select no action.&quot;
++		echo &quot;        FreeNX guesses that you want to _install_ the&quot;
++		echo &quot;        server.&quot;
++		echo &quot;        Use --help to get help contents.&quot;
++		echo &quot;&quot;
++		echo -n &quot;Do you want to abort now? [y/N] &quot;
++		read -n 1 CHOICE
++		echo
++		[ &quot;$CHOICE&quot; = &quot;y&quot; ] &amp;&amp; HELP=&quot;yes&quot;
++	else
++		HELP=&quot;yes&quot;
++	fi
++fi
++
+ if [ &quot;$HELP&quot; = &quot;yes&quot; ]
+ then
+ 	echo &quot;nxsetup - Setup the FreeNX server.&quot;
+@@ -272,6 +289,11 @@
+ 	echo &quot;done&quot;
+ }
+ 
++test_nx()
++{
++	:	
++}
++
+ uninstall_nx() 
+ {
+ 	if nx_user_exists
+@@ -330,6 +352,8 @@
+ 	[ &quot;$CLEAN&quot; = &quot;yes&quot; ] &amp;&amp; uninstall_nx
+ 	
+ 	install_nx
++
++	test_nx
+ 	
+ 	echo &quot;Ok, nxserver is ready.&quot;
+ 	echo 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000245.html">[Freenx-cvs] r118 - freenx-server/branches/FreeNX-0.4
+</A></li>
+	<LI>Next message: <A HREF="000247.html">[Freenx-cvs] r120 - freenx-server/branches/FreeNX-0.4
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#246">[ date ]</a>
+              <a href="thread.html#246">[ thread ]</a>
+              <a href="subject.html#246">[ subject ]</a>
+              <a href="author.html#246">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,537 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r257 - nxclientlib
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r257%20-%20nxclientlib&In-Reply-To=%3C200608100035.k7A0ZgrG028506%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000387.html">
+   <LINK REL="Next"  HREF="000389.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r257 - nxclientlib</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r257%20-%20nxclientlib&In-Reply-To=%3C200608100035.k7A0ZgrG028506%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r257 - nxclientlib">gwright at mail.berlios.de
+       </A><BR>
+    <I>Thu Aug 10 02:35:42 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000387.html">[Freenx-cvs] r256 - in nxclientlib: . qt-test
+</A></li>
+        <LI>Next message: <A HREF="000389.html">[Freenx-cvs] r258 - nxclientlib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#388">[ date ]</a>
+              <a href="thread.html#388">[ thread ]</a>
+              <a href="subject.html#388">[ subject ]</a>
+              <a href="author.html#388">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2006-08-10 02:35:37 +0200 (Thu, 10 Aug 2006)
+New Revision: 257
+
+Added:
+   nxclientlib/nxparsexml.cpp
+   nxclientlib/nxparsexml.h
+   nxclientlib/nxwritexml.cpp
+   nxclientlib/nxwritexml.h
+Modified:
+   nxclientlib/nxclientlib.cpp
+   nxclientlib/nxclientlib.h
+   nxclientlib/nxclientlib.pro
+   nxclientlib/nxsession.h
+Log:
+XML parsing/writing code
+
+
+Modified: nxclientlib/nxclientlib.cpp
+===================================================================
+--- nxclientlib/nxclientlib.cpp	2006-08-06 09:41:15 UTC (rev 256)
++++ nxclientlib/nxclientlib.cpp	2006-08-10 00:35:37 UTC (rev 257)
+@@ -42,7 +42,7 @@
+ {
+ }
+ 
+-void NXClientLib::invokeNXSSH(QString publicKey, QString serverHost, bool encryption, QByteArray key)
++void NXClientLib::invokeNXSSH(QString publicKey, QString serverHost, bool encryption, QByteArray key, int port)
+ {
+ 
+ 	
+@@ -83,7 +83,7 @@
+ 
+ 	nxsshProcess.setEnvironment(nxsshProcess.systemEnvironment());
+ 
+-	arguments &lt;&lt; QString(&quot;nx@&quot; + serverHost);
++	arguments &lt;&lt; QString(&quot;-p %1&quot;).arg(port) &lt;&lt; QString(&quot;nx@&quot; + serverHost);
+ 	nxsshProcess.start(NXSSH_BIN, arguments);
+ }
+ 
+
+Modified: nxclientlib/nxclientlib.h
+===================================================================
+--- nxclientlib/nxclientlib.h	2006-08-06 09:41:15 UTC (rev 256)
++++ nxclientlib/nxclientlib.h	2006-08-10 00:35:37 UTC (rev 257)
+@@ -47,7 +47,7 @@
+ 		// publicKey is the path to the ssh public key file to authenticate with. Pass &quot;default&quot; to use the default NoMachine key
+ 		// serverHost is the hostname of the NX server to connect to
+ 		// encryption is whether to use an encrypted NX session
+-		void invokeNXSSH(QString publicKey = &quot;default&quot;, QString serverHost = &quot;&quot;, bool encryption = true, QByteArray key = 0);
++		void invokeNXSSH(QString publicKey = &quot;default&quot;, QString serverHost = &quot;&quot;, bool encryption = true, QByteArray key = 0, int port = 22);
+ 
+ 		// Overloaded to give callback data on write
+ 		void write(QString);
+
+Modified: nxclientlib/nxclientlib.pro
+===================================================================
+--- nxclientlib/nxclientlib.pro	2006-08-06 09:41:15 UTC (rev 256)
++++ nxclientlib/nxclientlib.pro	2006-08-10 00:35:37 UTC (rev 257)
+@@ -2,14 +2,14 @@
+ 
+ CONFIG		= qt warn_on debug dll
+ 
+-HEADERS		= nxclientlib.h nxsession.h
++HEADERS		= nxclientlib.h nxsession.h nxparsexml.h nxdata.h nxwritexml.h
+ 
+-SOURCES		= nxclientlib.cpp nxsession.cpp
++SOURCES		= nxclientlib.cpp nxsession.cpp nxparsexml.cpp nxwritexml.cpp
+ 
+ INCLUDEPATH	+= $(QTDIR)/include .
+ 
+ DEPENDPATH	+= $(QTDIR)/include
+ 
+-QT		= core
++QT		= core xml
+ 
+ TARGET		= nxclientlib
+\ No newline at end of file
+
+Added: nxclientlib/nxparsexml.cpp
+===================================================================
+--- nxclientlib/nxparsexml.cpp	2006-08-06 09:41:15 UTC (rev 256)
++++ nxclientlib/nxparsexml.cpp	2006-08-10 00:35:37 UTC (rev 257)
+@@ -0,0 +1,152 @@
++/***************************************************************************
++                               nxparsexml.cpp
++                             -------------------
++    begin                : Friday August 4th 2006
++    copyright            : (C) 2006 by George Wright
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++enum { ADVANCED, ENVIRONMENT, GENERAL, IMAGES, LOGIN, SERVICES, VNC, WINDOWS, SHARE };
++
++#include &lt;iostream&gt;
++#include &quot;nxparsexml.h&quot;
++
++using namespace std;
++
++NXParseXML::NXParseXML()
++{
++}
++
++NXParseXML::~NXParseXML()
++{
++}
++
++bool NXParseXML::startElement(const QString &amp;namespaceURI, const QString &amp;localName, const QString &amp;qName, const QXmlAttributes &amp;attributes)
++{
++	QString key = attributes.value(&quot;key&quot;);
++	QString value = attributes.value(&quot;value&quot;);
++	if (key == &quot;Connection Name&quot;){
++		sessionData-&gt;sessionName = value;
++	}
++	
++	if (key == &quot;Server Hostname&quot;) {
++		sessionData-&gt;serverHost = value;
++	}
++
++	if (key == &quot;Server Port&quot;) {
++		sessionData-&gt;serverPort = value.toInt();
++	}
++
++	if (key == &quot;Session Type&quot;) {
++		sessionData-&gt;sessionType = value;
++	}
++
++	if (key == &quot;Custom Session Command&quot;) {
++		sessionData-&gt;customCommand = value;
++	}
++
++	if (key == &quot;Disk Cache&quot;) {
++		sessionData-&gt;cache = value.toInt();
++	}
++
++	if (key == &quot;Image Cache&quot;) {
++		sessionData-&gt;images = value.toInt();
++	}
++
++	if (key == &quot;Link Type&quot;) {
++		sessionData-&gt;linkType = value;
++	}
++
++	if (key == &quot;Use Render Extension&quot;) {
++		if (value == &quot;True&quot;)
++			sessionData-&gt;render = true;
++		else
++			sessionData-&gt;render = false;
++	}
++
++	if (key == &quot;Image Compression Method&quot;) {
++		if (value == &quot;JPEG&quot;)
++			sessionData-&gt;imageCompressionMethod = -1;
++		else if (value == &quot;PNG&quot;)
++			sessionData-&gt;imageCompressionMethod = 2;
++		else if (value == &quot;RAW&quot;)
++			sessionData-&gt;imageCompressionMethod = 0;
++	}
++
++	if (key == &quot;JPEG Compression Level&quot;) {
++		sessionData-&gt;imageCompressionLevel = value.toInt();
++	}
++
++	if (key == &quot;Desktop Geometry&quot;) {
++		sessionData-&gt;geometry = value;
++	}
++
++	if (key == &quot;Keyboard Layout&quot;) {
++		sessionData-&gt;keyboard = value;
++	}
++
++	if (key == &quot;Keyboard Type&quot;) {
++		sessionData-&gt;kbtype = value;
++	}
++
++	if (key == &quot;Media&quot;) {
++		if (value == &quot;True&quot;)
++			sessionData-&gt;media = true;
++		else
++			sessionData-&gt;media = false;
++	}
++
++	if (key == &quot;Agent Server&quot;) {
++		sessionData-&gt;agentServer = value;
++	}
++
++	if (key == &quot;Agent User&quot;) {
++		sessionData-&gt;agentUser = value;
++	}
++
++	if (key == &quot;CUPS Port&quot;) {
++		sessionData-&gt;cups = value.toInt();
++	}
++
++	if (key == &quot;Authentication Key&quot;) {
++		sessionData-&gt;key = value;
++	}
++
++	if (key == &quot;Use SSL Tunnelling&quot;) {
++		if (value == &quot;True&quot;)
++			sessionData-&gt;encryption = true;
++		else
++			sessionData-&gt;encryption = false;
++	}
++
++	if (key == &quot;Enable Fullscreen Desktop&quot;) {
++		if (value == &quot;True&quot;)
++			sessionData-&gt;fullscreen = true;
++		else
++			sessionData-&gt;fullscreen = false;
++	}
++
++	return true;
++}
++
++bool NXParseXML::endElement(const QString &amp;namespaceURI, const QString &amp;localName, const QString &amp;qName)
++{
++	return true;
++}
++
++bool NXParseXML::characters(const QString &amp;str)
++{
++}
++
++bool NXParseXML::fatalError(const QXmlParseException &amp;exception)
++{
++}
+
+Added: nxclientlib/nxparsexml.h
+===================================================================
+--- nxclientlib/nxparsexml.h	2006-08-06 09:41:15 UTC (rev 256)
++++ nxclientlib/nxparsexml.h	2006-08-10 00:35:37 UTC (rev 257)
+@@ -0,0 +1,43 @@
++/***************************************************************************
++                               nxparsexml.h
++                             -------------------
++    begin                : Friday August 4th 2006
++    copyright            : (C) 2006 by George Wright
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++#ifndef _NXPARSEXML_H_
++#define _NXPARSEXML_H_
++
++#include &lt;QXmlDefaultHandler&gt;
++
++#include &quot;nxdata.h&quot;
++#include &quot;nxsession.h&quot;
++
++class NXParseXML : public QXmlDefaultHandler
++{
++	public:
++		NXParseXML();
++		~NXParseXML();
++		bool startElement(const QString &amp;namespaceURI, const QString &amp;localName, const QString &amp;qName, const QXmlAttributes &amp;attributes);
++		bool endElement(const QString &amp;namespaceURI, const QString &amp;localName, const QString &amp;qName);
++		bool characters(const QString &amp;str);
++		bool fatalError(const QXmlParseException &amp;exception);
++
++		void setSessionData(NXConfigData *data) { sessionData = data; };
++		NXConfigData data();
++	private:
++		NXConfigData *sessionData;
++		int group;
++};
++
++#endif
+\ No newline at end of file
+
+Modified: nxclientlib/nxsession.h
+===================================================================
+--- nxclientlib/nxsession.h	2006-08-06 09:41:15 UTC (rev 256)
++++ nxclientlib/nxsession.h	2006-08-10 00:35:37 UTC (rev 257)
+@@ -26,41 +26,8 @@
+ #include &lt;fcntl.h&gt;
+ #include &lt;unistd.h&gt;
+ 
+-struct NXSessionData {
+-	QString sessionName;
+-	QString sessionType;
+-	int cache;
+-	int images;
+-	QString linkType;
+-	bool render;
+-	QString backingstore;
+-	int imageCompressionMethod;
+-	int imageCompressionLevel;
+-	QString geometry;
+-	QString keyboard;
+-	QString kbtype;
+-	bool media;
+-	QString agentServer;
+-	QString agentUser;
+-	QString agentPass;
+-	int cups;
+-	QString id;
+-	QString key;
+-	bool suspended;
+-	bool fullscreen;
+-};
++#include &quot;nxdata.h&quot;
+ 
+-struct NXResumeData {
+-	int display;
+-	QString sessionType;
+-	QString sessionID;
+-	QString options;
+-	int depth;
+-	QString screen;
+-	QString available;
+-	QString sessionName;
+-};
+-
+ // This class is used to parse the output from the nxssh session to the server
+ 
+ class NXSession : public QObject
+
+Added: nxclientlib/nxwritexml.cpp
+===================================================================
+--- nxclientlib/nxwritexml.cpp	2006-08-06 09:41:15 UTC (rev 256)
++++ nxclientlib/nxwritexml.cpp	2006-08-10 00:35:37 UTC (rev 257)
+@@ -0,0 +1,90 @@
++/***************************************************************************
++                               nxwritexml.cpp
++                             -------------------
++    begin                : Wednesday August 9th 2006
++    copyright            : (C) 2006 by George Wright
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++#include &quot;nxwritexml.h&quot;
++
++NXWriteXML::NXWriteXML()
++{
++}
++
++NXWriteXML::~NXWriteXML()
++{
++}
++
++void NXWriteXML::write(QFile file)
++{
++	file.open(QFile::WriteOnly);
++	
++	QTextStream xml(&amp;file);
++	xml.setCodec(&quot;UTF-8&quot;);
++
++	xml &lt;&lt; &quot;&lt;!DOCTYPE NXClientLibSettings&gt;\n&quot;;
++	
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Connection Name\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.sessionName) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Server Hostname\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.serverHost) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Server Port\&quot; value=\&quot;&quot; &lt;&lt; escape(QString::number(sessionData.serverPort)) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Session Type\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.sessionType) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Custom Session Command\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.customCommand) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Disk Cache\&quot; value=\&quot;&quot; &lt;&lt; escape(QString::number(sessionData.cache)) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Image Cache\&quot; value=\&quot;&quot; &lt;&lt; escape(QString::number(sessionData.images)) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Link Type\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.linkType) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
++	
++	if (sessionData.render == true)
++		xml &lt;&lt; &quot;&lt;option key=\&quot;Use Render Extension\&quot; value=\&quot;True\&quot; /&gt;\n&quot;;
++	else
++		xml &lt;&lt; &quot;&lt;option key=\&quot;Use Render Extension\&quot; value=\&quot;False\&quot; /&gt;\n&quot;;
++
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Image Compression Method\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.sessionName) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
++	
++	xml &lt;&lt; &quot;&lt;option key=\&quot;JPEG Compression Level\&quot; value=\&quot;&quot; &lt;&lt; escape(QString::number(sessionData.imageCompressionLevel)) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Desktop Geometry\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.geometry) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Keyboard Layout\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.keyboard) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Keyboard Type\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.kbtype) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
++
++	if (sessionData.media == true)
++		xml &lt;&lt; &quot;&lt;option key=\&quot;Media\&quot; value=\&quot;True\&quot; /&gt;\n&quot;;
++	else
++		xml &lt;&lt; &quot;&lt;option key=\&quot;Media\&quot; value=\&quot;False\&quot; /&gt;\n&quot;;
++
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Agent Server\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.agentServer) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Agent User\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.agentUser) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;option key=\&quot;CUPS Port\&quot; value=\&quot;&quot; &lt;&lt; escape(QString::number(sessionData.cups)) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Authentication Key\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.key) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
++
++	if (sessionData.encryption == true)
++		xml &lt;&lt; &quot;&lt;option key=\&quot;Use SSL Tunnelling\&quot; value=\&quot;True\&quot; /&gt;\n&quot;;
++	else
++		xml &lt;&lt; &quot;&lt;option key=\&quot;Use SSL Tunnelling\&quot; value=\&quot;False\&quot; /&gt;\n&quot;;
++
++	if (sessionData.fullscreen == true)
++		xml &lt;&lt; &quot;&lt;option key=\&quot;Enable Fullscreen Desktop\&quot; value=\&quot;True\&quot; /&gt;\n&quot;;
++	else
++		xml &lt;&lt; &quot;&lt;option key=\&quot;Enable Fullscreen Desktop\&quot; value=\&quot;False\&quot; /&gt;\n&quot;;
++
++	xml &lt;&lt; &quot;&lt;/NXClientLibSettings&gt;\n&quot;;
++
++	file.close();
++}
++
++QString escape(QString plain)
++{
++	QString formatted;
++	formatted = plain.replace('&lt;', &quot;&lt;&quot;);
++	formatted = plain.replace('&gt;', &quot;&rt;&quot;);
++	formatted = plain.replace('&amp;', &quot;&amp;&quot;);
++	return formatted;
++}
+
+Added: nxclientlib/nxwritexml.h
+===================================================================
+--- nxclientlib/nxwritexml.h	2006-08-06 09:41:15 UTC (rev 256)
++++ nxclientlib/nxwritexml.h	2006-08-10 00:35:37 UTC (rev 257)
+@@ -0,0 +1,39 @@
++/***************************************************************************
++                               nxwritexml.h
++                             -------------------
++    begin                : Wednesday August 9th 2006
++    copyright            : (C) 2006 by George Wright
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++#ifndef _NXWRITEXML_H_
++#define _NXWRITEXML_H_
++
++#include &quot;nxdata.h&quot;
++
++#include &lt;QString&gt;
++#include &lt;QFile&gt;
++#include &lt;QTextStream&gt;
++
++class NXWriteXML
++{
++	public:
++		NXWriteXML();
++		~NXWriteXML();
++		void write(QFile);
++		void setSessionData(NXConfigData data) { sessionData = data; };
++		QString escape(QString);
++	private:
++		NXConfigData sessionData;
++};
++
++#endif
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000387.html">[Freenx-cvs] r256 - in nxclientlib: . qt-test
+</A></li>
+	<LI>Next message: <A HREF="000389.html">[Freenx-cvs] r258 - nxclientlib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#388">[ date ]</a>
+              <a href="thread.html#388">[ thread ]</a>
+              <a href="subject.html#388">[ subject ]</a>
+              <a href="author.html#388">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,170 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r538 - trunk/freenx-server
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-April/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r538%20-%20trunk/freenx-server&In-Reply-To=%3C200804051141.m35Bfwan000226%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000660.html">
+   <LINK REL="Next"  HREF="000673.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r538 - trunk/freenx-server</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r538%20-%20trunk/freenx-server&In-Reply-To=%3C200804051141.m35Bfwan000226%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r538 - trunk/freenx-server">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Sat Apr  5 13:41:58 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000660.html">[Freenx-cvs] r537 - trunk/freenx-server
+</A></li>
+        <LI>Next message: <A HREF="000673.html">[Freenx-cvs] r539 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#661">[ date ]</a>
+              <a href="thread.html#661">[ thread ]</a>
+              <a href="subject.html#661">[ subject ]</a>
+              <a href="author.html#661">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-04-05 13:41:57 +0200 (Sat, 05 Apr 2008)
+New Revision: 538
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/Makefile
+   trunk/freenx-server/nxacl.sample
+   trunk/freenx-server/nxcheckload.sample
+   trunk/freenx-server/nxcups-gethost
+   trunk/freenx-server/nxdesktop_helper
+   trunk/freenx-server/nxviewer_helper
+Log:
+* Used bash for all tasks as 'sh' might be not what we want
+  on standard ubuntu.
+(<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>, thx to tan (IRC))
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-04-01 20:29:53 UTC (rev 537)
++++ trunk/freenx-server/ChangeLog	2008-04-05 11:41:57 UTC (rev 538)
+@@ -6,6 +6,9 @@
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 	* Added -nolisten tcp to nxagent invocation.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>, idea by  pappy- (Gentoo))
++	* Used bash for all tasks as 'sh' might be not what we want
++	  on standard ubuntu.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>, thx to tan (IRC))
+ 
+ 14.03.2008 FreeNX 0.7.2 &quot;Priscilla Edition&quot;
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/Makefile
+===================================================================
+--- trunk/freenx-server/Makefile	2008-04-01 20:29:53 UTC (rev 537)
++++ trunk/freenx-server/Makefile	2008-04-05 11:41:57 UTC (rev 538)
+@@ -12,7 +12,7 @@
+ 	done
+ 
+ install:
+-	. nxloadconfig;\
++	bash -c '. nxloadconfig;\
+ 	install -m755 -d $(DESTDIR)/$$PATH_BIN/ ;\
+ 	install -m755 -d $(DESTDIR)/$$PATH_LIB/ ;\
+ 	install -m755 -d $(DESTDIR)/$$NX_ETC_DIR/ ;\
+@@ -23,4 +23,4 @@
+ 	done;\
+ 	export PATH_BIN PATH_LIB CUPS_BACKEND NX_VERSION;\
+ 	install -m644 node.conf.sample $(DESTDIR)/$$NX_ETC_DIR/ ; \
+-	make -C nxredir install
++	make -C nxredir install'
+
+Modified: trunk/freenx-server/nxacl.sample
+===================================================================
+--- trunk/freenx-server/nxacl.sample	2008-04-01 20:29:53 UTC (rev 537)
++++ trunk/freenx-server/nxacl.sample	2008-04-05 11:41:57 UTC (rev 538)
+@@ -1,4 +1,4 @@
+-#!/bin/sh
++#!/bin/bash
+ 
+ # Syntax: getparam &lt;param&gt;
+ getparam()
+
+Modified: trunk/freenx-server/nxcheckload.sample
+===================================================================
+--- trunk/freenx-server/nxcheckload.sample	2008-04-01 20:29:53 UTC (rev 537)
++++ trunk/freenx-server/nxcheckload.sample	2008-04-05 11:41:57 UTC (rev 538)
+@@ -1,4 +1,4 @@
+-#!/bin/sh
++#!/bin/bash
+ #
+ # nxcheckload - sample script for calculation of the load for a node.
+ #
+
+Modified: trunk/freenx-server/nxcups-gethost
+===================================================================
+--- trunk/freenx-server/nxcups-gethost	2008-04-01 20:29:53 UTC (rev 537)
++++ trunk/freenx-server/nxcups-gethost	2008-04-05 11:41:57 UTC (rev 538)
+@@ -1,4 +1,4 @@
+-#!/bin/sh
++#!/bin/bash
+ 
+ # Read the config file
+ . $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig) --userconf
+
+Modified: trunk/freenx-server/nxdesktop_helper
+===================================================================
+--- trunk/freenx-server/nxdesktop_helper	2008-04-01 20:29:53 UTC (rev 537)
++++ trunk/freenx-server/nxdesktop_helper	2008-04-05 11:41:57 UTC (rev 538)
+@@ -1,4 +1,4 @@
+-#!/bin/sh
++#!/bin/bash
+ #
+ # nxdesktop_helper - Small helper for external rdesktop program as needed by NX 3.0.0 backend.
+ #
+
+Modified: trunk/freenx-server/nxviewer_helper
+===================================================================
+--- trunk/freenx-server/nxviewer_helper	2008-04-01 20:29:53 UTC (rev 537)
++++ trunk/freenx-server/nxviewer_helper	2008-04-05 11:41:57 UTC (rev 538)
+@@ -1,4 +1,4 @@
+-#!/bin/sh
++#!/bin/bash
+ #
+ # nxviewer_helper - Small helper for external vncviewer program as needed by NX 3.0.0 backend.
+ #
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000660.html">[Freenx-cvs] r537 - trunk/freenx-server
+</A></li>
+	<LI>Next message: <A HREF="000673.html">[Freenx-cvs] r539 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#661">[ date ]</a>
+              <a href="thread.html#661">[ thread ]</a>
+              <a href="subject.html#661">[ subject ]</a>
+              <a href="author.html#661">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

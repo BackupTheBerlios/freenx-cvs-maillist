@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r401 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-October/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r401%20-%20freenx-server/trunk&In-Reply-To=%3C200710141811.l9EIBnCm018030%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000529.html">
+   <LINK REL="Next"  HREF="000531.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r401 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r401%20-%20freenx-server/trunk&In-Reply-To=%3C200710141811.l9EIBnCm018030%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r401 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Sun Oct 14 20:11:49 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000529.html">[Freenx-cvs] r400 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000531.html">[Freenx-cvs] r402 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#530">[ date ]</a>
+              <a href="thread.html#530">[ thread ]</a>
+              <a href="subject.html#530">[ subject ]</a>
+              <a href="author.html#530">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-10-14 20:11:49 +0200 (Sun, 14 Oct 2007)
+New Revision: 401
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/node.conf.sample
+   freenx-server/trunk/nxloadconfig
+Log:
+* Changed the default load balancing algorithm to &quot;random&quot;
+  as the nxcheckload script might not be available.
+  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-10-14 18:07:02 UTC (rev 400)
++++ freenx-server/trunk/ChangeLog	2007-10-14 18:11:49 UTC (rev 401)
+@@ -68,6 +68,9 @@
+ 	  vncviewer programs.	  
+ 	  This is for example needed for 3.0.0 backend.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Changed the default load balancing algorithm to &quot;random&quot;
++	  as the nxcheckload script might not be available.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
+ 07.07.2007 FreeNX 0.7.0 &quot;Jornade SPL Edition VI+1&quot;
+ 	* Fixed the printing support for CUPS 1.2.
+
+Modified: freenx-server/trunk/node.conf.sample
+===================================================================
+--- freenx-server/trunk/node.conf.sample	2007-10-14 18:07:02 UTC (rev 400)
++++ freenx-server/trunk/node.conf.sample	2007-10-14 18:11:49 UTC (rev 401)
+@@ -225,8 +225,12 @@
+ #
+ # &quot;load&quot;, &quot;round-robin&quot;, &quot;random&quot;
+ #
++# For &quot;load&quot; you need a script called nxcheckload in PATH_BIN.
++# 
++# A sample script, which you can change to your needs it shipped with
++# FreeNX under the name nxcheckload.sample.
+ 
+-#LOAD_BALANCE_ALGORITHM=&quot;load&quot;
++#LOAD_BALANCE_ALGORITHM=&quot;random&quot;
+ 
+ # By setting ENABLE_LOADBALANCE=&quot;1&quot; you can let users choose their
+ # preferred host, while being forwarded to another server. Of course
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2007-10-14 18:07:02 UTC (rev 400)
++++ freenx-server/trunk/nxloadconfig	2007-10-14 18:11:49 UTC (rev 401)
+@@ -134,7 +134,7 @@
+ NOMACHINE_FORWARD_PORT=&quot;22&quot;
+ 
+ LOAD_BALANCE_SERVERS=&quot;&quot;
+-LOAD_BALANCE_ALGORITHM=&quot;load&quot;
++LOAD_BALANCE_ALGORITHM=&quot;random&quot;
+ ENABLE_LOAD_BALANCE_PREFERENCE=&quot;0&quot;
+ 
+ # Services directives
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000529.html">[Freenx-cvs] r400 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000531.html">[Freenx-cvs] r402 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#530">[ date ]</a>
+              <a href="thread.html#530">[ thread ]</a>
+              <a href="subject.html#530">[ subject ]</a>
+              <a href="author.html#530">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

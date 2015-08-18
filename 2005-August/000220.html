@@ -1,0 +1,254 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fabianx modified 2 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%202%20files&In-Reply-To=%3C42EFAD98.mailIUY111XM0%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000219.html">
+   <LINK REL="Next"  HREF="000221.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fabianx modified 2 files</H1>
+    <B>fabianx</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%202%20files&In-Reply-To=%3C42EFAD98.mailIUY111XM0%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fabianx modified 2 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Tue Aug  2 19:30:00 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000219.html">[Freenx-cvs] CVS: freenx - fabianx modified 4 files
+</A></li>
+        <LI>Next message: <A HREF="000221.html">[Freenx-cvs] r91 - /
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#220">[ date ]</a>
+              <a href="thread.html#220">[ thread ]</a>
+              <a href="subject.html#220">[ subject ]</a>
+              <a href="author.html#220">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fabianx
+Date:      2005-08-02 17:30:00 GMT
+Modified:  .        ChangeLog nxsetup
+Log:
+* Made nxsetup more enterprise friendly. Added --localuser
+  (RedHat only) and --gid.
+  (Based on a patch by &quot;Ed Warnicke&quot; &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">eaw at cisco.com</A>&gt;
+
+Annotation: This release is now tagged 0.4.4-RC1 and such feature-freezed!
+
+Revision  Changes    Path
+1.92      +3 -0      freenx/ChangeLog
+
+
+rev 1.92, prev_rev 1.91
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.91
+retrieving revision 1.92
+diff -u -r1.91 -r1.92
+--- ChangeLog	2 Aug 2005 15:39:32 -0000	1.91
++++ ChangeLog	2 Aug 2005 17:29:59 -0000	1.92
+@@ -14,6 +14,9 @@
+ 	  (Suggestion by &quot;Sunil&quot; &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">funtoos at yahoo.com</A>&gt;)
+ 	* Made automatic timeout configurable.
+ 	  (Patch by &quot;Ed Warnicke&quot; &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">eaw at cisco.com</A>&gt;)
++	* Made nxsetup more enterprise friendly. Added --localuser
++	  (RedHat only) and --gid. 
++	  (Based on a patch by &quot;Ed Warnicke&quot; &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">eaw at cisco.com</A>&gt;)
+ 
+ 28.07.2005 FreeNX 0.4.3 &quot;NoMachine 1.5.0 Edition&quot;
+ 	* Fixed reconnection problems with !M 1.5.0 client.
+
+
+
+1.31      +58 -17    freenx/nxsetup
+
+
+rev 1.31, prev_rev 1.30
+Index: nxsetup
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxsetup,v
+retrieving revision 1.30
+retrieving revision 1.31
+diff -u -r1.30 -r1.31
+--- nxsetup	2 Aug 2005 14:51:43 -0000	1.30
++++ nxsetup	2 Aug 2005 17:29:59 -0000	1.31
+@@ -5,13 +5,18 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxsetup,v 1.30 2005/08/02 14:51:43 fabianx Exp $ 
++# CVS: $Id: nxsetup,v 1.31 2005/08/02 17:29:59 fabianx Exp $ 
+ #
+ 
+ HELP=&quot;no&quot;
+ INSTALL=&quot;no&quot;
+ SETUP_NOMACHINE_KEY=&quot;no&quot;
+ SETUP_UID=&quot;&quot;
++SETUP_GID=&quot;&quot;
++LOCAL_USER_OPTION=&quot;&quot;
++# luseradd / luserdel are only available on RedHat
++[ -f /etc/redhat-release ] &amp;&amp; LOCAL_USER_OPTION=&quot;yes&quot;
++SETUP_LOCAL_USER=&quot;no&quot;
+ CLEAN=&quot;no&quot;
+ UNINSTALL=&quot;no&quot;
+ PURGE=&quot;no&quot;
+@@ -27,6 +32,8 @@
+ 		--ssh2) SETUP_SSH2_KEY=&quot;yes&quot;; shift;;
+ 		--dont-build-known-hosts) BUILD_KNOWN_HOSTS=&quot;no&quot;; shift;;
+ 		--uid) SETUP_UID=$2; shift 2 ;;
++		--gid) SETUP_GID=$2; shift 2 ;;
++		--localuser) SETUP_LOCAL_USER=&quot;yes&quot;; shift;;
+ 		--clean) CLEAN=&quot;yes&quot;; shift ;;
+ 		--uninstall) UNINSTALL=&quot;yes&quot;; shift ;;
+ 		--purge) PURGE=&quot;yes&quot;; shift ;;
+@@ -36,6 +43,7 @@
+ done
+ 
+ #Check for invalid combinations:
++[ &quot;$SETUP_LOCAL_USER&quot; = &quot;yes&quot; -a -z &quot;$LOCAL_USER_OPTION&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+ [ &quot;$INSTALL&quot; = &quot;yes&quot; -a &quot;$UNINSTALL&quot; = &quot;yes&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+ [ &quot;$INSTALL&quot; = &quot;no&quot; -a &quot;$UNINSTALL&quot; = &quot;no&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+ [ &quot;$INSTALL&quot; = &quot;yes&quot; -a &quot;$CLEAN&quot; = &quot;no&quot; -a &quot;$PURGE&quot; = &quot;yes&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+@@ -59,6 +67,8 @@
+ 	echo &quot;  --ssh2		       Additionally create commercial pubkey-support, beware&quot;
+ 	echo &quot;			       own _commercial_ ssh2-key is not supported!.&quot;
+ 	echo &quot;  --uid &lt;number&gt;         The nx user will be given the uid &lt;number&gt;.&quot;
++	echo &quot;  --gid &lt;number&gt;         The nx user will be given the gid &lt;number&gt;.&quot;
++	[ -n &quot;$LOCAL_USER_OPTION&quot; ] &amp;&amp; echo &quot;  --localuser            The nx user will be created locally using luseradd, for use in NIS and NISplus environments.&quot;
+ 	echo &quot;  --clean                Performs an uninstall prior to the installation&quot;
+ 	echo &quot;  --uninstall            Remove log and session files, as well as the nx user&quot;
+ 	echo &quot;  --purge                Uninstall will remove extra configuration files and ssh&quot;
+@@ -80,28 +90,52 @@
+ # Read the config file
+ . $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig) --
+ 
++nx_user_exists()
++{
++	if [ &quot;$SETUP_LOCAL_USER&quot; = &quot;yes&quot; ]
++	then
++		egrep &quot;^nx:&quot; /etc/passwd &gt;/dev/null
++	else
++		getent passwd nx &gt;/dev/null
++	fi
++}	
++
+ # Tries to add a system user
+ useradd_nx()
+ {
+ 	# In any case create the basedir of the HOME directory before, 
+ 	# because useradd will fail to make more than one directory
+ 	mkdir -p $(dirname &quot;$NX_HOME_DIR&quot;)
+-	
+-	# Are uid specified
+-	if [ -n &quot;$SETUP_UID&quot; ]
+-	then
+-		useradd -u $SETUP_UID -d $NX_HOME_DIR -s $PATH_BIN/nxserver nx
++
+ 	# Is it a debian?
+-	elif [ -f /etc/debian_version ]
+-	then
+-		adduser --system --home $NX_HOME_DIR --shell $PATH_BIN/nxserver nx
+-	# or is it a SuSE?
+-	elif [ -f /etc/SuSE-release ]
++	if [ -f /etc/debian_version -a -z &quot;$SETUP_UID&quot; ]
+ 	then
+-		useradd -r -d $NX_HOME_DIR -s $PATH_BIN/nxserver nx
+-	# we don't know the system, fallback
++		USERADD_OPTIONS=&quot;--system --home $NX_HOME_DIR --shell $PATH_BIN/nxserver&quot;
++		[ -n &quot;$SETUP_GID&quot; ] &amp;&amp; USERADD_OPTIONS=&quot;--gid $SETUP_GID $USERADD_OPTIONS&quot;
++		adduser $USERADD_OPTIONS nx
++	# no, its a &quot;normal&quot; useradd
+ 	else
+-		useradd -d $NX_HOME_DIR -s $PATH_BIN/nxserver nx
++		USERADD_OPTIONS=&quot;-d $NX_HOME_DIR -s $PATH_BIN/nxserver&quot;
++		[ -n $SETUP_GID ] &amp;&amp; USERADD_OPTIONS=&quot;-g $SETUP_GID $USERADD_OPTIONS&quot;
++		# uid specified?
++		if [ -n &quot;$SETUP_UID&quot; ]
++		then
++			USERADD_OPTIONS=&quot;-u $SETUP_UID $USERADD_OPTIONS&quot;
++		# Is it a SuSE?
++		elif [ -f /etc/SuSE-release ]
++		then
++			USERADD_OPTIONS=&quot;-r $USERADD_OPTIONS&quot;
++		fi
++
++		if [ &quot;$SETUP_LOCAL_USER&quot; = &quot;yes&quot; ]
++		then
++			[ -n &quot;$SETUP_GID&quot; ] &amp;&amp; /usr/sbin/lgroupadd -g $SETUP_GID nx
++			luseradd $USERADD_OPTIONS nx
++		else
++			useradd $USERADD_OPTIONS nx
++		fi
++
++		
+ 	fi
+ }
+ 
+@@ -142,7 +176,7 @@
+ 	chmod 600 &quot;$NX_LOGFILE&quot;
+ 	echo &quot;done&quot;
+ 	
+-	if ! { getent passwd nx &gt;/dev/null; }
++	if ! nx_user_exists
+ 	then
+ 		echo -n &quot;Setting up user nx ...&quot;
+ 		useradd_nx
+@@ -226,10 +260,17 @@
+ 
+ uninstall_nx() 
+ {
+-	if { getent passwd nx &gt;/dev/null; }
++	if nx_user_exists
+ 	then
+ 		echo -n &quot;Removing user nx ...&quot;
+-		userdel nx
++		
++		if [ &quot;$SETUP_LOCAL_USER&quot; = &quot;yes&quot; ]
++		then
++			luserdel nx
++		else
++			userdel nx
++		fi
++			
+ 		echo &quot;done&quot;
+ 	fi
+ 	
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000219.html">[Freenx-cvs] CVS: freenx - fabianx modified 4 files
+</A></li>
+	<LI>Next message: <A HREF="000221.html">[Freenx-cvs] r91 - /
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#220">[ date ]</a>
+              <a href="thread.html#220">[ thread ]</a>
+              <a href="subject.html#220">[ subject ]</a>
+              <a href="author.html#220">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

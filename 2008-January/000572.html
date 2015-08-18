@@ -1,0 +1,214 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r446 - nxcl/lib
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r446%20-%20nxcl/lib&In-Reply-To=%3C200801291438.m0TEcfRD006535%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000571.html">
+   <LINK REL="Next"  HREF="000573.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r446 - nxcl/lib</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r446%20-%20nxcl/lib&In-Reply-To=%3C200801291438.m0TEcfRD006535%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r446 - nxcl/lib">gwright at mail.berlios.de
+       </A><BR>
+    <I>Tue Jan 29 15:38:41 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000571.html">[Freenx-cvs] r445 - nxcl/lib
+</A></li>
+        <LI>Next message: <A HREF="000573.html">[Freenx-cvs] r447 - nxcl/lib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#572">[ date ]</a>
+              <a href="thread.html#572">[ thread ]</a>
+              <a href="subject.html#572">[ subject ]</a>
+              <a href="author.html#572">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2008-01-29 15:38:40 +0100 (Tue, 29 Jan 2008)
+New Revision: 446
+
+Modified:
+   nxcl/lib/nxclientlib.cpp
+   nxcl/lib/nxclientlib.h
+Log:
+Add code to launch NXWin on Win32
+
+
+Modified: nxcl/lib/nxclientlib.cpp
+===================================================================
+--- nxcl/lib/nxclientlib.cpp	2008-01-29 11:27:34 UTC (rev 445)
++++ nxcl/lib/nxclientlib.cpp	2008-01-29 14:38:40 UTC (rev 446)
+@@ -153,6 +153,7 @@
+ 
+     this-&gt;pNxsshProcess = &amp;this-&gt;nxsshProcess;
+     this-&gt;pNxproxyProcess = &amp;this-&gt;nxproxyProcess;
++    this-&gt;pNxwinProcess = &amp;this-&gt;nxwinProcess;
+ 
+     /* Set up callback pointers */
+     this-&gt;nxsshProcess.setCallbacks (&amp;callbacks);
+@@ -683,13 +684,12 @@
+     }
+ }
+ 
+-int NXClientLib::startX11 (int xResolution, int yResolution, string name)
++int NXClientLib::startX11 (string resolution, string name)
+ {
+ #ifdef NXCL_CYGWIN
+     // Invoke NXWin.exe on Windows machines
+ 
+     // See if XAUTHORITY path is set
+-
+     stringstream xauthority;
+ 
+     xauthority &lt;&lt; getenv(&quot;XAUTHORITY&quot;);
+@@ -710,28 +710,86 @@
+ 
+     domain &lt;&lt; getenv(&quot;HOME&quot;) &lt;&lt; &quot;:0.0&quot;;
+ 
+-    list&lt;string&gt; arguments;
++    list&lt;string&gt; nxauthArguments;
+ 
+     // These arguments taken from the 2X GPL client
+     // We're going to assume that nxauth is in PATH
+-    arguments.push_back(&quot;nxauth&quot;);
+-    arguments.push_back(&quot;-i&quot;);
+-    arguments.push_back(&quot;-f&quot;);
+-    arguments.push_back(xauthority.str());
+-    arguments.push_back(&quot;add&quot;);
+-    arguments.push_back(domain.str());
+-    arguments.push_back(&quot;MIT-MAGIC-COOKIE-1&quot;);
+-    arguments.push_back(cookie);
++    nxauthArguments.push_back(&quot;nxauth&quot;);
++    nxauthArguments.push_back(&quot;-i&quot;);
++    nxauthArguments.push_back(&quot;-f&quot;);
++    nxauthArguments.push_back(xauthority.str());
++    nxauthArguments.push_back(&quot;add&quot;);
++    nxauthArguments.push_back(domain.str());
++    nxauthArguments.push_back(&quot;MIT-MAGIC-COOKIE-1&quot;);
++    nxauthArguments.push_back(cookie);
+ 
+     notQProcess nxauthProcess;
+ 
+-    nxauthProcess.start(&quot;nxauth&quot;, arguments);
++    nxauthProcess.start(&quot;nxauth&quot;, nxauthArguments);
+ 
+     if (nxauthProcess.waitForStarted() == false) {
+         this-&gt;externalCallbacks-&gt;write
+             (NXCL_PROCESS_ERROR, _(&quot;Error starting nxauth!&quot;));
+         this-&gt;isFinished = true;
+     }
++
++    // Now we actually start NXWin.exe
++
++    list&lt;string&gt; nxwinArguments;
++
++    // Arguments taken from 2X
++    nxwinArguments.push_back(&quot;NXWin&quot;);
++    nxwinArguments.push_back(&quot;-auth&quot;);
++
++    stringstream xauthPath;
++    xauthPath &lt;&lt; &quot;'&quot; &lt;&lt; xauthority.str() &lt;&lt; &quot;'&quot;;
++
++    nxwinArguments.push_back(xauthPath.str());
++    nxwinArguments.push_back(&quot;-nowinkill&quot;);
++    nxwinArguments.push_back(&quot;-clipboard&quot;);
++    nxwinArguments.push_back(&quot;-noloadxkb&quot;);
++
++    // TODO: If rootless, append &quot;-multiwindow&quot; and &quot;-hide&quot; but only
++    // hide if not restoring
++
++    // Now we set up the font paths. By default this is $PWD/usr/X11R6/...
++
++    stringstream fontPath;
++
++    fontPath &lt;&lt; &quot;\&quot;&quot; &lt;&lt; &quot;usr/X11R6/lib/X11/fonts/TTF&quot; &lt;&lt; &quot;\&quot;,&quot;
++        &lt;&lt; &quot;\&quot;&quot; &lt;&lt; &quot;usr/X11R6/lib/X11/fonts/misc&quot; &lt;&lt; &quot;\&quot;,&quot;
++        &lt;&lt; &quot;\&quot;&quot; &lt;&lt; &quot;usr/X11R6/lib/X11/fonts/Speedo&quot; &lt;&lt; &quot;\&quot;,&quot;
++        &lt;&lt; &quot;\&quot;&quot; &lt;&lt; &quot;usr/X11R6/lib/X11/fonts/Type1&quot; &lt;&lt; &quot;\&quot;,&quot;
++        &lt;&lt; &quot;\&quot;&quot; &lt;&lt; &quot;usr/X11R6/lib/X11/fonts/75dpi&quot; &lt;&lt; &quot;\&quot;,&quot;
++        &lt;&lt; &quot;\&quot;&quot; &lt;&lt; &quot;usr/X11R6/lib/X11/fonts/100dpi&quot; &lt;&lt; &quot;\&quot;&quot;;
++
++    nxwinArguments.push_back(&quot;-fp&quot;);
++    nxwinArguments.push_back(fontPath.str());
++    nxwinArguments.push_back(&quot;-agent&quot;);
++    nxwinArguments.push_back(&quot;-emulate3buttons&quot;);
++    nxwinArguments.push_back(&quot;-hide&quot;);
++    nxwinArguments.push_back(&quot;-noreset&quot;);
++    nxwinArguments.push_back(&quot;-name&quot;);
++    nxwinArguments.push_back(&quot;NXWin&quot;);
++    nxwinArguments.push_back(&quot;0&quot;);
++
++    nxwinArguments.push_back(&quot;-screen&quot;);
++    nxwinArguments.push_back(&quot;0&quot;);
++
++    char* dimensions = strtok(resolution.c_str(), &quot;x&quot;);
++
++    while (dimensions != NULL) {
++        nxwinArguments.push_back(dimensions);
++        dimensions = strtok(NULL, &quot;x&quot;);
++    }
++
++    this-&gt;nxwinProcess-&gt;start(&quot;nxwin&quot;, nxwinArguments);
++
++    if (this-&gt;nxwinProcess-&gt;waitForStarted() == false) {
++        this-&gt;externalCallbacks-&gt;write
++            (NXCL_PROCESS_ERROR, _(&quot;Error starting nxwin!&quot;));
++        this-&gt;isFinished = true;
++    }
+ #endif
+ }
+ 
+
+Modified: nxcl/lib/nxclientlib.h
+===================================================================
+--- nxcl/lib/nxclientlib.h	2008-01-29 11:27:34 UTC (rev 445)
++++ nxcl/lib/nxclientlib.h	2008-01-29 14:38:40 UTC (rev 446)
+@@ -391,6 +391,11 @@
+             notQProcess nxproxyProcess;
+             notQProcess* pNxproxyProcess;
+             /*!
++             * The nxwin process object
++             */
++            notQProcess nxwinProcess;
++            notQProcess* pNxwinProcess;
++            /*!
+              * A callbacks object. This holds the various callback
+              * methods. The callback methods are defined here, but
+              * are callable from notQProcess etc.
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000571.html">[Freenx-cvs] r445 - nxcl/lib
+</A></li>
+	<LI>Next message: <A HREF="000573.html">[Freenx-cvs] r447 - nxcl/lib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#572">[ date ]</a>
+              <a href="thread.html#572">[ thread ]</a>
+              <a href="subject.html#572">[ subject ]</a>
+              <a href="author.html#572">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

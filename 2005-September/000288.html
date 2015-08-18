@@ -1,0 +1,314 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r162 - / freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r162%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200509041543.j84FhM5E030054%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000287.html">
+   <LINK REL="Next"  HREF="000289.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r162 - / freenx-server/trunk</H1>
+    <B>Fabian Franz at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r162%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200509041543.j84FhM5E030054%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r162 - / freenx-server/trunk">fabianx at berlios.de
+       </A><BR>
+    <I>Sun Sep  4 17:43:22 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000287.html">[Freenx-cvs] r161 - / freenx-server/branches/FreeNX-0.4
+</A></li>
+        <LI>Next message: <A HREF="000289.html">[Freenx-cvs] r163 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#288">[ date ]</a>
+              <a href="thread.html#288">[ thread ]</a>
+              <a href="subject.html#288">[ subject ]</a>
+              <a href="author.html#288">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2005-09-04 17:43:18 +0200 (Sun, 04 Sep 2005)
+New Revision: 162
+
+Modified:
+   /
+   freenx-server/trunk/
+   freenx-server/trunk/nxloadconfig
+   freenx-server/trunk/nxsetup
+Log:
+ <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">r175 at Bluemoon</A>:  ffranz | 2005-09-03 18:38:35 +0200
+  <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">r137 at Bluemoon</A> (orig r131):  svm | 2005-08-28 16:30:00 +0200
+  SVM: initializing mirror for /mirror/freenx
+  <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">r163 at Bluemoon</A> (orig r145):  fabianx | 2005-08-31 21:00:34 +0200
+  First draft.
+  
+  <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">r164 at Bluemoon</A> (orig r146):  fabianx | 2005-08-31 21:31:50 +0200
+  Fixed --ignore-errors.
+  
+  <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">r165 at Bluemoon</A> (orig r147):  fabianx | 2005-08-31 21:35:11 +0200
+  Made smbmount / smbumount checks optional.
+  
+  
+  <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">r166 at Bluemoon</A> (orig r148):  fabianx | 2005-08-31 22:06:00 +0200
+  Backup of 2nd draft.
+  
+  <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">r167 at Bluemoon</A> (orig r149):  fabianx | 2005-08-31 22:38:04 +0200
+  First draft ready, some statements still need to be approved.
+  
+  <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">r168 at Bluemoon</A> (orig r150):  fabianx | 2005-08-31 22:42:30 +0200
+  Added Martin Konold proposal quote.
+  
+  <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">r169 at Bluemoon</A> (orig r151):  fabianx | 2005-09-01 04:17:03 +0200
+  Test for Manke on XP.
+  
+  <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">r170 at Bluemoon</A> (orig r152):  fabianx | 2005-09-01 04:19:58 +0200
+  Test.
+  
+  <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">r171 at Bluemoon</A> (orig r153):  pipitas | 2005-09-02 10:26:20 +0200
+  2nd version; exact quotes by Coolo and Martin still missing.
+  
+  <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">r172 at Bluemoon</A> (orig r154):  pipitas | 2005-09-02 21:41:03 +0200
+  Fixed typos and some messages given to users. I think
+  nxsetup needs more testing. Next release should probably
+  be a &quot;snapshot&quot; only.
+  
+  <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">r173 at Bluemoon</A> (orig r155):  pipitas | 2005-09-02 22:18:07 +0200
+  A few more fixes for strings (capitalisation where appropriate, 
+  trying to avoid confusing &quot;NX user&quot; and a &quot;special user named 
+  'nx'&quot;, etc.)
+  
+  
+  <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">r174 at Bluemoon</A> (orig r156):  pipitas | 2005-09-02 22:28:09 +0200
+  formatting fix (split long line into two)
+  
+ 
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:184
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:186
+
+
+Property changes on: freenx-server/trunk
+___________________________________________________________________
+Name: svk:merge
+   - dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx/freenx-server/branches/FreeNX-0.4:157
+   + dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx/freenx-server/branches/FreeNX-0.4:175
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2005-09-04 15:36:37 UTC (rev 161)
++++ freenx-server/trunk/nxloadconfig	2005-09-04 15:43:18 UTC (rev 162)
+@@ -452,9 +452,9 @@
+ 	! which &quot;$COMMAND_XAUTH&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_XAUTH=$COMMAND_XAUTH\&quot;&quot;
+ 	! which &quot;$COMMAND_SMBMOUNT&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_SMBMOUNT=$COMMAND_SMBMOUNT\&quot;&quot;
++		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;COMMAND_SMBMOUNT=$COMMAND_SMBMOUNT\&quot;. You'll not be able to use SAMBA. &quot;
+ 	! which &quot;$COMMAND_SMBUMOUNT&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_SMBUMOUNT=$COMMAND_SMBUMOUNT\&quot;&quot;
++		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;COMMAND_SMBUMOUNT=$COMMAND_SMBUMOUNT\&quot;. You'll not be able to use SAMBA.&quot;
+ 	! which &quot;$COMMAND_NETCAT&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_NETCAT=$COMMAND_NETCAT\&quot;&quot;
+ 	! which &quot;$COMMAND_SSH&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+
+Modified: freenx-server/trunk/nxsetup
+===================================================================
+--- freenx-server/trunk/nxsetup	2005-09-04 15:36:37 UTC (rev 161)
++++ freenx-server/trunk/nxsetup	2005-09-04 15:43:18 UTC (rev 162)
+@@ -57,11 +57,12 @@
+ if [ &quot;$INSTALL&quot; = &quot;no&quot; -a &quot;$UNINSTALL&quot; = &quot;no&quot; -a &quot;$AUTOMATIC&quot; = &quot;no&quot; -a &quot;$HELP&quot; = &quot;no&quot; ]
+ then
+ 	echo &quot;------&gt; You did select no action.&quot;
+-	echo &quot;        FreeNX guesses that you want to _install_ the&quot;
+-	echo &quot;        server.&quot;
+-	echo &quot;        Use --help to get help contents.&quot;
++	echo &quot;        FreeNX guesses that you want to _install_ the server.&quot;
++	echo &quot;        Type \&quot;y\&quot; to abort the installation at this point in time.&quot;
++	echo &quot;        \&quot;N\&quot; is the default and continues installation.&quot;
++	echo &quot;        Use \&quot;${0} --help\&quot; to get more detailed help hints.&quot;
+ 	echo &quot;&quot;
+-	echo -n &quot;Do you want to abort now? [y/N] &quot;
++	echo -n &quot; Do you want to abort now? [y/N] &quot;
+ 	read -n 1 CHOICE
+ 	echo
+ 	[ &quot;$CHOICE&quot; = &quot;y&quot; ] || INSTALL=&quot;yes&quot;
+@@ -76,22 +77,28 @@
+ 	echo &quot;        nxsetup --install [--setup-nomachine-key] [--uid &lt;nummber&gt;] [--clean [--purge]]&quot;
+ 	echo &quot;        nxsetup --uninstall [--purge]&quot;
+ 	echo
+-	echo &quot;  --help                 Displays this help message&quot;
+-	echo &quot;  --install              Install nessesary files and add the nx user&quot;
+-	echo &quot;	--ignore-errors	       check false configuration, but don't complain&quot;
++	echo &quot;  --help                 Display this help message.&quot;
++	echo &quot;  --install              Install necessary files and add the special user \&quot;nx\&quot;.&quot;
++	echo &quot;  --ignore-errors        Check for false configuration, but don't complain.&quot;
+ 	echo &quot;  --setup-nomachine-key  Allow login with the key shipped with the NoMachine&quot;
+-	echo &quot;                         client. This is not as secure, but it simplifies the &quot;
+-	echo &quot;                         configuration of clients.&quot;
++	echo &quot;                         client. This is fairly secure, and it simplifies the &quot;
++	echo &quot;                         configuration of clients. (Using a custom key pair.&quot;
++	echo &quot;                         increases security even more, but complicates the&quot;
++	echo &quot;                         configuration of clients.)&quot;
+ 	echo &quot;                         Use this option at your own risk.&quot;
+-	echo &quot;  --ssh2		       Additionally create commercial pubkey-support, beware&quot;
+-	echo &quot;			       own _commercial_ ssh2-key is not supported!.&quot;
+-	echo &quot;  --uid &lt;number&gt;         The nx user will be given the uid &lt;number&gt;.&quot;
+-	echo &quot;  --gid &lt;number&gt;         The nx user will be given the gid &lt;number&gt;.&quot;
+-	[ -n &quot;$LOCAL_USER_OPTION&quot; ] &amp;&amp; echo &quot;  --localuser            The nx user will be created locally using luseradd, for use in NIS and NISplus environments.&quot;
+-	echo &quot;  --clean                Performs an uninstall prior to the installation&quot;
+-	echo &quot;  --uninstall            Remove log and session files, as well as the nx user&quot;
+-	echo &quot;  --purge                Uninstall will remove extra configuration files and ssh&quot;
+-	echo &quot;                         keys as well. Note that node.conf will always be saved.&quot;
++	echo &quot;  --ssh2                 Create additionally commercial pubkey-support; beware:&quot;
++	echo &quot;                         own _commercial_ ssh2-key is not supported!&quot;
++	echo &quot;  --uid &lt;number&gt;         Give the uid &lt;number&gt; to the user \&quot;nx\&quot;.&quot;
++	echo &quot;  --gid &lt;number&gt;         Give the gid &lt;number&gt; to the user \&quot;nx\&quot;.&quot;
++	[ -n &quot;$LOCAL_USER_OPTION&quot; ] &amp;&amp; \
++	echo &quot;  --localuser            The special user \&quot;nx\&quot; will be created locally using&quot;
++	echo &quot;                         \&quot;luseradd\&quot;, for use in NIS and NISplus environments.&quot;
++	echo &quot;  --clean                Perform an uninstallation prior to installation.&quot;
++	echo &quot;  --uninstall            Remove log and session files, as well as the special&quot;
++	echo &quot;                         user \&quot;nx\&quot;.&quot;
++	echo &quot;  --purge                Remove extra configuration files and ssh keys when&quot;
++	echo &quot;                         performing a \&quot;--uninstall\&quot;.&quot;
++	echo &quot;                         Note that node.conf will always be saved.&quot;
+ 	exit 0
+ fi
+ #Undocumented
+@@ -109,10 +116,11 @@
+ if [ &quot;$INSTALL&quot; = &quot;yes&quot; -a &quot;$AUTOMATIC&quot; = &quot;no&quot; -a &quot;$SETUP_NOMACHINE_KEY&quot; = &quot;no&quot; ]
+ then
+ 	echo &quot;------&gt; It is recommended that you use the NoMachine key for&quot;
+-	echo &quot;        easier setup. At the moment FreeNX would create a custom&quot;
+-	echo &quot;        KeyPair and expect you to setup your clients manually. &quot;
++	echo &quot;        easier setup. If you answer \&quot;y\&quot;, FreeNX creates a custom&quot;
++	echo &quot;        KeyPair and expects you to setup your clients manually. &quot;
++	echo &quot;        \&quot;N\&quot; is default and uses the NoMachine key for installation.&quot;
+ 	echo &quot;&quot;
+-	echo -n &quot;        Do you really want to use your own keys? [y/N] &quot;
++	echo -n &quot; Do you want to use your own custom KeyPair? [y/N] &quot;
+ 	read -n 1 CHOICE
+ 	[ &quot;$CHOICE&quot; = &quot;y&quot; ] || SETUP_NOMACHINE_KEY=&quot;yes&quot;
+ fi
+@@ -226,7 +234,7 @@
+ 	
+ 	if ! nx_user_exists
+ 	then
+-		echo -n &quot;Setting up user nx ...&quot;
++		echo -n &quot;Setting up special user \&quot;nx\&quot; ...&quot;
+ 		useradd_nx
+ 		echo &quot;done&quot;
+ 	fi
+@@ -325,7 +333,7 @@
+ {
+ 	echo &quot;&quot;
+ 	echo &quot;----&gt; Testing your nxserver configuration ...&quot;
+-	[ &quot;$IGNORE_ERRORS&quot; = &quot;yes&quot; ] &amp;&amp; $NO_ERRORS=&quot;--ignore-errors&quot;
++	[ &quot;$IGNORE_ERRORS&quot; = &quot;yes&quot; ] &amp;&amp; NO_ERRORS=&quot;--ignore-errors&quot;
+ 	. $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig) --check $NO_ERRORS
+ 	echo &quot;&lt;---- done&quot;
+ 	echo &quot;&quot;
+@@ -354,7 +362,7 @@
+ 		echo 
+ 		echo &quot;Please check your ssh setup:&quot;
+ 		echo &quot;&quot;
+-		echo &quot;	- Make sure nx is one of the AllowUsers in sshd_config.&quot;
++		echo &quot;	- Make sure \&quot;nx\&quot; is one of the AllowUsers in sshd_config.&quot;
+ 		echo &quot;	- Make sure your sshd allows public key authentication.&quot;
+ 		echo &quot;	- Make sure your sshd is really running on port $SSHD_PORT.&quot;
+ 		echo &quot;	- Make sure your sshd_config AuthorizedKeysFile in sshd_config is set to $SSH_AUTHORIZED_KEYS.&quot;
+@@ -368,7 +376,7 @@
+ {
+ 	if nx_user_exists
+ 	then
+-		echo -n &quot;Removing user nx ...&quot;
++		echo -n &quot;Removing special user \&quot;nx\&quot; ...&quot;
+ 		
+ 		if [ &quot;$SETUP_LOCAL_USER&quot; = &quot;yes&quot; ]
+ 		then
+@@ -398,7 +406,7 @@
+ 	
+ 	if [ &quot;$PURGE&quot; = &quot;yes&quot; -a -e &quot;$NX_HOME_DIR&quot; ]
+ 	then
+-		echo -n &quot;Removing nx home directory ...&quot;
++		echo -n &quot;Removing home directory of special user \&quot;nx\&quot; ...&quot;
+ 		rm -f -r &quot;$NX_HOME_DIR&quot; 2&gt;/dev/null
+ 		rmdir -p $(dirname &quot;$NX_HOME_DIR&quot;) 2&gt;/dev/null
+ 		echo &quot;done&quot;
+@@ -433,8 +441,8 @@
+ 		if [ &quot;$ENABLE_USER_DB&quot; = &quot;1&quot; ]
+ 		then
+ 			echo &quot;  Users will be able to login with their normal passwords,&quot;
+-			echo &quot;  but they have to be registered in the nx database to do so.&quot;
+-			echo &quot;  To add new users to the nx database do:&quot;
++			echo &quot;  but they have to be registered in the NX database to do so.&quot;
++			echo &quot;  To add new users to the NX user database do:&quot;
+ 			echo &quot;    nxserver --adduser &lt;username&gt;&quot;
+ 		else
+ 			echo &quot;  All users will be able to login with their normal passwords.&quot;
+@@ -455,9 +463,9 @@
+ 		fi
+ 	else
+ 		echo &quot;PAM authentication disabled.&quot;
+-		echo &quot;  Only users in the nx database will be able to log in.&quot;
++		echo &quot;  Only users in the NX user database will be able to log in.&quot;
+ 		echo
+-		echo &quot;  To add new users to the nx database do:&quot;
++		echo &quot;  To add new users to the NX user database do:&quot;
+ 		echo &quot;    nxserver --adduser &lt;username&gt;&quot;
+ 		echo &quot;  Afterwards change the password with:&quot;
+ 		echo &quot;    nxserver --passwd &lt;username&gt;&quot;
+@@ -489,10 +497,10 @@
+ 	echo 
+ 	if [ &quot;$PURGE&quot; = &quot;yes&quot; ]
+ 	then
+-		echo &quot;To complete the uninstallation process, remove the nx scripts in $PATH_BIN&quot;
++		echo &quot;To complete the uninstallation process, remove the FreeNX scripts in $PATH_BIN&quot;
+ 		echo &quot;and the $NX_ETC_DIR/node.conf configuration file.&quot;
+ 	else
+-		echo &quot;To complete the uninstallation process, remove the nx scripts in $PATH_BIN&quot;
++		echo &quot;To complete the uninstallation process, remove the FreeNX scripts in $PATH_BIN&quot;
+ 		echo
+ 		echo &quot;Configuration files and ssh keys are saved in case you would like to reinstall&quot;
+ 		echo &quot;freenx at a later time. To remove them, please run 'nxsetup --uninstall --purge'&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000287.html">[Freenx-cvs] r161 - / freenx-server/branches/FreeNX-0.4
+</A></li>
+	<LI>Next message: <A HREF="000289.html">[Freenx-cvs] r163 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#288">[ date ]</a>
+              <a href="thread.html#288">[ thread ]</a>
+              <a href="subject.html#288">[ subject ]</a>
+              <a href="author.html#288">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

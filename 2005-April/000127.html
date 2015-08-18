@@ -1,0 +1,256 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fabianx modified 2 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-April/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%202%20files&In-Reply-To=%3C426C51CE.mail5AH11BDD3%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000126.html">
+   <LINK REL="Next"  HREF="000128.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fabianx modified 2 files</H1>
+    <B>fabianx</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%202%20files&In-Reply-To=%3C426C51CE.mail5AH11BDD3%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fabianx modified 2 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Mon Apr 25 04:11:26 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000126.html">[Freenx-cvs] CVS: freenx - jonno modified 2 files
+</A></li>
+        <LI>Next message: <A HREF="000128.html">[Freenx-cvs] CVS: freenx - jonno modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#127">[ date ]</a>
+              <a href="thread.html#127">[ thread ]</a>
+              <a href="subject.html#127">[ subject ]</a>
+              <a href="author.html#127">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fabianx
+Date:      2005-04-25 02:11:25 GMT
+Modified:  .        ChangeLog nxclient
+Log:
+Completed support for -printer in nxclient together with handling of drivers cache.
+
+The component now works exactly like the commercial nxclient.
+
+Revision  Changes    Path
+1.47      +2 -0      freenx/ChangeLog
+
+
+rev 1.47, prev_rev 1.46
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.46
+retrieving revision 1.47
+diff -u -r1.46 -r1.47
+--- ChangeLog	24 Apr 2005 16:03:37 -0000	1.46
++++ ChangeLog	25 Apr 2005 02:11:24 -0000	1.47
+@@ -29,6 +29,8 @@
+ 	  in nxsetup.
+ 	* Added ENABLE_FORCE_ENCRYPTION to enforce the usage of encryption on 
+ 	  the server.
++	* Added nxprint and added -printer to nxclient together with handling
++	  of drivers cache.
+ 
+ XX.03.2005 FreeNX 0.3.1-CVS
+ 	* Fixed keyboard mapping problems.
+
+
+
+1.5       +71 -12    freenx/nxclient
+
+
+rev 1.5, prev_rev 1.4
+Index: nxclient
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxclient,v
+retrieving revision 1.4
+retrieving revision 1.5
+diff -u -r1.4 -r1.5
+--- nxclient	24 Mar 2005 01:33:19 -0000	1.4
++++ nxclient	25 Apr 2005 02:11:24 -0000	1.5
+@@ -9,7 +9,7 @@
+ #       but we set it to a &quot;good value&quot; anyway in case 
+ #       it does check it someday.
+ #
+-# CVS: $Id: nxclient,v 1.4 2005/03/24 01:33:19 fabianx Exp $
++# CVS: $Id: nxclient,v 1.5 2005/04/25 02:11:24 fabianx Exp $
+ #
+ # ========================================================================
+ 
+@@ -73,6 +73,9 @@
+ #	set &lt;name&gt; &lt;driver&gt; &lt;description&gt; - sets the current driver and description for name
+ #	getvendlist - gets a list of vendors
+ #	getdrvlist &lt;vendor&gt; - gets a list of drivers for vendor
++#	getextdrvlist &lt;vendor&gt; - gets an extended list (with driver and 
++#                                description) of drivers for vendor
++#	getdesc &lt;driver&gt; - gets the description for driver &lt;driver&gt;
+ #	getlist - gets a list of drivers
+ 
+ #
+@@ -104,10 +107,17 @@
+ 			mv -f $UTILITY_DRIVERS_CACHE.tmp $UTILITY_DRIVERS_CACHE
+ 		;;
+ 		getvendlist)
+-			$UTILITY_NXPRINT -d | awk -F'|' '{ print $2 }' | uniq
++			$UTILITY_NXPRINT -d | awk -F'|' '{ print $2 }' | uniq | tr '\n' '|'
+ 		;;
+ 		getdrvlist)
+-			$UTILITY_NXPRINT -d | awk -F'|' '($2==&quot;'$2'&quot;) { print $4 }'
++			$UTILITY_NXPRINT -d | awk -F'|' '($2==&quot;'$2'&quot;) { print $4}' | tr '\n' '|'
++		;;
++		getextdrvlist)
++			$UTILITY_NXPRINT -d | awk -F'|' '($2==&quot;'$2'&quot;) { print $4 &quot;|&quot; $3 }'
++		;;
++
++		getdesc)
++			$UTILITY_NXPRINT -d | awk -F'|' '($4==&quot;'$2'&quot;) { print $3}'
+ 		;;
+ 		getlist)
+ 			$UTILITY_NXPRINT -d
+@@ -148,12 +158,38 @@
+ 
+ xmessage_printer_ask()
+ {
+-	$xmessage -buttons &quot;Ok:0,Configure:1,Cancel:2&quot; -center &quot;$DIALOG_MESSAGE&quot;
++	$xmessage -buttons &quot;Ok:100,Configure:101,Cancel:102&quot; -center &quot;$DIALOG_MESSAGE&quot;
++	RC=$?
++	[ $RC -lt 100 ] &amp;&amp; return 2
++	let RC=$RC-100
++	return $RC
+ }
+ 
+-xmessage_printer()
++xmessage_printer_configure()
+ {
+-	:
++	IFS=','
++	$xmessage -buttons &quot;$*&quot; -center &quot;$DIALOG_MESSAGE&quot;
++	RC=$?
++	unset IFS
++	VENDOR=&quot;&quot;
++	if [ $RC -gt 100 ]
++	then
++		let NR=$RC-100
++		VENDOR=&quot;${!NR}&quot;
++	fi
++	echo &quot;$VENDOR&quot;
++}
++
++xmessage_printer_configure_vendor()
++{
++	IFS='|' VENDOR_LIST=( $(utility_printer getvendlist) )
++	xmessage_printer_configure &quot;${VENDOR_LIST[@]}&quot;
++}
++
++xmessage_printer_configure_driver()
++{
++	IFS='|' DRIVER_LIST=( $(utility_printer getdrvlist &quot;$1&quot;) )
++	xmessage_printer_configure &quot;${DRIVER_LIST[@]}&quot;
+ }
+ 
+ #
+@@ -198,17 +234,26 @@
+ 
+ xdialog_printer_ask()
+ {
+-		$DIALOG --title &quot;$DIALOG_CAPTION&quot; --buttons-style text --ok-label &quot;Ok&quot; --cancel-label &quot;Configure&quot; --yesno &quot;$DIALOG_MESSAGE\n\nClose window to cancel.&quot; 400x250
++	$DIALOG --title &quot;$DIALOG_CAPTION&quot; --buttons-style text --ok-label &quot;Ok&quot; --cancel-label &quot;Configure&quot; --yesno &quot;$DIALOG_MESSAGE\n\nClose window to cancel.&quot; 400x250
+ 	RC=$?
+ 	[ $RC -eq 255 ] &amp;&amp; return 2
+ 	return $RC
+ }
+ 
+-xdialog_printer()
++xdialog_printer_configure_vendor()
+ {
+-	:
++	IFS='|' VENDOR_LIST=( $(utility_printer getvendlist | sed 's/|/||off|/g') )
++	$DIALOG --stdout --title &quot;$DIALOG_CAPTION&quot; --radiolist &quot;$DIALOG_MESSAGE&quot; 0 0 6 &quot;${VENDOR_LIST[@]}&quot;
+ }
+ 
++# xdialog_printer_configure_driver vendor old_driver
++xdialog_printer_configure_driver()
++{
++	IFS='|' XDIALOG_LIST=( $(utility_printer getextdrvlist &quot;$1&quot; | sed 's/$/|off/g; /'&quot;$2&quot;'/ s/|off/|on/g' | tr '\n' '|') )
++	$DIALOG --stdout --title &quot;$DIALOG_CAPTION&quot; --radiolist &quot;$DIALOG_MESSAGE&quot; 0 0 6 &quot;${XDIALOG_LIST[@]}&quot;
++}
++
++
+ #
+ # helper functions
+ #
+@@ -225,17 +270,31 @@
+ 		DIALOG_MESSAGE=$(echo -e &quot;Found driver for printer $DIALOG_PRINTER.\n\nOld choice was: ${PRINTER_INFORMATION[3]}.\n\nIf you want to keep the settings click on 'Ok' \n- else click on 'Configure'.&quot;) ${dialog_interface}_printer_ask
+ 		RC=$?
+ 		# bail out with exit code 2 in case the user cancelled the operation
+-		[ $RC -eq 2 ] &amp;&amp; exit 2
++		[ $RC -eq 2 ] &amp;&amp; echo &quot;cancel: aborted&quot; &amp;&amp; exit 2
+ 		[ $RC -eq 0 ] &amp;&amp; PRINTER_CONFIGURE=&quot;no&quot;
+ 	fi
++	
++	VENDOR=&quot;&quot;
++	OLD_DRIVER=&quot;${PRINTER_INFORMATION[2]}&quot;
+ 
+ 	if [ &quot;$PRINTER_CONFIGURE&quot; = &quot;yes&quot; ]
+ 	then
+-		DIALOG_MESSAGE=&quot;Not implemented.&quot; ${dialog_interface}_ok
++		DRIVER=&quot;&quot;
++		VENDOR=$(DIALOG_MESSAGE=&quot;Choose vendor for printer $DIALOG_PRINTER.&quot; ${dialog_interface}_printer_configure_vendor)
++		[ -n &quot;$VENDOR&quot; ] &amp;&amp; DRIVER=$(DIALOG_MESSAGE=&quot;Choose driver for printer $DIALOG_PRINTER.&quot; ${dialog_interface}_printer_configure_driver &quot;$VENDOR&quot; &quot;${OLD_DRIVER:-invalid}&quot;)
++		# set the new printer driver
++		if [ -n &quot;$DRIVER&quot; ]
++		then
++			DESC=$(utility_printer getdesc &quot;$DRIVER&quot;)
++			utility_printer set &quot;$DIALOG_PRINTER&quot; &quot;$DRIVER&quot; &quot;$DESC&quot;
++		fi
++	else
++		DRIVER=&quot;$OLD_DRIVER&quot;
+ 	fi
+ 
+ 	# echo the choosen &lt;ppdfile&gt; to stdout
+-	echo &quot;${PRINTER_INFORMATION[2]}&quot;
++	[ -n &quot;$DRIVER&quot; ] &amp;&amp; echo &quot;$DRIVER&quot;
++	[ -z &quot;$DRIVER&quot; ] &amp;&amp; echo &quot;cancel: aborted&quot; &amp;&amp; exit 2
+ 			
+ 	exit 0
+ }
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000126.html">[Freenx-cvs] CVS: freenx - jonno modified 2 files
+</A></li>
+	<LI>Next message: <A HREF="000128.html">[Freenx-cvs] CVS: freenx - jonno modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#127">[ date ]</a>
+              <a href="thread.html#127">[ thread ]</a>
+              <a href="subject.html#127">[ subject ]</a>
+              <a href="author.html#127">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

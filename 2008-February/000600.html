@@ -1,0 +1,94 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r474 - nxcl/lib
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r474%20-%20nxcl/lib&In-Reply-To=%3C200802050837.m158b6cN002959%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000599.html">
+   <LINK REL="Next"  HREF="000601.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r474 - nxcl/lib</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r474%20-%20nxcl/lib&In-Reply-To=%3C200802050837.m158b6cN002959%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r474 - nxcl/lib">gwright at mail.berlios.de
+       </A><BR>
+    <I>Tue Feb  5 09:37:06 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000599.html">[Freenx-cvs] r473 - qtnx
+</A></li>
+        <LI>Next message: <A HREF="000601.html">[Freenx-cvs] r475 - nxcl/lib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#600">[ date ]</a>
+              <a href="thread.html#600">[ thread ]</a>
+              <a href="subject.html#600">[ subject ]</a>
+              <a href="author.html#600">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2008-02-05 09:37:05 +0100 (Tue, 05 Feb 2008)
+New Revision: 474
+
+Modified:
+   nxcl/lib/nxclientlib.cpp
+Log:
+More general tweaks
+
+
+Modified: nxcl/lib/nxclientlib.cpp
+===================================================================
+--- nxcl/lib/nxclientlib.cpp	2008-02-05 08:37:03 UTC (rev 473)
++++ nxcl/lib/nxclientlib.cpp	2008-02-05 08:37:05 UTC (rev 474)
+@@ -694,7 +694,6 @@
+     if (proxyData.encrypted) {
+         data &lt;&lt; &quot;nx/nx&quot; &lt;&lt; x11Display &lt;&lt; &quot;,session=session,encryption=1,cookie=&quot;
+             &lt;&lt; proxyData.cookie
+-            &lt;&lt; &quot;,root=&quot; &lt;&lt; home &lt;&lt; &quot;/.nx&quot;
+             &lt;&lt; &quot;,id=&quot; &lt;&lt; proxyData.id &lt;&lt; &quot;,listen=&quot; 
+             &lt;&lt; proxyData.port &lt;&lt; &quot;:&quot; &lt;&lt; proxyData.display &lt;&lt; &quot;\n&quot;;
+         // may also need shmem=1,shpix=1,font=1,product=...
+@@ -702,8 +701,7 @@
+     } else {
+         // Not tested yet
+         data &lt;&lt; &quot;nx/nx&quot; &lt;&lt; x11Display &lt;&lt; &quot;,session=session,cookie=&quot; &lt;&lt; proxyData.cookie
+-            &lt;&lt; &quot;,root=&quot; &lt;&lt; home
+-            &lt;&lt; &quot;/.nx,id=&quot; &lt;&lt; proxyData.id
++            &lt;&lt; &quot;,id=&quot; &lt;&lt; proxyData.id
+             // &lt;&lt; &quot;,connect=&quot; &lt;&lt; proxyData.server &lt;&lt; &quot;:&quot; &lt;&lt; proxyData.display
+             &lt;&lt; &quot;,listen=&quot; &lt;&lt; proxyData.port &lt;&lt; &quot;:&quot; &lt;&lt; proxyData.display
+             &lt;&lt; &quot;\n&quot;;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000599.html">[Freenx-cvs] r473 - qtnx
+</A></li>
+	<LI>Next message: <A HREF="000601.html">[Freenx-cvs] r475 - nxcl/lib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#600">[ date ]</a>
+              <a href="thread.html#600">[ thread ]</a>
+              <a href="subject.html#600">[ subject ]</a>
+              <a href="author.html#600">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

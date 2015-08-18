@@ -1,0 +1,101 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - jonno modified nxserver
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-July/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20jonno%20modified%20nxserver&In-Reply-To=%3C42D13B0F.mailDHT1WJPNY%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000177.html">
+   <LINK REL="Next"  HREF="000179.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - jonno modified nxserver</H1>
+    <B>jonno</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20jonno%20modified%20nxserver&In-Reply-To=%3C42D13B0F.mailDHT1WJPNY%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - jonno modified nxserver">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Sun Jul 10 17:13:19 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000177.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+        <LI>Next message: <A HREF="000179.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#178">[ date ]</a>
+              <a href="thread.html#178">[ thread ]</a>
+              <a href="subject.html#178">[ subject ]</a>
+              <a href="author.html#178">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      jonno
+Date:      2005-07-10 15:13:19 GMT
+Modified:  .        nxserver
+Log:
+Fixing bug #4479. NX_LOGFILE will now be created if the nx user has permision to do so (using touch)
+
+Revision  Changes    Path
+1.63      +2 -1      freenx/nxserver
+
+
+rev 1.63, prev_rev 1.62
+Index: nxserver
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxserver,v
+retrieving revision 1.62
+retrieving revision 1.63
+diff -u -r1.62 -r1.63
+--- nxserver	6 Jul 2005 15:59:05 -0000	1.62
++++ nxserver	10 Jul 2005 15:13:19 -0000	1.63
+@@ -11,7 +11,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxserver,v 1.62 2005/07/06 15:59:05 fux Exp $
++# CVS: $Id: nxserver,v 1.63 2005/07/10 15:13:19 jonno Exp $
+ #
+ 
+ # Read the config file
+@@ -423,6 +423,7 @@
+ }
+ 
+ # Start!
++[ &quot;$NX_LOG_LEVEL&quot; -ge &quot;1&quot; ] &amp;&amp; touch &quot;$NX_LOGFILE&quot; &gt;/dev/null 2&gt;&amp;1
+ log 3 &quot;-- NX SERVER START: $@&quot;
+ 
+ if [ &quot;$ENABLE_SERVER_FORWARD&quot; = &quot;1&quot; -a -n &quot;$SERVER_FORWARD_HOST&quot; ]
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000177.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+	<LI>Next message: <A HREF="000179.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#178">[ date ]</a>
+              <a href="thread.html#178">[ thread ]</a>
+              <a href="subject.html#178">[ subject ]</a>
+              <a href="author.html#178">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

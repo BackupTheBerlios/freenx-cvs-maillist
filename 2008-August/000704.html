@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r570 - trunk/freenx-server
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r570%20-%20trunk/freenx-server&In-Reply-To=%3C200808180226.m7I2Q7R7000742%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000703.html">
+   <LINK REL="Next"  HREF="000705.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r570 - trunk/freenx-server</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r570%20-%20trunk/freenx-server&In-Reply-To=%3C200808180226.m7I2Q7R7000742%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r570 - trunk/freenx-server">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Mon Aug 18 04:26:07 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000703.html">[Freenx-cvs] r569 - in trunk/freenx-server: . nxserver-suid
+</A></li>
+        <LI>Next message: <A HREF="000705.html">[Freenx-cvs] r571 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#704">[ date ]</a>
+              <a href="thread.html#704">[ thread ]</a>
+              <a href="subject.html#704">[ subject ]</a>
+              <a href="author.html#704">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-08-18 04:26:05 +0200 (Mon, 18 Aug 2008)
+New Revision: 570
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/node.conf.sample
+   trunk/freenx-server/nxloadconfig
+   trunk/freenx-server/nxserver
+Log:
++       * Automatically disabled slave mode, when load balancing is activated.
++         (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++       * Made ENABLE_SLAVE_MODE=&quot;1&quot; the new default as its faster
++         and more reliable. If you encounter any problems with it,
++         disable it in node.conf.
++         (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-18 02:16:25 UTC (rev 569)
++++ trunk/freenx-server/ChangeLog	2008-08-18 02:26:05 UTC (rev 570)
+@@ -96,6 +96,12 @@
+ 	* Added disabled nxserver-suid wrapper with help from Google. To 
+ 	  enable it uncomment the suid_install target in Makefile.
+ 	  ( Alistair Riddoch &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">alriddoch at google.com</A>&gt;, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Automatically disabled slave mode, when load balancing is activated.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Made ENABLE_SLAVE_MODE=&quot;1&quot; the new default as its faster
++	  and more reliable. If you encounter any problems with it,
++	  disable it in node.conf.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
+ 14.03.2008 FreeNX 0.7.2 &quot;Priscilla Edition&quot;
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/node.conf.sample
+===================================================================
+--- trunk/freenx-server/node.conf.sample	2008-08-18 02:16:25 UTC (rev 569)
++++ trunk/freenx-server/node.conf.sample	2008-08-18 02:26:05 UTC (rev 570)
+@@ -104,7 +104,7 @@
+ # For this to work the binary nxserver-helper has to be installed in 
+ # PATH_BIN.
+ #
+-#ENABLE_SLAVE_MODE=&quot;0&quot;
++#ENABLE_SLAVE_MODE=&quot;1&quot;
+ 
+ # If ENABLE_LOG_FAILED_LOGINS=&quot;1&quot; then failed login attempts are logged to the system
+ # auth.log.
+
+Modified: trunk/freenx-server/nxloadconfig
+===================================================================
+--- trunk/freenx-server/nxloadconfig	2008-08-18 02:16:25 UTC (rev 569)
++++ trunk/freenx-server/nxloadconfig	2008-08-18 02:26:05 UTC (rev 570)
+@@ -98,7 +98,7 @@
+ ENABLE_FORCE_ENCRYPTION=&quot;0&quot;
+ SSHD_CHECK_IP=&quot;0&quot;
+ 
+-ENABLE_SLAVE_MODE=&quot;0&quot;
++ENABLE_SLAVE_MODE=&quot;1&quot;
+ 
+ ENABLE_LOG_FAILED_LOGINS=&quot;1&quot;
+ 
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-18 02:16:25 UTC (rev 569)
++++ trunk/freenx-server/nxserver	2008-08-18 02:26:05 UTC (rev 570)
+@@ -658,6 +658,13 @@
+ NXNODE_LOGIN_SLAVE_ENABLED=&quot;0&quot;
+ NXNODE_LOGIN_SLAVE=&quot;&quot;
+ 
++# slave mode does not work with load balancing
++if [ -n &quot;$LOAD_BALANCE_SERVERS&quot; -a &quot;$ENABLE_SLAVE_MODE&quot; = &quot;1&quot; ]
++then
++	log 2 &quot;Warning: Disabled slave mode. It does not work together with load balancing.&quot;
++	ENABLE_SLAVE_MODE=&quot;0&quot;
++fi
++
+ if [ &quot;$ENABLE_SLAVE_MODE&quot; = &quot;1&quot; -a &quot;$NXSERVER_HELPER_ACTIVE&quot; != &quot;1&quot; -a -z &quot;$NX_TRUSTED_USER&quot; ]
+ then
+ 	export SSH_ORIGINAL_COMMAND
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000703.html">[Freenx-cvs] r569 - in trunk/freenx-server: . nxserver-suid
+</A></li>
+	<LI>Next message: <A HREF="000705.html">[Freenx-cvs] r571 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#704">[ date ]</a>
+              <a href="thread.html#704">[ thread ]</a>
+              <a href="subject.html#704">[ subject ]</a>
+              <a href="author.html#704">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

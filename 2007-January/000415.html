@@ -1,0 +1,756 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r285 - in freenx-server/tags: . FreeNX-0.6.0
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r285%20-%20in%20freenx-server/tags%3A%20.%20FreeNX-0.6.0&In-Reply-To=%3C200701230311.l0N3BJ1e013643%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000414.html">
+   <LINK REL="Next"  HREF="000416.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r285 - in freenx-server/tags: . FreeNX-0.6.0</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r285%20-%20in%20freenx-server/tags%3A%20.%20FreeNX-0.6.0&In-Reply-To=%3C200701230311.l0N3BJ1e013643%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r285 - in freenx-server/tags: . FreeNX-0.6.0">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Tue Jan 23 04:11:19 CET 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000414.html">[Freenx-cvs] r284 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000416.html">[Freenx-cvs] r286 - freenx-website
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#415">[ date ]</a>
+              <a href="thread.html#415">[ thread ]</a>
+              <a href="subject.html#415">[ subject ]</a>
+              <a href="author.html#415">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-01-23 04:11:18 +0100 (Tue, 23 Jan 2007)
+New Revision: 285
+
+Added:
+   freenx-server/tags/FreeNX-0.6.0/
+   freenx-server/tags/FreeNX-0.6.0/ChangeLog
+   freenx-server/tags/FreeNX-0.6.0/nxclient
+Removed:
+   freenx-server/tags/FreeNX-0.6.0/ChangeLog
+   freenx-server/tags/FreeNX-0.6.0/nxclient
+Log:
+Tagged 0.6.0 release.
+
+
+
+Copied: freenx-server/tags/FreeNX-0.6.0 (from rev 283, freenx-server/trunk)
+
+Deleted: freenx-server/tags/FreeNX-0.6.0/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-01-23 02:15:28 UTC (rev 283)
++++ freenx-server/tags/FreeNX-0.6.0/ChangeLog	2007-01-23 03:11:18 UTC (rev 285)
+@@ -1,325 +0,0 @@
+-23.01.2007 FreeNX 0.6.0 &quot;Juliana birthday edition&quot;
+-	* Opened the 0.6.0 branch.
+-	* Added nxnode slave mode.
+-	* General code cleanup.
+-		* Huge cleanup of nxnode.
+-	* Removed &quot;no-x11-forwarding&quot; from keys to allow client to use the
+-	  faster interactive sessions.
+-	* Fixed nxsetup automatic testing of sessions and cleared up
+-	  explanations.
+-	* Added support for NX 2.0.0 style nxclient dialogs.
+-	* Support for NX 2.0.0 backend in nxloadconfig.
+-	* Fixed cups printing (added username and password).
+-	* Fixed one more stray tail process.
+-	* Added example script for &quot;load&quot; based loadbalancing.
+-	* Fixed spaces in parameters for NX Client 2.0.0.
+-	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">ssycplkbocve at spammotel.com</A>)
+-	* Added version 2.1.0 support.
+-	* Fixed LD_LIBRARY_PRELOAD default path in nxloadconfig.
+-	* Added autodetection of backend.
+-
+-01.07.2006 FreeNX 0.5.0 &quot;UKUUG 2006 Edition&quot;
+-	* Opened the 0.5.0 branch.
+-	* Added load balancing.
+-	* Completely removed support for 1.4.0 backend.
+-	* Rootless mode is now the default.
+-	* Reworked nxnode / suspend on connection failure should work now.
+-	* Added support for &quot;Running&quot; sessions.
+-	* Fixed --send command. (Emmanuel Blindauer &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">freenx at mooby.net</A>&gt;)
+-	* Fixed resume with nxclient &gt;=1.5.0-106 for Windows.
+-	* Fixed rootless sessions with Windows nxclient.
+-	* Fixed keyboard issues by enabling the keybd channel.
+-	* Fixed one more stray tail process and being able to
+-	  cleanup after a hopelessly failed reconnection. (i.e. agent died)
+-	* Fixed detection of xauth / netcat. Added option to disable extra
+-	  checks.
+-	* Fixed --terminate / --suspend when hostname has a '-' in it.
+-	  (Emmanuel Blindauer &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">freenx at mooby.net</A>&gt;)
+-	* ESD_NO_SPAWN is always set when ESPEAKER is set.
+-	  (&quot;Felipe Alfaro Solana&quot; &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">felipe.alfaro at gmail.com</A>&gt;)
+-	* Added perl replacement for 'rev' function on Sun OS 5.10.
+-	* Fixed NODE_AUTOSTART to be unable to block sessions.
+-	* Fixed stale sessions introduced by the new session handling model.
+-	* Added usage of TCP NODELAY option.
+-	* Fixed loadbalancing IP issues.
+-	* Added --force-terminate to remove session info.
+-	  Fixed issue with suspend/terminate commands.
+-	* Added correct errorcode 596 instead of 504.
+-	* Implemented &quot;round-robin&quot; and &quot;load&quot; loadbalancing algorithms.
+-	  Cleaned up node.conf keys.
+-	* Fixed help for --restart.
+-	* Fixed session_running function, which fixes all remaining stale
+-	  session problems.
+-	* Removed termination of nxagent in case of rootless mode.
+-	  (Fixes kontact without --nofork)
+-	* Last minute fixes for new functions using rev.
+-	* Added experimental last minute support for NX 2.0.0 backend.
+-	  (set ENABLE_2_0_0_BACKEND=1)
+-
+-XX.XX.2006 FreeNX 0.4.5 &quot;aKademy Edition&quot;
+-	* Made nxsetup more user-friendly and hopefully finally failsafe.
+-	* Added --agent to nxnode/nxserver to allow easier debugging.
+-	* Added addgroup/groupadd to nxsetup
+-	* Added --ignore-errors support on nxsetup/nxloadconfig
+-	* Added check for expect.
+-
+-06.08.2005 FreeNX 0.4.4 &quot;UKUUG Enterprise Edition&quot;
+-	* Added ENABLE_1_5_0_BACKEND configuration directive:
+-		* Fixed fullscreen support in nxdesktop (still feels more like
+-		  'Available Area', but with Ctrl-Alt-F you can get &quot;real&quot;
+-		  fullscreen)
+-	* Added COMMAND_MD5SUM directive
+-	* Security: $USER_FAKE_HOME/.nx now gets 0700
+-	* Fixed support for CUPS forwarding.
+-	* Added secure re-transmitting to client.
+-	* Removed grep from getent to not search through the whole database.
+-	  (Suggestion by &quot;Matthew S. Harris&quot; &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">mharris at google.com</A>&gt;,
+-	                 &quot;Ed Warnicke&quot;       &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">eaw at cisco.com</A>&gt;)
+-	* Set sleeps to 60 instead of 10 seconds, removed one wrong trap.
+-	  (Suggestion by &quot;Sunil&quot; &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">funtoos at yahoo.com</A>&gt;)
+-	* Made automatic timeout configurable.
+-	  (Patch by &quot;Ed Warnicke&quot; &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">eaw at cisco.com</A>&gt;)
+-	* Made nxsetup more enterprise friendly. Added --localuser
+-	  (RedHat only) and --gid. 
+-	  (Based on a patch by &quot;Ed Warnicke&quot; &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">eaw at cisco.com</A>&gt;)
+-	* Fixed resume of multiple sessions.	
+-
+-28.07.2005 FreeNX 0.4.3 &quot;NoMachine 1.5.0 Edition&quot;
+-	* Fixed reconnection problems with !M 1.5.0 client.
+-	* Fixed reconnection problems with !M 1.5.0 backend.
+-	* Added evaluation of $NX_ETC_DIR/node.conf.d/* config files.
+-	* Fixed a possible security problem. (The client was able
+-	  to overwrite parameters set by the server)
+-	* Added ENABLE_1_5_0_BACKEND configuration directive:
+-		* Added support for fake cookie authentication with
+-		  !M 1.5.0 client and 1.5.0 backend.
+-		* Fixed nxagent termination problems with !M 1.5.0
+-		  backend.
+-		* Added RDP highcolor support for !M 1.5.0 client
+-		  with !M 1.5.0 backend.
+-	* Added secure logging - Passwords are no longer shown in log files.
+-	* Security: Certain passwords for VNC/RDP could have been visible via 
+-	  `ps aux`.
+-	* Added experimental usermode authentication scheme.
+-	  (Disabled by default)
+-
+-16.07.2005 FreeNX 0.4.2 &quot;Solaris / Bugfix / Linux Infotag Pforzheim Edition&quot;
+-	* Removed forwarding support via &quot;freenx.&lt;user&gt;&quot;, because it was
+-	  buggy.
+-	* Cleaned up lots of code.
+-		* Fixed one case of a left over file.
+-		* Removed one unnecessary usage of a temporary file.
+-	* Added exit handlers in nxserver and nxnode for more stability on 
+-	  reboot of system.
+-	* Changed nxnode to be much more stable.
+-		* Catched one additional &quot;unclean termination of nxagent&quot; 
+-		  case, which lead to &quot;zombie&quot; sessions.
+-	* Reworked reconnection support for more stability.
+-		* Added displaying of reconnection failure in
+-		  system log / client ssh log.
+-	* Added even more possibilities to catch and report session startup 
+-	  failures.
+-	* Fixed PNG and JPEG-levels pack method.
+-	* Added usage of netcat -z to check that the port is really not used by
+-	  another agent.
+-	* Added nxserver --cleanup, which terminates all running sessions.
+-	  Useful after a power outage.
+-	* Fixed nxclient invocation with non-standard installation path
+-	* Added detection of SSH2_CLIENT variable (commercial ssh)
+-	* Finally fixed problems with GNOME.
+-	* FINALLY added Solaris Support Patch.
+-
+-24.06.2005 FreeNX 0.4.1 &quot;LinuxTag Edition&quot;
+-	* Fixed a small security problem giving access to session database.
+-	* Added support for 1.5.0 OSS components. (especially rootless mode)
+-	* Fixed Filesharing over the Internet. (Thanks to <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">rogierm at users.berlios.de</A>)
+-	* Fixed Resume on Windows with non-fullscreen sessions.
+-	* Added suspend/resume support for 1.5.0 OSS components.
+-	* Fixed display of suspended sessions in nxserver --list.
+-
+-04.05.2005 FreeNX 0.4.0 &quot;SambaXP Edition&quot;
+-	* Opened the 0.4.0 branch.
+-	* Added initial support for filesharing via samba.
+-	* Improvements to be more node.conf compatible.
+-	* Added COMMAND_NETCAT, COMMAND_SSH &amp; COMMAND_SSH_KEYGEN directive
+-	* Added support for 'nxloadconfig --check' to validate node.conf 
+-	  settings
+-	* Added initial support for sound (esd/artsd).
+-	* Added optional support for utmp/wtmp/lastlog database.
+-	* Removed support for OSS components prior version 1.4.0 in nxnode.
+-	  Added -option option to nxagent/nxdesktop/nxviewer.
+-	* Added forwarding to commercial server via destination port.
+-	* Added more compatible getparam function
+-	* Sets LD_PRELOAD for applications and LD_LIBRARY_PATH for 
+-	  nxagent/nxproxy by default.
+-		- SET_LD_LIBRARY_PATH replaces NX_NOMACHINE_WAY and is 
+-		  enabled by default, as it is now safe to do so
+-	* Implemented SSHD_CHECK_IP directive.
+-	* Added the SESSION_HISTORY directive. Session history will by default 
+-	  be kept for 30 days.
+-	* Implemented DEFAULT_X_WM for unix-application virtual desktop mode.
+-	* Implemented SESSION_LIMIT and SESSION_USER_LIMIT.
+-	* Fixed nxviewer commandline for geometry and fullscreen-support
+-	* Added NX_LOG_LEVEL instead of NX_LOGGING, allowing less verbose 
+-	  logfile.
+-	* Added SESSION_LOG_CLEAN for configurable removal of the temporary 
+-	  session directory.
+-	* Added &quot;--ssh2&quot; cmdline switch for commercial ssh2-server support 
+-	  in nxsetup.
+-	* Added ENABLE_FORCE_ENCRYPTION to enforce the usage of encryption on 
+-	  the server.
+-	* Added nxprint and added -printer to nxclient together with handling
+-	  of drivers cache.
+-	* Fixed a possible race-condition. (reported by Edward Warnicke
+-	  &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">eaw at cisco.com</A>&gt;)
+-	* Feature Request #847 (stderror of some applications to log-file)
+-	* Feature Request #900 (Detect ssh/sshd in nxsetup)
+-	* Added printing support via userspace CUPSd and Samba.
+-
+-20.03.2005 FreeNX 0.3.1 &quot;Bugfix Edition&quot;
+-	* Fixed keyboard mapping problems.
+-	* Fixed unix-custom mode; now allowing parameters to be passed.
+-	* Fixed password prompt detection support in nxnode-login.
+-	* Fixed locking to prevent usage of the same display.
+-	* Fixed resume when agent is no longer there.
+-	* Fixed error message shown to user, when session startup fails.
+-	* Fixed handling of /tmp/.X*-lock files.
+-	* Fixed handling of not closed sessions in &quot;Terminating&quot; status.
+-	* Fixed resume of multiple suspended sessions.
+-
+-05.03.2005 FreeNX 0.3.0 &quot;Chemnitzer LinuxTage Edition&quot;
+-	* Initial CVS checkin.
+-	* Added unix-default as session type - by Kalev Lember 
+-	  &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">kalev at smartlink.ee</A>&gt;
+-	* Fixed nxclient loop - by &quot;Neil Wilson&quot; &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">neil at aldur.co.uk</A>&gt;.
+-	* Several fixes by Thorsten Sandfuchs &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fux at users.berlios.de</A>&gt;.
+-	* Optional config file support (system- and user-wide)
+-		- by Jon Severinsson &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">jonno at users.berlios.de</A>&gt;.
+-	* Moved logfile to /var/log/nxserver.log.
+-	* Moved nx homedir to /var/lib/nxserver/home
+-	* Complete rewrite of authentication code
+-		* passdb, su or ssh is now supported.
+-		- by Jon Severinsson &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">jonno at users.berlios.de</A>&gt;.
+-	* Added NODE_AUTOSTART, EXPORT_{USERIP/SESSIONID} config file
+-	  directives.
+-	* Added mechanism to forward connection to commercial NoMachine 
+-	  nxserver (as available from www.nomachine.com).
+-	* Added mechanism to forward connection to another nxserver. This
+-	  allows using a &quot;chain&quot; of nxservers.
+-	* Added &quot;floating window&quot; support by using rootless nxagent as
+-	  it will be standard in NX 1.5.0.
+-	* Added &quot;floating window&quot; support by just nxproxy/nxproxy connection
+-	  and added configuration directive to enable rootless mode.
+-	* Added nxsetup --uninstall and added more feature to nxsetup.
+-	  Note: You need to use nxsetup --install for installation now.
+-	* Added Disabling of port-forwarding, X11-forwarding, ... to ssh-key.
+-
+-	* Security: Fixed a security blunder. Authority file was not used 
+-	            and so basically xhost +localhost was set. (ported from
+-		    0.2.8)
+-		    
+-		    Update immediately.
+-                   
+-	* Security: Fixed two possible security problems (umask was not set
+-                   correctly; ported from 0.2.8)
+-
+-20.11.2004 FreeNX 0.2.7 &quot;Skolelinux Edition&quot;
+-	* Fix nxserver to work again with KNX-Client. ('\r' is evil)
+-	* Fix timeout in nxnode-login to allow proper session management
+-	  again.
+-	* Fixed possible race condition for the wait-file.
+-
+-11.11.2004 FreeNX 0.2.6
+-	
+-	* Security: Fixed a possible exploit in ssh-usage
+-	    (thanx to Sebastian Krahmer from the SuSE security team)
+-	* Important: Public/Private key is no longer used for PAM auth mode.
+-	
+-14.10.2004 FreeNX 0.2.5
+-	* Added Xdialog interface for nxclient and automatic usage
+-	  of commercial nxclient when available. (Thx go to Rick Stout 
+-	  &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">zipsonic at gmail.com</A>&gt;)
+-	* Added bugfix from the 0.3.0 branch for more flexible nxdesktop in
+-	  nxnode.
+-	* Added patch by Rick Stout for permission problems in nxnode.
+-	* Added patch by Rick Stout for a typo in nxkeygen.
+-	* Updated gentoo-nomachine.diff.
+-	* Updated CONTRIB to include a description of lazy-image encoding.
+-
+-11.09.2004 FreeNX 0.2.4
+-	* Added timeout to avoid having hanging tail processes.
+-	* Added &quot;locking&quot; of the display-offset if nxagent failed to start.
+-	* Fixed ssh encryption for resume on client 1.4.0-snapshot 5.
+-	* Fixed mktemp, which was non-portable to FreeBSD and Red Hat 9.
+-
+-10.09.2004 FreeNX 0.2-3
+-	* Added support for autoreconnection or autoreconnection just 
+-	  for the case when an older client version is used.
+-	  	* This makes it possible to use Reconnection with the 
+-	  	  stable version 1.3.2-7 (enabled by default)
+-	* Added instructions how to install the NoMachine sources to INSTALL
+-	* Changed $NX_DIR/bin/ssh to ssh to fix gentoo-nomachine.diff
+-	* Added nxkeygen by Stuart Herbert for easier change from the 
+-	  NoMachine key to another key afterwards.
+-	
+-	* Security: Any user was able to change the status of other sessions
+-	            in the session database by providing the correct uniqueid.
+-
+-10.09.2004 FreeNX 0.2-2
+-	* Added additional support for safe session suspend, 
+-	  autosuspend when network connection times out works now!
+-	* AuthorizedKeysFile cannot be safely determined on Gentoo;
+-	  changed it to config option now.
+-	* Added config option to completely disable passdb support.
+-	* Fixed bugs in nxclient dialog frontend.
+-	* Removed all usage of nxssh due to security concerns from SuSE. 
+-	* Fixed session management for knx client.
+-	* Added detection of failed nxagent startup.
+-	* Updated the gentoo-nomachine.diff to be not fuzzy.
+-
+-08.09.2004 FreeNX 0.2-1
+-	* Fixed support for one windows client version. 
+-	* Fixed setting of key with --adduser.
+-	  (Thanks to Stuart Herbert &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">stuart at gentoo.org</A>&gt;)
+-	* Fixed _some_ cases for AuthorizedKeysFile in sshd_config.
+-	  (Thanks to Peter Holik &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">peter at holik.at</A>&gt;)
+-
+-	* Fixed gentoo-nomachine.diff (nxnode not in path, but nxnode-login would try that)
+-	* Fixed the bug with hanging tail processes.
+-
+-07.09.2004 FreeNX 0.2-0
+-	* Reworked the whole security model in nxsetup due to requests from SuSE and Gentoo.
+-		- nxsetup does not use the NoMachine key by default. 
+-		- PAM authentication is enabled by default.
+-	
+-	* Added nxclient for compatibility with nxclient -dialog mode.
+-	
+-	* Minor changes
+-		* Added SSHD_AUTH_PORT to config vars in nxserver
+-		* Made all programs NX_ aware
+-		* Programs do now honor the setting of AuthorizedKeysFile in sshd_config
+-		* Changed nxsetup check from direct reading of passwd to getent
+-		  (Thanks to Tom Hibbert &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">tom at nsp.co.nz</A>&gt;)
+-		* Changed overall messages in nxsetup
+-	
+-	* Made a overall clean upstream package.
+-	* Added Gentoo / NoMachine compatibility diff
+-
+-06.09.2004 
+-	* Added pam authentication
+-	* Added user_db switch
+-	* moved some su - to nxnode-login
+-
+-02.09.2004 
+-	* Added support for snapshot 4 (43/66)
+-	* Fixed compatibility issue with 1.3.0 
+-	  (Used by Knoppix 3.4 and earlier)
+-	* added sane logging (LOGGING is now properly used)
+-
+-20.06.2004 
+-	* Added Protocol version 1.4.0
+-	* Cleanup
+-	* Added missing functions
+-
+-14.06.2004 
+-	* Added Protocol version 1.3.2
+
+Copied: freenx-server/tags/FreeNX-0.6.0/ChangeLog (from rev 284, freenx-server/trunk/ChangeLog)
+
+Deleted: freenx-server/tags/FreeNX-0.6.0/nxclient
+===================================================================
+--- freenx-server/trunk/nxclient	2007-01-23 02:15:28 UTC (rev 283)
++++ freenx-server/tags/FreeNX-0.6.0/nxclient	2007-01-23 03:11:18 UTC (rev 285)
+@@ -1,336 +0,0 @@
+-#!/bin/bash
+-#
+-# Copyright (c) 2004 by Fabian Franz &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">freenx at fabian-franz.de</A>&gt;
+-#           (c) 2004 by Rick Stout &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">zipsonic at gmail.com</A>&gt;
+-#
+-# License: GPL, version 2
+-#
+-# Note: NX does not check the exit-code from nxclient,
+-#       but we set it to a &quot;good value&quot; anyway in case 
+-#       it does check it someday.
+-#
+-# SVN: $Id$
+-#
+-# ========================================================================
+-
+-# First check if the commercial nxclient is available and use it
+-# but check that it isn't this script to prevent a loop!
+-NXCLIENT=&quot;/usr/NX/bin/nxclient&quot;
+-[ -x &quot;$NXCLIENT&quot; -a &quot;$(file -bi $NXCLIENT)&quot; != 'application/x-shellscript' ] \
+-	&amp;&amp; exec ${NXCLIENT} &quot;$@&quot;
+-
+-TEMP=`getopt -a -o d: --long local,noautokill,dialog:,caption:,message:,display:,printer:,parent: -n $(basename $0) -- &quot;$@&quot;`
+-
+-if [ $? != 0 ] ; then echo &quot;Terminating...&quot; &gt;&amp;2 ; exit 1 ; fi
+-
+-# Note the quotes around `$TEMP': they are essential!
+-eval set -- &quot;$TEMP&quot;
+-
+-DIALOG_TYPE=&quot;ok&quot;;
+-DIALOG_CAPTION=&quot;&quot;
+-DIALOG_MESSAGE=&quot;&quot;
+-DIALOG_LOCAL=&quot;&quot;
+-DIALOG_NOAUTOKILL=&quot;&quot;
+-DIALOG_PRINTER=&quot;&quot;
+-DIALOG_PARENT=&quot;$PPID&quot;
+-
+-while true
+-do
+-        case &quot;$1&quot; in
+-		--dialog) DIALOG_TYPE=&quot;$2&quot;; shift 2 ;;
+-		--caption) DIALOG_CAPTION=&quot;$2&quot;; shift 2 ;;
+-		--message) DIALOG_MESSAGE=&quot;$2&quot;; shift 2 ;;
+-		--local) DIALOG_LOCAL=&quot;yes&quot;; shift ;;
+-		--noautokill) DIALOG_NOAUTOKILL=&quot;yes&quot;; shift ;;
+-		--display) DISPLAY=&quot;$2&quot;; shift 2 ;;
+-		--printer) DIALOG_PRINTER=&quot;$2&quot;; shift 2 ; break ;;
+-		--parent) DIALOG_PARENT=&quot;$2&quot;; shift 2 ; break ;;
+-		--) shift ; break ;;
+-                *) echo &quot;Internal error!&quot; ; exit 1; ;;
+-	esac
+-done
+-
+-export DISPLAY
+-
+-# if --printer is set, the dialog type is overridden
+-[ -n &quot;$DIALOG_PRINTER&quot; ] &amp;&amp; DIALOG_TYPE=&quot;printer&quot;
+-
+-if [ -x /usr/bin/Xdialog ] 
+-then
+-	dialog_interface=&quot;xdialog&quot;
+-	DIALOG=/usr/bin/Xdialog # just in case that we have no good path
+-else
+-	dialog_interface=&quot;xmessage&quot;
+-	xmessage=$(which xmessage 2&gt;/dev/null)
+-	[ -z &quot;$xmessage&quot; ] &amp;&amp; xmessage=&quot;/usr/X11R6/bin/xmessage&quot;
+-fi
+-
+-#
+-# utility functions for all interfaces
+-#
+-
+-# utility_printer &quot;get|set|getlist|getvendlist|getdrvlist&quot;
+-#
+-#	get &lt;name&gt; - gets the current driver for name
+-#	set &lt;name&gt; &lt;driver&gt; &lt;description&gt; - sets the current driver and description for name
+-#	getvendlist - gets a list of vendors
+-#	getdrvlist &lt;vendor&gt; - gets a list of drivers for vendor
+-#	getextdrvlist &lt;vendor&gt; - gets an extended list (with driver and 
+-#                                description) of drivers for vendor
+-#	getdesc &lt;driver&gt; - gets the description for driver &lt;driver&gt;
+-#	getlist - gets a list of drivers
+-
+-#
+-# drivers.cache has the following format:
+-#	
+-#	driver|&lt;printername&gt;|&lt;ppdfile&gt;|&lt;description&gt;
+-#
+-
+-#
+-# Example: IFS='|' DEFAULT_PRINTER=( $(utility_printer get &lt;myprinter&gt;) )
+-# 	  
+-#	You can then select ${DEFAULT_PRINTER[1]} for &lt;printername&gt;.
+-# 
+-
+-utility_printer()
+-{
+-	UTILITY_DRIVERS_CACHE=&quot;$HOME/.nx/config/drivers.cache&quot;
+-	[ -n &quot;$USER_FAKE_HOME&quot; ] &amp;&amp; UTILITY_DRIVERS_CACHE=&quot;$USER_FAKE_HOME/.nx/config/drivers.cache&quot;
+-	UTILITY_NXPRINT=&quot;nxprint&quot;
+-	[ -n &quot;$PATH_BIN&quot; ] &amp;&amp; UTILITY_NXPRINT=&quot;$PATH_BIN/nxprint&quot;
+-	case &quot;$1&quot; in 
+-		get)
+-			grep &quot;driver|$2|&quot; &quot;$UTILITY_DRIVERS_CACHE&quot; 2&gt;/dev/null
+-		;;
+-		set)
+-			# FIXME: Handle possible race conditions?
+-			grep -v &quot;driver|$2|&quot; &quot;$UTILITY_DRIVERS_CACHE&quot; 2&gt;/dev/null &gt; $UTILITY_DRIVERS_CACHE.tmp
+-			echo &quot;driver|$2|$3|$4&quot; &gt;&gt; $UTILITY_DRIVERS_CACHE.tmp
+-			mv -f $UTILITY_DRIVERS_CACHE.tmp $UTILITY_DRIVERS_CACHE
+-		;;
+-		getvendlist)
+-			$UTILITY_NXPRINT -d | awk -F'|' '{ print $2 }' | uniq | tr '\n' '|'
+-		;;
+-		getdrvlist)
+-			$UTILITY_NXPRINT -d | awk -F'|' '($2==&quot;'$2'&quot;) { print $4}' | tr '\n' '|'
+-		;;
+-		getextdrvlist)
+-			$UTILITY_NXPRINT -d | awk -F'|' '($2==&quot;'$2'&quot;) { print $4 &quot;|&quot; $3 }'
+-		;;
+-
+-		getdesc)
+-			$UTILITY_NXPRINT -d | awk -F'|' '($4==&quot;'$2'&quot;) { print $3}'
+-		;;
+-		getlist)
+-			$UTILITY_NXPRINT -d
+-		;;
+-	esac
+-}
+-
+-#
+-# xmessage dialog interface
+-#
+-
+-xmessage_ok()
+-{
+-	$xmessage -buttons &quot;Ok:0&quot; -center &quot;$DIALOG_MESSAGE&quot;
+-	return 0 # Give cancel on close ...
+-}
+-
+-xmessage_yesno()
+-{
+-	$xmessage -buttons &quot;Yes:2,No:0&quot; -center &quot;$DIALOG_MESSAGE&quot;
+-}
+-
+-xmessage_yesnosuspend()
+-{
+-	$xmessage -buttons &quot;Suspend:3,Terminate:2,Cancel:0&quot; -center &quot;$DIALOG_MESSAGE&quot;
+-}
+-
+-xmessage_panic()
+-{
+-	$xmessage -buttons &quot;Terminate:2,Cancel:0&quot; -center &quot;$DIALOG_MESSAGE&quot;
+-}
+-
+-xmessage_quit()
+-{
+-	$xmessage -buttons &quot;Quit:0&quot; -center &quot;$DIALOG_MESSAGE&quot;
+-	return 0 # Give cancel on close ...
+-}
+-
+-xmessage_printer_ask()
+-{
+-	$xmessage -buttons &quot;Ok:100,Configure:101,Cancel:102&quot; -center &quot;$DIALOG_MESSAGE&quot;
+-	RC=$?
+-	[ $RC -lt 100 ] &amp;&amp; return 2
+-	let RC=$RC-100
+-	return $RC
+-}
+-
+-xmessage_printer_configure()
+-{
+-	IFS=','
+-	$xmessage -buttons &quot;$*&quot; -center &quot;$DIALOG_MESSAGE&quot;
+-	RC=$?
+-	unset IFS
+-	VENDOR=&quot;&quot;
+-	if [ $RC -gt 100 ]
+-	then
+-		let NR=$RC-100
+-		VENDOR=&quot;${!NR}&quot;
+-	fi
+-	echo &quot;$VENDOR&quot;
+-}
+-
+-xmessage_printer_configure_vendor()
+-{
+-	IFS='|' VENDOR_LIST=( $(utility_printer getvendlist) )
+-	xmessage_printer_configure &quot;${VENDOR_LIST[@]}&quot;
+-}
+-
+-xmessage_printer_configure_driver()
+-{
+-	IFS='|' DRIVER_LIST=( $(utility_printer getdrvlist &quot;$1&quot;) )
+-	xmessage_printer_configure &quot;${DRIVER_LIST[@]}&quot;
+-}
+-
+-#
+-# xdialog interface
+-#
+-
+-xdialog_ok()
+-{
+-	$DIALOG --title &quot;$DIALOG_CAPTION&quot; --msgbox &quot;$DIALOG_MESSAGE&quot; 0 0
+-	return 0 # Give cancel on close ...
+-}
+-
+-xdialog_yesno()
+-{
+-	$DIALOG --title &quot;$DIALOG_CAPTION&quot; --yesno &quot;$DIALOG_MESSAGE&quot; 0 0
+-	RC=$?
+-	[ $RC -eq 0 ] &amp;&amp; return 2
+-	[ $RC -eq 1 ] &amp;&amp; return 0
+-}
+-
+-xdialog_yesnosuspend()
+-{
+-	$DIALOG --title &quot;$DIALOG_CAPTION&quot; --buttons-style text --ok-label &quot;Suspend&quot; --cancel-label &quot;Terminate&quot; --yesno &quot;$DIALOG_MESSAGE Close window to cancel.&quot; 400x150
+-	RC=$?
+-	[ $RC -eq 0 ] &amp;&amp; return 3
+-	[ $RC -eq 1 ] &amp;&amp; return 2
+-}
+-
+-xdialog_panic()
+-{
+-	$DIALOG --title &quot;$DIALOG_CAPTION&quot; --buttons-style text --default-no --ok-label &quot;Terminate&quot; --cancel-label &quot;Cancel&quot; --yesno &quot;$DIALOG_MESSAGE&quot; 0x0
+-	RC=$?
+-	[ $RC -eq 0 ] &amp;&amp; return 2
+-	[ $RC -eq 1 ] &amp;&amp; return 0
+-}
+-
+-xdialog_quit()
+-{
+-        $DIALOG --buttons-style text --ok-label &quot;Quit&quot; --title &quot;$DIALOG_CAPTION&quot; --msgbox &quot;$DIALOG_MESSAGE&quot; 0 0
+-        return 0 # Give cancel on close ...
+-}
+-
+-xdialog_printer_ask()
+-{
+-	$DIALOG --title &quot;$DIALOG_CAPTION&quot; --buttons-style text --ok-label &quot;Ok&quot; --cancel-label &quot;Configure&quot; --yesno &quot;$DIALOG_MESSAGE\n\nClose window to cancel.&quot; 400x250
+-	RC=$?
+-	[ $RC -eq 255 ] &amp;&amp; return 2
+-	return $RC
+-}
+-
+-xdialog_printer_configure_vendor()
+-{
+-	IFS='|' VENDOR_LIST=( $(utility_printer getvendlist | sed 's/|/||off|/g') )
+-	$DIALOG --stdout --title &quot;$DIALOG_CAPTION&quot; --radiolist &quot;$DIALOG_MESSAGE&quot; 0 0 6 &quot;${VENDOR_LIST[@]}&quot;
+-}
+-
+-# xdialog_printer_configure_driver vendor old_driver
+-xdialog_printer_configure_driver()
+-{
+-	IFS='|' XDIALOG_LIST=( $(utility_printer getextdrvlist &quot;$1&quot; | sed 's/$/|off/g; /'&quot;$2&quot;'/ s/|off/|on/g' | tr '\n' '|') )
+-	$DIALOG --stdout --title &quot;$DIALOG_CAPTION&quot; --radiolist &quot;$DIALOG_MESSAGE&quot; 0 0 6 &quot;${XDIALOG_LIST[@]}&quot;
+-}
+-
+-
+-#
+-# helper functions
+-#
+-
+-helper_dialog_printer()
+-{
+-	IFS=&quot;|&quot; PRINTER_INFORMATION=( $(utility_printer get &quot;$DIALOG_PRINTER&quot;) )
+-	PRINTER_CONFIGURE=&quot;yes&quot;
+-	[ -z &quot;$DIALOG_CAPTION&quot; ] &amp;&amp; DIALOG_CAPTION=&quot;NX Printer configuration for $DIALOG_PRINTER&quot;
+-	
+-	# Do we have old printer information present?
+-	if [ -n &quot;$PRINTER_INFORMATION&quot; ]
+-	then
+-		DIALOG_MESSAGE=$(echo -e &quot;Found driver for printer $DIALOG_PRINTER.\n\nOld choice was: ${PRINTER_INFORMATION[3]}.\n\nIf you want to keep the settings click on 'Ok' \n- else click on 'Configure'.&quot;) ${dialog_interface}_printer_ask
+-		RC=$?
+-		# bail out with exit code 2 in case the user cancelled the operation
+-		[ $RC -eq 2 ] &amp;&amp; echo &quot;cancel: aborted&quot; &amp;&amp; exit 2
+-		[ $RC -eq 0 ] &amp;&amp; PRINTER_CONFIGURE=&quot;no&quot;
+-	fi
+-	
+-	VENDOR=&quot;&quot;
+-	OLD_DRIVER=&quot;${PRINTER_INFORMATION[2]}&quot;
+-
+-	if [ &quot;$PRINTER_CONFIGURE&quot; = &quot;yes&quot; ]
+-	then
+-		DRIVER=&quot;&quot;
+-		VENDOR=$(DIALOG_MESSAGE=&quot;Choose vendor for printer $DIALOG_PRINTER.&quot; ${dialog_interface}_printer_configure_vendor)
+-		[ -n &quot;$VENDOR&quot; ] &amp;&amp; DRIVER=$(DIALOG_MESSAGE=&quot;Choose driver for printer $DIALOG_PRINTER.&quot; ${dialog_interface}_printer_configure_driver &quot;$VENDOR&quot; &quot;${OLD_DRIVER:-invalid}&quot;)
+-		# set the new printer driver
+-		if [ -n &quot;$DRIVER&quot; ]
+-		then
+-			DESC=$(utility_printer getdesc &quot;$DRIVER&quot;)
+-			utility_printer set &quot;$DIALOG_PRINTER&quot; &quot;$DRIVER&quot; &quot;$DESC&quot;
+-		fi
+-	else
+-		DRIVER=&quot;$OLD_DRIVER&quot;
+-	fi
+-
+-	# echo the choosen &lt;ppdfile&gt; to stdout
+-	[ -n &quot;$DRIVER&quot; ] &amp;&amp; echo &quot;$DRIVER&quot;
+-	[ -z &quot;$DRIVER&quot; ] &amp;&amp; echo &quot;cancel: aborted&quot; &amp;&amp; exit 2
+-			
+-	exit 0
+-}
+-
+-#
+-# main case statement
+-#
+-
+-case $DIALOG_TYPE in 
+-	ok)
+-		${dialog_interface}_ok
+-	;;
+-	yesno)
+-		${dialog_interface}_yesno
+-	;;
+-	yesnosuspend)
+-		${dialog_interface}_yesnosuspend
+-	;;
+-	panic)
+-		${dialog_interface}_panic
+-	;;
+-	quit)
+-		${dialog_interface}_quit
+-	;;
+-	printer)
+-		helper_dialog_printer
+-	;;
+-esac
+-
+-#
+-# Time for exit code checks :)
+-#
+-
+-RC=$?
+-	[ $RC -eq 2 ] &amp;&amp; kill -TERM $DIALOG_PARENT
+-	[ $RC -eq 3 ] &amp;&amp; kill -HUP $DIALOG_PARENT
+-exit 0
+
+Copied: freenx-server/tags/FreeNX-0.6.0/nxclient (from rev 284, freenx-server/trunk/nxclient)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000414.html">[Freenx-cvs] r284 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000416.html">[Freenx-cvs] r286 - freenx-website
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#415">[ date ]</a>
+              <a href="thread.html#415">[ thread ]</a>
+              <a href="subject.html#415">[ subject ]</a>
+              <a href="author.html#415">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,121 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r548 - trunk/freenx-server
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-July/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r548%20-%20trunk/freenx-server&In-Reply-To=%3C200807311822.m6VIMVE4003395%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000681.html">
+   <LINK REL="Next"  HREF="000683.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r548 - trunk/freenx-server</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r548%20-%20trunk/freenx-server&In-Reply-To=%3C200807311822.m6VIMVE4003395%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r548 - trunk/freenx-server">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Thu Jul 31 20:22:31 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000681.html">[Freenx-cvs] r547 - in trunk/freenx-server: . nxredir
+</A></li>
+        <LI>Next message: <A HREF="000683.html">[Freenx-cvs] r549 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#682">[ date ]</a>
+              <a href="thread.html#682">[ thread ]</a>
+              <a href="subject.html#682">[ subject ]</a>
+              <a href="author.html#682">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-07-31 20:22:30 +0200 (Thu, 31 Jul 2008)
+New Revision: 548
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/node.conf.sample
+   trunk/freenx-server/nxloadconfig
+Log:
+* Changed the default for ENABLE_PASSDB_AUTHENTICATION. If you had
+  added a user with different password via --adduser consider
+  re-activating this option in node.conf.
+  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-07-31 18:12:33 UTC (rev 547)
++++ trunk/freenx-server/ChangeLog	2008-07-31 18:22:30 UTC (rev 548)
+@@ -25,6 +25,10 @@
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 	* Fixed Makefile to stop on all errors.
+ 	  (Idea by Hai Zaar &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">haizaar at gmail.com</A>&gt;, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Changed the default for ENABLE_PASSDB_AUTHENTICATION. If you had
++	  added a user with different password via --adduser consider
++	  re-activating this option in node.conf.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
+ 14.03.2008 FreeNX 0.7.2 &quot;Priscilla Edition&quot;
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/node.conf.sample
+===================================================================
+--- trunk/freenx-server/node.conf.sample	2008-07-31 18:12:33 UTC (rev 547)
++++ trunk/freenx-server/node.conf.sample	2008-07-31 18:22:30 UTC (rev 548)
+@@ -63,7 +63,7 @@
+ #ENABLE_USERMODE_AUTHENTICATION=&quot;0&quot;
+ 
+ # This adds the passdb to the possible authentication methods
+-#ENABLE_PASSDB_AUTHENTICATION=&quot;1&quot;
++#ENABLE_PASSDB_AUTHENTICATION=&quot;0&quot;
+ 
+ # This adds SSH to the possible authentication methods. For it to work sshd
+ # must be set up at localhost accepting password authentication.
+
+Modified: trunk/freenx-server/nxloadconfig
+===================================================================
+--- trunk/freenx-server/nxloadconfig	2008-07-31 18:12:33 UTC (rev 547)
++++ trunk/freenx-server/nxloadconfig	2008-07-31 18:22:30 UTC (rev 548)
+@@ -90,7 +90,7 @@
+ # Authentication / Security directives
+ 
+ ENABLE_USERMODE_AUTHENTICATION=&quot;0&quot;
+-ENABLE_PASSDB_AUTHENTICATION=&quot;1&quot;
++ENABLE_PASSDB_AUTHENTICATION=&quot;0&quot;
+ ENABLE_SSH_AUTHENTICATION=&quot;1&quot;
+ ENABLE_SU_AUTHENTICATION=&quot;0&quot;
+ ENABLE_USER_DB=&quot;0&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000681.html">[Freenx-cvs] r547 - in trunk/freenx-server: . nxredir
+</A></li>
+	<LI>Next message: <A HREF="000683.html">[Freenx-cvs] r549 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#682">[ date ]</a>
+              <a href="thread.html#682">[ thread ]</a>
+              <a href="subject.html#682">[ subject ]</a>
+              <a href="author.html#682">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

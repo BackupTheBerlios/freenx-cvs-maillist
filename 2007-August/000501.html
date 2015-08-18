@@ -1,0 +1,326 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r369 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r369%20-%20freenx-server/trunk&In-Reply-To=%3C200708120505.l7C55oXD022221%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000500.html">
+   <LINK REL="Next"  HREF="000502.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r369 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r369%20-%20freenx-server/trunk&In-Reply-To=%3C200708120505.l7C55oXD022221%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r369 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Sun Aug 12 07:05:50 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000500.html">[Freenx-cvs] r368 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000502.html">[Freenx-cvs] r370 - in freenx-server/trunk: . nxserver-helper
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#501">[ date ]</a>
+              <a href="thread.html#501">[ thread ]</a>
+              <a href="subject.html#501">[ subject ]</a>
+              <a href="author.html#501">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-08-12 07:05:49 +0200 (Sun, 12 Aug 2007)
+New Revision: 369
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/node.conf.sample
+   freenx-server/trunk/nxloadconfig
+   freenx-server/trunk/nxnode
+   freenx-server/trunk/nxserver
+Log:
+* Added basic support for mirrored sessions.
+  * The functionality can be used by connecting to VNC session
+    and choosing to &quot;resume&quot; such a session.
+  * New configuration key: ENABLE_MIRROR_VIA_VNC=1
+  * New configuration key: ENABLE_DESKTOP_SHARING=1
+  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+Note: This functionality is not yet _that_ useful as only sessions that the user is logged
+into can be mirrored / shared.
+
+However especially for :0 there might already be use cases.
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-08-12 03:58:23 UTC (rev 368)
++++ freenx-server/trunk/ChangeLog	2007-08-12 05:05:49 UTC (rev 369)
+@@ -25,6 +25,12 @@
+ 	  slow in case of huge databases like foomatic. (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 	* Removed bad -noautokill option from the nxclient dialog spawning.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">wayneb at bat.berlios.de</A>)
++	* Added basic support for mirrored sessions.
++	  * The functionality can be used by connecting to VNC session
++	    and choosing to &quot;resume&quot; such a session.
++	  * New configuration key: ENABLE_MIRROR_VIA_VNC=1
++	  * New configuration key: ENABLE_DESKTOP_SHARING=1
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
+ 07.07.2007 FreeNX 0.7.0 &quot;Jornade SPL Edition VI+1&quot;
+ 	* Fixed the printing support for CUPS 1.2.
+
+Modified: freenx-server/trunk/node.conf.sample
+===================================================================
+--- freenx-server/trunk/node.conf.sample	2007-08-12 03:58:23 UTC (rev 368)
++++ freenx-server/trunk/node.conf.sample	2007-08-12 05:05:49 UTC (rev 369)
+@@ -120,7 +120,22 @@
+ # Especially useful if ENABLE_PERSISTENT_SESSION=&quot;all&quot;
+ #DISABLE_PERSISTENT_SESSION=&quot;&quot;
+ 
++# This enables the mirroring of running sessions via VNC feature.
++# 
++# Session is marked as resumable and type is vnc-mirrored.
++# 
++#ENABLE_MIRROR_VIA_VNC=1
+ 
++# This enables the sharing of :0 via VNC feature.
++# 
++# Session is marked as resumable and type is vnc-local.
++# 
++# Note: You need to have the rights to access the display
++#       else it does not work.
++#
++#ENABLE_DESKTOP_SHARING=1
++
++
+ #########################################################################
+ # Logging directives
+ #########################################################################
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2007-08-12 03:58:23 UTC (rev 368)
++++ freenx-server/trunk/nxloadconfig	2007-08-12 05:05:49 UTC (rev 369)
+@@ -109,6 +109,8 @@
+ ENABLE_PERSISTENT_SESSION=&quot;all&quot;
+ DISABLE_PERSISTENT_SESSION=&quot;&quot;
+ 
++ENABLE_MIRROR_VIA_VNC=1
++ENABLE_DESKTOP_SHARING=1
+ 
+ # Logging directives
+ 
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2007-08-12 03:58:23 UTC (rev 368)
++++ freenx-server/trunk/nxnode	2007-08-12 05:05:49 UTC (rev 369)
+@@ -465,13 +465,32 @@
+ 
+ 	elif [ &quot;$type&quot; = &quot;vnc&quot; ]
+ 	then
+-		# nxviewer session (VNC RFP)
++		# nxviewer session (VNC RFB)
+ 		
+ 		[ &quot;$SET_LD_LIBRARY_PATH&quot; = &quot;1&quot; ] &amp;&amp; export LD_LIBRARY_PATH=&quot;$AGENT_LIBRARY_PATH:$LD_LIBRARY_PATH&quot;
+ 		# Setup password
+ 		
+ 		mkdir -p &quot;$USER_FAKE_HOME/.nx/C-$sess_id/scripts/&quot;
+ 		echo &quot;$agent_password&quot; | $PATH_BIN/nxpasswd &quot;$USER_FAKE_HOME/.nx/C-$sess_id/scripts/.passwd&quot; doit
++
++		# Start x11vnc
++		if [ -n &quot;$mirrordisplay&quot; ]
++		then
++			[ -z &quot;$mirrorhost&quot; ] &amp;&amp; mirrorhost=&quot;unix&quot;
++			(
++				unset XAUTHORITY
++				# Note: No &quot;-accept popup&quot; as its the same user and with that password
++				#       he could do already more than -accept popup would allow.
++				DISPLAY=&quot;$mirrorhost:$mirrordisplay.0&quot; x11vnc -timeout 120 -rfbauth &quot;$USER_FAKE_HOME/.nx/C-$sess_id/scripts/.passwd&quot; &gt;&quot;$USER_FAKE_HOME/.nx/C-$sess_id/scripts/.vnc_port&quot; 2&gt;&amp;3 &amp;
++			)
++			sleep 1
++			agent_port=$(cat &quot;$USER_FAKE_HOME/.nx/C-$sess_id/scripts/.vnc_port&quot; | egrep &quot;^PORT=&quot; | cut -d'=' -f 2)
++			[ -z &quot;agent_port&quot; ] &amp;&amp; agent_port=&quot;0&quot;
++			# note the :: is not a mistake, but rather a hint for nxviewer to use this as a port and not 
++			# interpret it as a display.
++			agent_server=&quot;127.0.0.1::$agent_port&quot;
++			rm -f &quot;$USER_FAKE_HOME/.nx/C-$sess_id/scripts/.vnc_port&quot;
++		fi
+ 		
+ 		# Start the agent
+ 		
+@@ -1069,6 +1088,8 @@
+ 	clientproto=$(getparam clientproto)
+ 	status=$(getparam status)
+ 	host=$(getparam host)
++	mirrordisplay=$(getparam mirrordisplay)
++	mirrorhost=$(getparam mirrorhost)
+ 
+ 	fullscreen=$(getparam fullscreen)
+ 	[ &quot;$geometry&quot; = &quot;fullscreen&quot; ] &amp;&amp; fullscreen=&quot;1&quot;
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2007-08-12 03:58:23 UTC (rev 368)
++++ freenx-server/trunk/nxserver	2007-08-12 05:05:49 UTC (rev 369)
+@@ -253,20 +253,43 @@
+ 			then
+ 				available=&quot;Yes&quot;
+ 			fi
+-			printf &quot;%-7s %-16s %32s %8s %5s %-14s %-11s %s\n&quot; &quot;$(getparam display)&quot; &quot;$(getparam type)&quot; &quot;$(getparam sessionId)&quot; &quot;$options&quot; &quot;$depth&quot; &quot;$geom&quot; &quot;$available&quot; &quot;$(getparam sessionName)&quot; &gt;&gt; $TMPFILE
++			
++			# We automatically offer VNC mirrored sessions for &quot;remote&quot; support
++			if [ &quot;$4&quot; = &quot;vnc&quot; -a &quot;$ENABLE_MIRROR_VIA_VNC&quot; = &quot;1&quot; ] &amp;&amp; stringinstring &quot;unix-&quot; &quot;$(getparam type)&quot;
++			then
++				printf &quot;%-7s %-16s %32s %8s %5s %-14s %-11s %s\n&quot; &quot;$(getparam display)&quot; &quot;vnc-mirrored&quot; &quot;$(getparam sessionId)&quot; &quot;$options&quot; &quot;$depth&quot; &quot;$geom&quot; &quot;$available&quot; &quot;$(getparam sessionName) (Mirrored)&quot; &gt;&gt; $TMPFILE
++			else
++				# only unix-* sessions can be resumed, but other session types can still be terminated
++				stringinstring &quot;unix-&quot; &quot;$4&quot; || available=&quot;N/A&quot;
++				printf &quot;%-7s %-16s %32s %8s %5s %-14s %-11s %s\n&quot; &quot;$(getparam display)&quot; &quot;$(getparam type)&quot; &quot;$(getparam sessionId)&quot; &quot;$options&quot; &quot;$depth&quot; &quot;$geom&quot; &quot;$available&quot; &quot;$(getparam sessionName)&quot; &gt;&gt; $TMPFILE
++			fi
+ 		fi
+ 		egrep -q &quot;^userName=$1$&quot; $i &amp;&amp; let SESSION_COUNT_USER=$SESSION_COUNT_USER+1
+ 	done
++	
++	if [ &quot;$ENABLE_DESKTOP_SHARING&quot; = &quot;1&quot; ]
++	then
++		export DESKTOP_SHARING_IDS=&quot;&quot;
++		for i in $(LC_ALL=C netstat -ln --protocol=unix | egrep 'X11-unix/X[0-9]$' | sed 's/.*X\(.*\)/\1/g')
++		do
++			uniqueid=$(echo $[$RANDOM*$RANDOM] | $COMMAND_MD5SUM | cut -d&quot; &quot; -f1 | tr &quot;[a-z]&quot; &quot;[A-Z]&quot;)
++			DESKTOP_SHARING_IDS=&quot;$DESKTOP_SHARING_IDS $uniqueid=$i&quot;
++			printf &quot;%-7s %-16s %32s %8s %5s %-14s %-11s %s\n&quot; &quot;$i&quot; &quot;vnc-local&quot; &quot;$uniqueid&quot; &quot;--------&quot; &quot;$udepth&quot; &quot;$(echo $3 | cut -d'x' -f1,2)&quot; &quot;Running&quot; &quot;X$i (Local)&quot; &gt;&gt; $TMPFILE
++		done
++	fi
++	
+ 	echo &quot;&quot; &gt;&gt; $TMPFILE
+ 	echo &quot;&quot; &gt;&gt; $TMPFILE
+-	cat $TMPFILE
+-	rm -f $TMPFILE
++	
+ 	if [ &quot;$SESSION_COUNT&quot; -ge &quot;$SESSION_LIMIT&quot; -o &quot;$SESSION_COUNT_USER&quot; -ge &quot;$SESSION_USER_LIMIT&quot; ]
+ 	then
+-		echo &quot;NX&gt; 147 Server capacity: reached for user: $1&quot;
++		echo &quot;NX&gt; 147 Server capacity: reached for user: $1&quot; &gt;&gt; $TMPFILE
+ 	else
+-		echo &quot;NX&gt; 148 Server capacity: not reached for user: $1&quot;
++		echo &quot;NX&gt; 148 Server capacity: not reached for user: $1&quot; &gt;&gt; $TMPFILE
+ 	fi
++	
++	cat $TMPFILE | log_tee
++	rm -f $TMPFILE
+ }
+ 
+ session_list_user()
+@@ -1085,6 +1108,37 @@
+ 	PARAMS=&quot;$PARAMS&amp;clientproto=$PROTO&quot;
+ 	CMDLINE=$PARAMS
+ 	echo_x
++
++	# special mirrored type
++	[ &quot;$ACTION&quot; != &quot;start&quot; -a &quot;$(getparam type)&quot; = &quot;vnc&quot; ] &amp;&amp; ACTION=&quot;mirror&quot;
++
++	if [ &quot;$ACTION&quot; = &quot;mirror&quot; ]
++	then
++		ACTION=&quot;start&quot;
++		uniqueid=$(getparam restore)
++		[ -z &quot;$uniqueid&quot; ] &amp;&amp; uniqueid=$(getparam id) # 1.4.0-5 compatibility
++		CMDLINE=$(session_get &quot;$uniqueid&quot; 2&gt;/dev/null)
++
++		mirrordisplay=$(getparam display)
++		mirrorhost=$(getparam host)
++
++		if [ -z &quot;$mirrordisplay&quot;  ]
++		then
++			# check for DESKTOP_SHARING_IDS
++			mirrordisplay=$(echo $DESKTOP_SHARING_IDS | tr ' ' '\n' | egrep &quot;^$uniqueid=&quot; | cut -d'=' -f2)
++			mirrorhost=&quot;127.0.0.1&quot;
++		fi
++
++		if [ -z &quot;$mirrordisplay&quot; ]
++		then
++			echo_x &quot;NX&gt; 596 Could not find mirrored session $uniqueid. Session failed.&quot;
++			echo_x &quot;NX&gt; 596 Sharing: $DESKTOP_SHARING_IDS&quot;
++			return 1
++		fi
++
++		PARAMS=&quot;$PARAMS&amp;mirrordisplay=$mirrordisplay&amp;mirrorhost=$mirrorhost&quot;
++		CMDLINE=$PARAMS
++	fi
+ 	
+ 	# If we can't get the userip and SSHD_CHECK_IP is set to 1
+ 	# we bail out.
+@@ -1124,7 +1178,7 @@
+ 	# as only $SSH_CLIENT or $SSH2_CLIENT will be set, this should work
+ 	USERIP=$(echo $SSH_CLIENT $SSH2_CLIENT | cut -d&quot; &quot; -f1 | sed 's/::<A HREF="ffff://g">ffff://g</A>')
+ 	[ -z &quot;$USERIP&quot; ] &amp;&amp; USERIP=&quot;*&quot;
+-	if [ &quot;$ACTION&quot; = &quot;start&quot; ]
++	if [ &quot;$ACTION&quot; = &quot;start&quot; -o &quot;$ACTION&quot; = &quot;mirror&quot; ]
+ 	then
+ 		server_check_session_count || return 1
+ 		
+@@ -1272,16 +1326,16 @@
+ 
+ 			if [ &quot;$status&quot; = &quot;Suspended&quot; -a -n &quot;$(getparam screeninfo)&quot; ]
+ 			then
+-				session_list_user_suspended &quot;$USER&quot; &quot;Suspended&quot; &quot;$(getparam screeninfo)&quot; &quot;$(getparam type)&quot; | log_tee
++				session_list_user_suspended &quot;$USER&quot; &quot;Suspended&quot; &quot;$(getparam screeninfo)&quot; &quot;$(getparam type)&quot;
+ 			elif [ &quot;$status&quot; = &quot;Suspended,Running&quot; -o &quot;$status&quot; = &quot;Suspended&quot; ] # since 1.4.0-5
+ 			then
+ 				# disabled due to problems with 1.4.0-5 client
+ 				#session_list_user_suspended &quot;$USER&quot; 'Suspended$|^status=Running$' &quot;$(getparam geometry)&quot; &quot;$(getparam type)&quot; | log_tee
+-				session_list_user_suspended &quot;$USER&quot; 'Suspended' &quot;$(getparam geometry)&quot; &quot;$(getparam type)&quot; | log_tee
++				session_list_user_suspended &quot;$USER&quot; 'Suspended' &quot;$(getparam geometry)&quot; &quot;$(getparam type)&quot;
+ 			elif [ &quot;$status&quot; = &quot;suspended,running&quot; -o &quot;$status&quot; = &quot;suspended&quot; ] # since 1.5.0
+ 			then
+ 				status=$(echo $status | sed 's/,/$|^status=/g; s/suspended/Suspended/g; s/running/Running/g')
+-				session_list_user_suspended &quot;$USER&quot; &quot;$status&quot; &quot;$(getparam geometry)&quot; &quot;$(getparam type)&quot; | log_tee
++				session_list_user_suspended &quot;$USER&quot; &quot;$status&quot; &quot;$(getparam geometry)&quot; &quot;$(getparam type)&quot;
+ 			else
+ 				session_list_user &quot;$USER&quot; | log_tee
+ 			fi
+@@ -1307,6 +1361,10 @@
+ 		restoresession*)
+ 			server_startrestore_session &quot;resume&quot;
+ 		;;
++		mirrorsession*)
++			server_startrestore_session &quot;mirror&quot;
++		;;
++
+ 		passwd)
+ 			echo_x &quot;NX&gt; 113 Changing password of user '$USER'&quot;
+ 			echo_x -n &quot;NX&gt; 102 Current password:&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000500.html">[Freenx-cvs] r368 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000502.html">[Freenx-cvs] r370 - in freenx-server/trunk: . nxserver-helper
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#501">[ date ]</a>
+              <a href="thread.html#501">[ thread ]</a>
+              <a href="subject.html#501">[ subject ]</a>
+              <a href="author.html#501">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

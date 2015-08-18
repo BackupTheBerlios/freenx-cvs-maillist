@@ -1,0 +1,427 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r170 - / freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r170%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200603060307.k2637CcV020980%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000295.html">
+   <LINK REL="Next"  HREF="000297.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r170 - / freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r170%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200603060307.k2637CcV020980%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r170 - / freenx-server/trunk">fabianx at berlios.de
+       </A><BR>
+    <I>Mon Mar  6 04:07:12 CET 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000295.html">[Freenx-cvs] r169 - / freenx-server/tags/FreeNX-0.4.5
+</A></li>
+        <LI>Next message: <A HREF="000297.html">[Freenx-cvs] r171 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#296">[ date ]</a>
+              <a href="thread.html#296">[ thread ]</a>
+              <a href="subject.html#296">[ subject ]</a>
+              <a href="author.html#296">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2006-03-06 04:06:22 +0100 (Mon, 06 Mar 2006)
+New Revision: 170
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxnode
+   freenx-server/trunk/nxserver
+Log:
+Reworked nxnode. Suspend on connection failure should work now.
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:197
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:198
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-03-06 03:04:58 UTC (rev 169)
++++ freenx-server/trunk/ChangeLog	2006-03-06 03:06:22 UTC (rev 170)
+@@ -1,10 +1,11 @@
+-XX.XX.2005 FreeNX 0.5.0
++XX.XX.2006 FreeNX 0.5.0
+ 	* Opened the 0.5.0 branch.
+ 	* Added load balancing.
+ 	* Completely removed support for 1.4.0 backend.
+ 	* Rootless mode is now the default.
++	* Reworked nxnode / suspend on connection failure should work now.
+ 
+-0?.09.2005 FreeNX 0.4.5 &quot;aKademy Edition&quot;
++XX.XX.2006 FreeNX 0.4.5 &quot;aKademy Edition&quot;
+ 	* Made nxsetup more user-friendly and hopefully finally failsafe.
+ 	* Added --agent to nxnode/nxserver to allow easier debugging.
+ 	* Added addgroup/groupadd to nxsetup
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2006-03-06 03:04:58 UTC (rev 169)
++++ freenx-server/trunk/nxnode	2006-03-06 03:06:22 UTC (rev 170)
+@@ -100,7 +100,6 @@
+ 	
+ 	# remove cookie
+ 	$COMMAND_XAUTH -v source $USER_FAKE_HOME/.nx/C-$sess_id/scripts/authority &gt;/dev/null 2&gt;&amp;1
+-	# FIXME: What to do on errors ... ?
+ 	[ &quot;$SESSION_LOG_CLEAN&quot; = &quot;1&quot; ] &amp;&amp; rm -rf $USER_FAKE_HOME/.nx/C-$1/
+ 	[ &quot;$SESSION_LOG_CLEAN&quot; = &quot;0&quot; -a &quot;$2&quot; = &quot;failed&quot; ] &amp;&amp; mv $USER_FAKE_HOME/.nx/C-$1/ $USER_FAKE_HOME/.nx/F-C-$1/
+ 	[ &quot;$SESSION_LOG_CLEAN&quot; = &quot;0&quot; -a &quot;$2&quot; != &quot;failed&quot; ] &amp;&amp; mv $USER_FAKE_HOME/.nx/C-$1/ $USER_FAKE_HOME/.nx/T-C-$1/
+@@ -210,16 +209,15 @@
+ 		[ &quot;$KILL_DEFAULT_X_WM&quot; = &quot;1&quot; ] || wait $WM_PID
+ 	fi
+ 	rm -f $USER_FAKE_HOME/.nx/C-$sess_id/pids/applications
+-	node_terminate_agent $sess_id
++	
++	# FIXME: Do not terminate agent!
++	#node_terminate_agent $sess_id
+ }
+ 
+ node_start_agent()
+ {
+ 	# close input and output file descriptors
+-	exec 0&lt;&amp;-
+-	exec 1&gt;&amp;-
+-	exec 2&gt;&amp;-
+-	
++
+ 	export DISPLAY=&quot;nx/nx,options=$USER_FAKE_HOME/.nx/C-$sess_id/options:$display&quot;
+ 	export XAUTHORITY=&quot;$USER_FAKE_HOME/.nx/C-$sess_id/authority&quot;
+ 	export HOME=&quot;$USER_FAKE_HOME&quot;
+@@ -285,12 +283,22 @@
+ 	mkdir -p $USER_FAKE_HOME/.nx/C-$sess_id/pids/
+ 	echo &quot;$PID&quot; &gt; $USER_FAKE_HOME/.nx/C-$sess_id/pids/agent
+ 	wait $PID
++	AGENT_EXIT_STATUS=$?
++	failed=&quot;&quot;
++	if [ $AGENT_EXIT_STATUS -ne 0 ]
++	then
++		echo &quot;NX&gt; 1004 Error: NX Agent exited with exit status 1.&quot;
++		failed=&quot;failed&quot;
++	fi
++	echo &quot;NX&gt; 1006 Session status: closed&quot;
++	
+ 	rm -f $USER_FAKE_HOME/.nx/C-$sess_id/pids/agent
+-	[ &quot;$type&quot; = &quot;windows&quot; -o &quot;$type&quot; = &quot;vnc&quot; ] &amp;&amp; node_terminate_session &quot;$sess_id&quot;
++	node_terminate_session &quot;$sess_id&quot; $failed
++	
+ 	# remove possible leftovers of nxagent
+ 	rm -f /tmp/.X$display-lock
+ 	rm -f /tmp/.X11-unix/X$display
+-	[ -f $USER_FAKE_HOME/.nx/C-$sess_id/pids/monitor ] || node_terminate_session &quot;$sess_id&quot;
++	[ -f $USER_FAKE_HOME/.nx/C-$sess_id/pids/monitor ] &amp;&amp; kill &quot;$MONITOR_PID&quot;
+ }
+ 
+ node_kill_proxy()
+@@ -413,12 +421,8 @@
+ node_start_monitor()
+ {
+ 	RUNNING=0
+-	RECONNECT=0
+ 	TAIL_PID=&quot;&quot;
+-	TIMEOUT_PID=&quot;&quot;
+ 
+-	trap node_emergency_exit EXIT
+-	
+ 	sh -c 'echo &quot;Info: tail -f running with pid '\'\$$\''.&quot;; exec tail -n1 -f '$USER_FAKE_HOME'/.nx/C-'$sess_id'/session' | while read line 
+ 	do
+ 		#
+@@ -427,72 +431,49 @@
+ 		if stringinstring &quot;Info: tail -f running with pid&quot; &quot;$line&quot;
+ 		then
+ 			TAIL_PID=$(echo $line | cut -d&quot;'&quot; -f2)
+-			# now set a timeout of 60 seconds ...
+-			( 
+-                          sleep 60
+-			  if [ -d &quot;$HOME/.nx/C-$sess_id/&quot; ]
+-			  then
+-		          	echo &quot;NX&gt; 1004 Error: nxagent failed to start. Session timed out.&quot;
+-			  	echo &quot;                Blocking $display again ...&quot;
+-				touch /tmp/.X$display-lock
+-			  	mv $HOME/.nx/C-$sess_id/ $HOME/.nx/F-C-$sess_id/ 2&gt;/dev/null
+-			  fi
+-			  kill $TAIL_PID 2&gt;/dev/null
+-			) &amp;
+-			TIMEOUT_PID=$!
+-			disown $TIMEOUT_PID
++			trap &quot;kill $TAIL_PID&quot; EXIT
+ 		fi
+ 
+ 		#
+ 		# Detect nxagent syntax errors
+ 		#
+ 		
+-		SYNTAX=&quot;&quot;
++		#SYNTAX=&quot;&quot;
+ 
+-		stringinstring &quot;Unrecognized option:&quot; &quot;$line&quot; &amp;&amp; SYNTAX=&quot;yes&quot;
+-		stringinstring &quot;NXAGENT: Fatal IO error on display&quot; &quot;$line&quot; &amp;&amp; SYNTAX=&quot;yes&quot;
+-		stringinstring &quot;NXAGENT: Unable to open display&quot; &quot;$line&quot; &amp;&amp; SYNTAX=&quot;yes&quot;
+-		if [ -n &quot;$SYNTAX&quot; ]
+-		then
+-			kill $TAIL_PID 2&gt;/dev/null
+-			echo &quot;NX&gt; 1004 Error: nxagent failed to start with: $line&quot;
+-			[ &quot;$SESSION_LOG_CLEAN&quot; = &quot;1&quot; ] &amp;&amp; rm -rf $USER_FAKE_HOME/.nx/C-$sess_id/
+-			[ &quot;$SESSION_LOG_CLEAN&quot; = &quot;1&quot; ] || mv $USER_FAKE_HOME/.nx/C-$sess_id/ $USER_FAKE_HOME/.nx/F-C-$sess_id/
+-			break
+-		fi
++		#stringinstring &quot;Unrecognized option:&quot; &quot;$line&quot; &amp;&amp; SYNTAX=&quot;yes&quot;
++		#stringinstring &quot;NXAGENT: Fatal IO error on display&quot; &quot;$line&quot; &amp;&amp; SYNTAX=&quot;yes&quot;
++		#stringinstring &quot;NXAGENT: Unable to open display&quot; &quot;$line&quot; &amp;&amp; SYNTAX=&quot;yes&quot;
++		#if [ -n &quot;$SYNTAX&quot; ]
++		#then
++		#	kill $TAIL_PID 2&gt;/dev/null
++		#	echo &quot;NX&gt; 1004 Error: nxagent failed to start with: $line&quot;
++		#	[ &quot;$SESSION_LOG_CLEAN&quot; = &quot;1&quot; ] &amp;&amp; rm -rf $USER_FAKE_HOME/.nx/C-$sess_id/
++		#	[ &quot;$SESSION_LOG_CLEAN&quot; = &quot;1&quot; ] || mv $USER_FAKE_HOME/.nx/C-$sess_id/ $USER_FAKE_HOME/.nx/F-C-$sess_id/
++		#	break
++		#fi
+ 
+ 		#
+-		# Suspending possibilities
++		# Session suspend
+ 		#
+ 
+-		SUSP=&quot;&quot;
+-		stringinstring &quot;Info: Reconnection failed&quot; &quot;$line&quot; &amp;&amp; echo &quot;NX&gt; 504 $line&quot;
+-		stringinstring &quot;Info: Reconnection failed&quot; &quot;$line&quot; &amp;&amp; SUSP=&quot;yes&quot;
+-
+-		stringinstring &quot;Info: Suspending session on user request.&quot; &quot;$line&quot; &amp;&amp; SUSP=&quot;yes&quot;
+-		stringinstring &quot;Error: Connection with remote peer broken.&quot; &quot;$line&quot; &amp;&amp; SUSP=&quot;yes&quot;
+-		
+-		if [ -n &quot;$SUSP&quot; ]
++		if stringinstring &quot;Info: Session suspended.&quot; &quot;$line&quot;
+ 		then
+-			kill $TAIL_PID 2&gt;/dev/null
+ 			echo &quot;NX&gt; 1005 Session status: suspended&quot;
+-			kill -HUP $PROXY_PID 2&gt;/dev/null
+-			sleep 2
+-			break
+-		fi
+-		
+-		#if stringinstring &quot;Info: Disconnected from user display.&quot;
+-		if stringinstring &quot;Info: Going to sleep waiting for reconnection.&quot; &quot;$line&quot;
+-		then
+-			kill $TAIL_PID 2&gt;/dev/null
+-			
+-			echo &quot;NX&gt; 1005 Session status: suspended&quot;
+ 			# umount shares &amp; stop printers
+ 			node_stop_services
+-			break
+ 		fi
+ 
+ 		#
++		# Proxy termination
++		#
++
++		if stringinstring &quot;Info: Waiting for a further signal to complete.&quot; &quot;$line&quot;
++		then
++			# Kill the proxy
++			kill -HUP $PROXY_PID 2&gt;/dev/null
++		fi
++		
++		#
+ 		# Session end
+ 		#
+ 		
+@@ -502,39 +483,7 @@
+ 			kill -HUP $PROXY_PID 2&gt;/dev/null
+ 		fi
+ 		
+-		TERM=&quot;&quot;
+-		stringinstring &quot;Info: Waiting for a further signal to complete.&quot; &quot;$line&quot; &amp;&amp; TERM=&quot;yes&quot;
+-		stringinstring &quot;Info: Aborting procedure due to signal&quot; &quot;$line&quot; &amp;&amp; TERM=&quot;yes&quot;
+-		if [ -n &quot;$TERM&quot; -a &quot;$RECONNECT&quot; = &quot;0&quot; ]
+-		then
+-			kill $TAIL_PID 2&gt;/dev/null
+-			echo &quot;NX&gt; 1006 Session status: closed&quot;
+-			# TODO: Need a way to remove session infos ...
+-			# especially for windows/vnc mode
+-			kill $PROXY_PID 2&gt;/dev/null
+-			sleep 2
+-			kill -0 $PROXY_PID 2&gt;/dev/null &amp;&amp; kill -9 $PROXY_PID 2&gt;/dev/null
+-
+-			# umount shares &amp; stop printers
+-			node_stop_services
+-
+-			# kill the session
+-			node_terminate_session &quot;$sess_id&quot;
+-			
+-			break
+-		fi
+-
+ 		#
+-		# Session was suspended before, do not _close_ it, until
+-		# it is fully resumed.
+-		#
+-
+-		if stringinstring &quot;Info: Going to reconnect to a new display.&quot; &quot;$line&quot;
+-		then
+-			RECONNECT=1
+-		fi
+-
+-		#
+ 		# Session is running
+ 		#
+ 		
+@@ -543,7 +492,6 @@
+ 			echo &quot;NX&gt; 710 Session status: running&quot;
+ 			echo &quot;NX&gt; 1002 Commit&quot;
+ 			echo &quot;NX&gt; 1006 Session status: running&quot;
+-			[ -n &quot;$TIMEOUT_PID&quot; ] &amp;&amp; kill $TIMEOUT_PID 2&gt;/dev/null
+ 		fi
+ 
+ 		#
+@@ -562,7 +510,6 @@
+ 		if stringinstring &quot;Info: Proxy running in server mode with pid&quot; &quot;$line&quot;
+ 		then
+ 			PROXY_PID=$(echo $line | cut -d&quot;'&quot; -f2)
+-			#echo &quot;Got $PROXY_PID ... &quot; &gt;&gt; /tmp/nxnode.log
+ 		fi
+ 		
+ 		#
+@@ -572,27 +519,45 @@
+ 		if stringinstring &quot;Info: Reconnection succeded.&quot; &quot;$line&quot;
+ 		then
+ 			echo &quot;NX&gt; 718 Session restore succeded&quot;
+-			RECONNECT=0 # Do no longer block &quot;Connection Close&quot;
++			if [ &quot;$1&quot; = &quot;restore&quot; ]
++			then
++				kill $TAIL_PID
++				break
++			fi
+ 		fi
+ 
+ 		#
+-		# Error handling.
++		# Reconnection failure
+ 		#
+-
+-		if stringinstring &quot;Error: Connection with remote host&quot; &quot;$line&quot; &amp;&amp; [ &quot;$RUNNING&quot; = &quot;0&quot; ] 
++		
++		if stringinstring &quot;Info: Reconnection failed:&quot; &quot;$line&quot;
+ 		then
+-			kill $TAIL_PID 2&gt;/dev/null
+-			echo &quot;NX&gt; 1004 Error:&quot;
+-			echo &quot;Session '$sess_id' has failed after reaching usable state.&quot;
+-			[ &quot;$SESSION_LOG_CLEAN&quot; = &quot;1&quot; ] &amp;&amp; rm -rf $USER_FAKE_HOME/.nx/C-$sess_id/
+-			[ &quot;$SESSION_LOG_CLEAN&quot; = &quot;1&quot; ] || mv $USER_FAKE_HOME/.nx/C-$sess_id/ $USER_FAKE_HOME/.nx/F-C-$sess_id/
+-			break
++			echo &quot;NX&gt; 1004 Error: Session restore failed. Reason was: $line&quot;
++			if [ &quot;$1&quot; = &quot;restore&quot; ]
++			then
++				kill $TAIL_PID
++				break
++			fi
+ 		fi
+-	done 
++
++		#
++		# Error handling.
++		#
++
++		#if stringinstring &quot;Error: Connection with remote host&quot; &quot;$line&quot; &amp;&amp; [ &quot;$RUNNING&quot; = &quot;0&quot; ] 
++		#then
++		#	kill $TAIL_PID 2&gt;/dev/null
++		#	echo &quot;NX&gt; 1004 Error:&quot;
++		#	echo &quot;Session '$sess_id' has failed after reaching usable state.&quot;
++		#	[ &quot;$SESSION_LOG_CLEAN&quot; = &quot;1&quot; ] &amp;&amp; rm -rf $USER_FAKE_HOME/.nx/C-$sess_id/
++		#	[ &quot;$SESSION_LOG_CLEAN&quot; = &quot;1&quot; ] || mv $USER_FAKE_HOME/.nx/C-$sess_id/ $USER_FAKE_HOME/.nx/F-C-$sess_id/
++		#	break
++		#fi
++	done
+ 	
+ 	trap &quot;&quot; EXIT
+ 	
+-	node_stop_services
++	[ &quot;$1&quot; = &quot;restore&quot; ] ||	node_stop_services
+ 	# close all open file descriptors
+ 	exec 0&lt;&amp;-
+ 	exec 1&gt;&amp;-
+@@ -725,10 +690,13 @@
+ EOF
+ 
+ echo &gt; $USER_FAKE_HOME/.nx/C-$sess_id/session
+-node_start_monitor &amp;
+-SPID=$!
++node_start_monitor &quot;$1&quot; &amp;
++
++MONITOR_PID=$!
++export MONITOR_PID
++
+ mkdir -p $USER_FAKE_HOME/.nx/C-$sess_id/pids/
+-echo &quot;$SPID&quot; &gt; $USER_FAKE_HOME/.nx/C-$sess_id/pids/monitor
++echo &quot;$MONITOR_PID&quot; &gt; $USER_FAKE_HOME/.nx/C-$sess_id/pids/monitor
+ 
+ if [ &quot;$1&quot; = &quot;restore&quot; ]
+ then
+@@ -756,7 +724,7 @@
+ # NX&gt; 1004 Error:
+ #Session 'Knoppix-1000-40EFB9F64FA55C64C41C72CA39EBD720' has failed after reaching usable state. Session directory '/home/knoppix/.nx/F-C-Knoppix-1000-40EFB9F64FA55C64C41C72CA39EBD720' will be not deleted to allow for further investigation.
+ 
+-wait $SPID
++wait $MONITOR_PID
+ rm -f $USER_FAKE_HOME/.nx/C-$sess_id/pids/monitor
+ }
+ 
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2006-03-06 03:04:58 UTC (rev 169)
++++ freenx-server/trunk/nxserver	2006-03-06 03:06:22 UTC (rev 170)
+@@ -983,8 +983,7 @@
+ 			if [ &quot;$ENCRYPTION&quot; = &quot;1&quot; ] 
+ 			then 
+ 				let PROXY_DISPLAY=$SESS_DISPLAY+4000
+-				$COMMAND_NETCAT $SERVER_HOST $PROXY_DISPLAY
+-				exit 0
++				exec $COMMAND_NETCAT $SERVER_HOST $PROXY_DISPLAY
+ 			else
+ 				echo_x &quot;NX&gt; 1001 Bye.&quot;
+ 			fi
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000295.html">[Freenx-cvs] r169 - / freenx-server/tags/FreeNX-0.4.5
+</A></li>
+	<LI>Next message: <A HREF="000297.html">[Freenx-cvs] r171 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#296">[ date ]</a>
+              <a href="thread.html#296">[ thread ]</a>
+              <a href="subject.html#296">[ subject ]</a>
+              <a href="author.html#296">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fabianx modified 2 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%202%20files&In-Reply-To=%3C4234E143.mail2FS12QQ24%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000087.html">
+   <LINK REL="Next"  HREF="000089.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fabianx modified 2 files</H1>
+    <B>fabianx</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%202%20files&In-Reply-To=%3C4234E143.mail2FS12QQ24%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fabianx modified 2 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Mon Mar 14 01:56:35 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000087.html">[Freenx-cvs] CVS: freenx - fabianx modified nxserver
+</A></li>
+        <LI>Next message: <A HREF="000089.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#88">[ date ]</a>
+              <a href="thread.html#88">[ thread ]</a>
+              <a href="subject.html#88">[ subject ]</a>
+              <a href="author.html#88">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fabianx
+Date:      2005-03-14 00:56:35 GMT
+Modified:  .        Tag: FreeNX-0_3_0-bugfixes ChangeLog nxserver
+Log:
+Fixed resume of multiple suspended sessions.
+
+Explanation:
+
+The nxclient sends &quot;Suspended,Running&quot; at the first attempt. At the second attempt it just sends &quot;Suspended&quot;, but the code &quot;thought&quot; that it was an older client version that way. So there were no longer any resumable sessions.
+
+Revision  Changes    Path
+No                   revision
+
+
+
+No                   revision
+
+
+
+1.16.2.9  +1 -0      freenx/ChangeLog
+
+
+rev 1.16.2.9, prev_rev 1.16.2.8
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.16.2.8
+retrieving revision 1.16.2.9
+diff -u -r1.16.2.8 -r1.16.2.9
+--- ChangeLog	13 Mar 2005 15:35:27 -0000	1.16.2.8
++++ ChangeLog	14 Mar 2005 00:56:34 -0000	1.16.2.9
+@@ -7,6 +7,7 @@
+ 	* Fixed error message shown to user, when session startup fails.
+ 	* Fixed handling of /tmp/.X*-lock files.
+ 	* Fixed handling of not closed sessions in &quot;Terminating&quot; status.
++	* Fixed resume of multiple suspended sessions.
+ 
+ 05.03.2005 FreeNX 0.3.0 &quot;Chemnitzer LinuxTage Edition&quot;
+ 	* Initial CVS checkin.
+
+
+
+1.24.2.5  +3 -3      freenx/nxserver
+
+
+rev 1.24.2.5, prev_rev 1.24.2.4
+Index: nxserver
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxserver,v
+retrieving revision 1.24.2.4
+retrieving revision 1.24.2.5
+diff -u -r1.24.2.4 -r1.24.2.5
+--- nxserver	13 Mar 2005 15:35:27 -0000	1.24.2.4
++++ nxserver	14 Mar 2005 00:56:34 -0000	1.24.2.5
+@@ -11,7 +11,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxserver,v 1.24.2.4 2005/03/13 15:35:27 fabianx Exp $
++# CVS: $Id: nxserver,v 1.24.2.5 2005/03/14 00:56:34 fabianx Exp $
+ #
+ 
+ # Read the config file
+@@ -773,10 +773,10 @@
+ 
+ 			status=$(getparam status)
+ 
+-			if [ &quot;$status&quot; = &quot;Suspended&quot; ]
++			if [ &quot;$status&quot; = &quot;Suspended&quot; -a -n &quot;$(getparam screeninfo)&quot; ]
+ 			then
+ 				session_list_user_suspended &quot;$USER&quot; &quot;Suspended&quot; &quot;$(getparam screeninfo)&quot; &quot;$(getparam type)&quot; | log_tee
+-			elif [ &quot;$status&quot; = &quot;Suspended,Running&quot; ] # since 1.4.0-5
++			elif [ &quot;$status&quot; = &quot;Suspended,Running&quot; -o &quot;$status&quot; = &quot;Suspended&quot; ] # since 1.4.0-5
+ 			then
+ 				# disabled due to problems with 1.4.0-5 client
+ 				#session_list_user_suspended &quot;$USER&quot; 'Suspended$|^status=Running$' &quot;$(getparam geometry)&quot; &quot;$(getparam type)&quot; | log_tee
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000087.html">[Freenx-cvs] CVS: freenx - fabianx modified nxserver
+</A></li>
+	<LI>Next message: <A HREF="000089.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#88">[ date ]</a>
+              <a href="thread.html#88">[ thread ]</a>
+              <a href="subject.html#88">[ subject ]</a>
+              <a href="author.html#88">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,330 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r98 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r98%20-%20freenx-server/trunk&In-Reply-To=%3C200508022221.j72ML2eq001026%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000226.html">
+   <LINK REL="Next"  HREF="000228.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r98 - freenx-server/trunk</H1>
+    <B>Fabian Franz at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r98%20-%20freenx-server/trunk&In-Reply-To=%3C200508022221.j72ML2eq001026%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r98 - freenx-server/trunk">fabianx at berlios.de
+       </A><BR>
+    <I>Wed Aug  3 00:21:02 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000226.html">[Freenx-cvs] r97 - freenx-server/tags
+</A></li>
+        <LI>Next message: <A HREF="000228.html">[Freenx-cvs] r99 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#227">[ date ]</a>
+              <a href="thread.html#227">[ thread ]</a>
+              <a href="subject.html#227">[ subject ]</a>
+              <a href="author.html#227">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2005-08-03 00:21:01 +0200 (Wed, 03 Aug 2005)
+New Revision: 98
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/node.conf.sample
+   freenx-server/trunk/nxloadconfig
+   freenx-server/trunk/nxnode-login
+   freenx-server/trunk/nxserver
+Log:
+Merged changes from 0_5_0_based_on_0.4.1 branch. (-r63:70):
+
+r70 | fabianx | 2005-07-03 19:29:44 +0200 (So, 03 Jul 2005) | 2 lines
+Ge?\195?\164nderte Pfade:
+   M /freenx-server/node.conf.sample
+
+Warned for using share session space via NFS, as nxserver is not yet fully ready to support it.
+
+------------------------------------------------------------------------
+r69 | fabianx | 2005-07-03 19:27:10 +0200 (So, 03 Jul 2005) | 2 lines
+Ge?\195?\164nderte Pfade:
+   M /freenx-server/nxloadconfig
+
+Bumped version number to 0.5.0.
+
+------------------------------------------------------------------------
+r65 | fabianx | 2005-07-03 17:44:33 +0200 (So, 03 Jul 2005) | 2 lines
+Ge?\195?\164nderte Pfade:
+   M /freenx-server/ChangeLog
+   M /freenx-server/node.conf.sample
+   M /freenx-server/nxloadconfig
+   M /freenx-server/nxnode-login
+   M /freenx-server/nxserver
+
+Initial support for loadbalancing.
+
+------------------------------------------------------------------------
+r64 | fabianx | 2005-07-03 16:39:45 +0200 (So, 03 Jul 2005) | 2 lines
+Ge?\195?\164nderte Pfade:
+   D /freenx-server/CVS
+
+Deleted superflous CVS directory.
+
+------------------------------------------------------------------------
+r63 | fabianx | 2005-07-03 16:38:23 +0200 (So, 03 Jul 2005) | 2 lines
+Ge?\195?\164nderte Pfade:
+   D /freenx-server/RoadMap
+   D /freenx-server/nxserver.old
+
+Deleted two superflous files.
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2005-08-02 17:56:19 UTC (rev 97)
++++ freenx-server/trunk/ChangeLog	2005-08-02 22:21:01 UTC (rev 98)
+@@ -1,3 +1,7 @@
++XX.08.2005 FreeNX 0.5.0
++	* Opened the 0.5.0 branch.
++	* Added load balancing.
++
+ 06.08.2005 FreeNX 0.4.4 &quot;UKUUG Enterprise Edition&quot;
+ 	* Added ENABLE_1_5_0_BACKEND configuration directive:
+ 		* Fixed fullscreen support in nxdesktop (still feels more like
+
+Modified: freenx-server/trunk/node.conf.sample
+===================================================================
+--- freenx-server/trunk/node.conf.sample	2005-08-02 17:56:19 UTC (rev 97)
++++ freenx-server/trunk/node.conf.sample	2005-08-02 22:21:01 UTC (rev 98)
+@@ -200,7 +200,24 @@
+ #ENABLE_NOMACHINE_FORWARD_PORT=&quot;0&quot;
+ #NOMACHINE_FORWARD_PORT=&quot;22&quot;
+ 
++# To do loadbalancing setup some hosts in SERVER_LOADBALANCING and
++# make:
++#
++#   - either sure that all incoming connections are sent to the master
++#     server by using forwarding directives on the &quot;slave&quot; servers.
++#
++#   - or share the session database space via NFS between the servers.
++#     (not recommended at the moment as race conditions for DISPLAYs can 
++#      occur)
++#
++# By setting ENABLE_LOADBALANCE=&quot;1&quot; you can let users choose their
++# preferred host, while being forwarded to another server. Of course
++# this is just a preference. The loadbalancing algorithm can completely
++# choose to ignore the users choice.
+ 
++#SERVER_LOADBALANCING=&quot;&quot;
++#ENABLE_LOADBALANCE_PREFERENCE=&quot;0&quot;
++
+ #########################################################################
+ # Services directives
+ #########################################################################
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2005-08-02 17:56:19 UTC (rev 97)
++++ freenx-server/trunk/nxloadconfig	2005-08-02 22:21:01 UTC (rev 98)
+@@ -49,7 +49,7 @@
+ # DO NOT TOUCH unless you REALLY know what you are doing
+ #########################################################################
+ 
+-NX_VERSION=1.4.0-04-CVS
++NX_VERSION=1.4.0-05-SVN
+ NX_LICENSE=&quot;OS (GPL)&quot;
+ 
+ # Where can different nx components be found
+@@ -125,6 +125,8 @@
+ ENABLE_NOMACHINE_FORWARD_PORT=&quot;0&quot;
+ NOMACHINE_FORWARD_PORT=&quot;22&quot;
+ 
++SERVER_LOADBALANCING=&quot;&quot;
++ENABLE_LOADBALANCE_PREFERENCE=&quot;0&quot;
+ 
+ # Services directives
+ 
+
+Modified: freenx-server/trunk/nxnode-login
+===================================================================
+--- freenx-server/trunk/nxnode-login	2005-08-02 17:56:19 UTC (rev 97)
++++ freenx-server/trunk/nxnode-login	2005-08-02 22:21:01 UTC (rev 98)
+@@ -17,6 +17,8 @@
+ catch {set tosend $env(NXNODE_TOSEND)}
+ set command_ssh &quot;ssh&quot;
+ catch {set command_ssh $env(COMMAND_SSH)}
++set host &quot;127.0.0.1&quot;
++catch {set host $env(NODE_HOSTNAME)}
+ 
+ expect_user -re &quot;(.*)\n&quot; 
+ set password $expect_out(1,string)
+@@ -24,7 +26,7 @@
+ set stty_init &quot;raw icrnl -echo&quot;
+ 
+ if { &quot;$auth_method&quot;==&quot;ssh&quot; } { 
+-	set pid [spawn -noecho $command_ssh -2 -x -l &quot;$user&quot; &quot;127.0.0.1&quot; -o &quot;NumberOfPasswordPrompts 1&quot; -p &quot;$port&quot; &quot;$executable $command&quot; ]
++	set pid [spawn -noecho $command_ssh -2 -x -l &quot;$user&quot; &quot;$host&quot; -o &quot;NumberOfPasswordPrompts 1&quot; -p &quot;$port&quot; &quot;$executable $command&quot; ]
+ } elseif { &quot;$auth_method&quot;==&quot;su&quot; } {
+ 	set pid [spawn -noecho su - &quot;$user&quot; -c &quot;$executable $command&quot; ]
+ } else {
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2005-08-02 17:56:19 UTC (rev 97)
++++ freenx-server/trunk/nxserver	2005-08-02 22:21:01 UTC (rev 98)
+@@ -456,15 +456,18 @@
+ 
+ # Start!
+ [ &quot;$NX_LOG_LEVEL&quot; -ge &quot;1&quot; ] &amp;&amp; touch &quot;$NX_LOGFILE&quot; &gt;/dev/null 2&gt;&amp;1
+-log 3 &quot;-- NX SERVER START: $@&quot;
++log 3 &quot;-- NX SERVER START: $@ - ORIG_COMMAND=$SSH_ORIGINAL_COMMAND&quot;
+ 
+ if [ &quot;$ENABLE_SERVER_FORWARD&quot; = &quot;1&quot; -a -n &quot;$SERVER_FORWARD_HOST&quot; ]
+ then
+ 	log 3 &quot;Info: Forwarding connection to $SERVER_FORWARD_HOST with secret key $SERVER_FORWARD_KEY.&quot;
+-	$COMMAND_SSH -i &quot;$SERVER_FORWARD_KEY&quot; &quot;nx@$SERVER_FORWARD_HOST:$SERVER_FORWARD_PORT&quot;
++	$COMMAND_SSH -i &quot;$SERVER_FORWARD_KEY&quot; &quot;-p$SERVER_FORWARD_PORT&quot; &quot;nx@$SERVER_FORWARD_HOST&quot; &quot;host=$SERVER_NAME&quot;
+ 	exit 0
+ fi
+ 
++# Get the hostname out of SSH_ORIGINAL_COMMAND
++PREFERRED_HOST=$(echo $SSH_ORIGINAL_COMMAND | tr '&amp;' '\n' | grep &quot;^host=&quot; | cut -d'=' -f2)
++
+ # forward the connection to commercial NoMachine server?
+ if [ &quot;$ENABLE_NOMACHINE_FORWARD_PORT&quot; = &quot;1&quot; -a &quot;$NOMACHINE_FORWARD_PORT&quot; = &quot;$(echo $SSH_CLIENT $SSH2_CLIENT| cut -d' ' -f3)&quot; -a -n &quot;$NOMACHINE_SERVER&quot; ]
+ then
+@@ -633,6 +636,20 @@
+ 	USER=&quot;$2&quot;
+ 	shift
+ 	shift
++
++	# Find NODE_HOSTNAME
++	
++	NODE_HOSTNAME=&quot;&quot;
++	CMDLINE=&quot;$@&quot;
++	uniqueid=$(getparam uniqueid)
++	[ -z &quot;$uniqueid&quot; ] &amp;&amp; uniqueid=$(getparam sessionid)
++	[ -z &quot;$uniqueid&quot; ] &amp;&amp; uniqueid=$(getparam session_id)
++	CMDLINE=$(session_get &quot;$uniqueid&quot;)
++	
++	NODE_HOSTNAME=&quot;$(getparam host)&quot;
++	[ -z &quot;$NODE_HOSTNAME&quot; ] &amp;&amp; NODE_HOSTNAME=&quot;127.0.0.1&quot;
++	export NODE_HOSTNAME
++	
+ 	# Use nxnode-login?
+ 	if [ &quot;$LOGIN_METHOD&quot; = &quot;SSH&quot; ]
+ 	then
+@@ -645,7 +662,7 @@
+ 	then
+ 	    echo &quot;$@&quot; | $PATH_BIN/nxnode &quot;$CMD&quot; 2&gt;&amp;1 | log_tee
+ 	else
+-	    echo &quot;$@&quot; | $COMMAND_SSH -l &quot;$USER&quot; 127.0.0.1 -p $SSHD_PORT -x -2 -i $NX_ETC_DIR/users.id_dsa -o 'PubkeyAuthentication yes' -o 'RSAAuthentication yes' -o 'RhostsAuthentication no' -o 'PasswordAuthentication no' -o 'RhostsRSAAuthentication no' -o 'StrictHostKeyChecking no' $PATH_BIN/nxnode &quot;$CMD&quot; | log_tee
++	    echo &quot;$@&quot; | $COMMAND_SSH -l &quot;$USER&quot; &quot;$NODE_HOSTNAME&quot; -p $SSHD_PORT -x -2 -i $NX_ETC_DIR/users.id_dsa -o 'PubkeyAuthentication yes' -o 'RSAAuthentication yes' -o 'RhostsAuthentication no' -o 'PasswordAuthentication no' -o 'RhostsRSAAuthentication no' -o 'StrictHostKeyChecking no' $PATH_BIN/nxnode &quot;$CMD&quot; | log_tee
+ 	fi
+ }
+ 
+@@ -762,6 +779,36 @@
+ 	return 0
+ }
+ 
++# FIXME: Add round-robin algorithm
++server_loadbalance_random_rr()
++{
++	# Pick one based on &quot;round-robin random&quot;
++	SERVER_HOSTS=( $SERVER_LOADBALANCING )
++	SERVER_NR_OF_HOSTS=${#SERVER_HOSTS[@]}
++	let SERVER_NR=(RANDOM % SERVER_NR_OF_HOSTS)
++	SERVER_HOST_RR=${SERVER_HOSTS[$SERVER_NR]}
++	echo $SERVER_HOST_RR
++}
++
++server_loadbalance()
++{
++	SERVER_HOST=&quot;127.0.0.1&quot;
++	if [ -n &quot;$SERVER_LOADBALANCING&quot; ]
++	then
++		# FIXME: Add preference host
++		SERVER_HOST=&quot;&quot;
++		if [ -n &quot;$PREFERRED_HOST&quot; -a &quot;$ENABLE_LOADBALANCE_PREFERENCE&quot; = &quot;1&quot; ]
++		then
++			stringinstring &quot; $PREFERRED_HOST &quot; &quot; $SERVER_LOADBALANCING &quot; &amp;&amp; SERVER_HOST=&quot;$PREFERRED_HOST&quot;
++		fi
++		# Fallback if still empty
++		[ -z &quot;$SERVER_HOST&quot; ] &amp;&amp; SERVER_HOST=$(server_loadbalance_random_rr)
++		[ -n &quot;$SERVER_HOST&quot; ] &amp;&amp; log 5 &quot;Info: Load-Balancing (if possible) to $SERVER_HOST ...&quot;
++		[ -z &quot;$SERVER_HOST&quot; ] &amp;&amp; SERVER_HOST=&quot;127.0.0.1&quot;
++	fi
++	echo &quot;$SERVER_HOST&quot;
++}	
++
+ server_startrestore_session()
+ {
+ 	ACTION=&quot;$1&quot;
+@@ -858,9 +905,13 @@
+ 		FULL_PARAMS=&quot;$PARAMS&amp;user=$USER&amp;userip=$USERIP&amp;uniqueid=$uniqueid&amp;display=$SESS_DISPLAY&quot;
+ 		log_secure &quot;6&quot; &quot;$FULL_PARAMS&quot;
+ 
++		# Possibly do loadbalancing
++		
++		SERVER_HOST=$(server_loadbalance)
++
+ 		# now update the session listing
+ 		CMDLINE=&quot;a=b&amp;$FULL_PARAMS&quot;
+-		session_add $uniqueid &quot;sessionName=$(getparam session)&amp;display=$(getparam display)&amp;status=Running&amp;startTime=$(date +%s)&amp;foreignAddress=$(getparam userip)&amp;type=$(getparam type)&amp;sessionId=$uniqueid&amp;creationTime=$(date +%s)&amp;userName=$USER&amp;serverPid=$SERVER_PID&amp;screeninfo=$(getparam screeninfo)&amp;geometry=$(getparam geometry)&quot;
++		session_add $uniqueid &quot;sessionName=$(getparam session)&amp;display=$(getparam display)&amp;status=Running&amp;startTime=$(date +%s)&amp;foreignAddress=$(getparam userip)&amp;type=$(getparam type)&amp;sessionId=$uniqueid&amp;creationTime=$(date +%s)&amp;userName=$USER&amp;serverPid=$SERVER_PID&amp;screeninfo=$(getparam screeninfo)&amp;geometry=$(getparam geometry)&amp;host=$SERVER_HOST&quot;
+ 	else
+ 		uniqueid=$(getparam restore)
+ 		[ -z &quot;$uniqueid&quot; ] &amp;&amp; uniqueid=$(getparam id) # 1.4.0-5 compatibility
+@@ -869,6 +920,8 @@
+ 		CMDLINE=$(session_get &quot;$uniqueid&quot;)
+ 		FULL_PARAMS=&quot;$PARAMS&amp;user=$USER&amp;userip=$(getparam foreignAddress)&amp;uniqueid=$uniqueid&amp;display=$(getparam display)&quot;
+ 		SESS_DISPLAY=$(getparam display)
++		SERVER_HOST=$(getparam host)
++		[ -z &quot;$SERVER_HOST&quot; ] &amp;&amp; SERVER_HOST=&quot;127.0.0.1&quot;
+ 	fi
+ 
+ 	# now start the node
+@@ -930,7 +983,7 @@
+ 			if [ &quot;$ENCRYPTION&quot; = &quot;1&quot; ] 
+ 			then 
+ 				let PROXY_DISPLAY=$SESS_DISPLAY+4000
+-				$COMMAND_NETCAT 127.0.0.1 $PROXY_DISPLAY
++				$COMMAND_NETCAT $SERVER_HOST $PROXY_DISPLAY
+ 				exit 0
+ 			else
+ 				echo_x &quot;NX&gt; 1001 Bye.&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000226.html">[Freenx-cvs] r97 - freenx-server/tags
+</A></li>
+	<LI>Next message: <A HREF="000228.html">[Freenx-cvs] r99 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#227">[ date ]</a>
+              <a href="thread.html#227">[ thread ]</a>
+              <a href="subject.html#227">[ subject ]</a>
+              <a href="author.html#227">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

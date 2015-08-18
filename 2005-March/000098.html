@@ -1,0 +1,502 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - jonno modified 5 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20jonno%20modified%205%20files&In-Reply-To=%3C42383B92.mail88311M6FB%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000097.html">
+   <LINK REL="Next"  HREF="000102.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - jonno modified 5 files</H1>
+    <B>jonno</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20jonno%20modified%205%20files&In-Reply-To=%3C42383B92.mail88311M6FB%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - jonno modified 5 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Wed Mar 16 14:58:42 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000097.html">[Freenx-cvs] CVS: freenx - fabianx modified ChangeLog
+</A></li>
+        <LI>Next message: <A HREF="000102.html">[Freenx-cvs] CVS: freenx - jonno modified 5 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#98">[ date ]</a>
+              <a href="thread.html#98">[ thread ]</a>
+              <a href="subject.html#98">[ subject ]</a>
+              <a href="author.html#98">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      jonno
+Date:      2005-03-16 13:58:42 GMT
+Modified:  .        ChangeLog node.conf.sample nxloadconfig nxnode
+Modified:           nxserver
+Log:
+Added configurable verbosity of logging.
+
+Revision  Changes    Path
+1.42      +2 -0      freenx/ChangeLog
+
+
+rev 1.42, prev_rev 1.41
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.41
+retrieving revision 1.42
+diff -u -r1.41 -r1.42
+--- ChangeLog	16 Mar 2005 10:59:24 -0000	1.41
++++ ChangeLog	16 Mar 2005 13:58:42 -0000	1.42
+@@ -18,6 +18,8 @@
+ 	* Implemented DEFAULT_X_WM for unix-application virtual desktop mode.
+ 	* Implemented SESSION_LIMIT and SESSION_USER_LIMIT.
+ 	* Fixed nxviewer commandline for geometry and fullscreen-support
++	* Added NX_LOG_LEVEL instead of NX_LOGGING, allowing less verbose logfile.
++	* Added SESSION_LOG_CLEAN for configurable removal of the temporary session directory.
+ 
+ XX.03.2005 FreeNX 0.3.1-CVS
+ 	* Fixed keyboard mapping problems.
+
+
+
+1.17      +19 -4     freenx/node.conf.sample
+
+
+rev 1.17, prev_rev 1.16
+Index: node.conf.sample
+===================================================================
+RCS file: /cvsroot/freenx/freenx/node.conf.sample,v
+retrieving revision 1.16
+retrieving revision 1.17
+diff -u -r1.16 -r1.17
+--- node.conf.sample	13 Mar 2005 15:12:16 -0000	1.16
++++ node.conf.sample	16 Mar 2005 13:58:42 -0000	1.17
+@@ -37,19 +37,34 @@
+ #
+ #           <A HREF="https://mail.kde.org/mailman/listinfo/freenx-knx">https://mail.kde.org/mailman/listinfo/freenx-knx</A>
+ #
+-# CVS: $Id: node.conf.sample,v 1.16 2005/03/13 15:12:16 fabianx Exp $
++# CVS: $Id: node.conf.sample,v 1.17 2005/03/16 13:58:42 jonno Exp $
+ 
+ #########################################################################
+ # FreeNX specific node.conf directives
+ #########################################################################
+ 
+-# Logfile directives
++# This directives controls the verbosity of the server-wide log.
++# 0: No Logging, 
++# 1: Errors
++# 2: Warnings
++# 3: Important information
++# 4: Server - Client communication
++# 5: Information
++# 6: Debugging information
++#NX_LOG_LEVEL=0
++
+ # Before turning logging on, please make sure that NX_LOGFILE is 
+ # writeable for the &quot;nx&quot; user
+-#NX_LOGGING=0
+ #NX_LOGFILE=/var/log/nxserver.log
+ 
+-# Amount of seconds nxserver is to keep session data. The default of 2592000
++# This directive controls if the temporary session directory 
++# ($HOME/.nx/C-&lt;hostname&gt;-&lt;display&gt;-&lt;session_id&gt;) should be kept after a 
++# session has ended. A successfullty terminated session will be saved as 
++# T-C-&lt;hostname&gt;-&lt;display&gt;-&lt;session_id&gt; while a failed session will be saved 
++# as F-C-&lt;hostname&gt;-&lt;display&gt;-&lt;session_id&gt;.
++#SESSION_LOG_CLEAN=0
++
++# Amount of seconds nxserver is to keep session history. The default of 2592000
+ # is equivalent to 30 days. If this is 0 no session history will be kept,
+ # and a negative value denotes infinity.
+ #SESSION_HISTORY=2592000
+
+
+
+1.21      +8 -5      freenx/nxloadconfig
+
+
+rev 1.21, prev_rev 1.20
+Index: nxloadconfig
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxloadconfig,v
+retrieving revision 1.20
+retrieving revision 1.21
+diff -u -r1.20 -r1.21
+--- nxloadconfig	13 Mar 2005 15:12:16 -0000	1.20
++++ nxloadconfig	16 Mar 2005 13:58:42 -0000	1.21
+@@ -5,7 +5,7 @@
+ #
+ # License: GPL, version 2
+ #
+-# CVS: $Id: nxloadconfig,v 1.20 2005/03/13 15:12:16 fabianx Exp $
++# CVS: $Id: nxloadconfig,v 1.21 2005/03/16 13:58:42 jonno Exp $
+ #
+ # ========================================================================
+ 
+@@ -68,8 +68,9 @@
+ # DO NOT EVER TOUCH THIS, edit $NX_ETC_DIR/node.conf instead
+ #########################################################################
+ 
+-NX_LOGGING=0
++NX_LOG_LEVEL=0
+ NX_LOGFILE=/var/log/nxserver.log
++SESSION_LOG_CLEAN=1
+ SESSION_HISTORY=2592000
+ 
+ ENABLE_PASSDB_AUTHENTICATION=&quot;1&quot;
+@@ -209,12 +210,14 @@
+ 	[ -z &quot;$SSH_AUTHORIZED_KEYS&quot; ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SSH_AUTHORIZED_KEYS=$SSH_AUTHORIZED_KEYS\&quot;&quot; 
+ 	
+-	[ -z $(echo &quot;$NX_LOGGING&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;NX_LOGGING=$NX_LOGGING\&quot;&quot;
+-	[ &quot;$NX_LOGGING&quot; = &quot;1&quot; -a ! -e &quot;$NX_LOGFILE&quot; ] &amp;&amp; \
++	[ -z $(echo &quot;$NX_LOG_LEVEL&quot; | egrep &quot;^[0-7]$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;NX_LOG_LEVEL=$NX_LOG_LEVEL\&quot;&quot;
++	[ &quot;$NX_LOG_LEVEL&quot; != &quot;0&quot; -a ! -e &quot;$NX_LOGFILE&quot; ] &amp;&amp; \
+ 		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;NX_LOGFILE=$NX_LOGFILE\&quot;&quot; \
+ 					  &amp;&amp; echo &quot;         No loggfile will be kept.&quot;
+ 		# How do I check if another user might write to a file? ( -w checks only current user)
++	[ -z $(echo &quot;$SESSION_LOG_CLEAN&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SESSION_LOG_CLEAN=$SESSION_LOG_CLEAN\&quot;&quot;
+ 	[ -z $(echo &quot;$SESSION_HISTORY&quot; | egrep &quot;^-?[0-9]+$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SESSION_HISTORY=$SESSION_HISTORY\&quot;&quot;
+ 	
+
+
+
+1.48      +16 -16    freenx/nxnode
+
+
+rev 1.48, prev_rev 1.47
+Index: nxnode
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxnode,v
+retrieving revision 1.47
+retrieving revision 1.48
+diff -u -r1.47 -r1.48
+--- nxnode	16 Mar 2005 09:50:37 -0000	1.47
++++ nxnode	16 Mar 2005 13:58:42 -0000	1.48
+@@ -13,7 +13,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxnode,v 1.47 2005/03/16 09:50:37 fux Exp $
++# CVS: $Id: nxnode,v 1.48 2005/03/16 13:58:42 jonno Exp $
+ #
+ # 21.06.2004: - Full reconnection support
+ 
+@@ -58,6 +58,12 @@
+ 	[ $UID -eq 0 ] || $(whoami)
+ }
+ 
++node_abort()
++{
++	echo &quot;$@&quot; 1&gt;&amp;2
++	exit 1
++}
++
+ getparam_sessionid()
+ {
+ 	sessionid=$(getparam sessionid)
+@@ -67,13 +73,6 @@
+ 	echo $sessionid
+ }
+ 
+-node_abort()
+-{
+-	echo &quot;$@&quot; 1&gt;&amp;2
+-	exit 1
+-}
+-
+-
+ 
+ node_terminate_agent()
+ {
+@@ -102,15 +101,15 @@
+ 	# remove cookie
+ 	$COMMAND_XAUTH -v source $USER_FAKE_HOME/.nx/C-$sess_id/scripts/authority &gt;/dev/null 2&gt;&amp;1
+ 	# FIXME: What to do on errors ... ?
+-	# TODO: Add parsing of var ...
+-	#mv $USER_FAKE_HOME/.nx/C-$1/ $USER_FAKE_HOME/.nx/F-C-$1/
+-	rm -rf $USER_FAKE_HOME/.nx/C-$1/
++	[ &quot;$SESSION_LOG_CLEAN&quot; = &quot;1&quot; ] &amp;&amp; rm -rf $USER_FAKE_HOME/.nx/C-$1/
++	[ &quot;$SESSION_LOG_CLEAN&quot; = &quot;0&quot; -a &quot;$2&quot; = &quot;failed&quot; ] &amp;&amp; mv $USER_FAKE_HOME/.nx/C-$1/ $USER_FAKE_HOME/.nx/F-C-$1/
++	[ &quot;$SESSION_LOG_CLEAN&quot; = &quot;0&quot; -a &quot;$2&quot; != &quot;failed&quot; ] &amp;&amp; mv $USER_FAKE_HOME/.nx/C-$1/ $USER_FAKE_HOME/.nx/T-C-$1/
+ }
+ 
+ node_fail_restore_session()
+ {
+ 	echo &quot;NX&gt; 1004 Error: Could not resume session. nxagent process could not be found.&quot;
+-	node_terminate_session &quot;$sess_id&quot;
++	node_terminate_session &quot;$sess_id&quot; &quot;failed&quot;
+ 	exit 1
+ }
+ 
+@@ -195,10 +194,10 @@
+ 	[ &quot;$virtualdesktop&quot; = &quot;0&quot; -a &quot;$ENABLE_ROOTLESS_MODE&quot; != &quot;1&quot; ] &amp;&amp; export LD_PRELOAD=&quot;$APPLICATION_LIBRARY_PRELOAD:$LD_PRELOAD&quot;
+ 	if [ &quot;$ENABLE_DEFAULT_X_WM&quot; = &quot;1&quot; -a &quot;$virtualdesktop&quot; = &quot;1&quot; -a &quot;$type&quot; = &quot;unix-application&quot; -a -x &quot;$(find_app $DEFAULT_X_WM)&quot; ]
+ 	then
+-		DISPLAY=unix:$display $DEFAULT_X_WM &gt;&gt; $USER_FAKE_HOME/.nx/C-$sess_id/session 2&gt;&amp;1 &amp;
++		DISPLAY=unix:$display $DEFAULT_X_WM 2&gt;&gt;$USER_FAKE_HOME/.nx/C-$sess_id/session &amp;
+ 		WM_PID=$!
+ 	fi
+-	DISPLAY=unix:$display $STARTX &gt;&gt;$USER_FAKE_HOME/.nx/C-$sess_id/session 2&gt;&amp;1 &amp;
++	DISPLAY=unix:$display $STARTX 2&gt;&gt;$USER_FAKE_HOME/.nx/C-$sess_id/session &amp;
+ 	APP_PID=$!
+ 	mkdir -p $USER_FAKE_HOME/.nx/C-$sess_id/pids/
+ 	echo &quot;$APP_PID&quot; &gt; $USER_FAKE_HOME/.nx/C-$sess_id/pids/applications
+@@ -473,8 +472,9 @@
+ 		then
+ 			kill $TAIL_PID 2&gt;/dev/null
+ 			echo &quot;NX&gt; 1004 Error:&quot;
+-			echo &quot;Session '$sess_id' has failed after reaching usable state. Session directory '$USER_FAKE_HOME/.nx/F-C-$sess_id' will be not deleted to allow for further investigation.&quot;
+-		#	mv $USER_FAKE_HOME/.nx/C-$sess_id/ $USER_FAKE_HOME/.nx/F-C-$sess_id/
++			echo &quot;Session '$sess_id' has failed after reaching usable state.&quot;
++			[ &quot;$SESSION_LOG_CLEAN&quot; = &quot;1&quot; ] &amp;&amp; rm -rf $USER_FAKE_HOME/.nx/C-$sess_id/
++			[ &quot;$SESSION_LOG_CLEAN&quot; = &quot;1&quot; ] || mv $USER_FAKE_HOME/.nx/C-$sess_id/ $USER_FAKE_HOME/.nx/F-C-$sess_id/
+ 			break
+ 		fi
+ 	done 
+
+
+
+1.44      +35 -27    freenx/nxserver
+
+
+rev 1.44, prev_rev 1.43
+Index: nxserver
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxserver,v
+retrieving revision 1.43
+retrieving revision 1.44
+diff -u -r1.43 -r1.44
+--- nxserver	14 Mar 2005 01:17:09 -0000	1.43
++++ nxserver	16 Mar 2005 13:58:42 -0000	1.44
+@@ -11,7 +11,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxserver,v 1.43 2005/03/14 01:17:09 fabianx Exp $
++# CVS: $Id: nxserver,v 1.44 2005/03/16 13:58:42 jonno Exp $
+ #
+ 
+ # Read the config file
+@@ -388,20 +388,28 @@
+ if [ $USER = &quot;nxfree&quot; -o &quot;$USER&quot; = &quot;nx&quot; ]
+ then
+ 
++# Loglevels:
++# 1: Errors
++# 2: Warnings
++# 3: Important information
++# 4: Server - Client communication
++# 5: Information
++# 6: Debugging information
++
+ log()
+ {
+-	[ &quot;$NX_LOGGING&quot; = &quot;1&quot; -a -w &quot;$NX_LOGFILE&quot; ] &amp;&amp; echo &quot;$@&quot; &gt;&gt; &quot;$NX_LOGFILE&quot;
++	[ &quot;$NX_LOG_LEVEL&quot; -ge &quot;$1&quot; -a -w &quot;$NX_LOGFILE&quot; ] &amp;&amp; shift &amp;&amp; echo &quot;$@&quot; &gt;&gt; &quot;$NX_LOGFILE&quot;
+ }
+ 
+ log_tee()
+ {
+-	[ &quot;$NX_LOGGING&quot; = &quot;1&quot; -a -w &quot;$NX_LOGFILE&quot; ] &amp;&amp; exec tee -a &quot;$NX_LOGFILE&quot;
+-	[ &quot;$NX_LOGGING&quot; = &quot;1&quot; -a -w &quot;$NX_LOGFILE&quot; ] || exec cat -
++	[ &quot;$NX_LOG_LEVEL&quot; -ge &quot;4&quot; -a -w &quot;$NX_LOGFILE&quot; ] &amp;&amp; exec tee -a &quot;$NX_LOGFILE&quot;
++	[ &quot;$NX_LOG_LEVEL&quot; -ge &quot;4&quot; -a -w &quot;$NX_LOGFILE&quot; ] || exec cat -
+ }
+ 
+ echo_x()
+ {
+-	log &quot;$@&quot;
++	log &quot;4&quot; &quot;$@&quot;
+ 	echo &quot;$@&quot;
+ }
+ 
+@@ -440,7 +448,7 @@
+ 			;;
+ 		esac
+ 	done
+-	log &quot;done.&quot;
++	log 5 &quot;Info: Forwarding connection to NoMachine server done.&quot;
+ 	cat &lt;&amp;4 &amp;
+ 	CAT_PID=$!
+ 	cat - &gt;&amp;3
+@@ -451,11 +459,11 @@
+ }
+ 
+ # Start!
+-log &quot;-- NX SERVER START: $@&quot;
++log 3 &quot;-- NX SERVER START: $@&quot;
+ 
+ if [ &quot;$ENABLE_SERVER_FORWARD&quot; = &quot;1&quot; -a -n &quot;$SERVER_FORWARD_HOST&quot; ]
+ then
+-	log &quot;Forwarding connection to $SERVER_FORWARD_HOST with secret key $SERVER_FORWARD_KEY.&quot;
++	log 3 &quot;Info: Forwarding connection to $SERVER_FORWARD_HOST with secret key $SERVER_FORWARD_KEY.&quot;
+ 	ssh -i &quot;$SERVER_FORWARD_KEY&quot; &quot;nx@$SERVER_FORWARD_HOST:$SERVER_FORWARD_PORT&quot;
+ 	exit 0
+ fi
+@@ -463,9 +471,9 @@
+ # forward the connection to commercial NoMachine server?
+ if [ &quot;$ENABLE_NOMACHINE_FORWARD_PORT&quot; = &quot;1&quot; -a &quot;$NOMACHINE_FORWARD_PORT&quot; = &quot;$(echo $SSH_CLIENT | cut -d' ' -f3)&quot; -a -n &quot;$NOMACHINE_SERVER&quot; ]
+ then
+-	log &quot;Info: Detected SSH destination port $NOMACHINE_FORWARD_PORT. Forwarding connection to commercial NoMachine server.&quot;
++	log 3 &quot;Info: Detected SSH destination port $NOMACHINE_FORWARD_PORT. Forwarding connection to commercial NoMachine server.&quot;
+ 	exec $NOMACHINE_SERVER
+-	log &quot;Error: Forwarding to NoMachine Server $NOMACHINE_SERVER failed. Using FreeNX server instead.&quot;
++	log 1 &quot;Error: Forwarding to NoMachine Server $NOMACHINE_SERVER failed. Using FreeNX server instead.&quot;
+ fi
+ 
+ echo_x &quot;HELLO NXSERVER - Version $NX_VERSION $NX_LICENSE&quot;
+@@ -508,7 +516,7 @@
+ 				[ &quot;$ENABLE_AUTORECONNECT_BEFORE_140&quot; = &quot;1&quot; ] &amp;&amp; ENABLE_AUTORECONNECT=&quot;1&quot;
+ 			fi
+ 		;;
+-		set*|SET)
++		set*|SET*)
+ 			if [ &quot;$CMD&quot; = &quot;set auth_mode password&quot; -o &quot;$CMD&quot; = &quot;SET AUTH_MODE PASSWORD&quot; ]
+ 			then
+ 				echo_x &quot;Set auth_mode: password&quot;
+@@ -528,13 +536,13 @@
+ 			then
+ 				case &quot;$USER&quot; in
+ 					freenx.*)
+-						log &quot;Not forwarding connection. FreeNX user found.&quot;
++						log 3 &quot;Info: Not forwarding connection. FreeNX user found.&quot;
+ 						USER=${USER##freenx.}
+ 					;;
+ 					*)
+-						log -n &quot;Forwarding connection to NoMachine server...&quot;
++						log 3 &quot;Info: Forwarding connection to NoMachine server&quot;
+ 						server_forward_nomachine
+-						log &quot;failed.&quot;
++						log 1 &quot;Error: Forwarding connection to NoMachine server failed.&quot;
+ 					;;
+ 				esac
+ 			fi
+@@ -542,12 +550,12 @@
+ 			echo_x -n &quot;NX&gt; 102 Password: &quot;
+ 			read -s PASS
+ 			echo_x &quot;&quot;
+-			log -n &quot;Auth method: &quot;
++			log 6 -n &quot;Info: Auth method: &quot;
+ 			
+ 			# PASSDB based auth
+ 			if [ &quot;$ENABLE_PASSDB_AUTHENTICATION&quot; = &quot;1&quot; -a &quot;$LOGIN_SUCCESS&quot; = &quot;0&quot; ]
+ 			then
+-				log -n &quot;passdb &quot;
++				log 6 -n &quot;passdb &quot;
+ 				if [ $(passdb_get_crypt_pass &quot;$PASS&quot;) = $(passdb_get_pass &quot;$USER&quot;) ]
+ 				then
+ 					LOGIN_SUCCESS=&quot;1&quot;
+@@ -558,7 +566,7 @@
+ 			# SSH based auth
+ 			if [ &quot;$ENABLE_SSH_AUTHENTICATION&quot; = &quot;1&quot; -a &quot;$LOGIN_SUCCESS&quot; = &quot;0&quot; ]
+ 			then
+-				log -n &quot;ssh &quot;
++				log 6 -n &quot;ssh &quot;
+ 				echo &quot;$PASS&quot; | $PATH_BIN/nxnode-login -- ssh &quot;$USER&quot; &quot;$SSHD_PORT&quot; &quot;$PATH_BIN/nxnode&quot; --check &gt; /dev/null 2&gt;/dev/null
+ 				if [ $? -eq 0 ]
+ 				then
+@@ -570,7 +578,7 @@
+ 			# SU based auth
+ 			if [ &quot;$ENABLE_SU_AUTHENTICATION&quot; = &quot;1&quot; -a &quot;$LOGIN_SUCCESS&quot; = &quot;0&quot; ]
+ 			then
+-				log -n &quot;su &quot;
++				log 6 -n &quot;su &quot;
+ 				echo &quot;$PASS&quot; | $PATH_BIN/nxnode-login -- su &quot;$USER&quot; &quot;&quot; &quot;$PATH_BIN/nxnode&quot; --check &gt; /dev/null 2&gt;/dev/null
+ 				if [ $? -eq 0 ]
+ 				then
+@@ -578,14 +586,14 @@
+ 					LOGIN_METHOD=&quot;SU&quot;
+ 				fi
+ 			fi
+-			log &quot;&quot;
+ 			
+ 			# Check if user in passdb
+ 			if [ &quot;$ENABLE_USER_DB&quot; = &quot;1&quot; ]
+ 			then
+-				log &quot;userdb check&quot;
++				log 6 &quot;userdb check&quot;
+ 				passdb_user_exists &quot;$USER&quot; || LOGIN_SUCCESS=&quot;0&quot;
+ 			fi
++			log 6 &quot;&quot;
+ 
+ 			if [ &quot;$LOGIN_SUCCESS&quot; = &quot;1&quot; ]
+ 			then
+@@ -753,12 +761,12 @@
+ 	then 
+ 		if [ &quot;$SSHD_CHECK_IP&quot; = &quot;1&quot; ]
+ 		then
+-			echo &quot;NX&gt; 504 Session startup failed. (Missing SSH_CLIENT environment variable)&quot;
++			echo_x &quot;NX&gt; 504 Session startup failed. (Missing SSH_CLIENT environment variable)&quot;
+ 			return 1
+ 		else
+-			log &quot;WARNING: Failed to determine the client IP.&quot;
+-			log &quot;WARNING: The SSH_CLIENT variable was not provided by SSHD.&quot;
+-			log &quot;WARNING: Please set SSHD_CHECK_IP=1 if you want to refuse the connection.&quot;
++			log 2 &quot;Warning: Failed to determine the client IP.&quot;
++			log 2 &quot;Warning: The SSH_CLIENT variable was not provided by SSHD.&quot;
++			log 2 &quot;Warning: Please set SSHD_CHECK_IP=1 if you want to refuse the connection.&quot;
+ 		fi
+ 	fi
+ 
+@@ -811,7 +819,7 @@
+ 	
+ 		uniqueid=$(echo $[$RANDOM*$RANDOM] | md5sum | cut -d&quot; &quot; -f1 | tr &quot;[a-z]&quot; &quot;[A-Z]&quot;)
+ 		FULL_PARAMS=&quot;user=$USER&amp;userip=$USERIP&amp;uniqueid=$uniqueid&amp;display=$SESS_DISPLAY&amp;$PARAMS&quot;
+-		log &quot;$FULL_PARAMS&quot;
++		log 6 &quot;$FULL_PARAMS&quot;
+ 
+ 		# now update the session listing
+ 		CMDLINE=&quot;a=b&amp;$FULL_PARAMS&quot;
+@@ -923,8 +931,8 @@
+ 			server_startrestore_session &quot;resume&quot;
+ 		;;
+ 		passwd)
+-			echo &quot;NX&gt; 113 Changing password of user '$USER'&quot;
+-			echo -n &quot;NX&gt; 102 Current password:&quot;
++			echo_x &quot;NX&gt; 113 Changing password of user '$USER'&quot;
++			echo_x -n &quot;NX&gt; 102 Current password:&quot;
+ 			read -s PASS
+ 			ENC_PASS=$(passdb_get_crypt_pass &quot;$PASS&quot;)
+ 			REAL_PASS=$(passdb_get_pass &quot;$USER&quot;)
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000097.html">[Freenx-cvs] CVS: freenx - fabianx modified ChangeLog
+</A></li>
+	<LI>Next message: <A HREF="000102.html">[Freenx-cvs] CVS: freenx - jonno modified 5 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#98">[ date ]</a>
+              <a href="thread.html#98">[ thread ]</a>
+              <a href="subject.html#98">[ subject ]</a>
+              <a href="author.html#98">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

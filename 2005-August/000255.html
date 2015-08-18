@@ -1,0 +1,132 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r128 - / freenx-server/branches/FreeNX-0.4
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r128%20-%20/%20freenx-server/branches/FreeNX-0.4&In-Reply-To=%3C200508182045.j7IKjTlw005026%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000254.html">
+   <LINK REL="Next"  HREF="000256.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r128 - / freenx-server/branches/FreeNX-0.4</H1>
+    <B>Thorsten Sandfuchs at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r128%20-%20/%20freenx-server/branches/FreeNX-0.4&In-Reply-To=%3C200508182045.j7IKjTlw005026%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r128 - / freenx-server/branches/FreeNX-0.4">fux at berlios.de
+       </A><BR>
+    <I>Thu Aug 18 22:45:29 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000254.html">[Freenx-cvs] r127 - / freenx-server/branches/FreeNX-0.4
+</A></li>
+        <LI>Next message: <A HREF="000256.html">[Freenx-cvs] r129 - / freenx-server/branches/FreeNX-0.4
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#255">[ date ]</a>
+              <a href="thread.html#255">[ thread ]</a>
+              <a href="subject.html#255">[ subject ]</a>
+              <a href="author.html#255">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fux
+Date: 2005-08-18 22:45:27 +0200 (Thu, 18 Aug 2005)
+New Revision: 128
+
+Modified:
+   /
+   freenx-server/branches/FreeNX-0.4/ChangeLog
+   freenx-server/branches/FreeNX-0.4/nxsetup
+Log:
+fixed useradd/adduser-calls with nx-group. Reverted r126 as groupdel isn't really necessary obviously
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1278
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1280
+
+Modified: freenx-server/branches/FreeNX-0.4/ChangeLog
+===================================================================
+--- freenx-server/branches/FreeNX-0.4/ChangeLog	2005-08-18 19:45:28 UTC (rev 127)
++++ freenx-server/branches/FreeNX-0.4/ChangeLog	2005-08-18 20:45:27 UTC (rev 128)
+@@ -1,7 +1,7 @@
+ *****.2005 FreeNX 0.4.5 ???
+ 	* Made nxsetup more user-friendly and hopefully finally failsafe.
+ 	* Added --agent to nxnode/nxserver to allow easier debugging.
+-	* Added addgroup/groupadd/delgroup to nxsetup
++	* Added addgroup/groupadd to nxsetup
+ 
+ 06.08.2005 FreeNX 0.4.4 &quot;UKUUG Enterprise Edition&quot;
+ 	* Added ENABLE_1_5_0_BACKEND configuration directive:
+
+Modified: freenx-server/branches/FreeNX-0.4/nxsetup
+===================================================================
+--- freenx-server/branches/FreeNX-0.4/nxsetup	2005-08-18 19:45:28 UTC (rev 127)
++++ freenx-server/branches/FreeNX-0.4/nxsetup	2005-08-18 20:45:27 UTC (rev 128)
+@@ -148,8 +148,8 @@
+ 	# Is it a debian?
+ 	if [ -f /etc/debian_version -a -z &quot;$SETUP_UID&quot; ]
+ 	then
+-		USERADD_OPTIONS=&quot;--system --home $NX_HOME_DIR --shell $PATH_BIN/nxserver&quot;
+-		[ -n &quot;$SETUP_GID&quot; ] &amp;&amp; USERADD_OPTIONS=&quot;--gid $SETUP_GID $USERADD_OPTIONS&quot; &amp;&amp; GROUPADD_OPTIONS=&quot;--gid $SETUP_GID&quot;
++		USERADD_OPTIONS=&quot;--ingroup nx --system --home $NX_HOME_DIR --shell $PATH_BIN/nxserver&quot;
++		[ -n &quot;$SETUP_GID&quot; ] &amp;&amp; GROUPADD_OPTIONS=&quot;--gid $SETUP_GID&quot;
+ 
+ 		# adduser needs a valid group to add the user to
+ 		! nx_group_exists &amp;&amp; addgroup --system --quiet $GROUPADD_OPTIONS nx
+@@ -157,8 +157,8 @@
+ 		
+ 	# no, its a &quot;normal&quot; useradd
+ 	else
+-		USERADD_OPTIONS=&quot;-d $NX_HOME_DIR -s $PATH_BIN/nxserver&quot;
+-		[ -n &quot;$SETUP_GID&quot; ] &amp;&amp; USERADD_OPTIONS=&quot;-g $SETUP_GID $USERADD_OPTIONS&quot; &amp;&amp; GROUPADD_OPTIONS=&quot;-g $SETUP_GID&quot;
++		USERADD_OPTIONS=&quot;-g nx -d $NX_HOME_DIR -s $PATH_BIN/nxserver&quot;
++		[ -n &quot;$SETUP_GID&quot; ] &amp;&amp; GROUPADD_OPTIONS=&quot;-g $SETUP_GID&quot;
+ 
+ 		# uid specified?
+ 		if [ -n &quot;$SETUP_UID&quot; ]
+@@ -369,10 +369,8 @@
+ 		if [ &quot;$SETUP_LOCAL_USER&quot; = &quot;yes&quot; ]
+ 		then
+ 			luserdel nx
+-			lgroupdel nx
+ 		else
+ 			userdel nx
+-			groupdel nx
+ 		fi
+ 			
+ 		echo &quot;done&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000254.html">[Freenx-cvs] r127 - / freenx-server/branches/FreeNX-0.4
+</A></li>
+	<LI>Next message: <A HREF="000256.html">[Freenx-cvs] r129 - / freenx-server/branches/FreeNX-0.4
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#255">[ date ]</a>
+              <a href="thread.html#255">[ thread ]</a>
+              <a href="subject.html#255">[ subject ]</a>
+              <a href="author.html#255">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r464 - qtnx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r464%20-%20qtnx&In-Reply-To=%3C200802050122.m151Mktb011328%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000589.html">
+   <LINK REL="Next"  HREF="000591.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r464 - qtnx</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r464%20-%20qtnx&In-Reply-To=%3C200802050122.m151Mktb011328%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r464 - qtnx">gwright at mail.berlios.de
+       </A><BR>
+    <I>Tue Feb  5 02:22:46 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000589.html">[Freenx-cvs] r463 - qtnx
+</A></li>
+        <LI>Next message: <A HREF="000591.html">[Freenx-cvs] r465 - qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#590">[ date ]</a>
+              <a href="thread.html#590">[ thread ]</a>
+              <a href="subject.html#590">[ subject ]</a>
+              <a href="author.html#590">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2008-02-05 02:22:44 +0100 (Tue, 05 Feb 2008)
+New Revision: 464
+
+Modified:
+   qtnx/qtnxsettings.cpp
+   qtnx/qtnxsettings.h
+   qtnx/qtnxwindow.cpp
+   qtnx/qtnxwindow.h
+Log:
+Usability improvements with settings dialog
+
+
+Modified: qtnx/qtnxsettings.cpp
+===================================================================
+--- qtnx/qtnxsettings.cpp	2008-02-05 01:08:54 UTC (rev 463)
++++ qtnx/qtnxsettings.cpp	2008-02-05 01:22:44 UTC (rev 464)
+@@ -187,7 +187,7 @@
+ void QtNXSettings::okPressed()
+ {
+     applyPressed();
+-    emit closing();
++    emit closing(ui_sd.sessionName-&gt;text());
+     close();
+ }
+ 
+
+Modified: qtnx/qtnxsettings.h
+===================================================================
+--- qtnx/qtnxsettings.h	2008-02-05 01:08:54 UTC (rev 463)
++++ qtnx/qtnxsettings.h	2008-02-05 01:22:44 UTC (rev 464)
+@@ -48,7 +48,7 @@
+         void keyDialogAccept();
+         void keyDialogReject();
+ signals:
+-        void closing();
++        void closing(QString);
+     private:
+         Ui::SettingsDialog ui_sd;
+         Ui::KeyDialog ui_kd;
+
+Modified: qtnx/qtnxwindow.cpp
+===================================================================
+--- qtnx/qtnxwindow.cpp	2008-02-05 01:08:54 UTC (rev 463)
++++ qtnx/qtnxwindow.cpp	2008-02-05 01:22:44 UTC (rev 464)
+@@ -327,23 +327,27 @@
+     else
+         settingsDialog = new QtNXSettings(ui_lg.session-&gt;currentText());
+ 
+-    connect(settingsDialog, SIGNAL(closing()), this, SLOT(configureClosed()));
++    connect(settingsDialog, SIGNAL(closing(QString)), this, SLOT(configureClosed(QString)));
+ 
+     settingsDialog-&gt;show();
+ }
+ 
+-void QtNXWindow::configureClosed()
++void QtNXWindow::configureClosed(QString sessionName)
+ {
+     while (ui_lg.session-&gt;count() != 0) {
+         ui_lg.session-&gt;removeItem(0);
+     }
+ 
+     QDir dir(QDir::homePath() + &quot;/.qtnx&quot;, &quot;*.nxml&quot;);
+-    for (unsigned int i=0;i&lt;dir.count();i++) {
++    for (unsigned int i = 0; i &lt; dir.count(); i++) {
+         QString conn=dir[i];
+-        ui_lg.session-&gt;addItem(conn.left(conn.length()-5));
++        ui_lg.session-&gt;addItem(conn.left(conn.length() - 5));
+     }
++
+     ui_lg.session-&gt;addItem(tr(&quot;Create new session&quot;));
++
++    ui_lg.session-&gt;setCurrentIndex(
++            ui_lg.session-&gt;findText(sessionName));
+ }
+ 
+ void QtNXWindow::resumeNewPressed()
+
+Modified: qtnx/qtnxwindow.h
+===================================================================
+--- qtnx/qtnxwindow.h	2008-02-05 01:08:54 UTC (rev 463)
++++ qtnx/qtnxwindow.h	2008-02-05 01:22:44 UTC (rev 464)
+@@ -99,7 +99,7 @@
+     public slots:
+         void startConnect();
+         void configure();
+-        void configureClosed();
++        void configureClosed(QString);
+ 
+         // Callback handlers
+         void handleSuspendedSessions(QList&lt;NXResumeData&gt;);
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000589.html">[Freenx-cvs] r463 - qtnx
+</A></li>
+	<LI>Next message: <A HREF="000591.html">[Freenx-cvs] r465 - qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#590">[ date ]</a>
+              <a href="thread.html#590">[ thread ]</a>
+              <a href="subject.html#590">[ subject ]</a>
+              <a href="author.html#590">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r345 - freenx-redesign/server/compatibility
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-July/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r345%20-%20freenx-redesign/server/compatibility&In-Reply-To=%3C200707051612.l65GCnLJ027667%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000477.html">
+   <LINK REL="Next"  HREF="000479.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r345 - freenx-redesign/server/compatibility</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r345%20-%20freenx-redesign/server/compatibility&In-Reply-To=%3C200707051612.l65GCnLJ027667%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r345 - freenx-redesign/server/compatibility">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Thu Jul  5 18:12:49 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000477.html">[Freenx-cvs] r344 - freenx-redesign/server/compatibility
+</A></li>
+        <LI>Next message: <A HREF="000479.html">[Freenx-cvs] r346 - freenx-redesign/server/compatibility
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#478">[ date ]</a>
+              <a href="thread.html#478">[ thread ]</a>
+              <a href="subject.html#478">[ subject ]</a>
+              <a href="author.html#478">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-07-05 18:12:49 +0200 (Thu, 05 Jul 2007)
+New Revision: 345
+
+Modified:
+   freenx-redesign/server/compatibility/nxserver-login-helper
+Log:
+Added error message from netcat via protocol extension FREENX 400&gt;. (error reply number == base req + 300).
+
+Finished documentation.
+
+
+
+Modified: freenx-redesign/server/compatibility/nxserver-login-helper
+===================================================================
+--- freenx-redesign/server/compatibility/nxserver-login-helper	2007-07-05 12:30:36 UTC (rev 344)
++++ freenx-redesign/server/compatibility/nxserver-login-helper	2007-07-05 16:12:49 UTC (rev 345)
+@@ -1,23 +1,62 @@
+ #!/usr/bin/expect
+ #
+-# nxnode-login: spawns and controls ssh for backwards compatibility.
++# nxnode-login: spawns and controls ssh|su for backwards compatibility.
+ #
++# Copyright (c) 2004-2007 by Fabian Franz.
++#
++# License: GPL, version 2
++#
+ # Environment variables used:
+ #
+-# @param COMMAND_SSH	Command for spawning ssh.
+-# @param COMMAND_SSH	Command for spawning netcat.
+-# @param NODE_PUBLICKEY	Public key for test-nx mode.
+-# @param NODE_PASSWORD	Password for ssh|su mode.
++# @env COMMAND_SSH	Command for spawning ssh.
++# @env COMMAND_NETCAT	Command for spawning netcat.
++# @env NODE_PUBLICKEY	Public key for test-nx mode.
++# @env NODE_PASSWORD	Password for ssh|su mode.
+ #
+-# Copyright (c) 2004-2007 by Fabian Franz.
++# Used external programs:
+ #
+-# License: GPL, version 2
++# @ext COMMAND_SSH	OpenSSH SSH client (remote login program)
++# @ext su	Change user ID or become super-user
++# @ext cat	Concatenate files and print on the standard output (coreutils)
++# @ext cut	Remove sections from each line of files (coreutils)
++# @ext tr	Translate or delete characters (coreutils)
++# @ext COMMAND_NETCAT	TCP/IP swiss army knife.
+ #
+-# SVN: $Id:$
++# Exit codes used:
+ #
++# @exit 0 Success
++# @exit 1 Authentication failed.
++# @exit 2 Redirection via netcat failed.
++#
++# Known protocol from server:
++#
++# @proto &quot;hello NXSERVER - Version x.y.z&quot; Banner used to determine successful connection.
++# @proto &quot;NX&gt; 105&quot; Prompt to send &quot;quit&quot; to.
++# @proto &quot;NX&gt; 999 Bye.&quot; We have successfully logged out.
++# @proto &quot;NX&gt; 103 Welcome to: &lt;server&gt; user: &lt;user&gt;&quot; Used to determine successful login.
++#
++# Accepted protocol extensions from nxserver / nxnode:
++#
++# @protoext * &quot;FREENX&gt; 100 Switch: &lt;host&gt;:&lt;port&gt;&quot; Spawns netcat to enable SSL tunneling mode.
++#
++# Used protocol extensions to nxclient:
++#
++# @protoext 100 &quot;FREENX&gt; 400 Redirection failed: $error&quot; Thrown when redirecting netcat process fails.
++#
++# Parameters used:
++#
++# @param 1 &quot;operation mode&quot; - can be ssh or su or test-nx
++# @param 2 username - to be used username## @param 3 &quot;ssh port&quot; - port provided to ssh command line
++# @param 4 executable - program to be executed as &lt;username&gt;
++# @param 5 parameters - parameters provided for &lt;executable&gt;
++#
++# Syntax used:
++#
++# nxserver-login-helper {ssh|su|test-nx} user ssh-port executable parameters
++#
++# SVN: $Id: $
++#
+ 
+-# Syntax: nxnode-login {ssh|su|test-nx} user ssh-port executable parameters
+-
+ set auth_method [lindex $argv 0]
+ set user [lindex $argv 1]
+ set port [lindex $argv 2]
+@@ -106,6 +145,7 @@
+ 		        catch { exec kill $pid 2&gt;/dev/null }
+ 			if { &quot;$rc&quot; != &quot;0&quot; } {
+ 				# redirection failed
++				send_error &quot;FREENX&gt; 400 Redirection failed: $error\n&quot;
+ 				exit 2
+ 			}
+ 		}
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000477.html">[Freenx-cvs] r344 - freenx-redesign/server/compatibility
+</A></li>
+	<LI>Next message: <A HREF="000479.html">[Freenx-cvs] r346 - freenx-redesign/server/compatibility
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#478">[ date ]</a>
+              <a href="thread.html#478">[ thread ]</a>
+              <a href="subject.html#478">[ subject ]</a>
+              <a href="author.html#478">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

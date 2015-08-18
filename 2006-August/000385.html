@@ -1,0 +1,159 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r254 - in nxclientlib: . qt-test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r254%20-%20in%20nxclientlib%3A%20.%20qt-test&In-Reply-To=%3C200608051620.k75GKXO0027147%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000384.html">
+   <LINK REL="Next"  HREF="000386.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r254 - in nxclientlib: . qt-test</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r254%20-%20in%20nxclientlib%3A%20.%20qt-test&In-Reply-To=%3C200608051620.k75GKXO0027147%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r254 - in nxclientlib: . qt-test">gwright at mail.berlios.de
+       </A><BR>
+    <I>Sat Aug  5 18:20:33 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000384.html">[Freenx-cvs] r253 - in nxclientlib: . qt-test test
+</A></li>
+        <LI>Next message: <A HREF="000386.html">[Freenx-cvs] r255 - nxclientlib/qt-test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#385">[ date ]</a>
+              <a href="thread.html#385">[ thread ]</a>
+              <a href="subject.html#385">[ subject ]</a>
+              <a href="author.html#385">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2006-08-05 18:20:33 +0200 (Sat, 05 Aug 2006)
+New Revision: 254
+
+Modified:
+   nxclientlib/README
+   nxclientlib/qt-test/qt-test.pro
+   nxclientlib/qt-test/qtnxwindow.cpp
+Log:
+Update docs, various very small changes
+
+
+Modified: nxclientlib/README
+===================================================================
+--- nxclientlib/README	2006-08-04 16:06:17 UTC (rev 253)
++++ nxclientlib/README	2006-08-05 16:20:33 UTC (rev 254)
+@@ -11,6 +11,28 @@
+ (this is /usr/NX/bin on most systems), and $QTDIR/bin. Set
+ LD_LIBRARY_PATH to include /usr/NX/lib, . and ..
+ 
++If you do not have nxproxy and nxssh, you will need to compile them.
++Grab the sources from <A HREF="http://www.nomachine.com/sources.php">http://www.nomachine.com/sources.php</A> (click
++on &quot;1.5.0 release&quot; to grab the 1.5.x sources). You'll need the
++NX development libraries for this to work.
++
++If you compiled Qt 4 without debugging, you will need to modify the
++file nxclientlib.pro. Change:
++
++ CONFIG		= qt warn_on debug dll
++
++to:
++
++ CONFIG		= qt warn_on dll
++
++Also change qt-test.pro from:
++
++ CONFIG		= qt warn_on debug
++
++to:
++
++ CONFIG		= qt warn_on
++
+ Run qmake inside the nxclientlib directory, then run make. After that
+ has finished, run qmake inside qt-test and run make again. This will
+ build nxclientlib and the qt-test frontend.
+@@ -21,6 +43,11 @@
+ which shows all the nxssh data.
+ 
+ At the moment you can only use the default NoMachine public key
+-for authentication.
++for authentication. Be sure to check stdout; if it hangs with a message
++that is asking for confirmation to save the host key, quit qtnx, run
++&quot;ssh server&quot; on the command line, where &quot;server&quot; is the hostname of
++the NX server you are trying to connect to, then type &quot;yes&quot; when it
++prompts you with the same message. You can then quit ssh and start qtnx
++again.
+ 
+ August 3rd 2006 - George Wright - <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
+\ No newline at end of file
+
+Modified: nxclientlib/qt-test/qt-test.pro
+===================================================================
+--- nxclientlib/qt-test/qt-test.pro	2006-08-04 16:06:17 UTC (rev 253)
++++ nxclientlib/qt-test/qt-test.pro	2006-08-05 16:20:33 UTC (rev 254)
+@@ -1,5 +1,7 @@
+ TEMPLATE	= app
+ 
++CONFIG		= qt warn_on debug
++
+ FORMS = mainwindow.ui
+ 
+ SOURCES = main.cpp qtnxwindow.cpp
+
+Modified: nxclientlib/qt-test/qtnxwindow.cpp
+===================================================================
+--- nxclientlib/qt-test/qtnxwindow.cpp	2006-08-04 16:06:17 UTC (rev 253)
++++ nxclientlib/qt-test/qtnxwindow.cpp	2006-08-05 16:20:33 UTC (rev 254)
+@@ -75,7 +75,11 @@
+ 	session-&gt;agentServer = ui_mw.rdp_server-&gt;text();
+ 	session-&gt;agentUser = ui_mw.rdp_username-&gt;text();
+ 	session-&gt;agentPass = ui_mw.rdp_password-&gt;text();
+-
++	if (QApplication::desktop()-&gt;paintEngine()-&gt;hasFeature(QPaintEngine::Antialiasing))
++		m_lib.setRender(true);
++	else
++		m_lib.setRender(false);
++		
+ 	// session-&gt;screenInfo = QString::number(dw.screenGeometry(this).width()) + &quot;x&quot; + QString::number(dw.screenGeometry(this).height()) + &quot;x&quot; + QString::number(info.depth()) + &quot;render&quot;;
+ 	session-&gt;suspended = false;
+ 
+@@ -88,6 +92,5 @@
+ 	m_lib.setPassword(ui_mw.password-&gt;text());
+ 	m_lib.setResolution(dw.screenGeometry(this).width(), dw.screenGeometry(this).height());
+ 	m_lib.setDepth(info.depth());
+-	m_lib.setRender(true);
+ 	m_lib.setSession(session);
+ }
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000384.html">[Freenx-cvs] r253 - in nxclientlib: . qt-test test
+</A></li>
+	<LI>Next message: <A HREF="000386.html">[Freenx-cvs] r255 - nxclientlib/qt-test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#385">[ date ]</a>
+              <a href="thread.html#385">[ thread ]</a>
+              <a href="subject.html#385">[ subject ]</a>
+              <a href="author.html#385">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

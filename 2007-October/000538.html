@@ -1,0 +1,87 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r410 - nxlaunch/src
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-October/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r410%20-%20nxlaunch/src&In-Reply-To=%3C200710170909.l9H99lOE021988%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000537.html">
+   <LINK REL="Next"  HREF="000539.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r410 - nxlaunch/src</H1>
+    <B>sebjames at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r410%20-%20nxlaunch/src&In-Reply-To=%3C200710170909.l9H99lOE021988%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r410 - nxlaunch/src">sebjames at mail.berlios.de
+       </A><BR>
+    <I>Wed Oct 17 11:09:47 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000537.html">[Freenx-cvs] r409 - nxlaunch/lib
+</A></li>
+        <LI>Next message: <A HREF="000539.html">[Freenx-cvs] r411 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#538">[ date ]</a>
+              <a href="thread.html#538">[ thread ]</a>
+              <a href="subject.html#538">[ subject ]</a>
+              <a href="author.html#538">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: sebjames
+Date: 2007-10-17 11:09:47 +0200 (Wed, 17 Oct 2007)
+New Revision: 410
+
+Modified:
+   nxlaunch/src/nxlaunch.c
+Log:
+Added an important zeroing function for config creation. This code 
+is still full of bugs though.
+
+
+Modified: nxlaunch/src/nxlaunch.c
+===================================================================
+--- nxlaunch/src/nxlaunch.c	2007-10-17 08:34:20 UTC (rev 409)
++++ nxlaunch/src/nxlaunch.c	2007-10-17 09:09:47 UTC (rev 410)
+@@ -191,6 +191,9 @@
+ 	widget = glade_xml_get_widget (xml_glob, &quot;conn_new_nx&quot;);
+ 	gtk_widget_show_all (widget);
+ 
++	/* Initialise the new connection popup */
++	zero_new_nx_popup();
++
+ 	return;
+ }
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000537.html">[Freenx-cvs] r409 - nxlaunch/lib
+</A></li>
+	<LI>Next message: <A HREF="000539.html">[Freenx-cvs] r411 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#538">[ date ]</a>
+              <a href="thread.html#538">[ thread ]</a>
+              <a href="subject.html#538">[ subject ]</a>
+              <a href="author.html#538">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

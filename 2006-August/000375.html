@@ -1,0 +1,408 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r244 - in nxclientlib: . test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r244%20-%20in%20nxclientlib%3A%20.%20test&In-Reply-To=%3C200608031828.k73ISl1I027532%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000374.html">
+   <LINK REL="Next"  HREF="000376.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r244 - in nxclientlib: . test</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r244%20-%20in%20nxclientlib%3A%20.%20test&In-Reply-To=%3C200608031828.k73ISl1I027532%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r244 - in nxclientlib: . test">gwright at mail.berlios.de
+       </A><BR>
+    <I>Thu Aug  3 20:28:47 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000374.html">[Freenx-cvs] r243 - in nxclientlib: . test
+</A></li>
+        <LI>Next message: <A HREF="000376.html">[Freenx-cvs] r245 - nxclientlib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#375">[ date ]</a>
+              <a href="thread.html#375">[ thread ]</a>
+              <a href="subject.html#375">[ subject ]</a>
+              <a href="author.html#375">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2006-08-03 20:28:45 +0200 (Thu, 03 Aug 2006)
+New Revision: 244
+
+Modified:
+   nxclientlib/nxclientlib.cpp
+   nxclientlib/nxclientlib.h
+   nxclientlib/nxsession.cpp
+   nxclientlib/nxsession.h
+   nxclientlib/test/main.cpp
+Log:
+Finally - it works!
+
+
+Modified: nxclientlib/nxclientlib.cpp
+===================================================================
+--- nxclientlib/nxclientlib.cpp	2006-08-03 15:17:51 UTC (rev 243)
++++ nxclientlib/nxclientlib.cpp	2006-08-03 18:28:45 UTC (rev 244)
+@@ -17,15 +17,21 @@
+ 
+ #include &quot;nxclientlib.h&quot;
+ 
++#include &lt;QDir&gt;
++
+ #define NXSSH_BIN &quot;nxssh&quot;
++#define NXPROXY_BIN &quot;nxproxy&quot;
+ 
+ // Default NoMachine certificate for FALLBACK
+ QByteArray cert(&quot;-----BEGIN DSA PRIVATE KEY-----\nMIIBuwIBAAKBgQCXv9AzQXjxvXWC1qu3CdEqskX9YomTfyG865gb4D02ZwWuRU/9\nC3I9/bEWLdaWgJYXIcFJsMCIkmWjjeSZyTmeoypI1iLifTHUxn3b7WNWi8AzKcVF\naBsBGiljsop9NiD1mEpA0G+nHHrhvTXz7pUvYrsrXcdMyM6rxqn77nbbnwIVALCi\nxFdHZADw5KAVZI7r6QatEkqLAoGBAI4L1TQGFkq5xQ/nIIciW8setAAIyrcWdK/z\n5/ZPeELdq70KDJxoLf81NL/8uIc4PoNyTRJjtT3R4f8Az1TsZWeh2+ReCEJxDWgG\nfbk2YhRqoQTtXPFsI4qvzBWct42WonWqyyb1bPBHk+JmXFscJu5yFQ+JUVNsENpY\n+Gkz3HqTAoGANlgcCuA4wrC+3Cic9CFkqiwO/Rn1vk8dvGuEQqFJ6f6LVfPfRTfa\nQU7TGVLk2CzY4dasrwxJ1f6FsT8DHTNGnxELPKRuLstGrFY/PR7KeafeFZDf+fJ3\nmbX5nxrld3wi5titTnX+8s4IKv29HJguPvOK/SI7cjzA+SqNfD7qEo8CFDIm1xRf\n8xAPsSKs6yZ6j1FNklfu\n-----END DSA PRIVATE KEY-----&quot;);
+ 
+ NXClientLib::NXClientLib(QObject *parent) : QObject(parent)
+ {
++	isFinished = false;
++	
+ 	connect(&amp;session, SIGNAL(authenticated()), this, SLOT(doneAuth()));
+ 	connect(&amp;session, SIGNAL(loginFailed()), this, SLOT(failedLogin()));
++	connect(&amp;session, SIGNAL(finished()), this, SLOT(finished()));
+ }
+ 
+ NXClientLib::~NXClientLib()
+@@ -52,7 +58,7 @@
+ 	
+ 	if (encryption == true) {
+ 		arguments &lt;&lt; &quot;-B&quot;;
+-		session.sessionData.encryption = true;
++		session.setEncryption(true);
+ 	}
+ 	
+ 	connect(&amp;nxsshProcess, SIGNAL(started()), this, SLOT(processStarted()));
+@@ -122,7 +128,10 @@
+ 	QStringList::const_iterator i;
+ 
+ 	for (i = messages.constBegin(); i != messages.constEnd(); ++i) {
+-		write(session.parseSSH(*i));
++		if (!isFinished)
++			write(session.parseSSH(*i));
++		else
++			write(parseSSH(*i));
+ 	}
+ }
+ 
+@@ -146,7 +155,14 @@
+ 	QString message = nxsshProcess.readAllStandardError().data();
+ 	
+ 	cout &lt;&lt; &quot;STDERR: &quot; &lt;&lt; message.toStdString();
+-	
++
++	if (proxyData.encrypted &amp;&amp; isFinished &amp;&amp; message.contains(&quot;NX&gt; 999 Bye&quot;)) {
++		QString returnMessage;
++		returnMessage = &quot;NX&gt; 299 Switching connection to: &quot;;
++		returnMessage += proxyData.proxyIP + &quot;:33057&quot; + &quot; cookie: &quot; + proxyData.cookie + &quot;\n&quot;;
++		write(returnMessage);
++	}
++
+ 	callbackStderr = message.toStdString();
+ 	callback-&gt;stderr(&amp;callbackStderr);
+ }
+@@ -180,5 +196,50 @@
+ 
+ void NXClientLib::setSession(NXSessionData nxSession)
+ {
++	session.setSession(nxSession);
++}
++
++QString NXClientLib::parseSSH(QString message)
++{
++	QString returnMessage = 0;
++	cout &lt;&lt; &quot;FOO: &quot;&lt;&lt;message.toStdString() &lt;&lt; endl;
++	if (message.contains(&quot;NX&gt; 700 Session id: &quot;)) {
++		proxyData.id = message.right(message.length() - 20);
++	} else if (message.contains(&quot;NX&gt; 705 Session display: &quot;)) {
++		proxyData.display = message.right(message.length() - 24).toInt();
++	} else if (message.contains(&quot;NX&gt; 706 Agent cookie: &quot;)) {
++		proxyData.cookie = message.right(message.length() - 22);
++	} else if (message.contains(&quot;NX&gt; 702 Proxy IP: &quot;)) {
++		proxyData.proxyIP = message.right(message.length() - 18);
++	} else if (message.contains(&quot;NX&gt; 707 SSL tunneling: 1&quot;)) {
++		proxyData.encrypted = true;
++	}
++
++	if (message.contains(&quot;NX&gt; 710 Session status: running&quot;)) {
++		invokeProxy();
++		returnMessage = &quot;bye\n&quot;;
++	}
+ 	
++	return returnMessage;
+ }
++
++void NXClientLib::invokeProxy()
++{
++	QFile options;
++	QDir nxdir;
++	
++	nxdir.mkpath(QDir::homePath() + &quot;/.nx/S-&quot; + proxyData.id);
++	options.setFileName(QDir::homePath() + &quot;/.nx/S-&quot; + proxyData.id + &quot;/options&quot;);
++
++	QString data;
++	data = &quot;nx,session=session,cookie=&quot; + proxyData.cookie + &quot;,root=&quot; + QDir::homePath() + &quot;/.nx,id=&quot; + proxyData.id + &quot;,listen=33057:&quot; + QString::number(proxyData.display) + &quot;\n&quot;;
++	options.open(QIODevice::WriteOnly);
++	options.write(data.toAscii());
++	options.close();
++
++	QStringList arguments;
++	nxproxyProcess.setEnvironment(nxproxyProcess.systemEnvironment());
++
++	arguments &lt;&lt; &quot;-S&quot; &lt;&lt; &quot;options=&quot; + options.fileName() + &quot;:&quot; + QString::number(proxyData.display);
++	nxproxyProcess.startDetached(NXPROXY_BIN, arguments);
++}
+
+Modified: nxclientlib/nxclientlib.h
+===================================================================
+--- nxclientlib/nxclientlib.h	2006-08-03 15:17:51 UTC (rev 243)
++++ nxclientlib/nxclientlib.h	2006-08-03 18:28:45 UTC (rev 244)
+@@ -28,6 +28,14 @@
+ 
+ using namespace std;
+ 
++struct ProxyData {
++	QString id;
++	int display;
++	QString cookie;
++	QString proxyIP;
++	bool encrypted;
++};
++
+ class NXClientLib : public QObject
+ {
+ 	Q_OBJECT
+@@ -55,6 +63,10 @@
+ 		void allowSSHConnect(bool auth);
+ 
+ 		void setSession(NXSessionData);
++
++		void invokeProxy();
++
++		QString parseSSH(QString);
+ 	public slots:
+ 		void processStarted();
+ 		void processError(QProcess::ProcessError);
+@@ -64,8 +76,15 @@
+ 
+ 		void doneAuth();
+ 		void failedLogin();
++
++		void finished() { isFinished = true; };
+ 	private:
++		bool usingHardcodedKey;
++		bool isFinished;
++		
+ 		QProcess nxsshProcess;
++		QProcess nxproxyProcess;
++		
+ 		QTemporaryFile *keyFile;
+ 		
+ 		NXSession session;
+@@ -79,7 +98,7 @@
+ 		string callbackStdout;
+ 		string callbackStderr;
+ 		
+-		bool usingHardcodedKey;
++		ProxyData proxyData;
+ };
+ 
+ #endif
+
+Modified: nxclientlib/nxsession.cpp
+===================================================================
+--- nxclientlib/nxsession.cpp	2006-08-03 15:17:51 UTC (rev 243)
++++ nxclientlib/nxsession.cpp	2006-08-03 18:28:45 UTC (rev 244)
+@@ -16,7 +16,7 @@
+  ***************************************************************************/
+  
+ // Enumerated type defining the stages through which the client goes when connecting
+-enum { HELLO_NXCLIENT, ACKNOWLEDGE, SHELL_MODE, AUTH_MODE, LOGIN, LIST_SESSIONS, PARSESESSIONS, STARTSESSION };
++enum { HELLO_NXCLIENT, ACKNOWLEDGE, SHELL_MODE, AUTH_MODE, LOGIN, LIST_SESSIONS, PARSESESSIONS, STARTSESSION, FINISHED };
+ 
+ /*
+ 	0 HELLO NXCLIENT
+@@ -124,54 +124,55 @@
+ 			if (response == 105 &amp;&amp; sessionSet) {
+ 				int media = 0;
+ 				int render = 0;
+-				int encryption = 0;
+ 
+ 				if (sessionData.media)
+ 					media = 1;
+ 				if (sessionData.render)
+ 					render = 1;
+-				if (sessionData.encryption)
+-					encryption = 1;
+ 					
+ 				if (sessionData.suspended) {
+ 					// These are the session parameters that NoMachine's client sends for resume
+ 					returnMessage = &quot;restoresession --id=\&quot;&quot; + sessionData.id +
+ 					&quot;\&quot; --session=\&quot;&quot; + sessionData.sessionName +
+ 					&quot;\&quot; --type=\&quot;&quot; + sessionData.sessionType +
+-					&quot;\&quot; --cache=\&quot;&quot; + sessionData.cache +
+-					&quot;M\&quot; --images=\&quot;&quot; + sessionData.images +
++					&quot;\&quot; --cache=\&quot;&quot; + QString::number(sessionData.cache) +
++					&quot;M\&quot; --images=\&quot;&quot; + QString::number(sessionData.images) +
+ 					&quot;M\&quot; --cookie=\&quot;&quot; + generateCookie() +
+ 					&quot;\&quot; --link=\&quot;&quot; + sessionData.linkType +
+ 					&quot;\&quot; --kbtype=\&quot;&quot; + sessionData.kbtype +
+-					&quot;\&quot; --nodelay=\&quot;1\&quot; --encryption=\&quot;&quot; + encryption +
++					&quot;\&quot; --nodelay=\&quot;1\&quot; --encryption=\&quot;&quot; + QString::number(encryption) +
+ 					&quot;\&quot; --backingstore=\&quot;&quot; + sessionData.backingstore +
+ 					&quot;\&quot; --geometry=\&quot;&quot; + sessionData.geometry +
+ 					&quot;\&quot; --media=\&quot;&quot; + sessionData.media +
+ 					&quot;\&quot; --agent_server=\&quot;&quot; + sessionData.agentServer +
+ 					&quot;\&quot; --agent_user=\&quot;&quot; + sessionData.agentUser +
+ 					&quot;\&quot; --agent_password=\&quot;&quot; + sessionData.agentPass + &quot;\&quot;&quot;;
++					stage++;
+ 				} else {
+ 					returnMessage = &quot;startsession --session=\&quot;&quot; + sessionData.sessionName +
+ 					&quot;\&quot; --type=\&quot;&quot; + sessionData.sessionType +
+-					&quot;\&quot; --cache=\&quot;&quot; + sessionData.cache +
+-					&quot;M\&quot; --images=\&quot;&quot; + sessionData.images +
++					&quot;\&quot; --cache=\&quot;&quot; + QString::number(sessionData.cache) +
++					&quot;M\&quot; --images=\&quot;&quot; + QString::number(sessionData.images) +
+ 					&quot;M\&quot; --cookie=\&quot;&quot; + generateCookie() +
+ 					&quot;\&quot; --link=\&quot;&quot; + sessionData.linkType +
+-					&quot;\&quot; --render=\&quot;&quot; + render +
+-					&quot;\&quot; --encryption=\&quot;&quot; + encryption +
++					&quot;\&quot; --render=\&quot;&quot; + QString::number(render) +
++					&quot;\&quot; --encryption=\&quot;&quot; + QString::number(encryption) +
+ 					&quot;\&quot; --backingstore=\&quot;&quot; + sessionData.backingstore +
+-					&quot;\&quot; --imagecompressionmethod=\&quot;&quot; + sessionData.imageCompressionMethod +
++					&quot;\&quot; --imagecompressionmethod=\&quot;&quot; + QString::number(sessionData.imageCompressionMethod) +
+ 					&quot;\&quot; --geometry=\&quot;&quot; + sessionData.geometry +
++					&quot;\&quot; --screeninfo=\&quot;&quot; + sessionData.screenInfo + 
+ 					&quot;\&quot; --keyboard=\&quot;&quot; + sessionData.keyboard +
+ 					&quot;\&quot; --kbtype=\&quot;&quot; + sessionData.kbtype +
+-					&quot;\&quot; --media=\&quot;&quot; + media +
++					&quot;\&quot; --media=\&quot;&quot; + QString::number(media) +
+ 					&quot;\&quot; --agent_server=\&quot;&quot; + sessionData.agentServer +
+ 					&quot;\&quot; --agent_user=\&quot;&quot; + sessionData.agentUser +
+-					&quot;\&quot; --agent_password=\&quot;&quot; + sessionData.agentPass +
+-					&quot;\&quot; --screeninfo=\&quot;&quot; + sessionData.screenInfo + &quot;\&quot;&quot;;
++					&quot;\&quot; --agent_password=\&quot;&quot; + sessionData.agentPass + &quot;\&quot;&quot;;
++					stage++;
+ 				}
+ 			}
+ 			break;
++		case FINISHED:
++			emit finished();
+ 	}
+ 
+ 	if (!returnMessage.isEmpty()) {
+@@ -269,5 +270,3 @@
+ 		nbytes -= r;
+ 	}
+ }
+-
+-
+
+Modified: nxclientlib/nxsession.h
+===================================================================
+--- nxclientlib/nxsession.h	2006-08-03 15:17:51 UTC (rev 243)
++++ nxclientlib/nxsession.h	2006-08-03 18:28:45 UTC (rev 244)
+@@ -34,7 +34,6 @@
+ 	int images;
+ 	QString linkType;
+ 	bool render;
+-	bool encryption;
+ 	QString backingstore;
+ 	int imageCompressionMethod;
+ 	int imageCompressionLevel;
+@@ -82,6 +81,8 @@
+ 		void setRender(bool isRender) { if (isRender) renderSet = &quot;render&quot;; };
+ 		void setContinue(bool allow) { doSSH = allow; };
+ 		void setSession(NXSessionData);
++		void setEncryption(bool enc) { encryption = enc; };
++		
+ 		QString generateCookie();
+ 		
+ 		NXSessionData sessionData;
+@@ -90,10 +91,13 @@
+ 		// Emitted when the initial public key authentication is successful
+ 		void authenticated();
+ 		void loginFailed();
++		void finished();
+ 	private:
+ 		bool doSSH;
+ 		bool suspendedSessions;
+ 		bool sessionSet;
++		bool encryption;
++		
+ 		void reset();
+ 		void fillRand(unsigned char *, size_t);
+ 
+
+Modified: nxclientlib/test/main.cpp
+===================================================================
+--- nxclientlib/test/main.cpp	2006-08-03 15:17:51 UTC (rev 243)
++++ nxclientlib/test/main.cpp	2006-08-03 18:28:45 UTC (rev 244)
+@@ -37,5 +37,30 @@
+ 	lib.setResolution(640,480);
+ 	lib.setDepth(24);
+ 	lib.setRender(true);
++
++	NXSessionData session;
++
++	// HARDCODED TEST CASE
++	session.sessionName = &quot;TEST&quot;;
++	session.sessionType = &quot;unix-kde&quot;;
++	session.cache = 8;
++	session.images = 32;
++	session.linkType = &quot;adsl&quot;;
++	session.render = true;
++	session.backingstore = &quot;when_requested&quot;;
++	session.imageCompressionMethod = 2;
++	// session.imageCompressionLevel;
++	session.geometry = &quot;800x600+0+0&quot;;
++	session.keyboard = &quot;defkeymap&quot;;
++	session.kbtype = &quot;pc102/defkeymap&quot;;
++	session.media = false;
++	session.agentServer = &quot;&quot;;
++	session.agentUser = &quot;&quot;;
++	session.agentPass = &quot;&quot;;
++	session.screenInfo = &quot;800x600x24+render&quot;;
++	session.cups = 0;
++	session.suspended = false;
++
++	lib.setSession(session);
+ 	return qApp-&gt;exec();
+ }
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000374.html">[Freenx-cvs] r243 - in nxclientlib: . test
+</A></li>
+	<LI>Next message: <A HREF="000376.html">[Freenx-cvs] r245 - nxclientlib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#375">[ date ]</a>
+              <a href="thread.html#375">[ thread ]</a>
+              <a href="subject.html#375">[ subject ]</a>
+              <a href="author.html#375">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

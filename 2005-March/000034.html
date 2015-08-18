@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fabianx modified 3 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%203%20files&In-Reply-To=%3C422B9E1C.mailD231DZ05F%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000033.html">
+   <LINK REL="Next"  HREF="000035.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fabianx modified 3 files</H1>
+    <B>fabianx</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%203%20files&In-Reply-To=%3C422B9E1C.mailD231DZ05F%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fabianx modified 3 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Mon Mar  7 01:19:40 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000033.html">[Freenx-cvs] CVS: freenx - fabianx modified ChangeLog
+</A></li>
+        <LI>Next message: <A HREF="000035.html">[Freenx-cvs] CVS: freenx - fabianx modified nxnode
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#34">[ date ]</a>
+              <a href="thread.html#34">[ thread ]</a>
+              <a href="subject.html#34">[ subject ]</a>
+              <a href="author.html#34">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fabianx
+Date:      2005-03-07 00:19:40 GMT
+Modified:  .        ChangeLog nxnode nxserver
+Log:
+Fixed unix-custom mode; now allowing parameters to be passed.
+
+This means: &quot;kontact --nofork&quot; will now actually work.
+
+Revision  Changes    Path
+1.20      +1 -0      freenx/ChangeLog
+
+
+rev 1.20, prev_rev 1.19
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.19
+retrieving revision 1.20
+diff -u -r1.19 -r1.20
+--- ChangeLog	6 Mar 2005 23:54:33 -0000	1.19
++++ ChangeLog	7 Mar 2005 00:19:39 -0000	1.20
+@@ -2,6 +2,7 @@
+ 	* Opened the 0.4.0 branch.
+ 	* Added initial support for filesharing via samba.
+ 	* Improvements to be more node.conf compatible.
++	* Fixed unix-custom mode; now allowing parameters to be passed.
+ 
+ 05.03.2005 FreeNX 0.3.0 &quot;Chemnitzer LinuxTage Edition&quot;
+ 	* Initial CVS checkin.
+
+
+
+1.26      +2 -2      freenx/nxnode
+
+
+rev 1.26, prev_rev 1.25
+Index: nxnode
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxnode,v
+retrieving revision 1.25
+retrieving revision 1.26
+diff -u -r1.25 -r1.26
+--- nxnode	6 Mar 2005 23:52:48 -0000	1.25
++++ nxnode	7 Mar 2005 00:19:39 -0000	1.26
+@@ -13,7 +13,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxnode,v 1.25 2005/03/06 23:52:48 fabianx Exp $
++# CVS: $Id: nxnode,v 1.26 2005/03/07 00:19:39 fabianx Exp $
+ #
+ # 21.06.2004: - Full reconnection support
+ 
+@@ -136,7 +136,7 @@
+ 			STARTX=$COMMAND_START_CDE
+ 		;;
+ 		unix-application)
+-			STARTX=$(which $application)
++			STARTX=$application
+ 		;;
+ 		unix-default)
+ 			if [ -f &quot;$HOME/.Xclients&quot; ]; then
+
+
+
+1.27      +2 -2      freenx/nxserver
+
+
+rev 1.27, prev_rev 1.26
+Index: nxserver
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxserver,v
+retrieving revision 1.26
+retrieving revision 1.27
+diff -u -r1.26 -r1.27
+--- nxserver	6 Mar 2005 15:45:01 -0000	1.26
++++ nxserver	7 Mar 2005 00:19:39 -0000	1.27
+@@ -11,7 +11,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxserver,v 1.26 2005/03/06 15:45:01 fabianx Exp $
++# CVS: $Id: nxserver,v 1.27 2005/03/07 00:19:39 fabianx Exp $
+ #
+ 
+ # Read the config file
+@@ -563,7 +563,7 @@
+ 
+ server_get_params()
+ {
+-	SERVER_PARAMS=$(echo &quot;$@&quot; | sed &quot;s/^$1//g; s/ --/\&amp;/g; s/\&quot;//g&quot;)
++	SERVER_PARAMS=$(echo &quot;$@&quot; | sed &quot;s/^$1/\&quot;/g; s/\&quot; --/\&amp;/g; s/\&quot;//g&quot;)
+ 	if [ &quot;$SERVER_PARAMS&quot; = &quot;&quot; ]
+ 	then
+ 		echo_x -n &quot;NX&gt; 106 Parameters: &quot;
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000033.html">[Freenx-cvs] CVS: freenx - fabianx modified ChangeLog
+</A></li>
+	<LI>Next message: <A HREF="000035.html">[Freenx-cvs] CVS: freenx - fabianx modified nxnode
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#34">[ date ]</a>
+              <a href="thread.html#34">[ thread ]</a>
+              <a href="subject.html#34">[ subject ]</a>
+              <a href="author.html#34">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

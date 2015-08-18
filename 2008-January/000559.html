@@ -1,0 +1,91 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r432 - qtnx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r432%20-%20qtnx&In-Reply-To=%3C200801070944.m079icS9023703%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000558.html">
+   <LINK REL="Next"  HREF="000669.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r432 - qtnx</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r432%20-%20qtnx&In-Reply-To=%3C200801070944.m079icS9023703%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r432 - qtnx">gwright at mail.berlios.de
+       </A><BR>
+    <I>Mon Jan  7 10:44:38 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000558.html">[Freenx-cvs] r431 - qtnx
+</A></li>
+        <LI>Next message: <A HREF="000669.html">[Freenx-cvs] r433 - nxcl/lib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#559">[ date ]</a>
+              <a href="thread.html#559">[ thread ]</a>
+              <a href="subject.html#559">[ subject ]</a>
+              <a href="author.html#559">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2008-01-07 10:44:37 +0100 (Mon, 07 Jan 2008)
+New Revision: 432
+
+Modified:
+   qtnx/README
+Log:
+Workaround for a bug in nxcl
+
+
+Modified: qtnx/README
+===================================================================
+--- qtnx/README	2008-01-04 19:07:20 UTC (rev 431)
++++ qtnx/README	2008-01-07 09:44:37 UTC (rev 432)
+@@ -27,5 +27,14 @@
+ qmake
+ make
+ 
++There is currently a bug in nxcl which means that qtnx (or any other
++application linking directly) won't compile properly; simply remove
++the line
++
++#include &quot;../config.h&quot;
++
++from notQt.h in $PREFIX/include/nxcl (normally /usr/local/include/nxcl)
++to allow it to compile cleanly.
++
+ This will generate a qtnx binary in that directory; install it to /usr/bin
+ or anywhere you want.
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000558.html">[Freenx-cvs] r431 - qtnx
+</A></li>
+	<LI>Next message: <A HREF="000669.html">[Freenx-cvs] r433 - nxcl/lib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#559">[ date ]</a>
+              <a href="thread.html#559">[ thread ]</a>
+              <a href="subject.html#559">[ subject ]</a>
+              <a href="author.html#559">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r140 - / nx-utils/nxfish
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r140%20-%20/%20nx-utils/nxfish&In-Reply-To=%3C200508291611.j7TGBs8b002710%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000266.html">
+   <LINK REL="Next"  HREF="000268.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r140 - / nx-utils/nxfish</H1>
+    <B>Fabian Franz at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r140%20-%20/%20nx-utils/nxfish&In-Reply-To=%3C200508291611.j7TGBs8b002710%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r140 - / nx-utils/nxfish">fabianx at berlios.de
+       </A><BR>
+    <I>Mon Aug 29 18:11:54 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000266.html">[Freenx-cvs] r139 - / freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000268.html">[Freenx-cvs] r141 - / freenx-website freenx-website/intern freenx-website/intern/press
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#267">[ date ]</a>
+              <a href="thread.html#267">[ thread ]</a>
+              <a href="subject.html#267">[ subject ]</a>
+              <a href="author.html#267">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2005-08-29 18:11:53 +0200 (Mon, 29 Aug 2005)
+New Revision: 140
+
+Modified:
+   /
+   nx-utils/nxfish/fish.cpp
+   nx-utils/nxfish/nxfish.protocol
+Log:
+Changed NXFish according to Waldo Bastians instructions for inclusion into KDE.
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:150
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:153
+
+Modified: nx-utils/nxfish/fish.cpp
+===================================================================
+--- nx-utils/nxfish/fish.cpp	2005-08-29 11:44:59 UTC (rev 139)
++++ nx-utils/nxfish/fish.cpp	2005-08-29 16:11:53 UTC (rev 140)
+@@ -148,10 +148,9 @@
+     ;
+     sigaction(SIGCHLD,&amp;act,NULL);
+ 
+-    if (QString(argv[1])==QString(&quot;nxfish&quot;)) {
++    if (qstrcmp(argv[1],&quot;nxfish&quot;)==0) {
+         // Set NXFish - Mode
+         isNXFish=1;
+-        sshPath = strdup(QFile::encodeName(KStandardDirs::findExe(&quot;nxfish&quot;)));
+     }
+ 
+     fishProtocol slave(argv[2], argv[3]);
+@@ -252,7 +251,10 @@
+     if (sshPath == NULL) {
+         // disabled: currently not needed. Didn't work reliably.
+         // isOpenSSH = !system(&quot;ssh -V 2&gt;&amp;1 | grep OpenSSH &gt; /dev/null&quot;);
+-        sshPath = strdup(QFile::encodeName(KStandardDirs::findExe(&quot;ssh&quot;)));
++	if (isNXFish)
++            sshPath = strdup(QFile::encodeName(KStandardDirs::findExe(&quot;nxfish&quot;)));
++	else
++            sshPath = strdup(QFile::encodeName(KStandardDirs::findExe(&quot;ssh&quot;)));
+     }
+     if (suPath == NULL) {
+         suPath = strdup(QFile::encodeName(KStandardDirs::findExe(&quot;su&quot;)));
+
+Modified: nx-utils/nxfish/nxfish.protocol
+===================================================================
+--- nx-utils/nxfish/nxfish.protocol	2005-08-29 11:44:59 UTC (rev 139)
++++ nx-utils/nxfish/nxfish.protocol	2005-08-29 16:11:53 UTC (rev 140)
+@@ -12,43 +12,4 @@
+ moving=true
+ Icon=remote
+ Description=A kioslave for the NXFISH protocol
+-Description[bn]=&#2475;&#2495;&#2486; (FISH) &#2474;&#2509;&#2480;&#2507;&#2463;&#2507;&#2453;&#2482;-&#2447;&#2480; &#2460;&#2472;&#2509;&#2479; &#2447;&#2453;&#2463;&#2495; kioslave
+-Description[bs]=kioslave za FISH protokol
+-Description[ca]=Un kioslave pel protocol FISH
+-Description[cs]=Pomocn&#253; protokol FISH
+-Description[da]=En kioslave for FISH-protokollen
+-Description[de]=Ein-/Ausgabemodul f&#252;r das FISH-Protokoll
+-Description[el]=&#904;&#957;&#945;&#962; kioslave &#947;&#953;&#945; &#964;&#959; &#960;&#961;&#969;&#964;&#972;&#954;&#959;&#955;&#955;&#959; FISH
+-Description[es]=Un kioslave para el protocolo FISH
+-Description[et]=Protokolli FISH IO-moodul
+-Description[eu]=FISH protokolorako kioslavea
+-Description[fi]=Liit&#228;nt&#228; FISH-yhteysk&#228;yt&#228;nt&#246;
+-Description[fr]=Un kioslave pour le protocole FISH
+-Description[fy]=In kioslave foar it FISH protokol
+-Description[hi]=&#2347;&#2367;&#2358; &#2346;&#2381;&#2352;&#2379;&#2335;&#2379;&#2325;&#2377;&#2354; &#2361;&#2375;&#2340;&#2369; &#2325;&#2375;-&#2310;&#2312;-&#2323;-&#2360;&#2381;&#2354;&#2375;&#2357;
+-Description[hu]=KDE-protokoll a FISH protokollhoz
+-Description[is]=kioslave fyrir FISH samskiptaregluna
+-Description[it]=Un kioslave per il protocollo FISH
+-Description[ja]=FISH &#12503;&#12525;&#12488;&#12467;&#12523;&#12398;&#12383;&#12417;&#12398; kioslave
+-Description[lt]=Kiovergas FISH protokolui
+-Description[nb]=En IU-slave for FISH-protokollen
+-Description[nds]=En In-/Utgaavdeenst f&#246;r dat FISH-Protokull
+-Description[nl]=Een kioslave voor het protocol FISH
+-Description[nn]=Ein IU-slave for FISH-protokollen
+-Description[pa]=FISH &#2602;&#2637;&#2608;&#2635;&#2591;&#2635;&#2581;&#2622;&#2610; &#2610;&#2568; kioslave
+-Description[pl]=Wtyczka protoko&#322;u FISH
+-Description[pt]=Um 'kioslave' para protocolo FISH
+-Description[pt_BR]=Uma implementa&#231;&#227;o para o protocolo FISH
+-Description[ro]=Un dispozitiv de I/E pentru protocolul FISH
+-Description[ru]=&#1052;&#1086;&#1076;&#1091;&#1083;&#1100; &#1092;&#1072;&#1081;&#1083;&#1086;&#1074;&#1086;&#1081; &#1089;&#1080;&#1089;&#1090;&#1077;&#1084;&#1099; &#1076;&#1083;&#1103; &#1087;&#1088;&#1086;&#1090;&#1086;&#1082;&#1086;&#1083;&#1072; FISH
+-Description[se]=SO-&#353;l&#225;va FISH-protokolla v&#225;r&#225;s
+-Description[sk]=IO klient pre protokol FISH
+-Description[sl]=kioslave za protokol FISH
+-Description[sr]=Kioslave &#1079;&#1072; &#1087;&#1088;&#1086;&#1090;&#1086;&#1082;&#1086;&#1083; FISH
+-Description[<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">sr at Latn</A>]=Kioslave za protokol FISH
+-Description[sv]=En I/O-slav f&#246;r protokollet FISH
+-Description[ta]=FISH &#2984;&#3014;&#2993;&#3007;&#2990;&#3009;&#2993;&#3016;&#2965;&#3021;&#2965;&#3006;&#2985; &#2962;&#2992;&#3009; &#2965;&#3021;&#2991;&#3019;&#3000;&#3021;&#2994;&#3015;&#2997;&#3021;
+-Description[tg]=&#1052;&#1086;&#1076;&#1091;&#1083;&#1080; &#1092;&#1072;&#1081;&#1083;&#1080;&#1080; &#1089;&#1080;&#1089;&#1090;&#1077;&#1084;&#1072; &#1073;&#1072;&#1088;&#1086;&#1080; &#1087;&#1088;&#1086;&#1090;&#1086;&#1082;&#1086;&#1083;&#1080; FISH
+-Description[tr]=FISH protokol&#252; i&#231;in kioslave
+-Description[uk]=&#1055;&#1110;&#1076;&#1083;&#1077;&#1075;&#1083;&#1080;&#1081; B/&#1042; &#1076;&#1083;&#1103; &#1087;&#1088;&#1086;&#1090;&#1086;&#1082;&#1086;&#1083;&#1091; FISH
+ DocPath=kioslave/fish.html
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000266.html">[Freenx-cvs] r139 - / freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000268.html">[Freenx-cvs] r141 - / freenx-website freenx-website/intern freenx-website/intern/press
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#267">[ date ]</a>
+              <a href="thread.html#267">[ thread ]</a>
+              <a href="subject.html#267">[ subject ]</a>
+              <a href="author.html#267">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r78 - nx-utils/nxsocks/nxsocksd
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-July/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r78%20-%20nx-utils/nxsocks/nxsocksd&In-Reply-To=%3C200507311658.j6VGwL5s008381%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000202.html">
+   <LINK REL="Next"  HREF="000203.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r78 - nx-utils/nxsocks/nxsocksd</H1>
+    <B>Fabian Franz at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r78%20-%20nx-utils/nxsocks/nxsocksd&In-Reply-To=%3C200507311658.j6VGwL5s008381%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r78 - nx-utils/nxsocks/nxsocksd">fabianx at berlios.de
+       </A><BR>
+    <I>Sun Jul 31 18:58:21 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000202.html">[Freenx-cvs] r77 - in nx-utils/nxsocks: . nxnotify
+</A></li>
+        <LI>Next message: <A HREF="000203.html">[Freenx-cvs] r79 - nx-utils/nxsocks/nxsocksd
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#201">[ date ]</a>
+              <a href="thread.html#201">[ thread ]</a>
+              <a href="subject.html#201">[ subject ]</a>
+              <a href="author.html#201">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2005-07-31 18:57:19 +0200 (Sun, 31 Jul 2005)
+New Revision: 78
+
+Modified:
+   nx-utils/nxsocks/nxsocksd/main.c
+Log:
+Added support for passing password in environment var and removed dependency for a controlling terminal.
+
+
+Modified: nx-utils/nxsocks/nxsocksd/main.c
+===================================================================
+--- nx-utils/nxsocks/nxsocksd/main.c	2005-07-31 16:53:32 UTC (rev 77)
++++ nx-utils/nxsocks/nxsocksd/main.c	2005-07-31 16:57:19 UTC (rev 78)
+@@ -481,7 +481,7 @@
+     printaddrlist(&quot; Accepting connnections from %s&quot;, pm.acc, pm.nacc);
+     printf(&quot; ident %s\n&quot;, (pm.id) ? pm.id : &quot;(anyone)&quot;);
+     printaddrlist(&quot; Relaying UDP from %s\n&quot;, pm.udp, pm.nudp);
+-    if (pm.uname) {
++    if (pm.uname &amp;&amp; getenv(&quot;USOCKS_PASSWORD&quot;) == NULL) {
+ #ifdef HAVE_TERMIOS_H
+ 	struct termios tio;
+ 	int l=0;
+@@ -512,8 +512,12 @@
+ 	}
+ #endif
+     }
++    else
++    {
++        pm.pass=strncpy(buf, getenv(&quot;USOCKS_PASSWORD&quot;), sizeof(buf));
++    }
+     printf(&quot;Listening on port %d.\n&quot;, port);
+-    thread_fd_register(0, eofh, NULL, NULL, NULL);
++    /*thread_fd_register(0, eofh, NULL, NULL, NULL); */
+     setsig(SIGINT, finish);
+     setsig(SIGTERM, finish);
+     setsig(SIGPIPE, SIG_IGN);
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000202.html">[Freenx-cvs] r77 - in nx-utils/nxsocks: . nxnotify
+</A></li>
+	<LI>Next message: <A HREF="000203.html">[Freenx-cvs] r79 - nx-utils/nxsocks/nxsocksd
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#201">[ date ]</a>
+              <a href="thread.html#201">[ thread ]</a>
+              <a href="subject.html#201">[ subject ]</a>
+              <a href="author.html#201">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

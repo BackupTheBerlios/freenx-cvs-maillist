@@ -1,0 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r200 - / freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r200%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200603111150.k2BBoXNB003497%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000329.html">
+   <LINK REL="Next"  HREF="000331.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r200 - / freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r200%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200603111150.k2BBoXNB003497%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r200 - / freenx-server/trunk">fabianx at berlios.de
+       </A><BR>
+    <I>Sat Mar 11 12:50:33 CET 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000329.html">[Freenx-cvs] r199 - / freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000331.html">[Freenx-cvs] r201 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#330">[ date ]</a>
+              <a href="thread.html#330">[ thread ]</a>
+              <a href="subject.html#330">[ subject ]</a>
+              <a href="author.html#330">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2006-03-11 12:50:22 +0100 (Sat, 11 Mar 2006)
+New Revision: 200
+
+Modified:
+   /
+   freenx-server/trunk/node.conf.sample
+   freenx-server/trunk/nxloadconfig
+   freenx-server/trunk/nxnode
+Log:
+Let nxnode honor the setting of PROXY_TCP_NODELAY in node.conf.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:263
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:265
+
+Modified: freenx-server/trunk/node.conf.sample
+===================================================================
+--- freenx-server/trunk/node.conf.sample	2006-03-11 11:45:15 UTC (rev 199)
++++ freenx-server/trunk/node.conf.sample	2006-03-11 11:50:22 UTC (rev 200)
+@@ -392,7 +392,7 @@
+ # specify whether to enable or disable TCP nodelay. Setting this option to
+ # the value of &quot;0&quot; NX proxy avoids using 'tcp nodelay' but it will cause a
+ # loss of interaction in sessions.
+-#PROXY_TCP_NODELAY=&quot;0&quot;
++#PROXY_TCP_NODELAY=&quot;&quot;
+ 
+ # Extra options to nxproxy. See !M documentation for useful parameters.
+ #PROXY_EXTRA_OPTIONS=&quot;&quot;
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2006-03-11 11:45:15 UTC (rev 199)
++++ freenx-server/trunk/nxloadconfig	2006-03-11 11:50:22 UTC (rev 200)
+@@ -182,7 +182,7 @@
+ AGENT_EXTRA_OPTIONS_X=&quot;&quot;
+ AGENT_STARTUP_TIMEOUT=&quot;60&quot;
+ AGENT_FONT_SERVER=&quot;&quot;
+-PROXY_TCP_NODELAY=&quot;0&quot;
++PROXY_TCP_NODELAY=&quot;&quot;
+ PROXY_EXTRA_OPTIONS=&quot;&quot;
+ 
+ ############################################################################
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2006-03-11 11:45:15 UTC (rev 199)
++++ freenx-server/trunk/nxnode	2006-03-11 11:50:22 UTC (rev 200)
+@@ -633,6 +633,7 @@
+ 	agent_domain=$(getparam agent_domain)
+ 	screeninfo=$(getparam screeninfo)
+ 	nodelay=$(getparam nodelay)
++	[ &quot;$PROXY_TCP_NODELAY&quot; = &quot;0&quot; ] &amp;&amp; nodelay=0
+ 
+ 	# 1.5.0 options
+ 	rdpcolors=$(getparam rdpcolors)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000329.html">[Freenx-cvs] r199 - / freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000331.html">[Freenx-cvs] r201 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#330">[ date ]</a>
+              <a href="thread.html#330">[ thread ]</a>
+              <a href="subject.html#330">[ subject ]</a>
+              <a href="author.html#330">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

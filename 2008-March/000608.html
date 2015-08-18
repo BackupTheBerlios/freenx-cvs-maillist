@@ -1,0 +1,139 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r482 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r482%20-%20freenx-server/trunk&In-Reply-To=%3C200803021006.m22A6Bj8016414%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000607.html">
+   <LINK REL="Next"  HREF="000609.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r482 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r482%20-%20freenx-server/trunk&In-Reply-To=%3C200803021006.m22A6Bj8016414%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r482 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Sun Mar  2 11:06:11 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000607.html">[Freenx-cvs] r481 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000609.html">[Freenx-cvs] r483 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#608">[ date ]</a>
+              <a href="thread.html#608">[ thread ]</a>
+              <a href="subject.html#608">[ subject ]</a>
+              <a href="author.html#608">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-03-02 11:06:11 +0100 (Sun, 02 Mar 2008)
+New Revision: 482
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/node.conf.sample
+   freenx-server/trunk/nxloadconfig
+   freenx-server/trunk/nxsetup
+Log:
+* Set ENABLE_USESSION=&quot;1&quot; option by default - its hard to find and those who know can
+  shut it off anyway. Added automatic adding of user nx to group utmp.
+  (Patch by Gentoo Portage)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2008-03-02 09:53:00 UTC (rev 481)
++++ freenx-server/trunk/ChangeLog	2008-03-02 10:06:11 UTC (rev 482)
+@@ -34,6 +34,9 @@
+ 	  (Patch from Gentoo Portage)
+ 	* Fixed possible bug in nxserver when $USER is not set.
+ 	  (Patch from Gentoo Portage)
++	* Set ENABLE_USESSION=&quot;1&quot; option by default - its hard to find and those who know can
++	  shut it off anyway. Added automatic adding of user nx to group utmp.
++	  (Patch by Gentoo Portage)
+ 
+ 14.10.2007 FreeNX 0.7.1 &quot;Hip Hop Edition&quot;
+ 	* Fixed the issue that makes fonts look tiny and unreadable by default 
+
+Modified: freenx-server/trunk/node.conf.sample
+===================================================================
+--- freenx-server/trunk/node.conf.sample	2008-03-02 09:53:00 UTC (rev 481)
++++ freenx-server/trunk/node.conf.sample	2008-03-02 10:06:11 UTC (rev 482)
+@@ -469,7 +469,7 @@
+ # Note: You have to make sure that you add the nx user to the
+ #       utmp or tty group or how its called on your system
+ #       before this directive works.
+-#ENABLE_USESSION=&quot;0&quot;
++#ENABLE_USESSION=&quot;1&quot;
+ #COMMAND_SESSREG=&quot;sessreg&quot;
+ 
+ # Extra options sent to the different nx agents. See !M documentation
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2008-03-02 09:53:00 UTC (rev 481)
++++ freenx-server/trunk/nxloadconfig	2008-03-02 10:06:11 UTC (rev 482)
+@@ -201,7 +201,7 @@
+ EXPORT_SESSIONID=&quot;1&quot;
+ NODE_AUTOSTART=&quot;&quot;
+ ENABLE_ROOTLESS_MODE=&quot;1&quot;
+-ENABLE_USESSION=&quot;0&quot;
++ENABLE_USESSION=&quot;1&quot;
+ COMMAND_SESSREG=&quot;sessreg&quot;
+ AGENT_EXTRA_OPTIONS_RFB=&quot;&quot;
+ AGENT_EXTRA_OPTIONS_RDP=&quot;&quot;
+
+Modified: freenx-server/trunk/nxsetup
+===================================================================
+--- freenx-server/trunk/nxsetup	2008-03-02 09:53:00 UTC (rev 481)
++++ freenx-server/trunk/nxsetup	2008-03-02 10:06:11 UTC (rev 482)
+@@ -269,6 +269,13 @@
+ 		echo &quot;done&quot;
+ 	fi
+ 	
++	if [ &quot;$ENABLE_USESSION&quot; = &quot;1&quot; ]
++	then
++		echo -n &quot;Adding user \&quot;nx\&quot; to group \&quot;utmp\&quot; ...&quot;
++		usermod -G utmp nx
++		echo &quot;done&quot;
++	fi
++	
+ 	if [ &quot;$ENABLE_NOMACHINE_FORWARD_PORT&quot; = &quot;1&quot; -a -x &quot;$NOMACHINE_SERVER&quot; ]
+ 	then
+ 		echo -n &quot;Setting up NoMachine forwarding ...&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000607.html">[Freenx-cvs] r481 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000609.html">[Freenx-cvs] r483 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#608">[ date ]</a>
+              <a href="thread.html#608">[ thread ]</a>
+              <a href="subject.html#608">[ subject ]</a>
+              <a href="author.html#608">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

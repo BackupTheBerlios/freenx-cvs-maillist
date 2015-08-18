@@ -1,0 +1,277 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r380 - in nxcl: lib nxcl
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-September/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r380%20-%20in%20nxcl%3A%20lib%20nxcl&In-Reply-To=%3C200709162016.l8GKG5i2013868%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000509.html">
+   <LINK REL="Next"  HREF="000668.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r380 - in nxcl: lib nxcl</H1>
+    <B>sebjames at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r380%20-%20in%20nxcl%3A%20lib%20nxcl&In-Reply-To=%3C200709162016.l8GKG5i2013868%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r380 - in nxcl: lib nxcl">sebjames at mail.berlios.de
+       </A><BR>
+    <I>Sun Sep 16 22:16:05 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000509.html">[Freenx-cvs] r379 - in nxcl: lib nxcl
+</A></li>
+        <LI>Next message: <A HREF="000668.html">[Freenx-cvs] r381 - / nxlaunch nxlaunch/lib nxlaunch/src	nxlaunch/src/pixmaps
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#510">[ date ]</a>
+              <a href="thread.html#510">[ thread ]</a>
+              <a href="subject.html#510">[ subject ]</a>
+              <a href="author.html#510">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: sebjames
+Date: 2007-09-16 22:16:05 +0200 (Sun, 16 Sep 2007)
+New Revision: 380
+
+Modified:
+   nxcl/lib/nxclientlib.cpp
+   nxcl/lib/nxclientlib.h
+   nxcl/lib/nxdata.h
+   nxcl/nxcl/nxcl.cpp
+Log:
+Now do runtime checks to find suitable nxproxy and nxssh programs to 
+run. nxproxy and nxssh can be in teh same bin directory that nxcl is 
+installed in (first choice) or /usr/local/bin or /usr/bin or /usr/NX/bin 
+or /bin.
+
+
+Modified: nxcl/lib/nxclientlib.cpp
+===================================================================
+--- nxcl/lib/nxclientlib.cpp	2007-09-15 22:01:07 UTC (rev 379)
++++ nxcl/lib/nxclientlib.cpp	2007-09-16 20:16:05 UTC (rev 380)
+@@ -24,7 +24,10 @@
+ #include &lt;fstream&gt;
+ 
+ extern &quot;C&quot; {
+-#include &quot;errno.h&quot;
++#include &lt;errno.h&gt;
++#include &lt;sys/types.h&gt;
++#include &lt;sys/stat.h&gt;
++#include &lt;unistd.h&gt;
+ }
+ 
+ /*
+@@ -178,9 +181,7 @@
+ 
+ 	// Start to build the arguments for the nxssh command.
+ 	// notQProcess requires that argv[0] contains the program name
+-	// FIXME: Here, I place the PACKAGE_BIN_DIR path in front of
+-	// nxssh, but nxssh may be installed in a different prefix...
+-	arguments.push_back (PACKAGE_BIN_DIR&quot;/nxssh&quot;);
++	arguments.push_back (&quot;nxssh&quot;);
+ 	
+ 	argtmp &lt;&lt; &quot;-nx&quot;;
+ 	arguments.push_back (argtmp.str());
+@@ -235,10 +236,12 @@
+ 	// ...so there you have the meaning.
+ 	arguments.push_back (&quot;-E&quot;);
+ 	
+-	this-&gt;nxsshProcess.start (PACKAGE_BIN_DIR&quot;/nxssh&quot;, arguments);
+-
+-	if (nxsshProcess.waitForStarted() == false) {
+-		dbgln (&quot;nx ssh process didn't start :(&quot;);
++	// Find a path for the nxssh process using getPath()
++	string nxsshPath = this-&gt;getPath (&quot;nxssh&quot;);
++	this-&gt;nxsshProcess.start(nxsshPath, arguments);
++	if (this-&gt;nxsshProcess.waitForStarted() == false) {
++		this-&gt;externalCallbacks-&gt;write (NXCL_PROCESS_ERROR, _(&quot;Error starting nxssh!&quot;));
++		this-&gt;isFinished = true;
+ 	}
+ }
+ 
+@@ -498,8 +501,6 @@
+ 
+ void NXClientLib::invokeProxy()
+ {
+-	dbgln (&quot;invokeProxy called&quot;);
+-
+ 	this-&gt;externalCallbacks-&gt;write(NXCL_INVOKE_PROXY, _(&quot;Starting NX session&quot;));
+ 	
+ 	int e;
+@@ -552,18 +553,19 @@
+ 
+ 	// Build arguments for the call to the nxproxy command
+ 	list&lt;string&gt; arguments;
+-	arguments.push_back(PACKAGE_BIN_DIR&quot;/nxproxy&quot;); // argv[0] has to be the program name
++	arguments.push_back(&quot;nxproxy&quot;); // argv[0] has to be the program name
+ 	arguments.push_back(&quot;-S&quot;);
+ 	ss.str(&quot;&quot;);
+ 	ss &lt;&lt; &quot;options=&quot; &lt;&lt; nxdir;
+ 	ss &lt;&lt; &quot;:&quot; &lt;&lt; proxyData.display;
+ 	arguments.push_back(ss.str());	
+ 
+-	// This is of type notQProcess.
+-	this-&gt;nxproxyProcess.start(PACKAGE_BIN_DIR&quot;/nxproxy&quot;, arguments);
+-
+-	if (nxproxyProcess.waitForStarted() == false) {
+-		dbgln (&quot;nxproxy process didn't start :(&quot;);
++	// Find a path for the nxproxy process using getPath()
++	string nxproxyPath = this-&gt;getPath (&quot;nxproxy&quot;);
++	this-&gt;nxproxyProcess.start(nxproxyPath, arguments);
++	if (this-&gt;nxproxyProcess.waitForStarted() == false) {
++		this-&gt;externalCallbacks-&gt;write (NXCL_PROCESS_ERROR, _(&quot;Error starting nxproxy!&quot;));
++		this-&gt;isFinished = true;
+ 	}
+ }
+ 
+@@ -576,4 +578,61 @@
+ {
+ 	return (this-&gt;session.terminateSession(n));
+ }
++
++string NXClientLib::getPath (string prog)
++{
++	string path;
++	struct stat * buf;
++
++	buf = static_cast&lt;struct stat*&gt;(malloc (sizeof (struct stat)));
++	if (!buf) {
++		// Malloc error.
++		return prog;
++	}
++
++	path = PACKAGE_BIN_DIR&quot;/&quot; + prog;
++	memset (buf, 0, sizeof(struct stat));
++	stat (path.c_str(), buf);
++	if (S_ISREG (buf-&gt;st_mode) || S_ISLNK (buf-&gt;st_mode)) {
++		// Found prog in PACKAGE_BIN_DIR
++	} else {
++		path = &quot;/usr/local/bin/&quot; + prog;
++		memset (buf, 0, sizeof(struct stat));
++		stat (path.c_str(), buf);
++		if (S_ISREG (buf-&gt;st_mode) || S_ISLNK (buf-&gt;st_mode)) {
++			// Found prog in /usr/local/bin
++		} else {
++			path = &quot;/usr/bin/&quot; + prog;
++			memset (buf, 0, sizeof(struct stat));
++			stat (path.c_str(), buf);
++			if (S_ISREG (buf-&gt;st_mode) || 
++			    S_ISLNK (buf-&gt;st_mode)) {
++				// Found prog in /usr/bin
++			} else {
++				path = &quot;/usr/NX/bin/&quot; + prog;
++				memset (buf, 0, sizeof(struct stat));
++				stat (path.c_str(), buf);
++				if (S_ISREG (buf-&gt;st_mode) || 
++				    S_ISLNK (buf-&gt;st_mode)) {
++
++				} else {
++					path = &quot;/bin/&quot; + prog;
++					memset (buf, 0, sizeof(struct stat));
++					stat (path.c_str(), buf);
++					if (S_ISREG (buf-&gt;st_mode) || 
++					    S_ISLNK (buf-&gt;st_mode)) {
++						// Found prog in /bin
++					} else {
++						// Just return the
++						// prog name.
++						path = prog;
++					}
++				}
++			}
++		}
++	}
++
++	free (buf);
++	return path;
++}
+ //@}
+
+Modified: nxcl/lib/nxclientlib.h
+===================================================================
+--- nxcl/lib/nxclientlib.h	2007-09-15 22:01:07 UTC (rev 379)
++++ nxcl/lib/nxclientlib.h	2007-09-16 20:16:05 UTC (rev 380)
+@@ -275,6 +275,17 @@
+ 
+ 	private:
+ 		/*!
++		 * Try a number of different paths to try to find the
++		 * program prog's full path.
++		 *
++		 * \param prog The program to find, likely to be nxssh
++		 * or nxproxy.
++		 *
++		 * \return The full path; e.g. /usr/bin/nxssh
++		 */
++		string getPath (string prog);
++
++		/*!
+ 		 * Set true when the program is ready to end, e.g if
+ 		 * authentication failed, nxssh failed to start amoung
+ 		 * other reasons.
+
+Modified: nxcl/lib/nxdata.h
+===================================================================
+--- nxcl/lib/nxdata.h	2007-09-15 22:01:07 UTC (rev 379)
++++ nxcl/lib/nxdata.h	2007-09-16 20:16:05 UTC (rev 380)
+@@ -37,6 +37,7 @@
+ #define NXCL_STARTING               1000008
+ #define NXCL_FINISHED               1000009
+ #define NXCL_ALIVE                  1000010
++#define NXCL_PROCESS_ERROR          1000011
+ 
+ using namespace std;
+ 
+
+Modified: nxcl/nxcl/nxcl.cpp
+===================================================================
+--- nxcl/nxcl/nxcl.cpp	2007-09-15 22:01:07 UTC (rev 379)
++++ nxcl/nxcl/nxcl.cpp	2007-09-16 20:16:05 UTC (rev 380)
+@@ -434,13 +434,14 @@
+ void
+ Nxcl::startTheNXConnection (void)
+ {
+-	// First things first; set the sessionData. FIXME: Should check if sessionData has been set.
++	// First things first; set the sessionData.
++	// FIXME: Should check if this-&gt;sessionData has been set.
+ 	this-&gt;nxclientlib.setSessionData (&amp;this-&gt;sessionData);
+ 
+ 	this-&gt;nxclientlib.setUsername (this-&gt;nxuser);
+ 	this-&gt;nxclientlib.setPassword (this-&gt;nxpass);
+ 
+-	// FIXME: Need to pull in res from the dbus message or probe for it.	
++	// Probe for X display resolution in nxcl.
+ 	this-&gt;nxclientlib.setResolution (this-&gt;xRes, this-&gt;yRes); 
+                                                // This is the size of
+                                                // your screen... We need
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000509.html">[Freenx-cvs] r379 - in nxcl: lib nxcl
+</A></li>
+	<LI>Next message: <A HREF="000668.html">[Freenx-cvs] r381 - / nxlaunch nxlaunch/lib nxlaunch/src	nxlaunch/src/pixmaps
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#510">[ date ]</a>
+              <a href="thread.html#510">[ thread ]</a>
+              <a href="subject.html#510">[ subject ]</a>
+              <a href="author.html#510">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

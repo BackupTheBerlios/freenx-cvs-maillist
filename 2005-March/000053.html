@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fabianx modified 2 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%202%20files&In-Reply-To=%3C423256FC.mail4BS11WCWH%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000052.html">
+   <LINK REL="Next"  HREF="000054.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fabianx modified 2 files</H1>
+    <B>fabianx</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%202%20files&In-Reply-To=%3C423256FC.mail4BS11WCWH%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fabianx modified 2 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Sat Mar 12 03:42:04 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000052.html">[Freenx-cvs] CVS: freenx - jonno modified 5 files
+</A></li>
+        <LI>Next message: <A HREF="000054.html">[Freenx-cvs] CVS: freenx - fabianx modified 4 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#53">[ date ]</a>
+              <a href="thread.html#53">[ thread ]</a>
+              <a href="subject.html#53">[ subject ]</a>
+              <a href="author.html#53">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fabianx
+Date:      2005-03-12 02:42:03 GMT
+Modified:  .        ChangeLog nxnode
+Log:
+Removed support for OSS components prior version 1.4.0,snapshot 6 in nxnode. (They do not accept the -option option)
+
+Added -option option to nxagent/nxdesktop.
+
+Revision  Changes    Path
+1.27      +2 -0      freenx/ChangeLog
+
+
+rev 1.27, prev_rev 1.26
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.26
+retrieving revision 1.27
+diff -u -r1.26 -r1.27
+--- ChangeLog	11 Mar 2005 03:47:09 -0000	1.26
++++ ChangeLog	12 Mar 2005 02:42:01 -0000	1.27
+@@ -6,6 +6,8 @@
+ 	* Added support for 'nxloadconfig --check' to validate node.conf settings
+ 	* Added initial support for sound (esd/artsd).
+ 	* Added optional support for utmp/wtmp/lastlog database.
++	* Removed support for OSS components prior version 1.4.0 in nxnode.
++	  Added -option option to nxagent/nxdesktop.
+ 
+ 11.03.2005 FreeNX 0.3.1
+ 	* Fixed keyboard mapping problems.
+
+
+
+1.34      +3 -3      freenx/nxnode
+
+
+rev 1.34, prev_rev 1.33
+Index: nxnode
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxnode,v
+retrieving revision 1.33
+retrieving revision 1.34
+diff -u -r1.33 -r1.34
+--- nxnode	11 Mar 2005 16:53:02 -0000	1.33
++++ nxnode	12 Mar 2005 02:42:02 -0000	1.34
+@@ -13,7 +13,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxnode,v 1.33 2005/03/11 16:53:02 jonno Exp $
++# CVS: $Id: nxnode,v 1.34 2005/03/12 02:42:02 fabianx Exp $
+ #
+ # 21.06.2004: - Full reconnection support
+ 
+@@ -216,7 +216,7 @@
+ 		P=&quot;&quot;
+ 		[ -n &quot;$agent_user&quot; ] &amp;&amp; U=&quot;-u $agent_user&quot;
+ 		[ -n &quot;$agent_password&quot; ] &amp;&amp; P=&quot;-p -&quot;
+-		echo &quot;$agent_password&quot; | $PATH_BIN/nxdesktop -name &quot;NX - $user@$SERVER_NAME:$display - $session (GPL Edition)&quot; $K $G $U $P $agent_server $AGENT_EXTRA_OPTIONS_RDP 2&gt;&gt;$USER_FAKE_HOME/.nx/C-$sess_id/session &amp;
++		echo &quot;$agent_password&quot; | $PATH_BIN/nxdesktop -name &quot;NX - $user@$SERVER_NAME:$display - $session (GPL Edition)&quot; -option &quot;$USER_FAKE_HOME/.nx/C-$sess_id/options&quot; $K $G $U $P $agent_server $AGENT_EXTRA_OPTIONS_RDP 2&gt;&gt;$USER_FAKE_HOME/.nx/C-$sess_id/session &amp;
+ 	else
+ 
+ 	# nxviewer session
+@@ -236,7 +236,7 @@
+ 			FP=&quot;&quot;
+ 			[ -n &quot;$AGENT_FONT_SERVER&quot; ] &amp;&amp; FP=&quot;-fp $AGENT_FONT_SERVER&quot;
+ 			# nxagent session
+-			$PATH_BIN/nxagent -persistent $R -name &quot;NX - $user@$SERVER_NAME:$display - $session (GPL Edition)&quot; $K $G $B $FP :$display $AGENT_EXTRA_OPTIONS_X 2&gt;&gt;$USER_FAKE_HOME/.nx/C-$sess_id/session &amp;
++			$PATH_BIN/nxagent -persistent $R -name &quot;NX - $user@$SERVER_NAME:$display - $session (GPL Edition)&quot; -option &quot;$USER_FAKE_HOME/.nx/C-$sess_id/options&quot; $K $G $B $FP :$display $AGENT_EXTRA_OPTIONS_X 2&gt;&gt;$USER_FAKE_HOME/.nx/C-$sess_id/session &amp;
+ 		fi
+ 	fi
+ 	fi
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000052.html">[Freenx-cvs] CVS: freenx - jonno modified 5 files
+</A></li>
+	<LI>Next message: <A HREF="000054.html">[Freenx-cvs] CVS: freenx - fabianx modified 4 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#53">[ date ]</a>
+              <a href="thread.html#53">[ thread ]</a>
+              <a href="subject.html#53">[ subject ]</a>
+              <a href="author.html#53">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

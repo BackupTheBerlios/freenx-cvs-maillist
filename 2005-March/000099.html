@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - jonno modified nxnode
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20jonno%20modified%20nxnode&In-Reply-To=%3C42383C7E.mail8D5113ZRW%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000102.html">
+   <LINK REL="Next"  HREF="000100.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - jonno modified nxnode</H1>
+    <B>jonno</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20jonno%20modified%20nxnode&In-Reply-To=%3C42383C7E.mail8D5113ZRW%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - jonno modified nxnode">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Wed Mar 16 15:02:38 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000102.html">[Freenx-cvs] CVS: freenx - jonno modified 5 files
+</A></li>
+        <LI>Next message: <A HREF="000100.html">[Freenx-cvs] CVS: freenx - jonno modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#99">[ date ]</a>
+              <a href="thread.html#99">[ thread ]</a>
+              <a href="subject.html#99">[ subject ]</a>
+              <a href="author.html#99">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      jonno
+Date:      2005-03-16 14:02:38 GMT
+Modified:  .        nxnode
+Log:
+nxnode now uses $COMMAND_SMBUMOUNT instead of smbumount
+
+Revision  Changes    Path
+1.49      +2 -2      freenx/nxnode
+
+
+rev 1.49, prev_rev 1.48
+Index: nxnode
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxnode,v
+retrieving revision 1.48
+retrieving revision 1.49
+diff -u -r1.48 -r1.49
+--- nxnode	16 Mar 2005 13:58:42 -0000	1.48
++++ nxnode	16 Mar 2005 14:02:38 -0000	1.49
+@@ -13,7 +13,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxnode,v 1.48 2005/03/16 13:58:42 jonno Exp $
++# CVS: $Id: nxnode,v 1.49 2005/03/16 14:02:38 jonno Exp $
+ #
+ # 21.06.2004: - Full reconnection support
+ 
+@@ -299,7 +299,7 @@
+ 	[ -e &quot;$USER_FAKE_HOME/.nx/C-$sess_id/scripts/mpoint&quot; ] || return
+ 	cat &quot;$USER_FAKE_HOME/.nx/C-$sess_id/scripts/mpoint&quot; | while read mpoint
+ 	do
+-		smbumount &quot;$mpoint&quot; &gt;/dev/null 2&gt;/dev/null
++		$COMMAND_SMBUMOUNT &quot;$mpoint&quot; &gt;/dev/null 2&gt;/dev/null
+ 	done
+ }
+ 
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000102.html">[Freenx-cvs] CVS: freenx - jonno modified 5 files
+</A></li>
+	<LI>Next message: <A HREF="000100.html">[Freenx-cvs] CVS: freenx - jonno modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#99">[ date ]</a>
+              <a href="thread.html#99">[ thread ]</a>
+              <a href="subject.html#99">[ subject ]</a>
+              <a href="author.html#99">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

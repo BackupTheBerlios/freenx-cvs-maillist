@@ -1,0 +1,539 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r314 - in nx-utils: . nxspeex
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r314%20-%20in%20nx-utils%3A%20.%20nxspeex&In-Reply-To=%3C200702060715.l167FCUX005408%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000447.html">
+   <LINK REL="Next"  HREF="000449.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r314 - in nx-utils: . nxspeex</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r314%20-%20in%20nx-utils%3A%20.%20nxspeex&In-Reply-To=%3C200702060715.l167FCUX005408%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r314 - in nx-utils: . nxspeex">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Tue Feb  6 08:15:12 CET 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000447.html">[Freenx-cvs] r313 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000449.html">[Freenx-cvs] r315 - nx-utils/nxspeex
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#448">[ date ]</a>
+              <a href="thread.html#448">[ thread ]</a>
+              <a href="subject.html#448">[ subject ]</a>
+              <a href="author.html#448">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-02-06 08:15:11 +0100 (Tue, 06 Feb 2007)
+New Revision: 314
+
+Added:
+   nx-utils/nxspeex/
+   nx-utils/nxspeex/README
+   nx-utils/nxspeex/nxspeex.c
+Log:
+* nxspeex.c - A nx esd proxy for low bandwidth speex encoded transmission of data.
+
+Transparent compression/decompression of esd data via speex to allow low bandwidth usage.
+
+
+
+Added: nx-utils/nxspeex/README
+===================================================================
+--- nx-utils/nxspeex/README	2007-02-04 01:05:52 UTC (rev 313)
++++ nx-utils/nxspeex/README	2007-02-06 07:15:11 UTC (rev 314)
+@@ -0,0 +1,38 @@
++nxspeex - A simple nx esd proxy for low bandwidth speex encoded transmission of data.
++=====================================================================================
++
++Ok here is how to use it:
++
++Building
++--------
++
++- Install libspeex development headers and libspeex library.
++- Install libesd development headers and libesd library.
++- Build nxspeex for client and server:
++	gcc -Wall -o nxspeex nxspeex.c -lesd -lspeex
++
++Using
++-----
++
++- Install netpipes on server and client
++- Start a nxsession with normal ESD support
++
++On server:
++	faucet &lt;someport&gt; --fd 6 hose localhost &lt;$DISPLAY+7000&gt; --fd 7 nxspeex encode &amp;
++
++	Start application:
++	
++	ESPEAKER=127.0.0.1:&lt;someport&gt; mpg123 -o esd somefile.mp3
++	ESPEAKER=127.0.0.1:&lt;someport&gt; esddsp &lt;someossapp&gt;
++
++On client:
++
++	ps aux | grep nxesd
++	# write down port and start nxesd on another port
++	killall nxesd
++	/usr/NX/bin/nxesd -public -tcp -nobeeps -port &lt;noted port+1&gt;
++	faucet &lt;noted port&gt; --fd 6 hose localhost &lt;noted port + 1&gt; --fd 7 nxspeex
++
++Thats it!
++
++Of course this might be easily and transparently incorporated into nxcomp/Loop.cpp in the future.
+
+Added: nx-utils/nxspeex/nxspeex.c
+===================================================================
+--- nx-utils/nxspeex/nxspeex.c	2007-02-04 01:05:52 UTC (rev 313)
++++ nx-utils/nxspeex/nxspeex.c	2007-02-06 07:15:11 UTC (rev 314)
+@@ -0,0 +1,413 @@
++/*
++ * nxspeex.c - A nx esd proxy for low bandwidth speex encoded transmission of data.
++ *
++ * Copyright (c) 2007 by Fabian Franz &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">freenx at fabian-franz.de</A>&gt;.
++ *
++ * License: GPL, v2
++ *
++ */
++
++#include &lt;unistd.h&gt;
++#include &lt;stdlib.h&gt;
++#include &lt;stdio.h&gt;
++#include &lt;esd.h&gt;
++#include &lt;sys/types.h&gt;
++#include &lt;sys/socket.h&gt;
++#include &lt;sys/time.h&gt;
++#include &lt;time.h&gt;
++
++#include &lt;speex/speex.h&gt;
++#include &lt;speex/speex_stereo.h&gt;
++#include &lt;speex/speex_callbacks.h&gt;
++
++int esd_set_socket_buffers( int sock, int src_format,
++		            int src_rate, int base_rate );
++
++int do_fwd(int from, int to, void* buf, size_t count)
++{
++        ssize_t len;
++
++	len=read(from, buf, count);
++        return write(to, buf, len);
++}
++
++int do_fwd_all(int from, int to, void* buf, size_t count)
++{
++	size_t erg, len=0;
++	
++	do
++	{
++		erg=do_fwd(from, to, buf+len, count-len);
++		if (erg &lt;= 0)
++			break;
++		len+=erg;
++	}
++	while (len &lt; count);
++	
++	return len;
++}
++
++int do_fwd_noblock(int from, int to, void* buf, size_t count)
++{
++	size_t erg, len=0, olen=0;
++	
++	do
++	{
++		erg=read(from, buf+len, count-len);
++		if (erg &lt;= 0)
++			return len;
++		len+=erg;
++	}
++	while (len &lt; count);
++
++	do
++	{
++		erg=write(to, buf+olen, count-olen);
++		if (erg &lt;= 0)
++			break;
++		olen+=erg;
++	}
++	while (olen &lt; count);
++	
++	return olen;
++}
++
++void do_sockopts(int sock, int buf_size)
++{
++	int sz=buf_size;
++	setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &amp;sz, sizeof(sz));
++	setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &amp;sz, sizeof(sz));
++}
++
++int do_read_complete(int from, void* buf, size_t count)
++{
++	size_t erg, len=0;
++	
++	do
++	{
++		erg=read(from, buf+len, count-len);
++		if (erg &lt;= 0)
++			break;
++		len+=erg;
++	}
++	while (len &lt; count);
++
++	return len;
++}
++
++#define MAX_FRAME_SIZE 2000
++#define MAX_FRAME_BYTES 2000
++
++/* After how many frames should we resync with server? */
++#define DO_SYNC_SEQ	20
++
++int do_read_samples(int from, short* sbuf, int frame_size, int bits)
++{
++	unsigned char buf[2*MAX_FRAME_SIZE+1];
++	short *s;
++	int i;	
++	size_t erg, len=0, count=frame_size*(bits/8);
++
++	if (frame_size &gt; 2*MAX_FRAME_SIZE)
++	{
++		fprintf(stderr, &quot;Error: frame_size too big!&quot;);
++		exit(1);
++	}
++	
++	do
++	{
++		erg=read(from, buf+len, count-len);
++		if (erg &lt;= 0)
++			return len;
++		len+=erg;
++	}
++	while (len &lt; count);
++
++	/* Now do the conversion */
++
++	s=(short*)buf;
++
++	/* FIXME: Unsupported */
++	if (bits == 8)
++	{
++		fprintf(stderr, &quot;8 Bits unsupported for now.&quot;);
++		return 0;
++	}
++
++	/* FIXME: Endian? */
++	for (i=0;i&lt;frame_size;i++)
++		sbuf[i]=(short)s[i];
++
++	return frame_size;
++}
++
++int do_encode(int client, int server, esd_format_t format, int speed, char* ident)
++{
++	/* Encoder specific variables */
++	void *enc_state;
++	SpeexBits bits;
++	const SpeexMode* mode = NULL;
++	int frame_size, frame_size2;
++	int seqNr = 0;
++	
++	/* Configuration variables */
++	/* FIXME: Depend on NX setting */
++	int modeID = SPEEX_MODEID_UWB;
++	int complexity=3;
++	
++	/* Encoder initialisation */
++	speex_bits_init(&amp;bits);
++	mode = speex_lib_get_mode (modeID);
++	enc_state=speex_encoder_init(mode);
++	
++	speex_encoder_ctl(enc_state, SPEEX_SET_SAMPLING_RATE, &amp;speed);
++	speex_encoder_ctl(enc_state, SPEEX_SET_COMPLEXITY, &amp;complexity);
++	speex_encoder_ctl(enc_state, SPEEX_GET_FRAME_SIZE, &amp;frame_size);
++
++	frame_size2=frame_size*((format &amp; ESD_STEREO)?2:1);
++	
++	/* Lower the latency */
++	
++	//do_sockopts(client, frame_size2 * (((format &amp; ESD_BITS16)?16:8) / 8) * 4);
++	esd_set_socket_buffers(client, format, speed, 44100);
++	do_sockopts(server, 200);
++
++	/* FIXME: Add denoise */
++
++	/* Main encoding loop */
++
++	while (1)
++	{
++		int nbBytes;
++		int newSeq;
++		short input[MAX_FRAME_SIZE+1];
++		char output[MAX_FRAME_BYTES+1];
++
++		if (do_read_samples(client, input, frame_size2, ((format &amp; ESD_BITS16)?16:8)) != frame_size2)
++			break;
++		
++		speex_bits_reset(&amp;bits); 
++		if (format &amp; ESD_STEREO)
++			speex_encode_stereo_int(input, frame_size, &amp;bits);
++			
++		speex_encode_int(enc_state, input, &amp;bits);
++		nbBytes = speex_bits_write(&amp;bits, output, MAX_FRAME_BYTES);
++	
++		if (write(server, &amp;seqNr, sizeof(seqNr)) != sizeof(seqNr))
++			break;
++		fprintf(stderr, &quot;Encoder SeqNr: %d\n&quot;, seqNr);
++		
++		if (seqNr % DO_SYNC_SEQ == 0)
++		{
++			if (do_read_complete(server, &amp;newSeq, sizeof(newSeq)) != sizeof(newSeq))
++				break;
++			if (seqNr != newSeq)
++				fprintf(stderr,&quot;Warning: Seq Nr mismatch!\n&quot;);
++		}
++
++		seqNr++;
++		if (write(server, &amp;nbBytes, sizeof(nbBytes)) != sizeof(nbBytes))
++			break;
++		if (write(server, output, nbBytes) != nbBytes)
++			break;
++	}
++
++	/* Encoder shutdown */
++	speex_bits_destroy(&amp;bits); 
++
++	speex_encoder_destroy(enc_state);
++
++	return 0;
++}
++
++int do_write_samples(int to, short* sbuf, int frame_size, int bits)
++{
++	unsigned char buf[2*MAX_FRAME_SIZE+1];
++	short *s;
++	int i;	
++	size_t erg, len=0, count=frame_size*(bits/8);
++	
++	s=(short*)buf;
++	
++	/* FIXME: Unsupported */
++	if (bits == 8)
++	{
++		fprintf(stderr, &quot;8 Bits unsupported for now.&quot;);
++		return 0;
++	}
++
++	/* FIXME: Endian? */
++	for (i=0;i&lt;frame_size;i++)
++		s[i]=(short)sbuf[i];
++
++	if (frame_size &gt; 2*MAX_FRAME_SIZE)
++	{
++		fprintf(stderr, &quot;Error: frame_size too big!&quot;);
++		exit(1);
++	}
++	
++	do
++	{
++		erg=write(to, buf+len, count-len);
++		if (erg &lt;= 0)
++			return len;
++		len+=erg;
++	}
++	while (len &lt; count);
++
++	/* Now do the conversion */
++
++	return frame_size;
++}
++
++int do_decode(int client, int server, esd_format_t format, int speed, char* ident)
++{
++	/* Decoder specific variables */
++	void *dec_state;
++	SpeexBits bits;
++	const SpeexMode* mode = NULL;
++	int frame_size, frame_size2;
++	SpeexCallback callback;
++	SpeexStereoState stereo = SPEEX_STEREO_STATE_INIT;
++	
++	/* Configuration variables */
++	/* FIXME: Depend on NX setting and read from network */
++	int modeID = SPEEX_MODEID_UWB;
++	
++	/* Encoder initialisation */
++	speex_bits_init(&amp;bits);
++	mode = speex_lib_get_mode (modeID);
++	dec_state=speex_decoder_init(mode);
++	
++	speex_decoder_ctl(dec_state, SPEEX_SET_SAMPLING_RATE, &amp;speed);
++
++	if (format &amp; ESD_STEREO)
++	{
++		callback.callback_id = SPEEX_INBAND_STEREO;
++		callback.func = speex_std_stereo_request_handler;
++		callback.data = &stereo;
++		speex_decoder_ctl(dec_state, SPEEX_SET_HANDLER, &amp;callback);
++	}
++	speex_decoder_ctl(dec_state, SPEEX_GET_FRAME_SIZE, &amp;frame_size);
++	
++	frame_size2=frame_size*((format &amp; ESD_STEREO)?2:1);
++
++	/* Lower the latency a bit */
++	//do_sockopts(client, 200);
++	do_sockopts(server, frame_size2 * (((format &amp; ESD_BITS16)?16:8) / 8));
++	//esd_set_socket_buffers(server, format, speed, 44100);
++
++	/* Main decoding loop */
++
++	while (1)
++	{
++		int seqNr = 0;
++		int nbBytes;
++		char input[MAX_FRAME_BYTES+1];
++		short output[MAX_FRAME_SIZE+1];
++		
++		if (do_read_complete(client, &amp;seqNr, sizeof(seqNr)) != sizeof(seqNr))
++			break;
++		
++		fprintf(stderr, &quot;SeqNr: %d\n&quot;, seqNr);
++
++		if (seqNr % DO_SYNC_SEQ == 0)
++			if (write(client, &amp;seqNr, sizeof(seqNr)) != sizeof(seqNr))
++				break;
++		
++		if (do_read_complete(client, &amp;nbBytes, sizeof(nbBytes)) != sizeof(nbBytes))
++			break;
++		if (do_read_complete(client, input, nbBytes) != nbBytes)
++			break;
++
++		speex_bits_read_from(&amp;bits, input, nbBytes); 
++		speex_decode_int(dec_state, &amp;bits, output);
++		
++		if (format &amp; ESD_STEREO)
++			speex_decode_stereo_int(output, frame_size, &amp;stereo);
++	
++		if (do_write_samples(server, output, frame_size2, ((format &amp; ESD_BITS16)?16:8)) != frame_size2)
++			break;
++	}
++
++	/* Decoder shutdown */
++	speex_bits_destroy(&amp;bits); 
++
++	speex_decoder_destroy(dec_state);
++
++	return 0;
++}
++
++int do_child(int client, int server, int encode)
++{
++	esd_format_t format;
++	int speed;
++	char ident[ESD_NAME_MAX+1];
++
++	read(client, &amp;format, sizeof(format));
++	read(client, &amp;speed, sizeof(speed));
++	read(client, ident, ESD_NAME_MAX);
++
++	write(server, &amp;format, sizeof(format));
++	write(server, &amp;speed, sizeof(speed));
++	write(server, ident, ESD_NAME_MAX);
++
++	if (encode)
++		return do_encode(client, server, format, speed, ident);
++	else
++		return do_decode(client, server, format, speed, ident);
++	
++	/* Should never get here */
++	
++	return -1;
++}
++
++int main(int argc, char** argv)
++{
++	char buf[255];
++	int reply;
++	int proto;
++	
++	int client=6;
++	int server=7;
++	
++
++        do_fwd(client, server, buf, ESD_KEY_LEN);
++        do_fwd(client, server, buf, sizeof(int));
++
++	do_fwd(server, client, &amp;reply, sizeof(reply));
++	//reply=1;
++	//write(client, &amp;reply, sizeof(reply));
++
++	/* Server will close connection anyway */
++	if (reply != 1)
++		exit(1);
++
++	while (read(client, &amp;proto, sizeof(proto)) == sizeof(proto))
++	{
++		write(server, &amp;proto, sizeof(proto));
++
++		fprintf(stderr, &quot;proto = %d\n&quot;, proto);
++
++	 	switch(proto)
++		{
++			case ESD_PROTO_SERVER_INFO:
++				do_fwd(client, server, buf, sizeof(int));
++				do_fwd(server, client, buf, sizeof(int)+sizeof(esd_format_t)+sizeof(int));
++				break;
++			case ESD_PROTO_LATENCY:
++				do_fwd(server, client, buf, sizeof(int));
++				break;
++			case ESD_PROTO_STREAM_PLAY:
++				do_child(client, server, (argc &gt; 1 &amp;&amp; argv[1][0] == 'e'));
++				exit(0);
++				break;
++			default:
++				close(client);
++				close(server);
++				exit(1);
++		}
++	}
++
++	exit(1);
++}
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000447.html">[Freenx-cvs] r313 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000449.html">[Freenx-cvs] r315 - nx-utils/nxspeex
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#448">[ date ]</a>
+              <a href="thread.html#448">[ thread ]</a>
+              <a href="subject.html#448">[ subject ]</a>
+              <a href="author.html#448">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

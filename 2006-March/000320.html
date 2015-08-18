@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r190 - / freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r190%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200603090223.k292NoIs030580%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000319.html">
+   <LINK REL="Next"  HREF="000321.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r190 - / freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r190%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200603090223.k292NoIs030580%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r190 - / freenx-server/trunk">fabianx at berlios.de
+       </A><BR>
+    <I>Thu Mar  9 03:23:50 CET 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000319.html">[Freenx-cvs] r189 - / freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000321.html">[Freenx-cvs] r191 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#320">[ date ]</a>
+              <a href="thread.html#320">[ thread ]</a>
+              <a href="subject.html#320">[ subject ]</a>
+              <a href="author.html#320">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2006-03-09 03:23:46 +0100 (Thu, 09 Mar 2006)
+New Revision: 190
+
+Modified:
+   /
+   freenx-server/trunk/node.conf.sample
+   freenx-server/trunk/nxloadconfig
+   freenx-server/trunk/nxnode
+Log:
+Added NXSESSIONID to the variables seen by NODE_AUTOSTART.
+
+Changed default for export of NXSESSIONID to &quot;1&quot;. Its not a big secret anyway, as with $DISPLAY one easily can get the ID.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:243
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:244
+
+Modified: freenx-server/trunk/node.conf.sample
+===================================================================
+--- freenx-server/trunk/node.conf.sample	2006-03-09 02:23:21 UTC (rev 189)
++++ freenx-server/trunk/node.conf.sample	2006-03-09 02:23:46 UTC (rev 190)
+@@ -342,7 +342,7 @@
+ 
+ # When set to 1 exports NXUSERIP / NXSESSIONID in nxnode
+ #EXPORT_USERIP=&quot;0&quot;
+-#EXPORT_SESSIONID=&quot;0&quot;
++#EXPORT_SESSIONID=&quot;1&quot;
+ 
+ # This can be set to any executable, which is started after session startup
+ # like: $NODE_AUTOSTART {start|restore}
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2006-03-09 02:23:21 UTC (rev 189)
++++ freenx-server/trunk/nxloadconfig	2006-03-09 02:23:46 UTC (rev 190)
+@@ -171,7 +171,7 @@
+ ENABLE_AUTORECONNECT=&quot;0&quot;
+ ENABLE_AUTORECONNECT_BEFORE_140=&quot;1&quot;
+ EXPORT_USERIP=&quot;0&quot;
+-EXPORT_SESSIONID=&quot;0&quot;
++EXPORT_SESSIONID=&quot;1&quot;
+ NODE_AUTOSTART=&quot;&quot;
+ ENABLE_ROOTLESS_MODE=&quot;1&quot;
+ ENABLE_USESSION=&quot;0&quot;
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2006-03-09 02:23:21 UTC (rev 189)
++++ freenx-server/trunk/nxnode	2006-03-09 02:23:46 UTC (rev 190)
+@@ -753,8 +753,9 @@
+ 
+ if which &quot;$NODE_AUTOSTART&quot; &gt;/dev/null 2&gt;&amp;1
+ then
++	sess_id=&quot;$SERVER_NAME-$display-$uniqueid&quot;
+ 	# go into background immediately
+-	DISPLAY=unix:$display &quot;$NODE_AUTOSTART&quot; &quot;$1&quot; &gt;/dev/null 2&gt;&amp;1 &amp;
++	NXSESSIONID=&quot;$sess_id&quot; DISPLAY=unix:$display &quot;$NODE_AUTOSTART&quot; &quot;$1&quot; &gt;/dev/null 2&gt;&amp;1 &amp;
+ 	# dont't wait for this child!
+ 	disown $!
+ fi
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000319.html">[Freenx-cvs] r189 - / freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000321.html">[Freenx-cvs] r191 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#320">[ date ]</a>
+              <a href="thread.html#320">[ thread ]</a>
+              <a href="subject.html#320">[ subject ]</a>
+              <a href="author.html#320">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

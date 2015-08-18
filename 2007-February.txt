@@ -1,0 +1,5443 @@
+From fabianx at mail.berlios.de  Thu Feb  1 02:22:58 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Thu, 1 Feb 2007 02:22:58 +0100
+Subject: [Freenx-cvs] r310 - in nx-utils: . univprn.drv
+	univprn.drv/SPLFilter-0.0.1
+Message-ID: <200702010122.l111MwUs011154@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-02-01 02:22:55 +0100 (Thu, 01 Feb 2007)
+New Revision: 310
+
+Added:
+   nx-utils/univprn.drv/
+   nx-utils/univprn.drv/SPLFilter-0.0.1/
+   nx-utils/univprn.drv/SPLFilter-0.0.1/ReadMe.txt
+   nx-utils/univprn.drv/SPLFilter-0.0.1/SPLFilter.cpp
+   nx-utils/univprn.drv/SPLFilter-0.0.1/SPLFilter.vcproj
+   nx-utils/univprn.drv/SPLFilter-0.0.1/fpdfdoc.h
+   nx-utils/univprn.drv/SPLFilter-0.0.1/fpdfview.def
+   nx-utils/univprn.drv/SPLFilter-0.0.1/fpdfview.h
+   nx-utils/univprn.drv/SPLFilter-0.0.1/generic.ppd
+   nx-utils/univprn.drv/SPLFilter-0.0.1/spl.h
+   nx-utils/univprn.drv/SPLFilter-0.0.1/stdafx.cpp
+   nx-utils/univprn.drv/SPLFilter-0.0.1/stdafx.h
+   nx-utils/univprn.drv/SPLFilter-0.0.1/wine-emf-bezier-impl.diff
+   nx-utils/univprn.drv/SPLFilter-0.0.1/wine-emf-path-bbox-fillpath.diff
+   nx-utils/univprn.drv/SPLFilter-0.0.1/wine-psdrv-resolution-support.diff
+Log:
+Initial import of a "universal printer driver" for CUPS -> Win printing. (Very early stage)
+
+This is what I have so far, so I commited it.
+
+It might later be possible to use any of the free pdf libraries for windows to do the same, but for now fpdfview.dll 
+seems to be the best solution available. (small EMF files with good quality)
+
+
+
+Added: nx-utils/univprn.drv/SPLFilter-0.0.1/ReadMe.txt
+===================================================================
+--- nx-utils/univprn.drv/SPLFilter-0.0.1/ReadMe.txt	2007-01-31 21:10:57 UTC (rev 309)
++++ nx-utils/univprn.drv/SPLFilter-0.0.1/ReadMe.txt	2007-02-01 01:22:55 UTC (rev 310)
+@@ -0,0 +1,32 @@
++SPLFilter - A universal printer driver for CUPS -> Windows
++----------------------------------------------------------
++
++SPLFilter is now in a very early stage and is for testing only!
++
++And it needs a commercial evaluation .DLL to function at all. 
++(fpdfview.dll)
++
++Apply *.diff patches to wine (0.9.29) and do:
++
++Have a printer called 'FF' with datatype 'raw', 
++which will revert to share/wine/generic.ppd. Or use 'FF' with some other .ppd, 
++which supports multiple Resolutions up to the dpi value you want to use.
++
++(This is needed as reference for GDI drawing functions)
++
++Usage: wine SPLFilter.exe
++
++Input file is testdoc.pdf (Use symlink)
++Output file is: test.spl (Use symlink)
++
++Then you can do:
++
++kprinter test.spl -> CUPS printer with "RAW" smb windows printer.
++
++Hopefully the printer will print the file.
++
++cu
++
++Fabian, January 2007
++
++PS: Wine does not yet embed fonts in EMF, so you might want to try to set resolution a bit higher.
+
+Added: nx-utils/univprn.drv/SPLFilter-0.0.1/SPLFilter.cpp
+===================================================================
+--- nx-utils/univprn.drv/SPLFilter-0.0.1/SPLFilter.cpp	2007-01-31 21:10:57 UTC (rev 309)
++++ nx-utils/univprn.drv/SPLFilter-0.0.1/SPLFilter.cpp	2007-02-01 01:22:55 UTC (rev 310)
+@@ -0,0 +1,369 @@
++// SPLFilter.cpp : Generiert aus PDF Eingangsdaten, SPL/EMF Ausgangsdaten
++//
++// Copyright (c) 2007 by Fabian Franz.
++//
++// License: GPL, v2
++
++#include <windows.h>
++#include "stdafx.h"
++#include "fpdfview.h"
++#include "spl.h"
++
++// Debug?
++//#undef DEBUG
++#define DEBUG 1
++
++// Also print to some printer?
++#undef PRINT
++//#define PRINT 1
++
++// Change and embed DEV MODE structures?
++//#undef EXT_PRINT
++#define EXT_PRINT 1
++
++// Show a print dialog?
++#undef EXT_PRNDLG
++//#define EXT_PRNDLG 1
++
++// Show printer options dialog?
++#undef EXT_PRNOPTS
++//#define EXT_PRNOPTS 1
++
++/* Everything for the main loop is global, because due to a dll-imports bug we have massive stack corruption */
++
++// Variables
++
++FILE *out = NULL;
++char *fbuf = NULL;
++char buf[256];
++DWORD bufSize = 0;
++RECT   rect;
++HDC hMeta;
++HDC hDC;
++HBRUSH brush;
++FPDF_DOCUMENT pdf_doc;
++FPDF_PAGE pdf_page;
++HENHMETAFILE efile;
++int logpixelsx, logpixelsy, size_x, size_y;
++int i;
++
++// DEVMODE
++
++HANDLE hPrinter;
++DEVMODE* lpDevMode = NULL;
++
++// ErrorExit out function
++
++void ErrorExit(LPTSTR lpszFunction) 
++{ 
++    LPVOID lpMsgBuf;
++    LPVOID lpDisplayBuf;
++
++    DWORD dw = GetLastError(); 
++
++    FormatMessage(
++        FORMAT_MESSAGE_ALLOCATE_BUFFER | 
++        FORMAT_MESSAGE_FROM_SYSTEM |
++        FORMAT_MESSAGE_IGNORE_INSERTS,
++        NULL,
++        dw,
++        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
++        (LPTSTR) &lpMsgBuf,
++        0, NULL );
++
++    lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT, 
++        (lstrlen((LPCTSTR)lpMsgBuf)+lstrlen((LPCTSTR)lpszFunction)+40)*sizeof(TCHAR)); 
++    fwprintf(stderr, TEXT("%s failed with error %d: %s"), lpszFunction, dw, lpMsgBuf); 
++    
++    LocalFree(lpMsgBuf);
++    LocalFree(lpDisplayBuf);
++	if (out)
++		fclose(out);
++    ExitProcess(dw); 
++}
++
++// Enumeration function for the enh meta file records.
++
++int CALLBACK enum_it(
++  HDC hDC,                      // handle to DC
++  HANDLETABLE *lpHTable,        // metafile handle table
++  CONST ENHMETARECORD *lpEMFR,  // metafile record
++  int nObj,                     // count of objects
++  LPARAM lpData                 // optional data
++)
++{
++	// Okay, we need to send a StartPage() first
++
++	if (lpEMFR->iType == EMR_HEADER)
++	{
++		PENHMETAHEADER header=(PENHMETAHEADER)lpEMFR;
++
++		bufSize = header->nBytes;
++		
++		// Write "Start of Page" record
++		SMR smr;
++		
++		smr.iType=SRT_PAGE_EMF2;
++		smr.nSize=bufSize;
++
++		fwrite(&smr, sizeof(smr), 1, out);
++
++#ifdef DEBUG
++		fprintf(stderr, "header->nBytes = %d\n", header->nBytes);
++#endif
++	}
++
++	// Write EMF records
++	if (lpEMFR->iType == EMR_EXTTEXTOUTW)
++	{
++		EMREXTTEXTOUTW* emr=(PEMREXTTEXTOUTW)lpEMFR;
++
++		if (emr != NULL && emr->emrtext.nChars > 1)
++		{
++			wchar_t buf[16384];
++
++			if (emr == NULL || emr->emrtext.nChars > 4095)
++				fprintf(stderr, "Error: EMR_EXTTEXTOUTW: Too long\n");
++			else
++			{
++				memcpy(buf, (char*)emr + emr->emrtext.offString, emr->emrtext.nChars * sizeof(WCHAR));
++				buf[emr->emrtext.nChars]='\0';
++				buf[emr->emrtext.nChars+1]='\0';
++#ifdef DEBUG
++				fwprintf(stderr, L"EMR_EXTTEXTOUTW (%d): %s\n", wcslen(buf), buf);
++#endif
++			}
++		}
++	}
++
++#ifdef DEBUG
++	//fprintf(stderr, "Got %d with %u bytes\n", lpEMFR->iType, lpEMFR->nSize);
++#endif
++	
++	// TODO: Implement embedding of fonts
++	fwrite(lpEMFR, 1, lpEMFR->nSize, out);
++	
++	return 1;
++}
++
++int _tmain(int argc, _TCHAR* argv[])
++{
++	// Before we can do anything, we need to unlock the DLL
++	// NOTE: If you are evaluating FOXIT READER SDK, you don?t need unlock the DLL,
++	// then evaluation marks will be shown with all rendered pages.
++	FPDF_UnlockDLL("license_id", "unlock_code");
++
++	// first, load the document (no password specified)
++	pdf_doc = FPDF_LoadDocument("testdoc.pdf", NULL);
++
++	// error handling
++	if (pdf_doc == NULL) 
++	{
++		fprintf(stderr, "ERROR - doc\n");
++		exit(1);
++	}
++
++	// Open the out file
++	
++	fopen_s(&out, "test.spl", "wb");
++
++	// Send the StartDoc header
++	
++	wchar_t* dname = L"desktop.ini - Editor";
++	wchar_t* prn = L"c:\\output.prn";
++	
++	{
++
++	if (wcsnlen(dname, 255) == 255)
++		ErrorExit(L"dname too long");
++	if (wcsnlen(prn, 255) == 255)
++		ErrorExit(L"prn too long");
++
++	SPL_HEADER spl;
++
++	spl.SIGNATURE=SPLMETA_SIGNATURE;
++	spl.nSize=(DWORD)sizeof(spl)+wcslen(dname)*2+wcslen(prn)*2+4; // +4, because \0\0 is after dname and prn
++	spl.offDocumentName=(DWORD)sizeof(spl);
++	spl.offPort=(DWORD)sizeof(spl)+wcslen(dname)*2+2; // +2 because \0\0 is after dname
++	
++	fwrite(&spl, sizeof(spl), 1, out);
++	
++	fwrite(dname, wcslen(dname)*2, 1, out);
++	fwrite("\0\0", 2, 1, out);
++
++	fwrite(prn, wcslen(prn)*2, 1, out);
++	fwrite("\0\0", 2, 1, out);
++	}
++
++	// Load the first page and calculate the bbox
++	// based on the printer margins
++
++	pdf_page = FPDF_LoadPage(pdf_doc, 0);
++	if (pdf_page == NULL)
++		ErrorExit(L"FPDF_LoadPage");
++
++	double page_width, page_height;
++    
++	page_width = FPDF_GetPageWidth(pdf_page);
++    page_height = FPDF_GetPageHeight(pdf_page);
++
++#ifdef EXT_PRINT
++#ifdef EXT_PRNDLG
++	PRINTDLG pd;
++	HWND hwnd = NULL;
++
++	// Initialize PRINTDLG
++	ZeroMemory(&pd, sizeof(pd));
++	pd.lStructSize = sizeof(pd);
++	pd.hwndOwner   = hwnd;
++	pd.hDevMode    = NULL;     // Don't forget to free or store hDevMode
++	pd.hDevNames   = NULL;     // Don't forget to free or store hDevNames
++	pd.Flags       = PD_USEDEVMODECOPIESANDCOLLATE | PD_RETURNDC; 
++	pd.nCopies     = 1;
++	pd.nFromPage   = 0xFFFF; 
++	pd.nToPage     = 0xFFFF; 
++	pd.nMinPage    = 1; 
++	pd.nMaxPage    = 0xFFFF; 
++	
++
++	if (PrintDlg(&pd) != TRUE)
++		ErrorExit(L"PrintDialog\n");
++
++	hDC = pd.hDC;
++#else
++	wchar_t* printer=L"FF";
++	if (!OpenPrinter(printer, &hPrinter, NULL))
++		ErrorExit(L"OpenPrinter\n");
++    DWORD dwNeeded = DocumentProperties(NULL, hPrinter, printer, NULL, NULL, 0);
++    lpDevMode = (LPDEVMODE)malloc(dwNeeded);
++	
++	DocumentProperties(NULL, hPrinter, printer, lpDevMode, NULL, DM_OUT_BUFFER);
++	/* Try to set a higher print quality */
++	lpDevMode->dmPrintQuality=1200;
++	lpDevMode->dmFields|=DM_PRINTQUALITY;
++	DocumentProperties(NULL, hPrinter, printer, lpDevMode, lpDevMode, DM_IN_BUFFER | DM_OUT_BUFFER);
++#ifdef EXT_PRNOPTS
++	DocumentProperties(NULL, hPrinter, printer, lpDevMode, lpDevMode, DM_IN_BUFFER | DM_PROMPT | DM_OUT_BUFFER);
++#endif
++	hDC = CreateDC(L"WINEPS.DRV", printer, NULL, lpDevMode);
++
++	ClosePrinter(&hPrinter);
++#endif
++#else
++	hDC = CreateDC(L"WINEPS.DRV", L"FF", NULL, lpDevMode);
++#endif
++
++	
++#ifdef PRINT
++	DOCINFO doc_info;
++
++	doc_info.cbSize=sizeof(DOCINFO)+12;
++	doc_info.lpszDocName=dname;
++	doc_info.lpszOutput=prn;
++	doc_info.lpszDatatype=NULL;
++	doc_info.fwType=0;
++
++	// Start a printer job
++	StartDoc(hDC, &doc_info);
++#endif
++	
++	// get number of pixels per inch (horizontally and vertically)
++	logpixelsx = GetDeviceCaps(hDC, LOGPIXELSX);
++	logpixelsy = GetDeviceCaps(hDC, LOGPIXELSY);
++	
++	// convert points into pixels
++	size_x = (int)page_width / 72 * logpixelsx;
++	size_y = (int)page_height / 72 * logpixelsy;
++
++	DWORD p_width =GetDeviceCaps(hDC, HORZSIZE)*100;
++	DWORD p_height=GetDeviceCaps(hDC, VERTSIZE)*100;
++
++	SetRect( &rect, 0, 0, p_width, p_height );
++
++#ifdef DEBUG
++	//fprintf(stderr, "x=%u, y=%u, pw=%u, ph=%u,sx=%u,sy=%u,lpx=%u,lpy=%u,size_x=%u,size_y=%u\n",x,y,page_width,page_height,sx,sy,logpixelsx,logpixelsy,size_x,size_y);
++#endif
++
++	// now load the pages one after another
++
++	for (i=0; i < FPDF_GetPageCount(pdf_doc); i++)
++	{
++#ifdef DEBUG
++		fprintf(stderr, "Load page %d/%d\n", i, FPDF_GetPageCount(pdf_doc));
++#endif
++
++		// Load the next page
++
++		pdf_page = FPDF_LoadPage(pdf_doc, i);
++		
++		if (pdf_page == NULL)
++			ErrorExit(L"FPDF_LoadPage");
++	
++		fbuf=NULL;
++#ifdef DEBUG
++		sprintf_s(buf, 255, "test-%d.emf", i);
++		//fbuf=buf;
++#endif
++
++		// Create a metafile to render to
++
++		hMeta = CreateEnhMetaFileA(hDC, 
++	          fbuf, 
++	          &rect, "SPLFilter.exe\0Created by Fabian\0\0");
++
++		if (hMeta == NULL)
++			ErrorExit(L"CreateEnhMetaFileA");
++
++	 	// Call FPDF_RenderPage function to render the whole page
++		FPDF_RenderPage(hMeta, pdf_page, 0, 0, size_x, size_y, 0, 0);
++
++#ifdef PRINT
++		// Start a new printing page
++		StartPage(hDC);
++		FPDF_RenderPage(hDC, pdf_page, 0, 0, size_x, size_y, 0, 0);
++		EndPage(hDC);
++#endif
++
++		// Close PDF page
++
++		FPDF_ClosePage(pdf_page);
++
++		efile=CloseEnhMetaFile(hMeta);
++
++		if (efile == NULL)
++			ErrorExit(L"CloseEnhMetaFile");
++
++		// Write EMF data - via enumeration, because we want to embed fonts later
++	    EnumEnhMetaFile(hDC, efile, enum_it, NULL, &rect);
++
++		// Write EndPage() record
++		{
++		SMR_EOPAGE smr_eopage;
++		
++		smr_eopage.smrext.smr.iType=SRT_EXT_EOPAGE_VECTOR;
++		smr_eopage.smrext.smr.nSize=sizeof(smr_eopage)-sizeof(smr_eopage.smrext.smr);
++
++		/* FIXME: Need to calcualte low and high correctly */
++		smr_eopage.smrext.DistanceLow=bufSize+smr_eopage.smrext.smr.nSize;
++		smr_eopage.smrext.DistanceHigh=0;
++
++		fwrite(&smr_eopage, sizeof(smr_eopage), 1, out);
++		}
++		
++		DeleteEnhMetaFile(efile);
++	}
++#ifdef PRINT
++	EndDoc(hDC);
++#endif
++
++	fclose(out);
++	out=NULL;
++	DeleteDC(hDC);
++	FPDF_CloseDocument(pdf_doc);
++
++#ifdef DEBUG
++	fprintf(stderr, "SPLFilter: Conversion successful!\n");
++#endif
++	exit(0);
++}
++
+
+Added: nx-utils/univprn.drv/SPLFilter-0.0.1/SPLFilter.vcproj
+===================================================================
+--- nx-utils/univprn.drv/SPLFilter-0.0.1/SPLFilter.vcproj	2007-01-31 21:10:57 UTC (rev 309)
++++ nx-utils/univprn.drv/SPLFilter-0.0.1/SPLFilter.vcproj	2007-02-01 01:22:55 UTC (rev 310)
+@@ -0,0 +1,222 @@
++<?xml version="1.0" encoding="Windows-1252"?>
++<VisualStudioProject
++	ProjectType="Visual C++"
++	Version="8,00"
++	Name="SPLFilter"
++	ProjectGUID="{351E5640-B64A-48E8-A202-EFED4ABF8C1E}"
++	RootNamespace="DLLTest"
++	Keyword="Win32Proj"
++	>
++	<Platforms>
++		<Platform
++			Name="Win32"
++		/>
++	</Platforms>
++	<ToolFiles>
++	</ToolFiles>
++	<Configurations>
++		<Configuration
++			Name="Debug|Win32"
++			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
++			IntermediateDirectory="$(ConfigurationName)"
++			ConfigurationType="1"
++			CharacterSet="1"
++			>
++			<Tool
++				Name="VCPreBuildEventTool"
++			/>
++			<Tool
++				Name="VCCustomBuildTool"
++			/>
++			<Tool
++				Name="VCXMLDataGeneratorTool"
++			/>
++			<Tool
++				Name="VCWebServiceProxyGeneratorTool"
++			/>
++			<Tool
++				Name="VCMIDLTool"
++			/>
++			<Tool
++				Name="VCCLCompilerTool"
++				Optimization="0"
++				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
++				MinimalRebuild="true"
++				BasicRuntimeChecks="3"
++				RuntimeLibrary="0"
++				UsePrecompiledHeader="0"
++				WarningLevel="3"
++				Detect64BitPortabilityProblems="true"
++				DebugInformationFormat="4"
++			/>
++			<Tool
++				Name="VCManagedResourceCompilerTool"
++			/>
++			<Tool
++				Name="VCResourceCompilerTool"
++			/>
++			<Tool
++				Name="VCPreLinkEventTool"
++			/>
++			<Tool
++				Name="VCLinkerTool"
++				AdditionalDependencies="kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib fpdfview.lib $(NoInherit)"
++				LinkIncremental="2"
++				DelayLoadDLLs=""
++				GenerateDebugInformation="true"
++				SubSystem="1"
++				TargetMachine="1"
++			/>
++			<Tool
++				Name="VCALinkTool"
++			/>
++			<Tool
++				Name="VCManifestTool"
++			/>
++			<Tool
++				Name="VCXDCMakeTool"
++			/>
++			<Tool
++				Name="VCBscMakeTool"
++			/>
++			<Tool
++				Name="VCFxCopTool"
++			/>
++			<Tool
++				Name="VCAppVerifierTool"
++			/>
++			<Tool
++				Name="VCWebDeploymentTool"
++			/>
++			<Tool
++				Name="VCPostBuildEventTool"
++			/>
++		</Configuration>
++		<Configuration
++			Name="Release|Win32"
++			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
++			IntermediateDirectory="$(ConfigurationName)"
++			ConfigurationType="1"
++			CharacterSet="1"
++			WholeProgramOptimization="1"
++			>
++			<Tool
++				Name="VCPreBuildEventTool"
++			/>
++			<Tool
++				Name="VCCustomBuildTool"
++			/>
++			<Tool
++				Name="VCXMLDataGeneratorTool"
++			/>
++			<Tool
++				Name="VCWebServiceProxyGeneratorTool"
++			/>
++			<Tool
++				Name="VCMIDLTool"
++			/>
++			<Tool
++				Name="VCCLCompilerTool"
++				Optimization="0"
++				WholeProgramOptimization="false"
++				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
++				RuntimeLibrary="2"
++				UsePrecompiledHeader="0"
++				WarningLevel="3"
++				Detect64BitPortabilityProblems="true"
++				DebugInformationFormat="3"
++			/>
++			<Tool
++				Name="VCManagedResourceCompilerTool"
++			/>
++			<Tool
++				Name="VCResourceCompilerTool"
++			/>
++			<Tool
++				Name="VCPreLinkEventTool"
++			/>
++			<Tool
++				Name="VCLinkerTool"
++				AdditionalDependencies="kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib fpdfview.lib $(NoInherit)"
++				LinkIncremental="1"
++				GenerateDebugInformation="true"
++				SubSystem="1"
++				OptimizeReferences="2"
++				EnableCOMDATFolding="2"
++				TargetMachine="1"
++			/>
++			<Tool
++				Name="VCALinkTool"
++			/>
++			<Tool
++				Name="VCManifestTool"
++			/>
++			<Tool
++				Name="VCXDCMakeTool"
++			/>
++			<Tool
++				Name="VCBscMakeTool"
++			/>
++			<Tool
++				Name="VCFxCopTool"
++			/>
++			<Tool
++				Name="VCAppVerifierTool"
++			/>
++			<Tool
++				Name="VCWebDeploymentTool"
++			/>
++			<Tool
++				Name="VCPostBuildEventTool"
++			/>
++		</Configuration>
++	</Configurations>
++	<References>
++	</References>
++	<Files>
++		<Filter
++			Name="Quelldateien"
++			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
++			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
++			>
++			<File
++				RelativePath=".\SPLFilter.cpp"
++				>
++			</File>
++			<File
++				RelativePath=".\stdafx.cpp"
++				>
++			</File>
++		</Filter>
++		<Filter
++			Name="Headerdateien"
++			Filter="h;hpp;hxx;hm;inl;inc;xsd"
++			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
++			>
++			<File
++				RelativePath=".\fpdfview.h"
++				>
++			</File>
++			<File
++				RelativePath=".\spl.h"
++				>
++			</File>
++			<File
++				RelativePath=".\stdafx.h"
++				>
++			</File>
++		</Filter>
++		<Filter
++			Name="Ressourcendateien"
++			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
++			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
++			>
++		</Filter>
++		<File
++			RelativePath=".\ReadMe.txt"
++			>
++		</File>
++	</Files>
++	<Globals>
++	</Globals>
++</VisualStudioProject>
+
+Added: nx-utils/univprn.drv/SPLFilter-0.0.1/fpdfdoc.h
+===================================================================
+--- nx-utils/univprn.drv/SPLFilter-0.0.1/fpdfdoc.h	2007-01-31 21:10:57 UTC (rev 309)
++++ nx-utils/univprn.drv/SPLFilter-0.0.1/fpdfdoc.h	2007-02-01 01:22:55 UTC (rev 310)
+@@ -0,0 +1,285 @@
++// FPDFDOC.H - Header file for FPDFDOC module - a part of Foxit Reader SDK
++// Copyright (c) 2005 Foxit Software Company, All Right Reserved.
++
++// Revision: 0.1
++// Date: 2005-10-19
++
++#ifndef _FPDFDOC_H_
++#define _FPDFDOC_H_
++
++#ifndef _FPDFVIEW_H_
++#include "fpdfview.h"
++#endif
++
++// Data types
++typedef void* FPDF_BOOKMARK;
++typedef void* FPDF_DEST;
++typedef void* FPDF_ACTION;
++typedef void* FPDF_LINK;
++
++typedef unsigned short FPDF_WCHAR;
++
++// Exported Functions
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++// Function: FPDFBookmark_GetFirstChild
++//			Get first child of a bookmark item, or first top level bookmark item
++// Parameters: 
++//			document	-	Handle to the document. Returned by FPDF_LoadDocument or FPDF_LoadMemDocument
++//			bookmark	-	Handle to the current bookmark. Can be NULL if you want to get the first top level item
++// Return value:
++//			Handle to the first child or top level bookmark item. NULL if no child or top level bookmark found.
++//
++__declspec(dllimport)  FPDF_BOOKMARK STDCALL FPDFBookmark_GetFirstChild(FPDF_DOCUMENT document, FPDF_BOOKMARK bookmark);
++
++// Function: FPDFBookmark_GetNextSibling
++//			Get next bookmark item on the same level
++// Parameters: 
++//			document	-	Handle to the document. Returned by FPDF_LoadDocument or FPDF_LoadMemDocument
++//			bookmark	-	Handle to the current bookmark. Cannot be NULL.
++// Return value:
++//			Handle to the next bookmark item on the same level. NULL if this is the last bookmark on this level.
++//
++__declspec(dllimport)  FPDF_BOOKMARK STDCALL FPDFBookmark_GetNextSibling(FPDF_DOCUMENT document, FPDF_BOOKMARK bookmark);
++
++// Function: FPDFBookmark_Find
++//			Find a bookmark in the document, using the bookmark title
++// Parameters: 
++//			document	-	Handle to the document. Returned by FPDF_LoadDocument or FPDF_LoadMemDocument
++//			title		-	The Unicode string (UTF-16LE encoded) for the bookmark title. Can't be NULL.
++// Return value:
++//			Handle to the found bookmark item. NULL if the title can't be found.
++// Comments:
++//			It always returns the first found bookmark if more than one bookmarks have the same title.
++//
++__declspec(dllimport)  FPDF_BOOKMARK STDCALL FPDFBookmark_Find(FPDF_DOCUMENT document, const FPDF_WCHAR* title);
++
++// Function: FPDFBookmark_GetColorRef
++//			Get designated color of a bookmark item
++// Parameters:
++//			bookmark	-	Handle to the bookmark
++// Return value:
++//			A COLORREF value (0x00ggbbrr) for the bookmark item.
++//
++__declspec(dllimport)  unsigned long STDCALL FPDFBookmark_GetColorRef(FPDF_BOOKMARK bookmark);
++
++// Bookmark font styles
++#define PDFBOOKMARK_NORMAL			0
++#define PDFBOOKMARK_ITALIC			1
++#define PDFBOOKMARK_BOLD			2
++#define PDFBOOKMARK_BOLDITALIC		3
++
++// Function: FPDFBookmark_GetFontStyle
++//			Get designated font style for a bookmark item
++// Parameters:
++//			bookmark	-	Handle to the bookmark
++// Return value:
++//			A number indicating the font style, as defined above
++//
++__declspec(dllimport)  unsigned long STDCALL FPDFBookmark_GetFontStyle(FPDF_BOOKMARK bookmark);
++
++// Function: FPDFBookmark_GetTitle
++//			Get title of a bookmark
++// Parameters:
++//			bookmark	-	Handle to the bookmark
++//			buffer		-	A buffer for output the title. Can be NULL.
++//			buflen		-	The length of the buffer, number of bytes. Can be 0.
++// Return value:
++//			Number of bytes the title consumes, including trailing zeroes.
++// Comments:
++//			The title is always output in UTF-16LE encoding, which means the buffer can be regarded as
++//			an array of WORD (on Intel and compatible CPUs), each WORD represent the Unicode of a character.
++//			The string is followed by two bytes of zero indicating end of the string.
++//			It's up to the application to convert the Unicode string to local encoded string, if necessary.
++//
++//			The return value always indicated number of bytes required for the buffer, even when there is
++//			no buffer specified, or the buffer size is less then required. In this case, the buffer will not
++//			be modified.
++//
++__declspec(dllimport)  unsigned long STDCALL FPDFBookmark_GetTitle(FPDF_BOOKMARK bookmark, void* buffer, unsigned long buflen);
++
++// Function: FPDFBookmark_GetAction
++//			Get the action associated with a bookmark item
++// Parameters:
++//			bookmark	-	Handle to the bookmark
++// Return value:
++//			Handle to the action data. NULL if no action is associated with this bookmark. In this case, the 
++//			application should try FPDFBookmark_GetDest
++//
++__declspec(dllimport)  FPDF_ACTION STDCALL FPDFBookmark_GetAction(FPDF_BOOKMARK bookmark);
++
++// Function: FPDFBookmark_GetDest
++//			Get the destination associated with a bookmark item
++// Parameters:
++//			document	-	Handle to the document
++//			bookmark	-	Handle to the bookmark
++// Return value:
++//			Handle to the destination data. NULL if no destination is associated with this bookmark
++//
++__declspec(dllimport)  FPDF_DEST STDCALL FPDFBookmark_GetDest(FPDF_DOCUMENT document, FPDF_BOOKMARK bookmark);
++
++#define PDFACTION_UNSUPPORTED		0		// Unsupported action type
++#define PDFACTION_GOTO				1		// Go to a destination within current document
++#define PDFACTION_REMOTEGOTO		2		// Go to a destination within another document
++#define PDFACTION_URI				3		// Universal Resource Identifier, including web pages and 
++											// other Internet based resources
++#define PDFACTION_LAUNCH			4		// Launch an application or open a file
++
++// Function: FPDFAction_GetType
++//			Get type of an action
++// Parameters:
++//			action		-	Handle to the action
++// Return value:
++//			A type number as defined above.
++//
++__declspec(dllimport)  unsigned long STDCALL FPDFAction_GetType(FPDF_ACTION action);
++
++// Function: FPDFAction_GetFilePath
++//			Get file path of an remote goto action
++// Parameters:
++//			action		-	Handle to the action. Must be a RMEOTEGOTO or LAUNCH action
++//			buffer		-	A buffer for output the title. Can be NULL.
++//			buflen		-	The length of the buffer, number of bytes. Can be 0.
++// Return value:
++//			Number of bytes the file path consumes, including trailing zero.
++// Comments:
++//			The file path is output in local encoding.
++// 
++//			The return value always indicated number of bytes required for the buffer, even when there is
++//			no buffer specified, or the buffer size is less then required. In this case, the buffer will not
++//			be modified.
++//
++__declspec(dllimport)  unsigned long STDCALL FPDFAction_GetFilePath(FPDF_ACTION action, void* buffer, unsigned long buflen);
++
++// Function: FPDFAction_GetDest
++//			Get destination of an action
++// Parameters:
++//			document	-	Handle to the document.
++//			action		-	Handle to the action. It must be a GOTO or REMOTEGOTO action.
++// Return value:
++//			Handle to the destination data.
++// Comments:
++//			In case of remote goto action, the application should first use FPDFAction_GetFilePath to
++//			get file path, then load that particular document, and use its document handle to call this
++//			function.
++//
++__declspec(dllimport)  FPDF_DEST STDCALL FPDFAction_GetDest(FPDF_DOCUMENT document, FPDF_ACTION action);
++
++// Function: FPDFAction_GetURIPath
++//			Get URI path of a URI action
++// Parameters:
++//			document	-	Handle to the document.
++//			action		-	Handle to the action. Must be a URI action
++//			buffer		-	A buffer for output the title. Can be NULL.
++//			buflen		-	The length of the buffer, number of bytes. Can be 0.
++// Return value:
++//			Number of bytes the URI path consumes, including trailing zero.
++// Comments:
++//			The URI path is always encoded in 7-bit ASCII.
++// 
++//			The return value always indicated number of bytes required for the buffer, even when there is
++//			no buffer specified, or the buffer size is less then required. In this case, the buffer will not
++//			be modified.
++//
++__declspec(dllimport)  unsigned long STDCALL FPDFAction_GetURIPath(FPDF_DOCUMENT document, FPDF_ACTION action,
++													  void* buffer, unsigned long buflen);
++
++// Function: FPDFDest_GetPageIndex
++//			Get page index of a destination
++// Parameters:
++//			document	-	Handle to the document
++//			dest		-	Handle to the destination
++// Return value:
++//			The page index. Starting from 0 for the first page.
++//
++__declspec(dllimport)  unsigned long STDCALL FPDFDest_GetPageIndex(FPDF_DOCUMENT document, FPDF_DEST dest);
++
++// Zoom modes
++#define PDFZOOM_XYZ				1			// zoom level with specified offset
++#define PDFZOOM_FITPAGE			2			// fit both the width and height of the page (whichever smaller)
++#define PDFZOOM_FITHORZ			3			// fit the page width
++#define PDFZOOM_FITVERT			4			// fit the page height
++#define PDFZOOM_FITRECT			5			// fit a specific rectangle area within the window
++
++// Function: FPDFDest_GetZoomMode
++//			Get the designated zoom mode of a destination
++// Parameters:
++//			dest		-	Handle to the destination
++// Return value:
++//			The zoom mode as defined above.
++//
++__declspec(dllimport)  unsigned long STDCALL FPDFDest_GetZoomMode(FPDF_DEST dest);
++
++// Function: FPDFDest_GetZoomParam
++//			Get zoom parameters
++// Parameters:
++//			dest		-	Handle to the destination
++//			param		-	Index of the parameter, starting with zero (see comments below)
++// Return value:
++//			A float number for the zoom parameter.
++// Comments:
++//			Different zoom mode has different parameters. Here is a list:
++//			XYZ				three parameters: x, y position in the page and the zoom ratio (0 for not specified);
++//			FITPAGE			no parameters;
++//			FITHORZ			one parameter: the top margin of the page
++//			FITVERT			one parameter: the left margin of the page
++//			FITRECT			four parameters: the left, top, right, bottom margin of the fitting rectangle.
++//							Use 0-3 as parameter index for them, respectively.
++//
++__declspec(dllimport)  double STDCALL FPDFDest_GetZoomParam(FPDF_DEST dest, int param);
++
++// Function: FPDFLink_GetLinkAtPoint
++//			Find a link at specified point on a document page
++// Parameters:
++//			page		-	Handle to the document page
++//			x			-	The x coordination of the point, specified in page coordination system.
++//			y			-	The y coordination of the point, specified in page coordination system.
++// Return value:
++//			Handle to the link. NULL if no link at that point found.
++// Comments:
++//			The point coordinations are specified in page coordination system. You can convert coordinations 
++//			from screen system to page system using FPDF_DeviceToPage functions.
++//
++__declspec(dllimport)  FPDF_LINK STDCALL FPDFLink_GetLinkAtPoint(FPDF_PAGE page, double x, double y);
++
++// Function: FPDFLink_GetDest
++//			Get destination info of a link
++// Parameters:
++//			document	-	Handle to the document
++//			link		-	Handle to the link. Returned by FPDFLink_GetLinkAtPoint
++// Return value:
++//			Handle to the destination. NULL if there is no destination associated with the link, in this case
++//			the application should try FPDFLink_GetAction
++//
++__declspec(dllimport)  FPDF_DEST STDCALL FPDFLink_GetDest(FPDF_DOCUMENT document, FPDF_LINK link);
++
++// Function: FPDFLink_GetAction
++//			Get action info of a link
++// Parameters:
++//			link		-	Handle to the link.
++// Return value:
++//			Handle to the action. NULL if there is no action associated with the link.
++//
++__declspec(dllimport)  FPDF_ACTION STDCALL FPDFLink_GetAction(FPDF_LINK link);
++
++// Function: FPDF_GetThumbnail
++//			Get stored thumbnail image of a page
++// Parameters:
++//			page		-	Handle to a page.
++// Return value:
++//			Handle to a Windows bitmap storing the thumbnail. NULL if no thumbnail is stored for this page.
++// Comments:
++//			If no thumbnail is stored for a page, the application can render the page into a small bitmap for thumbnail.
++//			The application should free the image with DeleteObject WIN32 function, when it's done with the thumbnail.
++//
++//			NOTE: This function is not supported on Windows CE.
++//
++__declspec(dllimport)  HBITMAP STDCALL FPDF_GetPageThumbnail(FPDF_PAGE page);
++
++#ifdef __cplusplus
++};
++#endif
++
++#endif	// _FPDFDOC_H_
+\ No newline at end of file
+
+Added: nx-utils/univprn.drv/SPLFilter-0.0.1/fpdfview.def
+===================================================================
+--- nx-utils/univprn.drv/SPLFilter-0.0.1/fpdfview.def	2007-01-31 21:10:57 UTC (rev 309)
++++ nx-utils/univprn.drv/SPLFilter-0.0.1/fpdfview.def	2007-02-01 01:22:55 UTC (rev 310)
+@@ -0,0 +1,16 @@
++; fpdfview.def : Declares the module parameters for the DLL.
++
++LIBRARY      "fpdfview"
++
++EXPORTS
++        FPDF_CloseDocument @29
++        FPDF_ClosePage @30
++        FPDF_GetLastError @33
++        FPDF_GetPageCount @34
++        FPDF_GetPageHeight @35
++        FPDF_GetPageWidth @38
++        FPDF_LoadDocument @40
++        FPDF_LoadMemDocument @41
++        FPDF_LoadPage @42
++        FPDF_RenderPage @44
++        FPDF_UnlockDLL @47
+
+Added: nx-utils/univprn.drv/SPLFilter-0.0.1/fpdfview.h
+===================================================================
+--- nx-utils/univprn.drv/SPLFilter-0.0.1/fpdfview.h	2007-01-31 21:10:57 UTC (rev 309)
++++ nx-utils/univprn.drv/SPLFilter-0.0.1/fpdfview.h	2007-02-01 01:22:55 UTC (rev 310)
+@@ -0,0 +1,381 @@
++// FPDFVIEW.H - Header file for FPDFVIEW component
++// Copyright (c) 2004-2005 Foxit Software Company, All Right Reserved.
++
++// Revision: 1.4
++// Date: 2005-12-15
++
++#ifndef _FPDFVIEW_H_
++#define _FPDFVIEW_H_
++
++// Data types
++typedef void* FPDF_DOCUMENT;
++typedef void* FPDF_PAGE;
++typedef void* FPDF_BITMAP;
++
++// String types
++// FPDFSDK may use three types of strings: byte string, wide string (UTF-16LE encoded), and platform dependant string
++typedef const char* FPDF_BYTESTRING;
++
++typedef const unsigned short* FPDF_WIDESTRING;		// Foxit PDF SDK always use UTF-16LE encoding wide string,
++													// each character use 2 bytes (except surrogation), with low byte first.
++
++// For Windows programmers: for most case it's OK to treat FPDF_WIDESTRING as Windows unicode string,
++//		 however, special care needs to be taken if you expect to process Unicode larger than 0xffff.
++// For Linux/Unix programmers: most compiler/library environment uses 4 bytes for a Unicode character,
++//		you have to convert between FPDF_WIDESTRING and system wide string by yourself.
++
++#ifdef _WIN32_WCE
++typedef const unsigned short* FPDF_STRING;
++#else
++typedef const char* FPDF_STRING;
++#endif
++
++#ifdef _WIN32
++// On Windows system, functions are exported in a DLL
++#define DLLEXPORT __declspec( dllexport )
++#define STDCALL 
++//__stdcall
++#else
++#define DLLEXPORT
++#define STDCALL
++#endif
++
++// Exported Functions
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++// Function: FPDF_UnlockDLL
++//			Unlock the DLL using license key info received from Foxit
++// Parameters: 
++//			license_id	-	A string received from Foxit identifying the SDK license
++//			unlock_code	-	A string received from Foxit for unlocking the DLL
++// Return value:
++//			None
++// Comments:
++//			For SDK evaluators, this function call is not required, then all
++//			rendered pages will come with an evaluation mark.
++//			For purchased SDK customers, this should be the first function
++//			to call before any other functions to be called.
++//
++DLLEXPORT void STDCALL FPDF_UnlockDLL(const char* license_id, const char* unlock_code);
++
++// Function: FPDF_LoadDocument
++//			Open and load a PDF document.
++// Parameters: 
++//			file_path	-	Path to the PDF file (including extension)
++//			password	-	A string used as the password for PDF file. 
++//							If no password needed, empty or NULL can be used.
++// Return value:
++//			A handle to the loaded document. If failed, NULL is returned.
++// Comments:
++//			Loaded document can be closed by FPDF_CloseDocument.
++//			If this function fails, you can use FPDF_GetLastError() to retrieve
++//			the reason why it fails.
++//
++DLLEXPORT FPDF_DOCUMENT	STDCALL FPDF_LoadDocument(FPDF_STRING file_path, 
++												  FPDF_BYTESTRING password);
++
++// Function: FPDF_LoadMemDocument
++//			Open and load a PDF document from memory.
++// Parameters: 
++//			data_buf	-	Pointer to a buffer containing the PDF document
++//			size		-	Number of bytes in the PDF document
++//			password	-	A string used as the password for PDF file. 
++//							If no password needed, empty or NULL can be used.
++// Return value:
++//			A handle to the loaded document. If failed, NULL is returned.
++// Comments:
++//			The memory buffer must remain valid when the document is open.
++//			Loaded document can be closed by FPDF_CloseDocument.
++//			If this function fails, you can use FPDF_GetLastError() to retrieve
++//			the reason why it fails.
++//
++DLLEXPORT FPDF_DOCUMENT	STDCALL FPDF_LoadMemDocument(const void* data_buf, 
++											int size, FPDF_BYTESTRING password);
++
++#define FPDF_ERR_SUCCESS		0		// no error
++#define FPDF_ERR_UNKNOWN		1		// unknown error
++#define FPDF_ERR_FILE			2		// file not found or could not be opened
++#define FPDF_ERR_FORMAT			3		// file not in PDF format or corrupted
++#define FPDF_ERR_PASSWORD		4		// password required or incorrect password
++#define FPDF_ERR_SECURITY		5		// unsupported security scheme
++#define FPDF_ERR_PAGE			6		// page not found or content error
++
++// Function: FPDF_GetLastError
++//			Get last error code when an SDK function failed
++// Parameters: 
++//			None
++// Return value:
++//			A 32-bit integer indicating error codes (defined above).
++// Comments:
++//			If the previous SDK call succeeded, the return value of this function
++//			is not defined.
++//
++DLLEXPORT unsigned long	STDCALL FPDF_GetLastError();
++
++// Function: FPDF_GetDocPermission
++//			Get file permission flags of the document.
++// Parameters: 
++//			document	-	Handle to document. Returned by FPDF_LoadDocument function.
++// Return value:
++//			A 32-bit integer indicating permission flags. Please refer to PDF Reference for
++//			detailed description. If the document is not protected, 0xffffffff will be returned.
++//
++DLLEXPORT unsigned long	STDCALL FPDF_GetDocPermissions(FPDF_DOCUMENT document);
++
++// Function: FPDF_GetPageCount
++//			Get total number of pages in a document.
++// Parameters: 
++//			document	-	Handle to document. Returned by FPDF_LoadDocument function.
++// Return value:
++//			total number of pages in the document.
++//
++DLLEXPORT int STDCALL FPDF_GetPageCount(FPDF_DOCUMENT document);
++
++// Function: FPDF_LoadPage
++//			Load a page inside a document.
++// Parameters: 
++//			document	-	Handle to document. Returned by FPDF_LoadDocument function.
++//			page_index	-	Index number of the page. 0 for the first page.
++// Return value:
++//			A handle to the loaded page. If failed, NULL is returned.
++// Comments:
++//			Loaded page can be rendered to devices using FPDF_RenderPage function.
++//			Loaded page can be closed by FPDF_CloseDocument.
++//
++DLLEXPORT FPDF_PAGE	STDCALL FPDF_LoadPage(FPDF_DOCUMENT document, int page_index);
++
++// Function: FPDF_GetPageWidth
++//			Get page width
++// Parameters:
++//			page		-	Handle to the page. Returned by FPDF_LoadPage function.
++// Return value:
++//			Page width (excluding non-displayable area) measured in points.
++//			One point is 1/72 inch (around 0.3528 mm)
++//
++DLLEXPORT double STDCALL FPDF_GetPageWidth(FPDF_PAGE page);
++
++// Function: FPDF_GetPageHeight
++//			Get page height
++// Parameters:
++//			page		-	Handle to the page. Returned by FPDF_LoadPage function.
++// Return value:
++//			Page height (excluding non-displayable area) measured in points.
++//			One point is 1/72 inch (around 0.3528 mm)
++//
++DLLEXPORT double STDCALL FPDF_GetPageHeight(FPDF_PAGE page);
++
++// Page rendering flags. They can be combined with bit OR
++#define FPDF_ANNOT			0x01		// Set if annotations are to be rendered
++#define FPDF_LCD_TEXT		0x02		// Set if using text rendering optimized for LCD display
++#define FPDF_NO_GDIPLUS		0x04		// Set if you don't want to use GDI+ (for fast rendering with poorer graphic quality)
++										// Applicable to desktop Windows systems only.
++#define FPDF_DEBUG_INFO		0x80		// Set if you want to get some debug info. 
++										// Please discuss with Foxit first if you need to collect debug info.
++
++#ifdef _WIN32
++// Function: FPDF_RenderPage
++//			Render contents in a page to a device (screen, bitmap, or printer)
++//			This function is only supported on Windows system
++// Parameters: 
++//			dc			-	Handle to device context.
++//			page		-	Handle to the page. Returned by FPDF_LoadPage function.
++//			start_x		-	Left pixel position of the display area in the device coordination
++//			start_y		-	Top pixel position of the display area in the device coordination
++//			size_x		-	Horizontal size (in pixels) for displaying the page
++//			size_y		-	Vertical size (in pixels) for displaying the page
++//			rotate		-	Page orientation: 0 (normal), 1 (rotated 90 degrees clockwise),
++//								2 (rotated 180 degrees), 3 (rotated 90 degrees counter-clockwise).
++//			flags		-	0 for normal display, or combination of flags defined above
++// Return value:
++//			None.
++//
++DLLEXPORT void STDCALL FPDF_RenderPage(HDC dc, FPDF_PAGE page, int start_x, int start_y, int size_x, int size_y,
++						int rotate, int flags);
++#endif
++
++// Function: FPDF_RenderPageBitmap
++//			Render contents in a page to a device independant bitmap
++// Parameters: 
++//			bitmap		-	Handle to the device independant bitmap (as the output buffer).
++//							Bitmap handle can be created by FPDFBitmap_Create function.
++//			page		-	Handle to the page. Returned by FPDF_LoadPage function.
++//			start_x		-	Left pixel position of the display area in the device coordination
++//			start_y		-	Top pixel position of the display area in the device coordination
++//			size_x		-	Horizontal size (in pixels) for displaying the page
++//			size_y		-	Vertical size (in pixels) for displaying the page
++//			rotate		-	Page orientation: 0 (normal), 1 (rotated 90 degrees clockwise),
++//								2 (rotated 180 degrees), 3 (rotated 90 degrees counter-clockwise).
++//			flags		-	0 for normal display, or combination of flags defined above
++// Return value:
++//			None.
++//
++DLLEXPORT void STDCALL FPDF_RenderPageBitmap(FPDF_BITMAP bitmap, FPDF_PAGE page, int start_x, int start_y, 
++						int size_x, int size_y, int rotate, int flags);
++
++// Function: FPDF_LoadDocument
++//			Close a loaded PDF page.
++// Parameters: 
++//			page		-	Handle to the loaded page
++// Return value:
++//			None.
++//
++DLLEXPORT void STDCALL FPDF_ClosePage(FPDF_PAGE page);
++
++// Function: FPDF_CloseDocument
++//			Close a loaded PDF document.
++// Parameters: 
++//			document	-	Handle to the loaded document
++// Return value:
++//			None.
++//
++DLLEXPORT void STDCALL FPDF_CloseDocument(FPDF_DOCUMENT document);
++
++// Function: FPDF_DeviceToPage
++//			Convert the screen coordinations of a point to page coordinations.
++// Parameters:
++//			page		-	Handle to the page. Returned by FPDF_LoadPage function.
++//			start_x		-	Left pixel position of the display area in the device coordination
++//			start_y		-	Top pixel position of the display area in the device coordination
++//			size_x		-	Horizontal size (in pixels) for displaying the page
++//			size_y		-	Vertical size (in pixels) for displaying the page
++//			rotate		-	Page orientation: 0 (normal), 1 (rotated 90 degrees clockwise),
++//								2 (rotated 180 degrees), 3 (rotated 90 degrees counter-clockwise).
++//			device_x	-	X value in device coordination, for the point to be converted
++//			device_y	-	Y value in device coordination, for the point to be converted
++//			page_x		-	Pointer to a double value receiving the converted X value in page coordination
++//			page_y		-	Pointer to a double value receiving the converted Y value in page coordination
++// Return value:
++//			None.
++// Comments:
++//			The page coordination system has its origin at left-bottom corner of the page, with X axis goes along
++//			the bottom side to the right, and Y axis goes along the left side upward. NOTE: this coordination system 
++//			can be altered when you zoom, scroll, or rotate a page, however, a point on the page should always have 
++//			the same coordination values in the page coordination system. 
++//
++//			The device coordination system is device dependant. For screen device, its origin is at left-top
++//			corner of the window. However this origin can be altered by Windows coordination transformation
++//			utilities. You must make sure the start_x, start_y, size_x, size_y and rotate parameters have exactly
++//			same values as you used in FPDF_RenderPage() function call.
++//
++DLLEXPORT void STDCALL FPDF_DeviceToPage(FPDF_PAGE page, int start_x, int start_y, int size_x, int size_y,
++						int rotate, int device_x, int device_y, double* page_x, double* page_y);
++
++// Function: FPDF_PageToDevice
++//			Convert the screen coordinations of a point to page coordinations.
++// Parameters:
++//			page		-	Handle to the page. Returned by FPDF_LoadPage function.
++//			start_x		-	Left pixel position of the display area in the device coordination
++//			start_y		-	Top pixel position of the display area in the device coordination
++//			size_x		-	Horizontal size (in pixels) for displaying the page
++//			size_y		-	Vertical size (in pixels) for displaying the page
++//			rotate		-	Page orientation: 0 (normal), 1 (rotated 90 degrees clockwise),
++//								2 (rotated 180 degrees), 3 (rotated 90 degrees counter-clockwise).
++//			page_x		-	X value in page coordination, for the point to be converted
++//			page_y		-	Y value in page coordination, for the point to be converted
++//			device_x	-	Point to an integer value receiving the result X value in device coordination.
++//			device_y	-	Point to an integer value receiving the result Y value in device coordination.
++// Return value:
++//			None
++// Comments:
++//			See comments of FPDF_DeviceToPage() function.
++//
++DLLEXPORT void STDCALL FPDF_PageToDevice(FPDF_PAGE page, int start_x, int start_y, int size_x, int size_y,
++						int rotate, double page_x, double page_y, int* device_x, int* device_y);
++
++// Fucntion: FPDFBitmap_Create
++//			Create a Foxit Device Independant Bitmap (FXDIB)
++// Parameters:
++//			width		-	Number of pixels in a horizontal line of the bitmap. Must be greater than 0.
++//			height		-	Number of pixels in a vertical line of the bitmap. Must be greater than 0.
++//			alpha		-	A flag indicating whether alpha channel is used. Non-zero for using alpha, zero for not using.
++// Return value:
++//			The created bitmap handle, or NULL if parameter error or out of memory.
++// Comments:
++//			An FXDIB always use 4 byte per pixel. The first byte of a pixel is always double word aligned.
++//			Each pixel contains red (R), green (G), blue (B) and optionally alpha (A) values.
++//			The byte order is BGRx (the last byte unused if no alpha channel) or BGRA.
++//			
++//			The pixels in a horizontal line (also called scan line) are stored side by side, with left most
++//			pixel stored first (with lower memory address). Each scan line uses width*4 bytes.
++//
++//			Scan lines are stored one after another, with top most scan line stored first. There is no gap
++//			between adjacent scan lines.
++//
++//			This function allocates enough memory for holding all pixels in the bitmap, but it doesn't 
++//			initialize the buffer. Applications can use FPDFBitmap_FillRect to fill the bitmap using any color.
++DLLEXPORT FPDF_BITMAP STDCALL FPDFBitmap_Create(int width, int height, int alpha);
++
++// Fucntion: FPDFBitmap_FillRect
++//			Fill a rectangle area in an FXDIB
++// Parameters:
++//			bitmap		-	The handle to the bitmap. Returned by FPDFBitmap_Create function.
++//			left		-	The left side position. Starting from 0 at the left-most pixel.
++//			top			-	The top side position. Starting from 0 at the top-most scan line.
++//			width		-	Number of pixels to be filled in each scan line.
++//			height		-	Number of scan lines to be filled.
++//			red			-	A number from 0 to 255, identifying the red intensity
++//			green		-	A number from 0 to 255, identifying the green intensity
++//			blue		-	A number from 0 to 255, identifying the blue intensity
++//			alpha		-	(Only if the alpha channeled is used when bitmap created) A number from 0 to 255,
++//							identifying the alpha value.
++// Return value:
++//			None
++// Comments:
++//			This function set the color and (optionally) alpha value in specified region of the bitmap.
++//			NOTE: If alpha channel is used, this function does NOT composite the background with the source color,
++//			instead the background will be replaced by the source color and alpha.
++//			If alpha channel is not used, the "alpha" parameter is ignored.
++DLLEXPORT void STDCALL FPDFBitmap_FillRect(FPDF_BITMAP bitmap, int left, int top, int width, int height, 
++									int red, int green, int blue, int alpha);
++
++// Function: FPDFBitmap_GetBuffer
++//			Get data buffer of an FXDIB
++// Parameters:
++//			bitmap		-	Handle to the bitmap. Returned by FPDFBitmap_Create function.
++// Return value:
++//			The pointer to the first byte of the bitmap buffer.
++// Comments:
++//			Applications can use this function to get the bitmap buffer pointer, then manipulate any color
++//			and/or alpha values for any pixels in the bitmap.
++DLLEXPORT void* STDCALL FPDFBitmap_GetBuffer(FPDF_BITMAP bitmap);
++
++// Function: FPDFBitmap_GetWidth
++//			Get width of an FXDIB
++// Parameters:
++//			bitmap		-	Handle to the bitmap. Returned by FPDFBitmap_Create function.
++// Return value:
++//			The number of pixels in a horizontal line of the bitmap.
++DLLEXPORT int STDCALL FPDFBitmap_GetWidth(FPDF_BITMAP bitmap);
++
++// Function: FPDFBitmap_GetHeight
++//			Get height of an FXDIB
++// Parameters:
++//			bitmap		-	Handle to the bitmap. Returned by FPDFBitmap_Create function.
++// Return value:
++//			The number of pixels in a vertical line of the bitmap.
++DLLEXPORT int STDCALL FPDFBitmap_GetHeight(FPDF_BITMAP bitmap);
++
++// Function: FPDFBitmap_Destroy
++//			Destroy an FXDIB and release all related buffers
++// Parameters:
++//			bitmap		-	Handle to the bitmap. Returned by FPDFBitmap_Create function.
++// Return value:
++//			None.
++DLLEXPORT void STDCALL FPDFBitmap_Destroy(FPDF_BITMAP bitmap);
++
++// Funcion: FPDF_SetModuleFolder
++//			Set the folder path for module files (like the FPDFCJK.BIN)
++// Parameters;
++//			module_name	-	Name of the module. Currently please use NULL (0) only
++//			folder_name	-	Name of the folder. For example: "C:\\program files\\FPDFVIEW"
++// Return value:
++//			None.
++DLLEXPORT void STDCALL FPDF_SetModulePath(FPDF_STRING module_name, FPDF_STRING folder_name);
++
++#ifdef __cplusplus
++};
++#endif
++
++#endif // _FPDFVIEW_H_
+
+Added: nx-utils/univprn.drv/SPLFilter-0.0.1/generic.ppd
+===================================================================
+--- nx-utils/univprn.drv/SPLFilter-0.0.1/generic.ppd	2007-01-31 21:10:57 UTC (rev 309)
++++ nx-utils/univprn.drv/SPLFilter-0.0.1/generic.ppd	2007-02-01 01:22:55 UTC (rev 310)
+@@ -0,0 +1,156 @@
++*PPD-Adobe: "4.3"
++*FormatVersion:	"4.3"
++*FileVersion:	"1.2"
++*LanguageVersion: English
++*LanguageEncoding: ISOLatin1
++*PCFileName:	"POSTSCRIPT.PPD"
++*Manufacturer:	"Postscript"
++*Product:	"(WINE v20021009)"
++*ModelName:     "Generic postscript printer"
++*ShortNickName: "Generic postscript printer"
++*NickName:      "Generic postscript printer"
++*PSVersion:	"(3010.000) 550"
++*LanguageLevel:	"3"
++*ColorDevice:   True
++*DefaultColorSpace: RGB
++*FileSystem:	False
++*Throughput:	"8"
++*LandscapeOrientation: Plus90
++*VariablePaperSize: False
++*TTRasterizer:	None
++
++*UIConstraints: *PageSize Executive *InputSlot Envelope
++*UIConstraints: *PageSize Letter *InputSlot Envelope
++*UIConstraints: *PageSize Legal *InputSlot Envelope
++*UIConstraints: *PageSize A3 *InputSlot Envelope
++*UIConstraints: *PageSize A4 *InputSlot Envelope
++*UIConstraints: *PageSize A5 *InputSlot Envelope
++*UIConstraints: *PageSize B5 *InputSlot Envelope
++
++*OpenUI *PageSize/Media Size: PickOne
++*OrderDependency: 10 AnySetup *PageSize
++*DefaultPageSize: A4
++*PageSize Letter/Letter:	"<</PageSize[612 792]/ImagingBBox null>>setpagedevice"
++*PageSize Legal/Legal:		"<</PageSize[612 1008]/ImagingBBox null>>setpagedevice"
++*PageSize Executive/Executive:	"<</PageSize[522 756]/ImagingBBox null>>setpagedevice"
++*PageSize A3/A3:               "<</PageSize[842 1191]/ImagingBBox null>>setpagedevice"
++*PageSize A4/A4:		"<</PageSize[595 842]/ImagingBBox null>>setpagedevice"
++*PageSize A5/A5:		"<</PageSize[420 595]/ImagingBBox null>>setpagedevice"
++*PageSize B5/B5 (JIS):		"<</PageSize[516 729]/ImagingBBox null>>setpagedevice"
++*PageSize EnvISOB5/Envelope B5: "<</PageSize[499 709]/ImagingBBox null>>setpagedevice"
++*PageSize Env10/Envelope #10:	"<</PageSize[297 684]/ImagingBBox null>>setpagedevice"
++*PageSize EnvC5/Envelope C5:	"<</PageSize[459 649]/ImagingBBox null>>setpagedevice"
++*PageSize EnvDL/Envelope DL:	"<</PageSize[312 624]/ImagingBBox null>>setpagedevice"
++*PageSize EnvMonarch/Envelope Monarch: "<</PageSize[279 540]/ImagingBBox null>>setpagedevice"
++*CloseUI: *PageSize
++
++*OpenUI *PageRegion: PickOne
++*OrderDependency: 10 AnySetup *PageRegion
++*DefaultPageRegion: A4
++*PageRegion Letter/Letter:	"<</PageSize[612 792]/ImagingBBox null>>setpagedevice"
++*PageRegion Legal/Legal:	"<</PageSize[612 1008]/ImagingBBox null>>setpagedevice"
++*PageRegion Executive/Executive: "<</PageSize[522 756]/ImagingBBox null>>setpagedevice"
++*PageRegion A3/A3:             "<</PageSize[842 1191]/ImagingBBox null>>setpagedevice"
++*PageRegion A4/A4:		"<</PageSize[595 842]/ImagingBBox null>>setpagedevice"
++*PageRegion A5/A5:		"<</PageSize[421 595]/ImagingBBox null>>setpagedevice"
++*PageRegion B5/B5 (JIS):	"<</PageSize[516 729]/ImagingBBox null>>setpagedevice"
++*PageRegion EnvISOB5/Envelope B5: "<</PageSize[499 709]/ImagingBBox null>>setpagedevice"
++*PageRegion Env10/Envelope #10:	"<</PageSize[297 684]/ImagingBBox null>>setpagedevice"
++*PageRegion EnvC5/Envelope C5:	"<</PageSize[459 649]/ImagingBBox null>>setpagedevice"
++*PageRegion EnvDL/Envelope DL:	"<</PageSize[312 624]/ImagingBBox null>>setpagedevice"
++*PageRegion EnvMonarch/Envelope Monarch: "<</PageSize[279 540]/ImagingBBox null>>setpagedevice"
++*CloseUI: *PageRegion
++
++*DefaultImageableArea: Letter
++*ImageableArea Letter/US Letter:	"18 18 594 774"
++*ImageableArea Legal/US Legal:		"18 18 594 990"
++*ImageableArea Executive/Executive:	"18 18 504 738"
++*ImageableArea A3/A3:			"12 12 830 1179"
++*ImageableArea A4/A4:			"18 18 577 824"
++*ImageableArea A5/A5:			"18 36 403 559"
++*ImageableArea B5/JIS B5:		"18 36 498 693"
++*ImageableArea EnvISOB5/B5 (ISO):	"18 36 463 673"
++*ImageableArea Env10/Com-10:		"18 36 279 648"
++*ImageableArea EnvC5/EnvC5:		"18 36 441 613"
++*ImageableArea EnvDL/EnvDL:		"18 36 294 588"
++*ImageableArea EnvMonarch/Envelope Monarch: "18 36 261 504"
++
++*DefaultPaperDimension: Letter
++*PaperDimension Letter/Letter:		"612 792"
++*PaperDimension Legal/Legal:		"612 1008"
++*PaperDimension Executive/Executive:	"522 756"
++*PaperDimension A3/A3:			"842 1191"
++*PaperDimension A4/A4:			"595 842"
++*PaperDimension A5/A5:			"421 595"
++*PaperDimension B5/B5 (JIS):		"516 729"
++*PaperDimension EnvISOB5/Envelope B5:	"499 709"
++*PaperDimension Env10/Envelope #10:	"297 684"
++*PaperDimension EnvC5/Envelope C5:	"459 649"
++*PaperDimension EnvDL/Envelope DL:	"312 624"
++*PaperDimension EnvMonarch/Envelope Monarch: "279 540"
++
++*OpenUI *InputSlot/Media Source: PickOne
++*OrderDependency: 10 AnySetup *InputSlot
++*DefaultInputSlot: Default
++*InputSlot Default/Default: ""
++*InputSlot Tray1/Tray 1: "<</ManualFeed false /MediaPosition 3>>setpagedevice"
++*InputSlot Tray2/Tray 2: "<</ManualFeed false /MediaPosition 0>>setpagedevice"
++*InputSlot Tray3/Tray 3: "<</ManualFeed false /MediaPosition 1>>setpagedevice"
++*InputSlot Manual/Manual Feed: "<</ManualFeed true /MediaPosition 3>>setpagedevice"
++*CloseUI: *InputSlot
++
++*OpenUI *Resolution/Output Resolution: PickOne
++*OrderDependency: 20 AnySetup *Resolution
++*DefaultResolution: 600dpi
++*Resolution 150dpi/150 DPI: "<</HWResolution[150 150]>>setpagedevice"
++*Resolution 300dpi/300 DPI: "<</HWResolution[300 300]>>setpagedevice"
++*Resolution 600dpi/600 DPI: "<</HWResolution[600 600]>>setpagedevice"
++*Resolution 1200dpi/1200 DPI: "<</HWResolution[1200 1200]>>setpagedevice"
++*Resolution 2400dpi/2400 DPI: "<</HWResolution[2400 2400]>>setpagedevice"
++*Resolution 4800dpi/4800 DPI: "<</HWResolution[4800 4800]>>setpagedevice"
++*CloseUI: *Resolution
++
++*OpenUI *Duplex/Double-Sided Printing: PickOne
++*OrderDependency: 20 AnySetup *Duplex
++*DefaultDuplex: None
++*Duplex None/Off: "<</Duplex false>>setpagedevice"
++*Duplex DuplexNoTumble/Long Edge (Standard): "<</Duplex true/Tumble false>>setpagedevice"
++*Duplex DuplexTumble/Short Edge (Flip): "<</Duplex true/Tumble true>>setpagedevice"
++*CloseUI:       *Duplex
++
++*DefaultFont: Courier
++*Font AvantGarde-Book: Standard "(001.006S)" Standard ROM
++*Font AvantGarde-BookOblique: Standard "(001.006S)" Standard ROM
++*Font AvantGarde-Demi: Standard "(001.007S)" Standard ROM
++*Font AvantGarde-DemiOblique: Standard "(001.007S)" Standard ROM
++*Font Bookman-Demi: Standard "(001.004S)" Standard ROM
++*Font Bookman-DemiItalic: Standard "(001.004S)" Standard ROM
++*Font Bookman-Light: Standard "(001.004S)" Standard ROM
++*Font Bookman-LightItalic: Standard "(001.004S)" Standard ROM
++*Font Courier: Standard "(002.004S)" Standard ROM
++*Font Courier-Bold: Standard "(002.004S)" Standard ROM
++*Font Courier-BoldOblique: Standard "(002.004S)" Standard ROM
++*Font Courier-Oblique: Standard "(002.004S)" Standard ROM
++*Font Helvetica: Standard "(001.006S)" Standard ROM
++*Font Helvetica-Bold: Standard "(001.007S)" Standard ROM
++*Font Helvetica-BoldOblique: Standard "(001.007S)" Standard ROM
++*Font Helvetica-Narrow: Standard "(001.006S)" Standard ROM
++*Font Helvetica-Narrow-Bold: Standard "(001.007S)" Standard ROM
++*Font Helvetica-Narrow-BoldOblique: Standard "(001.007S)" Standard ROM
++*Font Helvetica-Narrow-Oblique: Standard "(001.006S)" Standard ROM
++*Font Helvetica-Oblique: Standard "(001.006S)" Standard ROM
++*Font NewCenturySchlbk-Bold: Standard "(001.009S)" Standard ROM
++*Font NewCenturySchlbk-BoldItalic: Standard "(001.007S)" Standard ROM
++*Font NewCenturySchlbk-Italic: Standard "(001.006S)" Standard ROM
++*Font NewCenturySchlbk-Roman: Standard "(001.007S)" Standard ROM
++*Font Palatino-Bold: Standard "(001.005S)" Standard ROM
++*Font Palatino-BoldItalic: Standard "(001.005S)" Standard ROM
++*Font Palatino-Italic: Standard "(001.005S)" Standard ROM
++*Font Palatino-Roman: Standard "(001.005S)" Standard ROM
++*Font Symbol: Special "(001.007S)" Special ROM
++*Font Times-Bold: Standard "(001.007S)" Standard ROM
++*Font Times-BoldItalic: Standard "(001.009S)" Standard ROM
++*Font Times-Italic: Standard "(001.007S)" Standard ROM
++*Font Times-Roman: Standard "(001.007S)" Standard ROM
++*Font ZapfChancery-MediumItalic: Standard "(001.007S)" Standard ROM
++*Font ZapfDingbats: Special "(001.004S)" Standard ROM
+
+Added: nx-utils/univprn.drv/SPLFilter-0.0.1/spl.h
+===================================================================
+--- nx-utils/univprn.drv/SPLFilter-0.0.1/spl.h	2007-01-31 21:10:57 UTC (rev 309)
++++ nx-utils/univprn.drv/SPLFilter-0.0.1/spl.h	2007-02-01 01:22:55 UTC (rev 310)
+@@ -0,0 +1,167 @@
++/*****************************************************************************
++ * Terms of Use
++ * Copyright ? Christoph Lindemann. All rights reserved.
++ *
++ * Permission is granted to copy, distribute and/or modify this document under
++ * the terms of the GNU Free Documentation License, Version 1.2 or any later 
++ * version published by the Free Software Foundation; with no Invariant 
++ * Sections, no Front-Cover Texts, and no Back-Cover Texts. A copy of the 
++ * license is included in the section entitled "GNU Free Documentation 
++ * License".
++ *----------------------------------------------------------------------------
++ * History:
++ *  24-03-2004  Initial Document
++ *     Christoph Lindemann, christoph at lindemann.nu
++ *  
++ *  24-03-2004  Release to public
++ *     Christoph Lindemann, christoph at lindemann.nu
++ *  
++ *  10-06-2004  Added SPL_SMR_PADDING
++ *     Thanks to Fabian Franz
++ *  
++ *  11-06-2004  CORRECTED FAULTY INFORMATIONS
++ *     Christoph Lindemann, christoph at lindemann.nu
++ *  
++ *  14-06-2004  Added some text explaining the format.
++ *     Christoph Lindemann, christoph at lindemann.nu
++ *  
++ *  19-05-2005  Corrected typos in SMREXT definition
++ *     Thanks to Peter Wasser
++ *  
++ *  02-11-2005  Updated End-Of-Page records 0x0D and 0x0E
++ *     Thanks to Krzys
++ *
++ *  15-06-2006  Updated EMF Spool Metafile record types
++ *     Christoph Lindemann, christoph at lindemann.nu
++ *
++ *  16-06-2006  Added information about PRESTARTPAGE record
++ *     Christoph Lindemann, christoph at lindemann.nu
++ *
++ *****************************************************************************/
++ 
++//Spool Metafile constants
++#define SPLMETA_SIGNATURE 0x00010000 //Version 1.0 
++ 
++// Spool Metafile record types
++// Please note remarks in the corresponding struct definitions
++#define SRT_PAGE_EMF1         0x00000001 /*  1 Enhanced Meta File (EMF) NT4   */                                         
++#define SRT_FONT1             0x00000002 /*  2 Font Data                      */
++#define SRT_DEVMODE           0x00000003 /*  3 DevMode                        */
++#define SRT_FONT2             0x00000004 /*  4 Font Data                      */
++#define SRT_PRESTARTPAGE      0x00000005 /*  5 PRESTARTPAGE                   */
++#define SRT_FONT_MM           0x00000006 /*  6 Font Data (Multiple Master)    */
++#define SRT_FONT_SUB1         0x00000007 /*  7 Font Data (SubsetFont 1)       */
++#define SRT_FONT_SUB2         0x00000008 /*  8 Font Data (SubsetFont 2)       */
++#define SRT_RESERVED_9        0x00000009 /*  9                                */
++#define SRT_RESERVED_A        0x0000000A /* 10                                */ 
++#define SRT_RESERVED_B        0x0000000B /* 11                                */
++#define SRT_PAGE_EMF2         0x0000000C /* 12 Enhanced Meta File (EMF) Win2k */ 
++#define SRT_EXT_EOPAGE_RASTER 0x0000000D /* 13 Ext EndOfPage raster bitmap    */
++#define SRT_EXT_EOPAGE_VECTOR 0x0000000E /* 14 Ext EndOfPage GDI image data   */
++#define SRT_EXT_FONT1         0x0000000F /* 15 Ext Font (SRT_FONT1)           */
++#define SRT_EXT_FONT2         0x00000010 /* 16 Ext Font (SRT_FONT2)           */
++#define SRT_EXT_FONT_MM       0x00000011 /* 17 Ext Font (SRT_FONT_MM)         */
++#define SRT_EXT_FONT_SUB1     0x00000012 /* 18 Ext Font (SRT_FONT_SUB1)       */
++#define SRT_EXT_FONT_SUB2     0x00000013 /* 19 Ext Font (SRT_FONT_SUB2)       */
++#define SRT_EXT_PS_JOB_DATA   0x00000014 /* 20 PS_JOB_DATA escape data        */
++#define SRT_EXT_FONT_EMBED    0x00000015 /* 21 Font (Embeded/Ghost?)          */
++ 
++/*****************************************************************************
++ * SPL_HEADER
++ *----------------------------------------------------------------------------
++ * SPL file header for EMFSPL files
++ *****************************************************************************/
++typedef struct tagSPLHEADER { 
++    DWORD SIGNATURE; 
++    DWORD nSize;            // record size INCLUDING header 
++    DWORD offDocumentName;  // offset of Job Title from start 
++    DWORD offPort;          // offset of portname from start
++    //BYTE HeaderData[1]; 
++	//LPCTSTR lpszDocName; 
++    //LPCTSTR lpszOutput; 
++} SPL_HEADER, *PSPL_HEADER;
++ 
++/*****************************************************************************
++ * SMR - Base record
++ *----------------------------------------------------------------------------
++ * Base record type for the Spool Metafile.
++ *****************************************************************************/
++typedef struct tagSMR{ 
++    DWORD iType; // Spool metafile record type 
++    DWORD nSize; // length of the following data 
++                 // NOT INCLUDING this header 
++} SMR, *PSMR;
++ 
++/*****************************************************************************
++ * SMREXT - Extended record
++ *----------------------------------------------------------------------------
++ * Contains neg. distance to start of Data
++ *****************************************************************************/
++typedef struct tagSMREXT{ 
++    SMR smr; 
++    DWORD DistanceLow; 
++    DWORD DistanceHigh;
++} SMREXT, *PSMREXT;
++ 
++/*****************************************************************************
++ * SMRPRESTARTPAGE - PRESTARTPAGE
++ *----------------------------------------------------------------------------
++ * Written before pagedata is written to spoolfile
++ * Used as a temporary "end of file" indicating following data is not
++ * fully spooled yet
++ *****************************************************************************/
++typedef struct tagSMRPRESTARTPAGE{ 
++    SMR smr; 
++    DWORD Unknown1; 
++    DWORD Unknown2; //0xFFFFFFFF
++} SMRPRESTARTPAGE, *PSMRPRESTARTPAGE;
++ 
++/*****************************************************************************
++ * SMR_PAGE - EMF/Page data
++ *----------------------------------------------------------------------------
++ * EMF/Page data
++ *****************************************************************************/
++typedef struct tagSMRPAGE{ 
++    SMR smr;   // if smr.nSize == 0, this indicates EndOfFile
++    BYTE EMFData[1];
++} SMR_PAGE, *PSMR_PAGE;
++ 
++/*****************************************************************************
++ * SMR_DEVMODE - DEVMODE data
++ *----------------------------------------------------------------------------
++ * DEVMODE data
++ *****************************************************************************/
++typedef struct tagSMRDEVMODE{ 
++    SMR smr; 
++    BYTE DEVMODEData[1];
++} SMR_DEVMODE, *PSMR_DEVMODE;
++ 
++/*****************************************************************************
++ * SMR_FONT - FONT data
++ *****************************************************************************/
++typedef struct tagSMRFONT{ 
++    SMR smr; 
++    BYTE FONTData[1];
++} SMR_FONT, *PSMR_FONT;
++ 
++/*****************************************************************************
++ * SMR_EXTFONT - Extended Font Data
++ *----------------------------------------------------------------------------
++ * Contains neg. distance to start of
++ * Font Data
++ * Font data is typically embedded as
++ * GDICOMMENT in the prev EMF data
++ *****************************************************************************/
++typedef struct tagEXTFONT{ 
++    SMREXT smrext;
++} SMR_EXTFONT, *PSMR_EXTFONT;
++ 
++/*****************************************************************************
++ * SMR_EOPAGE - End of Page
++ *----------------------------------------------------------------------------
++ * Contains neg. distance to
++ * start of page record
++ *****************************************************************************/
++typedef struct tagSMREOPAGE{ 
++    SMREXT smrext; 
++} SMR_EOPAGE, *PSMR_EOPAGE;
+\ No newline at end of file
+
+Added: nx-utils/univprn.drv/SPLFilter-0.0.1/stdafx.cpp
+===================================================================
+--- nx-utils/univprn.drv/SPLFilter-0.0.1/stdafx.cpp	2007-01-31 21:10:57 UTC (rev 309)
++++ nx-utils/univprn.drv/SPLFilter-0.0.1/stdafx.cpp	2007-02-01 01:22:55 UTC (rev 310)
+@@ -0,0 +1,8 @@
++// stdafx.cpp : Quelldatei, die nur die Standard-Includes einbindet.
++// DLLTest.pch ist der vorkompilierte Header.
++// stdafx.obj enth?lt die vorkompilierten Typinformationen.
++
++#include "stdafx.h"
++
++// TODO: Auf zus?tzliche Header verweisen, die in STDAFX.H
++// und nicht in dieser Datei erforderlich sind.
+
+Added: nx-utils/univprn.drv/SPLFilter-0.0.1/stdafx.h
+===================================================================
+--- nx-utils/univprn.drv/SPLFilter-0.0.1/stdafx.h	2007-01-31 21:10:57 UTC (rev 309)
++++ nx-utils/univprn.drv/SPLFilter-0.0.1/stdafx.h	2007-02-01 01:22:55 UTC (rev 310)
+@@ -0,0 +1,15 @@
++// stdafx.h : Includedatei f?r Standardsystem-Includedateien
++// oder h?ufig verwendete projektspezifische Includedateien,
++// die nur in unregelm??igen Abst?nden ge?ndert werden.
++//
++
++#pragma once
++
++
++#define WIN32_LEAN_AND_MEAN		// Selten verwendete Teile der Windows-Header nicht einbinden.
++#include <stdio.h>
++#include <tchar.h>
++
++
++
++// TODO: Hier auf zus?tzliche Header, die das Programm erfordert, verweisen.
+
+Added: nx-utils/univprn.drv/SPLFilter-0.0.1/wine-emf-bezier-impl.diff
+===================================================================
+--- nx-utils/univprn.drv/SPLFilter-0.0.1/wine-emf-bezier-impl.diff	2007-01-31 21:10:57 UTC (rev 309)
++++ nx-utils/univprn.drv/SPLFilter-0.0.1/wine-emf-bezier-impl.diff	2007-02-01 01:22:55 UTC (rev 310)
+@@ -0,0 +1,231 @@
++diff -ur ../gdi32.old2/enhmfdrv/enhmetafiledrv.h ./enhmfdrv/enhmetafiledrv.h
++--- ../gdi32.old2/enhmfdrv/enhmetafiledrv.h	2007-01-28 11:33:21.000000000 +0100
+++++ ./enhmfdrv/enhmetafiledrv.h	2007-01-30 06:26:45.000000000 +0100
++@@ -61,6 +61,10 @@
++ extern BOOL     EMFDRV_Arc( PHYSDEV dev, INT left, INT top, INT right,
++                             INT bottom, INT xstart, INT ystart, INT xend,
++                             INT yend );
+++extern BOOL     EMFDRV_ArcTo( PHYSDEV dev, INT left, INT top, INT right,
+++                            INT bottom, INT xstart, INT ystart, INT xend,
+++                            INT yend );
+++
++ extern BOOL     EMFDRV_BeginPath( PHYSDEV dev );
++ extern BOOL     EMFDRV_BitBlt( PHYSDEV devDst, INT xDst, INT yDst,
++                                INT width, INT height, PHYSDEV devSrc,
++@@ -105,8 +109,11 @@
++                                     const INT* counts, UINT polys);
++ extern BOOL     EMFDRV_PolyPolyline( PHYSDEV dev, const POINT* pt,
++                                      const DWORD* counts, DWORD polys);
++-extern BOOL     EMFDRV_Polygon( PHYSDEV dev, const POINT* pt, INT count );
++ extern BOOL     EMFDRV_Polyline( PHYSDEV dev, const POINT* pt,INT count);
+++extern BOOL     EMFDRV_PolyBezier( PHYSDEV dev, const POINT* pt, DWORD count );
+++extern BOOL     EMFDRV_Polygon( PHYSDEV dev, const POINT* pt, INT count );
+++extern BOOL     EMFDRV_PolyBezierTo( PHYSDEV dev, const POINT* pt, DWORD count );
+++extern BOOL     EMFDRV_PolylineTo( PHYSDEV dev, const POINT* pt, DWORD count);
++ extern BOOL     EMFDRV_Rectangle( PHYSDEV dev, INT left, INT top,
++                                   INT right, INT bottom);
++ extern BOOL     EMFDRV_RestoreDC( PHYSDEV dev, INT level );
++diff -ur ../gdi32.old2/enhmfdrv/graphics.c ./enhmfdrv/graphics.c
++--- ../gdi32.old2/enhmfdrv/graphics.c	2007-01-09 16:42:47.000000000 +0100
+++++ ./enhmfdrv/graphics.c	2007-01-30 06:25:24.000000000 +0100
++@@ -80,7 +80,6 @@
++     return TRUE;
++ }
++ 
++-
++ /***********************************************************************
++  *           EMFDRV_ArcChordPie
++  */
++@@ -197,6 +196,16 @@
++ }
++ 
++ /***********************************************************************
+++ *           EMFDRV_Arc
+++ */
+++BOOL
+++EMFDRV_ArcTo( PHYSDEV dev, INT left, INT top, INT right, INT bottom,
+++	    INT xstart, INT ystart, INT xend, INT yend )
+++{
+++    return EMFDRV_ArcChordPie( dev, left, top, right, bottom, xstart, ystart,
+++			       xend, yend, EMR_ARCTO );
+++}
+++/***********************************************************************
++  *           EMFDRV_Pie
++  */
++ BOOL
++@@ -351,6 +360,8 @@
++ static BOOL
++ EMFDRV_Polylinegon( PHYSDEV dev, const POINT* pt, INT count, DWORD iType )
++ {
+++    EMFDRV_PDEVICE *physDev = (EMFDRV_PDEVICE *)dev;
+++    POINT tpt;
++     EMRPOLYLINE *emr;
++     DWORD size;
++     INT i;
++@@ -362,10 +373,22 @@
++     emr->emr.iType = iType;
++     emr->emr.nSize = size;
++ 
++-    emr->rclBounds.left = emr->rclBounds.right = pt[0].x;
++-    emr->rclBounds.top = emr->rclBounds.bottom = pt[0].y;
+++    if (iType == EMR_POLYLINETO || iType == EMR_POLYBEZIERTO)
+++    {
+++        i = 0;
+++        GetCurrentPositionEx(physDev->hdc, &tpt);
+++        emr->rclBounds.left = emr->rclBounds.right = tpt.x;
+++        emr->rclBounds.top = emr->rclBounds.bottom = tpt.y;
+++    
+++    }
+++    else
+++    {
+++        i = 1;
+++        emr->rclBounds.left = emr->rclBounds.right = pt[0].x;
+++        emr->rclBounds.top = emr->rclBounds.bottom = pt[0].y;
+++    }
++ 
++-    for(i = 1; i < count; i++) {
+++    for(; i < count; i++) {
++         if(pt[i].x < emr->rclBounds.left)
++ 	    emr->rclBounds.left = pt[i].x;
++ 	else if(pt[i].x > emr->rclBounds.right)
++@@ -398,6 +421,8 @@
++ static BOOL
++ EMFDRV_Polylinegon16( PHYSDEV dev, const POINT* pt, INT count, DWORD iType )
++ {
+++    EMFDRV_PDEVICE *physDev = (EMFDRV_PDEVICE *)dev;
+++    POINT tpt;
++     EMRPOLYLINE16 *emr;
++     DWORD size;
++     INT i;
++@@ -416,10 +441,22 @@
++     emr->emr.iType = iType;
++     emr->emr.nSize = size;
++ 
++-    emr->rclBounds.left = emr->rclBounds.right = pt[0].x;
++-    emr->rclBounds.top = emr->rclBounds.bottom = pt[0].y;
+++    if (iType == EMR_POLYLINETO16 || iType == EMR_POLYBEZIERTO16)
+++    {
+++        i = 0;
+++        GetCurrentPositionEx(physDev->hdc, &tpt);
+++        emr->rclBounds.left = emr->rclBounds.right = tpt.x;
+++        emr->rclBounds.top = emr->rclBounds.bottom = tpt.y;
+++    
+++    }
+++    else
+++    {
+++        i = 1;
+++        emr->rclBounds.left = emr->rclBounds.right = pt[0].x;
+++        emr->rclBounds.top = emr->rclBounds.bottom = pt[0].y;
+++    }
++ 
++-    for(i = 1; i < count; i++) {
+++    for(; i < count; i++) {
++         if(pt[i].x < emr->rclBounds.left)
++ 	    emr->rclBounds.left = pt[i].x;
++ 	else if(pt[i].x > emr->rclBounds.right)
++@@ -456,6 +493,21 @@
++ }
++ 
++ /**********************************************************************
+++ *          EMFDRV_PolyBezier
+++ */
+++
+++/* FIXME: The BBox could be a bit too large, but there is no easy approximation function 
+++ *        known. */
+++BOOL
+++EMFDRV_PolyBezier( PHYSDEV dev, const POINT* pt, DWORD count )
+++{
+++    if(count < 4 || ((count-4) % 3) != 0) return FALSE;
+++    if( EMFDRV_Polylinegon16( dev, pt, count, EMR_POLYBEZIER16 ) )
+++        return TRUE;
+++    return EMFDRV_Polylinegon( dev, pt, count, EMR_POLYBEZIER );
+++}
+++
+++/**********************************************************************
++  *          EMFDRV_Polygon
++  */
++ BOOL
++@@ -467,6 +519,32 @@
++     return EMFDRV_Polylinegon( dev, pt, count, EMR_POLYGON );
++ }
++ 
+++/**********************************************************************
+++ *          EMFDRV_PolyBezierTo
+++ */
+++
+++/* FIXME: The BBox could be a bit too large, but there is no easy approximation function 
+++ *        known. */
+++BOOL
+++EMFDRV_PolyBezierTo( PHYSDEV dev, const POINT* pt, DWORD count )
+++{
+++    if(count < 3 || (count % 3) != 0) return FALSE;
+++    if( EMFDRV_Polylinegon16( dev, pt, count, EMR_POLYBEZIERTO16 ) )
+++        return TRUE;
+++    return EMFDRV_Polylinegon( dev, pt, count, EMR_POLYBEZIERTO );
+++}
+++
+++
+++/**********************************************************************
+++ *          EMFDRV_PolylineTo
+++ */
+++BOOL
+++EMFDRV_PolylineTo( PHYSDEV dev, const POINT* pt, DWORD count )
+++{
+++    if( EMFDRV_Polylinegon16( dev, pt, count, EMR_POLYLINETO16 ) )
+++        return TRUE;
+++    return EMFDRV_Polylinegon( dev, pt, count, EMR_POLYLINETO );
+++}
++ 
++ /**********************************************************************
++  *          EMFDRV_PolyPolylinegon
++diff -ur ../gdi32.old2/enhmfdrv/init.c ./enhmfdrv/init.c
++--- ../gdi32.old2/enhmfdrv/init.c	2007-01-28 11:34:23.000000000 +0100
+++++ ./enhmfdrv/init.c	2007-01-30 06:21:02.000000000 +0100
++@@ -38,7 +38,7 @@
++     NULL,                            /* pAlphaBlend */
++     NULL,                            /* pAngleArc */
++     EMFDRV_Arc,                      /* pArc */
++-    NULL,                            /* pArcTo */
+++    EMFDRV_ArcTo,                    /* pArcTo */
++     EMFDRV_BeginPath,                /* pBeginPath */
++     EMFDRV_BitBlt,                   /* pBitBlt */
++     NULL,                            /* pChoosePixelFormat */
++@@ -92,14 +92,14 @@
++     EMFDRV_PaintRgn,                 /* pPaintRgn */
++     EMFDRV_PatBlt,                   /* pPatBlt */
++     EMFDRV_Pie,                      /* pPie */
++-    NULL,                            /* pPolyBezier */
++-    NULL,                            /* pPolyBezierTo */
+++    EMFDRV_PolyBezier,               /* pPolyBezier */
+++    EMFDRV_PolyBezierTo,             /* pPolyBezierTo */
++     NULL,                            /* pPolyDraw */
++     EMFDRV_PolyPolygon,              /* pPolyPolygon */
++     EMFDRV_PolyPolyline,             /* pPolyPolyline */
++     EMFDRV_Polygon,                  /* pPolygon */
++     EMFDRV_Polyline,                 /* pPolyline */
++-    NULL,                            /* pPolylineTo */
+++    EMFDRV_PolylineTo,               /* pPolylineTo */
++     NULL,                            /* pRealizeDefaultPalette */
++     NULL,                            /* pRealizePalette */
++     EMFDRV_Rectangle,                /* pRectangle */
++@@ -129,7 +129,7 @@
++     NULL,                            /* pSetDeviceGammaRamp */
++     EMFDRV_SetMapMode,               /* pSetMapMode */
++     EMFDRV_SetMapperFlags,           /* pSetMapperFlags */
++-    NULL,                            /* pSetPixel */
+++    EMFDRV_SetPixel,                 /* pSetPixel */
++     NULL,                            /* pSetPixelFormat */
++     EMFDRV_SetPolyFillMode,          /* pSetPolyFillMode */
++     EMFDRV_SetROP2,                  /* pSetROP2 */
++diff -ur ../gdi32.old2/gdi_private.h ./gdi_private.h
++--- ../gdi32.old2/gdi_private.h	2007-01-09 16:42:47.000000000 +0100
+++++ ./gdi_private.h	2007-01-30 06:27:04.000000000 +0100
++@@ -165,7 +165,7 @@
++     BOOL     (*pPolyPolyline)(PHYSDEV,const POINT*,const DWORD*,DWORD);
++     BOOL     (*pPolygon)(PHYSDEV,const POINT*,INT);
++     BOOL     (*pPolyline)(PHYSDEV,const POINT*,INT);
++-    BOOL     (*pPolylineTo)(PHYSDEV,const POINT*,INT);
+++    BOOL     (*pPolylineTo)(PHYSDEV,const POINT*,DWORD);
++     UINT     (*pRealizeDefaultPalette)(PHYSDEV);
++     UINT     (*pRealizePalette)(PHYSDEV,HPALETTE,BOOL);
++     BOOL     (*pRectangle)(PHYSDEV,INT,INT,INT,INT);
+
+Added: nx-utils/univprn.drv/SPLFilter-0.0.1/wine-emf-path-bbox-fillpath.diff
+===================================================================
+--- nx-utils/univprn.drv/SPLFilter-0.0.1/wine-emf-path-bbox-fillpath.diff	2007-01-31 21:10:57 UTC (rev 309)
++++ nx-utils/univprn.drv/SPLFilter-0.0.1/wine-emf-path-bbox-fillpath.diff	2007-02-01 01:22:55 UTC (rev 310)
+@@ -0,0 +1,119 @@
++diff -ur ../gdi32.old/enhmfdrv/dc.c ./enhmfdrv/dc.c
++--- ../gdi32.old/enhmfdrv/dc.c	2007-01-09 16:42:47.000000000 +0100
+++++ ./enhmfdrv/dc.c	2007-01-28 11:40:27.000000000 +0100
++@@ -188,11 +188,16 @@
++ 
++ BOOL EMFDRV_BeginPath( PHYSDEV dev )
++ {
+++    EMFDRV_PDEVICE *physDev = (EMFDRV_PDEVICE *)dev;
++     EMRBEGINPATH emr;
++ 
++     emr.emr.iType = EMR_BEGINPATH;
++     emr.emr.nSize = sizeof(emr);
++ 
+++    /* Re-initialise the bounding box */
+++    physDev->Path_rclBounds.left = 1;
+++    physDev->Path_rclBounds.right = 0;
+++
++     return EMFDRV_WriteRecord( dev, &emr.emr );
++ }
++ 
++@@ -218,15 +223,12 @@
++ 
++ BOOL EMFDRV_FillPath( PHYSDEV dev )
++ {
+++    EMFDRV_PDEVICE *physDev = (EMFDRV_PDEVICE *)dev;
++     EMRFILLPATH emr;
++ 
++     emr.emr.iType = EMR_FILLPATH;
++     emr.emr.nSize = sizeof(emr);
++-    FIXME("Bounds\n");
++-    emr.rclBounds.left = 0;
++-    emr.rclBounds.top = 0;
++-    emr.rclBounds.right = 0;
++-    emr.rclBounds.bottom = 0;
+++    emr.rclBounds = physDev->Path_rclBounds;
++     return EMFDRV_WriteRecord( dev, &emr.emr );
++ }
++ 
++@@ -253,29 +255,23 @@
++ 
++ BOOL EMFDRV_StrokeAndFillPath( PHYSDEV dev )
++ {
+++    EMFDRV_PDEVICE *physDev = (EMFDRV_PDEVICE *)dev;
++     EMRSTROKEANDFILLPATH emr;
++ 
++     emr.emr.iType = EMR_STROKEANDFILLPATH;
++     emr.emr.nSize = sizeof(emr);
++-    FIXME("Bounds\n");
++-    emr.rclBounds.left = 0;
++-    emr.rclBounds.top = 0;
++-    emr.rclBounds.right = 0;
++-    emr.rclBounds.bottom = 0;
+++    emr.rclBounds = physDev->Path_rclBounds;
++     return EMFDRV_WriteRecord( dev, &emr.emr );
++ }
++ 
++ BOOL EMFDRV_StrokePath( PHYSDEV dev )
++ {
+++    EMFDRV_PDEVICE *physDev = (EMFDRV_PDEVICE *)dev;
++     EMRSTROKEPATH emr;
++ 
++     emr.emr.iType = EMR_STROKEPATH;
++     emr.emr.nSize = sizeof(emr);
++-    FIXME("Bounds\n");
++-    emr.rclBounds.left = 0;
++-    emr.rclBounds.top = 0;
++-    emr.rclBounds.right = 0;
++-    emr.rclBounds.bottom = 0;
+++    emr.rclBounds = physDev->Path_rclBounds;
++     return EMFDRV_WriteRecord( dev, &emr.emr );
++ }
++ 
++diff -ur ../gdi32.old/enhmfdrv/enhmetafiledrv.h ./enhmfdrv/enhmetafiledrv.h
++--- ../gdi32.old/enhmfdrv/enhmetafiledrv.h	2007-01-09 16:42:47.000000000 +0100
+++++ ./enhmfdrv/enhmetafiledrv.h	2007-01-28 11:33:21.000000000 +0100
++@@ -38,6 +38,7 @@
++     UINT       handles_size, cur_handles;
++     HGDIOBJ   *handles;
++     HANDLE     hFile;              /* Handle for disk based MetaFile */
+++    RECTL      Path_rclBounds;
++     INT        horzres, vertres;
++     INT        horzsize, vertsize;
++     INT        logpixelsx, logpixelsy;
++diff -ur ../gdi32.old/enhmfdrv/init.c ./enhmfdrv/init.c
++--- ../gdi32.old/enhmfdrv/init.c	2007-01-09 16:42:47.000000000 +0100
+++++ ./enhmfdrv/init.c	2007-01-28 11:34:23.000000000 +0100
++@@ -224,6 +224,9 @@
++     RECTL *bounds = &physDev->emh->rclBounds;
++     RECTL vportRect = *rect;
++ 
+++    /* We need to run the code twice ... */
+++    INT runLoop=2;
+++
++     LPtoDP(physDev->hdc, (LPPOINT)&vportRect, 2);
++     
++     /* The coordinate systems may be mirrored
++@@ -241,6 +244,9 @@
++         vportRect.top = temp;
++     }
++ 
+++    do
+++    {
+++
++     if (bounds->left > bounds->right)
++     {
++         /* first bounding rectangle */
++@@ -253,6 +259,12 @@
++         bounds->right  = max(bounds->right,  vportRect.right);
++         bounds->bottom = max(bounds->bottom, vportRect.bottom);
++     }
+++
+++    runLoop--;
+++    bounds=&physDev->Path_rclBounds;
+++
+++    }
+++    while (runLoop > 0);
++ }
++ 
++ /**********************************************************************
+
+Added: nx-utils/univprn.drv/SPLFilter-0.0.1/wine-psdrv-resolution-support.diff
+===================================================================
+--- nx-utils/univprn.drv/SPLFilter-0.0.1/wine-psdrv-resolution-support.diff	2007-01-31 21:10:57 UTC (rev 309)
++++ nx-utils/univprn.drv/SPLFilter-0.0.1/wine-psdrv-resolution-support.diff	2007-02-01 01:22:55 UTC (rev 310)
+@@ -0,0 +1,250 @@
++diff -ur ../wineps.drv.old/driver.c ./driver.c
++--- ../wineps.drv.old/driver.c	2007-01-09 16:42:47.000000000 +0100
+++++ ./driver.c	2007-02-01 01:24:49.000000000 +0100
++@@ -129,11 +129,27 @@
++ 		dm2->dmPublic.dmDefaultSource);
++ 	}
++     }
+++    if (dm2->dmPublic.dmFields & DM_PRINTQUALITY ) {
+++	RESOLUTION *res;
+++
+++	for(res = pi->ppd->Resolutions; res; res = res->next) {
+++	    if(res->WinRes == dm2->dmPublic.dmPrintQuality)
+++	        break;
+++	}
+++	if(res) {
+++	    dm1->dmPublic.dmPrintQuality = dm2->dmPublic.dmPrintQuality;
+++	    dm1->dmPublic.dmFields |= DM_PRINTQUALITY;
+++	    TRACE("Changing PrintQuality to '%s'\n", res->FullName);
+++	} else {
+++	  TRACE("Trying to change to unsupported PrintQuality %d\n",
+++		dm2->dmPublic.dmPrintQuality);
+++	}
+++
+++   }
+++
++ 
++    if (dm2->dmPublic.dmFields & DM_DEFAULTSOURCE )
++        dm1->dmPublic.dmDefaultSource = dm2->dmPublic.dmDefaultSource;
++-   if (dm2->dmPublic.dmFields & DM_PRINTQUALITY )
++-       dm1->dmPublic.dmPrintQuality = dm2->dmPublic.dmPrintQuality;
++    if (dm2->dmPublic.dmFields & DM_COLOR )
++        dm1->dmPublic.dmColor = dm2->dmPublic.dmColor;
++    if (dm2->dmPublic.dmFields & DM_DUPLEX && pi->ppd->DefaultDuplex && pi->ppd->DefaultDuplex->WinDuplex != 0)
++@@ -531,13 +547,16 @@
++ 
++   case DC_ENUMRESOLUTIONS:
++     {
++-      LONG *lp = (LONG*)lpszOutput;
+++      RESOLUTION *res;
+++      LONG *lp = (LONG*) lpszOutput;
+++      int i = 0;
++ 
++-      if(lpszOutput != NULL) {
++-	lp[0] = (LONG)pi->ppd->DefaultResolution;
++-	lp[1] = (LONG)pi->ppd->DefaultResolution;
++-      }
++-      return 1;
+++      for(res = pi->ppd->Resolutions; res; res = res->next, i++)
+++	if(lpszOutput != NULL) {
+++		lp[i*2]=res->WinRes;
+++		lp[i*2+1]=res->WinRes;
+++	}
+++      return i;
++     }
++ 
++   /* Windows returns 9999 too */
++diff -ur ../wineps.drv.old/init.c ./init.c
++--- ../wineps.drv.old/init.c	2007-01-09 16:42:47.000000000 +0100
+++++ ./init.c	2007-02-01 01:11:40.000000000 +0100
++@@ -175,6 +175,10 @@
++     PAGESIZE *page;
++     INT width = 0, height = 0;
++ 
+++    if(physDev->Devmode->dmPublic.dmFields & DM_PRINTQUALITY) {
+++    	physDev->logPixelsX=physDev->logPixelsY=physDev->Devmode->dmPublic.dmPrintQuality;
+++    }
+++
++     if(physDev->Devmode->dmPublic.dmFields & DM_PAPERSIZE) {
++         for(page = physDev->pi->ppd->PageSizes; page; page = page->next) {
++ 	    if(page->WinPage == physDev->Devmode->dmPublic.u1.s1.dmPaperSize)
++@@ -255,6 +259,7 @@
++ 	  "horzRes = %d, vertRes = %d\n",
++ 	  physDev->horzSize, physDev->vertSize,
++ 	  physDev->horzRes, physDev->vertRes);
+++    
++ }
++ 
++ 
++@@ -351,8 +356,8 @@
++ 
++     memcpy( physDev->Devmode, pi->Devmode, sizeof(PSDRV_DEVMODEA) );
++ 
++-    physDev->logPixelsX = physDev->pi->ppd->DefaultResolution;
++-    physDev->logPixelsY = physDev->pi->ppd->DefaultResolution;
+++    physDev->logPixelsX = physDev->pi->ppd->DefaultResolution->WinRes;
+++    physDev->logPixelsY = physDev->pi->ppd->DefaultResolution->WinRes;
++ 
++     if (output) {
++         INT len = WideCharToMultiByte( CP_ACP, 0, output, -1, NULL, 0, NULL, NULL );
++@@ -464,11 +469,12 @@
++     /* Are aspect[XY] and logPixels[XY] correct? */
++     /* Need to handle different res in x and y => fix ppd */
++     case ASPECTX:
+++    	return physDev->logPixelsX;
++     case ASPECTY:
++-        return physDev->pi->ppd->DefaultResolution;
+++        return physDev->logPixelsY;
++     case ASPECTXY:
++-        return (int)hypot( (double)physDev->pi->ppd->DefaultResolution,
++-                           (double)physDev->pi->ppd->DefaultResolution );
+++        return (int)hypot( (double)physDev->logPixelsX,
+++                           (double)physDev->logPixelsY);
++     case LOGPIXELSX:
++         return MulDiv(physDev->logPixelsX,
++ 		      physDev->Devmode->dmPublic.dmScale, 100);
++@@ -671,8 +677,13 @@
++ 
++     /* Some gimp-print ppd files don't contain a DefaultResolution line
++        set it to 300 if it's not specified */
++-    if(pi->ppd->DefaultResolution == 0)
++-        pi->ppd->DefaultResolution = 300;
+++    if(pi->ppd->DefaultResolution->WinRes == 0)
+++    {
+++        pi->ppd->DefaultResolution->Name = "300dpi";
+++        pi->ppd->DefaultResolution->FullName = "300 DPI";
+++        pi->ppd->DefaultResolution->InvocationString = "<</HWResolution[300 300]>>setpagedevice";
+++        pi->ppd->DefaultResolution->WinRes = 300;
+++    }
++ 
++     if(using_default_devmode) {
++         DWORD papersize;
++diff -ur ../wineps.drv.old/ppd.c ./ppd.c
++--- ../wineps.drv.old/ppd.c	2007-01-09 16:42:47.000000000 +0100
+++++ ./ppd.c	2007-02-01 01:31:52.000000000 +0100
++@@ -556,7 +556,7 @@
++     FILE *fp;
++     PPD *ppd;
++     PPDTuple tuple;
++-    char *default_pagesize = NULL, *default_duplex = NULL;
+++    char *default_pagesize = NULL, *default_duplex = NULL, *default_resolution = NULL;
++ 
++     TRACE("file '%s'\n", fname);
++ 
++@@ -603,12 +603,6 @@
++ 	    TRACE("ColorDevice = %d\n", (int)ppd->ColorDevice);
++ 	}
++ 
++-	else if((!strcmp("*DefaultResolution", tuple.key)) ||
++-		(!strcmp("*DefaultJCLResolution", tuple.key))) {
++-	    sscanf(tuple.value, "%d", &(ppd->DefaultResolution));
++-	    TRACE("DefaultResolution = %d\n", ppd->DefaultResolution);
++-	}
++-
++ 	else if(!strcmp("*Font", tuple.key)) {
++ 	    FONTNAME *fn;
++ 
++@@ -818,6 +812,30 @@
++ 	    TRACE("*TTRasterizer = %d\n", ppd->TTRasterizer);
++ 	}
++ 
+++	else if(!strcmp("*Resolution", tuple.key)) {
+++            RESOLUTION **res;
+++            for(res = &ppd->Resolutions; *res; res = &(*res)->next)
+++                ;
+++            *res = HeapAlloc(GetProcessHeap(), 0, sizeof(**res));
+++            (*res)->Name = tuple.option;
+++            (*res)->FullName = tuple.opttrans;
+++            (*res)->InvocationString = tuple.value;
+++	    sscanf(tuple.option, "%d", &((*res)->WinRes));
+++            (*res)->next = NULL;
+++            tuple.option = tuple.opttrans = tuple.value = NULL;
+++        }
+++
+++        else if((!strcmp("*DefaultResolution", tuple.key)) ||
+++	       (!strcmp("*DefaultJCLResolution", tuple.key))) {
+++            if(default_resolution) {
+++                WARN("Already set default resolution\n");
+++            } else {
+++                default_resolution = tuple.value;
+++                tuple.value = NULL;
+++           }
+++        }
+++
+++
++         else if(!strcmp("*Duplex", tuple.key)) {
++             DUPLEX **duplex;
++             for(duplex = &ppd->Duplexes; *duplex; duplex = &(*duplex)->next)
++@@ -878,6 +896,35 @@
++         TRACE("Setting DefaultPageSize to first in list\n");
++     }
++ 
+++    ppd->DefaultResolution = NULL;
+++    if(default_resolution) {
+++	RESOLUTION *res;
+++	for(res = ppd->Resolutions; res; res = res->next) {
+++            if(!strcmp(res->Name, default_resolution)) {
+++                ppd->DefaultResolution = res;
+++                TRACE("DefaultResolution: %s\n", res->Name);
+++                break;
+++            }
+++        }
+++        HeapFree(PSDRV_Heap, 0, default_resolution);
+++    }
+++   
+++    if(!ppd->DefaultResolution) {
+++        ppd->DefaultResolution = ppd->Resolutions;
+++        TRACE("Setting DefaultResolution to first in list\n");
+++    }
+++    
+++    if (!ppd->DefaultResolution)
+++    {
+++        RESOLUTION **res = &ppd->Resolutions;
+++        *res = HeapAlloc(GetProcessHeap(), 0, sizeof(**res));
+++        (*res)->Name = NULL; 
+++        (*res)->FullName = NULL; 
+++        (*res)->InvocationString = NULL;
+++	(*res)->WinRes=0;
+++        TRACE("Setting DefaultResolution to dummy entry\n");
+++    } 
+++
++     ppd->DefaultDuplex = NULL;
++     if(default_duplex) {
++ 	DUPLEX *duplex;
++diff -ur ../wineps.drv.old/psdrv.h ./psdrv.h
++--- ../wineps.drv.old/psdrv.h	2007-01-09 16:42:47.000000000 +0100
+++++ ./psdrv.h	2007-02-01 01:17:31.000000000 +0100
++@@ -180,6 +180,16 @@
++     struct _tagINPUTSLOT	*next;
++ } INPUTSLOT;
++ 
+++typedef struct _tagRESOLUTION {
+++    const char			*Name;
+++    const char			*FullName;
+++    const char			*InvocationString;
+++    int				WinRes;
+++    struct _tagRESOLUTION	*next;
+++} RESOLUTION;
+++
+++
+++
++ typedef enum _RASTERIZEROPTION
++   {RO_None, RO_Accept68K, RO_Type42, RO_TrueImage} RASTERIZEROPTION;
++ 
++@@ -195,7 +205,6 @@
++     char		*NickName;
++     int			LanguageLevel;
++     BOOL		ColorDevice;
++-    int			DefaultResolution;
++     signed int		LandscapeOrientation;
++     char		*JCLBegin;
++     char		*JCLToPSInterpreter;
++@@ -207,6 +216,8 @@
++     OPTION		*InstalledOptions;
++     CONSTRAINT		*Constraints;
++     INPUTSLOT		*InputSlots;
+++    RESOLUTION		*Resolutions;
+++    RESOLUTION		*DefaultResolution;
++     RASTERIZEROPTION    TTRasterizer;
++     DUPLEX              *Duplexes;
++     DUPLEX              *DefaultDuplex;
+
+
+
+From fabianx at mail.berlios.de  Thu Feb  1 05:27:25 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Thu, 1 Feb 2007 05:27:25 +0100
+Subject: [Freenx-cvs] r311 - in nx-utils/univprn.drv: . SPLFilter-0.0.1 cups
+Message-ID: <200702010427.l114RPjF021820@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-02-01 05:27:25 +0100 (Thu, 01 Feb 2007)
+New Revision: 311
+
+Added:
+   nx-utils/univprn.drv/cups/
+   nx-utils/univprn.drv/cups/ff-uniprn-pdf.sh
+   nx-utils/univprn.drv/cups/ff-uniprn.sh
+Modified:
+   nx-utils/univprn.drv/SPLFilter-0.0.1/generic.ppd
+Log:
+Added example for usage of universal printer driver with CUPS!
+
+It works!!!
+
+Just with printer FF, but anyway ...
+
+
+
+Modified: nx-utils/univprn.drv/SPLFilter-0.0.1/generic.ppd
+===================================================================
+--- nx-utils/univprn.drv/SPLFilter-0.0.1/generic.ppd	2007-02-01 01:22:55 UTC (rev 310)
++++ nx-utils/univprn.drv/SPLFilter-0.0.1/generic.ppd	2007-02-01 04:27:25 UTC (rev 311)
+@@ -6,6 +6,8 @@
+ *PCFileName:	"POSTSCRIPT.PPD"
+ *Manufacturer:	"Postscript"
+ *Product:	"(WINE v20021009)"
++*cupsFilter:    "application/vnd.cups-postscript 0 ff-uniprn-pdf.sh"
++*cupsFilter:    "application/pdf 0 ff-uniprn.sh"
+ *ModelName:     "Generic postscript printer"
+ *ShortNickName: "Generic postscript printer"
+ *NickName:      "Generic postscript printer"
+
+Added: nx-utils/univprn.drv/cups/ff-uniprn-pdf.sh
+===================================================================
+--- nx-utils/univprn.drv/cups/ff-uniprn-pdf.sh	2007-02-01 01:22:55 UTC (rev 310)
++++ nx-utils/univprn.drv/cups/ff-uniprn-pdf.sh	2007-02-01 04:27:25 UTC (rev 311)
+@@ -0,0 +1,8 @@
++#! /bin/bash
++# see http://localhost:631/spm.html#WRITING_FILTERS
++# debug info in /var/log/cups/error_log
++set -x
++# have the input at fd0 (stdin) in any case
++[ -n "$6" ] && exec <"$6"
++# prefiltering
++ps2pdf - - | /usr/lib/cups/filter/ff-uniprn.sh
+
+
+Property changes on: nx-utils/univprn.drv/cups/ff-uniprn-pdf.sh
+___________________________________________________________________
+Name: svn:executable
+   + *
+
+Added: nx-utils/univprn.drv/cups/ff-uniprn.sh
+===================================================================
+--- nx-utils/univprn.drv/cups/ff-uniprn.sh	2007-02-01 01:22:55 UTC (rev 310)
++++ nx-utils/univprn.drv/cups/ff-uniprn.sh	2007-02-01 04:27:25 UTC (rev 311)
+@@ -0,0 +1,18 @@
++#! /bin/bash
++# see http://localhost:631/spm.html#WRITING_FILTERS
++# debug info in /var/log/cups/error_log
++set -x
++# Have some dummy Xserver like Xvnc running there
++export DISPLAY=:1.0
++# have the input at fd0 (stdin) in any case
++[ -n "$6" ] && exec <"$6"
++# prefiltering
++TMPDIR=$(mktemp -d /tmp/ff-uniprn.XXXXXXXXXX) || exit 1
++(
++cd $TMPDIR
++dd bs=1k of=testdoc.pdf
++LD_LIBRARY_PATH=/usr/local/lib/ wine /home/info/ff/public/SPLFilter/SPLFilter.exe
++cat test.spl
++)
++rm -rf "$TMPDIR"
++
+
+
+Property changes on: nx-utils/univprn.drv/cups/ff-uniprn.sh
+___________________________________________________________________
+Name: svn:executable
+   + *
+
+
+
+From fabianx at mail.berlios.de  Sun Feb  4 01:54:45 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sun, 4 Feb 2007 01:54:45 +0100
+Subject: [Freenx-cvs] r312 - freenx-server/trunk
+Message-ID: <200702040054.l140sjif009182@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-02-04 01:54:44 +0100 (Sun, 04 Feb 2007)
+New Revision: 312
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxnode
+Log:
+* Fixed RDP/VNC sessions. No application should be started for that type.
+  (Patch by Bernard Cafarelli <voyageur at operamail.com>)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-02-01 04:27:25 UTC (rev 311)
++++ freenx-server/trunk/ChangeLog	2007-02-04 00:54:44 UTC (rev 312)
+@@ -24,6 +24,8 @@
+ 	* Made the NXAgent exited with exit code 1 message more verbose.
+ 	* Added support for nxipp to nxnode and nxsetup.
+ 	* Added nxcups-gethost script for automatic usage in KDE.
++	* Fixed RDP/VNC sessions. No application should be started for that type. 
++	  (Patch by Bernard Cafarelli <voyageur at operamail.com>)
+ 
+ 23.01.2007 FreeNX 0.6.0 "Juliana birthday edition"
+ 	* Opened the 0.6.0 branch.
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2007-02-01 04:27:25 UTC (rev 311)
++++ freenx-server/trunk/nxnode	2007-02-04 00:54:44 UTC (rev 312)
+@@ -252,6 +252,9 @@
+ 	#
+ 
+ 	NODE_APPLICATION=$(node_find_application "$type")
++	
++	# For rdesktop/VNC, there is no application to start
++	[ -n "$NODE_APPLICATION" ] || return
+ 
+ 	#
+ 	# Check if we want to use a mediahelper
+
+
+
+From fabianx at mail.berlios.de  Sun Feb  4 02:05:53 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sun, 4 Feb 2007 02:05:53 +0100
+Subject: [Freenx-cvs] r313 - freenx-server/trunk
+Message-ID: <200702040105.l1415rC5010066@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-02-04 02:05:52 +0100 (Sun, 04 Feb 2007)
+New Revision: 313
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxnode
+Log:
+* Added backingstore fix for older clients from Gentoo.
+  (http://bugs.gentoo.org/show_bug.cgi?id=149298)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-02-04 00:54:44 UTC (rev 312)
++++ freenx-server/trunk/ChangeLog	2007-02-04 01:05:52 UTC (rev 313)
+@@ -26,6 +26,8 @@
+ 	* Added nxcups-gethost script for automatic usage in KDE.
+ 	* Fixed RDP/VNC sessions. No application should be started for that type. 
+ 	  (Patch by Bernard Cafarelli <voyageur at operamail.com>)
++	* Added backingstore fix for older clients from Gentoo.
++	  (http://bugs.gentoo.org/show_bug.cgi?id=149298)
+ 
+ 23.01.2007 FreeNX 0.6.0 "Juliana birthday edition"
+ 	* Opened the 0.6.0 branch.
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2007-02-04 00:54:44 UTC (rev 312)
++++ freenx-server/trunk/nxnode	2007-02-04 01:05:52 UTC (rev 313)
+@@ -412,7 +412,11 @@
+ 	# backingstore
+ 	
+ 	B=""
+-	[ -n "$backingstore" -a "$ENABLE_2_0_0_BACKEND" != "1" ] && B="-bs $backingstore"
++	if [ -n "$backingstore" -a "$ENABLE_2_0_0_BACKEND" != "1" ]
++	then
++		[ "$backingstore" != 1 ] && B="-bs $backingstore"
++		[ "$backingstore" = 1 ] && B="+bs"
++	fi
+ 
+ 	# geometry
+ 	
+
+
+
+From fabianx at mail.berlios.de  Tue Feb  6 08:15:12 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 6 Feb 2007 08:15:12 +0100
+Subject: [Freenx-cvs] r314 - in nx-utils: . nxspeex
+Message-ID: <200702060715.l167FCUX005408@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-02-06 08:15:11 +0100 (Tue, 06 Feb 2007)
+New Revision: 314
+
+Added:
+   nx-utils/nxspeex/
+   nx-utils/nxspeex/README
+   nx-utils/nxspeex/nxspeex.c
+Log:
+* nxspeex.c - A nx esd proxy for low bandwidth speex encoded transmission of data.
+
+Transparent compression/decompression of esd data via speex to allow low bandwidth usage.
+
+
+
+Added: nx-utils/nxspeex/README
+===================================================================
+--- nx-utils/nxspeex/README	2007-02-04 01:05:52 UTC (rev 313)
++++ nx-utils/nxspeex/README	2007-02-06 07:15:11 UTC (rev 314)
+@@ -0,0 +1,38 @@
++nxspeex - A simple nx esd proxy for low bandwidth speex encoded transmission of data.
++=====================================================================================
++
++Ok here is how to use it:
++
++Building
++--------
++
++- Install libspeex development headers and libspeex library.
++- Install libesd development headers and libesd library.
++- Build nxspeex for client and server:
++	gcc -Wall -o nxspeex nxspeex.c -lesd -lspeex
++
++Using
++-----
++
++- Install netpipes on server and client
++- Start a nxsession with normal ESD support
++
++On server:
++	faucet <someport> --fd 6 hose localhost <$DISPLAY+7000> --fd 7 nxspeex encode &
++
++	Start application:
++	
++	ESPEAKER=127.0.0.1:<someport> mpg123 -o esd somefile.mp3
++	ESPEAKER=127.0.0.1:<someport> esddsp <someossapp>
++
++On client:
++
++	ps aux | grep nxesd
++	# write down port and start nxesd on another port
++	killall nxesd
++	/usr/NX/bin/nxesd -public -tcp -nobeeps -port <noted port+1>
++	faucet <noted port> --fd 6 hose localhost <noted port + 1> --fd 7 nxspeex
++
++Thats it!
++
++Of course this might be easily and transparently incorporated into nxcomp/Loop.cpp in the future.
+
+Added: nx-utils/nxspeex/nxspeex.c
+===================================================================
+--- nx-utils/nxspeex/nxspeex.c	2007-02-04 01:05:52 UTC (rev 313)
++++ nx-utils/nxspeex/nxspeex.c	2007-02-06 07:15:11 UTC (rev 314)
+@@ -0,0 +1,413 @@
++/*
++ * nxspeex.c - A nx esd proxy for low bandwidth speex encoded transmission of data.
++ *
++ * Copyright (c) 2007 by Fabian Franz <freenx at fabian-franz.de>.
++ *
++ * License: GPL, v2
++ *
++ */
++
++#include <unistd.h>
++#include <stdlib.h>
++#include <stdio.h>
++#include <esd.h>
++#include <sys/types.h>
++#include <sys/socket.h>
++#include <sys/time.h>
++#include <time.h>
++
++#include <speex/speex.h>
++#include <speex/speex_stereo.h>
++#include <speex/speex_callbacks.h>
++
++int esd_set_socket_buffers( int sock, int src_format,
++		            int src_rate, int base_rate );
++
++int do_fwd(int from, int to, void* buf, size_t count)
++{
++        ssize_t len;
++
++	len=read(from, buf, count);
++        return write(to, buf, len);
++}
++
++int do_fwd_all(int from, int to, void* buf, size_t count)
++{
++	size_t erg, len=0;
++	
++	do
++	{
++		erg=do_fwd(from, to, buf+len, count-len);
++		if (erg <= 0)
++			break;
++		len+=erg;
++	}
++	while (len < count);
++	
++	return len;
++}
++
++int do_fwd_noblock(int from, int to, void* buf, size_t count)
++{
++	size_t erg, len=0, olen=0;
++	
++	do
++	{
++		erg=read(from, buf+len, count-len);
++		if (erg <= 0)
++			return len;
++		len+=erg;
++	}
++	while (len < count);
++
++	do
++	{
++		erg=write(to, buf+olen, count-olen);
++		if (erg <= 0)
++			break;
++		olen+=erg;
++	}
++	while (olen < count);
++	
++	return olen;
++}
++
++void do_sockopts(int sock, int buf_size)
++{
++	int sz=buf_size;
++	setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &sz, sizeof(sz));
++	setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &sz, sizeof(sz));
++}
++
++int do_read_complete(int from, void* buf, size_t count)
++{
++	size_t erg, len=0;
++	
++	do
++	{
++		erg=read(from, buf+len, count-len);
++		if (erg <= 0)
++			break;
++		len+=erg;
++	}
++	while (len < count);
++
++	return len;
++}
++
++#define MAX_FRAME_SIZE 2000
++#define MAX_FRAME_BYTES 2000
++
++/* After how many frames should we resync with server? */
++#define DO_SYNC_SEQ	20
++
++int do_read_samples(int from, short* sbuf, int frame_size, int bits)
++{
++	unsigned char buf[2*MAX_FRAME_SIZE+1];
++	short *s;
++	int i;	
++	size_t erg, len=0, count=frame_size*(bits/8);
++
++	if (frame_size > 2*MAX_FRAME_SIZE)
++	{
++		fprintf(stderr, "Error: frame_size too big!");
++		exit(1);
++	}
++	
++	do
++	{
++		erg=read(from, buf+len, count-len);
++		if (erg <= 0)
++			return len;
++		len+=erg;
++	}
++	while (len < count);
++
++	/* Now do the conversion */
++
++	s=(short*)buf;
++
++	/* FIXME: Unsupported */
++	if (bits == 8)
++	{
++		fprintf(stderr, "8 Bits unsupported for now.");
++		return 0;
++	}
++
++	/* FIXME: Endian? */
++	for (i=0;i<frame_size;i++)
++		sbuf[i]=(short)s[i];
++
++	return frame_size;
++}
++
++int do_encode(int client, int server, esd_format_t format, int speed, char* ident)
++{
++	/* Encoder specific variables */
++	void *enc_state;
++	SpeexBits bits;
++	const SpeexMode* mode = NULL;
++	int frame_size, frame_size2;
++	int seqNr = 0;
++	
++	/* Configuration variables */
++	/* FIXME: Depend on NX setting */
++	int modeID = SPEEX_MODEID_UWB;
++	int complexity=3;
++	
++	/* Encoder initialisation */
++	speex_bits_init(&bits);
++	mode = speex_lib_get_mode (modeID);
++	enc_state=speex_encoder_init(mode);
++	
++	speex_encoder_ctl(enc_state, SPEEX_SET_SAMPLING_RATE, &speed);
++	speex_encoder_ctl(enc_state, SPEEX_SET_COMPLEXITY, &complexity);
++	speex_encoder_ctl(enc_state, SPEEX_GET_FRAME_SIZE, &frame_size);
++
++	frame_size2=frame_size*((format & ESD_STEREO)?2:1);
++	
++	/* Lower the latency */
++	
++	//do_sockopts(client, frame_size2 * (((format & ESD_BITS16)?16:8) / 8) * 4);
++	esd_set_socket_buffers(client, format, speed, 44100);
++	do_sockopts(server, 200);
++
++	/* FIXME: Add denoise */
++
++	/* Main encoding loop */
++
++	while (1)
++	{
++		int nbBytes;
++		int newSeq;
++		short input[MAX_FRAME_SIZE+1];
++		char output[MAX_FRAME_BYTES+1];
++
++		if (do_read_samples(client, input, frame_size2, ((format & ESD_BITS16)?16:8)) != frame_size2)
++			break;
++		
++		speex_bits_reset(&bits); 
++		if (format & ESD_STEREO)
++			speex_encode_stereo_int(input, frame_size, &bits);
++			
++		speex_encode_int(enc_state, input, &bits);
++		nbBytes = speex_bits_write(&bits, output, MAX_FRAME_BYTES);
++	
++		if (write(server, &seqNr, sizeof(seqNr)) != sizeof(seqNr))
++			break;
++		fprintf(stderr, "Encoder SeqNr: %d\n", seqNr);
++		
++		if (seqNr % DO_SYNC_SEQ == 0)
++		{
++			if (do_read_complete(server, &newSeq, sizeof(newSeq)) != sizeof(newSeq))
++				break;
++			if (seqNr != newSeq)
++				fprintf(stderr,"Warning: Seq Nr mismatch!\n");
++		}
++
++		seqNr++;
++		if (write(server, &nbBytes, sizeof(nbBytes)) != sizeof(nbBytes))
++			break;
++		if (write(server, output, nbBytes) != nbBytes)
++			break;
++	}
++
++	/* Encoder shutdown */
++	speex_bits_destroy(&bits); 
++
++	speex_encoder_destroy(enc_state);
++
++	return 0;
++}
++
++int do_write_samples(int to, short* sbuf, int frame_size, int bits)
++{
++	unsigned char buf[2*MAX_FRAME_SIZE+1];
++	short *s;
++	int i;	
++	size_t erg, len=0, count=frame_size*(bits/8);
++	
++	s=(short*)buf;
++	
++	/* FIXME: Unsupported */
++	if (bits == 8)
++	{
++		fprintf(stderr, "8 Bits unsupported for now.");
++		return 0;
++	}
++
++	/* FIXME: Endian? */
++	for (i=0;i<frame_size;i++)
++		s[i]=(short)sbuf[i];
++
++	if (frame_size > 2*MAX_FRAME_SIZE)
++	{
++		fprintf(stderr, "Error: frame_size too big!");
++		exit(1);
++	}
++	
++	do
++	{
++		erg=write(to, buf+len, count-len);
++		if (erg <= 0)
++			return len;
++		len+=erg;
++	}
++	while (len < count);
++
++	/* Now do the conversion */
++
++	return frame_size;
++}
++
++int do_decode(int client, int server, esd_format_t format, int speed, char* ident)
++{
++	/* Decoder specific variables */
++	void *dec_state;
++	SpeexBits bits;
++	const SpeexMode* mode = NULL;
++	int frame_size, frame_size2;
++	SpeexCallback callback;
++	SpeexStereoState stereo = SPEEX_STEREO_STATE_INIT;
++	
++	/* Configuration variables */
++	/* FIXME: Depend on NX setting and read from network */
++	int modeID = SPEEX_MODEID_UWB;
++	
++	/* Encoder initialisation */
++	speex_bits_init(&bits);
++	mode = speex_lib_get_mode (modeID);
++	dec_state=speex_decoder_init(mode);
++	
++	speex_decoder_ctl(dec_state, SPEEX_SET_SAMPLING_RATE, &speed);
++
++	if (format & ESD_STEREO)
++	{
++		callback.callback_id = SPEEX_INBAND_STEREO;
++		callback.func = speex_std_stereo_request_handler;
++		callback.data = &stereo;
++		speex_decoder_ctl(dec_state, SPEEX_SET_HANDLER, &callback);
++	}
++	speex_decoder_ctl(dec_state, SPEEX_GET_FRAME_SIZE, &frame_size);
++	
++	frame_size2=frame_size*((format & ESD_STEREO)?2:1);
++
++	/* Lower the latency a bit */
++	//do_sockopts(client, 200);
++	do_sockopts(server, frame_size2 * (((format & ESD_BITS16)?16:8) / 8));
++	//esd_set_socket_buffers(server, format, speed, 44100);
++
++	/* Main decoding loop */
++
++	while (1)
++	{
++		int seqNr = 0;
++		int nbBytes;
++		char input[MAX_FRAME_BYTES+1];
++		short output[MAX_FRAME_SIZE+1];
++		
++		if (do_read_complete(client, &seqNr, sizeof(seqNr)) != sizeof(seqNr))
++			break;
++		
++		fprintf(stderr, "SeqNr: %d\n", seqNr);
++
++		if (seqNr % DO_SYNC_SEQ == 0)
++			if (write(client, &seqNr, sizeof(seqNr)) != sizeof(seqNr))
++				break;
++		
++		if (do_read_complete(client, &nbBytes, sizeof(nbBytes)) != sizeof(nbBytes))
++			break;
++		if (do_read_complete(client, input, nbBytes) != nbBytes)
++			break;
++
++		speex_bits_read_from(&bits, input, nbBytes); 
++		speex_decode_int(dec_state, &bits, output);
++		
++		if (format & ESD_STEREO)
++			speex_decode_stereo_int(output, frame_size, &stereo);
++	
++		if (do_write_samples(server, output, frame_size2, ((format & ESD_BITS16)?16:8)) != frame_size2)
++			break;
++	}
++
++	/* Decoder shutdown */
++	speex_bits_destroy(&bits); 
++
++	speex_decoder_destroy(dec_state);
++
++	return 0;
++}
++
++int do_child(int client, int server, int encode)
++{
++	esd_format_t format;
++	int speed;
++	char ident[ESD_NAME_MAX+1];
++
++	read(client, &format, sizeof(format));
++	read(client, &speed, sizeof(speed));
++	read(client, ident, ESD_NAME_MAX);
++
++	write(server, &format, sizeof(format));
++	write(server, &speed, sizeof(speed));
++	write(server, ident, ESD_NAME_MAX);
++
++	if (encode)
++		return do_encode(client, server, format, speed, ident);
++	else
++		return do_decode(client, server, format, speed, ident);
++	
++	/* Should never get here */
++	
++	return -1;
++}
++
++int main(int argc, char** argv)
++{
++	char buf[255];
++	int reply;
++	int proto;
++	
++	int client=6;
++	int server=7;
++	
++
++        do_fwd(client, server, buf, ESD_KEY_LEN);
++        do_fwd(client, server, buf, sizeof(int));
++
++	do_fwd(server, client, &reply, sizeof(reply));
++	//reply=1;
++	//write(client, &reply, sizeof(reply));
++
++	/* Server will close connection anyway */
++	if (reply != 1)
++		exit(1);
++
++	while (read(client, &proto, sizeof(proto)) == sizeof(proto))
++	{
++		write(server, &proto, sizeof(proto));
++
++		fprintf(stderr, "proto = %d\n", proto);
++
++	 	switch(proto)
++		{
++			case ESD_PROTO_SERVER_INFO:
++				do_fwd(client, server, buf, sizeof(int));
++				do_fwd(server, client, buf, sizeof(int)+sizeof(esd_format_t)+sizeof(int));
++				break;
++			case ESD_PROTO_LATENCY:
++				do_fwd(server, client, buf, sizeof(int));
++				break;
++			case ESD_PROTO_STREAM_PLAY:
++				do_child(client, server, (argc > 1 && argv[1][0] == 'e'));
++				exit(0);
++				break;
++			default:
++				close(client);
++				close(server);
++				exit(1);
++		}
++	}
++
++	exit(1);
++}
+
+
+
+From fabianx at mail.berlios.de  Tue Feb  6 08:23:29 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 6 Feb 2007 08:23:29 +0100
+Subject: [Freenx-cvs] r315 - nx-utils/nxspeex
+Message-ID: <200702060723.l167NTvY005820@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-02-06 08:23:29 +0100 (Tue, 06 Feb 2007)
+New Revision: 315
+
+Modified:
+   nx-utils/nxspeex/nxspeex.c
+Log:
+- Made seqNr unsigned (prevent underflow).
+
+- Some cleanup.
+
+
+
+Modified: nx-utils/nxspeex/nxspeex.c
+===================================================================
+--- nx-utils/nxspeex/nxspeex.c	2007-02-06 07:15:11 UTC (rev 314)
++++ nx-utils/nxspeex/nxspeex.c	2007-02-06 07:23:29 UTC (rev 315)
+@@ -20,6 +20,14 @@
+ #include <speex/speex_stereo.h>
+ #include <speex/speex_callbacks.h>
+ 
++#define MAX_FRAME_SIZE 2000
++#define MAX_FRAME_BYTES 2000
++
++/* After how many frames should we resync with server? */
++#define DO_SYNC_SEQ	20
++
++/* #define DEBUG 1 */
++
+ int esd_set_socket_buffers( int sock, int src_format,
+ 		            int src_rate, int base_rate );
+ 
+@@ -95,12 +103,7 @@
+ 	return len;
+ }
+ 
+-#define MAX_FRAME_SIZE 2000
+-#define MAX_FRAME_BYTES 2000
+ 
+-/* After how many frames should we resync with server? */
+-#define DO_SYNC_SEQ	20
+-
+ int do_read_samples(int from, short* sbuf, int frame_size, int bits)
+ {
+ 	unsigned char buf[2*MAX_FRAME_SIZE+1];
+@@ -148,7 +151,7 @@
+ 	SpeexBits bits;
+ 	const SpeexMode* mode = NULL;
+ 	int frame_size, frame_size2;
+-	int seqNr = 0;
++	unsigned int seqNr = 0;
+ 	
+ 	/* Configuration variables */
+ 	/* FIXME: Depend on NX setting */
+@@ -179,7 +182,7 @@
+ 	while (1)
+ 	{
+ 		int nbBytes;
+-		int newSeq;
++		unsigned int newSeq;
+ 		short input[MAX_FRAME_SIZE+1];
+ 		char output[MAX_FRAME_BYTES+1];
+ 
+@@ -195,15 +198,13 @@
+ 	
+ 		if (write(server, &seqNr, sizeof(seqNr)) != sizeof(seqNr))
+ 			break;
++#ifdef DEBUG
+ 		fprintf(stderr, "Encoder SeqNr: %d\n", seqNr);
++#endif
+ 		
+ 		if (seqNr % DO_SYNC_SEQ == 0)
+-		{
+ 			if (do_read_complete(server, &newSeq, sizeof(newSeq)) != sizeof(newSeq))
+ 				break;
+-			if (seqNr != newSeq)
+-				fprintf(stderr,"Warning: Seq Nr mismatch!\n");
+-		}
+ 
+ 		seqNr++;
+ 		if (write(server, &nbBytes, sizeof(nbBytes)) != sizeof(nbBytes))
+@@ -301,15 +302,16 @@
+ 
+ 	while (1)
+ 	{
+-		int seqNr = 0;
++		unsigned int seqNr = 0;
+ 		int nbBytes;
+ 		char input[MAX_FRAME_BYTES+1];
+ 		short output[MAX_FRAME_SIZE+1];
+ 		
+ 		if (do_read_complete(client, &seqNr, sizeof(seqNr)) != sizeof(seqNr))
+ 			break;
+-		
++#ifdef DEBUG	
+ 		fprintf(stderr, "SeqNr: %d\n", seqNr);
++#endif
+ 
+ 		if (seqNr % DO_SYNC_SEQ == 0)
+ 			if (write(client, &seqNr, sizeof(seqNr)) != sizeof(seqNr))
+@@ -387,7 +389,9 @@
+ 	{
+ 		write(server, &proto, sizeof(proto));
+ 
++#ifdef DEBUG
+ 		fprintf(stderr, "proto = %d\n", proto);
++#endif
+ 
+ 	 	switch(proto)
+ 		{
+
+
+
+From fabianx at mail.berlios.de  Tue Feb  6 08:36:23 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 6 Feb 2007 08:36:23 +0100
+Subject: [Freenx-cvs] r316 - nx-utils/nxspeex
+Message-ID: <200702060736.l167aNXv006488@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-02-06 08:36:18 +0100 (Tue, 06 Feb 2007)
+New Revision: 316
+
+Modified:
+   nx-utils/nxspeex/nxspeex.c
+Log:
+Added denoise filter and enabled it by default.
+
+
+
+Modified: nx-utils/nxspeex/nxspeex.c
+===================================================================
+--- nx-utils/nxspeex/nxspeex.c	2007-02-06 07:23:29 UTC (rev 315)
++++ nx-utils/nxspeex/nxspeex.c	2007-02-06 07:36:18 UTC (rev 316)
+@@ -19,6 +19,7 @@
+ #include <speex/speex.h>
+ #include <speex/speex_stereo.h>
+ #include <speex/speex_callbacks.h>
++#include <speex/speex_preprocess.h>
+ 
+ #define MAX_FRAME_SIZE 2000
+ #define MAX_FRAME_BYTES 2000
+@@ -150,6 +151,7 @@
+ 	void *enc_state;
+ 	SpeexBits bits;
+ 	const SpeexMode* mode = NULL;
++	SpeexPreprocessState *preprocess = NULL;
+ 	int frame_size, frame_size2;
+ 	unsigned int seqNr = 0;
+ 	
+@@ -157,6 +159,7 @@
+ 	/* FIXME: Depend on NX setting */
+ 	int modeID = SPEEX_MODEID_UWB;
+ 	int complexity=3;
++	int denoise_enabled=1;
+ 	
+ 	/* Encoder initialisation */
+ 	speex_bits_init(&bits);
+@@ -175,7 +178,11 @@
+ 	esd_set_socket_buffers(client, format, speed, 44100);
+ 	do_sockopts(server, 200);
+ 
+-	/* FIXME: Add denoise */
++	if (denoise_enabled)
++	{
++		preprocess = speex_preprocess_state_init(frame_size, speed);
++		speex_preprocess_ctl(preprocess, SPEEX_PREPROCESS_SET_DENOISE, &denoise_enabled);
++	}
+ 
+ 	/* Main encoding loop */
+ 
+@@ -192,6 +199,9 @@
+ 		speex_bits_reset(&bits); 
+ 		if (format & ESD_STEREO)
+ 			speex_encode_stereo_int(input, frame_size, &bits);
++
++		if (preprocess)
++			speex_preprocess(preprocess, input, NULL);
+ 			
+ 		speex_encode_int(enc_state, input, &bits);
+ 		nbBytes = speex_bits_write(&bits, output, MAX_FRAME_BYTES);
+
+
+
+From fabianx at mail.berlios.de  Tue Feb  6 08:52:49 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 6 Feb 2007 08:52:49 +0100
+Subject: [Freenx-cvs] r317 - nx-utils/nxspeex
+Message-ID: <200702060752.l167qnxM007915@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-02-06 08:52:48 +0100 (Tue, 06 Feb 2007)
+New Revision: 317
+
+Modified:
+   nx-utils/nxspeex/nxspeex.c
+Log:
+* Cleanup of some unused functions.
+
+* Added send of do_sync_seq variable to decoder.
+
+
+
+Modified: nx-utils/nxspeex/nxspeex.c
+===================================================================
+--- nx-utils/nxspeex/nxspeex.c	2007-02-06 07:36:18 UTC (rev 316)
++++ nx-utils/nxspeex/nxspeex.c	2007-02-06 07:52:48 UTC (rev 317)
+@@ -25,7 +25,7 @@
+ #define MAX_FRAME_BYTES 2000
+ 
+ /* After how many frames should we resync with server? */
+-#define DO_SYNC_SEQ	20
++#define DEFAULT_DO_SYNC_SEQ	20
+ 
+ /* #define DEBUG 1 */
+ 
+@@ -40,47 +40,6 @@
+         return write(to, buf, len);
+ }
+ 
+-int do_fwd_all(int from, int to, void* buf, size_t count)
+-{
+-	size_t erg, len=0;
+-	
+-	do
+-	{
+-		erg=do_fwd(from, to, buf+len, count-len);
+-		if (erg <= 0)
+-			break;
+-		len+=erg;
+-	}
+-	while (len < count);
+-	
+-	return len;
+-}
+-
+-int do_fwd_noblock(int from, int to, void* buf, size_t count)
+-{
+-	size_t erg, len=0, olen=0;
+-	
+-	do
+-	{
+-		erg=read(from, buf+len, count-len);
+-		if (erg <= 0)
+-			return len;
+-		len+=erg;
+-	}
+-	while (len < count);
+-
+-	do
+-	{
+-		erg=write(to, buf+olen, count-olen);
+-		if (erg <= 0)
+-			break;
+-		olen+=erg;
+-	}
+-	while (olen < count);
+-	
+-	return olen;
+-}
+-
+ void do_sockopts(int sock, int buf_size)
+ {
+ 	int sz=buf_size;
+@@ -154,6 +113,7 @@
+ 	SpeexPreprocessState *preprocess = NULL;
+ 	int frame_size, frame_size2;
+ 	unsigned int seqNr = 0;
++	unsigned int do_sync_seq=DEFAULT_DO_SYNC_SEQ;
+ 	
+ 	/* Configuration variables */
+ 	/* FIXME: Depend on NX setting */
+@@ -184,6 +144,10 @@
+ 		speex_preprocess_ctl(preprocess, SPEEX_PREPROCESS_SET_DENOISE, &denoise_enabled);
+ 	}
+ 
++	/* Send do_sync_seq to decoder */
++	if (write(server, &do_sync_seq, sizeof(do_sync_seq)) != sizeof(do_sync_seq))
++		goto out;
++
+ 	/* Main encoding loop */
+ 
+ 	while (1)
+@@ -223,6 +187,7 @@
+ 			break;
+ 	}
+ 
++out:
+ 	/* Encoder shutdown */
+ 	speex_bits_destroy(&bits); 
+ 
+@@ -280,6 +245,7 @@
+ 	int frame_size, frame_size2;
+ 	SpeexCallback callback;
+ 	SpeexStereoState stereo = SPEEX_STEREO_STATE_INIT;
++	unsigned int do_sync_seq;
+ 	
+ 	/* Configuration variables */
+ 	/* FIXME: Depend on NX setting and read from network */
+@@ -307,6 +273,11 @@
+ 	//do_sockopts(client, 200);
+ 	do_sockopts(server, frame_size2 * (((format & ESD_BITS16)?16:8) / 8));
+ 	//esd_set_socket_buffers(server, format, speed, 44100);
++	//
++	
++	/* Get do_sync_seq from encoder */
++	if (do_read_complete(client, &do_sync_seq, sizeof(do_sync_seq)) != sizeof(do_sync_seq))
++		goto out;
+ 
+ 	/* Main decoding loop */
+ 
+@@ -323,7 +294,7 @@
+ 		fprintf(stderr, "SeqNr: %d\n", seqNr);
+ #endif
+ 
+-		if (seqNr % DO_SYNC_SEQ == 0)
++		if (seqNr % do_sync_seq == 0)
+ 			if (write(client, &seqNr, sizeof(seqNr)) != sizeof(seqNr))
+ 				break;
+ 		
+@@ -342,6 +313,7 @@
+ 			break;
+ 	}
+ 
++out:
+ 	/* Decoder shutdown */
+ 	speex_bits_destroy(&bits); 
+ 
+
+
+
+From fabianx at mail.berlios.de  Tue Feb  6 08:54:21 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 6 Feb 2007 08:54:21 +0100
+Subject: [Freenx-cvs] r318 - nx-utils/nxspeex
+Message-ID: <200702060754.l167sL5Z007982@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-02-06 08:54:21 +0100 (Tue, 06 Feb 2007)
+New Revision: 318
+
+Modified:
+   nx-utils/nxspeex/nxspeex.c
+Log:
+* Forgot one occurence of static definition.
+
+
+
+Modified: nx-utils/nxspeex/nxspeex.c
+===================================================================
+--- nx-utils/nxspeex/nxspeex.c	2007-02-06 07:52:48 UTC (rev 317)
++++ nx-utils/nxspeex/nxspeex.c	2007-02-06 07:54:21 UTC (rev 318)
+@@ -176,7 +176,7 @@
+ 		fprintf(stderr, "Encoder SeqNr: %d\n", seqNr);
+ #endif
+ 		
+-		if (seqNr % DO_SYNC_SEQ == 0)
++		if (seqNr % do_sync_seq == 0)
+ 			if (do_read_complete(server, &newSeq, sizeof(newSeq)) != sizeof(newSeq))
+ 				break;
+ 
+
+
+
+From fabianx at mail.berlios.de  Tue Feb  6 09:23:08 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 6 Feb 2007 09:23:08 +0100
+Subject: [Freenx-cvs] r319 - nx-utils/nxspeex
+Message-ID: <200702060823.l168N77h009384@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-02-06 09:23:07 +0100 (Tue, 06 Feb 2007)
+New Revision: 319
+
+Modified:
+   nx-utils/nxspeex/README
+Log:
+Added next steps to make nxspeex less latency dependent.
+
+
+
+Modified: nx-utils/nxspeex/README
+===================================================================
+--- nx-utils/nxspeex/README	2007-02-06 07:54:21 UTC (rev 318)
++++ nx-utils/nxspeex/README	2007-02-06 08:23:07 UTC (rev 319)
+@@ -36,3 +36,9 @@
+ Thats it!
+ 
+ Of course this might be easily and transparently incorporated into nxcomp/Loop.cpp in the future.
++
++Note:
++
++Its not yet perfect, as it depends on latency being quite low at the moment.
++
++To remove this limitation, nxspeex should check via select if there is a heartbeat and just if it can't find one in a certain latency limit, do the real read and resync.
+
+
+
+From fabianx at mail.berlios.de  Tue Feb  6 12:34:05 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 6 Feb 2007 12:34:05 +0100
+Subject: [Freenx-cvs] r320 - nx-utils/nxspeex
+Message-ID: <200702061134.l16BY5ks000116@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-02-06 12:34:03 +0100 (Tue, 06 Feb 2007)
+New Revision: 320
+
+Modified:
+   nx-utils/nxspeex/README
+Log:
+Added some more issues with current version.
+
+
+
+Modified: nx-utils/nxspeex/README
+===================================================================
+--- nx-utils/nxspeex/README	2007-02-06 08:23:07 UTC (rev 319)
++++ nx-utils/nxspeex/README	2007-02-06 11:34:03 UTC (rev 320)
+@@ -39,6 +39,12 @@
+ 
+ Note:
+ 
++- No 8 bit files are supported until now.
++
++- ESD_MIXER and other ESD commands are just discarded.
++
++- Latency issues:
++
+ Its not yet perfect, as it depends on latency being quite low at the moment.
+ 
+ To remove this limitation, nxspeex should check via select if there is a heartbeat and just if it can't find one in a certain latency limit, do the real read and resync.
+
+
+
+From fabianx at mail.berlios.de  Tue Feb  6 21:23:22 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 6 Feb 2007 21:23:22 +0100
+Subject: [Freenx-cvs] r321 - freenx-server/trunk
+Message-ID: <200702062023.l16KNMfp021862@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-02-06 21:23:15 +0100 (Tue, 06 Feb 2007)
+New Revision: 321
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxnode
+Log:
+Fixed VNC sessions.
+
+The %3A -> : conversion needed to be done.
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-02-06 11:34:03 UTC (rev 320)
++++ freenx-server/trunk/ChangeLog	2007-02-06 20:23:15 UTC (rev 321)
+@@ -28,6 +28,7 @@
+ 	  (Patch by Bernard Cafarelli <voyageur at operamail.com>)
+ 	* Added backingstore fix for older clients from Gentoo.
+ 	  (http://bugs.gentoo.org/show_bug.cgi?id=149298)
++	* Fixed VNC sessions.
+ 
+ 23.01.2007 FreeNX 0.6.0 "Juliana birthday edition"
+ 	* Opened the 0.6.0 branch.
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2007-02-06 11:34:03 UTC (rev 320)
++++ freenx-server/trunk/nxnode	2007-02-06 20:23:15 UTC (rev 321)
+@@ -969,7 +969,7 @@
+ 	sync=$(getparam sync)
+ 	samba=$(getparam samba)
+ 	cups=$(getparam cups)
+-	agent_server=$(getparam agent_server)
++	agent_server=$(getparam agent_server | sed 's/%3A/:/g')
+ 	agent_user=$(getparam agent_user)
+ 	agent_password=$(getparam agent_password)
+ 	agent_domain=$(getparam agent_domain)
+
+
+
+From fabianx at mail.berlios.de  Wed Feb  7 16:45:35 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Wed, 7 Feb 2007 16:45:35 +0100
+Subject: [Freenx-cvs] r322 - nx-utils/nxspeex
+Message-ID: <200702071545.l17FjZwx031070@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-02-07 16:45:35 +0100 (Wed, 07 Feb 2007)
+New Revision: 322
+
+Added:
+   nx-utils/nxspeex/nxvorbis.c
+Log:
+Added nxvorbis esd proxy.
+
+
+
+Added: nx-utils/nxspeex/nxvorbis.c
+===================================================================
+--- nx-utils/nxspeex/nxvorbis.c	2007-02-06 20:23:15 UTC (rev 321)
++++ nx-utils/nxspeex/nxvorbis.c	2007-02-07 15:45:35 UTC (rev 322)
+@@ -0,0 +1,549 @@
++/*
++ * nxvorbis.c - A nx esd proxy for low bandwidth vorbis encoded transmission of data.
++ *
++ * Copyright (c) 2007 by Fabian Franz <freenx at fabian-franz.de>.
++ *
++ * License: GPL, v2
++ *
++ */
++
++#include <unistd.h>
++#include <stdlib.h>
++#include <stdio.h>
++#include <esd.h>
++#include <sys/types.h>
++#include <sys/socket.h>
++#include <sys/time.h>
++#include <time.h>
++
++#include <vorbis/codec.h>
++#include <vorbis/vorbisenc.h>
++
++#define READSIZE 1024
++
++/* After how many frames should we resync with server? */
++#define DEFAULT_DO_SYNC_SEQ	20
++
++/* #define DEBUG 1 */
++
++int esd_set_socket_buffers( int sock, int src_format,
++		            int src_rate, int base_rate );
++
++int do_fwd(int from, int to, void* buf, size_t count)
++{
++        ssize_t len;
++
++	len=read(from, buf, count);
++        return write(to, buf, len);
++}
++
++typedef struct {
++  ogg_int64_t  bytes;
++  ogg_int64_t  b_o_s;
++  ogg_int64_t  e_o_s;
++
++  ogg_int64_t  granulepos;
++
++  ogg_int64_t  packetno;
++
++} nx_ogg_packet;
++
++int do_read_complete(int from, void* buf, size_t count);
++
++int do_read_op(int from, ogg_packet* op)
++{
++	nx_ogg_packet nxop;
++
++	if (do_read_complete(from, &nxop, sizeof(nxop)) != sizeof(nxop))
++		return 0;
++
++	op->bytes=nxop.bytes;
++	op->b_o_s=nxop.b_o_s;
++	op->granulepos=nxop.granulepos;
++	op->packetno=nxop.packetno;
++
++	op->packet=malloc(op->bytes+1);
++
++	if (do_read_complete(from, op->packet, op->bytes) != op->bytes)
++		return 0;
++	return 1;
++}
++
++int do_write_op(int to, ogg_packet* op)
++{
++	nx_ogg_packet nxop;
++
++	nxop.bytes=op->bytes;
++	nxop.b_o_s=op->b_o_s;
++	nxop.granulepos=op->granulepos;
++	nxop.packetno=op->packetno;
++	
++	if (write(to, &nxop, sizeof(nxop)) != sizeof(nxop))
++		return 0;
++	if (write(to, op->packet, op->bytes) != op->bytes)
++		return 0;
++	return 1;
++}
++
++void do_sockopts(int sock, int buf_size)
++{
++	int sz=buf_size;
++	setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &sz, sizeof(sz));
++	setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &sz, sizeof(sz));
++}
++
++int do_read_complete(int from, void* buf, size_t count)
++{
++	size_t erg, len=0;
++	
++	do
++	{
++		erg=read(from, buf+len, count-len);
++		if (erg <= 0)
++			break;
++		len+=erg;
++	}
++	while (len < count);
++
++	return len;
++}
++
++
++int do_read_samples(int from, float** buffer, int samples, esd_format_t format)
++{
++	int i,j;
++	int samplesize=(format & ESD_BITS16)?16:8;
++	int channels=(format & ESD_STEREO)?2:1;
++
++        int sampbyte = samplesize / 8;
++        signed char *buf = alloca(samples*sampbyte*channels);
++	size_t erg, len=0, count=samples*sampbyte*channels;
++
++	do
++	{
++		erg=read(from, buf+len, count-len);
++		if (erg <= 0)
++			return len / (sampbyte*channels);
++		len+=erg;
++	}
++	while (len < count);
++
++	/* Now do the conversion */
++
++	if (samplesize == 16)
++	{
++		/* FIXME: Big endian */
++		for(i = 0; i < samples; i++)
++			for(j=0; j < channels; j++)
++				buffer[j][i] = ((buf[i*2*channels + 2*j + 1]<<8) | 
++							(buf[i*2*channels + 2*j] & 0xff))/32768.0f;
++	}
++	else 
++	{
++		fprintf(stderr, "8 Bits unsupported for now.");
++		return 0;
++#if 0
++                unsigned char *bufu = (unsigned char *)buf;
++		for(i = 0; i < samples; i++)
++			for(j=0; j < channels; j++)
++				buffer[j][i]=((int)(bufu[i*channels + j])-128)/128.0f;
++#endif
++	}
++	
++	return samples;
++}
++
++
++
++int do_encode(int client, int server, esd_format_t format, int speed, char* ident)
++{
++	/* Encoder specific variables */
++	ogg_packet       op;
++	vorbis_dsp_state vd;
++	vorbis_block     vb;
++	vorbis_info      vi;
++	vorbis_comment   vc; /* struct that stores all the bitstream user comments */
++
++	unsigned int do_sync_seq=DEFAULT_DO_SYNC_SEQ;
++	unsigned int seqNr=0;
++	
++	/* Configuration variables */
++	/* FIXME: Depend on NX setting */
++	float quality=0.3;
++	
++	/* Encoder initialisation */
++	vorbis_info_init(&vi);
++	vorbis_comment_init(&vc);
++
++	vorbis_encode_setup_vbr(&vi, (format & ESD_STEREO)?2:1 , speed, quality);
++	vorbis_encode_setup_init(&vi);
++
++	/* Now, set up the analysis engine, stream encoder, and other
++	 *            preparation before the encoding begins.
++	 *                     
++	 */
++
++	vorbis_analysis_init(&vd,&vi);
++	vorbis_block_init(&vd,&vb);
++
++	fprintf(stderr, "Analysis ok\n");
++
++	/* Send all three headers */
++	{
++                ogg_packet header_main;
++		ogg_packet header_comments;
++		ogg_packet header_codebooks;
++
++		/* Build the packets */
++		vorbis_analysis_headerout(&vd,&vc, &header_main,&header_comments,&header_codebooks);
++		
++		if (!do_write_op(server, &header_main))
++			goto out;
++		if (!do_write_op(server, &header_comments))
++			goto out;
++		if (!do_write_op(server, &header_codebooks))
++			goto out;
++										
++	}
++	fprintf(stderr, "Header ok\n");
++	
++	/* Lower the latency */
++	
++	//do_sockopts(client, frame_size2 * (((format & ESD_BITS16)?16:8) / 8) * 4);
++	esd_set_socket_buffers(client, format, speed, 44100);
++	do_sockopts(server, 200);
++
++	/* Send do_sync_seq to decoder */
++	if (write(server, &do_sync_seq, sizeof(do_sync_seq)) != sizeof(do_sync_seq))
++		goto out;
++
++	/* Main encoding loop */
++
++	while (1)
++	{
++		unsigned int newSeq;
++		float **buffer = vorbis_analysis_buffer(&vd, READSIZE);
++		long samples_read = do_read_samples(client, buffer, READSIZE, format);
++
++		if (samples_read != READSIZE)
++			break;
++
++		/* Tell the library how many samples (per channel) we wrote
++		 * into the supplied buffer */
++		vorbis_analysis_wrote(&vd, samples_read);
++
++		while(vorbis_analysis_blockout(&vd,&vb)==1)
++                {
++
++                        /* Do the main analysis, creating a packet */
++                        vorbis_analysis(&vb, NULL);
++                        vorbis_bitrate_addblock(&vb);
++
++                        while(vorbis_bitrate_flushpacket(&vd, &op))
++                        {
++
++				if (write(server, &seqNr, sizeof(seqNr)) != sizeof(seqNr))
++					goto out;
++#ifdef DEBUG
++				fprintf(stderr, "Encoder SeqNr: %d\n", seqNr);
++#endif
++		
++				if (seqNr % do_sync_seq == 0)
++					if (do_read_complete(server, &newSeq, sizeof(newSeq)) != sizeof(newSeq))
++						goto out;
++
++				seqNr++;
++				if (!do_write_op(server, &op))
++					goto out;
++                        }
++                }
++
++
++	}
++
++out:
++	/* Encoder shutdown */
++        vorbis_block_clear(&vb);
++        vorbis_dsp_clear(&vd);
++        vorbis_info_clear(&vi);
++
++	return 0;
++}
++
++#if 0
++int do_write_samples(int to, short* sbuf, int frame_size, int bits)
++{
++	unsigned char buf[2*MAX_FRAME_SIZE+1];
++	short *s;
++	int i;	
++	size_t erg, len=0, count=frame_size*(bits/8);
++	
++	s=(short*)buf;
++	
++	/* FIXME: Unsupported */
++	if (bits == 8)
++	{
++		fprintf(stderr, "8 Bits unsupported for now.");
++		return 0;
++	}
++
++	/* FIXME: Endian? */
++	for (i=0;i<frame_size;i++)
++		s[i]=(short)sbuf[i];
++
++	if (frame_size > 2*MAX_FRAME_SIZE)
++	{
++		fprintf(stderr, "Error: frame_size too big!");
++		exit(1);
++	}
++	
++	do
++	{
++		erg=write(to, buf+len, count-len);
++		if (erg <= 0)
++			return len;
++		len+=erg;
++	}
++	while (len < count);
++
++	/* Now do the conversion */
++
++	return frame_size;
++}
++#endif
++
++ogg_int16_t convbuffer[4096]; /* take 8k out of the data segment, not the stack */
++int convsize=4096;
++
++int do_decode(int client, int server, esd_format_t format, int speed, char* ident)
++{
++	/* Decoder specific variables */
++	ogg_packet       op; /* one raw packet of data for decode */
++	vorbis_info      vi; /* struct that stores all the static vorbis bitstream settings */
++	vorbis_comment   vc; /* struct that stores all the bitstream user comments */
++	vorbis_dsp_state vd; /* central working state for the packet->PCM decoder */
++	vorbis_block     vb; /* local working space for packet->PCM decode */
++	unsigned int do_sync_seq=DEFAULT_DO_SYNC_SEQ;
++	
++	/* Configuration variables */
++	/* FIXME: Depend on NX setting and read from network */
++	
++	/* Encoder initialisation */
++	vorbis_info_init(&vi);
++        vorbis_comment_init(&vc);
++	
++	/* Read all three headers */
++	{
++		ogg_packet header_main;
++		ogg_packet header_comments;
++		ogg_packet header_codebooks;
++
++		/* Build the packets */
++		
++		if (!do_read_op(client, &header_main))
++			goto out;
++		if (!do_read_op(client, &header_comments))
++			goto out;
++		if (!do_read_op(client, &header_codebooks))
++			goto out;
++		vorbis_synthesis_headerin(&vi,&vc,&header_main);
++		vorbis_synthesis_headerin(&vi,&vc,&header_comments);
++		vorbis_synthesis_headerin(&vi,&vc,&header_codebooks);
++		if (header_main.packet)
++			free(header_main.packet);
++		if (header_comments.packet)
++			free(header_comments.packet);
++		if (header_codebooks.packet)
++			free(header_codebooks.packet);
++	}
++
++	/* Throw the comments plus a few lines about the bitstream we're
++	*        decoding */
++	{
++		char **ptr=vc.user_comments;
++		while(*ptr){
++			fprintf(stderr,"%s\n",*ptr);
++			++ptr;
++		}
++		fprintf(stderr,"\nBitstream is %d channel, %ldHz\n",vi.channels,vi.rate);
++		fprintf(stderr,"Encoded by: %s\n\n",vc.vendor);
++	}
++
++	convsize=4096/vi.channels;
++
++	vorbis_synthesis_init(&vd,&vi); /* central decode state */
++	vorbis_block_init(&vd,&vb);     
++
++	/* Lower the latency a bit */
++	//do_sockopts(client, 200);
++	do_sockopts(server, vi.channels * convsize * (((format & ESD_BITS16)?16:8) / 8));
++	//esd_set_socket_buffers(server, format, speed, 44100);
++	//
++	
++	/* Get do_sync_seq from encoder */
++	if (do_read_complete(client, &do_sync_seq, sizeof(do_sync_seq)) != sizeof(do_sync_seq))
++		goto out;
++
++	/* Main decoding loop */
++
++	while (1)
++	{
++		float **pcm;
++		int samples;
++		unsigned int seqNr = 0;
++		
++		if (do_read_complete(client, &seqNr, sizeof(seqNr)) != sizeof(seqNr))
++			break;
++#ifdef DEBUG	
++		fprintf(stderr, "SeqNr: %d\n", seqNr);
++#endif
++
++		if (seqNr % do_sync_seq == 0)
++			if (write(client, &seqNr, sizeof(seqNr)) != sizeof(seqNr))
++				break;
++		
++		if (!do_read_op(client, &op))
++			break;
++
++		if(vorbis_synthesis(&vb,&op)==0) /* test for success! */
++			vorbis_synthesis_blockin(&vd,&vb);
++
++		if (op.packet)
++			free(op.packet);
++
++		/*
++		
++		**pcm is a multichannel float vector.  In stereo, for
++		example, pcm[0] is left, and pcm[1] is right.  samples is
++		the size of each channel.  Convert the float values
++		(-1.<=range<=1.) to whatever PCM format and write it out */
++
++		while((samples=vorbis_synthesis_pcmout(&vd,&pcm))>0)
++		{
++			int j, i;
++			int clipflag=0;
++			int bout=(samples<convsize?samples:convsize);
++
++			/* convert floats to 16 bit signed ints (host order) and interleave */
++			for(i=0;i<vi.channels;i++)
++			{
++				ogg_int16_t *ptr=convbuffer+i;
++				float  *mono=pcm[i];
++				for(j=0;j<bout;j++)
++				{
++#if 1
++					int val=mono[j]*32767.f;
++#else					/* optional dither */
++					int val=mono[j]*32767.f+drand48()-0.5f;
++#endif
++					/* might as well guard against clipping */
++					if(val>32767)
++					{
++						val=32767;
++						clipflag=1;
++					}
++					if(val<-32768)
++					{
++						val=-32768;
++						clipflag=1;
++					}
++					*ptr=val;
++					ptr+=vi.channels;
++				}
++			}
++
++			if(clipflag)
++				fprintf(stderr,"Clipping in frame %ld\n",(long)(vd.sequence));
++			
++			write(server, convbuffer,2*vi.channels*bout);
++
++			vorbis_synthesis_read(&vd,bout); /* tell libvorbis how many samples we actually consumed */
++		}
++	}
++
++out:
++	/* Decoder shutdown */
++	vorbis_block_clear(&vb);
++	vorbis_dsp_clear(&vd);
++	vorbis_comment_clear(&vc);
++	
++	vorbis_info_clear(&vi);  /* must be called last */
++
++	return 0;
++}
++
++int do_child(int client, int server, int encode)
++{
++	esd_format_t format;
++	int speed;
++	char ident[ESD_NAME_MAX+1];
++
++	read(client, &format, sizeof(format));
++	read(client, &speed, sizeof(speed));
++	read(client, ident, ESD_NAME_MAX);
++
++	write(server, &format, sizeof(format));
++	write(server, &speed, sizeof(speed));
++	write(server, ident, ESD_NAME_MAX);
++
++	if (encode)
++		return do_encode(client, server, format, speed, ident);
++	else
++		return do_decode(client, server, format, speed, ident);
++	
++	/* Should never get here */
++	
++	return -1;
++}
++
++int main(int argc, char** argv)
++{
++	char buf[255];
++	int reply;
++	int proto;
++	
++	int client=6;
++	int server=7;
++	
++
++        do_fwd(client, server, buf, ESD_KEY_LEN);
++        do_fwd(client, server, buf, sizeof(int));
++
++	do_fwd(server, client, &reply, sizeof(reply));
++	//reply=1;
++	//write(client, &reply, sizeof(reply));
++
++	/* Server will close connection anyway */
++	if (reply != 1)
++		exit(1);
++
++	while (read(client, &proto, sizeof(proto)) == sizeof(proto))
++	{
++		write(server, &proto, sizeof(proto));
++
++#ifdef DEBUG
++		fprintf(stderr, "proto = %d\n", proto);
++#endif
++
++	 	switch(proto)
++		{
++			case ESD_PROTO_SERVER_INFO:
++				do_fwd(client, server, buf, sizeof(int));
++				do_fwd(server, client, buf, sizeof(int)+sizeof(esd_format_t)+sizeof(int));
++				break;
++			case ESD_PROTO_LATENCY:
++				do_fwd(server, client, buf, sizeof(int));
++				break;
++			case ESD_PROTO_STREAM_PLAY:
++				do_child(client, server, (argc > 1 && argv[1][0] == 'e'));
++				exit(0);
++				break;
++			default:
++				close(client);
++				close(server);
++				exit(1);
++		}
++	}
++
++	exit(1);
++}
+
+
+
+From fabianx at mail.berlios.de  Sun Feb 11 19:25:57 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sun, 11 Feb 2007 19:25:57 +0100
+Subject: [Freenx-cvs] r323 - freenx-server/trunk
+Message-ID: <200702111825.l1BIPvA5012526@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-02-11 19:25:57 +0100 (Sun, 11 Feb 2007)
+New Revision: 323
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxnode
+Log:
+Fixed fullscreen sessions.
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-02-07 15:45:35 UTC (rev 322)
++++ freenx-server/trunk/ChangeLog	2007-02-11 18:25:57 UTC (rev 323)
+@@ -29,6 +29,8 @@
+ 	* Added backingstore fix for older clients from Gentoo.
+ 	  (http://bugs.gentoo.org/show_bug.cgi?id=149298)
+ 	* Fixed VNC sessions.
++	* Fixed fullscreen sessions.
++	  (Patch by Gentoo Bugtracker)
+ 
+ 23.01.2007 FreeNX 0.6.0 "Juliana birthday edition"
+ 	* Opened the 0.6.0 branch.
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2007-02-07 15:45:35 UTC (rev 322)
++++ freenx-server/trunk/nxnode	2007-02-11 18:25:57 UTC (rev 323)
+@@ -997,7 +997,7 @@
+ 	status=$(getparam status)
+ 	host=$(getparam host)
+ 
+-	fullscreen=""
++	fullscreen=$(getparam fullscreen)
+ 	[ "$geometry" = "fullscreen" ] && fullscreen="1"
+ 
+ 	[ "$EXPORT_USERIP" = "1" ] && export NXUSERIP="$userip"
+
+
+
+From fabianx at mail.berlios.de  Mon Feb 12 05:15:10 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Mon, 12 Feb 2007 05:15:10 +0100
+Subject: [Freenx-cvs] r324 - freenx-server/trunk
+Message-ID: <200702120415.l1C4FAMh020533@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-02-12 05:15:10 +0100 (Mon, 12 Feb 2007)
+New Revision: 324
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxserver
+Log:
+Fixed --broadcast. One shift too much. Found by Wolfgang Schweer.
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-02-11 18:25:57 UTC (rev 323)
++++ freenx-server/trunk/ChangeLog	2007-02-12 04:15:10 UTC (rev 324)
+@@ -31,6 +31,7 @@
+ 	* Fixed VNC sessions.
+ 	* Fixed fullscreen sessions.
+ 	  (Patch by Gentoo Bugtracker)
++	* Fixed --broadcast.
+ 
+ 23.01.2007 FreeNX 0.6.0 "Juliana birthday edition"
+ 	* Opened the 0.6.0 branch.
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2007-02-11 18:25:57 UTC (rev 323)
++++ freenx-server/trunk/nxserver	2007-02-12 04:15:10 UTC (rev 324)
+@@ -1644,9 +1644,9 @@
+ 	else
+ 	  CMD_PARAMS=$(cmd_parse_3_params "$2")
+ 	  [ -z "$CMD_PARAMS" ] && exit 1
++	  shift
+ 	fi
+ 	shift
+-	shift
+ 	for i in $CMD_PARAMS;
+ 	do
+ 			CMDLINE=$(session_get_cmdline $i)
+
+
+
+From gwright at mail.berlios.de  Sun Feb 18 05:43:00 2007
+From: gwright at mail.berlios.de (gwright at BerliOS)
+Date: Sun, 18 Feb 2007 05:43:00 +0100
+Subject: [Freenx-cvs] r325 - in nxclientlib: . maemonx
+Message-ID: <200702180443.l1I4h0fA008818@sheep.berlios.de>
+
+Author: gwright
+Date: 2007-02-18 05:43:00 +0100 (Sun, 18 Feb 2007)
+New Revision: 325
+
+Added:
+   nxclientlib/maemonx/
+   nxclientlib/maemonx/maemonx.pro
+   nxclientlib/maemonx/main.cpp
+   nxclientlib/maemonx/mainwindow.cpp
+   nxclientlib/maemonx/mainwindow.h
+   nxclientlib/maemonx/nxhandler.cpp
+   nxclientlib/maemonx/nxhandler.h
+   nxclientlib/maemonx/settingsdialog.cpp
+   nxclientlib/maemonx/settingsdialog.h
+Modified:
+   nxclientlib/nxclientlib.pro
+Log:
+Initial import of maemonx - an NX client for the Nokia 770/N800. It doesn't do anything yet, there's just a GUI and no functional code.
+
+
+Added: nxclientlib/maemonx/maemonx.pro
+===================================================================
+--- nxclientlib/maemonx/maemonx.pro	2007-02-12 04:15:10 UTC (rev 324)
++++ nxclientlib/maemonx/maemonx.pro	2007-02-18 04:43:00 UTC (rev 325)
+@@ -0,0 +1,21 @@
++TEMPLATE	= app
++
++CONFIG		+= qt warn_on debug
++
++SOURCES = main.cpp mainwindow.cpp settingsdialog.cpp nxhandler.cpp
++
++HEADERS = mainwindow.h settingsdialog.h nxhandler.h
++
++INCLUDEPATH	+= $(QTDIR)/include . ..
++
++DEPENDPATH	+= $(QTDIR)/include
++
++LIBPATH += ..
++
++QMAKE_CXXFLAGS_DEBUG += $$system(pkg-config --cflags gtk+-2.0 hildon-libs)
++
++QT = core xml
++
++LIBS	= -lnxclientlib $$system(pkg-config --libs gtk+-2.0 hildon-libs)
++
++TARGET		= maemonx
+
+Added: nxclientlib/maemonx/main.cpp
+===================================================================
+--- nxclientlib/maemonx/main.cpp	2007-02-12 04:15:10 UTC (rev 324)
++++ nxclientlib/maemonx/main.cpp	2007-02-18 04:43:00 UTC (rev 325)
+@@ -0,0 +1,53 @@
++/***************************************************************************
++                                  main.cpp
++                             -------------------
++    begin                : Saturday February 17th 2007
++    copyright            : (C) 2007 by George Wright
++    email                : gwright at kde.org
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++#include <hildon-widgets/hildon-program.h>
++#include <gtk/gtkmain.h>
++
++#include "mainwindow.h"
++
++static void destroy(GtkWidget *widget, gpointer data);
++
++int main(int argc, char **argv)
++{
++	HildonProgram *program;
++	HildonWindow *window;
++
++	gtk_init(&argc, &argv);
++
++	program = HILDON_PROGRAM(hildon_program_get_instance());
++	g_set_application_name("NX Client");
++
++	window = HILDON_WINDOW(hildon_window_new());
++
++  g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(destroy), NULL);
++
++	hildon_program_add_window(program, window);
++	
++	setup_gui(GTK_WIDGET(window));
++
++	gtk_widget_show_all(GTK_WIDGET(window));
++
++	gtk_main();
++
++	return 0;
++}
++
++static void destroy(GtkWidget *widget, gpointer data)
++{
++    gtk_main_quit();
++}
+
+Added: nxclientlib/maemonx/mainwindow.cpp
+===================================================================
+--- nxclientlib/maemonx/mainwindow.cpp	2007-02-12 04:15:10 UTC (rev 324)
++++ nxclientlib/maemonx/mainwindow.cpp	2007-02-18 04:43:00 UTC (rev 325)
+@@ -0,0 +1,92 @@
++/***************************************************************************
++                                mainwindow.cpp
++                             -------------------
++    begin                : Saturday 17th February 2007
++    copyright            : (C) 2007 by George Wright
++    email                : gwright at kde.org
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++#include "mainwindow.h"
++#include "nxhandler.h"
++
++#include <stdio.h>
++
++GtkWidget *username_input;
++GtkWidget *password_input;
++GtkWidget *sessions_combo;
++
++GtkWidget *login_button;
++GtkWidget *config_button;
++
++GtkWidget *fixed_layout;
++GtkWidget *main_layout;
++GtkWidget *separator;
++
++void setup_gui(GtkWidget *window)
++{
++    main_layout = gtk_vbox_new(FALSE, 10);
++
++    fixed_layout = gtk_layout_new(NULL, NULL);
++    gtk_layout_set_size(GTK_LAYOUT(fixed_layout), 300, 20);
++    gtk_container_add(GTK_CONTAINER(window), main_layout);
++
++    gtk_box_pack_start(GTK_BOX(main_layout), fixed_layout, TRUE, FALSE, 0);
++    
++    username_input = gtk_entry_new();
++    password_input = gtk_entry_new();
++
++    sessions_combo = gtk_combo_box_new_text();
++
++    separator = gtk_hseparator_new();
++
++    config_button = gtk_button_new_with_label("Configure");
++    login_button = gtk_button_new_with_label("Login");
++
++    g_signal_connect(G_OBJECT(config_button), "clicked", G_CALLBACK(config_clicked), NULL);
++    g_signal_connect(G_OBJECT(login_button), "clicked", G_CALLBACK(login_clicked), NULL);
++
++    gtk_combo_box_append_text(GTK_COMBO_BOX(sessions_combo), "Foo");
++
++    gtk_entry_set_visibility(GTK_ENTRY(password_input), FALSE);
++
++    gtk_widget_set_size_request(password_input, 400, 30);
++    gtk_widget_set_size_request(username_input, 400, 30);
++    gtk_widget_set_size_request(sessions_combo, 400, 30);
++
++    gtk_widget_set_size_request(config_button, 150, 50);
++    gtk_widget_set_size_request(login_button, 150, 50);
++    gtk_widget_set_size_request(fixed_layout, 672, 220);
++    gtk_widget_set_size_request(separator, 600, 0);
++
++    gtk_layout_put(GTK_LAYOUT(fixed_layout), username_input, 236, 0);
++    gtk_layout_put(GTK_LAYOUT(fixed_layout), password_input, 236, 50);
++    gtk_layout_put(GTK_LAYOUT(fixed_layout), sessions_combo, 236, 100);
++
++    gtk_layout_put(GTK_LAYOUT(fixed_layout), gtk_label_new("Username:"), 36, 0);
++    gtk_layout_put(GTK_LAYOUT(fixed_layout), gtk_label_new("Password:"), 36, 50);
++    gtk_layout_put(GTK_LAYOUT(fixed_layout), gtk_label_new("Session:"), 36, 100);
++
++    gtk_layout_put(GTK_LAYOUT(fixed_layout), separator, 20, 150);
++
++    gtk_layout_put(GTK_LAYOUT(fixed_layout), config_button, 36, 170);
++    gtk_layout_put(GTK_LAYOUT(fixed_layout), login_button, 486, 170);
++}
++
++static void config_clicked(GtkWidget *widget, gpointer data)
++{
++    printf("Lalala config pressed\n");
++}
++
++static void login_clicked(GtkWidget *widget, gpointer data)
++{
++    printf("Lalala login pressed\n");
++}
+
+Added: nxclientlib/maemonx/mainwindow.h
+===================================================================
+--- nxclientlib/maemonx/mainwindow.h	2007-02-12 04:15:10 UTC (rev 324)
++++ nxclientlib/maemonx/mainwindow.h	2007-02-18 04:43:00 UTC (rev 325)
+@@ -0,0 +1,32 @@
++/***************************************************************************
++                                mainwindow.h
++                             -------------------
++    begin                : Saturday 17th February 2007
++    copyright            : (C) 2007 by George Wright
++    email                : gwright at kde.org
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++/* The main function which creates all the GUI components */
++
++#ifndef MAINWINDOW_H
++#define MAINWINDOW_H
++
++#include <gtk/gtk.h>
++
++void setup_gui(GtkWidget *window);
++
++/* Callback functions */
++
++static void config_clicked(GtkWidget *widget, gpointer data);
++static void login_clicked(GtkWidget *widget, gpointer data);
++
++#endif
+
+Added: nxclientlib/maemonx/nxhandler.cpp
+===================================================================
+--- nxclientlib/maemonx/nxhandler.cpp	2007-02-12 04:15:10 UTC (rev 324)
++++ nxclientlib/maemonx/nxhandler.cpp	2007-02-18 04:43:00 UTC (rev 325)
+@@ -0,0 +1,28 @@
++/***************************************************************************
++                                nxhandler.cpp
++                             -------------------
++    begin                : Saturday 17th February 2007
++    copyright            : (C) 2007 by George Wright
++    email                : gwright at kde.org
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++/* The main function which creates all the GUI components */
++
++#include "nxhandler.h"
++
++NXHandler::NXHandler()
++{
++}
++
++NXHandler::~NXHandler()
++{
++}
+
+Added: nxclientlib/maemonx/nxhandler.h
+===================================================================
+--- nxclientlib/maemonx/nxhandler.h	2007-02-12 04:15:10 UTC (rev 324)
++++ nxclientlib/maemonx/nxhandler.h	2007-02-18 04:43:00 UTC (rev 325)
+@@ -0,0 +1,33 @@
++/***************************************************************************
++                                nxhandler.h
++                             -------------------
++    begin                : Saturday 17th February 2007
++    copyright            : (C) 2007 by George Wright
++    email                : gwright at kde.org
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++/* The main function which creates all the GUI components */
++
++#ifndef NXHANDLER_H
++#define NXHANDLER_H
++
++#include <QObject>
++
++class NXHandler : public QObject
++{
++    Q_OBJECT
++    public:
++        NXHandler();
++        ~NXHandler();
++};
++#endif
++
+
+Added: nxclientlib/maemonx/settingsdialog.cpp
+===================================================================
+--- nxclientlib/maemonx/settingsdialog.cpp	2007-02-12 04:15:10 UTC (rev 324)
++++ nxclientlib/maemonx/settingsdialog.cpp	2007-02-18 04:43:00 UTC (rev 325)
+@@ -0,0 +1,23 @@
++/***************************************************************************
++                             settingsdialog.cpp
++                             -------------------
++    begin                : Saturday 17th February 2007
++    copyright            : (C) 2007 by George Wright
++    email                : gwright at kde.org
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++#include "settingsdialog.h"
++
++void create_settings(GtkWidget *window)
++{
++
++}
+
+Added: nxclientlib/maemonx/settingsdialog.h
+===================================================================
+--- nxclientlib/maemonx/settingsdialog.h	2007-02-12 04:15:10 UTC (rev 324)
++++ nxclientlib/maemonx/settingsdialog.h	2007-02-18 04:43:00 UTC (rev 325)
+@@ -0,0 +1,27 @@
++/***************************************************************************
++                               settingsdialog.h
++                             -------------------
++    begin                : Saturday 17th February 2007
++    copyright            : (C) 2007 by George Wright
++    email                : gwright at kde.org
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++/* The main function which creates all the GUI components */
++
++#ifndef SETTINGSDIALOG_H
++#define SETTINGSDIALOG_H
++
++#include <gtk/gtk.h>
++
++void create_settings(GtkWidget *window);
++
++#endif
+
+Modified: nxclientlib/nxclientlib.pro
+===================================================================
+--- nxclientlib/nxclientlib.pro	2007-02-12 04:15:10 UTC (rev 324)
++++ nxclientlib/nxclientlib.pro	2007-02-18 04:43:00 UTC (rev 325)
+@@ -12,4 +12,4 @@
+ 
+ QT		= core xml
+ 
+-TARGET		= nxclientlib
+\ No newline at end of file
++TARGET		= nxclientlib
+
+
+
+From gwright at mail.berlios.de  Wed Feb 21 07:53:14 2007
+From: gwright at mail.berlios.de (gwright at BerliOS)
+Date: Wed, 21 Feb 2007 07:53:14 +0100
+Subject: [Freenx-cvs] r326 - nxclientlib/maemonx
+Message-ID: <200702210653.l1L6rEw9025841@sheep.berlios.de>
+
+Author: gwright
+Date: 2007-02-21 07:53:13 +0100 (Wed, 21 Feb 2007)
+New Revision: 326
+
+Modified:
+   nxclientlib/maemonx/main.cpp
+   nxclientlib/maemonx/mainwindow.cpp
+   nxclientlib/maemonx/mainwindow.h
+   nxclientlib/maemonx/nxhandler.cpp
+   nxclientlib/maemonx/nxhandler.h
+Log:
+GUI code for the configuration dialog
+
+
+Modified: nxclientlib/maemonx/main.cpp
+===================================================================
+--- nxclientlib/maemonx/main.cpp	2007-02-18 04:43:00 UTC (rev 325)
++++ nxclientlib/maemonx/main.cpp	2007-02-21 06:53:13 UTC (rev 326)
+@@ -24,27 +24,26 @@
+ 
+ int main(int argc, char **argv)
+ {
+-	HildonProgram *program;
+-	HildonWindow *window;
++    HildonProgram *program;
++    HildonWindow *window;
+ 
+-	gtk_init(&argc, &argv);
++    gtk_init(&argc, &argv);
+ 
+-	program = HILDON_PROGRAM(hildon_program_get_instance());
+-	g_set_application_name("NX Client");
++    program = HILDON_PROGRAM(hildon_program_get_instance());
++    g_set_application_name("NX Client");
+ 
+-	window = HILDON_WINDOW(hildon_window_new());
++    window = HILDON_WINDOW(hildon_window_new());
++    g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(destroy), NULL);
+ 
+-  g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(destroy), NULL);
++    hildon_program_add_window(program, window);
+ 
+-	hildon_program_add_window(program, window);
+-	
+-	setup_gui(GTK_WIDGET(window));
++    setup_gui(GTK_WIDGET(window));
+ 
+-	gtk_widget_show_all(GTK_WIDGET(window));
++    gtk_widget_show_all(GTK_WIDGET(window));
+ 
+-	gtk_main();
++    gtk_main();
+ 
+-	return 0;
++    return 0;
+ }
+ 
+ static void destroy(GtkWidget *widget, gpointer data)
+
+Modified: nxclientlib/maemonx/mainwindow.cpp
+===================================================================
+--- nxclientlib/maemonx/mainwindow.cpp	2007-02-18 04:43:00 UTC (rev 325)
++++ nxclientlib/maemonx/mainwindow.cpp	2007-02-21 06:53:13 UTC (rev 326)
+@@ -20,6 +20,8 @@
+ 
+ #include <stdio.h>
+ 
++/* Widgets for the login screen */
++
+ GtkWidget *username_input;
+ GtkWidget *password_input;
+ GtkWidget *sessions_combo;
+@@ -31,6 +33,45 @@
+ GtkWidget *main_layout;
+ GtkWidget *separator;
+ 
++/* Widgets for the configuration dialog */
++
++GtkWidget *config_dialog;
++
++GtkWidget *config_pages;
++GtkWidget *config_server_page;
++GtkWidget *config_desktop_page;
++GtkWidget *config_advanced_page;
++
++GtkWidget *session_name;
++GtkWidget *host_name;
++GtkWidget *port_number;
++GtkWidget *use_default_key;
++GtkWidget *advanced_key_settings;
++GtkWidget *server_labels_layout;
++GtkWidget *server_inputs_vlayout;
++GtkWidget *server_inputs_hlayout;
++GtkWidget *server_layout;
++GtkWidget *server_key_layout;
++
++GtkWidget *platform_select;
++GtkWidget *type_select;
++GtkWidget *link_select;
++GtkWidget *desktop_advanced;
++GtkWidget *compression_type;
++GtkWidget *use_render;
++GtkWidget *desktop_labels_layout;
++GtkWidget *desktop_selects_layout;
++GtkWidget *desktop_type_hlayout;
++GtkWidget *desktop_type_vlayout;
++GtkWidget *desktop_hlayout;
++
++GtkWidget *use_ssh_encryption;
++GtkWidget *cache_size;
++GtkWidget *disk_size;
++GtkWidget *cache_layout;
++
++NXHandler m_nxhandler;
++
+ void setup_gui(GtkWidget *window)
+ {
+     main_layout = gtk_vbox_new(FALSE, 10);
+@@ -79,8 +120,116 @@
+ 
+     gtk_layout_put(GTK_LAYOUT(fixed_layout), config_button, 36, 170);
+     gtk_layout_put(GTK_LAYOUT(fixed_layout), login_button, 486, 170);
++
++    setup_config(window);
+ }
+ 
++void setup_config(GtkWidget *window)
++{
++    config_dialog = gtk_dialog_new();
++
++    config_server_page = gtk_vbox_new(FALSE, 10);
++    config_desktop_page = gtk_vbox_new(FALSE, 10);
++    config_advanced_page = gtk_vbox_new(FALSE, 10);
++
++    gtk_dialog_add_button(GTK_DIALOG(config_dialog), "OK", GTK_RESPONSE_OK);
++    gtk_dialog_add_button(GTK_DIALOG(config_dialog), "Cancel", GTK_RESPONSE_CANCEL);
++
++    config_pages = gtk_notebook_new();
++    gtk_notebook_append_page(GTK_NOTEBOOK(config_pages), config_server_page, gtk_label_new("Server"));
++    gtk_notebook_append_page(GTK_NOTEBOOK(config_pages), config_desktop_page, gtk_label_new("Desktop"));
++    gtk_notebook_append_page(GTK_NOTEBOOK(config_pages), config_advanced_page, gtk_label_new("Advanced"));
++
++    gtk_container_add(GTK_CONTAINER(GTK_DIALOG(config_dialog)->vbox), config_pages);
++
++    session_name = gtk_entry_new();
++    host_name = gtk_entry_new();
++    port_number = gtk_spin_button_new_with_range(1, 65535, 1);
++    use_default_key = gtk_check_button_new_with_label("Use default NoMachine key");
++    advanced_key_settings = gtk_button_new_with_label("Set custom key");
++
++    server_layout = gtk_hbox_new(FALSE, 10);
++
++    server_labels_layout = gtk_vbox_new(TRUE, 10);
++    gtk_box_pack_start(GTK_BOX(server_labels_layout), gtk_label_new("Session name"), FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(server_labels_layout), gtk_label_new("Hostname"), FALSE, FALSE, 0);
++
++    server_inputs_vlayout = gtk_vbox_new(TRUE, 10);
++    server_inputs_hlayout = gtk_hbox_new(FALSE, 10);
++    
++    gtk_box_pack_start(GTK_BOX(server_inputs_vlayout), session_name, FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(server_inputs_vlayout), server_inputs_hlayout, FALSE, FALSE, 0);
++
++    gtk_box_pack_start(GTK_BOX(server_inputs_hlayout), host_name, TRUE, TRUE, 0);
++    gtk_box_pack_start(GTK_BOX(server_inputs_hlayout), gtk_label_new("Port"), FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(server_inputs_hlayout), port_number, FALSE, FALSE, 0);
++
++    gtk_box_pack_start(GTK_BOX(server_layout), server_labels_layout, FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(server_layout), server_inputs_vlayout, TRUE, TRUE, 0);
++    gtk_box_pack_start(GTK_BOX(config_server_page), server_layout, TRUE, FALSE, 0);
++
++    server_key_layout = gtk_hbox_new(FALSE, 10);
++    gtk_box_pack_start(GTK_BOX(server_key_layout), use_default_key, TRUE, TRUE, 0);
++    gtk_box_pack_start(GTK_BOX(server_key_layout), advanced_key_settings, FALSE, FALSE, 0);
++
++    gtk_box_pack_start(GTK_BOX(config_server_page), server_key_layout, FALSE, FALSE, 0);
++ 
++    platform_select = gtk_combo_box_new();
++    type_select = gtk_combo_box_new();
++    link_select = gtk_combo_box_new();
++
++    desktop_advanced = gtk_button_new_with_label("Advanced");
++
++    compression_type = gtk_combo_box_new();
++    use_render = gtk_check_button_new_with_label("Use RENDER extension");
++
++    desktop_labels_layout = gtk_vbox_new(TRUE, 10);
++    desktop_selects_layout = gtk_vbox_new(TRUE, 10);
++    desktop_type_hlayout = gtk_hbox_new(FALSE, 10);
++    desktop_type_vlayout = gtk_vbox_new(TRUE, 10);
++
++    gtk_box_pack_start(GTK_BOX(desktop_labels_layout), gtk_label_new("Platform"), FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(desktop_labels_layout), gtk_label_new("Link"), FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(desktop_labels_layout), gtk_label_new("Compression"), FALSE, FALSE, 0);
++
++    gtk_box_pack_start(GTK_BOX(desktop_selects_layout), platform_select, FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(desktop_selects_layout), link_select, FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(desktop_selects_layout), compression_type, FALSE, FALSE, 0);
++
++    gtk_box_pack_start(GTK_BOX(desktop_type_hlayout), gtk_label_new("Type"), FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(desktop_type_hlayout), type_select, TRUE, TRUE, 0);
++
++    gtk_box_pack_start(GTK_BOX(desktop_type_vlayout), desktop_type_hlayout, FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(desktop_type_vlayout), desktop_advanced, FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(desktop_type_vlayout), use_render, FALSE, FALSE, 0);
++
++    desktop_hlayout = gtk_hbox_new(FALSE, 10);
++
++    gtk_box_pack_start(GTK_BOX(desktop_hlayout), desktop_labels_layout, FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(desktop_hlayout), desktop_selects_layout, FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(desktop_hlayout), desktop_type_vlayout, FALSE, FALSE, 0);
++
++    gtk_box_pack_start(GTK_BOX(config_desktop_page), desktop_hlayout, TRUE, FALSE, 0);
++
++    use_ssh_encryption = gtk_check_button_new_with_label("Use SSH encryption");
++    cache_size = gtk_combo_box_new();
++    disk_size = gtk_combo_box_new();
++
++    cache_layout = gtk_hbox_new(FALSE, 10);
++    gtk_box_pack_start(GTK_BOX(cache_layout), gtk_label_new("Memory cache"), FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(cache_layout), cache_size, FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(cache_layout), gtk_label_new("Disk cache"), FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(cache_layout), disk_size, FALSE, FALSE, 0);
++
++    gtk_box_pack_start(GTK_BOX(config_advanced_page), use_ssh_encryption, TRUE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(config_advanced_page), cache_layout, TRUE, FALSE, 0);
++
++
++    gtk_widget_show_all(config_dialog);
++}
++
++
++
+ static void config_clicked(GtkWidget *widget, gpointer data)
+ {
+     printf("Lalala config pressed\n");
+
+Modified: nxclientlib/maemonx/mainwindow.h
+===================================================================
+--- nxclientlib/maemonx/mainwindow.h	2007-02-18 04:43:00 UTC (rev 325)
++++ nxclientlib/maemonx/mainwindow.h	2007-02-21 06:53:13 UTC (rev 326)
+@@ -23,6 +23,7 @@
+ #include <gtk/gtk.h>
+ 
+ void setup_gui(GtkWidget *window);
++void setup_config(GtkWidget *window);
+ 
+ /* Callback functions */
+ 
+
+Modified: nxclientlib/maemonx/nxhandler.cpp
+===================================================================
+--- nxclientlib/maemonx/nxhandler.cpp	2007-02-18 04:43:00 UTC (rev 325)
++++ nxclientlib/maemonx/nxhandler.cpp	2007-02-21 06:53:13 UTC (rev 326)
+@@ -26,3 +26,76 @@
+ NXHandler::~NXHandler()
+ {
+ }
++
++void NXHandler::startConnect() {}
++//X {
++//X     QDesktopWidget dw;
++//X     QX11Info info;
++//X 
++//X     NXParseXML handler;
++//X     handler.setData(&config);
++//X 
++//X     QFile file(QDir::homePath() + "/.qtnx/" + ui_lg.session->currentText() + ".nxml");
++//X     QXmlInputSource inputSource(&file);
++//X 
++//X     QXmlSimpleReader reader;
++//X     reader.setContentHandler(&handler);
++//X     reader.setErrorHandler(&handler);
++//X     reader.parse(inputSource);
++//X 
++//X     session.sessionName = config.sessionName;
++//X     session.sessionType = config.sessionType;
++//X     session.cache = config.cache;
++//X     session.images = config.images;
++//X     session.linkType = config.linkType;
++//X     session.render = config.render;
++//X     session.backingstore = "when_requested";
++//X     session.imageCompressionMethod = config.imageCompressionMethod;
++//X     session.imageCompressionLevel = config.imageCompressionLevel;
++//X     session.geometry = config.geometry;
++//X     session.keyboard = "defkeymap";
++//X     session.kbtype = "pc102/defkeymap";
++//X     session.media = config.media;
++//X     session.agentServer = config.agentServer;
++//X     session.agentUser = config.agentUser;
++//X     session.agentPass = config.agentPass;
++//X     session.cups = config.cups;
++//X     session.fullscreen = config.fullscreen;
++//X 
++//X     if (!config.key.isEmpty()) {
++//X         key = config.key.toAscii();
++//X         session.key = "supplied";
++//X     } else
++//X         session.key = "default";
++//X 
++//X     if (config.sessionType == "unix-application")
++//X         session.customCommand = config.customCommand;
++//X 
++//X     if (config.encryption == false) {
++//X         if (session.key == "supplied")
++//X             nxClient.invokeNXSSH(session.key, config.serverHost, false, key, config.serverPort);
++//X         else if (session.key == "default")
++//X             nxClient.invokeNXSSH(session.key, config.serverHost, false, 0, config.serverPort);
++//X     } else {
++//X         if (session.key == "supplied")
++//X             nxClient.invokeNXSSH(session.key, config.serverHost, true, key, config.serverPort);
++//X         else if (session.key == "default")
++//X             nxClient.invokeNXSSH(session.key, config.serverHost, true, 0, config.serverPort);
++//X     }
++//X 
++//X     nxClient.setUsername(ui_lg.username->text());
++//X     nxClient.setPassword(ui_lg.password->text());
++//X     nxClient.setResolution(dw.screenGeometry(this).width(), dw.screenGeometry(this).height());
++//X     nxClient.setDepth(info.depth());
++//X 
++//X     connect(&nxClient, SIGNAL(resumeSessions(QList<NXResumeData>)), this, SLOT(loadResumeDialog(QList<NXResumeData>)));
++//X     connect(&nxClient, SIGNAL(noSessions()), this, SLOT(noSessions()));
++//X     connect(&nxClient, SIGNAL(sshRequestConfirmation(QString)), this, SLOT(sshContinue(QString)));
++//X     connect(&nxClient, SIGNAL(callbackWrite(QString)), this, SLOT(updateStatusBar(QString)));
++//X     connect(&nxClient, SIGNAL(loginFailed()), this, SLOT(failedLogin()));
++//X     connect(&nxClient, SIGNAL(stdout(QString)), this, SLOT(logStd(QString)));
++//X     connect(&nxClient, SIGNAL(stderr(QString)), this, SLOT(logStd(QString)));
++//X     connect(&nxClient, SIGNAL(stdin(QString)), this, SLOT(logStd(QString)));
++//X 
++//X     //nxClient.setSession(&session);
++//X }
+
+Modified: nxclientlib/maemonx/nxhandler.h
+===================================================================
+--- nxclientlib/maemonx/nxhandler.h	2007-02-18 04:43:00 UTC (rev 325)
++++ nxclientlib/maemonx/nxhandler.h	2007-02-21 06:53:13 UTC (rev 326)
+@@ -15,19 +15,33 @@
+  *                                                                         *
+  ***************************************************************************/
+ 
+-/* The main function which creates all the GUI components */
++/*
++ * An accessor class that handles NXClientLib and manages the session and
++ * configuration data
++ */
+ 
+ #ifndef NXHANDLER_H
+ #define NXHANDLER_H
+ 
+ #include <QObject>
+ 
++#include "nxclientlib.h"
++#include "nxdata.h"
++
+ class NXHandler : public QObject
+ {
+     Q_OBJECT
+     public:
+         NXHandler();
+         ~NXHandler();
++
++        void startConnect();
++
++    private:
++        NXSessionData m_session;
++        NXConfigData m_config;
++        NXClientLib m_nxclient;
++
+ };
+ #endif
+ 
+
+
+
+From gwright at mail.berlios.de  Wed Feb 21 08:19:09 2007
+From: gwright at mail.berlios.de (gwright at BerliOS)
+Date: Wed, 21 Feb 2007 08:19:09 +0100
+Subject: [Freenx-cvs] r327 - nxclientlib/maemonx
+Message-ID: <200702210719.l1L7J9GU026719@sheep.berlios.de>
+
+Author: gwright
+Date: 2007-02-21 08:19:09 +0100 (Wed, 21 Feb 2007)
+New Revision: 327
+
+Modified:
+   nxclientlib/maemonx/mainwindow.cpp
+Log:
+UI tweaks
+
+
+Modified: nxclientlib/maemonx/mainwindow.cpp
+===================================================================
+--- nxclientlib/maemonx/mainwindow.cpp	2007-02-21 06:53:13 UTC (rev 326)
++++ nxclientlib/maemonx/mainwindow.cpp	2007-02-21 07:19:09 UTC (rev 327)
+@@ -131,6 +131,9 @@
+     config_server_page = gtk_vbox_new(FALSE, 10);
+     config_desktop_page = gtk_vbox_new(FALSE, 10);
+     config_advanced_page = gtk_vbox_new(FALSE, 10);
++    gtk_widget_set_size_request(config_server_page, 630, 200);
++    gtk_widget_set_size_request(config_desktop_page, 630, 200);
++    gtk_widget_set_size_request(config_advanced_page, 630, 200);
+ 
+     gtk_dialog_add_button(GTK_DIALOG(config_dialog), "OK", GTK_RESPONSE_OK);
+     gtk_dialog_add_button(GTK_DIALOG(config_dialog), "Cancel", GTK_RESPONSE_CANCEL);
+@@ -151,14 +154,14 @@
+     server_layout = gtk_hbox_new(FALSE, 10);
+ 
+     server_labels_layout = gtk_vbox_new(TRUE, 10);
+-    gtk_box_pack_start(GTK_BOX(server_labels_layout), gtk_label_new("Session name"), FALSE, FALSE, 0);
+-    gtk_box_pack_start(GTK_BOX(server_labels_layout), gtk_label_new("Hostname"), FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(server_labels_layout), gtk_label_new("Session name"), TRUE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(server_labels_layout), gtk_label_new("Hostname"), TRUE, FALSE, 0);
+ 
+-    server_inputs_vlayout = gtk_vbox_new(TRUE, 10);
++    server_inputs_vlayout = gtk_vbox_new(FALSE, 10);
+     server_inputs_hlayout = gtk_hbox_new(FALSE, 10);
+     
+-    gtk_box_pack_start(GTK_BOX(server_inputs_vlayout), session_name, FALSE, FALSE, 0);
+-    gtk_box_pack_start(GTK_BOX(server_inputs_vlayout), server_inputs_hlayout, FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(server_inputs_vlayout), session_name, TRUE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(server_inputs_vlayout), server_inputs_hlayout, TRUE, FALSE, 0);
+ 
+     gtk_box_pack_start(GTK_BOX(server_inputs_hlayout), host_name, TRUE, TRUE, 0);
+     gtk_box_pack_start(GTK_BOX(server_inputs_hlayout), gtk_label_new("Port"), FALSE, FALSE, 0);
+@@ -166,21 +169,21 @@
+ 
+     gtk_box_pack_start(GTK_BOX(server_layout), server_labels_layout, FALSE, FALSE, 0);
+     gtk_box_pack_start(GTK_BOX(server_layout), server_inputs_vlayout, TRUE, TRUE, 0);
+-    gtk_box_pack_start(GTK_BOX(config_server_page), server_layout, TRUE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(config_server_page), server_layout, TRUE, TRUE, 0);
+ 
+     server_key_layout = gtk_hbox_new(FALSE, 10);
+     gtk_box_pack_start(GTK_BOX(server_key_layout), use_default_key, TRUE, TRUE, 0);
+     gtk_box_pack_start(GTK_BOX(server_key_layout), advanced_key_settings, FALSE, FALSE, 0);
+ 
+-    gtk_box_pack_start(GTK_BOX(config_server_page), server_key_layout, FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(config_server_page), server_key_layout, TRUE, FALSE, 0);
+  
+-    platform_select = gtk_combo_box_new();
+-    type_select = gtk_combo_box_new();
+-    link_select = gtk_combo_box_new();
++    platform_select = gtk_combo_box_new_text();
++    type_select = gtk_combo_box_new_text();
++    link_select = gtk_combo_box_new_text();
+ 
+     desktop_advanced = gtk_button_new_with_label("Advanced");
+ 
+-    compression_type = gtk_combo_box_new();
++    compression_type = gtk_combo_box_new_text();
+     use_render = gtk_check_button_new_with_label("Use RENDER extension");
+ 
+     desktop_labels_layout = gtk_vbox_new(TRUE, 10);
+@@ -188,20 +191,20 @@
+     desktop_type_hlayout = gtk_hbox_new(FALSE, 10);
+     desktop_type_vlayout = gtk_vbox_new(TRUE, 10);
+ 
+-    gtk_box_pack_start(GTK_BOX(desktop_labels_layout), gtk_label_new("Platform"), FALSE, FALSE, 0);
+-    gtk_box_pack_start(GTK_BOX(desktop_labels_layout), gtk_label_new("Link"), FALSE, FALSE, 0);
+-    gtk_box_pack_start(GTK_BOX(desktop_labels_layout), gtk_label_new("Compression"), FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(desktop_labels_layout), gtk_label_new("Platform"), TRUE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(desktop_labels_layout), gtk_label_new("Link"), TRUE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(desktop_labels_layout), gtk_label_new("Compression"), TRUE, FALSE, 0);
+ 
+-    gtk_box_pack_start(GTK_BOX(desktop_selects_layout), platform_select, FALSE, FALSE, 0);
+-    gtk_box_pack_start(GTK_BOX(desktop_selects_layout), link_select, FALSE, FALSE, 0);
+-    gtk_box_pack_start(GTK_BOX(desktop_selects_layout), compression_type, FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(desktop_selects_layout), platform_select, TRUE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(desktop_selects_layout), link_select, TRUE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(desktop_selects_layout), compression_type, TRUE, FALSE, 0);
+ 
+     gtk_box_pack_start(GTK_BOX(desktop_type_hlayout), gtk_label_new("Type"), FALSE, FALSE, 0);
+     gtk_box_pack_start(GTK_BOX(desktop_type_hlayout), type_select, TRUE, TRUE, 0);
+ 
+-    gtk_box_pack_start(GTK_BOX(desktop_type_vlayout), desktop_type_hlayout, FALSE, FALSE, 0);
+-    gtk_box_pack_start(GTK_BOX(desktop_type_vlayout), desktop_advanced, FALSE, FALSE, 0);
+-    gtk_box_pack_start(GTK_BOX(desktop_type_vlayout), use_render, FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(desktop_type_vlayout), desktop_type_hlayout, TRUE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(desktop_type_vlayout), desktop_advanced, TRUE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(desktop_type_vlayout), use_render, TRUE, FALSE, 0);
+ 
+     desktop_hlayout = gtk_hbox_new(FALSE, 10);
+ 
+@@ -209,11 +212,11 @@
+     gtk_box_pack_start(GTK_BOX(desktop_hlayout), desktop_selects_layout, FALSE, FALSE, 0);
+     gtk_box_pack_start(GTK_BOX(desktop_hlayout), desktop_type_vlayout, FALSE, FALSE, 0);
+ 
+-    gtk_box_pack_start(GTK_BOX(config_desktop_page), desktop_hlayout, TRUE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(config_desktop_page), desktop_hlayout, TRUE, TRUE, 0);
+ 
+     use_ssh_encryption = gtk_check_button_new_with_label("Use SSH encryption");
+-    cache_size = gtk_combo_box_new();
+-    disk_size = gtk_combo_box_new();
++    cache_size = gtk_combo_box_new_text();
++    disk_size = gtk_combo_box_new_text();
+ 
+     cache_layout = gtk_hbox_new(FALSE, 10);
+     gtk_box_pack_start(GTK_BOX(cache_layout), gtk_label_new("Memory cache"), FALSE, FALSE, 0);
+@@ -223,16 +226,13 @@
+ 
+     gtk_box_pack_start(GTK_BOX(config_advanced_page), use_ssh_encryption, TRUE, FALSE, 0);
+     gtk_box_pack_start(GTK_BOX(config_advanced_page), cache_layout, TRUE, FALSE, 0);
+-
+-
+-    gtk_widget_show_all(config_dialog);
+ }
+ 
+ 
+ 
+ static void config_clicked(GtkWidget *widget, gpointer data)
+ {
+-    printf("Lalala config pressed\n");
++    gtk_widget_show_all(config_dialog);
+ }
+ 
+ static void login_clicked(GtkWidget *widget, gpointer data)
+
+
+
+From gwright at mail.berlios.de  Wed Feb 21 08:31:57 2007
+From: gwright at mail.berlios.de (gwright at BerliOS)
+Date: Wed, 21 Feb 2007 08:31:57 +0100
+Subject: [Freenx-cvs] r328 - nxclientlib/maemonx
+Message-ID: <200702210731.l1L7VvgQ027393@sheep.berlios.de>
+
+Author: gwright
+Date: 2007-02-21 08:31:57 +0100 (Wed, 21 Feb 2007)
+New Revision: 328
+
+Modified:
+   nxclientlib/maemonx/mainwindow.cpp
+Log:
+Further UI tweaks
+
+
+Modified: nxclientlib/maemonx/mainwindow.cpp
+===================================================================
+--- nxclientlib/maemonx/mainwindow.cpp	2007-02-21 07:19:09 UTC (rev 327)
++++ nxclientlib/maemonx/mainwindow.cpp	2007-02-21 07:31:57 UTC (rev 328)
+@@ -103,8 +103,8 @@
+     gtk_widget_set_size_request(username_input, 400, 30);
+     gtk_widget_set_size_request(sessions_combo, 400, 30);
+ 
+-    gtk_widget_set_size_request(config_button, 150, 50);
+-    gtk_widget_set_size_request(login_button, 150, 50);
++    gtk_widget_set_size_request(config_button, 150, 40);
++    gtk_widget_set_size_request(login_button, 150, 40);
+     gtk_widget_set_size_request(fixed_layout, 672, 220);
+     gtk_widget_set_size_request(separator, 600, 0);
+ 
+@@ -116,7 +116,7 @@
+     gtk_layout_put(GTK_LAYOUT(fixed_layout), gtk_label_new("Password:"), 36, 50);
+     gtk_layout_put(GTK_LAYOUT(fixed_layout), gtk_label_new("Session:"), 36, 100);
+ 
+-    gtk_layout_put(GTK_LAYOUT(fixed_layout), separator, 20, 150);
++    gtk_layout_put(GTK_LAYOUT(fixed_layout), separator, 36, 150);
+ 
+     gtk_layout_put(GTK_LAYOUT(fixed_layout), config_button, 36, 170);
+     gtk_layout_put(GTK_LAYOUT(fixed_layout), login_button, 486, 170);
+@@ -131,9 +131,9 @@
+     config_server_page = gtk_vbox_new(FALSE, 10);
+     config_desktop_page = gtk_vbox_new(FALSE, 10);
+     config_advanced_page = gtk_vbox_new(FALSE, 10);
+-    gtk_widget_set_size_request(config_server_page, 630, 200);
+-    gtk_widget_set_size_request(config_desktop_page, 630, 200);
+-    gtk_widget_set_size_request(config_advanced_page, 630, 200);
++    gtk_widget_set_size_request(config_server_page, -1, 200);
++    gtk_widget_set_size_request(config_desktop_page, -1, 200);
++    gtk_widget_set_size_request(config_advanced_page, -1, 200);
+ 
+     gtk_dialog_add_button(GTK_DIALOG(config_dialog), "OK", GTK_RESPONSE_OK);
+     gtk_dialog_add_button(GTK_DIALOG(config_dialog), "Cancel", GTK_RESPONSE_CANCEL);
+@@ -151,6 +151,8 @@
+     use_default_key = gtk_check_button_new_with_label("Use default NoMachine key");
+     advanced_key_settings = gtk_button_new_with_label("Set custom key");
+ 
++    gtk_widget_set_size_request(advanced_key_settings, -1, 40);
++
+     server_layout = gtk_hbox_new(FALSE, 10);
+ 
+     server_labels_layout = gtk_vbox_new(TRUE, 10);
+@@ -183,6 +185,8 @@
+ 
+     desktop_advanced = gtk_button_new_with_label("Advanced");
+ 
++    gtk_widget_set_size_request(desktop_advanced, -1, 40);
++
+     compression_type = gtk_combo_box_new_text();
+     use_render = gtk_check_button_new_with_label("Use RENDER extension");
+ 
+
+
+
+From gwright at mail.berlios.de  Thu Feb 22 00:22:23 2007
+From: gwright at mail.berlios.de (gwright at BerliOS)
+Date: Thu, 22 Feb 2007 00:22:23 +0100
+Subject: [Freenx-cvs] r329 - nxclientlib/maemonx
+Message-ID: <200702212322.l1LNMNIo027351@sheep.berlios.de>
+
+Author: gwright
+Date: 2007-02-22 00:22:22 +0100 (Thu, 22 Feb 2007)
+New Revision: 329
+
+Modified:
+   nxclientlib/maemonx/mainwindow.cpp
+Log:
+Configuration UI hopefully finished now. Time for signals/callback fun!
+
+
+Modified: nxclientlib/maemonx/mainwindow.cpp
+===================================================================
+--- nxclientlib/maemonx/mainwindow.cpp	2007-02-21 07:31:57 UTC (rev 328)
++++ nxclientlib/maemonx/mainwindow.cpp	2007-02-21 23:22:22 UTC (rev 329)
+@@ -59,11 +59,13 @@
+ GtkWidget *desktop_advanced;
+ GtkWidget *compression_type;
+ GtkWidget *use_render;
++GtkWidget *jpeg_quality;
+ GtkWidget *desktop_labels_layout;
+ GtkWidget *desktop_selects_layout;
+ GtkWidget *desktop_type_hlayout;
+ GtkWidget *desktop_type_vlayout;
+ GtkWidget *desktop_hlayout;
++GtkWidget *desktop_jpeg_layout;
+ 
+ GtkWidget *use_ssh_encryption;
+ GtkWidget *cache_size;
+@@ -148,8 +150,11 @@
+     session_name = gtk_entry_new();
+     host_name = gtk_entry_new();
+     port_number = gtk_spin_button_new_with_range(1, 65535, 1);
++    gtk_spin_button_set_value(GTK_SPIN_BUTTON(port_number), 22);
+     use_default_key = gtk_check_button_new_with_label("Use default NoMachine key");
++    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(use_default_key), TRUE);
+     advanced_key_settings = gtk_button_new_with_label("Set custom key");
++    gtk_widget_set_state(advanced_key_settings, GTK_STATE_INSENSITIVE);
+ 
+     gtk_widget_set_size_request(advanced_key_settings, -1, 40);
+ 
+@@ -180,16 +185,42 @@
+     gtk_box_pack_start(GTK_BOX(config_server_page), server_key_layout, TRUE, FALSE, 0);
+  
+     platform_select = gtk_combo_box_new_text();
++    gtk_combo_box_append_text(GTK_COMBO_BOX(platform_select), "UNIX");
++    gtk_combo_box_append_text(GTK_COMBO_BOX(platform_select), "Windows");
++    gtk_combo_box_append_text(GTK_COMBO_BOX(platform_select), "VNC Proxy");
++    gtk_combo_box_set_active(GTK_COMBO_BOX(platform_select), 0);
++
+     type_select = gtk_combo_box_new_text();
++    gtk_combo_box_append_text(GTK_COMBO_BOX(type_select), "KDE");
++    gtk_combo_box_append_text(GTK_COMBO_BOX(type_select), "GNOME");
++    gtk_combo_box_append_text(GTK_COMBO_BOX(type_select), "CDE");
++    gtk_combo_box_append_text(GTK_COMBO_BOX(type_select), "XDM");
++    gtk_combo_box_append_text(GTK_COMBO_BOX(type_select), "Custom");
++    gtk_combo_box_set_active(GTK_COMBO_BOX(type_select), 0);
++
+     link_select = gtk_combo_box_new_text();
++    gtk_combo_box_append_text(GTK_COMBO_BOX(link_select), "Modem");
++    gtk_combo_box_append_text(GTK_COMBO_BOX(link_select), "ISDN");
++    gtk_combo_box_append_text(GTK_COMBO_BOX(link_select), "ADSL");
++    gtk_combo_box_append_text(GTK_COMBO_BOX(link_select), "WAN");
++    gtk_combo_box_append_text(GTK_COMBO_BOX(link_select), "LAN");
++    gtk_combo_box_set_active(GTK_COMBO_BOX(link_select), 0);
+ 
+     desktop_advanced = gtk_button_new_with_label("Advanced");
+-
++    gtk_widget_set_state(desktop_advanced, GTK_STATE_INSENSITIVE);
+     gtk_widget_set_size_request(desktop_advanced, -1, 40);
+ 
+     compression_type = gtk_combo_box_new_text();
++    gtk_combo_box_append_text(GTK_COMBO_BOX(compression_type), "PNG");
++    gtk_combo_box_append_text(GTK_COMBO_BOX(compression_type), "JPEG");
++    gtk_combo_box_append_text(GTK_COMBO_BOX(compression_type), "Raw X11");
++    gtk_combo_box_set_active(GTK_COMBO_BOX(compression_type), 0);
++
+     use_render = gtk_check_button_new_with_label("Use RENDER extension");
++    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(use_render), TRUE);
+ 
++    jpeg_quality = gtk_hscale_new_with_range(1, 9, 1);
++    gtk_widget_set_state(jpeg_quality, GTK_STATE_INSENSITIVE);
+     desktop_labels_layout = gtk_vbox_new(TRUE, 10);
+     desktop_selects_layout = gtk_vbox_new(TRUE, 10);
+     desktop_type_hlayout = gtk_hbox_new(FALSE, 10);
+@@ -218,15 +249,29 @@
+ 
+     gtk_box_pack_start(GTK_BOX(config_desktop_page), desktop_hlayout, TRUE, TRUE, 0);
+ 
++    desktop_jpeg_layout = gtk_hbox_new(FALSE, 10);
++    gtk_box_pack_start(GTK_BOX(desktop_jpeg_layout), gtk_label_new("JPEG Quality"), FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(desktop_jpeg_layout), jpeg_quality, TRUE, TRUE, 0);
++
++    gtk_box_pack_start(GTK_BOX(config_desktop_page), desktop_jpeg_layout, TRUE, FALSE, 10);
++
+     use_ssh_encryption = gtk_check_button_new_with_label("Use SSH encryption");
+-    cache_size = gtk_combo_box_new_text();
+-    disk_size = gtk_combo_box_new_text();
++    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(use_ssh_encryption), TRUE);
+ 
++    cache_size = gtk_spin_button_new_with_range(1, 32, 1);
++    disk_size = gtk_spin_button_new_with_range(1, 32, 1);
++
++    gtk_spin_button_set_value(GTK_SPIN_BUTTON(cache_size), 4);
++    gtk_spin_button_set_value(GTK_SPIN_BUTTON(disk_size), 4);
++
+     cache_layout = gtk_hbox_new(FALSE, 10);
+     gtk_box_pack_start(GTK_BOX(cache_layout), gtk_label_new("Memory cache"), FALSE, FALSE, 0);
+     gtk_box_pack_start(GTK_BOX(cache_layout), cache_size, FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(cache_layout), gtk_label_new("MB"), FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(cache_layout), gtk_label_new(0), TRUE, TRUE, 0);
+     gtk_box_pack_start(GTK_BOX(cache_layout), gtk_label_new("Disk cache"), FALSE, FALSE, 0);
+     gtk_box_pack_start(GTK_BOX(cache_layout), disk_size, FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(cache_layout), gtk_label_new("MB"), FALSE, FALSE, 0);
+ 
+     gtk_box_pack_start(GTK_BOX(config_advanced_page), use_ssh_encryption, TRUE, FALSE, 0);
+     gtk_box_pack_start(GTK_BOX(config_advanced_page), cache_layout, TRUE, FALSE, 0);
+@@ -237,6 +282,7 @@
+ static void config_clicked(GtkWidget *widget, gpointer data)
+ {
+     gtk_widget_show_all(config_dialog);
++    //g_signal_connect(G_OBJECT(config_dialog), "response", G_CALLBACK(destroy), NULL);
+ }
+ 
+ static void login_clicked(GtkWidget *widget, gpointer data)
+
+
+
+From fabianx at mail.berlios.de  Sat Feb 24 01:17:16 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sat, 24 Feb 2007 01:17:16 +0100
+Subject: [Freenx-cvs] r330 - freenx-server/trunk
+Message-ID: <200702240017.l1O0HGjL015633@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-02-24 01:17:15 +0100 (Sat, 24 Feb 2007)
+New Revision: 330
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxsetup
+Log:
++       * Added "passwd -u nx" to nxsetup to fix slackware.
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-02-21 23:22:22 UTC (rev 329)
++++ freenx-server/trunk/ChangeLog	2007-02-24 00:17:15 UTC (rev 330)
+@@ -32,6 +32,7 @@
+ 	* Fixed fullscreen sessions.
+ 	  (Patch by Gentoo Bugtracker)
+ 	* Fixed --broadcast.
++	* Added "passwd -u nx" to nxsetup to fix slackware.
+ 
+ 23.01.2007 FreeNX 0.6.0 "Juliana birthday edition"
+ 	* Opened the 0.6.0 branch.
+
+Modified: freenx-server/trunk/nxsetup
+===================================================================
+--- freenx-server/trunk/nxsetup	2007-02-21 23:22:22 UTC (rev 329)
++++ freenx-server/trunk/nxsetup	2007-02-24 00:17:15 UTC (rev 330)
+@@ -193,6 +193,9 @@
+ 
+ 		
+ 	fi
++
++	# the nx user account might be locked, so unlock it.
++	passwd -u nx
+ }
+ 
+ install_nx()
+
+
+
+From fabianx at mail.berlios.de  Mon Feb 26 00:50:50 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Mon, 26 Feb 2007 00:50:50 +0100
+Subject: [Freenx-cvs] r331 - freenx-server/trunk
+Message-ID: <200702252350.l1PNoohq027814@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-02-26 00:50:49 +0100 (Mon, 26 Feb 2007)
+New Revision: 331
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxnode
+Log:
+* Fixed respecting of enconding settings in case of rootless mode.
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-02-24 00:17:15 UTC (rev 330)
++++ freenx-server/trunk/ChangeLog	2007-02-25 23:50:49 UTC (rev 331)
+@@ -33,6 +33,7 @@
+ 	  (Patch by Gentoo Bugtracker)
+ 	* Fixed --broadcast.
+ 	* Added "passwd -u nx" to nxsetup to fix slackware.
++	* Fixed respecting of enconding settings in case of rootless mode.
+ 
+ 23.01.2007 FreeNX 0.6.0 "Juliana birthday edition"
+ 	* Opened the 0.6.0 branch.
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2007-02-24 00:17:15 UTC (rev 330)
++++ freenx-server/trunk/nxnode	2007-02-25 23:50:49 UTC (rev 331)
+@@ -991,6 +991,10 @@
+ 	rootless=0
+ 	# Its still the clients decision
+ 	[ "$ENABLE_ROOTLESS_MODE" = "1" ] &&  rootless=$(getparam rootless)
++
++	# Rootless fix from 2x nxserver 1.5.0
++	realtype=$type
++	[ "$type" = "unix-application" -o "$type" = "unix-default" ] && realtype="unix-desktop"
+ 	
+ 	# FreeNX specific variables
+ 	clientproto=$(getparam clientproto)
+@@ -1061,7 +1065,7 @@
+ 	umask 0077
+ 
+ cat << EOF > $USER_FAKE_HOME/.nx/C-$sess_id/options
+-${kbtype:+kbtype=$kbtype,}${kbload:+kbload=$kbload,}${keymap:+keymap=$keymap,}${resize:+resize=$resize,}${CACHE}${IMAGES}${PACK}link=$link,nodelay=$nodelay,type=$type,cleanup=0,${ACCEPT}cookie=$proxy_cookie,id=$sess_id,samba=$samba,media=$media${sync:+,sync=$sync}${cups:+,cups=$cups}${keybd:+,keybd=$keybd}${http:+,http=$http}${rdpcolors:+,rdpcolors=$rdpcolors}${rdpcache:+,rdpcache=$rdpcache}${fullscreen:+,fullscreen=1}:$display
++${kbtype:+kbtype=$kbtype,}${kbload:+kbload=$kbload,}${keymap:+keymap=$keymap,}${resize:+resize=$resize,}${CACHE}${IMAGES}${PACK}link=$link,nodelay=$nodelay,type=$realtype,cleanup=0,${ACCEPT}cookie=$proxy_cookie,id=$sess_id,samba=$samba,media=$media${sync:+,sync=$sync}${cups:+,cups=$cups}${keybd:+,keybd=$keybd}${http:+,http=$http}${rdpcolors:+,rdpcolors=$rdpcolors}${rdpcache:+,rdpcache=$rdpcache}${fullscreen:+,fullscreen=1}:$display
+ EOF
+ 	umask $OLD_UMASK
+ #samba=$samba,
+
+
+

@@ -1,0 +1,4005 @@
+From fabianx at berlios.de  Sat Jul  1 19:03:10 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Sat, 1 Jul 2006 19:03:10 +0200
+Subject: [Freenx-cvs] r205 - / freenx-server/trunk
+Message-ID: <200607011703.k61H3AQZ017116@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-01 19:03:07 +0200 (Sat, 01 Jul 2006)
+New Revision: 205
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxserver
+Log:
+Really fixed all remaining stale session problems this time.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:273
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:275
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-03-31 11:13:51 UTC (rev 204)
++++ freenx-server/trunk/ChangeLog	2006-07-01 17:03:07 UTC (rev 205)
+@@ -28,6 +28,8 @@
+ 	* Implemented "round-robin" and "load" loadbalancing algorithms.
+ 	  Cleaned up node.conf keys.
+ 	* Fixed help for --restart.
++	* Fixed session_running function, which fixes all remaining stale
++	  session problems.
+ 
+ XX.XX.2006 FreeNX 0.4.5 "aKademy Edition"
+ 	* Made nxsetup more user-friendly and hopefully finally failsafe.
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2006-03-31 11:13:51 UTC (rev 204)
++++ freenx-server/trunk/nxserver	2006-07-01 17:03:07 UTC (rev 205)
+@@ -363,7 +363,7 @@
+ 
+ session_running()
+ {
+-	test -f "$NX_SESS_DIR/running/sessionId'{'$1'}"
++	test -f $NX_SESS_DIR/running/sessionId'{'$1'}'
+ }
+ 
+ # session_close <session_id> <end-time>
+
+
+
+From fabianx at berlios.de  Sat Jul  1 19:03:15 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Sat, 1 Jul 2006 19:03:15 +0200
+Subject: [Freenx-cvs] r206 - / freenx-server/trunk
+Message-ID: <200607011703.k61H3F2O017254@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-01 19:03:14 +0200 (Sat, 01 Jul 2006)
+New Revision: 206
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+Log:
+Prepare for release of 0.5.0. Finally.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:275
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:276
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-07-01 17:03:07 UTC (rev 205)
++++ freenx-server/trunk/ChangeLog	2006-07-01 17:03:14 UTC (rev 206)
+@@ -1,4 +1,4 @@
+-XX.XX.2006 FreeNX 0.5.0
++01.07.2006 FreeNX 0.5.0 "UKUUG 2006 Edition"
+ 	* Opened the 0.5.0 branch.
+ 	* Added load balancing.
+ 	* Completely removed support for 1.4.0 backend.
+
+
+
+From fabianx at berlios.de  Sat Jul  1 19:03:25 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Sat, 1 Jul 2006 19:03:25 +0200
+Subject: [Freenx-cvs] r207 - / freenx-server/trunk
+Message-ID: <200607011703.k61H3Pwf017411@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-01 19:03:24 +0200 (Sat, 01 Jul 2006)
+New Revision: 207
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxnode
+Log:
+* Removed termination of nxagent in case of rootless mode.
+  (Fixes kontact without --nofork)
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:276
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:277
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-07-01 17:03:14 UTC (rev 206)
++++ freenx-server/trunk/ChangeLog	2006-07-01 17:03:24 UTC (rev 207)
+@@ -30,6 +30,8 @@
+ 	* Fixed help for --restart.
+ 	* Fixed session_running function, which fixes all remaining stale
+ 	  session problems.
++	* Removed termination of nxagent in case of rootless mode.
++	  (Fixes kontact without --nofork)
+ 
+ XX.XX.2006 FreeNX 0.4.5 "aKademy Edition"
+ 	* Made nxsetup more user-friendly and hopefully finally failsafe.
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2006-07-01 17:03:14 UTC (rev 206)
++++ freenx-server/trunk/nxnode	2006-07-01 17:03:24 UTC (rev 207)
+@@ -209,9 +209,10 @@
+ 		[ "$KILL_DEFAULT_X_WM" = "1" ] || wait $WM_PID
+ 	fi
+ 	rm -f $USER_FAKE_HOME/.nx/C-$sess_id/pids/applications
+-	
+-	# FIXME: Do not terminate agent!
+-	node_terminate_agent $sess_id
++
++	# Do not terminate agent in case of rootless agent mode.
++	# The agent times out after a while by itself anyway.
++	[ "$virtualdesktop" = "1" -o "$rootless" != "1" ] && node_terminate_agent $sess_id
+ }
+ 
+ node_start_agent()
+
+
+
+From fabianx at berlios.de  Sat Jul  1 19:03:29 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Sat, 1 Jul 2006 19:03:29 +0200
+Subject: [Freenx-cvs] r208 - / freenx-server/trunk
+Message-ID: <200607011703.k61H3TXW017506@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-01 19:03:28 +0200 (Sat, 01 Jul 2006)
+New Revision: 208
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxnode
+Log:
+Fixed cupsd directory, which was set to the wrong display since rev function was introduced.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:277
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:278
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-07-01 17:03:24 UTC (rev 207)
++++ freenx-server/trunk/ChangeLog	2006-07-01 17:03:28 UTC (rev 208)
+@@ -32,6 +32,7 @@
+ 	  session problems.
+ 	* Removed termination of nxagent in case of rootless mode.
+ 	  (Fixes kontact without --nofork)
++	* Last minute fixes for new functions using rev.
+ 
+ XX.XX.2006 FreeNX 0.4.5 "aKademy Edition"
+ 	* Made nxsetup more user-friendly and hopefully finally failsafe.
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2006-07-01 17:03:24 UTC (rev 207)
++++ freenx-server/trunk/nxnode	2006-07-01 17:03:28 UTC (rev 208)
+@@ -99,7 +99,7 @@
+ 	rm -f /tmp/.X11-unix/X$display
+ 	
+ 	# remove cookie
+-	$COMMAND_XAUTH -v source $USER_FAKE_HOME/.nx/C-$sess_id/scripts/authority >/dev/null 2>&1
++	$COMMAND_XAUTH -v source $USER_FAKE_HOME/.nx/C-$1/scripts/authority >/dev/null 2>&1
+ 	[ "$SESSION_LOG_CLEAN" = "1" ] && rm -rf $USER_FAKE_HOME/.nx/C-$1/
+ 	[ "$SESSION_LOG_CLEAN" = "0" -a "$2" = "failed" ] && mv $USER_FAKE_HOME/.nx/C-$1/ $USER_FAKE_HOME/.nx/F-C-$1/
+ 	[ "$SESSION_LOG_CLEAN" = "0" -a "$2" != "failed" ] && mv $USER_FAKE_HOME/.nx/C-$1/ $USER_FAKE_HOME/.nx/T-C-$1/
+@@ -848,7 +848,7 @@
+ 	public=$(getparam public)
+ 	model=$(getparam model)
+ 	defaultPrinter=$(getparam defaultPrinter)
+-	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | rev | cut -d"-" -f3 | rev)
++	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | rev | cut -d"-" -f2 | rev)
+ 	sess_id="$SERVER_NAME-$display-$sessionid"
+ 	# this will also setup the userspace cupsd
+ 	IPP_PORT=$(node_cupsd_get_port)
+
+
+
+From fabianx at berlios.de  Sat Jul  1 19:03:33 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Sat, 1 Jul 2006 19:03:33 +0200
+Subject: [Freenx-cvs] r209 - / freenx-server/trunk
+Message-ID: <200607011703.k61H3XKM017680@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-01 19:03:32 +0200 (Sat, 01 Jul 2006)
+New Revision: 209
+
+Modified:
+   /
+   freenx-server/trunk/nxloadconfig
+Log:
+Prepare for release.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:278
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:279
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2006-07-01 17:03:28 UTC (rev 208)
++++ freenx-server/trunk/nxloadconfig	2006-07-01 17:03:32 UTC (rev 209)
+@@ -52,7 +52,7 @@
+ # DO NOT TOUCH unless you REALLY know what you are doing
+ #########################################################################
+ 
+-NX_VERSION=1.5.0-50-SVN
++NX_VERSION=1.5.0-50
+ NX_LICENSE="OS (GPL)"
+ 
+ # Where can different nx components be found
+
+
+
+From fabianx at berlios.de  Sat Jul  1 19:03:42 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Sat, 1 Jul 2006 19:03:42 +0200
+Subject: [Freenx-cvs] r210 - / freenx-server/trunk
+Message-ID: <200607011703.k61H3gq4017759@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-01 19:03:39 +0200 (Sat, 01 Jul 2006)
+New Revision: 210
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/node.conf.sample
+   freenx-server/trunk/nxloadconfig
+   freenx-server/trunk/nxnode
+Log:
+Added experimental last minute support for NX 2.0.0 backend.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:279
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:280
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-07-01 17:03:32 UTC (rev 209)
++++ freenx-server/trunk/ChangeLog	2006-07-01 17:03:39 UTC (rev 210)
+@@ -33,6 +33,8 @@
+ 	* Removed termination of nxagent in case of rootless mode.
+ 	  (Fixes kontact without --nofork)
+ 	* Last minute fixes for new functions using rev.
++	* Added experimental last minute support for NX 2.0.0 backend.
++	  (set ENABLE_2_0_0_BACKEND=1)
+ 
+ XX.XX.2006 FreeNX 0.4.5 "aKademy Edition"
+ 	* Made nxsetup more user-friendly and hopefully finally failsafe.
+
+Modified: freenx-server/trunk/node.conf.sample
+===================================================================
+--- freenx-server/trunk/node.conf.sample	2006-07-01 17:03:32 UTC (rev 209)
++++ freenx-server/trunk/node.conf.sample	2006-07-01 17:03:39 UTC (rev 210)
+@@ -345,6 +345,9 @@
+ # Misc directives
+ #########################################################################
+ 
++# When you installed a 2.0.0 NX Backend, set this to 1.
++#ENABLE_2_0_0_BACKEND="0"
++
+ # When set to 1 this will automatically resume started sessions
+ #ENABLE_AUTORECONNECT="0"
+ 
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2006-07-01 17:03:32 UTC (rev 209)
++++ freenx-server/trunk/nxloadconfig	2006-07-01 17:03:39 UTC (rev 210)
+@@ -173,6 +173,7 @@
+ 
+ # Misc directives
+ 
++ENABLE_2_0_0_BACKEND="0"
+ ENABLE_AUTORECONNECT="0"
+ ENABLE_AUTORECONNECT_BEFORE_140="1"
+ EXPORT_USERIP="0"
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2006-07-01 17:03:32 UTC (rev 209)
++++ freenx-server/trunk/nxnode	2006-07-01 17:03:39 UTC (rev 210)
+@@ -252,7 +252,7 @@
+ 	[ -n "$keyboard" ] && K="-keyboard $keyboard"
+ 	[ -n "$kbtype" ] && K="-kbtype $kbtype"
+ 	B=""
+-	[ -n "$backingstore" ] && B="-bs $backingstore"
++	[ -n "$backingstore" -a "$ENABLE_2_0_0_BACKEND" != "1" ] && B="-bs $backingstore"
+ 	G=""
+ 	[ -n "$geometry" ] && G="-geometry $geometry"
+ 	R="-D"
+@@ -443,8 +443,133 @@
+ #                         connection states and react differently.
+ #
+ 
+-node_start_monitor()
++node_start_monitor_2_0_0()
+ {
++	TAIL_PID=""
++	SUSPEND_STATUS="$2"
++	SESSION_STATUS=""
++
++	while read line 
++	do
++		#
++		# Catch tail pid
++		#
++		
++		if stringinstring "Info: tail -f running with pid" "$line"
++		then
++			TAIL_PID=$(echo $line | cut -d"'" -f2)
++		fi
++
++		#
++		# Session messages
++		#
++
++		if stringinstring "Session: Starting session at" "$line"
++		then
++			echo "NX> 1009 Session status: starting"
++		fi
++		
++		if stringinstring "Session: Suspending session at" "$line"
++		then
++			echo "NX> 1009 Session status: suspending"
++		fi
++		
++		if stringinstring "Session: Terminating session at" "$line"
++		then
++			echo "NX> 1009 Session status: terminating"
++		fi
++		
++		if stringinstring "Session: Resuming session at" "$line"
++		then
++			echo "NX> 1009 Session status: resuming"
++		fi
++
++
++		#
++		# Session suspend
++		#
++
++		if stringinstring "Session: Session suspended at" "$line"
++		then
++			echo "NX> 1005 Session status: suspended"
++			# umount shares & stop printers
++
++			if [ "$SUSPEND_STATUS" = "Running" ]
++			then
++				node_suspend_session $sess_id
++				SUSPEND_STATUS=""
++			else
++				node_stop_services
++			fi
++		fi
++
++		#
++		# Watchdog termination
++		#
++
++		if stringinstring "Info: Watchdog running with pid" "$line"
++		then
++			WATCHDOG_PID=$(echo $line | cut -d"'" -f2)
++		fi
++
++		if stringinstring "Info: Waiting the watchdog process to complete." "$line"
++		then
++			# Kill the watchdog
++			kill $WATCHDOG_PID 2>/dev/null
++		fi
++		
++		#
++		# Session is running
++		#
++		
++		if stringinstring "Info: Waiting for connection from" "$line"
++		then
++			echo "NX> 710 Session status: running"
++			echo "NX> 1002 Commit"
++			echo "NX> 1006 Session status: running"
++		fi
++
++		#
++		# Reconnection success!
++		#
++		
++		if stringinstring "Session: Session resumed at" "$line"
++		then
++			echo "NX> 718 Session restore succeded"
++			if [ "$1" = "restore" ]
++			then
++				kill $TAIL_PID
++				break
++			fi
++		fi
++
++		#
++		# Reconnection failure
++		#
++		
++		if stringinstring "Session: Display failure detected at" "$line"
++		then
++			echo "NX> 596 Error: Session $1 failed. Reason was: $line"
++			if [ "$1" = "restore" ]
++			then
++				kill $TAIL_PID
++				break
++			fi
++		fi
++	done
++	
++	trap "" EXIT
++	
++	[ "$1" = "restore" ] ||	node_stop_services
++	# close all open file descriptors
++	exec 0<&-
++	exec 1>&-
++	exec 2>&-
++	exit 0
++}
++
++node_start_monitor_1_5_0()
++{
+ 	RUNNING=0
+ 	TAIL_PID=""
+ 	SUSPEND_STATUS="$2"
+@@ -599,6 +724,12 @@
+ 	exit 0
+ }
+ 
++node_start_monitor()
++{
++	[ "$ENABLE_2_0_0_BACKEND" = "1" ] && node_start_monitor_2_0_0 "$@"
++	[ "$ENABLE_2_0_0_BACKEND" = "1" ] || node_start_monitor_1_5_0 "$@"
++}
++
+ node_startsession()
+ {
+ 
+
+
+
+From fabianx at berlios.de  Sat Jul  1 19:08:28 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Sat, 1 Jul 2006 19:08:28 +0200
+Subject: [Freenx-cvs] r211 - / freenx-website
+Message-ID: <200607011708.k61H8S9W020030@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-01 19:08:27 +0200 (Sat, 01 Jul 2006)
+New Revision: 211
+
+Modified:
+   /
+   freenx-website/home.inc
+Log:
+Added news to the homepage.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:280
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-website/home.inc
+===================================================================
+--- freenx-website/home.inc	2006-07-01 17:03:39 UTC (rev 210)
++++ freenx-website/home.inc	2006-07-01 17:08:27 UTC (rev 211)
+@@ -11,6 +11,13 @@
+ 		News
+ 	</h2>
+ 	<h3>		<a
++	href="http://www.ukuug.org/events/linux2006/">FreeNX at UKUUG 2006.</a> 
++        - Saturday, August 01, 2006 -
++	</h3>
++	FreeNX is currently present at UKUUG Linux 2006 conference in
++	Brighton, England. You can visit us there.
++
++	<h3>		<a
+ 	href="http://www.linuxjournal.com/article/8477">Visit FreeNX on Linux WorldExpo San Francisco Aug 9-11, 2005</a> 
+         - Saturday, August 07, 2005 - 
+ 	</h3>
+
+
+
+From fabianx at berlios.de  Sat Jul  1 19:16:00 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Sat, 1 Jul 2006 19:16:00 +0200
+Subject: [Freenx-cvs] r212 - in freenx-server: branches tags
+Message-ID: <200607011716.k61HG05W023201@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-01 19:15:58 +0200 (Sat, 01 Jul 2006)
+New Revision: 212
+
+Added:
+   freenx-server/branches/FreeNX-0.5/
+   freenx-server/tags/FreeNX-0.5.0/
+Log:
+- Released FreeNX 0.5.0.
+
+- Started FreeNX-0.5 branch.
+
+
+
+Copied: freenx-server/branches/FreeNX-0.5 (from rev 210, freenx-server/trunk)
+
+Copied: freenx-server/tags/FreeNX-0.5.0 (from rev 210, freenx-server/trunk)
+
+
+
+From fabianx at berlios.de  Sat Jul  1 20:21:46 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Sat, 1 Jul 2006 20:21:46 +0200
+Subject: [Freenx-cvs] r214 - / freenx-website
+Message-ID: <200607011821.k61ILkBb010994@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-01 20:21:45 +0200 (Sat, 01 Jul 2006)
+New Revision: 214
+
+Modified:
+   /
+   freenx-website/download.inc
+Log:
+Typo.
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:292
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:293
+
+Modified: freenx-website/download.inc
+===================================================================
+--- freenx-website/download.inc	2006-07-01 18:20:53 UTC (rev 213)
++++ freenx-website/download.inc	2006-07-01 18:21:45 UTC (rev 214)
+@@ -1,6 +1,6 @@
+ <div class="box">
+ 	<h2>
+-		Official FreeNX Server Package
++		Official FreeNX Server Packages
+ 	</h2>
+ 	<p>
+ 		This tarball is intented mainly for distributions, which want to use FreeNX as building the other OpenSource NX components is quite difficult.
+
+
+
+From fabianx at berlios.de  Sat Jul  1 21:04:33 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Sat, 1 Jul 2006 21:04:33 +0200
+Subject: [Freenx-cvs] r215 - / freenx-server/branches freenx-server/branches/FreeNX-0.5 freenx-server/tags freenx-server/tags/FreeNX-0.5.0 freenx-website
+Message-ID: <200607011904.k61J4XQ1024762@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-01 21:04:31 +0200 (Sat, 01 Jul 2006)
+New Revision: 215
+
+Added:
+   freenx-server/branches/FreeNX-0.5/
+   freenx-server/tags/FreeNX-0.5.0/
+Removed:
+   freenx/
+Modified:
+   /
+   freenx-server/branches/FreeNX-0.5/nxclient
+   freenx-server/branches/FreeNX-0.5/nxkeygen
+   freenx-server/branches/FreeNX-0.5/nxloadconfig
+   freenx-server/branches/FreeNX-0.5/nxnode
+   freenx-server/branches/FreeNX-0.5/nxnode-login
+   freenx-server/branches/FreeNX-0.5/nxprint
+   freenx-server/branches/FreeNX-0.5/nxserver
+   freenx-server/branches/FreeNX-0.5/nxsetup
+   freenx-server/tags/FreeNX-0.5.0/nxclient
+   freenx-server/tags/FreeNX-0.5.0/nxkeygen
+   freenx-server/tags/FreeNX-0.5.0/nxloadconfig
+   freenx-server/tags/FreeNX-0.5.0/nxnode
+   freenx-server/tags/FreeNX-0.5.0/nxnode-login
+   freenx-server/tags/FreeNX-0.5.0/nxprint
+   freenx-server/tags/FreeNX-0.5.0/nxserver
+   freenx-server/tags/FreeNX-0.5.0/nxsetup
+   freenx-website/download.inc
+Log:
+Reverted problematic svk sync.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:293
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Copied: freenx-server/branches/FreeNX-0.5 (from rev 212, freenx-server/branches/FreeNX-0.5)
+
+
+Property changes on: freenx-server/branches/FreeNX-0.5
+___________________________________________________________________
+Name: svk:merge
+   + dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx/freenx-server/branches/FreeNX-0.4:184
+
+Copied: freenx-server/tags/FreeNX-0.5.0 (from rev 212, freenx-server/tags/FreeNX-0.5.0)
+
+
+Property changes on: freenx-server/tags/FreeNX-0.5.0
+___________________________________________________________________
+Name: svk:merge
+   + dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx/freenx-server/branches/FreeNX-0.4:184
+
+Modified: freenx-website/download.inc
+===================================================================
+--- freenx-website/download.inc	2006-07-01 18:21:45 UTC (rev 214)
++++ freenx-website/download.inc	2006-07-01 19:04:31 UTC (rev 215)
+@@ -1,6 +1,6 @@
+ <div class="box">
+ 	<h2>
+-		Official FreeNX Server Packages
++		Official FreeNX Server Package
+ 	</h2>
+ 	<p>
+ 		This tarball is intented mainly for distributions, which want to use FreeNX as building the other OpenSource NX components is quite difficult.
+
+
+
+From fabianx at berlios.de  Sat Jul  1 21:27:43 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Sat, 1 Jul 2006 21:27:43 +0200
+Subject: [Freenx-cvs] r216 - / freenx-website
+Message-ID: <200607011927.k61JRhDu011649@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-01 21:27:43 +0200 (Sat, 01 Jul 2006)
+New Revision: 216
+
+Modified:
+   /
+   freenx-website/download.inc
+Log:
+Typo.
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:220
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-website/download.inc
+===================================================================
+--- freenx-website/download.inc	2006-07-01 19:04:31 UTC (rev 215)
++++ freenx-website/download.inc	2006-07-01 19:27:43 UTC (rev 216)
+@@ -1,6 +1,6 @@
+ <div class="box">
+ 	<h2>
+-		Official FreeNX Server Package
++		Official FreeNX Server Packages
+ 	</h2>
+ 	<p>
+ 		This tarball is intented mainly for distributions, which want to use FreeNX as building the other OpenSource NX components is quite difficult.
+
+
+
+From fabianx at berlios.de  Tue Jul  4 17:46:36 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Tue, 4 Jul 2006 17:46:36 +0200
+Subject: [Freenx-cvs] r217 - / freenx-server/trunk
+Message-ID: <200607041546.k64Fkakw019195@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-04 17:46:34 +0200 (Tue, 04 Jul 2006)
+New Revision: 217
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxloadconfig
+Log:
+Opened the 0.6.0 branch.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:220
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:222
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-07-01 19:27:43 UTC (rev 216)
++++ freenx-server/trunk/ChangeLog	2006-07-04 15:46:34 UTC (rev 217)
+@@ -1,3 +1,6 @@
++xx.xx.2006 FreeNX 0.6.0
++	* Opened the 0.6.0 branch.
++
+ 01.07.2006 FreeNX 0.5.0 "UKUUG 2006 Edition"
+ 	* Opened the 0.5.0 branch.
+ 	* Added load balancing.
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2006-07-01 19:27:43 UTC (rev 216)
++++ freenx-server/trunk/nxloadconfig	2006-07-04 15:46:34 UTC (rev 217)
+@@ -52,7 +52,7 @@
+ # DO NOT TOUCH unless you REALLY know what you are doing
+ #########################################################################
+ 
+-NX_VERSION=1.5.0-50
++NX_VERSION=1.5.0-60-SVN
+ NX_LICENSE="OS (GPL)"
+ 
+ # Where can different nx components be found
+
+
+
+From fabianx at berlios.de  Tue Jul  4 17:46:38 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Tue, 4 Jul 2006 17:46:38 +0200
+Subject: [Freenx-cvs] r218 - / freenx-server/trunk
+Message-ID: <200607041546.k64FkcP0019246@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-04 17:46:38 +0200 (Tue, 04 Jul 2006)
+New Revision: 218
+
+Modified:
+   /
+   freenx-server/trunk/nxnode
+Log:
+Added first part of slave mode to nxnode.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:222
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:223
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2006-07-04 15:46:34 UTC (rev 217)
++++ freenx-server/trunk/nxnode	2006-07-04 15:46:38 UTC (rev 218)
+@@ -22,7 +22,7 @@
+ 
+ echo "NX> 1000 NXNODE - Version $NX_VERSION $NX_LICENSE"
+ 
+-if [ "$1" != "--check" -a "$1" != "--setkey" -a "$1" != "--agent" ]
++if [ "$1" != "--check" -a "$1" != "--setkey" -a "$1" != "--agent" -a "$1" != "--slave" ]
+ then 
+ 	read CMDLINE
+ 
+@@ -1001,6 +1001,8 @@
+ 	[ "$defaultPrinter" = "1" ] && lpadmin -d "$NAME"
+ }
+ 
++nxnode_func()
++{
+ 
+ case "$1" in 
+ 	--startsession)
+@@ -1046,4 +1048,29 @@
+ 		echo "NX> 500 Error: Command not found"
+ 	;;
+ esac
++
++}
++
++
++if [ "$1" = "--slave" ]
++then
++	# New slave mode accepts more than 1 command at a time
++	
++	while read CMD HANDLE
++	do
++		set -- "$CMD"
++		if [ "$1" != "--check" -a "$1" != "--setkey" -a "$1" != "--agent" ]
++		then 
++			read CMDLINE
++
++			CMDLINE="a=b&$CMDLINE"
++		fi
++
++		( echo $CMDLINE | "$0" "$CMD" | sed "s/^/[$HANDLE]-/g" ) &
++
++	done
++else
++	nxnode_func "$@"
++fi
++
+ echo "NX> 1001 Bye."
+
+
+
+From fabianx at berlios.de  Tue Jul  4 17:46:41 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Tue, 4 Jul 2006 17:46:41 +0200
+Subject: [Freenx-cvs] r219 - / freenx-server/trunk freenx-server/trunk/nxserver-helper
+Message-ID: <200607041546.k64FkfpY019299@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-04 17:46:40 +0200 (Tue, 04 Jul 2006)
+New Revision: 219
+
+Added:
+   freenx-server/trunk/nxserver-helper/
+   freenx-server/trunk/nxserver-helper/Makefile
+   freenx-server/trunk/nxserver-helper/nxserver-helper.c
+Modified:
+   /
+Log:
+Added small helper program to enable nxnode slave mode.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:223
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:224
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Added: freenx-server/trunk/nxserver-helper/Makefile
+===================================================================
+--- freenx-server/trunk/nxserver-helper/Makefile	2006-07-04 15:46:38 UTC (rev 218)
++++ freenx-server/trunk/nxserver-helper/Makefile	2006-07-04 15:46:40 UTC (rev 219)
+@@ -0,0 +1,6 @@
++.PHONY: all clean distclean
++
++all: nxserver-helper
++
++clean distclean:
++	rm -f *.o nxserver-helper
+
+Added: freenx-server/trunk/nxserver-helper/nxserver-helper.c
+===================================================================
+--- freenx-server/trunk/nxserver-helper/nxserver-helper.c	2006-07-04 15:46:38 UTC (rev 218)
++++ freenx-server/trunk/nxserver-helper/nxserver-helper.c	2006-07-04 15:46:40 UTC (rev 219)
+@@ -0,0 +1,11 @@
++#include <sys/types.h>
++#include <sys/socket.h>
++
++int main(int argc, char* argv[])
++{
++	int fds[2];
++
++	socketpair(AF_UNIX, SOCK_STREAM, 0, fds);
++	argv++;
++	execv(argv[0], argv);
++}
+
+
+
+From fabianx at berlios.de  Wed Jul  5 00:02:23 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Wed, 5 Jul 2006 00:02:23 +0200
+Subject: [Freenx-cvs] r220 - / freenx-server/trunk
+Message-ID: <200607042202.k64M2Nd5022759@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-05 00:02:22 +0200 (Wed, 05 Jul 2006)
+New Revision: 220
+
+Modified:
+   /
+   freenx-server/trunk/nxnode
+   freenx-server/trunk/nxserver
+Log:
+Added first version of nxnode slave mode.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:224
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:228
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2006-07-04 15:46:40 UTC (rev 219)
++++ freenx-server/trunk/nxnode	2006-07-04 22:02:22 UTC (rev 220)
+@@ -1055,8 +1055,9 @@
+ if [ "$1" = "--slave" ]
+ then
+ 	# New slave mode accepts more than 1 command at a time
++	echo "NX> 716 Slave mode started successfully."
+ 	
+-	while read CMD HANDLE
++	while read CMD
+ 	do
+ 		set -- "$CMD"
+ 		if [ "$1" != "--check" -a "$1" != "--setkey" -a "$1" != "--agent" ]
+@@ -1066,7 +1067,7 @@
+ 			CMDLINE="a=b&$CMDLINE"
+ 		fi
+ 
+-		( echo $CMDLINE | "$0" "$CMD" | sed "s/^/[$HANDLE]-/g" ) &
++		( echo $CMDLINE | "$0" "$CMD" ) &
+ 
+ 	done
+ else
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2006-07-04 15:46:40 UTC (rev 219)
++++ freenx-server/trunk/nxserver	2006-07-04 22:02:22 UTC (rev 220)
+@@ -466,6 +466,85 @@
+ 	echo "$@"
+ }
+ 
++
++#
++# needed for slave mode
++#
++
++nxnode_login_stop_slave()
++{
++	[ -n "$NXNODE_LOGIN_SLAVE" ] && kill "$NXNODE_LOGIN_SLAVE"
++}
++
++nxnode_login()
++{
++	PASS="$1"
++	shift
++
++	if [ "$NXNODE_LOGIN_SLAVE_ENABLED" != "1" ]
++	then
++		NXNODE_TOSEND="$NXNODE_TOSEND" echo $PASS | $PATH_BIN/nxnode-login "$@"
++	else
++		if [ -z "$NXNODE_LOGIN_SLAVE" ]
++		then
++			# Send password
++			echo "$PASS" >&4 
++
++			# Connect to NXNODE
++			
++			$PATH_BIN/nxnode-login "$1" "$2" "$3" "$4" "$5" "--slave" <&3 >&3 2>&3 &
++			NXNODE_LOGIN_SLAVE="$!"
++			disown $!
++
++			trap nxnode_login_stop_slave EXIT
++			
++			while read line <&4
++			do
++				log 6 "$line"
++				case "$line" in
++					"NX> 716 Slave mode started successfully.")
++						break
++					;;
++				esac
++			done
++
++			# TODO: KILL the slave node at end of session
++		fi
++		
++		#send CMD to nxnode
++		
++		echo "$6" >&4
++		[ -n "$NXNODE_TOSEND" ] && echo "$NXNODE_TOSEND" >&4
++
++		NXNODE_RETURN="1"
++
++		if [ -z "$NXNODE_READER" ]
++		then
++			while read line <&4
++			do
++				echo "$line"
++				case "$line" in
++					"NX> 716"*) 
++						NXNODE_RETURN="0"
++					;;
++					"NX> 1001"*)
++						break
++					;;
++				esac
++			done
++		fi
++		test "$NXNODE_RETURN" = "0"
++	fi
++}
++
++nxnode_login_register_reader()
++{
++	# Register a reader
++	NXNODE_READER="1"
++}
++
++ENABLE_NXNODE_SLAVE_MODE="1"
++
+ # Start!
+ [ "$NX_LOG_LEVEL" -ge "1" ] && touch "$NX_LOGFILE" >/dev/null 2>&1
+ log 3 "-- NX SERVER START: $@ - ORIG_COMMAND=$SSH_ORIGINAL_COMMAND"
+@@ -488,6 +567,27 @@
+ 	log 1 "Error: Forwarding to NoMachine Server $NOMACHINE_SERVER failed. Using FreeNX server instead."
+ fi
+ 
++#
++# nxnode slave mode preparations
++#
++
++NXNODE_LOGIN_SLAVE_ENABLED="0"
++NXNODE_LOGIN_SLAVE=""
++
++if [ "$ENABLE_NXNODE_SLAVE_MODE" = "1" -a "$NXSERVER_HELPER_ACTIVE" != "1" ]
++then
++	export SSH_ORIGINAL_COMMAND
++	export NXSERVER_HELPER_ACTIVE="1"
++	exec $PATH_BIN/nxserver-helper "$0"
++	log 1 "Error: Execution of $PATH_BIN/nxserver-helper failed. Disabling slave mode of nxnode."
++fi
++
++if [ "$ENABLE_NXNODE_SLAVE_MODE" = "1" -a "$NXSERVER_HELPER_ACTIVE" = "1" ]
++then
++	log 3 "Info: Using fds #3 and #4 for communication with nxnode."
++	NXNODE_LOGIN_SLAVE_ENABLED="1"
++fi
++
+ echo_x "HELLO NXSERVER - Version $NX_VERSION $NX_LICENSE"
+ 
+ # Login stage
+@@ -567,7 +667,7 @@
+ 			then
+ 				log 6 -n "ssh "
+ 				export COMMAND_SSH			
+-				echo "$PASS" | $PATH_BIN/nxnode-login -- ssh "$USER" "$SSHD_PORT" "$PATH_BIN/nxnode" --check 2>&1 >/dev/null
++				nxnode_login "$PASS" -- ssh "$USER" "$SSHD_PORT" "$PATH_BIN/nxnode" --check 2>&1 >/dev/null
+ 				if [ $? -eq 0 ]
+ 				then
+ 					LOGIN_SUCCESS="1"
+@@ -579,7 +679,7 @@
+ 			if [ "$ENABLE_SU_AUTHENTICATION" = "1" -a "$LOGIN_SUCCESS" = "0" ]
+ 			then
+ 				log 6 -n "su "
+-				echo "$PASS" | $PATH_BIN/nxnode-login -- su "$USER" "" "$PATH_BIN/nxnode" --check 2>&1 >/dev/null
++				nxnode_login "$PASS" -- su "$USER" "" "$PATH_BIN/nxnode" --check 2>&1 >/dev/null
+ 				if [ $? -eq 0 ]
+ 				then
+ 					LOGIN_SUCCESS="1"
+@@ -666,10 +766,10 @@
+ 	if [ "$LOGIN_METHOD" = "SSH" ]
+ 	then
+ 	    export COMMAND_SSH
+-	    echo "$PASS" | NXNODE_TOSEND="$@" $PATH_BIN/nxnode-login -- ssh "$USER" "$SSHD_PORT" "$PATH_BIN/nxnode" "$CMD" 2>&1 | log_tee
++	    NXNODE_TOSEND="$@" nxnode_login "$PASS" -- ssh "$USER" "$SSHD_PORT" "$PATH_BIN/nxnode" "$CMD" 2>&1 | log_tee
+ 	elif [ "$LOGIN_METHOD" = "SU" ]
+ 	then
+-	    echo "$PASS" | NXNODE_TOSEND="$@" $PATH_BIN/nxnode-login -- su "$USER" "" "$PATH_BIN/nxnode" "$CMD" 2>&1 | log_tee
++	    NXNODE_TOSEND="$@" nxnode_login "$PASS" -- su "$USER" "" "$PATH_BIN/nxnode" "$CMD" 2>&1 | log_tee
+ 	elif [ "$LOGIN_METHOD" = "USERMODE" ]
+ 	then
+ 	    echo "$@" | $PATH_BIN/nxnode "$CMD" 2>&1 | log_tee
+@@ -707,6 +807,9 @@
+ 
+ 	# remove lock file
+ 	[ -e "/tmp/.nX$SESS_DISPLAY-lock" ] && rm -f /tmp/.nX$SESS_DISPLAY-lock
++
++	# Kill possible slave node
++	nxnode_login_stop_slave
+ }
+ 
+ server_nxnode_start_wait()
+@@ -777,6 +880,8 @@
+ 	# remove lock file
+ 	[ -e "/tmp/.nX$SESS_DISPLAY-lock" ] && rm -f /tmp/.nX$SESS_DISPLAY-lock
+ 
++	nxnode_login_stop_slave
++
+ 	else # $1 = restore
+ 	
+ 	KILL_WAIT_PID=1
+@@ -816,6 +921,8 @@
+ 		esac
+ 	done
+ 	
++	nxnode_login_stop_slave
++	
+ 	fi # $1 = start
+ }
+ 
+@@ -1071,9 +1178,10 @@
+ 	# now start the node
+ 	sleep $AGENT_STARTUP_TIMEOUT &
+ 	SERVER_WAIT_PID=$!
+-	server_nxnode_start_wait --"$ACTION"session $USER "$FULL_PARAMS" &
++	( server_nxnode_start_wait --"$ACTION"session $USER "$FULL_PARAMS" ) &
+ 	SERVER_PID=$!
+ 	disown $SERVER_PID
++	
+ 	wait $SERVER_WAIT_PID
+ 	
+ 	if [ $? -eq 0 ]
+@@ -1086,6 +1194,9 @@
+ 		# FIXME: Send node signal to terminate
+ 		exit 1
+ 	fi
++	
++	# We have now an active reader
++	nxnode_login_register_reader
+ }
+ 
+ # Session stage
+@@ -1215,12 +1326,14 @@
+ 		addmount*)
+ 			server_get_params $CMD
+ 			PARAMS=$SERVER_PARAMS
++			# TODO: This redirection is crap here.
+ 			server_nxnode_start --smbmount "$USER" "$PARAMS" >/dev/null 2>&1 | log_error >/dev/null
+ 			echo_x "NX> 719 SMB filesystem: running"
+ 		;;
+ 		addprinter*)
+ 			server_get_params $CMD
+ 			PARAMS=$SERVER_PARAMS
++			# TODO: This redirecion is crap here.
+ 			server_nxnode_start --addprinter "$USER" "$PARAMS" >/dev/null 2>&1 | log_error >/dev/null
+ 		;;
+ 		*)
+
+
+
+From fabianx at berlios.de  Wed Jul  5 00:02:26 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Wed, 5 Jul 2006 00:02:26 +0200
+Subject: [Freenx-cvs] r221 - / freenx-server/trunk
+Message-ID: <200607042202.k64M2QQe022811@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-05 00:02:25 +0200 (Wed, 05 Jul 2006)
+New Revision: 221
+
+Modified:
+   /
+   freenx-server/trunk/node.conf.sample
+   freenx-server/trunk/nxclient
+   freenx-server/trunk/nxkeygen
+   freenx-server/trunk/nxloadconfig
+   freenx-server/trunk/nxnode
+   freenx-server/trunk/nxnode-login
+   freenx-server/trunk/nxserver
+   freenx-server/trunk/nxsetup
+Log:
+Added $Id$ properties, renamed CVS to SVN.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:228
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:229
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-server/trunk/node.conf.sample
+===================================================================
+--- freenx-server/trunk/node.conf.sample	2006-07-04 22:02:22 UTC (rev 220)
++++ freenx-server/trunk/node.conf.sample	2006-07-04 22:02:25 UTC (rev 221)
+@@ -37,7 +37,7 @@
+ #
+ #           https://mail.kde.org/mailman/listinfo/freenx-knx
+ #
+-# CVS: $Id: node.conf.sample,v 1.35 2005/08/02 15:39:32 fabianx Exp $
++# SVN: $Id$
+ 
+ #########################################################################
+ # General FreeNX directives
+
+
+Property changes on: freenx-server/trunk/node.conf.sample
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+
+Modified: freenx-server/trunk/nxclient
+===================================================================
+--- freenx-server/trunk/nxclient	2006-07-04 22:02:22 UTC (rev 220)
++++ freenx-server/trunk/nxclient	2006-07-04 22:02:25 UTC (rev 221)
+@@ -9,7 +9,7 @@
+ #       but we set it to a "good value" anyway in case 
+ #       it does check it someday.
+ #
+-# CVS: $Id: nxclient,v 1.5 2005/04/25 02:11:24 fabianx Exp $
++# SVN: $Id$
+ #
+ # ========================================================================
+ 
+
+
+Property changes on: freenx-server/trunk/nxclient
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+
+Modified: freenx-server/trunk/nxkeygen
+===================================================================
+--- freenx-server/trunk/nxkeygen	2006-07-04 22:02:22 UTC (rev 220)
++++ freenx-server/trunk/nxkeygen	2006-07-04 22:02:25 UTC (rev 221)
+@@ -11,7 +11,7 @@
+ # Copyright	(c) 2004 Gentoo Foundation
+ #		Released under v2 of the GNU GPL
+ #
+-# CVS: $Id: nxkeygen,v 1.12 2005/05/05 08:04:24 jonno Exp $
++# SVN: $Id$
+ #
+ # ========================================================================
+ 
+
+
+Property changes on: freenx-server/trunk/nxkeygen
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2006-07-04 22:02:22 UTC (rev 220)
++++ freenx-server/trunk/nxloadconfig	2006-07-04 22:02:25 UTC (rev 221)
+@@ -5,7 +5,7 @@
+ #
+ # License: GPL, version 2
+ #
+-# CVS: $Id: nxloadconfig,v 1.43 2005/08/02 15:39:32 fabianx Exp $
++# SVN: $Id$
+ #
+ # ========================================================================
+ 
+
+
+Property changes on: freenx-server/trunk/nxloadconfig
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2006-07-04 22:02:22 UTC (rev 220)
++++ freenx-server/trunk/nxnode	2006-07-04 22:02:25 UTC (rev 221)
+@@ -13,7 +13,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxnode,v 1.77 2005/08/02 15:20:18 fabianx Exp $
++# SVN: $Id$
+ #
+ # 21.06.2004: - Full reconnection support
+ 
+
+
+Property changes on: freenx-server/trunk/nxnode
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+
+Modified: freenx-server/trunk/nxnode-login
+===================================================================
+--- freenx-server/trunk/nxnode-login	2006-07-04 22:02:22 UTC (rev 220)
++++ freenx-server/trunk/nxnode-login	2006-07-04 22:02:25 UTC (rev 221)
+@@ -3,7 +3,7 @@
+ # Copyright (c) 2004 by Fabian Franz.
+ # License: GPL, version 2
+ #
+-# CVS: $Id: nxnode-login,v 1.13 2005/07/27 14:34:59 fabianx Exp $
++# SVN: $Id$
+ #
+ 
+ # Syntax: nxnode-login {ssh|su} user ssh-port executable command tosend
+
+
+Property changes on: freenx-server/trunk/nxnode-login
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2006-07-04 22:02:22 UTC (rev 220)
++++ freenx-server/trunk/nxserver	2006-07-04 22:02:25 UTC (rev 221)
+@@ -11,7 +11,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxserver,v 1.74 2005/08/02 15:39:32 fabianx Exp $
++# SVN: $Id$
+ #
+ 
+ # Read the config file
+
+
+Property changes on: freenx-server/trunk/nxserver
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+
+Modified: freenx-server/trunk/nxsetup
+===================================================================
+--- freenx-server/trunk/nxsetup	2006-07-04 22:02:22 UTC (rev 220)
++++ freenx-server/trunk/nxsetup	2006-07-04 22:02:25 UTC (rev 221)
+@@ -5,7 +5,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxsetup,v 1.31 2005/08/02 17:29:59 fabianx Exp $ 
++# SVN: $Id$ 
+ #
+ 
+ HELP="no"
+
+
+Property changes on: freenx-server/trunk/nxsetup
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+
+
+
+From fabianx at berlios.de  Wed Jul  5 00:23:47 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Wed, 5 Jul 2006 00:23:47 +0200
+Subject: [Freenx-cvs] r222 - / freenx-server/trunk freenx-server/trunk/nxserver-helper
+Message-ID: <200607042223.k64MNlJg024588@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-05 00:23:46 +0200 (Wed, 05 Jul 2006)
+New Revision: 222
+
+Modified:
+   /
+   freenx-server/trunk/INSTALL
+   freenx-server/trunk/nxprint
+   freenx-server/trunk/nxserver-helper/nxserver-helper.c
+Log:
+Added some more $Id$ properties.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:229
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:232
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-server/trunk/INSTALL
+===================================================================
+--- freenx-server/trunk/INSTALL	2006-07-04 22:02:25 UTC (rev 221)
++++ freenx-server/trunk/INSTALL	2006-07-04 22:23:46 UTC (rev 222)
+@@ -67,3 +67,7 @@
+ Then you need to run 'nxsetup --install' and follow the instructions given.
+ 
+ If you use 1.5.0 as backend be sure to set ENABLE_1_5_0_BACKEND to 1 in node.conf or nxloadconfig.
++
++--
++
++SVN: $Id$
+
+
+Property changes on: freenx-server/trunk/INSTALL
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+
+Modified: freenx-server/trunk/nxprint
+===================================================================
+--- freenx-server/trunk/nxprint	2006-07-04 22:02:25 UTC (rev 221)
++++ freenx-server/trunk/nxprint	2006-07-04 22:23:46 UTC (rev 222)
+@@ -6,6 +6,7 @@
+ #
+ # License: GPL, version 2
+ #
++# SVN: $Id$
+ #
+ 
+ # disable foomatic by default
+
+
+Property changes on: freenx-server/trunk/nxprint
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+
+Modified: freenx-server/trunk/nxserver-helper/nxserver-helper.c
+===================================================================
+--- freenx-server/trunk/nxserver-helper/nxserver-helper.c	2006-07-04 22:02:25 UTC (rev 221)
++++ freenx-server/trunk/nxserver-helper/nxserver-helper.c	2006-07-04 22:23:46 UTC (rev 222)
+@@ -1,3 +1,12 @@
++/*
++ * Copyright (c) 2006 by Fabian Franz.
++ *
++ * License: GPL, v2
++ *
++ * SVN: $Id$
++ *
++ */
++
+ #include <sys/types.h>
+ #include <sys/socket.h>
+ 
+
+
+Property changes on: freenx-server/trunk/nxserver-helper/nxserver-helper.c
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+
+
+
+From fabianx at berlios.de  Wed Jul  5 00:23:50 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Wed, 5 Jul 2006 00:23:50 +0200
+Subject: [Freenx-cvs] r223 - / freenx-server/trunk
+Message-ID: <200607042223.k64MNotx024639@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-05 00:23:49 +0200 (Wed, 05 Jul 2006)
+New Revision: 223
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxnode-login
+Log:
+Added initial version of nxnode slave mode.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:232
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:233
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-07-04 22:23:46 UTC (rev 222)
++++ freenx-server/trunk/ChangeLog	2006-07-04 22:23:49 UTC (rev 223)
+@@ -1,5 +1,6 @@
+ xx.xx.2006 FreeNX 0.6.0
+ 	* Opened the 0.6.0 branch.
++	* Added nxnode slave mode.
+ 
+ 01.07.2006 FreeNX 0.5.0 "UKUUG 2006 Edition"
+ 	* Opened the 0.5.0 branch.
+
+Modified: freenx-server/trunk/nxnode-login
+===================================================================
+--- freenx-server/trunk/nxnode-login	2006-07-04 22:23:46 UTC (rev 222)
++++ freenx-server/trunk/nxnode-login	2006-07-04 22:23:49 UTC (rev 223)
+@@ -59,6 +59,7 @@
+ 			}
+ 			exit 0
+ 		  }
++	"NX> 716 Slave mode started successfully." { interact }
+ 	"NX> 716 Public key is already present in:" { }
+ 	"NX> 716 Public key added to:" { }
+ 	"NX> 716 Terminating session * on user request." { }
+
+
+
+From fabianx at berlios.de  Wed Jul  5 00:23:52 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Wed, 5 Jul 2006 00:23:52 +0200
+Subject: [Freenx-cvs] r224 - / freenx-server/trunk
+Message-ID: <200607042223.k64MNqtd024690@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-05 00:23:51 +0200 (Wed, 05 Jul 2006)
+New Revision: 224
+
+Modified:
+   /
+   freenx-server/trunk/
+Log:
+Added ignore of nxserver-helper/nxserver-helper binary.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:233
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:234
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+
+Property changes on: freenx-server/trunk
+___________________________________________________________________
+Name: svn:ignore
+   + nxserver-helper/nxserver-helper
+
+
+
+From fabianx at berlios.de  Wed Jul  5 00:23:54 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Wed, 5 Jul 2006 00:23:54 +0200
+Subject: [Freenx-cvs] r225 - / freenx-server/trunk freenx-server/trunk/nxserver-helper
+Message-ID: <200607042223.k64MNsEM024741@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-05 00:23:53 +0200 (Wed, 05 Jul 2006)
+New Revision: 225
+
+Modified:
+   /
+   freenx-server/trunk/
+   freenx-server/trunk/nxserver-helper/
+Log:
+Added ignore property on nxserver-helper binary.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:234
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:235
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+
+Property changes on: freenx-server/trunk
+___________________________________________________________________
+Name: svn:ignore
+   - nxserver-helper/nxserver-helper
+
+
+Property changes on: freenx-server/trunk/nxserver-helper
+___________________________________________________________________
+Name: svn:ignore
+   + nxserver-helper
+
+
+
+
+From fabianx at berlios.de  Wed Jul  5 01:38:23 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Wed, 5 Jul 2006 01:38:23 +0200
+Subject: [Freenx-cvs] r226 - / freenx-server/trunk
+Message-ID: <200607042338.k64NcNaw008327@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-05 01:38:10 +0200 (Wed, 05 Jul 2006)
+New Revision: 226
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/node.conf.sample
+   freenx-server/trunk/nxloadconfig
+   freenx-server/trunk/nxsetup
+Log:
+Code cleanup:
+
+* Removed deprecated ENABLE_NOMACHINE_FORWARD_USER.
+* Fixed nxsetup to be able to setup the forwarding.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:235
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:240
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-07-04 22:23:53 UTC (rev 225)
++++ freenx-server/trunk/ChangeLog	2006-07-04 23:38:10 UTC (rev 226)
+@@ -1,6 +1,7 @@
+ xx.xx.2006 FreeNX 0.6.0
+ 	* Opened the 0.6.0 branch.
+ 	* Added nxnode slave mode.
++	* General code cleanup.
+ 
+ 01.07.2006 FreeNX 0.5.0 "UKUUG 2006 Edition"
+ 	* Opened the 0.5.0 branch.
+
+Modified: freenx-server/trunk/node.conf.sample
+===================================================================
+--- freenx-server/trunk/node.conf.sample	2006-07-04 22:23:53 UTC (rev 225)
++++ freenx-server/trunk/node.conf.sample	2006-07-04 23:38:10 UTC (rev 226)
+@@ -174,32 +174,22 @@
+ #SERVER_FORWARD_KEY="/usr/NX/share/client.id_dsa.key"
+ 
+ 
+-# FreeNX with ENABLE_NOMACHINE_FORWARD_USER="1" will automatically forward all
++# FreeNX with ENABLE_NOMACHINE_FORWARD_PORT="1" will automatically forward all
+ # connections to the commercial NoMachine nxserver installed on the same
+-# machine. This feature is introduced to enable the usage of FreeNX and
+-# NoMachine NX side by side on the same machine without conflicts.
++# machine, which go in by port NOMACHINE_FORWARD_PORT. This feature is introduced
++# to enable the usage of FreeNX and NoMachine NX side by side on the same machine
++# without conflicts.
+ #
+-# To make a connection to the FreeNX server, just use 'freenx.<user>' as 
+-# username (where <username> is the existing Unix username. (You do not 
+-# need to create a user named 'freenx.<user>'!)
+-#
+-# To make a connection to the NoMachine nxserver, use the unmodified
+-# '<user>' username.
+-
+-#ENABLE_NOMACHINE_FORWARD_USER="0"
+-#NOMACHINE_SERVER="/usr/NX/bin/nxserver"
+-#NOMACHINE_NX_HOME_DIR="/usr/NX/home/nx"
+-
+-
+-# To just forward connections to the NoMachine server, which connect to a
+-# certain port enable the following two directives.
+-# 
+ # Note: You need to let SSHD listen to several ports to make use of this
+ #       directive.
+ 
+ #ENABLE_NOMACHINE_FORWARD_PORT="0"
+ #NOMACHINE_FORWARD_PORT="22"
+ 
++#NOMACHINE_SERVER="/usr/NX/bin/nxserver"
++#NOMACHINE_NX_HOME_DIR="/usr/NX/home/nx"
++
++
+ # LOAD BALANCING
+ # ==============
+ #
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2006-07-04 22:23:53 UTC (rev 225)
++++ freenx-server/trunk/nxloadconfig	2006-07-04 23:38:10 UTC (rev 226)
+@@ -126,10 +126,8 @@
+ SERVER_FORWARD_PORT=22
+ SERVER_FORWARD_KEY="/usr/NX/share/client.id_dsa.key"
+ 
+-ENABLE_NOMACHINE_FORWARD_USER="0"
+ NOMACHINE_SERVER="/usr/NX/bin/nxserver"
+ NOMACHINE_NX_HOME_DIR="/usr/NX/home/nx"
+-
+ ENABLE_NOMACHINE_FORWARD_PORT="0"
+ NOMACHINE_FORWARD_PORT="22"
+ 
+
+Modified: freenx-server/trunk/nxsetup
+===================================================================
+--- freenx-server/trunk/nxsetup	2006-07-04 22:23:53 UTC (rev 225)
++++ freenx-server/trunk/nxsetup	2006-07-04 23:38:10 UTC (rev 226)
+@@ -239,7 +239,7 @@
+ 		echo "done"
+ 	fi
+ 	
+-	if [ "$ENABLE_NOMACHINE_FORWARD" = "1" -a -x "$NOMACHINE_SERVER" ]
++	if [ "$ENABLE_NOMACHINE_FORWARD_PORT" = "1" -a -x "$NOMACHINE_SERVER" ]
+ 	then
+ 		echo -n "Setting up NoMachine forwarding ..."
+ 		usermod -s "$PATH_BIN/nxserver" -d "$NOMACHINE_NX_HOME_DIR" nx
+
+
+
+From fabianx at berlios.de  Wed Jul  5 01:38:49 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Wed, 5 Jul 2006 01:38:49 +0200
+Subject: [Freenx-cvs] r227 - / freenx-server/trunk
+Message-ID: <200607042338.k64Ncntv008423@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-05 01:38:34 +0200 (Wed, 05 Jul 2006)
+New Revision: 227
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxkeygen
+   freenx-server/trunk/nxsetup
+Log:
+Removed no-x11-forwarding from key options.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:240
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:241
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-07-04 23:38:10 UTC (rev 226)
++++ freenx-server/trunk/ChangeLog	2006-07-04 23:38:34 UTC (rev 227)
+@@ -2,6 +2,8 @@
+ 	* Opened the 0.6.0 branch.
+ 	* Added nxnode slave mode.
+ 	* General code cleanup.
++	* Removed "no-x11-forwarding" from keys to allow client to use the
++	  faster interactive sessions.
+ 
+ 01.07.2006 FreeNX 0.5.0 "UKUUG 2006 Edition"
+ 	* Opened the 0.5.0 branch.
+
+Modified: freenx-server/trunk/nxkeygen
+===================================================================
+--- freenx-server/trunk/nxkeygen	2006-07-04 23:38:10 UTC (rev 226)
++++ freenx-server/trunk/nxkeygen	2006-07-04 23:38:34 UTC (rev 227)
+@@ -53,7 +53,7 @@
+ 	
+ 	# copy the key to the authorized_keys2 file
+ 	rm -f $NX_KEY_DIR/$SSH_AUTHORIZED_KEYS
+-	echo -n "no-port-forwarding,no-X11-forwarding,no-agent-forwarding,command=\"$PATH_BIN/nxserver\" " >$NX_KEY_DIR/$SSH_AUTHORIZED_KEYS
++	echo -n "no-port-forwarding,no-agent-forwarding,command=\"$PATH_BIN/nxserver\" " >$NX_KEY_DIR/$SSH_AUTHORIZED_KEYS
+ 	cat ${NX_SERVER_KEY} >> $NX_KEY_DIR/$SSH_AUTHORIZED_KEYS
+ 
+ 	# now tell the user what to do
+
+Modified: freenx-server/trunk/nxsetup
+===================================================================
+--- freenx-server/trunk/nxsetup	2006-07-04 23:38:10 UTC (rev 226)
++++ freenx-server/trunk/nxsetup	2006-07-04 23:38:34 UTC (rev 227)
+@@ -259,7 +259,7 @@
+ 		if [ "$SETUP_NOMACHINE_KEY" = "yes" ]
+ 		then
+ 			cat << EOF >$NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS
+-no-port-forwarding,no-X11-forwarding,no-agent-forwarding,command="$PATH_BIN/nxserver" ssh-dss AAAAB3NzaC1kc3MAAACBAJe/0DNBePG9dYLWq7cJ0SqyRf1iiZN/IbzrmBvgPTZnBa5FT/0Lcj39sRYt1paAlhchwUmwwIiSZaON5JnJOZ6jKkjWIuJ9MdTGfdvtY1aLwDMpxUVoGwEaKWOyin02IPWYSkDQb6cceuG9NfPulS9iuytdx0zIzqvGqfvudtufAAAAFQCwosRXR2QA8OSgFWSO6+kGrRJKiwAAAIEAjgvVNAYWSrnFD+cghyJbyx60AAjKtxZ0r/Pn9k94Qt2rvQoMnGgt/zU0v/y4hzg+g3JNEmO1PdHh/wDPVOxlZ6Hb5F4IQnENaAZ9uTZiFGqhBO1c8Wwjiq/MFZy3jZaidarLJvVs8EeT4mZcWxwm7nIVD4lRU2wQ2lj4aTPcepMAAACANlgcCuA4wrC+3Cic9CFkqiwO/Rn1vk8dvGuEQqFJ6f6LVfPfRTfaQU7TGVLk2CzY4dasrwxJ1f6FsT8DHTNGnxELPKRuLstGrFY/PR7KeafeFZDf+fJ3mbX5nxrld3wi5titTnX+8s4IKv29HJguPvOK/SI7cjzA+SqNfD7qEo8= root at nettuno
++no-port-forwarding,no-agent-forwarding,command="$PATH_BIN/nxserver" ssh-dss AAAAB3NzaC1kc3MAAACBAJe/0DNBePG9dYLWq7cJ0SqyRf1iiZN/IbzrmBvgPTZnBa5FT/0Lcj39sRYt1paAlhchwUmwwIiSZaON5JnJOZ6jKkjWIuJ9MdTGfdvtY1aLwDMpxUVoGwEaKWOyin02IPWYSkDQb6cceuG9NfPulS9iuytdx0zIzqvGqfvudtufAAAAFQCwosRXR2QA8OSgFWSO6+kGrRJKiwAAAIEAjgvVNAYWSrnFD+cghyJbyx60AAjKtxZ0r/Pn9k94Qt2rvQoMnGgt/zU0v/y4hzg+g3JNEmO1PdHh/wDPVOxlZ6Hb5F4IQnENaAZ9uTZiFGqhBO1c8Wwjiq/MFZy3jZaidarLJvVs8EeT4mZcWxwm7nIVD4lRU2wQ2lj4aTPcepMAAACANlgcCuA4wrC+3Cic9CFkqiwO/Rn1vk8dvGuEQqFJ6f6LVfPfRTfaQU7TGVLk2CzY4dasrwxJ1f6FsT8DHTNGnxELPKRuLstGrFY/PR7KeafeFZDf+fJ3mbX5nxrld3wi5titTnX+8s4IKv29HJguPvOK/SI7cjzA+SqNfD7qEo8= root at nettuno
+ EOF
+ 			chmod 600 $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS
+ 			cat << EOF >$NX_HOME_DIR/.ssh/client.id_dsa.key
+@@ -309,7 +309,7 @@
+ ---- END SSH2 PUBLIC KEY ----
+ EOF
+ 		echo "Key $SSH2_PUBKEY" >> ${SSH2_HOME_DIR}/$SSH2_AUTHORIZATION
+-		echo "Options no-port-forwarding,no-x11-forwarding,no-agent-forwarding,command=\"$PATH_BIN/nxserver\"" >> ${SSH2_HOME_DIR}/$SSH2_AUTHORIZATION
++		echo "Options no-port-forwarding,no-agent-forwarding,command=\"$PATH_BIN/nxserver\"" >> ${SSH2_HOME_DIR}/$SSH2_AUTHORIZATION
+ 		chmod 600 ${SSH2_HOME_DIR}/$SSH2_AUTHORIZATION ${SSH2_HOME_DIR}/$SSH2_PUBKEY
+ 	fi
+ 	
+
+
+
+From fabianx at berlios.de  Wed Jul  5 01:38:56 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Wed, 5 Jul 2006 01:38:56 +0200
+Subject: [Freenx-cvs] r228 - / freenx-server/trunk
+Message-ID: <200607042338.k64NcuBS008482@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-05 01:38:53 +0200 (Wed, 05 Jul 2006)
+New Revision: 228
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxnode-login
+   freenx-server/trunk/nxsetup
+Log:
+* Fixed nxsetup automatic testing of sessions and cleared up
+  explanations.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:241
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:242
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-07-04 23:38:34 UTC (rev 227)
++++ freenx-server/trunk/ChangeLog	2006-07-04 23:38:53 UTC (rev 228)
+@@ -4,6 +4,8 @@
+ 	* General code cleanup.
+ 	* Removed "no-x11-forwarding" from keys to allow client to use the
+ 	  faster interactive sessions.
++	* Fixed nxsetup automatic testing of sessions and cleared up
++	  explanations.
+ 
+ 01.07.2006 FreeNX 0.5.0 "UKUUG 2006 Edition"
+ 	* Opened the 0.5.0 branch.
+
+Modified: freenx-server/trunk/nxnode-login
+===================================================================
+--- freenx-server/trunk/nxnode-login	2006-07-04 23:38:34 UTC (rev 227)
++++ freenx-server/trunk/nxnode-login	2006-07-04 23:38:53 UTC (rev 228)
+@@ -1,12 +1,15 @@
+ #!/usr/bin/expect
++#
+ # nxnode-login: spawns and controls ssh 
+-# Copyright (c) 2004 by Fabian Franz.
++#
++# Copyright (c) 2004-2006 by Fabian Franz.
++#
+ # License: GPL, version 2
+ #
+ # SVN: $Id$
+ #
+ 
+-# Syntax: nxnode-login {ssh|su} user ssh-port executable command tosend
++# Syntax: nxnode-login {ssh|su|test-nx} user ssh-port executable command tosend
+ 
+ set auth_method [lindex $argv 0]
+ set user [lindex $argv 1]
+@@ -20,6 +23,32 @@
+ set host "127.0.0.1"
+ catch {set host $env(NODE_HOSTNAME)}
+ 
++#
++# Special test-nx instruction for nxsetup
++#
++
++if { "$auth_method"=="test-nx" } {
++	set stty_init "raw icrnl -echo"
++
++	set publickey ""
++	catch {set publickey $env(NODE_PUBLICKEY)}
++	
++	set pid [spawn -noecho $command_ssh -2 -x -l "$user" "$host" -i "$publickey" -o "RhostsAuthentication no" -o "PasswordAuthentication no" -o "RSAAuthentication no" -o "RhostsRSAAuthentication no" -o "PubkeyAuthentication yes" -o "PreferredAuthentications publickey" -p "$port" "$executable $command" ]
++	
++	while {1} {
++		expect {
++			"Are you sure you want to continue connecting (yes/no)?" { send "yes\r" }
++			"Permission denied*" { exit 1 }
++			"HELLO NXSERVER - Version*" { 
++				break
++			}
++		}
++	}
++	expect "NX> 105" { send "quit\r" }
++	expect "NX> 999 Bye"
++	exit 0
++}
++
+ expect_user -re "(.*)\n" 
+ set password $expect_out(1,string)
+ 
+
+Modified: freenx-server/trunk/nxsetup
+===================================================================
+--- freenx-server/trunk/nxsetup	2006-07-04 23:38:34 UTC (rev 227)
++++ freenx-server/trunk/nxsetup	2006-07-04 23:38:53 UTC (rev 228)
+@@ -342,30 +342,37 @@
+ 	CONNECTION=""
+ 	while read -t 3 line
+ 	do
++		echo $line
++		
+ 		case "$line" in
+ 			*"HELLO NXSERVER - Version $NX_VERSION"*)
+ 				CONNECTION="yes"
+ 			;;
+ 			*"HELLO NXSERVER - Version"*)
+-				echo "Warning: Version Mismatch. Expected $NX_VERSION got: $line."
++				echo "Warning: Version mismatch. Expected $NX_VERSION got: $line."
+ 				CONNECTION="yes"
+ 			;;
+ 			*"NX> 999 Bye"*)
+ 				break;
+ 			;;
+ 		esac
+-		echo $line
+-	done < <(echo "quit" | ssh -i $NX_HOME_DIR/.ssh/client.id_dsa.key -p "$SSHD_PORT" nx at 127.0.0.1 -o "RhostsAuthentication no" -o "PasswordAuthentication no" -o "RSAAuthentication no" -o "RhostsRSAAuthentication no" -o "PubkeyAuthentication yes" -o "PreferredAuthentications publickey" nxserver)
++
++	done < <(NODE_PUBLICKEY="$NX_HOME_DIR/.ssh/client.id_dsa.key" $PATH_BIN/nxnode-login test-nx nx "$SSHD_PORT" nxserver --check)
++
+ 	if [ -z "$CONNECTION" ]
+ 	then
+ 		echo "Fatal error: Could not connect to NX Server."
+ 		echo 
+ 		echo "Please check your ssh setup:"
+ 		echo ""
++		echo "The following are _examples_ of what you might need to check."
++		echo ""
+ 		echo "	- Make sure \"nx\" is one of the AllowUsers in sshd_config."
++		echo "    (or that the line is outcommented/not there)"
+ 		echo "	- Make sure your sshd allows public key authentication."
+ 		echo "	- Make sure your sshd is really running on port $SSHD_PORT."
+ 		echo "	- Make sure your sshd_config AuthorizedKeysFile in sshd_config is set to $SSH_AUTHORIZED_KEYS."
++		echo "    (this should be a filename not a pathname+filename)"
+ 		exit 1
+ 	fi
+ 	echo "<--- done"
+
+
+
+From fabianx at berlios.de  Wed Jul  5 01:53:42 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Wed, 5 Jul 2006 01:53:42 +0200
+Subject: [Freenx-cvs] r229 - / freenx-server/trunk
+Message-ID: <200607042353.k64NrgNt012174@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-05 01:53:17 +0200 (Wed, 05 Jul 2006)
+New Revision: 229
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxclient
+Log:
+* Added support for NX 2.0.0 style nxclient dialogs (--parent)
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:242
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:246
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-07-04 23:38:53 UTC (rev 228)
++++ freenx-server/trunk/ChangeLog	2006-07-04 23:53:17 UTC (rev 229)
+@@ -6,6 +6,7 @@
+ 	  faster interactive sessions.
+ 	* Fixed nxsetup automatic testing of sessions and cleared up
+ 	  explanations.
++	* Added support for NX 2.0.0 style nxclient dialogs.
+ 
+ 01.07.2006 FreeNX 0.5.0 "UKUUG 2006 Edition"
+ 	* Opened the 0.5.0 branch.
+
+Modified: freenx-server/trunk/nxclient
+===================================================================
+--- freenx-server/trunk/nxclient	2006-07-04 23:38:53 UTC (rev 228)
++++ freenx-server/trunk/nxclient	2006-07-04 23:53:17 UTC (rev 229)
+@@ -19,7 +19,7 @@
+ [ -x "$NXCLIENT" -a "$(file -bi $NXCLIENT)" != 'application/x-shellscript' ] \
+ 	&& exec ${NXCLIENT} "$@"
+ 
+-TEMP=`getopt -a -o d: --long local,noautokill,dialog:,caption:,message:,display:,printer: -n $(basename $0) -- "$@"`
++TEMP=`getopt -a -o d: --long local,noautokill,dialog:,caption:,message:,display:,printer:,parent: -n $(basename $0) -- "$@"`
+ 
+ if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
+ 
+@@ -32,6 +32,7 @@
+ DIALOG_LOCAL=""
+ DIALOG_NOAUTOKILL=""
+ DIALOG_PRINTER=""
++DIALOG_PARENT="$PPID"
+ 
+ while true
+ do
+@@ -43,6 +44,7 @@
+ 		--noautokill) DIALOG_NOAUTOKILL="yes"; shift ;;
+ 		--display) DISPLAY="$2"; shift 2 ;;
+ 		--printer) DIALOG_PRINTER="$2"; shift 2 ; break ;;
++		--parent) DIALOG_PARENT="$2"; shift 2 ; break ;;
+ 		--) shift ; break ;;
+                 *) echo "Internal error!" ; exit 1; ;;
+ 	esac
+@@ -329,6 +331,6 @@
+ #
+ 
+ RC=$?
+-	[ $RC -eq 2 ] && kill -TERM $PPID
+-	[ $RC -eq 3 ] && kill -HUP $PPID
++	[ $RC -eq 2 ] && kill -TERM $DIALOG_PARENT
++	[ $RC -eq 3 ] && kill -HUP $DIALOG_PARENT
+ exit 0
+
+
+
+From fabianx at berlios.de  Wed Jul  5 02:06:52 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Wed, 5 Jul 2006 02:06:52 +0200
+Subject: [Freenx-cvs] r230 - / freenx-server/trunk
+Message-ID: <200607050006.k6506quj014375@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-05 02:06:46 +0200 (Wed, 05 Jul 2006)
+New Revision: 230
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxloadconfig
+Log:
+- Support for NX 2.0.0 backend in nxloadconfig.
+
+- Removed testing of forwarding via user.
+
+- Typo
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:246
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:248
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-07-04 23:53:17 UTC (rev 229)
++++ freenx-server/trunk/ChangeLog	2006-07-05 00:06:46 UTC (rev 230)
+@@ -7,6 +7,7 @@
+ 	* Fixed nxsetup automatic testing of sessions and cleared up
+ 	  explanations.
+ 	* Added support for NX 2.0.0 style nxclient dialogs.
++	* Support for NX 2.0.0 backend in nxloadconfig.
+ 
+ 01.07.2006 FreeNX 0.5.0 "UKUUG 2006 Edition"
+ 	* Opened the 0.5.0 branch.
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2006-07-04 23:53:17 UTC (rev 229)
++++ freenx-server/trunk/nxloadconfig	2006-07-05 00:06:46 UTC (rev 230)
+@@ -384,7 +384,7 @@
+ 		ERROR="yes" && echo "Error: Invalid value \"NX_LOG_LEVEL=$NX_LOG_LEVEL\""
+ 	[ "$NX_LOG_LEVEL" != "0" -a ! -e "$NX_LOGFILE" ] && \
+ 		WARNING="yes" && echo "Warning: Invalid value \"NX_LOGFILE=$NX_LOGFILE\"" \
+-					  && echo "         No loggfile will be kept."
++					  && echo "         No logfile will be kept."
+ 		# How do I check if another user might write to a file? ( -w checks only current user)
+ 	[ -z $(echo "$SESSION_LOG_CLEAN" | egrep "^[0|1]$") ] && \
+ 		ERROR="yes" && echo "Error: Invalid value \"SESSION_LOG_CLEAN=$SESSION_LOG_CLEAN\""
+@@ -406,18 +406,13 @@
+ 	[ "$ENABLE_SERVER_FORWARD" = "1" -a ! -e "$SERVER_FORWARD_KEY" ] && \
+ 		ERROR="yes" && echo "Error: Invalid value \"SERVER_FORWARD_KEY=$SERVER_FORWARD_KEY\""
+ 	
+-	[ -z $(echo "$ENABLE_NOMACHINE_FORWARD_USER" | egrep "^[0|1]$") ] && \
+-		ERROR="yes" && echo "Error: Invalid value \"ENABLE_NOMACHINE_FORWARD_USER=$ENABLE_NOMACHINE_FORWARD_USER\""
+ 	[ -z $(echo "$ENABLE_NOMACHINE_FORWARD_PORT" | egrep "^[0|1]$") ] && \
+ 		ERROR="yes" && echo "Error: Invalid value \"ENABLE_NOMACHINE_FORWARD_PORT=$ENABLE_NOMACHINE_FORWARD_PORT\""
+-	[ "$ENABLE_NOMACHINE_FORWARD_USER" = "1" -o "$ENABLE_NOMACHINE_FORWARD_PORT" = "1" ] && ! which "$NOMACHINE_SERVER" >/dev/null 2>&1 && \
++	[ "$ENABLE_NOMACHINE_FORWARD_PORT" = "1" ] && ! which "$NOMACHINE_SERVER" >/dev/null 2>&1 && \
+ 		ERROR="yes" && echo "Error: Invalid value \"NOMACHINE_SERVER=$NOMACHINE_SERVER\""
+-	[ "$ENABLE_NOMACHINE_FORWARD_USER" = "1" -a ! -d "$NOMACHINE_NX_HOME_DIR" ] && \
+-		ERROR="yes" && echo "Error: Invalid value \"NOMACHINE_NX_HOME_DIR=$NOMACHINE_NX_HOME_DIR\""
+ 	[ "$ENABLE_NOMACHINE_FORWARD_PORT" = "1" -a -z $(echo "$NOMACHINE_FORWARD_PORT" | egrep "^[1-9][0-9]{0,4}$") ] && \
+ 		ERROR="yes" && echo "Error: Invalid value \"NOMACHINE_FORWARD_PORT=$NOMACHINE_FORWARD_PORT\""
+ 	
+-	
+ 	# Services directives
+ 	
+ 	[ -z $(echo "$ENABLE_ESD_PRELOAD" | egrep "^[0|1]$") ] && \
+@@ -509,8 +504,8 @@
+ 	[ -z $(echo "$ENABLE_ROOTLESS_MODE" | egrep "^[0|1]$") ] && \
+ 		ERROR="yes" && echo "Error: Invalid value \"ENABLE_ROOTLESS_MODE=$ENABLE_ROOTLESS_MODE\""
+ 
+-	[ -z "$(strings $PATH_BIN/nxagent | grep 'NXAGENT - Version 1.5.0')" ] && \
+-		ERROR="yes" && echo "Error: Could not find 1.5.0 version string in nxagent. NX 1.5.0 backend is needed for this version of FreeNX."
++	[ -z "$(strings $PATH_BIN/nxagent | egrep 'NXAGENT - Version 1.5.0|NXAGENT - Version 2.0.0')" ] && \
++		ERROR="yes" && echo "Error: Could not find 1.5.0 or 2.0.0 version string in nxagent. NX 1.5.0 or 2.0.0 backend is needed for this version of FreeNX."
+ 		
+ 	[ -z $(echo "$ENABLE_USESSION" | egrep "^[0|1]$") ] && \
+ 		ERROR="yes" && echo "Error: Invalid value \"ENABLE_USESSION=$ENABLE_USESSION\""
+
+
+
+From fabianx at berlios.de  Wed Jul  5 04:03:49 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Wed, 5 Jul 2006 04:03:49 +0200
+Subject: [Freenx-cvs] r231 - / freenx-server/trunk
+Message-ID: <200607050203.k6523nvt006895@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-05 04:03:45 +0200 (Wed, 05 Jul 2006)
+New Revision: 231
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxnode
+   freenx-server/trunk/nxnode-login
+Log:
+- Huge code cleanup of nxnode.
+
+- Some comments to nxnode-login.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:248
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:250
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-07-05 00:06:46 UTC (rev 230)
++++ freenx-server/trunk/ChangeLog	2006-07-05 02:03:45 UTC (rev 231)
+@@ -2,6 +2,7 @@
+ 	* Opened the 0.6.0 branch.
+ 	* Added nxnode slave mode.
+ 	* General code cleanup.
++		* Huge cleanup of nxnode.
+ 	* Removed "no-x11-forwarding" from keys to allow client to use the
+ 	  faster interactive sessions.
+ 	* Fixed nxsetup automatic testing of sessions and cleared up
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2006-07-05 00:06:46 UTC (rev 230)
++++ freenx-server/trunk/nxnode	2006-07-05 02:03:45 UTC (rev 231)
+@@ -20,6 +20,12 @@
+ # Read the config file
+ . $(PATH=$(cd $(dirname $0) && pwd):$PATH which nxloadconfig) --userconf
+ 
++#
++# -----------------------------------------------------------------------------
++# Startup of nxnode
++# -----------------------------------------------------------------------------
++#
++
+ echo "NX> 1000 NXNODE - Version $NX_VERSION $NX_LICENSE"
+ 
+ if [ "$1" != "--check" -a "$1" != "--setkey" -a "$1" != "--agent" -a "$1" != "--slave" ]
+@@ -29,21 +35,30 @@
+ 	CMDLINE="a=b&$CMDLINE"
+ fi
+ 
+-# --------
++#
++# -----------------------------------------------------------------------------
++# Various helper functions
++# -----------------------------------------------------------------------------
++#
+ 
+-# following two functions are Copyright by Klaus Knopper
+-
+-# same for strings
+-stringinstring(){
+-case "$2" in *$1*) return 0;; esac
+-return 1
++stringinstring()
++{
++	case "$2" in
++		*$1*)
++			return 0
++		;;
++	esac
++	
++	return 1
+ }
+ 
+-# Reread boot command line; echo last parameter's argument or return false.
+-getparam(){
+-stringinstring "&$1=" "$CMDLINE" || return 1
+-echo "$CMDLINE" |  tr "&" "\n" | egrep "^"$1"=" | awk -F= '{ VAL=$2 } END { print VAL }'
+-return 0
++getparam()
++{
++	stringinstring "&$1=" "$CMDLINE" || return 1
++	
++	echo "$CMDLINE" |  tr "&" "\n" | egrep "^"$1"=" | awk -F= '{ VAL=$2 } END { print VAL }'
++	
++	return 0
+ }
+ 
+ find_app()
+@@ -52,117 +67,186 @@
+ 	which $1 2>/dev/null
+ }
+ 
+-getparam_user()
+-{
+-	[ $UID -eq 0 ] && echo $(getparam user)
+-	[ $UID -eq 0 ] || $(whoami)
+-}
+-
+-node_abort()
+-{
+-	echo "$@" 1>&2
+-	exit 1
+-}
+-
+ getparam_sessionid()
+ {
+ 	sessionid=$(getparam sessionid)
+ 	
+ 	[ -n "$sessionid" ] || sessionid=$(getparam session_id)
+-	[ -n "$sessionid" ] || node_abort "NX> 500 Error: missing parameter session id"
++	if [ -z "$sessionid" ]
++	then
++		echo "NX> 500 Error: Fatal - Missing parameter session id." 1>&2
++		exit 1
++	fi
++	
+ 	echo $sessionid
+ }
+ 
++#
++# -----------------------------------------------------------------------------
++# Node functions module
++# -----------------------------------------------------------------------------
++#
+ 
++#
++# node_terminate_agent <session id>
++#
++
+ node_terminate_agent()
+ {
+-	AGENT_PID=$(cat $USER_FAKE_HOME/.nx/C-$1/pids/agent 2>/dev/null)
+-	[ -n "$AGENT_PID" ] && kill $AGENT_PID 2>/dev/null
++	NODE_AGENT_PID=$(cat "$USER_FAKE_HOME/.nx/C-$1/pids/agent" 2>/dev/null)
++	[ -n "$NODE_AGENT_PID" ] && kill $NODE_AGENT_PID 2>/dev/null
+ }
+ 
++#
++# node_terminate_session <session id>
++#
++#	Used local vars: $virtualdesktop, $rootless
++#
++#	Used config vars: $COMMAND_XAUTH, $SESSION_LOG_CLEAN
++#
++
+ node_terminate_session()
+ {
++	#
++	# Cleanup session
++	#
++
+ 	[ -d "$USER_FAKE_HOME/.nx/C-$1/" ] || return
+-	AGENT_PID=$(cat $USER_FAKE_HOME/.nx/C-$1/pids/agent 2>/dev/null)
+-	if [ -n "$AGENT_PID" ]
+-	then 
+-		kill $AGENT_PID 2>/dev/null
++
++	# Kill nxagent
++	
++	NODE_AGENT_PID=$(cat "$USER_FAKE_HOME/.nx/C-$1/pids/agent" 2>/dev/null)
++	
++	if [ -n "$NODE_AGENT_PID" ]
++	then
++		kill $NODE_AGENT_PID 2>/dev/null
+ 		if ! [ "$virtualdesktop" = "0" -a "$rootless" != "1" ]
+ 		then
+ 			sleep 1
+-			kill -0 $AGENT_PID 2>/dev/null && kill -9 $AGENT_PID 2>/dev/null
++			kill -0 $NODE_AGENT_PID 2>/dev/null && kill -9 $NODE_AGENT_PID 2>/dev/null
+ 		fi
+ 	fi
+-	# remove possible leftover display ...
+-	display=$(echo $1 | rev | cut -d"-" -f2 | rev)
+-	rm -f /tmp/.X$display-lock
+-	rm -f /tmp/.X11-unix/X$display
++
++	# Remove display information
+ 	
+-	# remove cookie
+-	$COMMAND_XAUTH -v source $USER_FAKE_HOME/.nx/C-$1/scripts/authority >/dev/null 2>&1
+-	[ "$SESSION_LOG_CLEAN" = "1" ] && rm -rf $USER_FAKE_HOME/.nx/C-$1/
+-	[ "$SESSION_LOG_CLEAN" = "0" -a "$2" = "failed" ] && mv $USER_FAKE_HOME/.nx/C-$1/ $USER_FAKE_HOME/.nx/F-C-$1/
+-	[ "$SESSION_LOG_CLEAN" = "0" -a "$2" != "failed" ] && mv $USER_FAKE_HOME/.nx/C-$1/ $USER_FAKE_HOME/.nx/T-C-$1/
++	NODE_DISPLAY=$(echo $1 | rev | cut -d"-" -f2 | rev)
++	rm -f /tmp/.X$NODE_DISPLAY-lock
++	rm -f /tmp/.X11-unix/X$NODE_DISPLAY
++	
++	# Remove magic cookie information
++	
++	$COMMAND_XAUTH -v source "$USER_FAKE_HOME/.nx/C-$1/scripts/authority" >/dev/null 2>&1
++
++	# Preserve or remove session information
++	
++	[ "$SESSION_LOG_CLEAN" = "1" ] && rm -rf "$USER_FAKE_HOME/.nx/C-$1/"
++	
++	[ "$SESSION_LOG_CLEAN" = "0" -a "$2" = "failed" ] && mv "$USER_FAKE_HOME/.nx/C-$1/" "$USER_FAKE_HOME/.nx/F-C-$1/"
++	[ "$SESSION_LOG_CLEAN" = "0" -a "$2" != "failed" ] && mv "$USER_FAKE_HOME/.nx/C-$1/" "$USER_FAKE_HOME/.nx/T-C-$1/"
+ }
+ 
++#
++# node_fail_restore_session <session id>
++#
++
++# TODO: Kill still running tail -f process.
++
+ node_fail_restore_session()
+ {
+ 	echo "NX> 1004 Error: Could not resume session. nxagent process could not be found."
+-	node_terminate_session "$sess_id" "failed"
++	node_terminate_session "$1" "failed"
+ 	exit 1
+ }
+ 
++#
++# node_suspend_session <session id>
++#
++
+ node_suspend_session()
+ {
+-	AGENT_PID=$(cat $USER_FAKE_HOME/.nx/C-$1/pids/agent 2>/dev/null)
+-	if [ -n "$AGENT_PID" ]
+-	then 
+-		kill -0 $AGENT_PID || return 1
+-		kill -HUP $AGENT_PID && return 0
++	NODE_AGENT_PID=$(cat "$USER_FAKE_HOME/.nx/C-$1/pids/agent" 2>/dev/null)
++
++	if [ -n "$NODE_AGENT_PID" ]
++	then
++		kill -0 $NODE_AGENT_PID || return 1
++		kill -HUP $NODE_AGENT_PID && return 0
+ 	fi
++
+ 	return 1
+ }
+ 
+-# ---------
+-#stringinstring "$CMD"
++#
++# node_find_application <type>
++#
++#	Used config vars: $COMMAND_START_KDE, $COMMAND_START_GNOME,
++#			  $COMMAND_START_CDE, $COMMAND_XTERM, $USER_X_STARTUP_SCRIPT,
++#			  $DEFAULT_X_SESSION
+ 
+-node_start_applications()
++node_find_application()
+ {
+-	# close input and output file descriptors
+-	exec 0<&-
+-	exec 1>&-
+-	exec 2>&-
+-	
+-	. /etc/profile
+-	[ -f ~/.bash_profile ] && . ~/.bash_profile
++	NODE_STARTX=""
+ 
+-	mkdir -p $USER_FAKE_HOME/.nx/C-$sess_id/pids/
+-
+-	STARTX=""
+-	case $type in
++	case $1 in
+ 		unix-kde)
+-			STARTX=$COMMAND_START_KDE
++			NODE_STARTX=$COMMAND_START_KDE
+ 		;;
+ 		unix-gnome)
+-			STARTX=$COMMAND_START_GNOME
++			NODE_STARTX=$COMMAND_START_GNOME
+ 		;;
+ 		unix-cde)
+-			STARTX=$COMMAND_START_CDE
++			NODE_STARTX=$COMMAND_START_CDE
+ 		;;
+ 		unix-application)
+ 			[ "$application" = "xterm" ] && application="$COMMAND_XTERM"
+-			STARTX=$application
++			NODE_STARTX=$application
+ 		;;
+ 		unix-default)
+ 			if [ -x "$HOME/$USER_X_STARTUP_SCRIPT" ]; then
+-				STARTX="$HOME/$USER_X_STARTUP_SCRIPT"
++				NODE_STARTX="$HOME/$USER_X_STARTUP_SCRIPT"
+ 			elif which "$DEFAULT_X_SESSION" >/dev/null 2>&1 ; then
+-				STARTX="$DEFAULT_X_SESSION"
++				NODE_STARTX="$DEFAULT_X_SESSION"
+ 			fi
+ 		;;
+ 	esac
+-	[ -n "$STARTX" ] || return
+ 
++	echo "$NODE_STARTX"
++}
++
++#
++# node_start_applications
++#
++#	Used local vars: $type, $application, $sess_id, $mediahelper,
++#		         $virtualdesktop, $rootless, $display
++#
++#	Used config vars: <several>
++#
++
++node_start_applications()
++{
++	# close input and output file descriptors
++	exec 0<&-
++	exec 1>&-
++	exec 2>&-
++
++	#
++	# Prepare application startup
++	#
++	
++	. /etc/profile
++	[ -f ~/.bash_profile ] && . ~/.bash_profile
++
++	mkdir -p "$USER_FAKE_HOME/.nx/C-$sess_id/pids/"
++
++	#
++	# Which application do we start?
++	#
++
++	NODE_APPLICATION=$(node_find_application "$type")
++
++	#
++	# Check if we want to use a mediahelper
++	#
++
+ 	if [ "$mediahelper" = "esd" ]
+ 	then
+ 		# Set Espeaker variable
+@@ -175,9 +259,8 @@
+ 		# Check for config file directive
+ 		if [ "$ENABLE_ESD_PRELOAD" = "1" -a -x "$(find_app $ESD_BIN_PRELOAD)" ]
+ 		then
+-			STARTX="$ESD_BIN_PRELOAD $STARTX"
+-			
+-			echo "Info: NXNODE - Using $ESD_BIN_PRELOAD wrapper script." >> $USER_FAKE_HOME/.nx/C-$sess_id/session
++			NODE_APPLICATION="$ESD_BIN_PRELOAD $NODE_APPLICATION"
++			echo "Info: NXNODE - Using $ESD_BIN_PRELOAD wrapper script." >> "$USER_FAKE_HOME/.nx/C-$sess_id/session"
+ 		fi
+ 	elif [ "$mediahelper" = "artsd" ]
+ 	then
+@@ -185,36 +268,85 @@
+ 		echo -n "GlobalComm=Arts::X11GlobalComm" > $HOME/.mcoprc
+ 		if [ "$ENABLE_ARTSD_PRELOAD" = "1" -a -x "$(find_app $ARTSD_BIN_PRELOAD)" ]
+ 		then
+-			STARTX="$ARTSD_BIN_PRELOAD $STARTX"
+-			echo "Info: NXNODE - Using $ARTSD_BIN_PRELOAD wrapper script." >> $USER_FAKE_HOME/.nx/C-$sess_id/session
++			NODE_APPLICATION="$ARTSD_BIN_PRELOAD $NODE_APPLICATION"
++			echo "Info: NXNODE - Using $ARTSD_BIN_PRELOAD wrapper script." >> "$USER_FAKE_HOME/.nx/C-$sess_id/session"
+ 		fi
+ 	fi
+ 
++	#
++	# Do we need to PRELOAD any libraries?
++	#	
++
+ 	[ "$virtualdesktop" = "0" -a "$rootless" != "1" ] && export LD_PRELOAD="$APPLICATION_LIBRARY_PRELOAD:$LD_PRELOAD"
++
++	#
++	# Should we start a window manager?
++	#
++	
+ 	if [ "$virtualdesktop" = "1" -a "$type" = "unix-application" -a "$DEFAULT_X_WM" != "" -a -x "$(find_app $DEFAULT_X_WM)" ]
+ 	then
+-		DISPLAY=unix:$display $DEFAULT_X_WM >>$USER_FAKE_HOME/.nx/C-$sess_id/session 2>&1 &
+-		WM_PID=$!
++		DISPLAY=unix:$display $DEFAULT_X_WM >>"$USER_FAKE_HOME/.nx/C-$sess_id/session" 2>&1 &
++		NODE_WM_PID=$!
+ 	fi
+-	DISPLAY=unix:$display $STARTX >>$USER_FAKE_HOME/.nx/C-$sess_id/session 2>&1 &
+-	APP_PID=$!
+-	mkdir -p $USER_FAKE_HOME/.nx/C-$sess_id/pids/
+-	echo "$APP_PID" > $USER_FAKE_HOME/.nx/C-$sess_id/pids/applications
+-	wait $APP_PID
+-	if [ -n "$WM_PID" ]
++
++	#
++	# Startup the application
++	#
++	
++	DISPLAY=unix:$display $STARTX >>"$USER_FAKE_HOME/.nx/C-$sess_id/session" 2>&1 &
++	NODE_APP_PID=$!
++	
++	mkdir -p "$USER_FAKE_HOME/.nx/C-$sess_id/pids/"
++	echo "$NODE_APP_PID" >"$USER_FAKE_HOME/.nx/C-$sess_id/pids/applications"
++	wait $NODE_APP_PID
++
++	#
++	# Kill or wait for the started window manager
++	#	
++	
++	if [ -n "$NODE_WM_PID" ]
+ 	then
+ 		# kill the WM after application is finished?
+-		[ "$KILL_DEFAULT_X_WM" = "1" ] && kill $WM_PID 2>/dev/null
++		[ "$KILL_DEFAULT_X_WM" = "1" ] && kill $NODE_WM_PID 2>/dev/null
+ 		# or just wait until it finishes?
+-		[ "$KILL_DEFAULT_X_WM" = "1" ] || wait $WM_PID
++		[ "$KILL_DEFAULT_X_WM" = "1" ] || wait $NODE_WM_PID
+ 	fi
+-	rm -f $USER_FAKE_HOME/.nx/C-$sess_id/pids/applications
++	rm -f "$USER_FAKE_HOME/.nx/C-$sess_id/pids/applications"
+ 
+ 	# Do not terminate agent in case of rootless agent mode.
+ 	# The agent times out after a while by itself anyway.
+-	[ "$virtualdesktop" = "1" -o "$rootless" != "1" ] && node_terminate_agent $sess_id
++	
++	[ "$virtualdesktop" = "1" -o "$rootless" != "1" ] && node_terminate_agent "$sess_id"
+ }
+ 
++#
++# node_persistent_session
++#
++#	Is the user allowed to run a persistent session?
++#
++
++node_agent_persistent_session()
++{
++	P="-nopersistent"
++	OLD_IFS=$IFS
++	IFS=","
++	[ "$ENABLE_PERSISTENT_SESSION" = "all" ] && P="-persistent"
++	[ "$ENABLE_PERSISTENT_SESSION" = "all" ] || for USERNAME in $ENABLE_PERSISTENT_SESSION; do
++		[ "${USERNAME:0:1}" != "@" ] && [ "$USER" = "$USERNAME" ] && P="-persistent" && break ;
++		[ "${USERNAME:0:1}" = "@" ] && [ -z $(groups "$USER" | egrep "^${USERNAME:1}:") ] && P="-persistent" && break ;
++	done
++	for USERNAME in $DISABLE_PERSISTENT_SESSION; do
++		[ "${USERNAME:0:1}" != "@" ] && [ "$USER" = "$USERNAME" ] && P="-nopersistent" && break ;
++		[ "${USERNAME:0:1}" = "@" ] && [ -z $(groups "$USER" | egrep "^${USERNAME:1}:") ] && P="-nopersistent" && break ;
++	done
++	IFS=$OLD_IFS
++	echo "$P"
++}
++
++#
++# node_start_agent
++#
++
+ node_start_agent()
+ {
+ 	# Ok, now we do some wicked fd magic.
+@@ -243,42 +375,83 @@
+ 	
+ 	{
+ 
++	#
++	# Setup environment
++	#
++
+ 	export DISPLAY="nx/nx,options=$USER_FAKE_HOME/.nx/C-$sess_id/options:$display"
+ 	export XAUTHORITY="$USER_FAKE_HOME/.nx/C-$sess_id/authority"
+ 	export HOME="$USER_FAKE_HOME"
++
++	#
++	# Setup optional parameters for nxagent
++	#
++
++	# keyboard
+ 	
++	K=""
+ 	# backwards compatibility
+-	K=""
+ 	[ -n "$keyboard" ] && K="-keyboard $keyboard"
+ 	[ -n "$kbtype" ] && K="-kbtype $kbtype"
++
++	# backingstore
++	
+ 	B=""
+ 	[ -n "$backingstore" -a "$ENABLE_2_0_0_BACKEND" != "1" ] && B="-bs $backingstore"
++
++	# geometry
++	
+ 	G=""
+ 	[ -n "$geometry" ] && G="-geometry $geometry"
++
++	# type of session
++	
+ 	R="-D"
+ 	[ "$rootless" = "1" ] && R="-R"
++
++	# Setup fullscreen parameters
++	
+ 	vncfullscreen=""
+ 	[ "$geometry" = "fullscreen" -a "$type" = "vnc" ] && vncfullscreen="-fullscreen" && G=""
++	
+ 	[ "$geometry" = "fullscreen" -a "$type" = "windows" ] && G="-geometry `echo $screeninfo | cut -d"x" -f1,2`"
+ 
++	#
++	# Start the wanted nxagent
++	#
++
+ 	if [ "$type" = "windows" ]
+ 	then
+ 		# nxdesktop session (Windows RDP)
++
+ 		[ "$SET_LD_LIBRARY_PATH" = "1" ] && export LD_LIBRARY_PATH="$AGENT_LIBRARY_PATH:$LD_LIBRARY_PATH"
++		# Setup optional parameters
++		
+ 		U=""
+ 		P=""
+ 		D=""
+ 		[ -n "$agent_user" ] && U="-u $agent_user"
+ 		[ -n "$agent_password" ] && P="-p -"
+ 		[ -n "$agent_domain" ] && D="-d $agent_domain"
++
++		# Start the agent
++		
+ 		echo "$agent_password" | $PATH_BIN/nxdesktop -name "NX - $user@$SERVER_NAME:$display - $session (GPL Edition)" -option "$USER_FAKE_HOME/.nx/C-$sess_id/options" $K $G $U $P $D $agent_server $AGENT_EXTRA_OPTIONS_RDP 2>&3 &
++
+ 	elif [ "$type" = "vnc" ]
+ 	then
+ 		# nxviewer session (VNC RFP)
++		
+ 		[ "$SET_LD_LIBRARY_PATH" = "1" ] && export LD_LIBRARY_PATH="$AGENT_LIBRARY_PATH:$LD_LIBRARY_PATH"
+-		mkdir -p $USER_FAKE_HOME/.nx/C-$sess_id/scripts/
+-		echo "$agent_password" | $PATH_BIN/nxpasswd $USER_FAKE_HOME/.nx/C-$sess_id/scripts/.passwd doit
++		# Setup password
++		
++		mkdir -p "$USER_FAKE_HOME/.nx/C-$sess_id/scripts/"
++		echo "$agent_password" | $PATH_BIN/nxpasswd "$USER_FAKE_HOME/.nx/C-$sess_id/scripts/.passwd" doit
++		
++		# Start the agent
++		
+ 		$PATH_BIN/nxviewer -encodings tight hextile copyrect raw -passwd $USER_FAKE_HOME/.nx/C-$sess_id/scripts/.passwd -name "NX - $user@$SERVER_NAME:$display - $session (GPL Edition)" -option "$USER_FAKE_HOME/.nx/C-$sess_id/options" $vncfullscreen $G $K $agent_server $AGENT_EXTRA_OPTIONS_RFB 2>&3 &
++
+ 	elif [ "$R" = "-R" -a "$rootless" != "1" ]
+ 	then
+ 		# nxproxy single application mode session
+@@ -287,76 +460,94 @@
+ 	else
+ 		# nxagent session (X11)
+ 		[ "$SET_LD_LIBRARY_PATH" = "1" ] && export LD_LIBRARY_PATH="$AGENT_LIBRARY_PATH:$LD_LIBRARY_PATH"
+-		P="-nopersistent"
+-		OLD_IFS=$IFS
+-		IFS=","
+-		[ "$ENABLE_PERSISTENT_SESSION" = "all" ] && P="-persistent"
+-		[ "$ENABLE_PERSISTENT_SESSION" = "all" ] || for USERNAME in $ENABLE_PERSISTENT_SESSION; do
+-			[ "${USERNAME:0:1}" != "@" ] && [ "$USER" = "$USERNAME" ] && P="-persistent" && break ;
+-			[ "${USERNAME:0:1}" = "@" ] && [ -z $(groups "$USER" | egrep "^${USERNAME:1}:") ] && P="-persistent" && break ;
+-		done
+-		for USERNAME in $DISABLE_PERSISTENT_SESSION; do
+-			[ "${USERNAME:0:1}" != "@" ] && [ "$USER" = "$USERNAME" ] && P="-nopersistent" && break ;
+-			[ "${USERNAME:0:1}" = "@" ] && [ -z $(groups "$USER" | egrep "^${USERNAME:1}:") ] && P="-nopersistent" && break ;
+-		done
+-		IFS=$OLD_IFS
++		
++		# Setup optional parameters
++
++		P=$(node_agent_persistent_session)
+ 		FP=""
+ 		[ -n "$AGENT_FONT_SERVER" ] && FP="-fp $AGENT_FONT_SERVER"
+-		PATH="$PATH_BIN:$PATH" $PATH_BIN/nxagent $P $R -name "NX - $user@$SERVER_NAME:$display - $session (GPL Edition)" -option "$USER_FAKE_HOME/.nx/C-$sess_id/options" $K $G $B $FP :$display $AGENT_EXTRA_OPTIONS_X 2>&3 &
++		
++		# Start the agent
++		
++		PATH="$PATH_BIN:$PATH" $PATH_BIN/nxagent $P $R -name "NX - $user@$SERVER_NAME:$display - $session (GPL Edition)" -option "$USER_FAKE_HOME/.nx/C-$sess_id/options" $K $G $B $FP $AGENT_EXTRA_OPTIONS_X :$display 2>&3 &
+ 	fi
+-	PID=$!
+-	mkdir -p $USER_FAKE_HOME/.nx/C-$sess_id/pids/
+-	echo "$PID" > $USER_FAKE_HOME/.nx/C-$sess_id/pids/agent
+-	wait $PID
+-	AGENT_EXIT_STATUS=$?
+-	failed=""
+-	if [ $AGENT_EXIT_STATUS -ne 0 ]
++	
++	#
++	# Wait for the agent
++	#
++	
++	NODE_AGENT_PID=$!
++	mkdir -p "$USER_FAKE_HOME/.nx/C-$sess_id/pids/"
++	echo "$NODE_AGENT_PID" >"$USER_FAKE_HOME/.nx/C-$sess_id/pids/agent"
++	wait $NODE_AGENT_PID
++
++	NODE_AGENT_EXIT_STATUS=$?
++	NODE_FAILED=""
++	if [ $NODE_AGENT_EXIT_STATUS -ne 0 ]
+ 	then
+ 		echo "NX> 1004 Error: NX Agent exited with exit status 1."
+-		failed="failed"
++		NODE_FAILED="failed"
+ 	fi
+ 	echo "NX> 1006 Session status: closed"
+ 	
+-	rm -f $USER_FAKE_HOME/.nx/C-$sess_id/pids/agent
+-	node_terminate_session "$sess_id" $failed
++	#
++	# Cleanup session information
++	#	
+ 	
++	rm -f "$USER_FAKE_HOME/.nx/C-$sess_id/pids/agent"
++	node_terminate_session "$sess_id" "$NODE_FAILED"
++	
+ 	# remove possible leftovers of nxagent
+ 	rm -f /tmp/.X$display-lock
+ 	rm -f /tmp/.X11-unix/X$display
+-	} 3>&1 1>&4 | tee $USER_FAKE_HOME/.nx/C-$sess_id/session | node_start_monitor; } 4>&1
++	} 3>&1 1>&4 | tee "$USER_FAKE_HOME/.nx/C-$sess_id/session" | node_start_monitor; } 4>&1
+ }
+ 
+-node_kill_proxy()
+-{
+-	# Info: Proxy running in server mode with pid '5279'.
+-	PROXY_PID=$(grep "Info: Proxy running in server mode with pid" $USER_FAKE_HOME/.nx/C-$1/session | cut -d"'" -f2)
+-	sleep 2
+-	[ -n "$PROXY_PID" ] && kill $PROXY_PID 2>/dev/null
+-}
++#
++# node_cupsd_stop
++#
++#	Used local vars: $sess_id
++#
+ 
+ node_cupsd_stop()
+ {
++	#
++	# Cleanup userspace cups daemon	
++	#
++	
+ 	[ -e "$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd" ] || return
++	
+ 	NODE_CUPSD_PID=$(cat "$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd")
++	
+ 	# Check for a running userspace cupsd, look if its still active 
+ 	# and kill it if so
+ 	( [ -n "$NODE_CUPSD_PID" ] && kill -0 $NODE_CUPSD_PID && kill $NODE_CUPSD_PID && sleep 2 && kill -0 $NODE_CUPSD_PID && kill -9 $NODE_CUPSD_PID ) 2>/dev/null
++	
+ 	# delete pid file
+ 	rm -f "$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd"
++	
+ 	# remove all printers
+ 	echo >"$USER_FAKE_HOME/.nx/C-$sess_id/cups/printers.conf"
+ }
+ 
++#
++# node_cupsd_setup
++#
++#	Used local vars: $sess_id, $display
++#
++
+ node_cupsd_setup()
+ {
+ 	let NODE_CUPSD_PORT=$display+9000 # offset 9000 for userspace cupsd's
+ 	export NODE_CUPSD_PORT
++	
+ 	mkdir -p "$USER_FAKE_HOME/.nx/C-$sess_id/pids/"
+ 	[ -e "$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd" ] && return
+ 	touch "$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd"
+ 	
+-	mkdir -p $USER_FAKE_HOME/.nx/C-$sess_id/cups/spool/tmp $USER_FAKE_HOME/.nx/C-$sess_id/cups/spool/certs $USER_FAKE_HOME/.nx/C-$sess_id/cups/ppd
+-	ln -sf spool/certs $USER_FAKE_HOME/.nx/C-$sess_id/cups/certs
++	mkdir -p "$USER_FAKE_HOME/.nx/C-$sess_id/cups/spool/tmp" "$USER_FAKE_HOME/.nx/C-$sess_id/cups/spool/certs" "$USER_FAKE_HOME/.nx/C-$sess_id/cups/ppd"
++	ln -sf spool/certs "$USER_FAKE_HOME/.nx/C-$sess_id/cups/certs"
++
+ cat <<EOF > $USER_FAKE_HOME/.nx/C-$sess_id/cups/cupsd.conf
+ AccessLog /dev/null
+ ErrorLog error_log
+@@ -375,16 +566,18 @@
+ Allow from 127.0.0.1
+ </Location>
+ EOF
+-	touch $USER_FAKE_HOME/.nx/C-$sess_id/cups/printers.conf $USER_FAKE_HOME/.nx/C-$sess_id/cups/classes.conf
+ 
++	touch "$USER_FAKE_HOME/.nx/C-$sess_id/cups/printers.conf" "$USER_FAKE_HOME/.nx/C-$sess_id/cups/classes.conf"
++
+ 	# copy mime.* files
+-	cp "$CUPS_ETC"/mime.* "$USER_FAKE_HOME/.nx/C-$sess_id/cups/"
++	cp -af "$CUPS_ETC"/mime.* "$USER_FAKE_HOME/.nx/C-$sess_id/cups/"
+ 
+ 	# start cupsd
+ 	$COMMAND_CUPSD -f -c "$USER_FAKE_HOME/.nx/C-$sess_id/cups/cupsd.conf" &>/dev/null </dev/null &
+-	CUPSD_PID=$!
++	NODE_CUPSD_PID=$!
+ 	sleep 3
+-	echo $CUPSD_PID >"$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd"
++	echo $NODE_CUPSD_PID >"$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd"
++
+ 	# setup KDE
+ 	if [ "$ENABLE_KDE_CUPS" = "1" -a -e "$KDE_PRINTRC" ]
+ 	then
+@@ -398,6 +591,12 @@
+ 	fi
+ }
+ 
++#
++# node_cupsd_reload
++#
++#	Used local vars: $sess_id
++#
++
+ node_cupsd_reload()
+ {
+ 	[ -e "$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd" ] || return
+@@ -445,9 +644,8 @@
+ 
+ node_start_monitor_2_0_0()
+ {
+-	TAIL_PID=""
+-	SUSPEND_STATUS="$2"
+-	SESSION_STATUS=""
++	NODE_TAIL_PID=""
++	NODE_SUSPEND_STATUS="$2"
+ 
+ 	while read line 
+ 	do
+@@ -457,7 +655,7 @@
+ 		
+ 		if stringinstring "Info: tail -f running with pid" "$line"
+ 		then
+-			TAIL_PID=$(echo $line | cut -d"'" -f2)
++			NODE_TAIL_PID=$(echo $line | cut -d"'" -f2)
+ 		fi
+ 
+ 		#
+@@ -494,10 +692,10 @@
+ 			echo "NX> 1005 Session status: suspended"
+ 			# umount shares & stop printers
+ 
+-			if [ "$SUSPEND_STATUS" = "Running" ]
++			if [ "$NODE_SUSPEND_STATUS" = "Running" ]
+ 			then
+-				node_suspend_session $sess_id
+-				SUSPEND_STATUS=""
++				node_suspend_session "$sess_id"
++				NODE_SUSPEND_STATUS=""
+ 			else
+ 				node_stop_services
+ 			fi
+@@ -509,13 +707,13 @@
+ 
+ 		if stringinstring "Info: Watchdog running with pid" "$line"
+ 		then
+-			WATCHDOG_PID=$(echo $line | cut -d"'" -f2)
++			NODE_WATCHDOG_PID=$(echo $line | cut -d"'" -f2)
+ 		fi
+ 
+ 		if stringinstring "Info: Waiting the watchdog process to complete." "$line"
+ 		then
+ 			# Kill the watchdog
+-			kill $WATCHDOG_PID 2>/dev/null
++			kill $NODE_WATCHDOG_PID 2>/dev/null
+ 		fi
+ 		
+ 		#
+@@ -538,7 +736,7 @@
+ 			echo "NX> 718 Session restore succeded"
+ 			if [ "$1" = "restore" ]
+ 			then
+-				kill $TAIL_PID
++				kill $NODE_TAIL_PID
+ 				break
+ 			fi
+ 		fi
+@@ -552,7 +750,7 @@
+ 			echo "NX> 596 Error: Session $1 failed. Reason was: $line"
+ 			if [ "$1" = "restore" ]
+ 			then
+-				kill $TAIL_PID
++				kill $NODE_TAIL_PID
+ 				break
+ 			fi
+ 		fi
+@@ -570,9 +768,9 @@
+ 
+ node_start_monitor_1_5_0()
+ {
+-	RUNNING=0
+-	TAIL_PID=""
+-	SUSPEND_STATUS="$2"
++	NODE_RUNNING=0
++	NODE_TAIL_PID=""
++	NODE_SUSPEND_STATUS="$2"
+ 
+ 	while read line 
+ 	do
+@@ -582,28 +780,10 @@
+ 		
+ 		if stringinstring "Info: tail -f running with pid" "$line"
+ 		then
+-			TAIL_PID=$(echo $line | cut -d"'" -f2)
++			NODE_TAIL_PID=$(echo $line | cut -d"'" -f2)
+ 		fi
+ 
+ 		#
+-		# Detect nxagent syntax errors
+-		#
+-		
+-		#SYNTAX=""
+-
+-		#stringinstring "Unrecognized option:" "$line" && SYNTAX="yes"
+-		#stringinstring "NXAGENT: Fatal IO error on display" "$line" && SYNTAX="yes"
+-		#stringinstring "NXAGENT: Unable to open display" "$line" && SYNTAX="yes"
+-		#if [ -n "$SYNTAX" ]
+-		#then
+-		#	kill $TAIL_PID 2>/dev/null
+-		#	echo "NX> 1004 Error: nxagent failed to start with: $line"
+-		#	[ "$SESSION_LOG_CLEAN" = "1" ] && rm -rf $USER_FAKE_HOME/.nx/C-$sess_id/
+-		#	[ "$SESSION_LOG_CLEAN" = "1" ] || mv $USER_FAKE_HOME/.nx/C-$sess_id/ $USER_FAKE_HOME/.nx/F-C-$sess_id/
+-		#	break
+-		#fi
+-
+-		#
+ 		# Session suspend
+ 		#
+ 
+@@ -612,10 +792,10 @@
+ 			echo "NX> 1005 Session status: suspended"
+ 			# umount shares & stop printers
+ 
+-			if [ "$SUSPEND_STATUS" = "Running" ]
++			if [ "$NODE_SUSPEND_STATUS" = "Running" ]
+ 			then
+-				node_suspend_session $sess_id
+-				SUSPEND_STATUS=""
++				node_suspend_session "$sess_id"
++				NODE_SUSPEND_STATUS=""
+ 			else
+ 				node_stop_services
+ 			fi
+@@ -628,7 +808,7 @@
+ 		if stringinstring "Info: Waiting for a further signal to complete." "$line"
+ 		then
+ 			# Kill the proxy
+-			kill -HUP $PROXY_PID 2>/dev/null
++			kill -HUP $NODE_PROXY_PID 2>/dev/null
+ 		fi
+ 		
+ 		#
+@@ -638,7 +818,7 @@
+ 		if stringinstring "Info: End of session requested by " "$line" && [ "$RECONNECT" = "0" ] && ! stringinstring "'SIGHUP'" "$line"
+ 		then
+ 			echo "NX> 1009 Session status: terminating"
+-			kill -HUP $PROXY_PID 2>/dev/null
++			kill -HUP $NODE_PROXY_PID 2>/dev/null
+ 		fi
+ 		
+ 		#
+@@ -658,7 +838,7 @@
+ 
+ 		if stringinstring "Info: Connection with remote proxy established." "$line"
+ 		then
+-			RUNNING=1
++			NODE_RUNNING=1
+ 		fi
+ 	
+ 		#
+@@ -667,7 +847,7 @@
+ 		
+ 		if stringinstring "Info: Proxy running in server mode with pid" "$line"
+ 		then
+-			PROXY_PID=$(echo $line | cut -d"'" -f2)
++			NODE_PROXY_PID=$(echo $line | cut -d"'" -f2)
+ 		fi
+ 		
+ 		#
+@@ -679,7 +859,7 @@
+ 			echo "NX> 718 Session restore succeded"
+ 			if [ "$1" = "restore" ]
+ 			then
+-				kill $TAIL_PID
++				kill $NODE_TAIL_PID
+ 				break
+ 			fi
+ 		fi
+@@ -694,24 +874,10 @@
+ 			echo "NX> 596 Error: Session restore failed. Reason was: $line"
+ 			if [ "$1" = "restore" ]
+ 			then
+-				kill $TAIL_PID
++				kill $NODE_TAIL_PID
+ 				break
+ 			fi
+ 		fi
+-
+-		#
+-		# Error handling.
+-		#
+-
+-		#if stringinstring "Error: Connection with remote host" "$line" && [ "$RUNNING" = "0" ] 
+-		#then
+-		#	kill $TAIL_PID 2>/dev/null
+-		#	echo "NX> 1004 Error:"
+-		#	echo "Session '$sess_id' has failed after reaching usable state."
+-		#	[ "$SESSION_LOG_CLEAN" = "1" ] && rm -rf $USER_FAKE_HOME/.nx/C-$sess_id/
+-		#	[ "$SESSION_LOG_CLEAN" = "1" ] || mv $USER_FAKE_HOME/.nx/C-$sess_id/ $USER_FAKE_HOME/.nx/F-C-$sess_id/
+-		#	break
+-		#fi
+ 	done
+ 	
+ 	trap "" EXIT
+@@ -724,13 +890,23 @@
+ 	exit 0
+ }
+ 
++#
++# node_start_monitor <start|restore> <Running|Suspended>
++#
++
+ node_start_monitor()
+ {
+ 	[ "$ENABLE_2_0_0_BACKEND" = "1" ] && node_start_monitor_2_0_0 "$@"
+ 	[ "$ENABLE_2_0_0_BACKEND" = "1" ] || node_start_monitor_1_5_0 "$@"
+ }
+ 
+-node_startsession()
++#
++# -----------------------------------------------------------------------------
++# startsession - Start a new session.
++# -----------------------------------------------------------------------------
++#
++
++startsession()
+ {
+ 
+ 	# user=knoppix&userip=192.168.1.66&uniqueid=6A8269CC467264EAEF6349D062689755&display=1000&session=lappi%5ffull&type=unix%2dkde&cache=8M&images=32M&cookie=84765070afee043cf83f85d21130145f&link=lan&render=1&backingstore=when_requested&imagecompressionmethod=0&geometry=fullscreen&keyboard=fr&media=0&samba=1&agent_server=&agent_user=&agent_password=
+@@ -799,6 +975,8 @@
+ 	then
+ 		# we need to use the IP of the "calling" server now
+ 		userip=$(echo $SSH_CLIENT $SSH2_CLIENT | cut -d" " -f1 | sed 's/::ffff://g')
++
++		# TODO: This logic is broken ... ;-)
+ 		[ -z "$userip" ] && userip="127.0.0.1"
+ 		[ -z "$userip" -a "$host" != "127.0.0.1" ] && userip="*"
+ 	fi
+@@ -889,7 +1067,7 @@
+ 	mkdir -p $USER_FAKE_HOME/.nx/C-$sess_id/pids/
+ 	echo "$MONITOR_PID" > $USER_FAKE_HOME/.nx/C-$sess_id/pids/monitor
+ 
+-	node_suspend_session $sess_id || { echo "Info: Reconnection failed: NX Agent process could not be found." >>$USER_FAKE_HOME'/.nx/C-'$sess_id'/session'; node_fail_restore_session; }
++	node_suspend_session $sess_id || { echo "Info: Reconnection failed: NX Agent process could not be found." >>$USER_FAKE_HOME'/.nx/C-'$sess_id'/session'; node_fail_restore_session $sess_id; }
+ else
+ 	node_start_agent &
+ 	node_start_applications &
+@@ -928,6 +1106,12 @@
+ wait # for all children
+ }
+ 
++#
++# -----------------------------------------------------------------------------
++# cmd_node functions - changes lots of small variables
++# -----------------------------------------------------------------------------
++#
++
+ cmd_node_terminate()
+ {
+ 	sessionid=$(getparam_sessionid)
+@@ -956,13 +1140,13 @@
+ 	rdir=$(getparam dir | sed 's|$(SHARES)/||g')
+ 	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | rev|cut -d"-" -f2| rev)
+ 	mkdir -p "$HOME/$dir"
+-	ERROR=$(PASSWD="$password" "$COMMAND_SMBMOUNT" "//$computername/$rdir" "$HOME/$dir" -o username="$username,ip=127.0.0.1,port=$port" 2>&1)
++	error=$(PASSWD="$password" "$COMMAND_SMBMOUNT" "//$computername/$rdir" "$HOME/$dir" -o username="$username,ip=127.0.0.1,port=$port" 2>&1)
+ 	if [ $? -eq 0 ]
+ 	then
+ 		$PATH_BIN/nxclient -dialog ok -caption "NXServer Message" -message "Info: Share: '//$computername/$rdir' mounted on: '$HOME/$dir'" -noautokill -display :$display &
+ 		echo "$HOME/$dir" >> "$USER_FAKE_HOME/.nx/C-$SERVER_NAME-$display-$sessionid/scripts/mpoint"
+ 	else
+-		$PATH_BIN/nxclient -dialog ok -caption "NXServer Message" -message "Info: Share: '//$computername/$rdir' failed to mount: $ERROR" -noautokill -display :$display &
++		$PATH_BIN/nxclient -dialog ok -caption "NXServer Message" -message "Info: Share: '//$computername/$rdir' failed to mount: $error" -noautokill -display :$display &
+ 	fi
+ }
+ 
+@@ -981,9 +1165,11 @@
+ 	defaultPrinter=$(getparam defaultPrinter)
+ 	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | rev | cut -d"-" -f2 | rev)
+ 	sess_id="$SERVER_NAME-$display-$sessionid"
++	
+ 	# this will also setup the userspace cupsd
+ 	IPP_PORT=$(node_cupsd_get_port)
+ 	export IPP_PORT
++	
+ 	if [ "$type" = "smb" ]
+ 	then
+ 		DEVICE_URI="smb://$username:$password at localhost:$port/$share"
+@@ -992,6 +1178,7 @@
+ 		DEVICE_URI="ipp://localhost:$port/printers/$printer"
+ 		NAME="$printer"
+ 	fi
++	
+ 	MODEL=$($PATH_BIN/nxclient -printer "$NAME" -noautokill -display :$display)
+ 	[ -z "$MODEL" -o "$MODEL" = "cancel: aborted" ] && return
+ 	
+
+Modified: freenx-server/trunk/nxnode-login
+===================================================================
+--- freenx-server/trunk/nxnode-login	2006-07-05 00:06:46 UTC (rev 230)
++++ freenx-server/trunk/nxnode-login	2006-07-05 02:03:45 UTC (rev 231)
+@@ -49,6 +49,10 @@
+ 	exit 0
+ }
+ 
++#
++# Log the user in via the supplied method.
++#
++
+ expect_user -re "(.*)\n" 
+ set password $expect_out(1,string)
+ 
+
+
+
+From fabianx at berlios.de  Wed Jul  5 04:06:55 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Wed, 5 Jul 2006 04:06:55 +0200
+Subject: [Freenx-cvs] r232 - / freenx-server/trunk
+Message-ID: <200607050206.k6526tN2007354@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-05 04:06:44 +0200 (Wed, 05 Jul 2006)
+New Revision: 232
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxnode
+Log:
+- Added username and password to cups printers. -> fixes printing via cupsd.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:250
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:252
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-07-05 02:03:45 UTC (rev 231)
++++ freenx-server/trunk/ChangeLog	2006-07-05 02:06:44 UTC (rev 232)
+@@ -9,6 +9,7 @@
+ 	  explanations.
+ 	* Added support for NX 2.0.0 style nxclient dialogs.
+ 	* Support for NX 2.0.0 backend in nxloadconfig.
++	* Fixed cups printing (added username and password).
+ 
+ 01.07.2006 FreeNX 0.5.0 "UKUUG 2006 Edition"
+ 	* Opened the 0.5.0 branch.
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2006-07-05 02:03:45 UTC (rev 231)
++++ freenx-server/trunk/nxnode	2006-07-05 02:06:44 UTC (rev 232)
+@@ -1175,7 +1175,7 @@
+ 		DEVICE_URI="smb://$username:$password at localhost:$port/$share"
+ 		NAME="$share"
+ 	else
+-		DEVICE_URI="ipp://localhost:$port/printers/$printer"
++		DEVICE_URI="ipp://$username:$password at localhost:$port/printers/$printer"
+ 		NAME="$printer"
+ 	fi
+ 	
+
+
+
+From fabianx at berlios.de  Wed Jul  5 04:13:54 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Wed, 5 Jul 2006 04:13:54 +0200
+Subject: [Freenx-cvs] r233 - / freenx-server/trunk
+Message-ID: <200607050213.k652Dsr9008596@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-05 04:13:50 +0200 (Wed, 05 Jul 2006)
+New Revision: 233
+
+Modified:
+   /
+   freenx-server/trunk/nxnode
+Log:
+- Added automatic end of slave mode.
+
+- Fixed rename of node_startsession -> startsession.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:252
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:254
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2006-07-05 02:06:44 UTC (rev 232)
++++ freenx-server/trunk/nxnode	2006-07-05 02:13:50 UTC (rev 233)
+@@ -1193,10 +1193,10 @@
+ 
+ case "$1" in 
+ 	--startsession)
+-		node_startsession
++		startsession
+ 	;;
+ 	--resumesession)
+-		node_startsession "restore"
++		startsession "restore"
+ 	;;
+ 	--terminate)
+ 		cmd_node_terminate
+@@ -1253,9 +1253,15 @@
+ 
+ 			CMDLINE="a=b&$CMDLINE"
+ 		fi
++		
++		if [ "$1" = "--startsession" -o "$1" = "--resumesession" ]
++		then
++			export SLAVE_PID=$$
++			( echo $CMDLINE | "$0" "$CMD"; kill $SLAVE_PID ) &
++		else
++			( echo $CMDLINE | "$0" "$CMD" ) &
++		fi
+ 
+-		( echo $CMDLINE | "$0" "$CMD" ) &
+-
+ 	done
+ else
+ 	nxnode_func "$@"
+
+
+
+From fabianx at berlios.de  Wed Jul  5 04:21:16 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Wed, 5 Jul 2006 04:21:16 +0200
+Subject: [Freenx-cvs] r234 - / freenx-server/trunk
+Message-ID: <200607050221.k652LGKc011220@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-05 04:21:14 +0200 (Wed, 05 Jul 2006)
+New Revision: 234
+
+Modified:
+   /
+   freenx-server/trunk/nxnode
+Log:
+- Fixed nxnode, because cleanup broke it.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:254
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:256
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2006-07-05 02:13:50 UTC (rev 233)
++++ freenx-server/trunk/nxnode	2006-07-05 02:21:14 UTC (rev 234)
+@@ -293,7 +293,7 @@
+ 	# Startup the application
+ 	#
+ 	
+-	DISPLAY=unix:$display $STARTX >>"$USER_FAKE_HOME/.nx/C-$sess_id/session" 2>&1 &
++	DISPLAY=unix:$display $NODE_APPLICATION >>"$USER_FAKE_HOME/.nx/C-$sess_id/session" 2>&1 &
+ 	NODE_APP_PID=$!
+ 	
+ 	mkdir -p "$USER_FAKE_HOME/.nx/C-$sess_id/pids/"
+
+
+
+From fabianx at berlios.de  Wed Jul  5 04:42:12 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Wed, 5 Jul 2006 04:42:12 +0200
+Subject: [Freenx-cvs] r235 - / freenx-server/trunk
+Message-ID: <200607050242.k652gCJ9018598@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-05 04:42:10 +0200 (Wed, 05 Jul 2006)
+New Revision: 235
+
+Modified:
+   /
+   freenx-server/trunk/nxserver
+Log:
+- More fixes for slave mode.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:256
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:258
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2006-07-05 02:21:14 UTC (rev 234)
++++ freenx-server/trunk/nxserver	2006-07-05 02:42:10 UTC (rev 235)
+@@ -473,7 +473,12 @@
+ 
+ nxnode_login_stop_slave()
+ {
+-	[ -n "$NXNODE_LOGIN_SLAVE" ] && kill "$NXNODE_LOGIN_SLAVE"
++	if [ -n "$NXNODE_LOGIN_SLAVE" ]
++	then
++		kill "$NXNODE_LOGIN_SLAVE"
++		sleep 2
++		kill -0 "$NXNODE_LOGIN_SLAVE" && kill -9 "$NXNODE_LOGIN_SLAVE"
++	fi
+ }
+ 
+ nxnode_login()
+
+
+
+From fabianx at berlios.de  Wed Jul  5 20:09:10 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Wed, 5 Jul 2006 20:09:10 +0200
+Subject: [Freenx-cvs] r236 - / freenx-server/trunk
+Message-ID: <200607051809.k65I9ABt002693@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-05 20:08:59 +0200 (Wed, 05 Jul 2006)
+New Revision: 236
+
+Modified:
+   /
+   freenx-server/trunk/nxnode
+   freenx-server/trunk/nxserver
+Log:
+Fixed one more stray tail -f process.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:258
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:260
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2006-07-05 02:42:10 UTC (rev 235)
++++ freenx-server/trunk/nxnode	2006-07-05 18:08:59 UTC (rev 236)
+@@ -154,6 +154,11 @@
+ node_fail_restore_session()
+ {
+ 	echo "NX> 1004 Error: Could not resume session. nxagent process could not be found."
++	
++	NODE_TAIL_PID=$(cat "$USER_FAKE_HOME/.nx/C-$sess_id/pids/tail" 2>/dev/null)
++	[ -n "$NODE_TAIL_PID" ] && kill $NODE_TAIL_PID
++	[ -n "$NODE_TAIL_PID" ] && echo "NX 1004> kill $NODE_TAIL_PID"
++	
+ 	node_terminate_session "$1" "failed"
+ 	exit 1
+ }
+@@ -656,6 +661,7 @@
+ 		if stringinstring "Info: tail -f running with pid" "$line"
+ 		then
+ 			NODE_TAIL_PID=$(echo $line | cut -d"'" -f2)
++			echo "$NODE_TAIL_PID" >"$USER_FAKE_HOME/.nx/C-$sess_id/pids/tail"
+ 		fi
+ 
+ 		#
+@@ -781,6 +787,7 @@
+ 		if stringinstring "Info: tail -f running with pid" "$line"
+ 		then
+ 			NODE_TAIL_PID=$(echo $line | cut -d"'" -f2)
++			echo "$NODE_TAIL_PID" >"$USER_FAKE_HOME/.nx/C-$sess_id/pids/tail"
+ 		fi
+ 
+ 		#
+@@ -881,7 +888,7 @@
+ 	done
+ 	
+ 	trap "" EXIT
+-	
++
+ 	[ "$1" = "restore" ] ||	node_stop_services
+ 	# close all open file descriptors
+ 	exec 0<&-
+@@ -1067,7 +1074,7 @@
+ 	mkdir -p $USER_FAKE_HOME/.nx/C-$sess_id/pids/
+ 	echo "$MONITOR_PID" > $USER_FAKE_HOME/.nx/C-$sess_id/pids/monitor
+ 
+-	node_suspend_session $sess_id || { echo "Info: Reconnection failed: NX Agent process could not be found." >>$USER_FAKE_HOME'/.nx/C-'$sess_id'/session'; node_fail_restore_session $sess_id; }
++	node_suspend_session $sess_id || { echo "Info: Reconnection failed: NX Agent process could not be found." >>"$USER_FAKE_HOME/.nx/C-$sess_id/session"; node_fail_restore_session $sess_id; }
+ else
+ 	node_start_agent &
+ 	node_start_applications &
+@@ -1101,7 +1108,8 @@
+ if [ -n "$MONITOR_PID" ]
+ then
+ 	wait "$MONITOR_PID"
+-	rm -f $USER_FAKE_HOME/.nx/C-$sess_id/pids/monitor
++	rm -f "$USER_FAKE_HOME/.nx/C-$sess_id/pids/monitor"
++	rm -f "$USER_FAKE_HOME/.nx/C-$sess_id/pids/tail"
+ fi
+ wait # for all children
+ }
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2006-07-05 02:42:10 UTC (rev 235)
++++ freenx-server/trunk/nxserver	2006-07-05 18:08:59 UTC (rev 236)
+@@ -548,7 +548,7 @@
+ 	NXNODE_READER="1"
+ }
+ 
+-ENABLE_NXNODE_SLAVE_MODE="1"
++#ENABLE_NXNODE_SLAVE_MODE="1"
+ 
+ # Start!
+ [ "$NX_LOG_LEVEL" -ge "1" ] && touch "$NX_LOGFILE" >/dev/null 2>&1
+
+
+
+From fabianx at berlios.de  Wed Jul  5 20:09:31 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Wed, 5 Jul 2006 20:09:31 +0200
+Subject: [Freenx-cvs] r237 - / freenx-server/trunk
+Message-ID: <200607051809.k65I9VBd002848@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-05 20:09:17 +0200 (Wed, 05 Jul 2006)
+New Revision: 237
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxnode
+Log:
+Fixed one more stray tail process.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:260
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:261
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-07-05 18:08:59 UTC (rev 236)
++++ freenx-server/trunk/ChangeLog	2006-07-05 18:09:17 UTC (rev 237)
+@@ -10,6 +10,7 @@
+ 	* Added support for NX 2.0.0 style nxclient dialogs.
+ 	* Support for NX 2.0.0 backend in nxloadconfig.
+ 	* Fixed cups printing (added username and password).
++	* Fixed one more stray tail process.
+ 
+ 01.07.2006 FreeNX 0.5.0 "UKUUG 2006 Edition"
+ 	* Opened the 0.5.0 branch.
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2006-07-05 18:08:59 UTC (rev 236)
++++ freenx-server/trunk/nxnode	2006-07-05 18:09:17 UTC (rev 237)
+@@ -127,6 +127,11 @@
+ 		fi
+ 	fi
+ 
++	# Kill tail process
++	
++	NODE_TAIL_PID=$(cat "$USER_FAKE_HOME/.nx/C-$sess_id/pids/tail" 2>/dev/null)
++	[ -n "$NODE_TAIL_PID" ] && kill $NODE_TAIL_PID 2>/dev/null
++
+ 	# Remove display information
+ 	
+ 	NODE_DISPLAY=$(echo $1 | rev | cut -d"-" -f2 | rev)
+
+
+
+From fabianx at berlios.de  Sun Jul  9 12:40:36 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Sun, 9 Jul 2006 12:40:36 +0200
+Subject: [Freenx-cvs] r240 - / freenx-server/trunk
+Message-ID: <200607091040.k69Aea6p031223@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-09 12:40:23 +0200 (Sun, 09 Jul 2006)
+New Revision: 240
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+Log:
+Added load based load sample script to Changelog.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:266
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:267
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-07-09 10:40:00 UTC (rev 239)
++++ freenx-server/trunk/ChangeLog	2006-07-09 10:40:23 UTC (rev 240)
+@@ -11,6 +11,7 @@
+ 	* Support for NX 2.0.0 backend in nxloadconfig.
+ 	* Fixed cups printing (added username and password).
+ 	* Fixed one more stray tail process.
++	* Added example script for "load" based loadbalancing.
+ 
+ 01.07.2006 FreeNX 0.5.0 "UKUUG 2006 Edition"
+ 	* Opened the 0.5.0 branch.
+
+
+
+From fabianx at berlios.de  Sun Jul  9 12:40:16 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Sun, 9 Jul 2006 12:40:16 +0200
+Subject: [Freenx-cvs] r239 - / freenx-server/trunk
+Message-ID: <200607091040.k69AeGlk031093@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-09 12:40:00 +0200 (Sun, 09 Jul 2006)
+New Revision: 239
+
+Added:
+   freenx-server/trunk/nxcheckload.sample
+Modified:
+   /
+Log:
+Added example script for load balancing.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:264
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:266
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Added: freenx-server/trunk/nxcheckload.sample
+===================================================================
+--- freenx-server/trunk/nxcheckload.sample	2006-07-09 09:46:16 UTC (rev 238)
++++ freenx-server/trunk/nxcheckload.sample	2006-07-09 10:40:00 UTC (rev 239)
+@@ -0,0 +1,68 @@
++#!/bin/sh
++#
++# nxcheckload - sample script for calculation of the load for a node.
++#
++# Version 0.5
++#
++# Under GPL
++#
++# Jonathan "Arrouan" ROUZAUD-CORNABAS (rouzaud.jonathan at gmail.com)
++#
++# Fabian Franz <FreeNX at fabian-franz.de>
++#
++# 0.5
++#  - Rewrote huge parts
++#
++# Change between 0.3 and 0.4
++#   - Add of TMP_FILE
++#   - Add of lock file to avoid two run at once.
++#
++# Change between 0.2 and 0.3
++#   - SMP support.
++#
++
++if [ "$1" != "" ]
++then
++	# Connect to a remote node
++	
++	# Note: This is a ssh sample, you'll need to tweak it for your setup
++	#       and setup the secret keys for yourself.
++	
++	#exec $COMMAND_SSH nxcal@"$1" "$PATH_BIN/nxcheckload"
++	
++	# Note: This is a netcat example. You need to have nxcheckload running through 
++	# netpipes or netcat like follows:
++	# 	node1:~$ faucet 9876 -io $PATH_BIN/nxcheckload
++	#
++	# Connect to another node running the load-service on some port.
++	#
++	
++	#exec $COMMAND_NETCAT "$1" 9876
++
++	# Same as loadbalance_rr_random
++	# pick a node by random.
++	
++	echo $RANDOM
++	exit 0
++fi
++
++# Be sure to use C numeric for calculations
++export LC_NUMERIC=C
++
++# The 3 variables of load from uptime
++LOADXX=$(awk '{ printf("(100-%s)+(100-%s)+(100-%s)\n", $1, $2, $3); }' /proc/loadavg | bc -q)
++
++# Add of total memory and free memory
++Mt=$(awk 'BEGIN { N=0 } /MemTotal|MemFree/ { N+=$2; } END { print N }' /proc/meminfo)
++
++# NBCPU = number of CPU
++NBCPU=$(cat /proc/cpuinfo | grep ^processor | wc -l)
++
++# CPU = Mhz of the CPU
++CPU=$(cat /proc/cpuinfo | grep "cpu MHz" | head -n1 | cut -d':' -f2 | cut -d' ' -f2)
++
++# Number of Xorg already launch and running.
++UNB=$(ps aux | grep Xorg | grep -v grep | wc -l)
++
++# Final calcul of the number of load.
++echo "100 * $LOADXX + $Mt + ( $NBCPU * $CPU ) / 100 + $UNB * 100" | bc -q | cut -d. -f1
+
+
+Property changes on: freenx-server/trunk/nxcheckload.sample
+___________________________________________________________________
+Name: svn:executable
+   + *
+
+
+
+From fabianx at berlios.de  Sun Jul  9 11:46:16 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Sun, 9 Jul 2006 11:46:16 +0200
+Subject: [Freenx-cvs] r238 - / freenx-website
+Message-ID: <200607090946.k699kG4w017827@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-09 11:46:16 +0200 (Sun, 09 Jul 2006)
+New Revision: 238
+
+Modified:
+   /
+   freenx-website/home.inc
+Log:
+Added DevCamp 2006.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:261
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:264
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-website/home.inc
+===================================================================
+--- freenx-website/home.inc	2006-07-05 18:09:17 UTC (rev 237)
++++ freenx-website/home.inc	2006-07-09 09:46:16 UTC (rev 238)
+@@ -11,8 +11,15 @@
+ 		News
+ 	</h2>
+ 	<h3>		<a
++	href="http://wiki.debian.org/DebianEdu/DevCamp2006">FreeNX at Debian-Edu DevCamp 2006.</a> 
++        - Saturday, July 08, 2006 -
++	</h3>
++	FreeNX is currently present at the Debian-Edu DevCamp 2006 in
++	Forbach, France. You can visit us there.
++
++	<h3>		<a
+ 	href="http://www.ukuug.org/events/linux2006/">FreeNX at UKUUG 2006.</a> 
+-        - Saturday, August 01, 2006 -
++        - Saturday, July 01, 2006 -
+ 	</h3>
+ 	FreeNX is currently present at UKUUG Linux 2006 conference in
+ 	Brighton, England. You can visit us there.
+
+
+
+From fabianx at berlios.de  Sun Jul  9 16:40:26 2006
+From: fabianx at berlios.de (fabianx at BerliOS)
+Date: Sun, 9 Jul 2006 16:40:26 +0200
+Subject: [Freenx-cvs] r241 - / freenx-server/trunk
+Message-ID: <200607091440.k69EeQf8023060@sheep.berlios.de>
+
+Author: fabianx
+Date: 2006-07-09 16:40:18 +0200 (Sun, 09 Jul 2006)
+New Revision: 241
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxserver
+Log:
+Fix for spaces in sessions regarding new NX Client 2.0.0.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:267
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:270
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-07-09 10:40:23 UTC (rev 240)
++++ freenx-server/trunk/ChangeLog	2006-07-09 14:40:18 UTC (rev 241)
+@@ -12,6 +12,8 @@
+ 	* Fixed cups printing (added username and password).
+ 	* Fixed one more stray tail process.
+ 	* Added example script for "load" based loadbalancing.
++	* Fixed spaces in parameters for NX Client 2.0.0.
++	  (ssycplkbocve at spammotel.com)
+ 
+ 01.07.2006 FreeNX 0.5.0 "UKUUG 2006 Edition"
+ 	* Opened the 0.5.0 branch.
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2006-07-09 10:40:23 UTC (rev 240)
++++ freenx-server/trunk/nxserver	2006-07-09 14:40:18 UTC (rev 241)
+@@ -726,12 +726,12 @@
+ 
+ server_get_params()
+ {
+-	SERVER_PARAMS=$(echo "$@" | sed "s/^$1/\"/g; s/\" --/\&/g; s/\"//g")
++	SERVER_PARAMS=$(echo "$@" | sed "s/^$1/\"/g; s/\" --/\&/g; s/\"//g; s/%20/ /g")
+ 	if [ "$SERVER_PARAMS" = "" ]
+ 	then
+ 		echo_x -n "NX> 106 Parameters: "
+ 		read SERVER_PARAMS2
+-		SERVER_PARAMS=$(echo $SERVER_PARAMS2 | sed 's/%2B/+/g')
++		SERVER_PARAMS=$(echo $SERVER_PARAMS2 | sed 's/%2B/+/g; s/%20/ /g')
+ 		echo_x
+ 	fi
+ }
+
+
+
+From freenx-cvs at lists.berlios.de  Wed Jul 26 13:40:09 2006
+From: freenx-cvs at lists.berlios.de (gwright)
+Date: Wed, 26 Jul 2006 13:40:09 +0200
+Subject: [Freenx-cvs] CVS: nxlib - gwright modified 3 files
+Message-ID: <44C75499.mail8OY1KM3W1@lists.berlios.de>
+
+User:      gwright
+Date:      2006-07-26 11:40:08 GMT
+Log:
+Initial import to CVS
+
+Status:
+
+Vendor Tag:	FREENX
+Release Tags:	NXLIB
+
+N nxlib/nxsession.h
+N nxlib/nxlib.cpp
+N nxlib/nxlib.pro
+N nxlib/nxlib.h
+N nxlib/test/main.cpp
+N nxlib/test/main.pro
+
+No conflicts created by this import
+
+
+
+From k1pfeifle at gmx.net  Wed Jul 26 15:34:38 2006
+From: k1pfeifle at gmx.net (Kurt Pfeifle)
+Date: Wed, 26 Jul 2006 14:34:38 +0100
+Subject: [Freenx-cvs] "nxlib" is a *BAD* name! [was: "CVS: nxlib - gwright
+	modified 3 files"]
+In-Reply-To: <44C75499.mail8OY1KM3W1@lists.berlios.de>
+References: <44C75499.mail8OY1KM3W1@lists.berlios.de>
+Message-ID: <200607261434.39835.k1pfeifle@gmx.net>
+
+On Wednesday 26 July 2006 12:40, gwright wrote:
+> User:      gwright
+> Date:      2006-07-26 11:40:08 GMT
+> Log:
+> Initial import to CVS
+> 
+> Status:
+> 
+> Vendor Tag:	FREENX
+> Release Tags:	NXLIB
+> 
+> N nxlib/nxsession.h
+> N nxlib/nxlib.cpp
+> N nxlib/nxlib.pro
+> N nxlib/nxlib.h
+> N nxlib/test/main.cpp
+> N nxlib/test/main.pro
+> 
+> No conflicts created by this import
+
+
+Hi, George,
+
+good to see some initial code committed now :-)
+
+However, I have one very serious objection: the choice for naming of 
+the thing is very, very, very much misleading. The name suggests a
+more generic NX capabilities -- and I can already smell now a *lot* 
+of questions and confusion coming up in IRC channels, on mailing 
+lists and in various forums.
+
+Please rename it into "nxclientlib". Or even better, let's have a
+short exchange about a good name for the thingie...
+
+Cheers,
+Kurt
+
+P.S.: Also, Fabian switched to SVN a year ago or so. CVS is only 
+      still there for historical reasons.
+
+
+From k1pfeifle at gmx.net  Wed Jul 26 15:34:38 2006
+From: k1pfeifle at gmx.net (Kurt Pfeifle)
+Date: Wed, 26 Jul 2006 14:34:38 +0100
+Subject: [Freenx-cvs] "nxlib" is a *BAD* name! [was: "CVS: nxlib - gwright
+	modified 3 files"]
+In-Reply-To: <44C75499.mail8OY1KM3W1@lists.berlios.de>
+References: <44C75499.mail8OY1KM3W1@lists.berlios.de>
+Message-ID: <200607261434.39835.k1pfeifle@gmx.net>
+
+On Wednesday 26 July 2006 12:40, gwright wrote:
+> User:      gwright
+> Date:      2006-07-26 11:40:08 GMT
+> Log:
+> Initial import to CVS
+> 
+> Status:
+> 
+> Vendor Tag:	FREENX
+> Release Tags:	NXLIB
+> 
+> N nxlib/nxsession.h
+> N nxlib/nxlib.cpp
+> N nxlib/nxlib.pro
+> N nxlib/nxlib.h
+> N nxlib/test/main.cpp
+> N nxlib/test/main.pro
+> 
+> No conflicts created by this import
+
+
+Hi, George,
+
+good to see some initial code committed now :-)
+
+However, I have one very serious objection: the choice for naming of 
+the thing is very, very, very much misleading. The name suggests a
+more generic NX capabilities -- and I can already smell now a *lot* 
+of questions and confusion coming up in IRC channels, on mailing 
+lists and in various forums.
+
+Please rename it into "nxclientlib". Or even better, let's have a
+short exchange about a good name for the thingie...
+
+Cheers,
+Kurt
+
+P.S.: Also, Fabian switched to SVN a year ago or so. CVS is only 
+      still there for historical reasons.
+
+

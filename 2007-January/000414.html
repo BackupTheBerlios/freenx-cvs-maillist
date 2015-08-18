@@ -1,0 +1,101 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r284 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r284%20-%20freenx-server/trunk&In-Reply-To=%3C200701230233.l0N2XII9012180%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000413.html">
+   <LINK REL="Next"  HREF="000415.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r284 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r284%20-%20freenx-server/trunk&In-Reply-To=%3C200701230233.l0N2XII9012180%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r284 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Tue Jan 23 03:33:18 CET 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000413.html">[Freenx-cvs] r283 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000415.html">[Freenx-cvs] r285 - in freenx-server/tags: . FreeNX-0.6.0
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#414">[ date ]</a>
+              <a href="thread.html#414">[ thread ]</a>
+              <a href="subject.html#414">[ subject ]</a>
+              <a href="author.html#414">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-01-23 03:33:17 +0100 (Tue, 23 Jan 2007)
+New Revision: 284
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxclient
+Log:
++       * Fixed nxclient to work with 2.1.0 backend.
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-01-23 02:15:28 UTC (rev 283)
++++ freenx-server/trunk/ChangeLog	2007-01-23 02:33:17 UTC (rev 284)
+@@ -16,6 +16,7 @@
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">ssycplkbocve at spammotel.com</A>)
+ 	* Added version 2.1.0 support.
+ 	* Fixed LD_LIBRARY_PRELOAD default path in nxloadconfig.
++	* Fixed nxclient to work with 2.1.0 backend.
+ 	* Added autodetection of backend.
+ 
+ 01.07.2006 FreeNX 0.5.0 &quot;UKUUG 2006 Edition&quot;
+
+Modified: freenx-server/trunk/nxclient
+===================================================================
+--- freenx-server/trunk/nxclient	2007-01-23 02:15:28 UTC (rev 283)
++++ freenx-server/trunk/nxclient	2007-01-23 02:33:17 UTC (rev 284)
+@@ -43,8 +43,8 @@
+ 		--local) DIALOG_LOCAL=&quot;yes&quot;; shift ;;
+ 		--noautokill) DIALOG_NOAUTOKILL=&quot;yes&quot;; shift ;;
+ 		--display) DISPLAY=&quot;$2&quot;; shift 2 ;;
+-		--printer) DIALOG_PRINTER=&quot;$2&quot;; shift 2 ; break ;;
+-		--parent) DIALOG_PARENT=&quot;$2&quot;; shift 2 ; break ;;
++		--printer) DIALOG_PRINTER=&quot;$2&quot;; shift 2 ;;
++		--parent) DIALOG_PARENT=&quot;$2&quot;; shift 2 ;;
+ 		--) shift ; break ;;
+                 *) echo &quot;Internal error!&quot; ; exit 1; ;;
+ 	esac
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000413.html">[Freenx-cvs] r283 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000415.html">[Freenx-cvs] r285 - in freenx-server/tags: . FreeNX-0.6.0
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#414">[ date ]</a>
+              <a href="thread.html#414">[ thread ]</a>
+              <a href="subject.html#414">[ subject ]</a>
+              <a href="author.html#414">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,168 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r203 - / freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r203%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200603161543.k2GFhI4T027084%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000332.html">
+   <LINK REL="Next"  HREF="000334.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r203 - / freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r203%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200603161543.k2GFhI4T027084%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r203 - / freenx-server/trunk">fabianx at berlios.de
+       </A><BR>
+    <I>Thu Mar 16 16:43:18 CET 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000332.html">[Freenx-cvs] r202 - / freenx-website
+</A></li>
+        <LI>Next message: <A HREF="000334.html">[Freenx-cvs] r204 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#333">[ date ]</a>
+              <a href="thread.html#333">[ thread ]</a>
+              <a href="subject.html#333">[ subject ]</a>
+              <a href="author.html#333">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2006-03-16 16:43:17 +0100 (Thu, 16 Mar 2006)
+New Revision: 203
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxloadconfig
+Log:
+- Fixed detection of xauth / netcat.
+
+- Added NXCONFIG_RETEST as nxloadconfig internal variable.
+
+- Fixed nxagent detection.
+
+- Fixed TCP_PROXY_NODELAY option to be set to the new meaning.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:269
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:271
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-03-15 14:46:12 UTC (rev 202)
++++ freenx-server/trunk/ChangeLog	2006-03-16 15:43:17 UTC (rev 203)
+@@ -11,7 +11,8 @@
+ 	* Fixed keyboard issues by enabling the keybd channel.
+ 	* Fixed one more stray tail process and being able to
+ 	  cleanup after a hopelessly failed reconnection. (i.e. agent died)
+-	* Fixed detection of xauth.
++	* Fixed detection of xauth / netcat. Added option to disable extra
++	  checks.
+ 	* Fixed --terminate / --suspend when hostname has a '-' in it.
+ 	  (Emmanuel Blindauer &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">freenx at mooby.net</A>&gt;)
+ 	* ESD_NO_SPAWN is always set when ESPEAKER is set.
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2006-03-15 14:46:12 UTC (rev 202)
++++ freenx-server/trunk/nxloadconfig	2006-03-16 15:43:17 UTC (rev 203)
+@@ -72,6 +72,11 @@
+ # the name of the authorized keys file for ssh
+ SSH_AUTHORIZED_KEYS=&quot;authorized_keys2&quot;
+ 
++# retest values like xauth, netcat
++# set to 0 if you are sure, you set the right values
++
++NXCONFIG_RETEST=1
++
+ #########################################################################
+ # Default Values
+ # A user should NEVER touch this, edit $NX_ETC_DIR/node.conf instead
+@@ -156,8 +161,7 @@
+ COMMAND_START_GNOME=gnome-session
+ COMMAND_START_CDE=cdwm
+ COMMAND_XTERM=xterm
+-COMMAND_XAUTH=$(which xauth)
+-[ -z &quot;$COMMAND_XAUTH&quot; ] &amp;&amp; COMMAND_XAUTH=/usr/X11R6/bin/xauth
++COMMAND_XAUTH=/usr/X11R6/bin/xauth
+ COMMAND_SMBMOUNT=smbmount
+ COMMAND_SMBUMOUNT=smbumount
+ COMMAND_NETCAT=netcat
+@@ -225,6 +229,16 @@
+ esac
+ 
+ #########################################################################
++# Retested values
++#########################################################################
++
++if [ &quot;$NXCONFIG_RETEST&quot; = &quot;1&quot; ]
++then
++	{ ! which &quot;$COMMAND_XAUTH&quot; &amp;&amp; which xauth; } &gt;/dev/null 2&gt;&amp;1 &amp;&amp; COMMAND_XAUTH=$(which xauth)
++	{ ! which &quot;$COMMAND_NETCAT&quot; &amp;&amp; which nc; } &gt;/dev/null 2&gt;&amp;1 &amp;&amp; COMMAND_NETCAT=$(which nc)
++fi
++
++#########################################################################
+ # node.conf file evaluation
+ #########################################################################
+ 
+@@ -496,7 +510,7 @@
+ 	[ -z $(echo &quot;$ENABLE_ROOTLESS_MODE&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_ROOTLESS_MODE=$ENABLE_ROOTLESS_MODE\&quot;&quot;
+ 
+-	[ -z &quot;$(strings $PATH_BIN/nxagent | grep 'NXAGENT - Version 1.5.0')&quot;] &amp;&amp; \
++	[ -z &quot;$(strings $PATH_BIN/nxagent | grep 'NXAGENT - Version 1.5.0')&quot; ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Could not find 1.5.0 version string in nxagent. NX 1.5.0 backend is needed for this version of FreeNX.&quot;
+ 		
+ 	[ -z $(echo &quot;$ENABLE_USESSION&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+@@ -514,8 +528,8 @@
+ 	#AGENT_FONT_SERVER=&quot;&quot;
+ 		#Any ideas on how I can check for a VALID host is velcome!
+ 	
+-	[ -z $(echo &quot;$PROXY_TCP_NODELAY&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;PROXY_TCP_NODELAY=$PROXY_TCP_NODELAY\&quot;&quot;
++	#[ -z $(echo &quot;$PROXY_TCP_NODELAY&quot; | egrep &quot;^[|0|1]$&quot;) ] &amp;&amp; \
++	#	ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;PROXY_TCP_NODELAY=$PROXY_TCP_NODELAY\&quot;&quot;
+ 	
+ 	
+ 	if [ &quot;$ERROR&quot; = &quot;yes&quot; ]
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000332.html">[Freenx-cvs] r202 - / freenx-website
+</A></li>
+	<LI>Next message: <A HREF="000334.html">[Freenx-cvs] r204 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#333">[ date ]</a>
+              <a href="thread.html#333">[ thread ]</a>
+              <a href="subject.html#333">[ subject ]</a>
+              <a href="author.html#333">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

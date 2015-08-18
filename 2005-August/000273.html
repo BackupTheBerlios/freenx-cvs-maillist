@@ -1,0 +1,85 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r146 - freenx-server/branches/FreeNX-0.4
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r146%20-%20freenx-server/branches/FreeNX-0.4&In-Reply-To=%3C200508311931.j7VJVp6c031360%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000272.html">
+   <LINK REL="Next"  HREF="000277.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r146 - freenx-server/branches/FreeNX-0.4</H1>
+    <B>Fabian Franz at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r146%20-%20freenx-server/branches/FreeNX-0.4&In-Reply-To=%3C200508311931.j7VJVp6c031360%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r146 - freenx-server/branches/FreeNX-0.4">fabianx at berlios.de
+       </A><BR>
+    <I>Wed Aug 31 21:31:51 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000272.html">[Freenx-cvs] r145 - freenx-website/intern/press
+</A></li>
+        <LI>Next message: <A HREF="000277.html">[Freenx-cvs] r147 - freenx-server/branches/FreeNX-0.4
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#273">[ date ]</a>
+              <a href="thread.html#273">[ thread ]</a>
+              <a href="subject.html#273">[ subject ]</a>
+              <a href="author.html#273">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2005-08-31 21:31:50 +0200 (Wed, 31 Aug 2005)
+New Revision: 146
+
+Modified:
+   freenx-server/branches/FreeNX-0.4/nxsetup
+Log:
+Fixed --ignore-errors.
+
+
+Modified: freenx-server/branches/FreeNX-0.4/nxsetup
+===================================================================
+--- freenx-server/branches/FreeNX-0.4/nxsetup	2005-08-31 19:00:34 UTC (rev 145)
++++ freenx-server/branches/FreeNX-0.4/nxsetup	2005-08-31 19:31:50 UTC (rev 146)
+@@ -325,7 +325,7 @@
+ {
+ 	echo &quot;&quot;
+ 	echo &quot;----&gt; Testing your nxserver configuration ...&quot;
+-	[ &quot;$IGNORE_ERRORS&quot; = &quot;yes&quot; ] &amp;&amp; $NO_ERRORS=&quot;--ignore-errors&quot;
++	[ &quot;$IGNORE_ERRORS&quot; = &quot;yes&quot; ] &amp;&amp; NO_ERRORS=&quot;--ignore-errors&quot;
+ 	. $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig) --check $NO_ERRORS
+ 	echo &quot;&lt;---- done&quot;
+ 	echo &quot;&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000272.html">[Freenx-cvs] r145 - freenx-website/intern/press
+</A></li>
+	<LI>Next message: <A HREF="000277.html">[Freenx-cvs] r147 - freenx-server/branches/FreeNX-0.4
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#273">[ date ]</a>
+              <a href="thread.html#273">[ thread ]</a>
+              <a href="subject.html#273">[ subject ]</a>
+              <a href="author.html#273">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

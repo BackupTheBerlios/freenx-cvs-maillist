@@ -1,0 +1,185 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r271 - nxclientlib/qtnx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r271%20-%20nxclientlib/qtnx&In-Reply-To=%3C200608162313.k7GNDwDC026997%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000400.html">
+   <LINK REL="Next"  HREF="000402.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r271 - nxclientlib/qtnx</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r271%20-%20nxclientlib/qtnx&In-Reply-To=%3C200608162313.k7GNDwDC026997%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r271 - nxclientlib/qtnx">gwright at mail.berlios.de
+       </A><BR>
+    <I>Thu Aug 17 01:13:58 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000400.html">[Freenx-cvs] r270 - in nxclientlib: . qtnx
+</A></li>
+        <LI>Next message: <A HREF="000402.html">[Freenx-cvs] r272 - in nxclientlib: . qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#401">[ date ]</a>
+              <a href="thread.html#401">[ thread ]</a>
+              <a href="subject.html#401">[ subject ]</a>
+              <a href="author.html#401">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2006-08-17 01:13:54 +0200 (Thu, 17 Aug 2006)
+New Revision: 271
+
+Added:
+   nxclientlib/qtnx/qtnxsessions.cpp
+   nxclientlib/qtnx/qtnxsessions.h
+Log:
+Would be nice if these files were here ;)
+
+
+Added: nxclientlib/qtnx/qtnxsessions.cpp
+===================================================================
+--- nxclientlib/qtnx/qtnxsessions.cpp	2006-08-16 22:31:35 UTC (rev 270)
++++ nxclientlib/qtnx/qtnxsessions.cpp	2006-08-16 23:13:54 UTC (rev 271)
+@@ -0,0 +1,52 @@
++/***************************************************************************
++                               qtnxsessions.cpp
++                             -------------------
++    begin                : Wednesday August 16th 2006
++    copyright            : (C) 2006 by George Wright
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++#include &quot;qtnxsessions.h&quot;
++
++QtNXSessions::QtNXSessions(QList&lt;NXResumeData&gt; sessions)
++{
++	ui_sd.setupUi(this);
++	
++	connect(ui_sd.newButton, SIGNAL(pressed()), this, SLOT(pressedNew()));
++	connect(ui_sd.resumeButton, SIGNAL(pressed()), this, SLOT(pressedResume()));
++	
++	for (int i = 0; i &lt; sessions.size(); ++i) {
++		sessionItems.append(new QTreeWidgetItem(ui_sd.sessionsList));
++		sessionItems.last()-&gt;setText(0, QString::number(sessions.at(i).display));
++		sessionItems.last()-&gt;setText(1, sessions.at(i).sessionType);
++		sessionItems.last()-&gt;setText(2, sessions.at(i).sessionID);
++		sessionItems.last()-&gt;setText(3, QString::number(sessions.at(i).depth));
++		sessionItems.last()-&gt;setText(4, sessions.at(i).screen);
++		sessionItems.last()-&gt;setText(5, sessions.at(i).sessionName);
++	}
++}
++
++QtNXSessions::~QtNXSessions()
++{
++}
++
++void QtNXSessions::pressedNew()
++{
++	emit newPressed();
++	close();
++}
++
++void QtNXSessions::pressedResume()
++{
++	emit resumePressed(ui_sd.sessionsList-&gt;currentItem()-&gt;text(2));
++	close();
++}
+\ No newline at end of file
+
+Added: nxclientlib/qtnx/qtnxsessions.h
+===================================================================
+--- nxclientlib/qtnx/qtnxsessions.h	2006-08-16 22:31:35 UTC (rev 270)
++++ nxclientlib/qtnx/qtnxsessions.h	2006-08-16 23:13:54 UTC (rev 271)
+@@ -0,0 +1,48 @@
++/***************************************************************************
++                               qtnxsessions.h
++                             -------------------
++    begin                : Wednesday August 16th 2006
++    copyright            : (C) 2006 by George Wright
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++#ifndef _QTNXSESSIONS_H_
++#define _QTNXSESSIONS_H_
++
++#include &lt;QList&gt;
++#include &lt;QTreeWidget&gt;
++#include &lt;QTreeWidgetItem&gt;
++
++#include &quot;nxdata.h&quot;
++
++#include &quot;ui_sessionsdialog.h&quot;
++
++class QtNXSessions : public QDialog
++{
++	Q_OBJECT
++	public:
++		QtNXSessions(QList&lt;NXResumeData&gt;);
++		~QtNXSessions();
++	public slots:
++		void pressedNew();
++		void pressedResume();
++	signals:
++		void newPressed();
++		void resumePressed(QString);
++	private:
++		void empty();
++		
++		Ui_SessionsDialog ui_sd;
++		QList&lt;QTreeWidgetItem*&gt; sessionItems;
++};
++
++#endif
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000400.html">[Freenx-cvs] r270 - in nxclientlib: . qtnx
+</A></li>
+	<LI>Next message: <A HREF="000402.html">[Freenx-cvs] r272 - in nxclientlib: . qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#401">[ date ]</a>
+              <a href="thread.html#401">[ thread ]</a>
+              <a href="subject.html#401">[ subject ]</a>
+              <a href="author.html#401">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

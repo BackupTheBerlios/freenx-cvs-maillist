@@ -1,0 +1,100 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r539 - trunk/freenx-server
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-April/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r539%20-%20trunk/freenx-server&In-Reply-To=%3C200804081445.m38EjlaF013677%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000661.html">
+   <LINK REL="Next"  HREF="000674.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r539 - trunk/freenx-server</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r539%20-%20trunk/freenx-server&In-Reply-To=%3C200804081445.m38EjlaF013677%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r539 - trunk/freenx-server">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Tue Apr  8 16:45:47 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000661.html">[Freenx-cvs] r538 - trunk/freenx-server
+</A></li>
+        <LI>Next message: <A HREF="000674.html">[Freenx-cvs] r540 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#673">[ date ]</a>
+              <a href="thread.html#673">[ thread ]</a>
+              <a href="subject.html#673">[ subject ]</a>
+              <a href="author.html#673">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-04-08 16:45:47 +0200 (Tue, 08 Apr 2008)
+New Revision: 539
+
+Modified:
+   trunk/freenx-server/Makefile
+Log:
+Changed the way the Makefile works. Now the correct shell is given at Makefile beginning.
+
+
+
+Modified: trunk/freenx-server/Makefile
+===================================================================
+--- trunk/freenx-server/Makefile	2008-04-05 11:41:57 UTC (rev 538)
++++ trunk/freenx-server/Makefile	2008-04-08 14:45:47 UTC (rev 539)
+@@ -1,5 +1,7 @@
+ .PHONY: all install
+ 
++SHELL = /bin/bash
++
+ SUBDIRS=nxredir nxviewer-passwd nxserver-helper
+ PROGRAMS=nxacl.sample nxcheckload.sample nxcups-gethost nxdesktop_helper nxdialog nxkeygen nxloadconfig nxnode nxnode-login nxprint nxserver nxserver-helper/nxserver-helper nxsetup nxviewer_helper nxviewer-passwd/nxpasswd/nxpasswd
+ 
+@@ -12,7 +14,7 @@
+ 	done
+ 
+ install:
+-	bash -c '. nxloadconfig;\
++	. nxloadconfig;\
+ 	install -m755 -d $(DESTDIR)/$$PATH_BIN/ ;\
+ 	install -m755 -d $(DESTDIR)/$$PATH_LIB/ ;\
+ 	install -m755 -d $(DESTDIR)/$$NX_ETC_DIR/ ;\
+@@ -23,4 +25,4 @@
+ 	done;\
+ 	export PATH_BIN PATH_LIB CUPS_BACKEND NX_VERSION;\
+ 	install -m644 node.conf.sample $(DESTDIR)/$$NX_ETC_DIR/ ; \
+-	make -C nxredir install'
++	make -C nxredir install
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000661.html">[Freenx-cvs] r538 - trunk/freenx-server
+</A></li>
+	<LI>Next message: <A HREF="000674.html">[Freenx-cvs] r540 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#673">[ date ]</a>
+              <a href="thread.html#673">[ thread ]</a>
+              <a href="subject.html#673">[ subject ]</a>
+              <a href="author.html#673">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

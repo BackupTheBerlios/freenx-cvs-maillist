@@ -1,0 +1,98 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r451 - nxcl/lib
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r451%20-%20nxcl/lib&In-Reply-To=%3C200801291909.m0TJ9f0C030379%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000576.html">
+   <LINK REL="Next"  HREF="000578.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r451 - nxcl/lib</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r451%20-%20nxcl/lib&In-Reply-To=%3C200801291909.m0TJ9f0C030379%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r451 - nxcl/lib">gwright at mail.berlios.de
+       </A><BR>
+    <I>Tue Jan 29 20:09:41 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000576.html">[Freenx-cvs] r450 - nxcl/lib
+</A></li>
+        <LI>Next message: <A HREF="000578.html">[Freenx-cvs] r452 - qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#577">[ date ]</a>
+              <a href="thread.html#577">[ thread ]</a>
+              <a href="subject.html#577">[ subject ]</a>
+              <a href="author.html#577">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2008-01-29 20:09:40 +0100 (Tue, 29 Jan 2008)
+New Revision: 451
+
+Modified:
+   nxcl/lib/nxclientlib.cpp
+Log:
+OS X uses open-x11
+
+
+Modified: nxcl/lib/nxclientlib.cpp
+===================================================================
+--- nxcl/lib/nxclientlib.cpp	2008-01-29 15:26:19 UTC (rev 450)
++++ nxcl/lib/nxclientlib.cpp	2008-01-29 19:09:40 UTC (rev 451)
+@@ -245,6 +245,11 @@
+ 
+     // Find a path for the nxssh process using getPath()
+     string nxsshPath = this-&gt;getPath (&quot;nxssh&quot;);
++
++#ifdef NXCL_DARWIN
++    nxsshPath = &quot;open-x11&quot;;
++#endif
++
+     this-&gt;nxsshProcess.start(nxsshPath, arguments);
+ 
+     if (this-&gt;nxsshProcess.waitForStarted() == false) {
+@@ -682,6 +687,9 @@
+ 
+     // Build arguments for the call to the nxproxy command
+     list&lt;string&gt; arguments;
++#ifdef NXCL_DARWIN
++    arguments.push_back(&quot;open-x11&quot;); // We open X11 apps on OS X with this script
++#endif
+     arguments.push_back(&quot;nxproxy&quot;); // argv[0] has to be the program name
+     arguments.push_back(&quot;-S&quot;);
+     ss.str(&quot;&quot;);
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000576.html">[Freenx-cvs] r450 - nxcl/lib
+</A></li>
+	<LI>Next message: <A HREF="000578.html">[Freenx-cvs] r452 - qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#577">[ date ]</a>
+              <a href="thread.html#577">[ thread ]</a>
+              <a href="subject.html#577">[ subject ]</a>
+              <a href="author.html#577">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

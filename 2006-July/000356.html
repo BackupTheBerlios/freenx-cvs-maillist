@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r227 - / freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-July/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r227%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200607042338.k64Ncntv008423%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000355.html">
+   <LINK REL="Next"  HREF="000357.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r227 - / freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r227%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200607042338.k64Ncntv008423%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r227 - / freenx-server/trunk">fabianx at berlios.de
+       </A><BR>
+    <I>Wed Jul  5 01:38:49 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000355.html">[Freenx-cvs] r226 - / freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000357.html">[Freenx-cvs] r228 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#356">[ date ]</a>
+              <a href="thread.html#356">[ thread ]</a>
+              <a href="subject.html#356">[ subject ]</a>
+              <a href="author.html#356">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2006-07-05 01:38:34 +0200 (Wed, 05 Jul 2006)
+New Revision: 227
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxkeygen
+   freenx-server/trunk/nxsetup
+Log:
+Removed no-x11-forwarding from key options.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:240
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:241
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-07-04 23:38:10 UTC (rev 226)
++++ freenx-server/trunk/ChangeLog	2006-07-04 23:38:34 UTC (rev 227)
+@@ -2,6 +2,8 @@
+ 	* Opened the 0.6.0 branch.
+ 	* Added nxnode slave mode.
+ 	* General code cleanup.
++	* Removed &quot;no-x11-forwarding&quot; from keys to allow client to use the
++	  faster interactive sessions.
+ 
+ 01.07.2006 FreeNX 0.5.0 &quot;UKUUG 2006 Edition&quot;
+ 	* Opened the 0.5.0 branch.
+
+Modified: freenx-server/trunk/nxkeygen
+===================================================================
+--- freenx-server/trunk/nxkeygen	2006-07-04 23:38:10 UTC (rev 226)
++++ freenx-server/trunk/nxkeygen	2006-07-04 23:38:34 UTC (rev 227)
+@@ -53,7 +53,7 @@
+ 	
+ 	# copy the key to the authorized_keys2 file
+ 	rm -f $NX_KEY_DIR/$SSH_AUTHORIZED_KEYS
+-	echo -n &quot;no-port-forwarding,no-X11-forwarding,no-agent-forwarding,command=\&quot;$PATH_BIN/nxserver\&quot; &quot; &gt;$NX_KEY_DIR/$SSH_AUTHORIZED_KEYS
++	echo -n &quot;no-port-forwarding,no-agent-forwarding,command=\&quot;$PATH_BIN/nxserver\&quot; &quot; &gt;$NX_KEY_DIR/$SSH_AUTHORIZED_KEYS
+ 	cat ${NX_SERVER_KEY} &gt;&gt; $NX_KEY_DIR/$SSH_AUTHORIZED_KEYS
+ 
+ 	# now tell the user what to do
+
+Modified: freenx-server/trunk/nxsetup
+===================================================================
+--- freenx-server/trunk/nxsetup	2006-07-04 23:38:10 UTC (rev 226)
++++ freenx-server/trunk/nxsetup	2006-07-04 23:38:34 UTC (rev 227)
+@@ -259,7 +259,7 @@
+ 		if [ &quot;$SETUP_NOMACHINE_KEY&quot; = &quot;yes&quot; ]
+ 		then
+ 			cat &lt;&lt; EOF &gt;$NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS
+-no-port-forwarding,no-X11-forwarding,no-agent-forwarding,command=&quot;$PATH_BIN/nxserver&quot; ssh-dss AAAAB3NzaC1kc3MAAACBAJe/0DNBePG9dYLWq7cJ0SqyRf1iiZN/IbzrmBvgPTZnBa5FT/0Lcj39sRYt1paAlhchwUmwwIiSZaON5JnJOZ6jKkjWIuJ9MdTGfdvtY1aLwDMpxUVoGwEaKWOyin02IPWYSkDQb6cceuG9NfPulS9iuytdx0zIzqvGqfvudtufAAAAFQCwosRXR2QA8OSgFWSO6+kGrRJKiwAAAIEAjgvVNAYWSrnFD+cghyJbyx60AAjKtxZ0r/Pn9k94Qt2rvQoMnGgt/zU0v/y4hzg+g3JNEmO1PdHh/wDPVOxlZ6Hb5F4IQnENaAZ9uTZiFGqhBO1c8Wwjiq/MFZy3jZaidarLJvVs8EeT4mZcWxwm7nIVD4lRU2wQ2lj4aTPcepMAAACANlgcCuA4wrC+3Cic9CFkqiwO/Rn1vk8dvGuEQqFJ6f6LVfPfRTfaQU7TGVLk2CzY4dasrwxJ1f6FsT8DHTNGnxELPKRuLstGrFY/PR7KeafeFZDf+fJ3mbX5nxrld3wi5titTnX+8s4IKv29HJguPvOK/SI7cjzA+SqNfD7qEo8= <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">root at nettuno</A>
++no-port-forwarding,no-agent-forwarding,command=&quot;$PATH_BIN/nxserver&quot; ssh-dss AAAAB3NzaC1kc3MAAACBAJe/0DNBePG9dYLWq7cJ0SqyRf1iiZN/IbzrmBvgPTZnBa5FT/0Lcj39sRYt1paAlhchwUmwwIiSZaON5JnJOZ6jKkjWIuJ9MdTGfdvtY1aLwDMpxUVoGwEaKWOyin02IPWYSkDQb6cceuG9NfPulS9iuytdx0zIzqvGqfvudtufAAAAFQCwosRXR2QA8OSgFWSO6+kGrRJKiwAAAIEAjgvVNAYWSrnFD+cghyJbyx60AAjKtxZ0r/Pn9k94Qt2rvQoMnGgt/zU0v/y4hzg+g3JNEmO1PdHh/wDPVOxlZ6Hb5F4IQnENaAZ9uTZiFGqhBO1c8Wwjiq/MFZy3jZaidarLJvVs8EeT4mZcWxwm7nIVD4lRU2wQ2lj4aTPcepMAAACANlgcCuA4wrC+3Cic9CFkqiwO/Rn1vk8dvGuEQqFJ6f6LVfPfRTfaQU7TGVLk2CzY4dasrwxJ1f6FsT8DHTNGnxELPKRuLstGrFY/PR7KeafeFZDf+fJ3mbX5nxrld3wi5titTnX+8s4IKv29HJguPvOK/SI7cjzA+SqNfD7qEo8= <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">root at nettuno</A>
+ EOF
+ 			chmod 600 $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS
+ 			cat &lt;&lt; EOF &gt;$NX_HOME_DIR/.ssh/client.id_dsa.key
+@@ -309,7 +309,7 @@
+ ---- END SSH2 PUBLIC KEY ----
+ EOF
+ 		echo &quot;Key $SSH2_PUBKEY&quot; &gt;&gt; ${SSH2_HOME_DIR}/$SSH2_AUTHORIZATION
+-		echo &quot;Options no-port-forwarding,no-x11-forwarding,no-agent-forwarding,command=\&quot;$PATH_BIN/nxserver\&quot;&quot; &gt;&gt; ${SSH2_HOME_DIR}/$SSH2_AUTHORIZATION
++		echo &quot;Options no-port-forwarding,no-agent-forwarding,command=\&quot;$PATH_BIN/nxserver\&quot;&quot; &gt;&gt; ${SSH2_HOME_DIR}/$SSH2_AUTHORIZATION
+ 		chmod 600 ${SSH2_HOME_DIR}/$SSH2_AUTHORIZATION ${SSH2_HOME_DIR}/$SSH2_PUBKEY
+ 	fi
+ 	
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000355.html">[Freenx-cvs] r226 - / freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000357.html">[Freenx-cvs] r228 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#356">[ date ]</a>
+              <a href="thread.html#356">[ thread ]</a>
+              <a href="subject.html#356">[ subject ]</a>
+              <a href="author.html#356">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r359 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r359%20-%20freenx-server/trunk&In-Reply-To=%3C200708081352.l78DqLpL008944%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000490.html">
+   <LINK REL="Next"  HREF="000492.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r359 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r359%20-%20freenx-server/trunk&In-Reply-To=%3C200708081352.l78DqLpL008944%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r359 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Wed Aug  8 15:52:21 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000490.html">[Freenx-cvs] r358 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000492.html">[Freenx-cvs] r360 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#491">[ date ]</a>
+              <a href="thread.html#491">[ thread ]</a>
+              <a href="subject.html#491">[ subject ]</a>
+              <a href="author.html#491">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-08-08 15:52:20 +0200 (Wed, 08 Aug 2007)
+New Revision: 359
+
+Modified:
+   freenx-server/trunk/nxclient
+Log:
+More dialog fixes. --stdout was added to all dialog parameters so that only the real output goes to tee.
+
+
+
+Modified: freenx-server/trunk/nxclient
+===================================================================
+--- freenx-server/trunk/nxclient	2007-08-08 13:36:53 UTC (rev 358)
++++ freenx-server/trunk/nxclient	2007-08-08 13:52:20 UTC (rev 359)
+@@ -93,8 +93,8 @@
+ 		xterm -geometry 120x24+100+100 +sb -title &quot;NXclient&quot; -e \
+ 		       /bin/bash -c &quot;$DIALOG --infobox 'Please wait...' 3 25; $0 $INPUTS | tee $TMPFILE&quot; || exit 1
+ 
+-		#Need to recover the last line output and remove non-printing chars
+-		tail -1 $TMPFILE | egrep -v &quot;^[&quot;
++		#Need to recover the last line output (and not remove non-printing chars, because --stdout is used)
++		tail -1 $TMPFILE 
+ 		rm -f $TMPFILE
+ 		exit 0
+ 	fi
+@@ -303,13 +303,13 @@
+ 
+ dialog_ok()
+ {
+-	$DIALOG --title &quot;$DIALOG_CAPTION&quot; --msgbox &quot;$DIALOG_MESSAGE&quot; 0 0
++	$DIALOG --stdout --title &quot;$DIALOG_CAPTION&quot; --msgbox &quot;$DIALOG_MESSAGE&quot; 0 0
+ 	return 0 # Give cancel on close ...
+ }
+ 
+ dialog_yesno()
+ {
+-	$DIALOG --title &quot;$DIALOG_CAPTION&quot; --yesno &quot;$DIALOG_MESSAGE&quot; 0 0
++	$DIALOG --stdout --title &quot;$DIALOG_CAPTION&quot; --yesno &quot;$DIALOG_MESSAGE&quot; 0 0
+ 	RC=$?
+ 	[ $RC -eq 0 ] &amp;&amp; return 2
+ 	[ $RC -eq 1 ] &amp;&amp; return 0
+@@ -317,7 +317,7 @@
+ 
+ dialog_yesnosuspend()
+ {
+-	$DIALOG --title &quot;$DIALOG_CAPTION&quot;  --yes-label &quot;Suspend&quot; --no-label &quot;Terminate&quot; --yesno &quot;$DIALOG_MESSAGE\n\nPress 'Esc' to cancel.&quot; 8 60
++	$DIALOG --stdout --title &quot;$DIALOG_CAPTION&quot;  --yes-label &quot;Suspend&quot; --no-label &quot;Terminate&quot; --yesno &quot;$DIALOG_MESSAGE\n\nPress 'Esc' to cancel.&quot; 8 60
+ 	RC=$?
+ 	[ $RC -eq 0 ] &amp;&amp; return 3
+ 	[ $RC -eq 1 ] &amp;&amp; return 2
+@@ -325,7 +325,7 @@
+ 
+ dialog_panic()
+ {
+-	$DIALOG --title &quot;$DIALOG_CAPTION&quot; --defaultno --yes-label &quot;Terminate&quot; --no-label &quot;Cancel&quot; --yesno &quot;$DIALOG_MESSAGE&quot; 0 0
++	$DIALOG --stdout --title &quot;$DIALOG_CAPTION&quot; --defaultno --yes-label &quot;Terminate&quot; --no-label &quot;Cancel&quot; --yesno &quot;$DIALOG_MESSAGE&quot; 0 0
+ 	RC=$?
+ 	[ $RC -eq 0 ] &amp;&amp; return 2
+ 	[ $RC -eq 1 ] &amp;&amp; return 0
+@@ -333,13 +333,13 @@
+ 
+ dialog_quit()
+ {
+-	$DIALOG --ok-label &quot;Quit&quot; --title &quot;$DIALOG_CAPTION&quot; --msgbox &quot;$DIALOG_MESSAGE&quot; 0 0
++	$DIALOG --stdout --ok-label &quot;Quit&quot; --title &quot;$DIALOG_CAPTION&quot; --msgbox &quot;$DIALOG_MESSAGE&quot; 0 0
+ 	return 0 # Give cancel on close ...
+ }
+ 
+ dialog_printer_ask()
+ {
+-	$DIALOG --cr-wrap --title &quot;$DIALOG_CAPTION&quot; --yes-label &quot;Ok&quot; --no-label &quot;Configure&quot; --yesno &quot;$DIALOG_MESSAGE\n\nPress 'Esc' to cancel.&quot; 10 70
++	$DIALOG --stdout --cr-wrap --title &quot;$DIALOG_CAPTION&quot; --yes-label &quot;Ok&quot; --no-label &quot;Configure&quot; --yesno &quot;$DIALOG_MESSAGE\n\nPress 'Esc' to cancel.&quot; 10 70
+ 	RC=$?
+ 	echo $RC
+ 	[ $RC -eq 255 ] &amp;&amp; return 2
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000490.html">[Freenx-cvs] r358 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000492.html">[Freenx-cvs] r360 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#491">[ date ]</a>
+              <a href="thread.html#491">[ thread ]</a>
+              <a href="subject.html#491">[ subject ]</a>
+              <a href="author.html#491">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

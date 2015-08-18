@@ -1,0 +1,186 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r329 - nxclientlib/maemonx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r329%20-%20nxclientlib/maemonx&In-Reply-To=%3C200702212322.l1LNMNIo027351%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000462.html">
+   <LINK REL="Next"  HREF="000464.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r329 - nxclientlib/maemonx</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r329%20-%20nxclientlib/maemonx&In-Reply-To=%3C200702212322.l1LNMNIo027351%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r329 - nxclientlib/maemonx">gwright at mail.berlios.de
+       </A><BR>
+    <I>Thu Feb 22 00:22:23 CET 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000462.html">[Freenx-cvs] r328 - nxclientlib/maemonx
+</A></li>
+        <LI>Next message: <A HREF="000464.html">[Freenx-cvs] r330 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#463">[ date ]</a>
+              <a href="thread.html#463">[ thread ]</a>
+              <a href="subject.html#463">[ subject ]</a>
+              <a href="author.html#463">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2007-02-22 00:22:22 +0100 (Thu, 22 Feb 2007)
+New Revision: 329
+
+Modified:
+   nxclientlib/maemonx/mainwindow.cpp
+Log:
+Configuration UI hopefully finished now. Time for signals/callback fun!
+
+
+Modified: nxclientlib/maemonx/mainwindow.cpp
+===================================================================
+--- nxclientlib/maemonx/mainwindow.cpp	2007-02-21 07:31:57 UTC (rev 328)
++++ nxclientlib/maemonx/mainwindow.cpp	2007-02-21 23:22:22 UTC (rev 329)
+@@ -59,11 +59,13 @@
+ GtkWidget *desktop_advanced;
+ GtkWidget *compression_type;
+ GtkWidget *use_render;
++GtkWidget *jpeg_quality;
+ GtkWidget *desktop_labels_layout;
+ GtkWidget *desktop_selects_layout;
+ GtkWidget *desktop_type_hlayout;
+ GtkWidget *desktop_type_vlayout;
+ GtkWidget *desktop_hlayout;
++GtkWidget *desktop_jpeg_layout;
+ 
+ GtkWidget *use_ssh_encryption;
+ GtkWidget *cache_size;
+@@ -148,8 +150,11 @@
+     session_name = gtk_entry_new();
+     host_name = gtk_entry_new();
+     port_number = gtk_spin_button_new_with_range(1, 65535, 1);
++    gtk_spin_button_set_value(GTK_SPIN_BUTTON(port_number), 22);
+     use_default_key = gtk_check_button_new_with_label(&quot;Use default NoMachine key&quot;);
++    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(use_default_key), TRUE);
+     advanced_key_settings = gtk_button_new_with_label(&quot;Set custom key&quot;);
++    gtk_widget_set_state(advanced_key_settings, GTK_STATE_INSENSITIVE);
+ 
+     gtk_widget_set_size_request(advanced_key_settings, -1, 40);
+ 
+@@ -180,16 +185,42 @@
+     gtk_box_pack_start(GTK_BOX(config_server_page), server_key_layout, TRUE, FALSE, 0);
+  
+     platform_select = gtk_combo_box_new_text();
++    gtk_combo_box_append_text(GTK_COMBO_BOX(platform_select), &quot;UNIX&quot;);
++    gtk_combo_box_append_text(GTK_COMBO_BOX(platform_select), &quot;Windows&quot;);
++    gtk_combo_box_append_text(GTK_COMBO_BOX(platform_select), &quot;VNC Proxy&quot;);
++    gtk_combo_box_set_active(GTK_COMBO_BOX(platform_select), 0);
++
+     type_select = gtk_combo_box_new_text();
++    gtk_combo_box_append_text(GTK_COMBO_BOX(type_select), &quot;KDE&quot;);
++    gtk_combo_box_append_text(GTK_COMBO_BOX(type_select), &quot;GNOME&quot;);
++    gtk_combo_box_append_text(GTK_COMBO_BOX(type_select), &quot;CDE&quot;);
++    gtk_combo_box_append_text(GTK_COMBO_BOX(type_select), &quot;XDM&quot;);
++    gtk_combo_box_append_text(GTK_COMBO_BOX(type_select), &quot;Custom&quot;);
++    gtk_combo_box_set_active(GTK_COMBO_BOX(type_select), 0);
++
+     link_select = gtk_combo_box_new_text();
++    gtk_combo_box_append_text(GTK_COMBO_BOX(link_select), &quot;Modem&quot;);
++    gtk_combo_box_append_text(GTK_COMBO_BOX(link_select), &quot;ISDN&quot;);
++    gtk_combo_box_append_text(GTK_COMBO_BOX(link_select), &quot;ADSL&quot;);
++    gtk_combo_box_append_text(GTK_COMBO_BOX(link_select), &quot;WAN&quot;);
++    gtk_combo_box_append_text(GTK_COMBO_BOX(link_select), &quot;LAN&quot;);
++    gtk_combo_box_set_active(GTK_COMBO_BOX(link_select), 0);
+ 
+     desktop_advanced = gtk_button_new_with_label(&quot;Advanced&quot;);
+-
++    gtk_widget_set_state(desktop_advanced, GTK_STATE_INSENSITIVE);
+     gtk_widget_set_size_request(desktop_advanced, -1, 40);
+ 
+     compression_type = gtk_combo_box_new_text();
++    gtk_combo_box_append_text(GTK_COMBO_BOX(compression_type), &quot;PNG&quot;);
++    gtk_combo_box_append_text(GTK_COMBO_BOX(compression_type), &quot;JPEG&quot;);
++    gtk_combo_box_append_text(GTK_COMBO_BOX(compression_type), &quot;Raw X11&quot;);
++    gtk_combo_box_set_active(GTK_COMBO_BOX(compression_type), 0);
++
+     use_render = gtk_check_button_new_with_label(&quot;Use RENDER extension&quot;);
++    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(use_render), TRUE);
+ 
++    jpeg_quality = gtk_hscale_new_with_range(1, 9, 1);
++    gtk_widget_set_state(jpeg_quality, GTK_STATE_INSENSITIVE);
+     desktop_labels_layout = gtk_vbox_new(TRUE, 10);
+     desktop_selects_layout = gtk_vbox_new(TRUE, 10);
+     desktop_type_hlayout = gtk_hbox_new(FALSE, 10);
+@@ -218,15 +249,29 @@
+ 
+     gtk_box_pack_start(GTK_BOX(config_desktop_page), desktop_hlayout, TRUE, TRUE, 0);
+ 
++    desktop_jpeg_layout = gtk_hbox_new(FALSE, 10);
++    gtk_box_pack_start(GTK_BOX(desktop_jpeg_layout), gtk_label_new(&quot;JPEG Quality&quot;), FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(desktop_jpeg_layout), jpeg_quality, TRUE, TRUE, 0);
++
++    gtk_box_pack_start(GTK_BOX(config_desktop_page), desktop_jpeg_layout, TRUE, FALSE, 10);
++
+     use_ssh_encryption = gtk_check_button_new_with_label(&quot;Use SSH encryption&quot;);
+-    cache_size = gtk_combo_box_new_text();
+-    disk_size = gtk_combo_box_new_text();
++    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(use_ssh_encryption), TRUE);
+ 
++    cache_size = gtk_spin_button_new_with_range(1, 32, 1);
++    disk_size = gtk_spin_button_new_with_range(1, 32, 1);
++
++    gtk_spin_button_set_value(GTK_SPIN_BUTTON(cache_size), 4);
++    gtk_spin_button_set_value(GTK_SPIN_BUTTON(disk_size), 4);
++
+     cache_layout = gtk_hbox_new(FALSE, 10);
+     gtk_box_pack_start(GTK_BOX(cache_layout), gtk_label_new(&quot;Memory cache&quot;), FALSE, FALSE, 0);
+     gtk_box_pack_start(GTK_BOX(cache_layout), cache_size, FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(cache_layout), gtk_label_new(&quot;MB&quot;), FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(cache_layout), gtk_label_new(0), TRUE, TRUE, 0);
+     gtk_box_pack_start(GTK_BOX(cache_layout), gtk_label_new(&quot;Disk cache&quot;), FALSE, FALSE, 0);
+     gtk_box_pack_start(GTK_BOX(cache_layout), disk_size, FALSE, FALSE, 0);
++    gtk_box_pack_start(GTK_BOX(cache_layout), gtk_label_new(&quot;MB&quot;), FALSE, FALSE, 0);
+ 
+     gtk_box_pack_start(GTK_BOX(config_advanced_page), use_ssh_encryption, TRUE, FALSE, 0);
+     gtk_box_pack_start(GTK_BOX(config_advanced_page), cache_layout, TRUE, FALSE, 0);
+@@ -237,6 +282,7 @@
+ static void config_clicked(GtkWidget *widget, gpointer data)
+ {
+     gtk_widget_show_all(config_dialog);
++    //g_signal_connect(G_OBJECT(config_dialog), &quot;response&quot;, G_CALLBACK(destroy), NULL);
+ }
+ 
+ static void login_clicked(GtkWidget *widget, gpointer data)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000462.html">[Freenx-cvs] r328 - nxclientlib/maemonx
+</A></li>
+	<LI>Next message: <A HREF="000464.html">[Freenx-cvs] r330 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#463">[ date ]</a>
+              <a href="thread.html#463">[ thread ]</a>
+              <a href="subject.html#463">[ subject ]</a>
+              <a href="author.html#463">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

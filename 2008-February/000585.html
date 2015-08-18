@@ -1,0 +1,317 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r459 - nxcl/lib
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r459%20-%20nxcl/lib&In-Reply-To=%3C200802050010.m150A6nN000181%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000584.html">
+   <LINK REL="Next"  HREF="000586.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r459 - nxcl/lib</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r459%20-%20nxcl/lib&In-Reply-To=%3C200802050010.m150A6nN000181%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r459 - nxcl/lib">gwright at mail.berlios.de
+       </A><BR>
+    <I>Tue Feb  5 01:10:06 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000584.html">[Freenx-cvs] r458 - nxcl/lib
+</A></li>
+        <LI>Next message: <A HREF="000586.html">[Freenx-cvs] r460 - nxcl/lib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#585">[ date ]</a>
+              <a href="thread.html#585">[ thread ]</a>
+              <a href="subject.html#585">[ subject ]</a>
+              <a href="author.html#585">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2008-02-05 01:10:06 +0100 (Tue, 05 Feb 2008)
+New Revision: 459
+
+Modified:
+   nxcl/lib/nxclientlib.cpp
+   nxcl/lib/nxclientlib.h
+Log:
+Stop this ridiculous pointer hackiness.
+
+
+Modified: nxcl/lib/nxclientlib.cpp
+===================================================================
+--- nxcl/lib/nxclientlib.cpp	2008-02-04 22:11:47 UTC (rev 458)
++++ nxcl/lib/nxclientlib.cpp	2008-02-05 00:10:06 UTC (rev 459)
+@@ -141,7 +141,11 @@
+  * Implementation of the NXClientLib class
+  */
+ //@{
+-NXClientLib::NXClientLib()
++NXClientLib::NXClientLib() :
++    nxsshProcess(new notQProcess()),
++    nxproxyProcess(new notQProcess()),
++    x11Process(new notQProcess()),
++    nxauthProcess(new notQProcess())
+ {
+     this-&gt;isFinished = false;
+     this-&gt;readyForProxy = false;
+@@ -151,16 +155,12 @@
+ 
+     dbgln (&quot;In NXClientLib constructor&quot;);
+ 
+-    this-&gt;pNxsshProcess = &amp;this-&gt;nxsshProcess;
+-    this-&gt;pNxproxyProcess = &amp;this-&gt;nxproxyProcess;
+-    this-&gt;pX11Process = &amp;this-&gt;x11Process;
+-    this-&gt;pNxauthProcess = &amp;this-&gt;nxauthProcess;
++    /* Set up callback pointers */
++    this-&gt;nxsshProcess-&gt;setCallbacks (&amp;callbacks);
++    this-&gt;nxproxyProcess-&gt;setCallbacks (&amp;callbacks);
++    this-&gt;x11Process-&gt;setCallbacks (&amp;callbacks);
++    this-&gt;nxauthProcess-&gt;setCallbacks (&amp;callbacks);
+ 
+-    /* Set up callback pointers */
+-    this-&gt;nxsshProcess.setCallbacks (&amp;callbacks);
+-    this-&gt;nxproxyProcess.setCallbacks (&amp;callbacks);
+-    this-&gt;x11Process.setCallbacks (&amp;callbacks);
+-    this-&gt;nxauthProcess.setCallbacks (&amp;callbacks);
+     this-&gt;session.setCallbacks (&amp;callbacks);
+     this-&gt;callbacks.setParent (this);
+ 
+@@ -170,7 +170,7 @@
+ NXClientLib::~NXClientLib()
+ {
+     dbgln (&quot;In NXClientLib destructor&quot;);
+-    this-&gt;nxsshProcess.terminate();
++    this-&gt;nxsshProcess-&gt;terminate();
+ }
+ 
+ void NXClientLib::invokeNXSSH (string publicKey, string serverHost,
+@@ -183,7 +183,7 @@
+     dbgln(&quot;invokeNXSSH called&quot;);
+ 
+     // We use same environment for the process as was used for the
+-    // parent, so remove nxsshProcess.setEnvironment();
++    // parent, so remove nxsshProcess-&gt;setEnvironment();
+ 
+     // Start to build the arguments for the nxssh command.
+     // notQProcess requires that argv[0] contains the program name
+@@ -246,9 +246,9 @@
+     // Find a path for the nxssh process using getPath()
+     string nxsshPath = this-&gt;getPath (&quot;nxssh&quot;);
+ 
+-    this-&gt;nxsshProcess.start(nxsshPath, arguments);
++    this-&gt;nxsshProcess-&gt;start(nxsshPath, arguments);
+ 
+-    if (this-&gt;nxsshProcess.waitForStarted() == false) {
++    if (this-&gt;nxsshProcess-&gt;waitForStarted() == false) {
+         this-&gt;externalCallbacks-&gt;write
+             (NXCL_PROCESS_ERROR, _(&quot;Error starting nxssh!&quot;));
+         this-&gt;isFinished = true;
+@@ -266,7 +266,7 @@
+ 
+ void NXClientLib::reset()
+ {
+-    this-&gt;nxsshProcess.terminate();
++    this-&gt;nxsshProcess-&gt;terminate();
+     this-&gt;isFinished = false;
+     this-&gt;proxyData.encrypted = false;
+     this-&gt;password = false;	
+@@ -279,12 +279,12 @@
+         (NXCL_LOGIN_FAILED, _(&quot;Got \&quot;Login Failed\&quot;&quot;));
+ 
+     this-&gt;isFinished = true;
+-    this-&gt;nxsshProcess.terminate();
++    this-&gt;nxsshProcess-&gt;terminate();
+ }
+ 
+ void NXClientLib::processParseStdout()
+ {
+-    string message = nxsshProcess.readAllStandardOutput();
++    string message = nxsshProcess-&gt;readAllStandardOutput();
+ 
+     this-&gt;externalCallbacks-&gt;stdoutSignal (message);
+ 
+@@ -308,15 +308,15 @@
+ 
+         int pid = response - 100000;
+ 
+-        if (this-&gt;nxsshProcess.getPid() == pid) {
+-            this-&gt;nxsshProcess.setError(NOTQPROCCRASHED);
++        if (this-&gt;nxsshProcess-&gt;getPid() == pid) {
++            this-&gt;nxsshProcess-&gt;setError(NOTQPROCCRASHED);
+ 
+             this-&gt;externalCallbacks-&gt;error
+                 (_(&quot;nxsshProcess crashed or exited&quot;));
+ 
+             this-&gt;isFinished = true;
+-        } else if (this-&gt;nxproxyProcess.getPid() == pid) {
+-            this-&gt;nxproxyProcess.setError(NOTQPROCCRASHED);
++        } else if (this-&gt;nxproxyProcess-&gt;getPid() == pid) {
++            this-&gt;nxproxyProcess-&gt;setError(NOTQPROCCRASHED);
+ 
+             this-&gt;externalCallbacks-&gt;error
+                 (_(&quot;nxproxyProcess crashed or exited&quot;));
+@@ -415,7 +415,7 @@
+ 
+ void NXClientLib::processParseStderr()
+ {
+-    string message = nxsshProcess.readAllStandardError();
++    string message = nxsshProcess-&gt;readAllStandardError();
+ 
+     dbgln (&quot;In NXClientLib::processParseStderr for message: '&quot;
+             + message + &quot;'(msg end)&quot;);
+@@ -486,7 +486,7 @@
+ 
+     dbgln (&quot;Writing '&quot; &lt;&lt; data &lt;&lt; &quot;' to nxssh process.&quot;);
+ 
+-    this-&gt;nxsshProcess.writeIn(data);
++    this-&gt;nxsshProcess-&gt;writeIn(data);
+ 
+     if (password) {
+         data = &quot;********&quot;;
+@@ -627,11 +627,11 @@
+ 
+     string openPath = this-&gt;getPath(&quot;open&quot;);
+     
+-    this-&gt;x11Process.start(openPath, x11Arguments);
++    this-&gt;x11Process-&gt;start(openPath, x11Arguments);
+ 
+     this-&gt;x11Probe = true;
+     
+-    if (this-&gt;x11Process.waitForStarted() == false) {
++    if (this-&gt;x11Process-&gt;waitForStarted() == false) {
+         this-&gt;externalCallbacks-&gt;write
+             (NXCL_PROCESS_ERROR, _(&quot;Error starting X11!&quot;));
+         this-&gt;isFinished = true;
+@@ -726,9 +726,9 @@
+ 
+     // Find a path for the nxproxy process using getPath()
+     string nxproxyPath = this-&gt;getPath (&quot;nxproxy&quot;);
+-    this-&gt;nxproxyProcess.start(nxproxyPath, arguments);
++    this-&gt;nxproxyProcess-&gt;start(nxproxyPath, arguments);
+ 
+-    if (this-&gt;nxproxyProcess.waitForStarted() == false) {
++    if (this-&gt;nxproxyProcess-&gt;waitForStarted() == false) {
+         this-&gt;externalCallbacks-&gt;write
+             (NXCL_PROCESS_ERROR, _(&quot;Error starting nxproxy!&quot;));
+         this-&gt;isFinished = true;
+@@ -774,11 +774,11 @@
+     nxauthArguments.push_back(&quot;MIT-MAGIC-COOKIE-1&quot;);
+     nxauthArguments.push_back(cookie);
+ 
+-    this-&gt;nxauthProcess.setCallbacks (&amp;callbacks);
++    this-&gt;nxauthProcess-&gt;setCallbacks (&amp;callbacks);
+ 
+-    this-&gt;nxauthProcess.start(&quot;nxauth&quot;, nxauthArguments);
++    this-&gt;nxauthProcess-&gt;start(&quot;nxauth&quot;, nxauthArguments);
+ 
+-    if (this-&gt;nxauthProcess.waitForStarted() == false) {
++    if (this-&gt;nxauthProcess-&gt;waitForStarted() == false) {
+         this-&gt;externalCallbacks-&gt;write
+             (NXCL_PROCESS_ERROR, _(&quot;Error starting nxauth!&quot;));
+         this-&gt;isFinished = true;
+@@ -834,9 +834,9 @@
+         dimensions = strtok(NULL, &quot;x&quot;);
+     }
+ 
+-    this-&gt;x11Process.start(&quot;nxwin&quot;, nxwinArguments);
++    this-&gt;x11Process-&gt;start(&quot;nxwin&quot;, nxwinArguments);
+ 
+-    if (this-&gt;x11Process.waitForStarted() == false) {
++    if (this-&gt;x11Process-&gt;waitForStarted() == false) {
+         this-&gt;externalCallbacks-&gt;write
+             (NXCL_PROCESS_ERROR, _(&quot;Error starting nxwin!&quot;));
+         this-&gt;isFinished = true;
+
+Modified: nxcl/lib/nxclientlib.h
+===================================================================
+--- nxcl/lib/nxclientlib.h	2008-02-04 22:11:47 UTC (rev 458)
++++ nxcl/lib/nxclientlib.h	2008-02-05 00:10:06 UTC (rev 459)
+@@ -313,22 +313,22 @@
+ 
+             notQProcess* getNXSSHProcess (void)
+             {
+-                return this-&gt;pNxsshProcess;
++                return this-&gt;nxsshProcess;
+             }
+ 
+             notQProcess* getNXProxyProcess (void)
+             {
+-                return this-&gt;pNxproxyProcess;
++                return this-&gt;nxproxyProcess;
+             }
+ 
+             notQProcess* getX11Process (void)
+             {
+-                return this-&gt;pX11Process;
++                return this-&gt;x11Process;
+             }
+ 
+             notQProcess* getNXAuthProcess (void)
+             {
+-                return this-&gt;pNxauthProcess;
++                return this-&gt;nxauthProcess;
+             }
+ 
+             bool getIsFinished (void)
+@@ -412,23 +412,19 @@
+             /*!
+              * The nxssh process object
+              */
+-            notQProcess nxsshProcess;
+-            notQProcess* pNxsshProcess;
++            notQProcess* nxsshProcess;
+             /*!
+              * The nxproxy process object
+              */
+-            notQProcess nxproxyProcess;
+-            notQProcess* pNxproxyProcess;
++            notQProcess* nxproxyProcess;
+             /*!
+              * The X11 process object
+              */
+-            notQProcess x11Process;
+-            notQProcess* pX11Process;
++            notQProcess* x11Process;
+             /*!
+              * The nxauth process object
+              */
+-            notQProcess nxauthProcess;
+-            notQProcess* pNxauthProcess;
++            notQProcess* nxauthProcess;
+             /*!
+              * A callbacks object. This holds the various callback
+              * methods. The callback methods are defined here, but
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000584.html">[Freenx-cvs] r458 - nxcl/lib
+</A></li>
+	<LI>Next message: <A HREF="000586.html">[Freenx-cvs] r460 - nxcl/lib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#585">[ date ]</a>
+              <a href="thread.html#585">[ thread ]</a>
+              <a href="subject.html#585">[ subject ]</a>
+              <a href="author.html#585">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

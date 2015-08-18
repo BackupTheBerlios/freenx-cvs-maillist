@@ -1,0 +1,261 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fabianx modified 4 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%204%20files&In-Reply-To=%3C423258B9.mail58911WU5V%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000053.html">
+   <LINK REL="Next"  HREF="000055.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fabianx modified 4 files</H1>
+    <B>fabianx</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%204%20files&In-Reply-To=%3C423258B9.mail58911WU5V%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fabianx modified 4 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Sat Mar 12 03:49:29 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000053.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+        <LI>Next message: <A HREF="000055.html">[Freenx-cvs] CVS: freenx - fabianx modified 3 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#54">[ date ]</a>
+              <a href="thread.html#54">[ thread ]</a>
+              <a href="subject.html#54">[ subject ]</a>
+              <a href="author.html#54">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fabianx
+Date:      2005-03-12 02:49:29 GMT
+Modified:  .        ChangeLog node.conf.sample nxloadconfig nxserver
+Log:
+Added forwarding to commercial server via destination port.
+
+This means you can use for example 23 for FreeNX and 22 for commercial server. This should be more reliable than the other forwarding method.
+
+Note: You have to have ssh listen on several ports yourself.
+
+Added configuration directives:
+
+ENABLE_NOMACHINE_FORWARD_{PORT,USER}=&quot;0&quot;
+
+NOMACHINE_FORWARD_PORT=&quot;22&quot;
+
+Removed directive:
+
+ENABLE_NOMACHINE_FORWARD=&quot;0&quot;
+
+Revision  Changes    Path
+1.28      +1 -0      freenx/ChangeLog
+
+
+rev 1.28, prev_rev 1.27
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.27
+retrieving revision 1.28
+diff -u -r1.27 -r1.28
+--- ChangeLog	12 Mar 2005 02:42:01 -0000	1.27
++++ ChangeLog	12 Mar 2005 02:49:28 -0000	1.28
+@@ -8,6 +8,7 @@
+ 	* Added optional support for utmp/wtmp/lastlog database.
+ 	* Removed support for OSS components prior version 1.4.0 in nxnode.
+ 	  Added -option option to nxagent/nxdesktop.
++	* Added forwarding to commercial server via destination port.
+ 
+ 11.03.2005 FreeNX 0.3.1
+ 	* Fixed keyboard mapping problems.
+
+
+
+1.11      +13 -4     freenx/node.conf.sample
+
+
+rev 1.11, prev_rev 1.10
+Index: node.conf.sample
+===================================================================
+RCS file: /cvsroot/freenx/freenx/node.conf.sample,v
+retrieving revision 1.10
+retrieving revision 1.11
+diff -u -r1.10 -r1.11
+--- node.conf.sample	11 Mar 2005 03:47:09 -0000	1.10
++++ node.conf.sample	12 Mar 2005 02:49:28 -0000	1.11
+@@ -37,7 +37,7 @@
+ #
+ #           <A HREF="https://mail.kde.org/mailman/listinfo/freenx-knx">https://mail.kde.org/mailman/listinfo/freenx-knx</A>
+ #
+-# CVS: $Id: node.conf.sample,v 1.10 2005/03/11 03:47:09 fabianx Exp $
++# CVS: $Id: node.conf.sample,v 1.11 2005/03/12 02:49:28 fabianx Exp $
+ 
+ #########################################################################
+ # FreeNX specific node.conf directives
+@@ -99,9 +99,9 @@
+ #SERVER_FORWARD_PORT=22
+ #SERVER_FORWARD_KEY=&quot;/usr/NX/share/client.id_dsa.key&quot;
+ 
+-# FreeNX with ENABLE_NOMACHINE_FORWARD=&quot;1&quot; will automatically forward all
++# FreeNX with ENABLE_NOMACHINE_FORWARD_USER=&quot;1&quot; will automatically forward all
+ # connections to the commercial NoMachine nxserver installed on the same
+-# machine. This feature is introduced to enable the usage of FreeNX adn
++# machine. This feature is introduced to enable the usage of FreeNX and
+ # NoMachine NX side by side on the same machine without conflicts.
+ #
+ # To make a connection to the FreeNX server, just use 'freenx.&lt;user&gt;' as 
+@@ -111,9 +111,18 @@
+ # To make a connection to the NoMachine nxserver, use the unmodified
+ # '&lt;user&gt;' username.
+ 
+-#ENABLE_NOMACHINE_FORWARD=&quot;0&quot;
++#ENABLE_NOMACHINE_FORWARD_USER=&quot;0&quot;
+ #NOMACHINE_SERVER=&quot;/usr/NX/bin/nxserver&quot;
+ #NOMACHINE_NX_HOME_DIR=&quot;/usr/NX/home/nx&quot;
++
++# To just forward connections to the NoMachine server, which connect to a 
++# certain port enable the following two directives.
++# 
++# Note: You need to let SSHD listen to several ports to make use of this 
++#       directive.
++
++#ENABLE_NOMACHINE_FORWARD_PORT=&quot;0&quot;
++#NOMACHINE_FORWARD_PORT=&quot;22&quot;
+ 
+ # When set to 1 will start nxagent in rootless mode.
+ #ENABLE_ROOTLESS_MODE=&quot;0&quot;
+
+
+
+1.15      +5 -2      freenx/nxloadconfig
+
+
+rev 1.15, prev_rev 1.14
+Index: nxloadconfig
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxloadconfig,v
+retrieving revision 1.14
+retrieving revision 1.15
+diff -u -r1.14 -r1.15
+--- nxloadconfig	11 Mar 2005 16:53:01 -0000	1.14
++++ nxloadconfig	12 Mar 2005 02:49:28 -0000	1.15
+@@ -5,7 +5,7 @@
+ #
+ # License: GPL, version 2
+ #
+-# CVS: $Id: nxloadconfig,v 1.14 2005/03/11 16:53:01 jonno Exp $
++# CVS: $Id: nxloadconfig,v 1.15 2005/03/12 02:49:28 fabianx Exp $
+ #
+ # ========================================================================
+ 
+@@ -93,9 +93,12 @@
+ SERVER_FORWARD_PORT=22
+ SERVER_FORWARD_KEY=&quot;/usr/NX/share/client.id_dsa.key&quot;
+ 
+-ENABLE_NOMACHINE_FORWARD=&quot;0&quot;
++ENABLE_NOMACHINE_FORWARD_USER=&quot;0&quot;
+ NOMACHINE_SERVER=&quot;/usr/NX/bin/nxserver&quot;
+ NOMACHINE_NX_HOME_DIR=&quot;/usr/NX/home/nx&quot;
++
++ENABLE_NOMACHINE_FORWARD_PORT=&quot;0&quot;
++NOMACHINE_FORWARD_PORT=&quot;22&quot;
+ 
+ ENABLE_ROOTLESS_MODE=&quot;0&quot;
+ 
+
+
+
+1.33      +12 -4     freenx/nxserver
+
+
+rev 1.33, prev_rev 1.32
+Index: nxserver
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxserver,v
+retrieving revision 1.32
+retrieving revision 1.33
+diff -u -r1.32 -r1.33
+--- nxserver	11 Mar 2005 16:53:02 -0000	1.32
++++ nxserver	12 Mar 2005 02:49:28 -0000	1.33
+@@ -11,7 +11,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxserver,v 1.32 2005/03/11 16:53:02 jonno Exp $
++# CVS: $Id: nxserver,v 1.33 2005/03/12 02:49:28 fabianx Exp $
+ #
+ 
+ # Read the config file
+@@ -423,9 +423,17 @@
+ 	exit 0
+ fi
+ 
++# forward the connection to commercial NoMachine server?
++if [ &quot;$ENABLE_NOMACHINE_FORWARD_PORT&quot; = &quot;1&quot; -a &quot;$NOMACHINE_FORWARD_PORT&quot; = &quot;$(echo $SSH_CLIENT | cut -d' ' -f3)&quot; -a -n &quot;$NOMACHINE_SERVER&quot; ]
++then
++	log &quot;Info: Detected SSH destination port $NOMACHINE_FORWARD_PORT. Forwarding connection to commercial NoMachine server.&quot;
++	exec $NOMACHINE_SERVER
++	log &quot;Error: Forwarding to NoMachine Server $NOMACHINE_SERVER failed. Using FreeNX server instead.&quot;
++fi
++
+ echo_x &quot;HELLO NXSERVER - Version $NX_VERSION $NX_LICENSE&quot;
+ 
+-[ &quot;$ENABLE_NOMACHINE_FORWARD&quot; = &quot;1&quot; ] &amp;&amp; RECORD_CMD=()
++[ &quot;$ENABLE_NOMACHINE_FORWARD_USER&quot; = &quot;1&quot; ] &amp;&amp; RECORD_CMD=()
+ 
+ # Login stage
+ while true
+@@ -437,7 +445,7 @@
+ 	echo_x &quot;$CMD&quot;
+ 	
+ 	# record $CMD in RECORD_CMD array
+-	[ &quot;$ENABLE_NOMACHINE_FORWARD&quot; = &quot;1&quot; ] &amp;&amp; RECORD_CMD=( &quot;${RECORD_CMD[@]}&quot; &quot;$CMD&quot; )
++	[ &quot;$ENABLE_NOMACHINE_FORWARD_USER&quot; = &quot;1&quot; ] &amp;&amp; RECORD_CMD=( &quot;${RECORD_CMD[@]}&quot; &quot;$CMD&quot; )
+ 	
+ 	case &quot;$CMD&quot; in 
+ 		quit|QUIT)
+@@ -479,7 +487,7 @@
+ 			echo_x $USER
+ 			
+ 			# forward the connection to commercial NoMachine server?
+-			if [ &quot;$ENABLE_NOMACHINE_FORWARD&quot; = &quot;1&quot; -a -n &quot;$NOMACHINE_SERVER&quot; ]
++			if [ &quot;$ENABLE_NOMACHINE_FORWARD_USER&quot; = &quot;1&quot; -a -n &quot;$NOMACHINE_SERVER&quot; ]
+ 			then
+ 				case &quot;$USER&quot; in
+ 					freenx.*)
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000053.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+	<LI>Next message: <A HREF="000055.html">[Freenx-cvs] CVS: freenx - fabianx modified 3 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#54">[ date ]</a>
+              <a href="thread.html#54">[ thread ]</a>
+              <a href="subject.html#54">[ subject ]</a>
+              <a href="author.html#54">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r541 - trunk/freenx-server
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-May/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r541%20-%20trunk/freenx-server&In-Reply-To=%3C200805061329.m46DTw94028620%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000676.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r541 - trunk/freenx-server</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r541%20-%20trunk/freenx-server&In-Reply-To=%3C200805061329.m46DTw94028620%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r541 - trunk/freenx-server">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Tue May  6 15:29:58 CEST 2008</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000676.html">[Freenx-cvs] r542 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#675">[ date ]</a>
+              <a href="thread.html#675">[ thread ]</a>
+              <a href="subject.html#675">[ subject ]</a>
+              <a href="author.html#675">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-05-06 15:29:58 +0200 (Tue, 06 May 2008)
+New Revision: 541
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxserver
+Log:
+* Added patch from 2005 to enable reconnect to 24-bit display via
+  32-bit or vice versa. Oops :)
+  (Sunil &lt;funtoos at yahoo.com&gt; )
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-04-15 23:38:54 UTC (rev 540)
++++ trunk/freenx-server/ChangeLog	2008-05-06 13:29:58 UTC (rev 541)
+@@ -12,6 +12,9 @@
+ 	* Finally fixed mv not working for failed or terminated
+ 	  sessions.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>, Terje Andersen &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">terander at guard.zapto.org</A>&gt;)
++	* Added patch from 2005 to enable reconnect to 24-bit display via
++	  32-bit or vice versa. Oops :)
++	  (Sunil &lt;funtoos at yahoo.com&gt; )
+ 
+ 14.03.2008 FreeNX 0.7.2 &quot;Priscilla Edition&quot;
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-04-15 23:38:54 UTC (rev 540)
++++ trunk/freenx-server/nxserver	2008-05-06 13:29:58 UTC (rev 541)
+@@ -233,10 +233,12 @@
+ 		then
+ 			CMDLINE=$(session_get_cmdline $i)
+ 			depth=$(getparam screeninfo | cut -d &quot;x&quot; -f3 | cut -d &quot;+&quot; -f1 )
++			[ &quot;$depth&quot; = &quot;32&quot; ] &amp;&amp; depth=24
+ 			geom=$(getparam screeninfo | cut -d &quot;x&quot; -f1,2) 
+ 			render=$(getparam screeninfo | cut -d &quot;+&quot; -f2 )
+ 			available=&quot;N/A&quot;
+ 			udepth=$(echo $3 | cut -d &quot;x&quot; -f3 | cut -d &quot;+&quot; -f1 )
++			[ &quot;$udepth&quot; = &quot;32&quot; ] &amp;&amp; udepth=24
+ 			urender=$(echo $3 | cut -d &quot;+&quot; -f2 )
+ 
+ 			mode=&quot;D&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000676.html">[Freenx-cvs] r542 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#675">[ date ]</a>
+              <a href="thread.html#675">[ thread ]</a>
+              <a href="subject.html#675">[ subject ]</a>
+              <a href="author.html#675">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

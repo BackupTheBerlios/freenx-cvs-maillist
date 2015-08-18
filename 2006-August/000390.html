@@ -1,0 +1,148 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r259 - nxclientlib
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r259%20-%20nxclientlib&In-Reply-To=%3C200608110351.k7B3pNFG018724%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000389.html">
+   <LINK REL="Next"  HREF="000391.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r259 - nxclientlib</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r259%20-%20nxclientlib&In-Reply-To=%3C200608110351.k7B3pNFG018724%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r259 - nxclientlib">gwright at mail.berlios.de
+       </A><BR>
+    <I>Fri Aug 11 05:51:23 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000389.html">[Freenx-cvs] r258 - nxclientlib
+</A></li>
+        <LI>Next message: <A HREF="000391.html">[Freenx-cvs] r261 - nxclientlib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#390">[ date ]</a>
+              <a href="thread.html#390">[ thread ]</a>
+              <a href="subject.html#390">[ subject ]</a>
+              <a href="author.html#390">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2006-08-11 05:51:17 +0200 (Fri, 11 Aug 2006)
+New Revision: 259
+
+Modified:
+   nxclientlib/nxclientlib.cpp
+   nxclientlib/nxdata.h
+   nxclientlib/nxsession.cpp
+   nxclientlib/nxwritexml.cpp
+Log:
+Various fixes
+
+
+Modified: nxclientlib/nxclientlib.cpp
+===================================================================
+--- nxclientlib/nxclientlib.cpp	2006-08-10 13:34:32 UTC (rev 258)
++++ nxclientlib/nxclientlib.cpp	2006-08-11 03:51:17 UTC (rev 259)
+@@ -40,12 +40,11 @@
+ 
+ NXClientLib::~NXClientLib()
+ {
++	nxsshProcess.terminate();
+ }
+ 
+ void NXClientLib::invokeNXSSH(QString publicKey, QString serverHost, bool encryption, QByteArray key, int port)
+ {
+-
+-	
+ 	QStringList arguments;
+ 	proxyData.server = serverHost;
+ 	
+
+Modified: nxclientlib/nxdata.h
+===================================================================
+--- nxclientlib/nxdata.h	2006-08-10 13:34:32 UTC (rev 258)
++++ nxclientlib/nxdata.h	2006-08-11 03:51:17 UTC (rev 259)
+@@ -40,7 +40,6 @@
+ 	QString agentUser;
+ 	QString agentPass;
+ 	int cups;
+-	QString id;
+ 	QString key;
+ 	bool encryption;
+ 	bool fullscreen;
+
+Modified: nxclientlib/nxsession.cpp
+===================================================================
+--- nxclientlib/nxsession.cpp	2006-08-10 13:34:32 UTC (rev 258)
++++ nxclientlib/nxsession.cpp	2006-08-11 03:51:17 UTC (rev 259)
+@@ -132,8 +132,10 @@
+ 					media = 1;
+ 				if (sessionData-&gt;render)
+ 					render = 1;
+-				if (sessionData-&gt;fullscreen)
++				if (sessionData-&gt;fullscreen) {
++					sessionData-&gt;geometry = &quot;fullscreen&quot;;
+ 					fullscreen = &quot;+fullscreen&quot;;
++				}
+ 
+ 				if (sessionData-&gt;suspended) {
+ 					// These are the session parameters that NoMachine's client sends for resume
+@@ -164,8 +166,8 @@
+ 					&quot;\&quot; --encryption=\&quot;&quot; + QString::number(encryption) +
+ 					&quot;\&quot; --backingstore=\&quot;&quot; + sessionData-&gt;backingstore +
+ 					&quot;\&quot; --imagecompressionmethod=\&quot;&quot; + QString::number(sessionData-&gt;imageCompressionMethod) +
+-					&quot;\&quot; --geometry=\&quot;&quot; + sessionData-&gt;geometry +
+-					&quot;\&quot; --screeninfo=\&quot;&quot; + xRes + &quot;x&quot; + yRes + &quot;x&quot; + depth + renderSet +
++					&quot;\&quot; --geometry=\&quot;&quot; + sessionData-&gt;geometry + 
++					&quot;\&quot; --screeninfo=\&quot;&quot; + xRes + &quot;x&quot; + yRes + &quot;x&quot; + depth + renderSet + fullscreen +
+ 					&quot;\&quot; --keyboard=\&quot;&quot; + sessionData-&gt;keyboard +
+ 					&quot;\&quot; --kbtype=\&quot;&quot; + sessionData-&gt;kbtype +
+ 					&quot;\&quot; --media=\&quot;&quot; + QString::number(media) +
+
+Modified: nxclientlib/nxwritexml.cpp
+===================================================================
+--- nxclientlib/nxwritexml.cpp	2006-08-10 13:34:32 UTC (rev 258)
++++ nxclientlib/nxwritexml.cpp	2006-08-11 03:51:17 UTC (rev 259)
+@@ -80,7 +80,7 @@
+ 	file.close();
+ }
+ 
+-QString escape(QString plain)
++QString NXWriteXML::escape(QString plain)
+ {
+ 	QString formatted;
+ 	formatted = plain.replace('&lt;', &quot;&lt;&quot;);
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000389.html">[Freenx-cvs] r258 - nxclientlib
+</A></li>
+	<LI>Next message: <A HREF="000391.html">[Freenx-cvs] r261 - nxclientlib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#390">[ date ]</a>
+              <a href="thread.html#390">[ thread ]</a>
+              <a href="subject.html#390">[ subject ]</a>
+              <a href="author.html#390">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r297 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r297%20-%20freenx-server/trunk&In-Reply-To=%3C200701241838.l0OIcc6R020513%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000426.html">
+   <LINK REL="Next"  HREF="000428.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r297 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r297%20-%20freenx-server/trunk&In-Reply-To=%3C200701241838.l0OIcc6R020513%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r297 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Wed Jan 24 19:38:38 CET 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000426.html">[Freenx-cvs] r296 - nx-utils/nxcupsd-wrapper
+</A></li>
+        <LI>Next message: <A HREF="000428.html">[Freenx-cvs] r298 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#427">[ date ]</a>
+              <a href="thread.html#427">[ thread ]</a>
+              <a href="subject.html#427">[ subject ]</a>
+              <a href="author.html#427">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-01-24 19:38:38 +0100 (Wed, 24 Jan 2007)
+New Revision: 297
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxnode
+   freenx-server/trunk/nxserver
+Log:
+Fixed support for &quot;Running&quot; sessions - again.
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-01-24 17:10:23 UTC (rev 296)
++++ freenx-server/trunk/ChangeLog	2007-01-24 18:38:38 UTC (rev 297)
+@@ -12,6 +12,7 @@
+ 	* Added cups seamless support with no &quot;use this driver?&quot; dialogs at all.
+ 	  * Note: You need nxcupsd-wrapper on the client side.
+ 	          Get it from nxutils repository.
++	* Fixed Support for &quot;Running&quot; sessions - again.
+ 
+ 23.01.2007 FreeNX 0.6.0 &quot;Juliana birthday edition&quot;
+ 	* Opened the 0.6.0 branch.
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2007-01-24 17:10:23 UTC (rev 296)
++++ freenx-server/trunk/nxnode	2007-01-24 18:38:38 UTC (rev 297)
+@@ -1198,6 +1198,7 @@
+ 	then
+ 		DEVICE_URI=&quot;<A HREF="smb://$username:$password@127.0.0.1:$port/$share">smb://$username:$password@127.0.0.1:$port/$share</A>&quot;
+ 		NAME=&quot;$share&quot;
++		ENABLE_CUPS_SEAMLESS=&quot;0&quot;
+ 	else
+ 		DEVICE_URI=&quot;<A HREF="ipp://$username:$password@127.0.0.1:$port/printers/$printer">ipp://$username:$password@127.0.0.1:$port/printers/$printer</A>&quot;
+ 		NAME=&quot;$printer&quot;
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2007-01-24 17:10:23 UTC (rev 296)
++++ freenx-server/trunk/nxserver	2007-01-24 18:38:38 UTC (rev 297)
+@@ -798,6 +798,7 @@
+ 
+ server_nxnode_echo()
+ {
++	log 6 &quot;server_nxnode_echo: $@&quot;
+ 	[ &quot;$SERVER_CHANNEL&quot; = &quot;1&quot; ] &amp;&amp; echo &quot;$@&quot;
+ 	[ &quot;$SERVER_CHANNEL&quot; = &quot;2&quot; ] &amp;&amp; echo &quot;$@&quot; &gt;&amp;2
+ }
+@@ -839,18 +840,30 @@
+ 					*running*)
+ 						[ &quot;$KILL_WAIT_PID&quot; = &quot;1&quot; ] &amp;&amp; kill $SERVER_WAIT_PID
+ 						KILL_WAIT_PID=0
++						log 6 session_status $uniqueid &quot;Running&quot;
+ 						session_status $uniqueid &quot;Running&quot;
+ 						[ &quot;$SERVER_CHANNEL&quot; = &quot;1&quot; ] &amp;&amp; SERVER_CHANNEL=2
+ 					;;
+ 					*closed*)
++						log 6 session_close $uniqueid
+ 						session_close $uniqueid
+ 					;;
+ 					*suspended*)
+ 						[ &quot;$KILL_WAIT_PID&quot; = &quot;1&quot; ] &amp;&amp; kill $SERVER_WAIT_PID
+ 						KILL_WAIT_PID=0
++						log 6 session_suspend $uniqueid
+ 						session_suspend $uniqueid
+ 					;;
++					*suspending*)
++						log 6 session_status $uniqueid &quot;Suspending&quot;
++						session_status $uniqueid &quot;Suspending&quot;
++						# we need to stop sending to client as it will have already
++						# closed his side of the channel and this will lead to not 
++						# closed sessions.
++						SERVER_CHANNEL=0
++					;;
+ 					*terminating*)
++						log 6 session_status $uniqueid &quot;Terminating&quot;
+ 						session_status $uniqueid &quot;Terminating&quot;
+ 						# we need to stop sending to client as it will have already
+ 						# closed his side of the channel and this will lead to not 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000426.html">[Freenx-cvs] r296 - nx-utils/nxcupsd-wrapper
+</A></li>
+	<LI>Next message: <A HREF="000428.html">[Freenx-cvs] r298 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#427">[ date ]</a>
+              <a href="thread.html#427">[ thread ]</a>
+              <a href="subject.html#427">[ subject ]</a>
+              <a href="author.html#427">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

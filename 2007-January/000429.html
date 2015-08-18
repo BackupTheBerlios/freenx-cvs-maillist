@@ -1,0 +1,109 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r299 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r299%20-%20freenx-server/trunk&In-Reply-To=%3C200701241914.l0OJEeBh023423%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000428.html">
+   <LINK REL="Next"  HREF="000443.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r299 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r299%20-%20freenx-server/trunk&In-Reply-To=%3C200701241914.l0OJEeBh023423%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r299 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Wed Jan 24 20:14:40 CET 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000428.html">[Freenx-cvs] r298 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000443.html">[Freenx-cvs] r300 - in freenx-server/tags: . FreeNX-0.6.0.99
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#429">[ date ]</a>
+              <a href="thread.html#429">[ thread ]</a>
+              <a href="subject.html#429">[ subject ]</a>
+              <a href="author.html#429">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-01-24 20:14:37 +0100 (Wed, 24 Jan 2007)
+New Revision: 299
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxnode
+Log:
+* Made the NXAgent exited with exit code 1 message more verbose.
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-01-24 18:41:15 UTC (rev 298)
++++ freenx-server/trunk/ChangeLog	2007-01-24 19:14:37 UTC (rev 299)
+@@ -13,6 +13,7 @@
+ 	  * Note: You need nxcupsd-wrapper on the client side.
+ 	          Get it from nxutils repository.
+ 	* Fixed Support for &quot;Running&quot; sessions - again.
++	* Made the NXAgent exited with exit code 1 message more verbose.
+ 
+ 23.01.2007 FreeNX 0.6.0 &quot;Juliana birthday edition&quot;
+ 	* Opened the 0.6.0 branch.
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2007-01-24 18:41:15 UTC (rev 298)
++++ freenx-server/trunk/nxnode	2007-01-24 19:14:37 UTC (rev 299)
+@@ -497,7 +497,8 @@
+ 	NODE_FAILED=&quot;&quot;
+ 	if [ $NODE_AGENT_EXIT_STATUS -ne 0 ]
+ 	then
+-		echo &quot;NX&gt; 1004 Error: NX Agent exited with exit status 1.&quot;
++		echo &quot;NX&gt; 1004 Error: NX Agent exited with exit status 1. To troubleshoot set SESSION_LOG_CLEAN=0 in node.conf and investigate \&quot;$USER_FAKE_HOME/.nx/F-C-$sess_id/session\&quot;. You might also want to try: ssh -X myserver; $PATH_BIN/nxnode --agent to test the basic functionality. Session log follows:&quot;
++		cat &quot;$USER_FAKE_HOME/.nx/C-$sess_id/session&quot; 1&gt;&amp;2
+ 		NODE_FAILED=&quot;failed&quot;
+ 	fi
+ 	echo &quot;NX&gt; 1006 Session status: closed&quot;
+@@ -1198,7 +1199,6 @@
+ 	then
+ 		DEVICE_URI=&quot;<A HREF="smb://$username:$password@127.0.0.1:$port/$share">smb://$username:$password@127.0.0.1:$port/$share</A>&quot;
+ 		NAME=&quot;$share&quot;
+-		# SEAMLESS mode is not available with smb
+ 		ENABLE_CUPS_SEAMLESS=&quot;0&quot;
+ 	else
+ 		DEVICE_URI=&quot;<A HREF="ipp://$username:$password@127.0.0.1:$port/printers/$printer">ipp://$username:$password@127.0.0.1:$port/printers/$printer</A>&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000428.html">[Freenx-cvs] r298 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000443.html">[Freenx-cvs] r300 - in freenx-server/tags: . FreeNX-0.6.0.99
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#429">[ date ]</a>
+              <a href="thread.html#429">[ thread ]</a>
+              <a href="subject.html#429">[ subject ]</a>
+              <a href="author.html#429">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

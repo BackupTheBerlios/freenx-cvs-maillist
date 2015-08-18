@@ -1,0 +1,111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r358 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r358%20-%20freenx-server/trunk&In-Reply-To=%3C200708081336.l78DasM6008272%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000489.html">
+   <LINK REL="Next"  HREF="000491.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r358 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r358%20-%20freenx-server/trunk&In-Reply-To=%3C200708081336.l78DasM6008272%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r358 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Wed Aug  8 15:36:54 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000489.html">[Freenx-cvs] r357 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000491.html">[Freenx-cvs] r359 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#490">[ date ]</a>
+              <a href="thread.html#490">[ thread ]</a>
+              <a href="subject.html#490">[ subject ]</a>
+              <a href="author.html#490">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-08-08 15:36:53 +0200 (Wed, 08 Aug 2007)
+New Revision: 358
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxloadconfig
+Log:
+* Fixed the APPLICATION_LIBRARY_PRELOAD to be just a warning and fixed
+  the default path
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-08-06 13:06:54 UTC (rev 357)
++++ freenx-server/trunk/ChangeLog	2007-08-08 13:36:53 UTC (rev 358)
+@@ -9,6 +9,8 @@
+ 	  not have Xdialog and since xmessage is very limiting. This new option 
+ 	  will work on any machine that has dialog and xterm.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">puterguy at bat.berlios.de</A>)
++	* Fixed the APPLICATION_LIBRARY_PRELOAD to be just a warning and fixed 
++	  the default path.
+ 
+ 07.07.2007 FreeNX 0.7.0 &quot;Jornade SPL Edition VI+1&quot;
+ 	* Fixed the printing support for CUPS 1.2.
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2007-08-06 13:06:54 UTC (rev 357)
++++ freenx-server/trunk/nxloadconfig	2007-08-08 13:36:53 UTC (rev 358)
+@@ -274,7 +274,7 @@
+ [ -z &quot;$AGENT_LIBRARY_PATH&quot; ] &amp;&amp; AGENT_LIBRARY_PATH=$PATH_LIB
+ [ -z &quot;$PROXY_LIBRARY_PATH&quot; ] &amp;&amp; PROXY_LIBRARY_PATH=$PATH_LIB
+ [ -z &quot;$APPLICATION_LIBRARY_PATH&quot; ] &amp;&amp; APPLICATION_LIBRARY_PATH=$PATH_LIB
+-[ -z &quot;$APPLICATION_LIBRARY_PRELOAD&quot; ] &amp;&amp; APPLICATION_LIBRARY_PRELOAD=&quot;$APPLICATION_LIBRARY_PATH/libX11.so.6.2:$APPLICATION_LIBRARY_PATH/libXext.so.6.4:$APPLICATION_LIBRARY_PATH/libXcomp.so:$APPLICATION_LIBRARY_PATH/libXcompext.so.1:$APPLICATION_LIBRARY_PATH/libXrender.so.1.2&quot;
++[ -z &quot;$APPLICATION_LIBRARY_PRELOAD&quot; ] &amp;&amp; APPLICATION_LIBRARY_PRELOAD=&quot;$APPLICATION_LIBRARY_PATH/libX11.so.6.2:$APPLICATION_LIBRARY_PATH/libXext.so.6.4:$APPLICATION_LIBRARY_PATH/libXcomp.so:$APPLICATION_LIBRARY_PATH/libXcompext.so:$APPLICATION_LIBRARY_PATH/libXrender.so.1.2&quot;
+ if [ -z &quot;$ENABLE_2_0_0_BACKEND&quot; ]
+ then
+ 	ENABLE_2_0_0_BACKEND=&quot;1&quot;
+@@ -331,7 +331,7 @@
+ 	IFS=&quot;:&quot;
+ 	for LIBRARY in $APPLICATION_LIBRARY_PRELOAD; do
+ 		[ ! -e $LIBRARY ] &amp;&amp; \
+-			ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;APPLICATION_LIBRARY_PRELOAD=$APPLICATION_LIBRARY_PRELOAD\&quot;&quot; &amp;&amp; break ;
++			WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;APPLICATION_LIBRARY_PRELOAD=$APPLICATION_LIBRARY_PRELOAD\&quot;. $LIBRARY could not be found. Users will not be able to run a single application in non-rootless mode.&quot; &amp;&amp; break ;
+ 	done
+ 	IFS=$OLD_IFS
+ 	
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000489.html">[Freenx-cvs] r357 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000491.html">[Freenx-cvs] r359 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#490">[ date ]</a>
+              <a href="thread.html#490">[ thread ]</a>
+              <a href="subject.html#490">[ subject ]</a>
+              <a href="author.html#490">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

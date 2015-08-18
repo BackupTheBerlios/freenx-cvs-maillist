@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r287 - freenx-website
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r287%20-%20freenx-website&In-Reply-To=%3C200701230404.l0N443Bm016155%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000416.html">
+   <LINK REL="Next"  HREF="000418.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r287 - freenx-website</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r287%20-%20freenx-website&In-Reply-To=%3C200701230404.l0N443Bm016155%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r287 - freenx-website">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Tue Jan 23 05:04:03 CET 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000416.html">[Freenx-cvs] r286 - freenx-website
+</A></li>
+        <LI>Next message: <A HREF="000418.html">[Freenx-cvs] r288 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#417">[ date ]</a>
+              <a href="thread.html#417">[ thread ]</a>
+              <a href="subject.html#417">[ subject ]</a>
+              <a href="author.html#417">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-01-23 05:04:03 +0100 (Tue, 23 Jan 2007)
+New Revision: 287
+
+Modified:
+   freenx-website/home.inc
+Log:
+Release 0.6.0.
+
+
+
+Modified: freenx-website/home.inc
+===================================================================
+--- freenx-website/home.inc	2007-01-23 03:56:21 UTC (rev 286)
++++ freenx-website/home.inc	2007-01-23 04:04:03 UTC (rev 287)
+@@ -10,6 +10,82 @@
+ 	&lt;h2&gt;
+ 		News
+ 	&lt;/h2&gt;
++	&lt;h3&gt;
++		&lt;a
++	href=&quot;<A HREF="http://mail.kde.org/pipermail/freenx-knx/2007-January/004535.html">http://mail.kde.org/pipermail/freenx-knx/2007-January/004535.html</A>&quot;&gt;FreeNX
++	0.6.0 Released&lt;/a&gt; 
++        - Tuesday, January 23, 2007 - 	
++	[&lt;a title=&quot;Download&quot;
++	href=&quot;<A HREF="http://prdownload.berlios.de/freenx/freenx-0.6.0.tar.gz">http://prdownload.berlios.de/freenx/freenx-0.6.0.tar.gz</A>&quot;&gt;Download&lt;/a&gt;]
++	&lt;/h3&gt;
++	&lt;pre&gt;
++23.01.2007 FreeNX 0.6.0 &quot;Juliana birthday edition&quot;
++        * Opened the 0.6.0 branch.
++        * Added nxnode slave mode.
++        * General code cleanup.
++                * Huge cleanup of nxnode.
++        * Removed &quot;no-x11-forwarding&quot; from keys to allow client to use the
++          faster interactive sessions.
++        * Fixed nxsetup automatic testing of sessions and cleared up
++          explanations.
++        * Added support for NX 2.0.0 style nxclient dialogs.
++        * Support for NX 2.0.0 backend in nxloadconfig.
++        * Fixed cups printing (added username and password).
++        * Fixed one more stray tail process.
++        * Added example script for &quot;load&quot; based loadbalancing.
++        * Fixed spaces in parameters for NX Client 2.0.0.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">ssycplkbocve at spammotel.com</A>)
++        * Added version 2.1.0 support.
++        * Fixed LD_LIBRARY_PRELOAD default path in nxloadconfig.
++        * Fixed nxclient to work with 2.1.0 backend.
++        * Added autodetection of backend.
++
++01.07.2006 FreeNX 0.5.0 &quot;UKUUG 2006 Edition&quot;
++        * Opened the 0.5.0 branch.
++        * Added load balancing.
++        * Completely removed support for 1.4.0 backend.
++        * Rootless mode is now the default.
++        * Reworked nxnode / suspend on connection failure should work now.
++        * Added support for &quot;Running&quot; sessions.
++        * Fixed --send command. (Emmanuel Blindauer )
++        * Fixed resume with nxclient &gt;=1.5.0-106 for Windows.
++        * Fixed rootless sessions with Windows nxclient.
++        * Fixed keyboard issues by enabling the keybd channel.
++        * Fixed one more stray tail process and being able to
++          cleanup after a hopelessly failed reconnection. (i.e. agent died)
++        * Fixed detection of xauth / netcat. Added option to disable extra
++          checks.
++        * Fixed --terminate / --suspend when hostname has a '-' in it.
++          (Emmanuel Blindauer )
++        * ESD_NO_SPAWN is always set when ESPEAKER is set.
++          (&quot;Felipe Alfaro Solana&quot; )
++        * Added perl replacement for 'rev' function on Sun OS 5.10.
++        * Fixed NODE_AUTOSTART to be unable to block sessions.
++        * Fixed stale sessions introduced by the new session handling model.
++        * Added usage of TCP NODELAY option.
++        * Fixed loadbalancing IP issues.
++        * Added --force-terminate to remove session info.
++          Fixed issue with suspend/terminate commands.
++        * Added correct errorcode 596 instead of 504.
++        * Implemented &quot;round-robin&quot; and &quot;load&quot; loadbalancing algorithms.
++          Cleaned up node.conf keys.
++        * Fixed help for --restart.
++        * Fixed session_running function, which fixes all remaining stale
++          session problems.
++        * Removed termination of nxagent in case of rootless mode.
++          (Fixes kontact without --nofork)
++        * Last minute fixes for new functions using rev.
++        * Added experimental last minute support for NX 2.0.0 backend.
++          (set ENABLE_2_0_0_BACKEND=1)
++
++XX.XX.2006 FreeNX 0.4.5 &quot;aKademy Edition&quot;
++        * Made nxsetup more user-friendly and hopefully finally failsafe.
++        * Added --agent to nxnode/nxserver to allow easier debugging.
++        * Added addgroup/groupadd to nxsetup
++        * Added --ignore-errors support on nxsetup/nxloadconfig
++        * Added check for expect.
++	&lt;/pre&gt;
++
+ 	&lt;h3&gt;		&lt;a
+ 	href=&quot;<A HREF="http://wiki.debian.org/DebianEdu/DevCamp2006">http://wiki.debian.org/DebianEdu/DevCamp2006</A>&quot;&gt;FreeNX at Debian-Edu DevCamp 2006.&lt;/a&gt; 
+         - Saturday, July 08, 2006 -
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000416.html">[Freenx-cvs] r286 - freenx-website
+</A></li>
+	<LI>Next message: <A HREF="000418.html">[Freenx-cvs] r288 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#417">[ date ]</a>
+              <a href="thread.html#417">[ thread ]</a>
+              <a href="subject.html#417">[ subject ]</a>
+              <a href="author.html#417">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

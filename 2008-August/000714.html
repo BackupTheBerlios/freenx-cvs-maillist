@@ -1,0 +1,294 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r580 - trunk/freenx-server
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r580%20-%20trunk/freenx-server&In-Reply-To=%3C200808220044.m7M0ilAB008354%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000713.html">
+   <LINK REL="Next"  HREF="000715.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r580 - trunk/freenx-server</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r580%20-%20trunk/freenx-server&In-Reply-To=%3C200808220044.m7M0ilAB008354%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r580 - trunk/freenx-server">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Fri Aug 22 02:44:47 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000713.html">[Freenx-cvs] r579 - trunk/freenx-server
+</A></li>
+        <LI>Next message: <A HREF="000715.html">[Freenx-cvs] r581 - tags/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#714">[ date ]</a>
+              <a href="thread.html#714">[ thread ]</a>
+              <a href="subject.html#714">[ subject ]</a>
+              <a href="author.html#714">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-08-22 02:44:43 +0200 (Fri, 22 Aug 2008)
+New Revision: 580
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/node.conf.sample
+   trunk/freenx-server/nxloadconfig
+   trunk/freenx-server/nxnode
+   trunk/freenx-server/nxserver
+   trunk/freenx-server/nxviewer_helper
+Log:
+* Fixed shadow mode and made it usable.
+(Patch by Amin Shehata &lt;amino7 at yahoo dot com&gt;, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+- Put -nolisten tcp to node.conf.
+
+- Added confirmation dialog for sharing.
+
+- Removed -accept popup as that is done by nxserver.
+
+**** Really released: FreeNX 0.7.3 &quot;Priscilla One Year Edition&quot;
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-18 19:19:20 UTC (rev 579)
++++ trunk/freenx-server/ChangeLog	2008-08-22 00:44:43 UTC (rev 580)
+@@ -1,4 +1,4 @@
+-18.08.2008 FreeNX 0.7.3
++18.08.2008 FreeNX 0.7.3 &quot;Priscilla One Year Edition&quot;
+ 	* Opened the 0.7.3 development.
+ 	* Added logging of failed authentication attempts
+ 	  to auth.log via syslog (3). This can be disabled by 
+@@ -110,12 +110,12 @@
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 	* Prepared shadowing foreign users for VNC-shadowing.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+-	* The same user is always allowed to shadow its own sessions.
+-	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 	* Added shadow support to --listsession command.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 	* Added shadow mode as nxagent target.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Fixed shadow mode and made it usable.
++	  (Patch by Amin Shehata &lt;amino7 at yahoo dot com&gt;, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
+ 14.03.2008 FreeNX 0.7.2 &quot;Priscilla Edition&quot;
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/node.conf.sample
+===================================================================
+--- trunk/freenx-server/node.conf.sample	2008-08-18 19:19:20 UTC (rev 579)
++++ trunk/freenx-server/node.conf.sample	2008-08-22 00:44:43 UTC (rev 580)
+@@ -605,7 +605,7 @@
+ # for examples of useful parameters.
+ #AGENT_EXTRA_OPTIONS_RFB=&quot;&quot;
+ #AGENT_EXTRA_OPTIONS_RDP=&quot;&quot;
+-#AGENT_EXTRA_OPTIONS_X=&quot;&quot;
++#AGENT_EXTRA_OPTIONS_X=&quot;-nolisten tcp&quot;
+ 
+ # The number of seconds we wait for the nxagent to start before
+ # deciding startup has failed
+
+Modified: trunk/freenx-server/nxloadconfig
+===================================================================
+--- trunk/freenx-server/nxloadconfig	2008-08-18 19:19:20 UTC (rev 579)
++++ trunk/freenx-server/nxloadconfig	2008-08-22 00:44:43 UTC (rev 580)
+@@ -220,7 +220,7 @@
+ COMMAND_SESSREG=&quot;sessreg&quot;
+ AGENT_EXTRA_OPTIONS_RFB=&quot;&quot;
+ AGENT_EXTRA_OPTIONS_RDP=&quot;&quot;
+-AGENT_EXTRA_OPTIONS_X=&quot;&quot;
++AGENT_EXTRA_OPTIONS_X=&quot;-nolisten tcp&quot;
+ AGENT_STARTUP_TIMEOUT=&quot;60&quot;
+ AGENT_FONT_SERVER=&quot;&quot;
+ PROXY_TCP_NODELAY=&quot;&quot;
+
+Modified: trunk/freenx-server/nxnode
+===================================================================
+--- trunk/freenx-server/nxnode	2008-08-18 19:19:20 UTC (rev 579)
++++ trunk/freenx-server/nxnode	2008-08-22 00:44:43 UTC (rev 580)
+@@ -496,15 +496,15 @@
+ 		echo &quot;$agent_password&quot; | $PATH_BIN/nxpasswd &quot;$USER_FAKE_HOME/.nx/C-$sess_id/scripts/.passwd&quot; doit
+ 
+ 		# Start x11vnc
+-		if [ -n &quot;$mirrordisplay&quot; ]
++		if [ -n &quot;$shadowdisplay&quot; ]
+ 		then
+ 			(
+-				unset XAUTHORITY
+-				# Note: No &quot;-accept popup&quot; as its the same user and with that password
+-				#       he could do already more than -accept popup would allow.
+-				DISPLAY=&quot;$mirrorhost:$mirrordisplay.0&quot; x11vnc -timeout 120 -rfbauth &quot;$USER_FAKE_HOME/.nx/C-$sess_id/scripts/.passwd&quot; &gt;&quot;$USER_FAKE_HOME/.nx/C-$sess_id/scripts/.vnc_port&quot; 2&gt;&amp;3 &amp;
++				viewonly=&quot;&quot;
++				[ &quot;$ENABLE_INTERACTIVE_SESSION_SHADOWING&quot; != &quot;1&quot; ] &amp;&amp; viewonly=&quot;-viewonly&quot;
++				
++				DISPLAY=&quot;$shadowhost:$shadowdisplay&quot; x11vnc -localhost $viewonly -timeout 120 -rfbauth &quot;$USER_FAKE_HOME/.nx/C-$sess_id/scripts/.passwd&quot; &gt;&quot;$USER_FAKE_HOME/.nx/C-$sess_id/scripts/.vnc_port&quot; 2&gt;&amp;3 &amp;
+ 			)
+-			sleep 1
++			sleep 2
+ 			agent_port=$(cat &quot;$USER_FAKE_HOME/.nx/C-$sess_id/scripts/.vnc_port&quot; | egrep &quot;^PORT=&quot; | cut -d'=' -f 2)
+ 			[ -z &quot;agent_port&quot; ] &amp;&amp; agent_port=&quot;0&quot;
+ 			# note the :: is not a mistake, but rather a hint for nxviewer to use this as a port and not 
+@@ -534,21 +534,13 @@
+ 		
+ 		if [ &quot;$type&quot; = &quot;shadow&quot; ]
+ 		then
+-			# Add to xauth and ask for permission
+-
+-        	        # not the same user? So we have a shadow cookie, we add to xauth
+-                	if [ -n &quot;$shadowcookie&quot; ]
+-                	then
+-                	        xauth add &quot;$shadowhost:$shadowdisplay&quot; MIT-MAGIC-COOKIE-1 &quot;$shadowcookie&quot;
+-                	fi
+-
+ 			R=&quot;-S -shadow $shadowhost:$shadowdisplay -shadowmode $ENABLE_INTERACTIVE_SESSION_SHADOWING&quot;
+ 			P=&quot;-nopersistent&quot;
+ 		fi
+ 		
+ 		# Start the agent
+ 		
+-		PATH=&quot;$PATH_BIN:$PATH&quot; $PATH_BIN/nxagent $P $R -nolisten tcp -name &quot;NX - $user@$SERVER_NAME:$display - $session (GPL Edition)&quot; -option &quot;$USER_FAKE_HOME/.nx/C-$sess_id/options&quot; $K $G $B $FP $AGENT_EXTRA_OPTIONS_X :$display 2&gt;&amp;3 &amp;
++		PATH=&quot;$PATH_BIN:$PATH&quot; $PATH_BIN/nxagent $P $R -name &quot;NX - $user@$SERVER_NAME:$display - $session (GPL Edition)&quot; -option &quot;$USER_FAKE_HOME/.nx/C-$sess_id/options&quot; $K $G $B $FP $AGENT_EXTRA_OPTIONS_X :$display 2&gt;&amp;3 &amp;
+ 	fi
+ 	
+ 	#
+@@ -1282,6 +1274,18 @@
+ exit
+ EOF
+ 
++	export SHADOW_XAUTHORITY=&quot;$USER_FAKE_HOME/.nx/C-$sess_id/authority&quot;
++
++	# If we have a shadow cookie, we add it to xauth session authority file as well
++	if [ -n &quot;$shadowcookie&quot; ]
++	then
++		$COMMAND_XAUTH -f &quot;$SHADOW_XAUTHORITY&quot; add &quot;$shadowhost:$shadowdisplay&quot; MIT-MAGIC-COOKIE-1 &quot;$shadowcookie&quot;
++	elif [ -n &quot;$shadowdisplay&quot; ]
++	then
++		# we need to merge in the normal .Xauthority file
++		$COMMAND_XAUTH -f &quot;$SHADOW_XAUTHORITY&quot; merge &quot;$HOME/.Xauthority&quot;
++	fi
++
+ if [ &quot;$1&quot; = &quot;restore&quot; ]
+ then
+ 	echo &gt; &quot;$USER_FAKE_HOME/.nx/C-$sess_id/session&quot;
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-18 19:19:20 UTC (rev 579)
++++ trunk/freenx-server/nxserver	2008-08-22 00:44:43 UTC (rev 580)
+@@ -1297,6 +1297,41 @@
+ 			return 1
+ 		fi
+ 
++		[ &quot;$shadowhost&quot; = &quot;127.0.0.1&quot; ] &amp;&amp; shadowhost=&quot;&quot;
++
++		# not the same user? So we have a shadow cookie, we add to xauth
++		if [ -n &quot;$shadowcookie&quot; -a &quot;$ENABLE_SESSION_SHADOWING_AUTHORIZATION&quot; = &quot;1&quot; ]
++		then
++			# Ask for permission first:
++			echo_x &quot;NX&gt; 726 Asking user for authorization to attach to session&quot;
++			export XAUTHORITY=&quot;.Xauthority-$RANDOM-$$&quot;
++	               	$COMMAND_XAUTH add &quot;$shadowhost:$shadowdisplay&quot; MIT-MAGIC-COOKIE-1 &quot;$shadowcookie&quot; &gt;/dev/null 2&gt;&amp;1
++			PERMISSION=$(
++				$PATH_BIN/nxdialog -display $shadowhost:$shadowdisplay -dialog yesno -caption &quot;Authorization Request&quot; -message &quot;Do you want to allow $USER to shadow your session?&quot; 2&gt;/dev/null &amp;
++				SHADOW_DIALOG_PID=$!
++				
++				I=0
++				while kill -0 $SHADOW_DIALOG_PID 2&gt;/dev/null
++				do
++					let I=I+1
++					[ $I -gt &quot;$AGENT_STARTUP_TIMEOUT&quot; ] &amp;&amp; kill $SHADOW_DIALOG_PID 2&gt;/dev/null
++					sleep 1
++				done
++				
++				echo &quot;no&quot;
++				)
++				
++			$COMMAND_XAUTH remove &quot;$shadowhost:$shadowdisplay&quot;
++			rm -f &quot;$XAUTHORITY&quot;
++
++			if [ &quot;$PERMISSION&quot; = &quot;no&quot; ]
++			then
++				# User answered NO
++				echo_x &quot;NX&gt; 596 Error: Authorization refused by user: $shadowuser.&quot;
++				return 1
++			fi
++		fi
++
+ 		PARAMS=&quot;$PARAMS&amp;shadowdisplay=$shadowdisplay&amp;shadowhost=$shadowhost&amp;shadowcookie=$shadowcookie&amp;shadowuser=$shadowuser&quot;
+ 		CMDLINE=$PARAMS
+ 	fi
+
+Modified: trunk/freenx-server/nxviewer_helper
+===================================================================
+--- trunk/freenx-server/nxviewer_helper	2008-08-18 19:19:20 UTC (rev 579)
++++ trunk/freenx-server/nxviewer_helper	2008-08-22 00:44:43 UTC (rev 580)
+@@ -20,28 +20,13 @@
+ if [ -n &quot;$shadowdisplay&quot; ]
+ then
+ 	(
+-		unset XAUTHORITY
++		# Get correct xauthority file from environment
++		export XAUTHORITY=&quot;$SHADOW_XAUTHORITY&quot;
+ 
+-		# We need to set just :0.0 in case of localhost connection.
+-		[ &quot;$shadowhost&quot; = &quot;127.0.0.1&quot; ] &amp;&amp; shadowhost=&quot;&quot;
+-			
+-		
+-		# don't use accept popup or viewonly mode  as its the same user
+-		accept=&quot;&quot;
+ 		viewonly=&quot;&quot;
++		[ &quot;$ENABLE_INTERACTIVE_SESSION_SHADOWING&quot; != &quot;1&quot; ] &amp;&amp; viewonly=&quot;-viewonly&quot;
+ 		
+-		# not the same user? So we have a shadow cookie, we add to xauth
+-		if [ -n &quot;$shadowcookie&quot; ]
+-		then
+-			xauth add &quot;$shadowhost:$shadowdisplay&quot; MIT-MAGIC-COOKIE-1 &quot;$shadowcookie&quot;
+-			if [ &quot;$shadowuser&quot; != &quot;$USER&quot; ]
+-			then
+-				[ &quot;$ENABLE_SESSION_SHADOWING_AUTHORIZATION&quot; = &quot;1&quot; ] &amp;&amp; accept=&quot;-accept popup&quot;
+-				[ &quot;$ENABLE_INTERACTIVE_SESSION_SHADOWING&quot; != &quot;1&quot; ] &amp;&amp; viewonly=&quot;-viewonly&quot;
+-			fi
+-		fi
+-		
+-		DISPLAY=&quot;$shadowhost:$shadowdisplay&quot; $COMMAND_X11VNC -localhost $accept $viewonly -timeout 120 -once -rfbauth &quot;$NXSESSION_DIRECTORY/scripts/.passwd&quot; &gt;&quot;$NXSESSION_DIRECTORY/scripts/.vnc_port&quot; &amp;
++		DISPLAY=&quot;$shadowhost:$shadowdisplay&quot; $COMMAND_X11VNC -localhost $viewonly -timeout 120 -once -rfbauth &quot;$NXSESSION_DIRECTORY/scripts/.passwd&quot; &gt;&quot;$NXSESSION_DIRECTORY/scripts/.vnc_port&quot; &amp;
+ 	)
+ 	sleep 2
+ 	agent_port=$(cat &quot;$NXSESSION_DIRECTORY/scripts/.vnc_port&quot; | egrep &quot;^PORT=&quot; | cut -d'=' -f 2)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000713.html">[Freenx-cvs] r579 - trunk/freenx-server
+</A></li>
+	<LI>Next message: <A HREF="000715.html">[Freenx-cvs] r581 - tags/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#714">[ date ]</a>
+              <a href="thread.html#714">[ thread ]</a>
+              <a href="subject.html#714">[ subject ]</a>
+              <a href="author.html#714">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

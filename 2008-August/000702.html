@@ -1,0 +1,302 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r568 - trunk/freenx-server
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r568%20-%20trunk/freenx-server&In-Reply-To=%3C200808180141.m7I1foEt024070%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000701.html">
+   <LINK REL="Next"  HREF="000703.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r568 - trunk/freenx-server</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r568%20-%20trunk/freenx-server&In-Reply-To=%3C200808180141.m7I1foEt024070%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r568 - trunk/freenx-server">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Mon Aug 18 03:41:50 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000701.html">[Freenx-cvs] r567 - trunk/freenx-server
+</A></li>
+        <LI>Next message: <A HREF="000703.html">[Freenx-cvs] r569 - in trunk/freenx-server: . nxserver-suid
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#702">[ date ]</a>
+              <a href="thread.html#702">[ thread ]</a>
+              <a href="subject.html#702">[ subject ]</a>
+              <a href="author.html#702">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-08-18 03:41:49 +0200 (Mon, 18 Aug 2008)
+New Revision: 568
+
+Added:
+   trunk/freenx-server/nxserver-usermode
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/Makefile
+   trunk/freenx-server/nxserver
+Log:
++       * Overhauled the usermode:
++               * There are now two modes of operation.
++               - One statically setting the
++                 ENABLE_USERMODE_AUTHENTICATION key
++                 in node.conf. (old behavior)
++               - Or using nxserver-usermode as startup
++                 binary, which directly goes into the 103 stage.
++               * Fixed using commandline parameters like --cleanup
++                 for static usermode.
++               * Enabled the root commandline parameters in usermode.
++               * Fixed usage of &quot;nx&quot; user as normal user in usermode.
++               * Disabled slave mode and load balancing for usermode.
++               * Fixed creation of the logfile directory.
++               * Fixed nxnode usage of SSH_CLIENT using fallback mechanism.
++         (Patch by <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">nbartos at bat.berlios.de</A>, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-17 20:44:12 UTC (rev 567)
++++ trunk/freenx-server/ChangeLog	2008-08-18 01:41:49 UTC (rev 568)
+@@ -78,6 +78,21 @@
+ 	* Fixed broken fallback logic if SSH_CLIENT variables cannot be read
+ 	  correctly.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Overhauled the usermode: 
++		* There are now two modes of operation.
++	  	- One statically setting the 
++		  ENABLE_USERMODE_AUTHENTICATION key
++	  	  in node.conf. (old behavior)
++		- Or using nxserver-usermode as startup 
++		  binary, which directly goes into the 103 stage.
++		* Fixed using commandline parameters like --cleanup 
++		  for static usermode.
++		* Enabled the root commandline parameters in usermode.
++		* Fixed usage of &quot;nx&quot; user as normal user in usermode.
++		* Disabled slave mode and load balancing for usermode.
++		* Fixed creation of the logfile directory.
++		* Fixed nxnode usage of SSH_CLIENT using fallback mechanism.
++	  (Patch by <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">nbartos at bat.berlios.de</A>, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
+ 14.03.2008 FreeNX 0.7.2 &quot;Priscilla Edition&quot;
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/Makefile
+===================================================================
+--- trunk/freenx-server/Makefile	2008-08-17 20:44:12 UTC (rev 567)
++++ trunk/freenx-server/Makefile	2008-08-18 01:41:49 UTC (rev 568)
+@@ -3,7 +3,7 @@
+ SHELL = /bin/bash
+ 
+ SUBDIRS=nxredir nxviewer-passwd nxserver-helper nx-session-launcher
+-PROGRAMS=nxacl.sample nxcheckload.sample nxcups-gethost nxdesktop_helper nxdialog nxkeygen nxloadconfig nxnode nxnode-login nxprint nxserver nxserver-helper/nxserver-helper nxsetup nxviewer_helper nxviewer-passwd/nxpasswd/nxpasswd nx-session-launcher/nx-session-launcher nx-session-launcher/nx-session-launcher-suid
++PROGRAMS=nxacl.sample nxcheckload.sample nxcups-gethost nxdesktop_helper nxdialog nxkeygen nxloadconfig nxnode nxnode-login nxprint nxserver nxserver-helper/nxserver-helper nxsetup nxviewer_helper nxviewer-passwd/nxpasswd/nxpasswd nx-session-launcher/nx-session-launcher nx-session-launcher/nx-session-launcher-suid nxserver-usermode
+ 
+ all:
+ 	cd nxviewer-passwd &amp;&amp; xmkmf &amp;&amp; make Makefiles &amp;&amp; make depend
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-17 20:44:12 UTC (rev 567)
++++ trunk/freenx-server/nxserver	2008-08-18 01:41:49 UTC (rev 568)
+@@ -484,24 +484,49 @@
+ # Main nxserver &lt;-&gt; nxclient communication module
+ #
+ 
+-if [ &quot;$USER&quot; = &quot;nxfree&quot; -o &quot;$USER&quot; = &quot;nx&quot; -o &quot;$ENABLE_USERMODE_AUTHENTICATION&quot; = &quot;1&quot; ]
+-then
++# do not run in server mode loop
++SERVER_MODE=&quot;0&quot;
+ 
+-setup_usermode_auth()
+-{
++# For users nxfree and nx run in SERVER MODE
++[ &quot;$USER&quot; = &quot;nxfree&quot; -o &quot;$USER&quot; = &quot;nx&quot; ] &amp;&amp; SERVER_MODE=&quot;1&quot;
+ 
+-	[ $USER = &quot;nxfree&quot; -o &quot;$USER&quot; = &quot;nx&quot; ] &amp;&amp; ENABLE_USERMODE_AUTHENTICATION=&quot;0&quot;
++# We can override usermode via environment var
++[ &quot;$NX_USERMODE&quot; = &quot;1&quot; ] &amp;&amp; ENABLE_USERMODE_AUTHENTICATION=&quot;1&quot;
+ 
+-	if [ &quot;$ENABLE_USERMODE_AUTHENTICATION&quot; = &quot;1&quot; ]
+-	then
+-		export NX_SESS_DIR=&quot;$USER_FAKE_HOME/.nx/db/&quot;
+-		export NX_LOGFILE=&quot;$USER_FAKE_HOME/.nx/temp/nxserver.log&quot;
+-		mkdir -p $NX_SESS_DIR/{closed,running,failed}
+-	fi
+-}
++# When usermode is 1, we only run in server loop
++# if nxserver was run without any arguments or just with -c nxserver.
++if [ &quot;$ENABLE_USERMODE_AUTHENTICATION&quot; = &quot;1&quot; ]
++then 
++	# do not run in server mode loop regardless of username
++	SERVER_MODE=&quot;0&quot;
+ 
+-setup_usermode_auth
++	[ -z &quot;$*&quot; -o &quot;$*&quot; = &quot;-c $PATH_BIN/nxserver&quot; ] &amp;&amp; SERVER_MODE=&quot;1&quot;
++	
++	# Reread the config files (so that $USER.node.conf get sourced)
++	. $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig) --userconf
++	
++	# We might need to reactivate this now
++	ENABLE_USERMODE_AUTHENTICATION=&quot;1&quot;
++	
++	# export the necessary variables
++	export NX_SESS_DIR=&quot;$USER_FAKE_HOME/.nx/db/&quot;
++	export NX_LOGFILE=&quot;$USER_FAKE_HOME/.nx/temp/nxserver.log&quot;
++	mkdir -p $(dirname $NX_LOGFILE)
++	mkdir -p $NX_SESS_DIR/{closed,running,failed}
++	
++	# we are logged in already 
++	LOGIN_SUCCESS=&quot;1&quot;
++	LOGIN_METHOD=&quot;USERMODE&quot;
+ 
++	# we do not use SLAVE mode for usermode
++	ENABLE_SLAVE_MODE=&quot;0&quot;
++	# we do not use loadbalancing mode for usermode
++	LOAD_BALANCE_SERVERS=&quot;&quot;
++fi
++
++if [ &quot;$SERVER_MODE&quot; = &quot;1&quot; ]
++then
++
+ #
+ # needed for slave mode
+ #
+@@ -671,7 +696,9 @@
+ 	
+ 	# Reread the config files (so that $USER.node.conf get sourced)
+ 	. $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig) --userconf
+-	echo_x &quot;NX&gt; 103 Welcome to: $SERVER_NAME user: $USER&quot;
++elif [ &quot;$NX_USERMODE&quot; = &quot;1&quot; ]
++then
++	log 3 &quot;Info: Usermode authentication: Logged in as $USER.&quot;
+ else
+ 
+ echo_x &quot;HELLO NXSERVER - Version $NX_VERSION $NX_LICENSE&quot;
+@@ -721,8 +748,8 @@
+ 			LOGIN_SUCCESS=&quot;0&quot;
+ 			
+ 			echo_x -n &quot;NX&gt; 101 User: &quot;
+-			read USER
+-			echo_x $USER
++			read USER2
++			echo_x $USER2
+ 			
+ 			echo_x -n &quot;NX&gt; 102 Password: &quot;
+ 			old_ifs=&quot;$IFS&quot;
+@@ -736,10 +763,13 @@
+ 			if [ &quot;$ENABLE_USERMODE_AUTHENTICATION&quot; = &quot;1&quot; ]
+ 			then
+ 				LOGIN_SUCCESS=&quot;1&quot;
+-				LOGIN_METHOD=&quot;USERMODE&quot;
+-				USER=$(whoami)
++				# we have read the user config already above,
++				# so we don't get any new information here
++				break
+ 			fi
+ 
++			USER=$USER2
++
+ 			# PASSDB based auth
+ 			if [ &quot;$ENABLE_PASSDB_AUTHENTICATION&quot; = &quot;1&quot; -a &quot;$LOGIN_SUCCESS&quot; = &quot;0&quot; ]
+ 			then
+@@ -788,9 +818,6 @@
+ 			then
+ 				# Reread the config files (so that $USER.node.conf get sourced)
+ 				. $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig) --userconf
+-				setup_usermode_auth
+-
+-				echo_x &quot;NX&gt; 103 Welcome to: $SERVER_NAME user: $USER&quot;
+ 				break
+ 			else
+ 				echo_x &quot;NX&gt; 404 ERROR: wrong password or login&quot;
+@@ -807,6 +834,8 @@
+ 
+ fi
+ 
++echo_x &quot;NX&gt; 103 Welcome to: $SERVER_NAME user: $USER&quot;
++
+ # Add the slave mode shutdown trap (just in case)
+ [ -n &quot;$NXNODE_LOGIN_SLAVE&quot; ] &amp;&amp; trap nxnode_login_stop_slave EXIT
+ 
+@@ -870,6 +899,9 @@
+ 	    NXNODE_TOSEND=&quot;$@&quot; nxnode_login &quot;$PASS&quot; -- su &quot;$USER&quot; &quot;&quot; &quot;$PATH_BIN/nxnode&quot; &quot;$CMD&quot; 2&gt;&amp;1 | log_tee
+ 	elif [ &quot;$LOGIN_METHOD&quot; = &quot;USERMODE&quot; ]
+ 	then
++	    # we need to unset SSH_* variables so that nxnode 
++	    # chooses the right accept= value.
++	    unset SSH_CLIENT SSH_CLIENT2
+ 	    echo &quot;$@&quot; | $PATH_BIN/nxnode &quot;$CMD&quot; 2&gt;&amp;1 | log_tee
+ 	else
+ 	    echo &quot;$@&quot; | $COMMAND_SSH -l &quot;$USER&quot; &quot;$NODE_HOSTNAME&quot; -p $SSHD_PORT -x -2 -i $NX_ETC_DIR/users.id_dsa -o 'PubkeyAuthentication yes' -o 'RSAAuthentication yes' -o 'RhostsAuthentication no' -o 'PasswordAuthentication no' -o 'RhostsRSAAuthentication no' -o 'StrictHostKeyChecking no' $PATH_BIN/nxnode &quot;$CMD&quot; | log_tee
+@@ -1902,10 +1934,10 @@
+ }
+ 
+ #
+-# user mode available functions
++# normal user available functions
+ #
+ 
+-if [ $UID -ne 0 ]
++if [ $UID -ne 0 -a &quot;$ENABLE_USERMODE_AUTHENTICATION&quot; != &quot;1&quot; ]
+ then
+ 	[ &quot;$1&quot; = &quot;--agent&quot; ] &amp;&amp; exec $PATH_BIN/nxnode &quot;$@&quot;
+ 	[ &quot;$1&quot; != &quot;--passwd&quot; ] &amp;&amp; cmd_usage
+
+Added: trunk/freenx-server/nxserver-usermode
+===================================================================
+--- trunk/freenx-server/nxserver-usermode	2008-08-17 20:44:12 UTC (rev 567)
++++ trunk/freenx-server/nxserver-usermode	2008-08-18 01:41:49 UTC (rev 568)
+@@ -0,0 +1,11 @@
++#!/bin/bash
++#
++# Small helper to startup nxserver in usermode setup.
++#
++# Copyright (c) 2008 by Fabian Franz &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">freenx at fabian-franz.de</A>&gt;
++#
++# License: GPL, version 2
++#
++
++export NX_USERMODE=&quot;1&quot;
++exec $(dirname $0)/nxserver &quot;$@&quot;
+
+
+Property changes on: trunk/freenx-server/nxserver-usermode
+___________________________________________________________________
+Name: svn:executable
+   + *
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000701.html">[Freenx-cvs] r567 - trunk/freenx-server
+</A></li>
+	<LI>Next message: <A HREF="000703.html">[Freenx-cvs] r569 - in trunk/freenx-server: . nxserver-suid
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#702">[ date ]</a>
+              <a href="thread.html#702">[ thread ]</a>
+              <a href="subject.html#702">[ subject ]</a>
+              <a href="author.html#702">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fabianx modified nxnode
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%20nxnode&In-Reply-To=%3C420FE69C.mailO1M11FRO8%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000008.html">
+   <LINK REL="Next"  HREF="000011.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fabianx modified nxnode</H1>
+    <B>fabianx</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%20nxnode&In-Reply-To=%3C420FE69C.mailO1M11FRO8%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fabianx modified nxnode">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Mon Feb 14 00:45:32 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000008.html">[Freenx-cvs] CVS: freenx - fabianx modified nxserver
+</A></li>
+        <LI>Next message: <A HREF="000011.html">[Freenx-cvs] CVS: freenx - fabianx modified nxnode
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9">[ date ]</a>
+              <a href="thread.html#9">[ thread ]</a>
+              <a href="subject.html#9">[ subject ]</a>
+              <a href="author.html#9">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fabianx
+Date:      2005-02-13 23:45:32 GMT
+Modified:  .        nxnode
+Log:
+Moved all commandline params to options file.
+Fixed giving password on cmdline to nxdesktop.
+
+Revision  Changes    Path
+1.19      +9 -7      freenx/nxnode
+
+
+rev 1.19, prev_rev 1.18
+Index: nxnode
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxnode,v
+retrieving revision 1.18
+retrieving revision 1.19
+diff -u -r1.18 -r1.19
+--- nxnode	13 Feb 2005 14:22:59 -0000	1.18
++++ nxnode	13 Feb 2005 23:45:31 -0000	1.19
+@@ -13,7 +13,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxnode,v 1.18 2005/02/13 14:22:59 fabianx Exp $
++# CVS: $Id: nxnode,v 1.19 2005/02/13 23:45:31 fabianx Exp $
+ #
+ # 21.06.2004: - Full reconnection support
+ 
+@@ -175,11 +175,7 @@
+ 
+ 	if [ &quot;$type&quot; = &quot;windows&quot; ]
+ 	then
+-		U=&quot;&quot;
+-		P=&quot;&quot;
+-		[ -n &quot;$agent_user&quot; ] &amp;&amp; U=&quot;-u $agent_user&quot;
+-		[ -n &quot;$agent_password&quot; ] &amp;&amp; P=&quot;-p $agent_password&quot;
+-		$PATH_BIN/nxdesktop -name &quot;NX - $user@$HOSTNAME:$display - $session (GPL Edition)&quot; $K $G $U $P $agent_server 2&gt;&gt;~/.nx/C-$sess_id/session &amp;
++		$PATH_BIN/nxdesktop -name &quot;NX - $user@$HOSTNAME:$display - $session (GPL Edition)&quot; $K $G $agent_server 2&gt;&gt;~/.nx/C-$sess_id/session &amp;
+ 	else
+ 
+ 	# nxviewer session
+@@ -449,8 +445,14 @@
+ 	IMAGES=&quot;images=$images,&quot;
+ 	[ -z &quot;$images&quot; ] &amp;&amp; IMAGES=&quot;&quot;
+ 
++	if [ &quot;$type&quot; = &quot;windows&quot; ]
++	then
++		AGENT_USER=${agent_user:+agent_user=$agent_user,}
++		AGENT_PASS=${agent_password:+agent_password=$agent_password,}
++	fi
++
+ cat &lt;&lt; EOF &gt; ~/.nx/C-$sess_id/options
+-${kbtype:+kbtype=$kbtype,}${CACHE}${IMAGES}${PACK}link=$link,type=$type,cleanup=0,accept=$userip,cookie=$proxy_cookie,id=$sess_id,samba=$samba,media=$media,sync=$sync:$display
++${kbtype:+kbtype=$kbtype,}${CACHE}${IMAGES}${PACK}link=$link,type=$type,cleanup=0,accept=$userip,cookie=$proxy_cookie,id=$sess_id,samba=$samba,media=$media,sync=$sync${AGENT_USER}${AGENT_PASS}:$display
+ EOF
+ #samba=$samba,
+ 	#cache=$cache,images=$images,pack=nopack,link=$link,type=$type,cleanup=0,accept=$userip,cookie=$proxy_cookie,id=$sess_id
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000008.html">[Freenx-cvs] CVS: freenx - fabianx modified nxserver
+</A></li>
+	<LI>Next message: <A HREF="000011.html">[Freenx-cvs] CVS: freenx - fabianx modified nxnode
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9">[ date ]</a>
+              <a href="thread.html#9">[ thread ]</a>
+              <a href="subject.html#9">[ subject ]</a>
+              <a href="author.html#9">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

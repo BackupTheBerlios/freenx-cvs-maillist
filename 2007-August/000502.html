@@ -1,0 +1,438 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r370 - in freenx-server/trunk: . nxserver-helper
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r370%20-%20in%20freenx-server/trunk%3A%20.%20nxserver-helper&In-Reply-To=%3C200708120545.l7C5jJZN020103%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000501.html">
+   <LINK REL="Next"  HREF="000503.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r370 - in freenx-server/trunk: . nxserver-helper</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r370%20-%20in%20freenx-server/trunk%3A%20.%20nxserver-helper&In-Reply-To=%3C200708120545.l7C5jJZN020103%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r370 - in freenx-server/trunk: . nxserver-helper">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Sun Aug 12 07:45:19 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000501.html">[Freenx-cvs] r369 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000503.html">[Freenx-cvs] r371 - in freenx-redesign/server: . utility
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#502">[ date ]</a>
+              <a href="thread.html#502">[ thread ]</a>
+              <a href="subject.html#502">[ subject ]</a>
+              <a href="author.html#502">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-08-12 07:45:19 +0200 (Sun, 12 Aug 2007)
+New Revision: 370
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxloadconfig
+   freenx-server/trunk/nxnode
+   freenx-server/trunk/nxserver
+   freenx-server/trunk/nxserver-helper/nxserver-helper.c
+Log:
+* Fixed some portability issues.
+          * Fixed nxloadconfig in case that COMMAND_X is not only one word,
+            like &quot;openssl md5&quot;.
+          * Added usage of &quot;openssl md5&quot; instead of &quot;md5sum&quot; by default.
+          * Changed perl to COMMAND_PERL.
+          * Removed rev and replaced the code with efficient awk code.
+          * Added an outcommented way to also use &quot;POSIX find&quot; for history
+            cleaning.
+
+(Peter O'Gorman &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">peter at pogma.com</A>&gt;)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-08-12 05:05:49 UTC (rev 369)
++++ freenx-server/trunk/ChangeLog	2007-08-12 05:45:19 UTC (rev 370)
+@@ -31,6 +31,15 @@
+ 	  * New configuration key: ENABLE_MIRROR_VIA_VNC=1
+ 	  * New configuration key: ENABLE_DESKTOP_SHARING=1
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Fixed some portability issues.
++	  * Fixed nxloadconfig in case that COMMAND_X is not only one word,
++	    like &quot;openssl md5&quot;.
++	  * Added usage of &quot;openssl md5&quot; instead of &quot;md5sum&quot; by default.
++	  * Changed perl to COMMAND_PERL.
++	  * Removed rev and replaced the code with efficient awk code.
++	  * Added an outcommented way to also use &quot;POSIX find&quot; for history
++	    cleaning.
++	  (Peter O'Gorman &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">peter at pogma.com</A>&gt;)
+ 
+ 07.07.2007 FreeNX 0.7.0 &quot;Jornade SPL Edition VI+1&quot;
+ 	* Fixed the printing support for CUPS 1.2.
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2007-08-12 05:05:49 UTC (rev 369)
++++ freenx-server/trunk/nxloadconfig	2007-08-12 05:45:19 UTC (rev 370)
+@@ -183,9 +183,9 @@
+ COMMAND_SSH=ssh
+ COMMAND_SSH_KEYGEN=ssh-keygen
+ COMMAND_CUPSD=/usr/sbin/cupsd
+-COMMAND_MD5SUM=md5sum
++COMMAND_MD5SUM=openssl md5
++COMMAND_PERL=perl
+ 
+-
+ # Misc directives
+ 
+ ENABLE_2_0_0_BACKEND=&quot;&quot;
+@@ -237,21 +237,26 @@
+                        done
+                        return 1
+                }
+-
+-	       function rev() {
+-		       perl -lpe'$_ = reverse'
+-	       }
+        ;;
+ esac
+ 
++#
++# Utility functions
++#
++
++function mywhich()
++{
++	which $(echo &quot;$*&quot; | cut -d&quot; &quot; -f1)
++}
++
+ #########################################################################
+ # Retested values
+ #########################################################################
+ 
+ if [ &quot;$NXCONFIG_RETEST&quot; = &quot;1&quot; ]
+ then
+-	{ ! which &quot;$COMMAND_XAUTH&quot; &amp;&amp; which xauth; } &gt;/dev/null 2&gt;&amp;1 &amp;&amp; COMMAND_XAUTH=$(which xauth)
+-	{ ! which &quot;$COMMAND_NETCAT&quot; &amp;&amp; which nc; } &gt;/dev/null 2&gt;&amp;1 &amp;&amp; COMMAND_NETCAT=$(which nc)
++	{ ! mywhich &quot;$COMMAND_XAUTH&quot; &amp;&amp; which xauth; } &gt;/dev/null 2&gt;&amp;1 &amp;&amp; COMMAND_XAUTH=$(which xauth)
++	{ ! mywhich &quot;$COMMAND_NETCAT&quot; &amp;&amp; which nc; } &gt;/dev/null 2&gt;&amp;1 &amp;&amp; COMMAND_NETCAT=$(which nc)
+ fi
+ 
+ #########################################################################
+@@ -431,7 +436,7 @@
+ 	
+ 	[ -z $(echo &quot;$ENABLE_NOMACHINE_FORWARD_PORT&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_NOMACHINE_FORWARD_PORT=$ENABLE_NOMACHINE_FORWARD_PORT\&quot;&quot;
+-	[ &quot;$ENABLE_NOMACHINE_FORWARD_PORT&quot; = &quot;1&quot; ] &amp;&amp; ! which &quot;$NOMACHINE_SERVER&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++	[ &quot;$ENABLE_NOMACHINE_FORWARD_PORT&quot; = &quot;1&quot; ] &amp;&amp; ! mywhich &quot;$NOMACHINE_SERVER&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;NOMACHINE_SERVER=$NOMACHINE_SERVER\&quot;&quot;
+ 	[ &quot;$ENABLE_NOMACHINE_FORWARD_PORT&quot; = &quot;1&quot; -a -z $(echo &quot;$NOMACHINE_FORWARD_PORT&quot; | egrep &quot;^[1-9][0-9]{0,4}$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;NOMACHINE_FORWARD_PORT=$NOMACHINE_FORWARD_PORT\&quot;&quot;
+@@ -440,13 +445,13 @@
+ 	
+ 	[ -z $(echo &quot;$ENABLE_ESD_PRELOAD&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_ESD_PRELOAD=$ENABLE_ESD_PRELOAD\&quot;&quot;
+-	[ &quot;$ENABLE_ESD_PRELOAD&quot; = &quot;1&quot; ] &amp;&amp; ! which &quot;$ESD_BIN_PRELOAD&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++	[ &quot;$ENABLE_ESD_PRELOAD&quot; = &quot;1&quot; ] &amp;&amp; ! mywhich &quot;$ESD_BIN_PRELOAD&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;ESD_BIN_PRELOAD=$ESD_BIN_PRELOAD\&quot;&quot; \
+ 					  &amp;&amp; echo &quot;         No esd preload will be performed.&quot;
+ 	
+ 	[ -z $(echo &quot;$ENABLE_ARTSD_PRELOAD&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_ARTSD_PRELOAD=$ENABLE_ARTSD_PRELOAD\&quot;&quot;
+-	[ &quot;$ARTSD_BIN_PRELOAD&quot; = &quot;1&quot; ] &amp;&amp; ! which &quot;$ARTSD_BIN_PRELOAD&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++	[ &quot;$ARTSD_BIN_PRELOAD&quot; = &quot;1&quot; ] &amp;&amp; ! mywhich &quot;$ARTSD_BIN_PRELOAD&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;ARTSD_BIN_PRELOAD=$ARTSD_BIN_PRELOAD\&quot;&quot; \
+ 					  &amp;&amp; echo &quot;         No arts preload will be performed.&quot;
+ 	
+@@ -456,7 +461,7 @@
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;KDE_PRINTRC=$KDE_PRINTRC\&quot;&quot;
+ 
+ 
+-	[ &quot;$ENABLE_FOOMATIC&quot; = &quot;1&quot; ] &amp;&amp; ! which &quot;$COMMAND_FOOMATIC&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++	[ &quot;$ENABLE_FOOMATIC&quot; = &quot;1&quot; ] &amp;&amp; ! mywhich &quot;$COMMAND_FOOMATIC&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;COMMAND_FOOMATIC=$COMMAND_FOOMATIC\&quot;&quot; \
+ 					  &amp;&amp; echo &quot;         Users will not be able to use foomatic.&quot;
+ 	[ ! -x &quot;$CUPS_IPP_BACKEND&quot; ] &amp;&amp; \
+@@ -476,51 +481,51 @@
+ 	[ -z $(echo &quot;$SET_LD_LIBRARY_PATH&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SET_LD_LIBRARY_PATH=$SET_LD_LIBRARY_PATH\&quot;&quot;
+ 	
+-	[ &quot;$DEFAULT_X_WM&quot; != &quot;&quot; ] &amp;&amp; ! which &quot;$DEFAULT_X_WM&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++	[ &quot;$DEFAULT_X_WM&quot; != &quot;&quot; ] &amp;&amp; ! mywhich &quot;$DEFAULT_X_WM&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;DEFAULT_X_WM=$DEFAULT_X_WM\&quot;&quot;
+ 	[ &quot;$DEFAULT_X_WM&quot; != &quot;&quot; -a  -z $(echo &quot;$KILL_DEFAULT_X_WM&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;KILL_DEFAULT_X_WM=$KILL_DEFAULT_X_WM\&quot;&quot;
+ 	[ -z &quot;$USER_X_STARTUP_SCRIPT&quot; ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;USER_X_STARTUP_SCRIPT=$USER_X_STARTUP_SCRIPT\&quot;&quot;
+-	! which &quot;$DEFAULT_X_SESSION&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++	! mywhich &quot;$DEFAULT_X_SESSION&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;DEFAULT_X_SESSION=$DEFAULT_X_SESSION\&quot;&quot; \
+ 					  &amp;&amp; echo &quot;         Users might not be able to request a default X session.&quot;
+-	! which &quot;$COMMAND_START_KDE&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++	! mywhich &quot;$COMMAND_START_KDE&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;COMMAND_START_KDE=$COMMAND_START_KDE\&quot;&quot; \
+ 					  &amp;&amp; echo &quot;         Users will not be able to request a KDE session.&quot;
+-	! which &quot;$COMMAND_START_GNOME&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++	! mywhich &quot;$COMMAND_START_GNOME&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;COMMAND_START_GNOME=$COMMAND_START_GNOME\&quot;&quot; \
+ 					  &amp;&amp; echo &quot;         Users will not be able to request a Gnome session.&quot;
+-	! which &quot;$COMMAND_START_CDE&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++	! mywhich &quot;$COMMAND_START_CDE&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;COMMAND_START_CDE=$COMMAND_START_CDE\&quot;&quot; \
+ 					  &amp;&amp; echo &quot;         Users will not be able to request a CDE session.&quot;
+-	! which &quot;$COMMAND_XTERM&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++	! mywhich &quot;$COMMAND_XTERM&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;COMMAND_XTERM=$COMMAND_XTERM\&quot;&quot; \
+ 					  &amp;&amp; echo &quot;         Users will not be able to request an xterm session.&quot;
+-	! which &quot;$COMMAND_XAUTH&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++	! mywhich &quot;$COMMAND_XAUTH&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_XAUTH=$COMMAND_XAUTH\&quot;&quot;
+-	! which &quot;$COMMAND_SMBMOUNT&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++	! mywhich &quot;$COMMAND_SMBMOUNT&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;COMMAND_SMBMOUNT=$COMMAND_SMBMOUNT\&quot;. You'll not be able to use SAMBA. &quot;
+-	! which &quot;$COMMAND_SMBUMOUNT&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++	! mywhich &quot;$COMMAND_SMBUMOUNT&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;COMMAND_SMBUMOUNT=$COMMAND_SMBUMOUNT\&quot;. You'll not be able to use SAMBA.&quot;
+-	! which &quot;$COMMAND_NETCAT&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++	! mywhich &quot;$COMMAND_NETCAT&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_NETCAT=$COMMAND_NETCAT\&quot;&quot;
+-	! which &quot;$COMMAND_SSH&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++	! mywhich &quot;$COMMAND_SSH&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_SSH=$COMMAND_SSH\&quot;&quot;
+-	! which &quot;$COMMAND_SSH_KEYGEN&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++	! mywhich &quot;$COMMAND_SSH_KEYGEN&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_SSH_KEYGEN=$COMMAND_SSH_KEYGEN\&quot;&quot;
+-	! which &quot;$COMMAND_CUPSD&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++	! mywhich &quot;$COMMAND_CUPSD&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;COMMAND_CUPSD=$COMMAND_CUPSD\&quot;&quot; \
+ 					  &amp;&amp; echo &quot;         Users will not be able to enable printing.&quot;
+ 	[ -z &quot;$(strings $COMMAND_CUPSD | egrep 'CUPS\/1.2')&quot; ] &amp;&amp; \
+ 		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid cupsd version of \&quot;$COMMAND_CUPSD\&quot;. Need version 1.2.&quot; \
+ 					  &amp;&amp; echo &quot;         Users will not be able to enable printing.&quot;
+-	! which &quot;$COMMAND_MD5SUM&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++	! mywhich &quot;$COMMAND_MD5SUM&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_MD5SUM=$COMMAND_MD5SUM\&quot;&quot;
+ 
+ 	# Check for expect
+ 	COMMAND_EXPECT=$(head -n1 $PATH_BIN/nxnode-login | cut -d'!' -f2)
+-	! which &quot;$COMMAND_EXPECT&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++	! mywhich &quot;$COMMAND_EXPECT&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: expect necessary for $PATH_BIN/nxnode-login could not be found in '$COMMAND_EXPECT'. Please install it or change nxnode-login accordingly.&quot;
+ 
+ 	# Misc directives
+@@ -534,7 +539,7 @@
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;EXPORT_USERIP=$EXPORT_USERIP\&quot;&quot;
+ 	[ -z $(echo &quot;$EXPORT_SESSIONID&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;EXPORT_SESSIONID=$EXPORT_SESSIONID\&quot;&quot;
+-	[ -n &quot;$NODE_AUTOSTART&quot; ] &amp;&amp; ! which &quot;$NODE_AUTOSTART&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++	[ -n &quot;$NODE_AUTOSTART&quot; ] &amp;&amp; ! mywhich &quot;$NODE_AUTOSTART&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;NODE_AUTOSTART=$NODE_AUTOSTART\&quot;&quot; \
+ 					  &amp;&amp; echo &quot;         No autostart will be performed.&quot;
+ 
+@@ -546,7 +551,7 @@
+ 		
+ 	[ -z $(echo &quot;$ENABLE_USESSION&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_USESSION=$ENABLE_USESSION\&quot;&quot;
+-	[ &quot;$ENABLE_USESSION&quot; = &quot;1&quot; ] &amp;&amp; ! which &quot;$COMMAND_SESSREG&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++	[ &quot;$ENABLE_USESSION&quot; = &quot;1&quot; ] &amp;&amp; ! mywhich &quot;$COMMAND_SESSREG&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;COMMAND_SESSREG=$COMMAND_SESSREG\&quot;&quot; \
+ 					  &amp;&amp; echo &quot;         Logged in users will not be registered with sessreg.&quot;
+ 	
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2007-08-12 05:05:49 UTC (rev 369)
++++ freenx-server/trunk/nxnode	2007-08-12 05:45:19 UTC (rev 370)
+@@ -138,7 +138,7 @@
+ 
+ 	# Remove display information
+ 	
+-	NODE_DISPLAY=$(echo $1 | rev | cut -d&quot;-&quot; -f2 | rev)
++	NODE_DISPLAY=$(echo $1 | awk 'BEGIN {FS=&quot;-&quot;} {i=NF-1; print $i}')
+ 	rm -f /tmp/.X$NODE_DISPLAY-lock
+ 	rm -f /tmp/.X11-unix/X$NODE_DISPLAY
+ 	
+@@ -211,7 +211,7 @@
+ 			NODE_STARTX=$COMMAND_START_CDE
+ 		;;
+ 		unix-application)
+-			[ &quot;$application&quot; = &quot;xterm&quot; ] &amp;&amp; application=&quot;$COMMAND_XTERM&quot;
++			[ &quot;$application&quot; = &quot;xterm&quot; ] &amp;&amp; application=$COMMAND_XTERM
+ 			NODE_STARTX=$application
+ 		;;
+ 		unix-default)
+@@ -638,8 +638,8 @@
+ 	then
+ 		if egrep -q &quot;^Host=&quot; &quot;$KDE_PRINTRC&quot;
+ 		then
+-			[ &quot;$ENABLE_KDE_CUPS_DYNAMIC&quot; = &quot;1&quot; ] &amp;&amp; perl -pi -e 's,^Host=.*,Host[\$ie]=\$\('&quot;$PATH_BIN/nxcups-gethost&quot;'),g' &quot;$KDE_PRINTRC&quot;
+-			[ &quot;$ENABLE_KDE_CUPS_DYNAMIC&quot; != &quot;1&quot; ] &amp;&amp; perl -pi -e 's,^Host=.*,Host='&quot;$NODE_CUPSD_SOCKET&quot;',g' &quot;$KDE_PRINTRC&quot;
++			[ &quot;$ENABLE_KDE_CUPS_DYNAMIC&quot; = &quot;1&quot; ] &amp;&amp; $COMMAND_PERL -pi -e 's,^Host=.*,Host[\$ie]=\$\('&quot;$PATH_BIN/nxcups-gethost&quot;'),g' &quot;$KDE_PRINTRC&quot;
++			[ &quot;$ENABLE_KDE_CUPS_DYNAMIC&quot; != &quot;1&quot; ] &amp;&amp; $COMMAND_PERL -pi -e 's,^Host=.*,Host='&quot;$NODE_CUPSD_SOCKET&quot;',g' &quot;$KDE_PRINTRC&quot;
+ 		else
+ 			echo &quot;[CUPS]&quot; &gt;&gt; &quot;$KDE_PRINTRC&quot;
+ 			[ &quot;$ENABLE_KDE_CUPS_DYNAMIC&quot; = &quot;1&quot; ] &amp;&amp; echo &quot;Host[\$ie]=\$($PATH_BIN/nxcups-gethost)&quot; &gt;&gt; &quot;$KDE_PRINTRC&quot;
+@@ -1249,7 +1249,7 @@
+ {
+ 	sessionid=$(getparam_sessionid)
+ 	echo &quot;NX&gt; 716 Terminating session $sessionid on user request.&quot;
+-	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | rev |cut -d&quot;-&quot; -f2 |rev)
++	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | awk 'BEGIN {FS=&quot;-&quot;} {i=NF-1; print $i}')
+ 	node_terminate_session &quot;$SERVER_NAME-$display-$sessionid&quot;
+ }
+ 
+@@ -1257,7 +1257,7 @@
+ {
+ 	sessionid=$(getparam_sessionid)
+ 	echo &quot;NX&gt; 716 Suspending session $sessionid on user request.&quot;
+-	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | rev | cut -d&quot;-&quot; -f2 |rev)
++	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | awk 'BEGIN {FS=&quot;-&quot;} {i=NF-1; print $i}') 
+ 	node_suspend_session &quot;$SERVER_NAME-$display-$sessionid&quot;
+ }
+ 
+@@ -1271,7 +1271,7 @@
+ 	computername=$(getparam computername)
+ 	dir=$(getparam dir | sed 's|$(SHARES)|MyShares|g')
+ 	# rdir=$(getparam dir | sed 's|$(SHARES)/||g')
+-	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | rev|cut -d&quot;-&quot; -f2| rev)
++	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | awk 'BEGIN {FS=&quot;-&quot;} {i=NF-1; print $i}') 
+ 	mkdir -p &quot;$HOME/$dir&quot;
+ 	# wait up to 30 sec until nxagent has opened the listener port for samba connections
+ 	for (( i=30; $i; --i ))
+@@ -1281,7 +1281,7 @@
+ 	done
+ 	# sometimes the samba port we get from nxserver is not the right one, so let's get it from nxagent
+ 	port=$(cat &quot;$USER_FAKE_HOME/.nx/C-$SERVER_NAME-$display-$sessionid/scripts/mport&quot;)
+-	error=$(PASSWD=&quot;$password&quot; &quot;$COMMAND_SMBMOUNT&quot; &quot;//$computername/$share&quot; &quot;$HOME/$dir&quot; -o username=&quot;$username,ip=127.0.0.1,port=$port&quot; 2&gt;&amp;1)
++	error=$(PASSWD=&quot;$password&quot; $COMMAND_SMBMOUNT &quot;//$computername/$share&quot; &quot;$HOME/$dir&quot; -o username=&quot;$username,ip=127.0.0.1,port=$port&quot; 2&gt;&amp;1)
+ 	if [ $? -eq 0 ]
+ 	then
+ 		$PATH_BIN/nxclient -dialog ok -caption &quot;NXServer Message&quot; -message &quot;Info: Share: '//$computername/$share' mounted on: '$HOME/$dir'&quot; -display :$display &amp;
+@@ -1304,7 +1304,7 @@
+ 	public=$(getparam public)
+ 	model=$(getparam model)
+ 	defaultPrinter=$(getparam defaultPrinter)
+-	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | rev | cut -d&quot;-&quot; -f2 | rev)
++	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | awk 'BEGIN {FS=&quot;-&quot;} {i=NF-1; print $i}') 
+ 	sess_id=&quot;$SERVER_NAME-$display-$sessionid&quot;
+ 	
+ 	# this will also setup the userspace cupsd
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2007-08-12 05:05:49 UTC (rev 369)
++++ freenx-server/trunk/nxserver	2007-08-12 05:45:19 UTC (rev 370)
+@@ -67,7 +67,7 @@
+ 	PASSDB_CHUSER=&quot;$1&quot;
+ 	PASSDB_ENC_PASS=&quot;$2&quot;
+ 	cp -f $NX_ETC_DIR/passwords $NX_ETC_DIR/passwords.orig
+-	perl -pi -e &quot;s/$PASSDB_CHUSER:.*/$PASSDB_CHUSER:$PASSDB_ENC_PASS/g&quot; $NX_ETC_DIR/passwords
++	$COMMAND_PERL -pi -e &quot;s/$PASSDB_CHUSER:.*/$PASSDB_CHUSER:$PASSDB_ENC_PASS/g&quot; $NX_ETC_DIR/passwords
+ }
+ 
+ passdb_user_exists()
+@@ -81,7 +81,7 @@
+ {
+ 	PASSDB_CHUSER=&quot;$1&quot;
+ 	cp -f $NX_ETC_DIR/passwords $NX_ETC_DIR/passwords.orig
+-	perl -pi -e &quot;s/$PASSDB_CHUSER:.*\n//g&quot; $NX_ETC_DIR/passwords
++	$COMMAND_PERL -pi -e &quot;s/$PASSDB_CHUSER:.*\n//g&quot; $NX_ETC_DIR/passwords
+ }
+ 
+ passdb_add_user()
+@@ -340,7 +340,11 @@
+ {
+ 	[ &quot;$SESSION_HISTORY&quot; -gt &quot;-1&quot; ] || return
+ 	let SESSION_HISTORY_MINUTES=$SESSION_HISTORY/60
++
++	# If you need posix find compatibility, use the outcommented variant below.
+ 	find $NX_SESS_DIR/closed/ $NX_SESS_DIR/failed/ -type f -mmin +&quot;$SESSION_HISTORY_MINUTES&quot; -exec rm -f '{}' ';'
++	#let SESSION_HISTORY_DAYS=$SESSION_HISTORY_MINUTES/1440
++	#find $NX_SESS_DIR/closed/ $NX_SESS_DIR/failed/ -type f -mtime +&quot;$SESSION_HISTORY_DAYS&quot; -exec rm -f '{}' ';'
+ }
+ 
+ session_list_all()
+@@ -371,7 +375,7 @@
+ 
+ session_change()
+ {
+-	[ -f $NX_SESS_DIR/running/sessionId'{'$1'}' ] &amp;&amp; perl -pi -e &quot;s/$2=.*/$2=$3/&quot; $NX_SESS_DIR/running/sessionId'{'$1'}'
++	[ -f $NX_SESS_DIR/running/sessionId'{'$1'}' ] &amp;&amp; $COMMAND_PERL -pi -e &quot;s/$2=.*/$2=$3/&quot; $NX_SESS_DIR/running/sessionId'{'$1'}'
+ }
+ 
+ # session_id &lt;new status&gt;
+@@ -393,7 +397,7 @@
+ 
+ session_close()
+ {
+-	perl -pi -e &quot;s/startTime=\(.*\)/startTime=\1\nendTime=$(date +%s)/&quot; $NX_SESS_DIR/running/sessionId'{'$1'}'
++	$COMMAND_PERL -pi -e &quot;s/startTime=\(.*\)/startTime=\1\nendTime=$(date +%s)/&quot; $NX_SESS_DIR/running/sessionId'{'$1'}'
+ 	session_status $1 &quot;Finished&quot;
+ 	[ &quot;$SESSION_HISTORY&quot; = &quot;0&quot; ] &amp;&amp; rm -f $NX_SESS_DIR/running/sessionId'{'$1'}'
+ 	[ &quot;$SESSION_HISTORY&quot; = &quot;0&quot; ] || mv -f $NX_SESS_DIR/running/sessionId'{'$1'}' $NX_SESS_DIR/closed/sessionId'{'$1'}'
+@@ -401,7 +405,7 @@
+ 
+ session_fail()
+ {
+-	perl -pi -e &quot;s/startTime=\(.*\)/startTime=\1\nendTime=$(date +%s)/&quot; $NX_SESS_DIR/running/sessionId'{'$1'}'
++	$COMMAND_PERL -pi -e &quot;s/startTime=\(.*\)/startTime=\1\nendTime=$(date +%s)/&quot; $NX_SESS_DIR/running/sessionId'{'$1'}'
+ 	session_status $1 &quot;Failed&quot;
+ 	[ &quot;$SESSION_HISTORY&quot; = &quot;0&quot; ] &amp;&amp; rm -f $NX_SESS_DIR/running/sessionId'{'$1'}'
+ 	[ &quot;$SESSION_HISTORY&quot; = &quot;0&quot; ] || mv -f $NX_SESS_DIR/running/sessionId'{'$1'}' $NX_SESS_DIR/failed/sessionId'{'$1'}'
+@@ -458,7 +462,7 @@
+ 
+ echo_secure()
+ {
+-	echo &quot;$@ &quot; | perl -pi -e 's/--cookie=&quot;.+?&quot;/--cookie=&quot;******&quot;/g; s/--agent_password=&quot;.+?&quot;/agent_password=&quot;******&quot;/g; s/--password=&quot;.+?&quot;/password=&quot;******&quot;/g; s/cookie=.+?&amp;/cookie=******&amp;/g; s/agent_password=.+?&amp;/agent_password=******&amp;/g; s/password=.+?&amp;/password=******&amp;/g;'
++	echo &quot;$@ &quot; | $COMMAND_PERL -pi -e 's/--cookie=&quot;.+?&quot;/--cookie=&quot;******&quot;/g; s/--agent_password=&quot;.+?&quot;/agent_password=&quot;******&quot;/g; s/--password=&quot;.+?&quot;/password=&quot;******&quot;/g; s/cookie=.+?&amp;/cookie=******&amp;/g; s/agent_password=.+?&amp;/agent_password=******&amp;/g; s/password=.+?&amp;/password=******&amp;/g;'
+ }
+ 
+ log_secure()
+
+Modified: freenx-server/trunk/nxserver-helper/nxserver-helper.c
+===================================================================
+--- freenx-server/trunk/nxserver-helper/nxserver-helper.c	2007-08-12 05:05:49 UTC (rev 369)
++++ freenx-server/trunk/nxserver-helper/nxserver-helper.c	2007-08-12 05:45:19 UTC (rev 370)
+@@ -9,6 +9,7 @@
+ 
+ #include &lt;sys/types.h&gt;
+ #include &lt;sys/socket.h&gt;
++#include &lt;unistd.h&gt;
+ 
+ int main(int argc, char* argv[])
+ {
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000501.html">[Freenx-cvs] r369 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000503.html">[Freenx-cvs] r371 - in freenx-redesign/server: . utility
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#502">[ date ]</a>
+              <a href="thread.html#502">[ thread ]</a>
+              <a href="subject.html#502">[ subject ]</a>
+              <a href="author.html#502">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

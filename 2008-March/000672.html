@@ -1,0 +1,3826 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r528 - in trunk/freenx-server: . nxviewer-passwd	nxviewer-passwd/include nxviewer-passwd/libvncauth	nxviewer-passwd/nxpasswd
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r528%20-%20in%20trunk/freenx-server%3A%20.%20nxviewer-passwd%0A%09nxviewer-passwd/include%20nxviewer-passwd/libvncauth%0A%09nxviewer-passwd/nxpasswd&In-Reply-To=%3C200803141754.m2EHsL5V009435%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000651.html">
+   <LINK REL="Next"  HREF="000652.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r528 - in trunk/freenx-server: . nxviewer-passwd	nxviewer-passwd/include nxviewer-passwd/libvncauth	nxviewer-passwd/nxpasswd</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r528%20-%20in%20trunk/freenx-server%3A%20.%20nxviewer-passwd%0A%09nxviewer-passwd/include%20nxviewer-passwd/libvncauth%0A%09nxviewer-passwd/nxpasswd&In-Reply-To=%3C200803141754.m2EHsL5V009435%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r528 - in trunk/freenx-server: . nxviewer-passwd	nxviewer-passwd/include nxviewer-passwd/libvncauth	nxviewer-passwd/nxpasswd">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Fri Mar 14 18:56:04 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000651.html">[Freenx-cvs] r527 - trunk/freenx-server
+</A></li>
+        <LI>Next message: <A HREF="000652.html">[Freenx-cvs] r529 - in trunk/freenx-server: . nxredir
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#672">[ date ]</a>
+              <a href="thread.html#672">[ thread ]</a>
+              <a href="subject.html#672">[ subject ]</a>
+              <a href="author.html#672">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-03-14 18:54:12 +0100 (Fri, 14 Mar 2008)
+New Revision: 528
+
+Added:
+   trunk/freenx-server/nxviewer-passwd/
+   trunk/freenx-server/nxviewer-passwd/COPYING
+   trunk/freenx-server/nxviewer-passwd/Imakefile
+   trunk/freenx-server/nxviewer-passwd/README
+   trunk/freenx-server/nxviewer-passwd/WhatsNew.TIGHTVNC.original
+   trunk/freenx-server/nxviewer-passwd/include/
+   trunk/freenx-server/nxviewer-passwd/include/rfbproto.h
+   trunk/freenx-server/nxviewer-passwd/include/vncauth.h
+   trunk/freenx-server/nxviewer-passwd/libvncauth/
+   trunk/freenx-server/nxviewer-passwd/libvncauth/Imakefile
+   trunk/freenx-server/nxviewer-passwd/libvncauth/d3des.c
+   trunk/freenx-server/nxviewer-passwd/libvncauth/d3des.h
+   trunk/freenx-server/nxviewer-passwd/libvncauth/vncauth.c
+   trunk/freenx-server/nxviewer-passwd/nxpasswd/
+   trunk/freenx-server/nxviewer-passwd/nxpasswd/Imakefile
+   trunk/freenx-server/nxviewer-passwd/nxpasswd/nxpasswd.man
+   trunk/freenx-server/nxviewer-passwd/nxpasswd/vncpasswd.c
+   trunk/freenx-server/nxviewer-passwd/nxpasswd/vncpasswd.c.NX.original
+   trunk/freenx-server/nxviewer-passwd/nxpasswd/vncpasswd.c.TIGHTVNC.original
+Modified:
+   trunk/freenx-server/ChangeLog
+Log:
+* Added nxviewer-passwd to distribution. It is a fork of the
+  tightvnc 1.2.9 vncpasswd part, which is necessary for FreeNX to work
+  with standard vncviewer.
+(<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-03-14 17:45:36 UTC (rev 527)
++++ trunk/freenx-server/ChangeLog	2008-03-14 17:54:12 UTC (rev 528)
+@@ -89,6 +89,10 @@
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 	* Updated documentation in INSTALL file.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Added nxviewer-passwd to distribution. It is a fork of the
++	  tightvnc vncpasswd part, which is necessary for FreeNX to work
++	  with standard vncviewer.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
+ 14.10.2007 FreeNX 0.7.1 &quot;Hip Hop Edition&quot;
+ 	* Fixed the issue that makes fonts look tiny and unreadable by default 
+
+Added: trunk/freenx-server/nxviewer-passwd/COPYING
+===================================================================
+--- trunk/freenx-server/nxviewer-passwd/COPYING	2008-03-14 17:45:36 UTC (rev 527)
++++ trunk/freenx-server/nxviewer-passwd/COPYING	2008-03-14 17:54:12 UTC (rev 528)
+@@ -0,0 +1,340 @@
++		    GNU GENERAL PUBLIC LICENSE
++		       Version 2, June 1991
++
++	  Copyright (C) 1989, 1991 Free Software Foundation, Inc.
++	 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
++ Everyone is permitted to copy and distribute verbatim copies
++ of this license document, but changing it is not allowed.
++
++			    Preamble
++
++  The licenses for most software are designed to take away your
++freedom to share and change it.  By contrast, the GNU General Public
++License is intended to guarantee your freedom to share and change free
++software--to make sure the software is free for all its users.  This
++General Public License applies to most of the Free Software
++Foundation's software and to any other program whose authors commit to
++using it.  (Some other Free Software Foundation software is covered by
++the GNU Library General Public License instead.)  You can apply it to
++your programs, too.
++
++  When we speak of free software, we are referring to freedom, not
++price.  Our General Public Licenses are designed to make sure that you
++have the freedom to distribute copies of free software (and charge for
++this service if you wish), that you receive source code or can get it
++if you want it, that you can change the software or use pieces of it
++in new free programs; and that you know you can do these things.
++
++  To protect your rights, we need to make restrictions that forbid
++anyone to deny you these rights or to ask you to surrender the rights.
++These restrictions translate to certain responsibilities for you if you
++distribute copies of the software, or if you modify it.
++
++  For example, if you distribute copies of such a program, whether
++gratis or for a fee, you must give the recipients all the rights that
++you have.  You must make sure that they, too, receive or can get the
++source code.  And you must show them these terms so they know their
++rights.
++
++  We protect your rights with two steps: (1) copyright the software, and
++(2) offer you this license which gives you legal permission to copy,
++distribute and/or modify the software.
++
++  Also, for each author's protection and ours, we want to make certain
++that everyone understands that there is no warranty for this free
++software.  If the software is modified by someone else and passed on, we
++want its recipients to know that what they have is not the original, so
++that any problems introduced by others will not reflect on the original
++authors' reputations.
++
++  Finally, any free program is threatened constantly by software
++patents.  We wish to avoid the danger that redistributors of a free
++program will individually obtain patent licenses, in effect making the
++program proprietary.  To prevent this, we have made it clear that any
++patent must be licensed for everyone's free use or not licensed at all.
++
++  The precise terms and conditions for copying, distribution and
++modification follow.
++
++		    GNU GENERAL PUBLIC LICENSE
++   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
++
++  0. This License applies to any program or other work which contains
++a notice placed by the copyright holder saying it may be distributed
++under the terms of this General Public License.  The &quot;Program&quot;, below,
++refers to any such program or work, and a &quot;work based on the Program&quot;
++means either the Program or any derivative work under copyright law:
++that is to say, a work containing the Program or a portion of it,
++either verbatim or with modifications and/or translated into another
++language.  (Hereinafter, translation is included without limitation in
++the term &quot;modification&quot;.)  Each licensee is addressed as &quot;you&quot;.
++
++Activities other than copying, distribution and modification are not
++covered by this License; they are outside its scope.  The act of
++running the Program is not restricted, and the output from the Program
++is covered only if its contents constitute a work based on the
++Program (independent of having been made by running the Program).
++Whether that is true depends on what the Program does.
++
++  1. You may copy and distribute verbatim copies of the Program's
++source code as you receive it, in any medium, provided that you
++conspicuously and appropriately publish on each copy an appropriate
++copyright notice and disclaimer of warranty; keep intact all the
++notices that refer to this License and to the absence of any warranty;
++and give any other recipients of the Program a copy of this License
++along with the Program.
++
++You may charge a fee for the physical act of transferring a copy, and
++you may at your option offer warranty protection in exchange for a fee.
++
++  2. You may modify your copy or copies of the Program or any portion
++of it, thus forming a work based on the Program, and copy and
++distribute such modifications or work under the terms of Section 1
++above, provided that you also meet all of these conditions:
++
++    a) You must cause the modified files to carry prominent notices
++    stating that you changed the files and the date of any change.
++
++    b) You must cause any work that you distribute or publish, that in
++    whole or in part contains or is derived from the Program or any
++    part thereof, to be licensed as a whole at no charge to all third
++    parties under the terms of this License.
++
++    c) If the modified program normally reads commands interactively
++    when run, you must cause it, when started running for such
++    interactive use in the most ordinary way, to print or display an
++    announcement including an appropriate copyright notice and a
++    notice that there is no warranty (or else, saying that you provide
++    a warranty) and that users may redistribute the program under
++    these conditions, and telling the user how to view a copy of this
++    License.  (Exception: if the Program itself is interactive but
++    does not normally print such an announcement, your work based on
++    the Program is not required to print an announcement.)
++
++These requirements apply to the modified work as a whole.  If
++identifiable sections of that work are not derived from the Program,
++and can be reasonably considered independent and separate works in
++themselves, then this License, and its terms, do not apply to those
++sections when you distribute them as separate works.  But when you
++distribute the same sections as part of a whole which is a work based
++on the Program, the distribution of the whole must be on the terms of
++this License, whose permissions for other licensees extend to the
++entire whole, and thus to each and every part regardless of who wrote it.
++
++Thus, it is not the intent of this section to claim rights or contest
++your rights to work written entirely by you; rather, the intent is to
++exercise the right to control the distribution of derivative or
++collective works based on the Program.
++
++In addition, mere aggregation of another work not based on the Program
++with the Program (or with a work based on the Program) on a volume of
++a storage or distribution medium does not bring the other work under
++the scope of this License.
++
++  3. You may copy and distribute the Program (or a work based on it,
++under Section 2) in object code or executable form under the terms of
++Sections 1 and 2 above provided that you also do one of the following:
++
++    a) Accompany it with the complete corresponding machine-readable
++    source code, which must be distributed under the terms of Sections
++    1 and 2 above on a medium customarily used for software interchange; or,
++
++    b) Accompany it with a written offer, valid for at least three
++    years, to give any third party, for a charge no more than your
++    cost of physically performing source distribution, a complete
++    machine-readable copy of the corresponding source code, to be
++    distributed under the terms of Sections 1 and 2 above on a medium
++    customarily used for software interchange; or,
++
++    c) Accompany it with the information you received as to the offer
++    to distribute corresponding source code.  (This alternative is
++    allowed only for noncommercial distribution and only if you
++    received the program in object code or executable form with such
++    an offer, in accord with Subsection b above.)
++
++The source code for a work means the preferred form of the work for
++making modifications to it.  For an executable work, complete source
++code means all the source code for all modules it contains, plus any
++associated interface definition files, plus the scripts used to
++control compilation and installation of the executable.  However, as a
++special exception, the source code distributed need not include
++anything that is normally distributed (in either source or binary
++form) with the major components (compiler, kernel, and so on) of the
++operating system on which the executable runs, unless that component
++itself accompanies the executable.
++
++If distribution of executable or object code is made by offering
++access to copy from a designated place, then offering equivalent
++access to copy the source code from the same place counts as
++distribution of the source code, even though third parties are not
++compelled to copy the source along with the object code.
++
++  4. You may not copy, modify, sublicense, or distribute the Program
++except as expressly provided under this License.  Any attempt
++otherwise to copy, modify, sublicense or distribute the Program is
++void, and will automatically terminate your rights under this License.
++However, parties who have received copies, or rights, from you under
++this License will not have their licenses terminated so long as such
++parties remain in full compliance.
++
++  5. You are not required to accept this License, since you have not
++signed it.  However, nothing else grants you permission to modify or
++distribute the Program or its derivative works.  These actions are
++prohibited by law if you do not accept this License.  Therefore, by
++modifying or distributing the Program (or any work based on the
++Program), you indicate your acceptance of this License to do so, and
++all its terms and conditions for copying, distributing or modifying
++the Program or works based on it.
++
++  6. Each time you redistribute the Program (or any work based on the
++Program), the recipient automatically receives a license from the
++original licensor to copy, distribute or modify the Program subject to
++these terms and conditions.  You may not impose any further
++restrictions on the recipients' exercise of the rights granted herein.
++You are not responsible for enforcing compliance by third parties to
++this License.
++
++  7. If, as a consequence of a court judgment or allegation of patent
++infringement or for any other reason (not limited to patent issues),
++conditions are imposed on you (whether by court order, agreement or
++otherwise) that contradict the conditions of this License, they do not
++excuse you from the conditions of this License.  If you cannot
++distribute so as to satisfy simultaneously your obligations under this
++License and any other pertinent obligations, then as a consequence you
++may not distribute the Program at all.  For example, if a patent
++license would not permit royalty-free redistribution of the Program by
++all those who receive copies directly or indirectly through you, then
++the only way you could satisfy both it and this License would be to
++refrain entirely from distribution of the Program.
++
++If any portion of this section is held invalid or unenforceable under
++any particular circumstance, the balance of the section is intended to
++apply and the section as a whole is intended to apply in other
++circumstances.
++
++It is not the purpose of this section to induce you to infringe any
++patents or other property right claims or to contest validity of any
++such claims; this section has the sole purpose of protecting the
++integrity of the free software distribution system, which is
++implemented by public license practices.  Many people have made
++generous contributions to the wide range of software distributed
++through that system in reliance on consistent application of that
++system; it is up to the author/donor to decide if he or she is willing
++to distribute software through any other system and a licensee cannot
++impose that choice.
++
++This section is intended to make thoroughly clear what is believed to
++be a consequence of the rest of this License.
++
++  8. If the distribution and/or use of the Program is restricted in
++certain countries either by patents or by copyrighted interfaces, the
++original copyright holder who places the Program under this License
++may add an explicit geographical distribution limitation excluding
++those countries, so that distribution is permitted only in or among
++countries not thus excluded.  In such case, this License incorporates
++the limitation as if written in the body of this License.
++
++  9. The Free Software Foundation may publish revised and/or new versions
++of the General Public License from time to time.  Such new versions will
++be similar in spirit to the present version, but may differ in detail to
++address new problems or concerns.
++
++Each version is given a distinguishing version number.  If the Program
++specifies a version number of this License which applies to it and &quot;any
++later version&quot;, you have the option of following the terms and conditions
++either of that version or of any later version published by the Free
++Software Foundation.  If the Program does not specify a version number of
++this License, you may choose any version ever published by the Free Software
++Foundation.
++
++  10. If you wish to incorporate parts of the Program into other free
++programs whose distribution conditions are different, write to the author
++to ask for permission.  For software which is copyrighted by the Free
++Software Foundation, write to the Free Software Foundation; we sometimes
++make exceptions for this.  Our decision will be guided by the two goals
++of preserving the free status of all derivatives of our free software and
++of promoting the sharing and reuse of software generally.
++
++			    NO WARRANTY
++
++  11. BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
++FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.  EXCEPT WHEN
++OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES
++PROVIDE THE PROGRAM &quot;AS IS&quot; WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED
++OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
++MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE RISK AS
++TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.  SHOULD THE
++PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING,
++REPAIR OR CORRECTION.
++
++  12. IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
++WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR
++REDISTRIBUTE THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES,
++INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING
++OUT OF THE USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED
++TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY
++YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER
++PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE
++POSSIBILITY OF SUCH DAMAGES.
++
++		     END OF TERMS AND CONDITIONS
++
++	Appendix: How to Apply These Terms to Your New Programs
++
++  If you develop a new program, and you want it to be of the greatest
++possible use to the public, the best way to achieve this is to make it
++free software which everyone can redistribute and change under these terms.
++
++  To do so, attach the following notices to the program.  It is safest
++to attach them to the start of each source file to most effectively
++convey the exclusion of warranty; and each file should have at least
++the &quot;copyright&quot; line and a pointer to where the full notice is found.
++
++    &lt;one line to give the program's name and a brief idea of what it does.&gt;
++    Copyright (C) 19yy  &lt;name of author&gt;
++
++    This program is free software; you can redistribute it and/or modify
++    it under the terms of the GNU General Public License as published by
++    the Free Software Foundation; either version 2 of the License, or
++    (at your option) any later version.
++
++    This program is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++    GNU General Public License for more details.
++
++    You should have received a copy of the GNU General Public License
++    along with this program; if not, write to the Free Software
++    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
++    USA.
++
++Also add information on how to contact you by electronic and paper mail.
++
++If the program is interactive, make it output a short notice like this
++when it starts in an interactive mode:
++
++    Gnomovision version 69, Copyright (C) 19yy name of author
++    Gnomovision comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
++    This is free software, and you are welcome to redistribute it
++    under certain conditions; type `show c' for details.
++
++The hypothetical commands `show w' and `show c' should show the appropriate
++parts of the General Public License.  Of course, the commands you use may
++be called something other than `show w' and `show c'; they could even be
++mouse-clicks or menu items--whatever suits your program.
++
++You should also get your employer (if you work as a programmer) or your
++school, if any, to sign a &quot;copyright disclaimer&quot; for the program, if
++necessary.  Here is a sample; alter the names:
++
++  Yoyodyne, Inc., hereby disclaims all copyright interest in the program
++  `Gnomovision' (which makes passes at compilers) written by James Hacker.
++
++  &lt;signature of Ty Coon&gt;, 1 April 1989
++  Ty Coon, President of Vice
++
++This General Public License does not permit incorporating your program into
++proprietary programs.  If your program is a subroutine library, you may
++consider it more useful to permit linking proprietary applications with the
++library.  If this is what you want to do, use the GNU Library General
++Public License instead of this License.
+
+Added: trunk/freenx-server/nxviewer-passwd/Imakefile
+===================================================================
+--- trunk/freenx-server/nxviewer-passwd/Imakefile	2008-03-14 17:45:36 UTC (rev 527)
++++ trunk/freenx-server/nxviewer-passwd/Imakefile	2008-03-14 17:54:12 UTC (rev 528)
+@@ -0,0 +1,35 @@
++/**************************************************************************/
++/*                                                                        */
++/* Copyright (c) 2001,2006 NoMachine, <A HREF="http://www.nomachine.com.">http://www.nomachine.com.</A>           */
++/*                                                                        */
++/* NXVIEWER, NX protocol compression and NX extensions to this software   */
++/* are copyright of NoMachine. Redistribution and use of the present      */
++/* software is allowed according to terms specified in the file LICENSE   */
++/* which comes in the source distribution.                                */
++/*                                                                        */
++/* Check <A HREF="http://www.nomachine.com/licensing.html">http://www.nomachine.com/licensing.html</A> for applicability.       */
++/*                                                                        */
++/* NX and NoMachine are trademarks of Medialogic S.p.A.                   */
++/*                                                                        */
++/* All rights reserved.                                                   */
++/*                                                                        */
++/**************************************************************************/
++
++#define IHaveSubdirs
++#define PassCDebugFlags
++
++SUBDIRS = libvncauth nxpasswd
++
++World:
++	make Makefiles
++	make depend
++	make all
++	@echo &quot;&quot;
++	@echo Built $(SUBDIRS).
++	@echo &quot;&quot;
++
++libs:
++	@echo 'No libraries included.'
++
++MakeSubdirs($(SUBDIRS))
++DependSubdirs($(SUBDIRS))
+
+Added: trunk/freenx-server/nxviewer-passwd/README
+===================================================================
+--- trunk/freenx-server/nxviewer-passwd/README	2008-03-14 17:45:36 UTC (rev 527)
++++ trunk/freenx-server/nxviewer-passwd/README	2008-03-14 17:54:12 UTC (rev 528)
+@@ -0,0 +1,8 @@
++This is just a fork of the vncpasswd part of TightVNC. This builds nxpasswd, which is needed for FreeNX.
++
++To build:
++
++xmkmf
++make World
++
++- Fabian
+
+Added: trunk/freenx-server/nxviewer-passwd/WhatsNew.TIGHTVNC.original
+===================================================================
+--- trunk/freenx-server/nxviewer-passwd/WhatsNew.TIGHTVNC.original	2008-03-14 17:45:36 UTC (rev 527)
++++ trunk/freenx-server/nxviewer-passwd/WhatsNew.TIGHTVNC.original	2008-03-14 17:54:12 UTC (rev 528)
+@@ -0,0 +1,566 @@
+++--------------------------------------------------------------------+
++|   This is a brief summary of changes introduced in each TightVNC   |
++|   release. For more details, please see ChangeLog files included   |
++|   in TightVNC source and binary archives.                          |
+++--------------------------------------------------------------------+
++
++* TightVNC 1.2.9
++
++  - Win32 version: Major security-related bug in the server has been
++    fixed -- handling of the &quot;QueryAllowNoPass&quot; option was seriously
++    broken. Together with fixing this bug, the whole authentication
++    logic in the server code has been redesigned.
++
++  - Win32 version: Now the HKEY_CURRENT_USER registry hive is being
++    closed properly on restoring display settings, on disconnect. This
++    change should solve the problem with unloading the registry on
++    logout, when WinVNC is running as a service.
++
++  - Win32 version: Problems with &quot;QuerySetting&quot; and &quot;QueryTimeout&quot;
++    options have been fixed -- the settings could be copied from user
++    configuration to default settings without user's intention.
++
++  - Win32 version: A long-standing bug has been fixed -- the logic to
++    handle retries after authentication failures was flawed, and used
++    to delete the same object twice under certain conditions.
++
++  - Win32 version: Now it's possible to specify port numbers with the
++    winvnc -connect option, using the &quot;host::port&quot; format. Also,
++    providing a -connect option without arguments now brings up the
++    &quot;Add New Client&quot; dialog.
++
++  - Unix version: New &quot;Request refresh&quot; button has been implemented in
++    the viewer's F8 popup menu.
++
++  - Unix version: Xvnc compilation fixes for HP-UX and MacOS X have
++    been applied, from Ki NETWORKS, Inc.
++
++  - Unix version: New vncpasswd -f command-line option has been
++    implemented. It allows providing passwords on stdin and writes
++    encrypted passwords to stdout. In addition, the password file name
++    &quot;-&quot; now denotes stdout. Finally, a buffer overflow has been fixed
++    in vncpasswd -- it could be caused by a long file name in the
++    command line.
++
++  - Unix version: A patch to fix input focus problems in the X11
++    viewer has been applied, from Greg Breland.
++
++  - Unix version: A patch fixing Xvnc crashes on Sparc has been
++    applied, from the RealVNC distribution.
++
++  - Unix version: A problem with incorrect port interpretation has
++    been fixed, in the vncviewer's -tunnel option handling. Thanks to
++    Clark Sessions.
++
++  - Java viewer: A modification from Bernd Krueger-Knauber has been
++    accepted, to pass through X keysyms for foreign currencies.
++
++  - Java viewer: The problem with initial keyboard focus not set to
++    the desktop on some JVMs has been fixed.
++
++  - Other minor improvements and bugfixes.
++
++----------------------------------------------------------------------
++
++* TightVNC 1.2.8
++
++  - Unix and Win32 versions: Support for a separate view-only password
++    has been implemented. Now the servers support two passwords -- one
++    to allow full control, another to restrict remote keyboard and
++    mouse input.
++
++  - Win32 version: The password reset problem has been solved. In
++    versions starting from 1.2.4, the password could get changed in
++    the registry on opening Properties dialog and just hitting the OK
++    button.
++
++  - Win32 version: New &quot;-reload&quot; command-line option has been
++    implemented in Win32 server. It forces the running instance to
++    reload the registry settings.
++
++  - Win32 version: &quot;RemoveWallpaper&quot; and &quot;LockSetting&quot; options have
++    been made configurable in the Properties dialog; the code has been
++    ported from RealVNC 3.3.6.
++
++  - Win32 version: Support for &quot;AllowEditClients&quot; registry setting has
++    been ported from RealVNC 3.3.6.
++
++  - Unix version: New &quot;-x11cursor&quot; option has been implemented in
++    vncviewer; a patch from Peter Astrand. This option allows using a
++    real X11 cursor with X11-style cursor shape updates, disables the
++    dot cursor, and disables cursor position updates in non-fullscreen
++    mode.
++
++  - Unix version: New &quot;RunCommand&quot; command to customize the X11
++    vncviewer popup menu has been implemented; a patch from Peter
++    Astrand.
++
++  - Unix version: Several patches from Debian Linux have been applied.
++    This should fix a number of bugs and improve building on some
++    platforms supported by Debian Linux.
++
++  - Unix version: A problem with Xvnc eating all CPU time after xfs
++    restarts has been fixed; a patch from Martin Koegler.
++
++  - Other minor improvements and bugfixes.
++
++----------------------------------------------------------------------
++
++* TightVNC 1.2.7
++
++  - Unix and Win32 versions, Java viewer: The most significant problem
++    with local cursor handling has been solved -- now clients can see
++    remote cursor movements performed on the server or by another
++    client. New PointerPos encoding and cursor shape updates both
++    minimize bandwidth requirements and greatly improve responsiveness
++    of the mouse pointer, while still allow to track correct pointer
++    position in all situations.
++
++  - Unix and Win32 versions: In all the places where display numbers
++    had to be used, now it's easy to use port numbers as well. The
++    viewers now allow to use new &quot;hostname::port&quot; syntax, in addition
++    to the traditional &quot;hostname:display&quot; format. The same new syntax
++    can be used in the &quot;Add new client&quot; dialog of Win32 server. In the
++    server, now it's equally easy to set display and port numbers. 
++    Besides that, HTTP and RFB port numbers can be set individually.
++
++  - Unix and Win32 versions: In servers, decreased JPEG quality
++    factors for low quality levels. This improves bandwidth usage
++    while the image quality remains satisfactory in most cases. In
++    clients, JPEG compression is now enabled by default, because
++    usually it's a reasonable choice. To prevent viewers from
++    requesting JPEG compression, new -nojpeg option can be used.
++
++  - Unix and Win32 versions: Improved installer under Windows, better
++    RPMs for Linux.
++
++  - Win32 version: Major enhancements in layout and functionality of
++    the dialog boxes.
++
++  - Win32 version: New keyboard handling code has been ported from
++    RealVNC 3.3.6. This should solve all the issues with arrow keys
++    acting as numbers in console windows, and shift+arrows not working
++    under Win2k.
++
++  - Win32 version: Adopted WinVNC -reinstall option from RealVNC
++    3.3.5, together with a number of other changes in different
++    places. The viewer now accepts a port number after the -listen
++    command-line option, an improvement from RealVNC 3.3.6.
++
++  - Win32 version: Eliminated high CPU usage on the server before
++    sending cursor shape updates.
++
++  - Unix version: Bugfix for Xvnc's -localhost and -interface options
++    that were broken on many systems, thanks to Luke Mewburn for the
++    bugfix. Xvnc -version command-line option is now supported.
++
++  - Tight encoding is now documented in rfbproto.h files within source
++    archives.
++
++  - Java viewer: Implemented new buttons &quot;Login again&quot; and &quot;Close
++    window&quot; near the disconnect or error messages in the applet mode,
++    and introduced new &quot;Offer Relogin&quot; parameter to control this
++    improvement. Thanks to Peter Astrand for the initial version of
++    the &quot;Login again&quot; patch.
++
++  - Java viewer: Support for connections via HTTP proxies using HTTP
++    CONNECT method. This will not work in the applet mode, due to Java
++    security restrictions.
++
++  - Java viewer: Extra .vnc files have been removed, having just
++    index.vnc should be enough. Also, an example HTML page has been
++    prepared, to simplify installation under a standalone Web server.
++
++  - Java viewer: Added a MANIFEST to the JAR archive, to allow easy
++    execution of the JAR file, using java -jar command-line option.
++
++  - Other minor improvements and bugfixes.
++
++----------------------------------------------------------------------
++
++* TightVNC 1.2.6
++
++  - Win32 version: In this version, when WinVNC binds to a local TCP
++    port, it does not try to check several times if the port is in
++    use. It just re-uses the port if the display number is not set to
++    &quot;Auto&quot;. One visible effect of this change is that the delay
++    between starting up and showing the icon is greatly reduced.
++
++  - Unix version: Fixed the bug which caused the vncserver script to
++    fail when the XAUTHORITY environment variable was not set.
++
++  - Unix version: Fixed the bug which prevented the vncpasswd utility
++    from setting correct permissions on the passwd file.
++
++  - Unix version: Fixed a repeated challenge replay attack
++    vulnerability, bugtraq id 5296.
++
++  - Unix version: Added files to simplify building of Linux RPMs,
++    thanks to Peter Astrand.
++
++  - Unix version: Improved scrolling in the full-screen mode, modified
++    patch from Ville Herva.
++
++  - Minor cleanups.
++
++----------------------------------------------------------------------
++
++* TightVNC 1.2.5
++
++  - Win32 version: Fixed a problem in the I/O subsystem that was
++    introduced in TightVNC 1.2.2 and was causing major slowdown in
++    communication with clients.
++
++  - Win32 version: Enabled remote upgrade in the installation script. 
++    Also, the installer will install a copy of the TightVNC Web site,
++    and will create shortcuts to most important documentation pages.
++
++  - Win32 version: Implemented new feature to specify applet
++    parameters in URL requests being sent to the built-in HTTP server. 
++    Added support for new &quot;EnableURLParams&quot; registry setting which can
++    be used to enable this feature.
++
++  - Win32 version: Added support for the NewFBSize pseudo-encoding
++    allowing to change framebuffer geometry on the fly on server's
++    request.
++
++  - Win32 version: Included &quot;solution&quot; and &quot;project&quot; files for MS
++    Visual Studio 7, from Andrew van der Stock, applied a set of minor
++    fixes to suppress compilation warnings under MS Visual Studio 7.
++
++  - Win32 version: The viewer now tries to preserve the size and
++    position of the desktop window after applying new connection
++    options.
++
++  - Unix version: Implemented new feature to specify applet parameters
++    in URL requests being sent to the built-in HTTP server. Added
++    support for new $PARAMS variable in .vnc HTML templates.
++
++  - Unix version: Added the possibility to keep users' vnc directories
++    under /tmp, as suggested by Ivan Popov. This mode can be enabled
++    by editing the $vncUserDir variable in the vncserver script. Also,
++    new -t option has been implemented in the vncpasswd utility which
++    allows to change VNC password files under /tmp.
++
++  - Unix version: Applied Xvnc -viewonly patch from Ehud Karni.
++
++  - Unix version: Applied Linux/PowerPC Xvnc fix from Peter A. Castro.
++
++  - Unix version: Bug fixed: Xvnc failed to reset compression level
++    and JPEG image quality on reading lists of encodings supported by
++    clients.
++
++  - Unix version: Made the viewer handle XCursor encoding operating on
++    the framebuffer instead of setting new cursors directly in X.
++
++  - Unix version: Applied a number of porting fixes from Ki Networks,
++    Inc.
++
++  - Java viewer: Added new feature allowing to save RFB sessions in
++    FBS files compatible with rfbproxy. This feature works only if JVM
++    security manager allows access to the local filesystem, which is
++    usually true only when the viewer is used as a standalone
++    application or if the viewer applet is cryptographically signed.
++    New &quot;Record&quot; button will appear in the button panel if this
++    feature is enabled.
++
++  - Java viewer: Added new &quot;ENCPASSWORD&quot; parameter, modified patch
++    from Peter Astrand.
++
++  - Java viewer: Applied patch from Peter Astrand to fix problems with
++    Swedish keys and broken JVMs.
++
++  - Other minor fixes and cleanups.
++
++----------------------------------------------------------------------
++
++* TightVNC 1.2.4
++
++  - Win32 version: WinVNC crashes on reporting zero statistics were
++    fixed. This should eliminate crashes when using x2vnc and win2vnc
++    client programs.
++
++  - Win32 version: a problem with listening viewer was fixed.
++    Initiating multiple non-shared connections could crash the viewer
++    application.
++
++  - Win32 version: real passwords are never placed into the password
++    text control in the WinVNC Properties dialog any more. This should
++    prevent grabbing plain-text passwords from that text control.
++
++  - Win32 version: logging on errors was improved to provide better
++    diagnosis for errors, especially for those causing the message
++    &quot;Connection closed&quot; right after authentication.
++
++  - Win32 version: handling of log files was improved. Now WinVNC
++    should be able to save backup copies of log files under
++    Win95/98/Me. Also, all log files are now written in MS-DOS/Windows
++    text format instead of the Unix one.
++
++  - Win32 version: a problem with reporting error messages in the
++    listening viewer was fixed.
++
++  - Win32 version: reporting incorrect statistics in the Tight encoder
++    was fixed.
++
++  - Win32 version: HTML pages and templates for the built-in HTTP
++    server were improved.
++
++  - Unix version: applied patch from Ki Networks, Inc. solving build
++    problems on a number of commercial Unix systems, and fixing a
++    number of minor bugs and typos.
++
++  - Unix version: added a possibility to denote standard input with
++    the &quot;-&quot; file name instead of a real password file name.
++
++  - Unix version: fixed a bug causing vncpasswd utility work
++    incorrectly when a file name argument was given in the command
++    line.
++
++  - Unix version: applied patch to solve keyboard focus problems in
++    the full-screen vncviewer, from Peter Astrand. The patch does not
++    seem to solve all the issues, but definitely makes things better.
++    New grabKeyboard resource was added to control full-screen mode
++    behavior.
++
++  - Java viewer: new &quot;Show Offline Desktop&quot; parameter was added to
++    make the desktop still visible even after the remote side has
++    closed connection.
++
++  - Java viewer: error messages were made much more meaningful.
++
++  - Java viewer: keyboard focus problems were fixed. This should
++    prevent opening new windows (e.g. Options or Clipboard) behind the
++    active authenticator or desktop window.
++
++  - Java viewer: now &quot;R&quot;/&quot;r&quot; keys can be used to request screen
++    updates in view-only mode.
++
++  - Java viewer: applied patch from Peter Astrand to fix problems with
++    Swedish keys and broken JVMs.
++
++  - Other minor fixes and cleanups.
++
++----------------------------------------------------------------------
++
++* TightVNC 1.2.3
++
++  - Unix and Win32 versions: zlib library was updated to the most
++    recent version (1.1.4) where a potential security issue was fixed.
++
++  - Unix and Win32 versions: fixed blocking I/O problems in built-in
++    HTTP servers. Older versions had to wait while one client finishes
++    his transaction, only then they served new client connections,
++    thus making easy denial-of-service attacks possible.
++
++  - Unix and Win32 versions: updated built-in Java viewer, see details
++    below.
++
++  - Win32 version: Added support for mouse wheel events. Wheel mouse
++    support is fully compatible and interoperable with Unix version
++    where this feature was available for a long time.
++
++  - Win32 version (WinVNC): The -connect command-line option now
++    accepts a display number after a hostname.
++
++  - Win32 version: Creating associations for .vnc files in the
++    installer.
++
++  - Java viewer was GREATLY improved: the code was converted to Java
++    1.1, painting techniques were re-designed completely (now the
++    viewer should work in MacOS), several new parameters were added,
++    all parameters were documented in the README file. Most important
++    new features include: support for 24-bit colors, JPEG support in
++    Tight encoding, RFB Bell message support, new &quot;Refresh&quot; button, a
++    possibility to operate in a separate scrollable window, dynamic
++    view-only mode. Many more changes were introduces, see the
++    ChangeLog for more information. Please note that new Java viewer
++    class names were changed, e.g. vncviewer.jar file has become
++    VncViewer.jar etc.
++
++  - Unix version: a number of changes in the vncserver script, e.g.
++    the default color depth is now 24, extra delay after Xvnc startup
++    removed, font path is now configurable in the beginning of the
++    script, and more.
++
++  - Unix version: zlib library was removed from the core X sources.
++    Instead, both vncviewer and Xvnc now can use either system zlib
++    and JPEG libraries, or ones packaged within TightVNC source
++    archive in the lib/ directory. Unix sources are distributed in two
++    versions: one with these libraries for those who don't have them
++    installed in the system, and another version without libraries,
++    copied directly from CVS, for those who do have zlib and/or JPEG
++    libraries installed. In the former case, build procedure would
++    include additional &quot;make libs&quot; step. System libraries will be
++    linked dynamically, libraries included in the source archive will
++    be linked in statically.
++
++  - Unix version now includes comprehensive manual pages for
++    vncviewer, vncserver, Xvnc, vncconnect and vncpasswd programs. The
++    vncinstall script in the source distribution now accepts one more
++    parameter allowing to specify where to install manual pages.
++
++  - Unix version (Xvnc): a number of patches from Red Hat Linux vnc
++    package were incorporated into the TightVNC codebase. This adds
++    support for more architectures including s390 and s390x, adds a
++    possibility to use tcp_wrappers for Xvnc access control.
++
++  - Unix version (Xvnc): several bugfixes, e.g. applied patch to fix
++    crash in the code dealing with font server; fixed word alignment
++    problem in raw encoder experienced by Sparc users.
++
++  - Unix version is no more distributed as patches to a standard VNC
++    release. This is because patches cannot handle changes in binary
++    files and handle file removals very inefficiently.
++
++  - Other minor fixes and cleanups.
++
++----------------------------------------------------------------------
++
++* TightVNC 1.2.2
++
++  - Win32 server: long-standing Win9x resource consumption problem has
++    been fixed. Now the server thread does not use blocking I/O, and
++    therefore is always ready to process messages from the VNCHooks
++    DLL.
++
++  - Win32 server: now built-in HTTP daemon may be enabled and disabled
++    interactively from the Advanced Preferences dialog (this setting
++    is saved in new &quot;EnableHTTPDaemon&quot; registry key).
++
++  - Win32 server: changes in layout and text of the Advanced
++    Preferences dialog.
++
++  - Xvnc: Minor bugfix which should prevent potential dereference of a
++    NULL pointer.
++
++  - Unix viewer: Now viewer window would be raised on beep (bell)
++    event, unless new -noraiseonbeep option is provided in the command
++    line or &quot;raiseOnBeep&quot; resource set to False.
++
++  - One more packaging option for the Unix source: ready to build
++    archive with Zlib and JPEG libraries inside.
++
++  - Other minor fixes and cleanups.
++
++----------------------------------------------------------------------
++
++* TightVNC 1.2.1
++
++  - Win32 server: added support for reverse connections on ports other
++    than 5500, modified patch from Steve Kann.
++
++  - Win32 viewer: added support for new command-line options:
++    -noshared and -encoding XXX.
++
++  - Bugfixes in Win32 viewer: changes in exception handling eliminate
++    Borland C++ compilation problems causing application crashes on
++    repetitive connections, notably in the listen mode. Also, now
++    warning exceptions causing disconnects are reported to user,
++    except for the case when a user has closed the viewer window.
++
++  - Better packaging in Win32 version: self-installing package is
++    available, vncviewer now shows correct icon image.
++
++  - Unix vncviewer: Default tunneling command template has been
++    changed, to allow tunneled connections to hosts where only
++    loopback VNC connections are enabled. New -via &lt;GATEWAY&gt;
++    command-line option provides enhanced tunneling functionality, now
++    one can make vncviewer tunnel connections to a VNC host via third
++    machine acting as a gateway.
++
++  - Java viewer: Addition of new parameters PASSWORD, &quot;Show Controls&quot;,
++    and &quot;View Only&quot;, modified patch from Steve Kann.
++
++----------------------------------------------------------------------
++
++* TightVNC 1.2.0
++
++  - Tight encoding is now configurable and can operate at different
++    compression levels where low compression levels are very fast in
++    terms of CPU usage. New &quot;-compresslevel N&quot; option implemented in
++    vncviewer to set compression levels for Tight encoding (1 - fast,
++    9 - best).
++
++  - Enhanced techniques to split large rectangles in Tight encoder;
++    now it tries to find large solid-color areas and send them in
++    separate rectangles.
++
++  - Lossy JPEG compression in Tight encoding has been implemented, new
++    &quot;-quality N&quot; vncviewer option should be used to enable this
++    feature (0 - low image quality and best compression, 9 - best
++    image quality). JPEG compression is used only for screen areas
++    that seem to be suitable for JPEG compression (although algorithms
++    to detect such areas are not perfect, of course).
++
++  - New &quot;XCursor&quot; and &quot;RichCursor&quot; encodings implemented. They are
++    used to transmit cursor shape updates from server to clients
++    (&quot;local cursor&quot; feature requested by many users). Mouse movement
++    no longer causes framebuffer updates to happen, vncviewer
++    processes mouse locally when this feature is active. New
++    -nocursorshape vncviewer option turns this feature off.
++
++  - A number of recent changes from both TridiaVNC and AT&amp;T's releases
++    merged into the source, now the code is based on version 3.3.3r2
++    for Unix part, and on 3.3.3r9 for Win32.
++
++  - Unix vncviewer: When -tunnel option is specified in the command
++    line, special rules are now used to choose preferred encoding. Now
++    viewer does not think that server is running on the same machine
++    when tunneling is on and the preferred encoding is now &quot;tight&quot;
++    with default compression instead of raw.
++
++  - Xvnc: Rules to set default pixel formats have been changed: now
++    they are RGB565 instead of BGR556 for color depth 16, and RGB888
++    instead of BGR888 for depth 24. This makes Xvnc compatible with
++    Imlib renderer used in Gnome and also helps to avoid unnecessary
++    pixel format translations in many cases.
++
++  - Xvnc: X11 modifier mapped to META key is now Mod4 instead of Mod1.
++    New -compatiblekbd option implemented in Xvnc to force META and
++    ALT keys behave the same way as they do in the original AT&amp;T's
++    version.
++
++  - A number of bugs fixed: viewer crashes after inflate() call, Xvnc
++    CoRRE encoding problems, Xvnc bit-order issues in XCursor and
++    RichCursor encodings, etc.
++
++  - Java viewer now supports Tight encoding and cursor shape updates.
++    Drawing techniques were changed, settings &quot;Raw pixel drawing:
++    Fast/Reliable&quot; and &quot;CopyRect: Fast/Reliable&quot; removed from the
++    Options panel since they do not make sense in new drawing model.
++
++  - Other new features, optimizations, fixes and cleanups, see
++    ChangeLog files.
++
++----------------------------------------------------------------------
++
++* VNC Tight Encoding 1.1
++
++  - New ``gradient'' filter implemented in servers (it can be disabled
++    in Xvnc with new -lazytight option). The filter preprocess
++    full-color screen areas prior to compression in order to achieve
++    better compression ratios (with the cost of slower compression).
++    Vncviewers of version 1.0 had support for this filter already, but
++    there was small bug causing image distortions in certain cases. So
++    it is recommended to upgrade both servers and viewers.
++
++  - Stupid bug fixed: extra unused color was included in palettes in
++    many cases; compression ratios used to be worse than they should
++    be.
++
++  - The algorithm used to split large rectangles into parts has been
++    changed. This change can increase compression ratios in many
++    situations.
++
++  - Byte-order issues in servers have been (hopefully) fixed.
++
++  - Performance tuning, code rewrites and cleanups in various places.
++
++----------------------------------------------------------------------
++
++* VNC Tight Encoding 1.0
++
++  - Initial release.
++
++----------------------------------------------------------------------
+
+Added: trunk/freenx-server/nxviewer-passwd/include/rfbproto.h
+===================================================================
+--- trunk/freenx-server/nxviewer-passwd/include/rfbproto.h	2008-03-14 17:45:36 UTC (rev 527)
++++ trunk/freenx-server/nxviewer-passwd/include/rfbproto.h	2008-03-14 17:54:12 UTC (rev 528)
+@@ -0,0 +1,907 @@
++/*
++ *  Copyright (C) 2000-2002 Constantin Kaplinsky.  All Rights Reserved.
++ *  Copyright (C) 2000 Tridia Corporation.  All Rights Reserved.
++ *  Copyright (C) 1999 AT&amp;T Laboratories Cambridge.  All Rights Reserved.
++ *
++ *  This is free software; you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License as published by
++ *  the Free Software Foundation; either version 2 of the License, or
++ *  (at your option) any later version.
++ *
++ *  This software is distributed in the hope that it will be useful,
++ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *  GNU General Public License for more details.
++ *
++ *  You should have received a copy of the GNU General Public License
++ *  along with this software; if not, write to the Free Software
++ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
++ *  USA.
++ */
++
++/*
++ * rfbproto.h - header file for the RFB protocol version 3.3
++ *
++ * Uses types CARD&lt;n&gt; for an n-bit unsigned integer, INT&lt;n&gt; for an n-bit signed
++ * integer (for n = 8, 16 and 32).
++ *
++ * All multiple byte integers are in big endian (network) order (most
++ * significant byte first).  Unless noted otherwise there is no special
++ * alignment of protocol structures.
++ *
++ *
++ * Once the initial handshaking is done, all messages start with a type byte,
++ * (usually) followed by message-specific data.  The order of definitions in
++ * this file is as follows:
++ *
++ *  (1) Structures used in several types of message.
++ *  (2) Structures used in the initial handshaking.
++ *  (3) Message types.
++ *  (4) Encoding types.
++ *  (5) For each message type, the form of the data following the type byte.
++ *      Sometimes this is defined by a single structure but the more complex
++ *      messages have to be explained by comments.
++ */
++
++
++/*****************************************************************************
++ *
++ * Structures used in several messages
++ *
++ *****************************************************************************/
++
++/*-----------------------------------------------------------------------------
++ * Structure used to specify a rectangle.  This structure is a multiple of 4
++ * bytes so that it can be interspersed with 32-bit pixel data without
++ * affecting alignment.
++ */
++
++typedef struct {
++    CARD16 x;
++    CARD16 y;
++    CARD16 w;
++    CARD16 h;
++} rfbRectangle;
++
++#define sz_rfbRectangle 8
++
++
++/*-----------------------------------------------------------------------------
++ * Structure used to specify pixel format.
++ */
++
++typedef struct {
++
++    CARD8 bitsPerPixel;		/* 8,16,32 only */
++
++    CARD8 depth;		/* 8 to 32 */
++
++    CARD8 bigEndian;		/* True if multi-byte pixels are interpreted
++				   as big endian, or if single-bit-per-pixel
++				   has most significant bit of the byte
++				   corresponding to first (leftmost) pixel. Of
++				   course this is meaningless for 8 bits/pix */
++
++    CARD8 trueColour;		/* If false then we need a &quot;colour map&quot; to
++				   convert pixels to RGB.  If true, xxxMax and
++				   xxxShift specify bits used for red, green
++				   and blue */
++
++    /* the following fields are only meaningful if trueColour is true */
++
++    CARD16 redMax;		/* maximum red value (= 2^n - 1 where n is the
++				   number of bits used for red). Note this
++				   value is always in big endian order. */
++
++    CARD16 greenMax;		/* similar for green */
++
++    CARD16 blueMax;		/* and blue */
++
++    CARD8 redShift;		/* number of shifts needed to get the red
++				   value in a pixel to the least significant
++				   bit. To find the red value from a given
++				   pixel, do the following:
++				   1) Swap pixel value according to bigEndian
++				      (e.g. if bigEndian is false and host byte
++				      order is big endian, then swap).
++				   2) Shift right by redShift.
++				   3) AND with redMax (in host byte order).
++				   4) You now have the red value between 0 and
++				      redMax. */
++
++    CARD8 greenShift;		/* similar for green */
++
++    CARD8 blueShift;		/* and blue */
++
++    CARD8 pad1;
++    CARD16 pad2;
++
++} rfbPixelFormat;
++
++#define sz_rfbPixelFormat 16
++
++
++
++/*****************************************************************************
++ *
++ * Initial handshaking messages
++ *
++ *****************************************************************************/
++
++/*-----------------------------------------------------------------------------
++ * Protocol Version
++ *
++ * The server always sends 12 bytes to start which identifies the latest RFB
++ * protocol version number which it supports.  These bytes are interpreted
++ * as a string of 12 ASCII characters in the format &quot;RFB xxx.yyy\n&quot; where
++ * xxx and yyy are the major and minor version numbers (for version 3.3
++ * this is &quot;RFB 003.003\n&quot;).
++ *
++ * The client then replies with a similar 12-byte message giving the version
++ * number of the protocol which should actually be used (which may be different
++ * to that quoted by the server).
++ *
++ * It is intended that both clients and servers may provide some level of
++ * backwards compatibility by this mechanism.  Servers in particular should
++ * attempt to provide backwards compatibility, and even forwards compatibility
++ * to some extent.  For example if a client demands version 3.1 of the
++ * protocol, a 3.0 server can probably assume that by ignoring requests for
++ * encoding types it doesn't understand, everything will still work OK.  This
++ * will probably not be the case for changes in the major version number.
++ *
++ * The format string below can be used in sprintf or sscanf to generate or
++ * decode the version string respectively.
++ */
++
++#define rfbProtocolVersionFormat &quot;RFB %03d.%03d\n&quot;
++#define rfbProtocolMajorVersion 3
++#define rfbProtocolMinorVersion 3
++
++typedef char rfbProtocolVersionMsg[13];	/* allow extra byte for null */
++
++#define sz_rfbProtocolVersionMsg 12
++
++
++/*-----------------------------------------------------------------------------
++ * Authentication
++ *
++ * Once the protocol version has been decided, the server then sends a 32-bit
++ * word indicating whether any authentication is needed on the connection.
++ * The value of this word determines the authentication scheme in use.  For
++ * version 3.0 of the protocol this may have one of the following values:
++ */
++
++#define rfbConnFailed 0
++#define rfbNoAuth 1
++#define rfbVncAuth 2
++
++/*
++ * rfbConnFailed:	For some reason the connection failed (e.g. the server
++ *			cannot support the desired protocol version).  This is
++ *			followed by a string describing the reason (where a
++ *			string is specified as a 32-bit length followed by that
++ *			many ASCII characters).
++ *
++ * rfbNoAuth:		No authentication is needed.
++ *
++ * rfbVncAuth:		The VNC authentication scheme is to be used.  A 16-byte
++ *			challenge follows, which the client encrypts as
++ *			appropriate using the password and sends the resulting
++ *			16-byte response.  If the response is correct, the
++ *			server sends the 32-bit word rfbVncAuthOK.  If a simple
++ *			failure happens, the server sends rfbVncAuthFailed and
++ *			closes the connection. If the server decides that too
++ *			many failures have occurred, it sends rfbVncAuthTooMany
++ *			and closes the connection.  In the latter case, the
++ *			server should not allow an immediate reconnection by
++ *			the client.
++ */
++
++#define rfbVncAuthOK 0
++#define rfbVncAuthFailed 1
++#define rfbVncAuthTooMany 2
++
++
++/*-----------------------------------------------------------------------------
++ * Client Initialisation Message
++ *
++ * Once the client and server are sure that they're happy to talk to one
++ * another, the client sends an initialisation message.  At present this
++ * message only consists of a boolean indicating whether the server should try
++ * to share the desktop by leaving other clients connected, or give exclusive
++ * access to this client by disconnecting all other clients.
++ */
++
++typedef struct {
++    CARD8 shared;
++} rfbClientInitMsg;
++
++#define sz_rfbClientInitMsg 1
++
++
++/*-----------------------------------------------------------------------------
++ * Server Initialisation Message
++ *
++ * After the client initialisation message, the server sends one of its own.
++ * This tells the client the width and height of the server's framebuffer,
++ * its pixel format and the name associated with the desktop.
++ */
++
++typedef struct {
++    CARD16 framebufferWidth;
++    CARD16 framebufferHeight;
++    rfbPixelFormat format;	/* the server's preferred pixel format */
++    CARD32 nameLength;
++    /* followed by char name[nameLength] */
++} rfbServerInitMsg;
++
++#define sz_rfbServerInitMsg (8 + sz_rfbPixelFormat)
++
++
++/*
++ * Following the server initialisation message it's up to the client to send
++ * whichever protocol messages it wants.  Typically it will send a
++ * SetPixelFormat message and a SetEncodings message, followed by a
++ * FramebufferUpdateRequest.  From then on the server will send
++ * FramebufferUpdate messages in response to the client's
++ * FramebufferUpdateRequest messages.  The client should send
++ * FramebufferUpdateRequest messages with incremental set to true when it has
++ * finished processing one FramebufferUpdate and is ready to process another.
++ * With a fast client, the rate at which FramebufferUpdateRequests are sent
++ * should be regulated to avoid hogging the network.
++ */
++
++
++
++/*****************************************************************************
++ *
++ * Message types
++ *
++ *****************************************************************************/
++
++/* server -&gt; client */
++
++#define rfbFramebufferUpdate 0
++#define rfbSetColourMapEntries 1
++#define rfbBell 2
++#define rfbServerCutText 3
++
++
++/* client -&gt; server */
++
++#define rfbSetPixelFormat 0
++#define rfbFixColourMapEntries 1	/* not currently supported */
++#define rfbSetEncodings 2
++#define rfbFramebufferUpdateRequest 3
++#define rfbKeyEvent 4
++#define rfbPointerEvent 5
++#define rfbClientCutText 6
++
++
++
++
++/*****************************************************************************
++ *
++ * Encoding types
++ *
++ *****************************************************************************/
++
++#define rfbEncodingRaw 0
++#define rfbEncodingCopyRect 1
++#define rfbEncodingRRE 2
++#define rfbEncodingCoRRE 4
++#define rfbEncodingHextile 5
++#define rfbEncodingZlib 6
++#define rfbEncodingTight 7
++#define rfbEncodingZlibHex 8
++
++/*
++ * Special encoding numbers:
++ *   0xFFFFFF00 .. 0xFFFFFF0F -- encoding-specific compression levels;
++ *   0xFFFFFF10 .. 0xFFFFFF1F -- mouse cursor shape data;
++ *   0xFFFFFF20 .. 0xFFFFFF2F -- various protocol extensions;
++ *   0xFFFFFF30 .. 0xFFFFFFDF -- not allocated yet;
++ *   0xFFFFFFE0 .. 0xFFFFFFEF -- quality level for JPEG compressor;
++ *   0xFFFFFFF0 .. 0xFFFFFFFF -- cross-encoding compression levels.
++ */
++
++#define rfbEncodingCompressLevel0  0xFFFFFF00
++#define rfbEncodingCompressLevel1  0xFFFFFF01
++#define rfbEncodingCompressLevel2  0xFFFFFF02
++#define rfbEncodingCompressLevel3  0xFFFFFF03
++#define rfbEncodingCompressLevel4  0xFFFFFF04
++#define rfbEncodingCompressLevel5  0xFFFFFF05
++#define rfbEncodingCompressLevel6  0xFFFFFF06
++#define rfbEncodingCompressLevel7  0xFFFFFF07
++#define rfbEncodingCompressLevel8  0xFFFFFF08
++#define rfbEncodingCompressLevel9  0xFFFFFF09
++
++#define rfbEncodingXCursor         0xFFFFFF10
++#define rfbEncodingRichCursor      0xFFFFFF11
++#define rfbEncodingPointerPos      0xFFFFFF18
++
++#define rfbEncodingLastRect        0xFFFFFF20
++
++#define rfbEncodingQualityLevel0   0xFFFFFFE0
++#define rfbEncodingQualityLevel1   0xFFFFFFE1
++#define rfbEncodingQualityLevel2   0xFFFFFFE2
++#define rfbEncodingQualityLevel3   0xFFFFFFE3
++#define rfbEncodingQualityLevel4   0xFFFFFFE4
++#define rfbEncodingQualityLevel5   0xFFFFFFE5
++#define rfbEncodingQualityLevel6   0xFFFFFFE6
++#define rfbEncodingQualityLevel7   0xFFFFFFE7
++#define rfbEncodingQualityLevel8   0xFFFFFFE8
++#define rfbEncodingQualityLevel9   0xFFFFFFE9
++
++
++/*****************************************************************************
++ *
++ * Server -&gt; client message definitions
++ *
++ *****************************************************************************/
++
++
++/*-----------------------------------------------------------------------------
++ * FramebufferUpdate - a block of rectangles to be copied to the framebuffer.
++ *
++ * This message consists of a header giving the number of rectangles of pixel
++ * data followed by the rectangles themselves.  The header is padded so that
++ * together with the type byte it is an exact multiple of 4 bytes (to help
++ * with alignment of 32-bit pixels):
++ */
++
++typedef struct {
++    CARD8 type;			/* always rfbFramebufferUpdate */
++    CARD8 pad;
++    CARD16 nRects;
++    /* followed by nRects rectangles */
++} rfbFramebufferUpdateMsg;
++
++#define sz_rfbFramebufferUpdateMsg 4
++
++/*
++ * Each rectangle of pixel data consists of a header describing the position
++ * and size of the rectangle and a type word describing the encoding of the
++ * pixel data, followed finally by the pixel data.  Note that if the client has
++ * not sent a SetEncodings message then it will only receive raw pixel data.
++ * Also note again that this structure is a multiple of 4 bytes.
++ */
++
++typedef struct {
++    rfbRectangle r;
++    CARD32 encoding;	/* one of the encoding types rfbEncoding... */
++} rfbFramebufferUpdateRectHeader;
++
++#define sz_rfbFramebufferUpdateRectHeader (sz_rfbRectangle + 4)
++
++
++/*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
++ * Raw Encoding.  Pixels are sent in top-to-bottom scanline order,
++ * left-to-right within a scanline with no padding in between.
++ */
++
++
++/*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
++ * CopyRect Encoding.  The pixels are specified simply by the x and y position
++ * of the source rectangle.
++ */
++
++typedef struct {
++    CARD16 srcX;
++    CARD16 srcY;
++} rfbCopyRect;
++
++#define sz_rfbCopyRect 4
++
++
++/*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
++ * RRE - Rise-and-Run-length Encoding.  We have an rfbRREHeader structure
++ * giving the number of subrectangles following.  Finally the data follows in
++ * the form [&lt;bgpixel&gt;&lt;subrect&gt;&lt;subrect&gt;...] where each &lt;subrect&gt; is
++ * [&lt;pixel&gt;&lt;rfbRectangle&gt;].
++ */
++
++typedef struct {
++    CARD32 nSubrects;
++} rfbRREHeader;
++
++#define sz_rfbRREHeader 4
++
++
++/*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
++ * CoRRE - Compact RRE Encoding.  We have an rfbRREHeader structure giving
++ * the number of subrectangles following.  Finally the data follows in the form
++ * [&lt;bgpixel&gt;&lt;subrect&gt;&lt;subrect&gt;...] where each &lt;subrect&gt; is
++ * [&lt;pixel&gt;&lt;rfbCoRRERectangle&gt;].  This means that
++ * the whole rectangle must be at most 255x255 pixels.
++ */
++
++typedef struct {
++    CARD8 x;
++    CARD8 y;
++    CARD8 w;
++    CARD8 h;
++} rfbCoRRERectangle;
++
++#define sz_rfbCoRRERectangle 4
++
++
++/*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
++ * Hextile Encoding.  The rectangle is divided up into &quot;tiles&quot; of 16x16 pixels,
++ * starting at the top left going in left-to-right, top-to-bottom order.  If
++ * the width of the rectangle is not an exact multiple of 16 then the width of
++ * the last tile in each row will be correspondingly smaller.  Similarly if the
++ * height is not an exact multiple of 16 then the height of each tile in the
++ * final row will also be smaller.  Each tile begins with a &quot;subencoding&quot; type
++ * byte, which is a mask made up of a number of bits.  If the Raw bit is set
++ * then the other bits are irrelevant; w*h pixel values follow (where w and h
++ * are the width and height of the tile).  Otherwise the tile is encoded in a
++ * similar way to RRE, except that the position and size of each subrectangle
++ * can be specified in just two bytes.  The other bits in the mask are as
++ * follows:
++ *
++ * BackgroundSpecified - if set, a pixel value follows which specifies
++ *    the background colour for this tile.  The first non-raw tile in a
++ *    rectangle must have this bit set.  If this bit isn't set then the
++ *    background is the same as the last tile.
++ *
++ * ForegroundSpecified - if set, a pixel value follows which specifies
++ *    the foreground colour to be used for all subrectangles in this tile.
++ *    If this bit is set then the SubrectsColoured bit must be zero.
++ *
++ * AnySubrects - if set, a single byte follows giving the number of
++ *    subrectangles following.  If not set, there are no subrectangles (i.e.
++ *    the whole tile is just solid background colour).
++ *
++ * SubrectsColoured - if set then each subrectangle is preceded by a pixel
++ *    value giving the colour of that subrectangle.  If not set, all
++ *    subrectangles are the same colour, the foreground colour;  if the
++ *    ForegroundSpecified bit wasn't set then the foreground is the same as
++ *    the last tile.
++ *
++ * The position and size of each subrectangle is specified in two bytes.  The
++ * Pack macros below can be used to generate the two bytes from x, y, w, h,
++ * and the Extract macros can be used to extract the x, y, w, h values from
++ * the two bytes.
++ */
++
++#define rfbHextileRaw			(1 &lt;&lt; 0)
++#define rfbHextileBackgroundSpecified	(1 &lt;&lt; 1)
++#define rfbHextileForegroundSpecified	(1 &lt;&lt; 2)
++#define rfbHextileAnySubrects		(1 &lt;&lt; 3)
++#define rfbHextileSubrectsColoured	(1 &lt;&lt; 4)
++
++#define rfbHextilePackXY(x,y) (((x) &lt;&lt; 4) | (y))
++#define rfbHextilePackWH(w,h) ((((w)-1) &lt;&lt; 4) | ((h)-1))
++#define rfbHextileExtractX(byte) ((byte) &gt;&gt; 4)
++#define rfbHextileExtractY(byte) ((byte) &amp; 0xf)
++#define rfbHextileExtractW(byte) (((byte) &gt;&gt; 4) + 1)
++#define rfbHextileExtractH(byte) (((byte) &amp; 0xf) + 1)
++
++
++/*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
++ * zlib - zlib compressed Encoding.  We have an rfbZlibHeader structure
++ * giving the number of bytes following.  Finally the data follows is
++ * zlib compressed version of the raw pixel data as negotiated.
++ */
++
++typedef struct {
++    CARD32 nBytes;
++} rfbZlibHeader;
++
++#define sz_rfbZlibHeader 4
++
++
++/*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
++ * Tight Encoding.
++ *
++ *-- The first byte of each Tight-encoded rectangle is a &quot;compression control
++ *   byte&quot;. Its format is as follows (bit 0 is the least significant one):
++ *
++ *   bit 0:    if 1, then compression stream 0 should be reset;
++ *   bit 1:    if 1, then compression stream 1 should be reset;
++ *   bit 2:    if 1, then compression stream 2 should be reset;
++ *   bit 3:    if 1, then compression stream 3 should be reset;
++ *   bits 7-4: if 1000 (0x08), then the compression type is &quot;fill&quot;,
++ *             if 1001 (0x09), then the compression type is &quot;jpeg&quot;,
++ *             if 0xxx, then the compression type is &quot;basic&quot;,
++ *             values greater than 1001 are not valid.
++ *
++ * If the compression type is &quot;basic&quot;, then bits 6..4 of the
++ * compression control byte (those xxx in 0xxx) specify the following:
++ *
++ *   bits 5-4:  decimal representation is the index of a particular zlib
++ *              stream which should be used for decompressing the data;
++ *   bit 6:     if 1, then a &quot;filter id&quot; byte is following this byte.
++ *
++ *-- The data that follows after the compression control byte described
++ * above depends on the compression type (&quot;fill&quot;, &quot;jpeg&quot; or &quot;basic&quot;).
++ *
++ *-- If the compression type is &quot;fill&quot;, then the only pixel value follows, in
++ * client pixel format (see NOTE 1). This value applies to all pixels of the
++ * rectangle.
++ *
++ *-- If the compression type is &quot;jpeg&quot;, the following data stream looks like
++ * this:
++ *
++ *   1..3 bytes:  data size (N) in compact representation;
++ *   N bytes:     JPEG image.
++ *
++ * Data size is compactly represented in one, two or three bytes, according
++ * to the following scheme:
++ *
++ *  0xxxxxxx                    (for values 0..127)
++ *  1xxxxxxx 0yyyyyyy           (for values 128..16383)
++ *  1xxxxxxx 1yyyyyyy zzzzzzzz  (for values 16384..4194303)
++ *
++ * Here each character denotes one bit, xxxxxxx are the least significant 7
++ * bits of the value (bits 0-6), yyyyyyy are bits 7-13, and zzzzzzzz are the
++ * most significant 8 bits (bits 14-21). For example, decimal value 10000
++ * should be represented as two bytes: binary 10010000 01001110, or
++ * hexadecimal 90 4E.
++ *
++ *-- If the compression type is &quot;basic&quot; and bit 6 of the compression control
++ * byte was set to 1, then the next (second) byte specifies &quot;filter id&quot; which
++ * tells the decoder what filter type was used by the encoder to pre-process
++ * pixel data before the compression. The &quot;filter id&quot; byte can be one of the
++ * following:
++ *
++ *   0:  no filter (&quot;copy&quot; filter);
++ *   1:  &quot;palette&quot; filter;
++ *   2:  &quot;gradient&quot; filter.
++ *
++ *-- If bit 6 of the compression control byte is set to 0 (no &quot;filter id&quot;
++ * byte), or if the filter id is 0, then raw pixel values in the client
++ * format (see NOTE 1) will be compressed. See below details on the
++ * compression.
++ *
++ *-- The &quot;gradient&quot; filter pre-processes pixel data with a simple algorithm
++ * which converts each color component to a difference between a &quot;predicted&quot;
++ * intensity and the actual intensity. Such a technique does not affect
++ * uncompressed data size, but helps to compress photo-like images better. 
++ * Pseudo-code for converting intensities to differences is the following:
++ *
++ *   P[i,j] := V[i-1,j] + V[i,j-1] - V[i-1,j-1];
++ *   if (P[i,j] &lt; 0) then P[i,j] := 0;
++ *   if (P[i,j] &gt; MAX) then P[i,j] := MAX;
++ *   D[i,j] := V[i,j] - P[i,j];
++ *
++ * Here V[i,j] is the intensity of a color component for a pixel at
++ * coordinates (i,j). MAX is the maximum value of intensity for a color
++ * component.
++ *
++ *-- The &quot;palette&quot; filter converts true-color pixel data to indexed colors
++ * and a palette which can consist of 2..256 colors. If the number of colors
++ * is 2, then each pixel is encoded in 1 bit, otherwise 8 bits is used to
++ * encode one pixel. 1-bit encoding is performed such way that the most
++ * significant bits correspond to the leftmost pixels, and each raw of pixels
++ * is aligned to the byte boundary. When &quot;palette&quot; filter is used, the
++ * palette is sent before the pixel data. The palette begins with an unsigned
++ * byte which value is the number of colors in the palette minus 1 (i.e. 1
++ * means 2 colors, 255 means 256 colors in the palette). Then follows the
++ * palette itself which consist of pixel values in client pixel format (see
++ * NOTE 1).
++ *
++ *-- The pixel data is compressed using the zlib library. But if the data
++ * size after applying the filter but before the compression is less then 12,
++ * then the data is sent as is, uncompressed. Four separate zlib streams
++ * (0..3) can be used and the decoder should read the actual stream id from
++ * the compression control byte (see NOTE 2).
++ *
++ * If the compression is not used, then the pixel data is sent as is,
++ * otherwise the data stream looks like this:
++ *
++ *   1..3 bytes:  data size (N) in compact representation;
++ *   N bytes:     zlib-compressed data.
++ *
++ * Data size is compactly represented in one, two or three bytes, just like
++ * in the &quot;jpeg&quot; compression method (see above).
++ *
++ *-- NOTE 1. If the color depth is 24, and all three color components are
++ * 8-bit wide, then one pixel in Tight encoding is always represented by
++ * three bytes, where the first byte is red component, the second byte is
++ * green component, and the third byte is blue component of the pixel color
++ * value. This applies to colors in palettes as well.
++ *
++ *-- NOTE 2. The decoder must reset compression streams' states before
++ * decoding the rectangle, if some of bits 0,1,2,3 in the compression control
++ * byte are set to 1. Note that the decoder must reset zlib streams even if
++ * the compression type is &quot;fill&quot; or &quot;jpeg&quot;.
++ *
++ *-- NOTE 3. The &quot;gradient&quot; filter and &quot;jpeg&quot; compression may be used only
++ * when bits-per-pixel value is either 16 or 32, not 8.
++ *
++ *-- NOTE 4. The width of any Tight-encoded rectangle cannot exceed 2048
++ * pixels. If a rectangle is wider, it must be split into several rectangles
++ * and each one should be encoded separately.
++ *
++ */
++
++#define rfbTightExplicitFilter         0x04
++#define rfbTightFill                   0x08
++#define rfbTightJpeg                   0x09
++#define rfbTightMaxSubencoding         0x09
++
++/* Filters to improve compression efficiency */
++#define rfbTightFilterCopy             0x00
++#define rfbTightFilterPalette          0x01
++#define rfbTightFilterGradient         0x02
++
++
++/*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
++ * XCursor encoding. This is a special encoding used to transmit X-style
++ * cursor shapes from server to clients. Note that for this encoding,
++ * coordinates in rfbFramebufferUpdateRectHeader structure hold hotspot
++ * position (r.x, r.y) and cursor size (r.w, r.h). If (w * h != 0), two RGB
++ * samples are sent after header in the rfbXCursorColors structure. They
++ * denote foreground and background colors of the cursor. If a client
++ * supports only black-and-white cursors, it should ignore these colors and
++ * assume that foreground is black and background is white. Next, two bitmaps
++ * (1 bits per pixel) follow: first one with actual data (value 0 denotes
++ * background color, value 1 denotes foreground color), second one with
++ * transparency data (bits with zero value mean that these pixels are
++ * transparent). Both bitmaps represent cursor data in a byte stream, from
++ * left to right, from top to bottom, and each row is byte-aligned. Most
++ * significant bits correspond to leftmost pixels. The number of bytes in
++ * each row can be calculated as ((w + 7) / 8). If (w * h == 0), cursor
++ * should be hidden (or default local cursor should be set by the client).
++ */
++
++typedef struct {
++    CARD8 foreRed;
++    CARD8 foreGreen;
++    CARD8 foreBlue;
++    CARD8 backRed;
++    CARD8 backGreen;
++    CARD8 backBlue;
++} rfbXCursorColors;
++
++#define sz_rfbXCursorColors 6
++
++
++/*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
++ * RichCursor encoding. This is a special encoding used to transmit cursor
++ * shapes from server to clients. It is similar to the XCursor encoding but
++ * uses client pixel format instead of two RGB colors to represent cursor
++ * image. For this encoding, coordinates in rfbFramebufferUpdateRectHeader
++ * structure hold hotspot position (r.x, r.y) and cursor size (r.w, r.h).
++ * After header, two pixmaps follow: first one with cursor image in current
++ * client pixel format (like in raw encoding), second with transparency data
++ * (1 bit per pixel, exactly the same format as used for transparency bitmap
++ * in the XCursor encoding). If (w * h == 0), cursor should be hidden (or
++ * default local cursor should be set by the client).
++ */
++
++
++/*-----------------------------------------------------------------------------
++ * SetColourMapEntries - these messages are only sent if the pixel
++ * format uses a &quot;colour map&quot; (i.e. trueColour false) and the client has not
++ * fixed the entire colour map using FixColourMapEntries.  In addition they
++ * will only start being sent after the client has sent its first
++ * FramebufferUpdateRequest.  So if the client always tells the server to use
++ * trueColour then it never needs to process this type of message.
++ */
++
++typedef struct {
++    CARD8 type;			/* always rfbSetColourMapEntries */
++    CARD8 pad;
++    CARD16 firstColour;
++    CARD16 nColours;
++
++    /* Followed by nColours * 3 * CARD16
++       r1, g1, b1, r2, g2, b2, r3, g3, b3, ..., rn, bn, gn */
++
++} rfbSetColourMapEntriesMsg;
++
++#define sz_rfbSetColourMapEntriesMsg 6
++
++
++
++/*-----------------------------------------------------------------------------
++ * Bell - ring a bell on the client if it has one.
++ */
++
++typedef struct {
++    CARD8 type;			/* always rfbBell */
++} rfbBellMsg;
++
++#define sz_rfbBellMsg 1
++
++
++
++/*-----------------------------------------------------------------------------
++ * ServerCutText - the server has new text in its cut buffer.
++ */
++
++typedef struct {
++    CARD8 type;			/* always rfbServerCutText */
++    CARD8 pad1;
++    CARD16 pad2;
++    CARD32 length;
++    /* followed by char text[length] */
++} rfbServerCutTextMsg;
++
++#define sz_rfbServerCutTextMsg 8
++
++
++/*-----------------------------------------------------------------------------
++ * Union of all server-&gt;client messages.
++ */
++
++typedef union {
++    CARD8 type;
++    rfbFramebufferUpdateMsg fu;
++    rfbSetColourMapEntriesMsg scme;
++    rfbBellMsg b;
++    rfbServerCutTextMsg sct;
++} rfbServerToClientMsg;
++
++
++
++/*****************************************************************************
++ *
++ * Message definitions (client -&gt; server)
++ *
++ *****************************************************************************/
++
++
++/*-----------------------------------------------------------------------------
++ * SetPixelFormat - tell the RFB server the format in which the client wants
++ * pixels sent.
++ */
++
++typedef struct {
++    CARD8 type;			/* always rfbSetPixelFormat */
++    CARD8 pad1;
++    CARD16 pad2;
++    rfbPixelFormat format;
++} rfbSetPixelFormatMsg;
++
++#define sz_rfbSetPixelFormatMsg (sz_rfbPixelFormat + 4)
++
++
++/*-----------------------------------------------------------------------------
++ * FixColourMapEntries - when the pixel format uses a &quot;colour map&quot;, fix
++ * read-only colour map entries.
++ *
++ *    ***************** NOT CURRENTLY SUPPORTED *****************
++ */
++
++typedef struct {
++    CARD8 type;			/* always rfbFixColourMapEntries */
++    CARD8 pad;
++    CARD16 firstColour;
++    CARD16 nColours;
++
++    /* Followed by nColours * 3 * CARD16
++       r1, g1, b1, r2, g2, b2, r3, g3, b3, ..., rn, bn, gn */
++
++} rfbFixColourMapEntriesMsg;
++
++#define sz_rfbFixColourMapEntriesMsg 6
++
++
++/*-----------------------------------------------------------------------------
++ * SetEncodings - tell the RFB server which encoding types we accept.  Put them
++ * in order of preference, if we have any.  We may always receive raw
++ * encoding, even if we don't specify it here.
++ */
++
++typedef struct {
++    CARD8 type;			/* always rfbSetEncodings */
++    CARD8 pad;
++    CARD16 nEncodings;
++    /* followed by nEncodings * CARD32 encoding types */
++} rfbSetEncodingsMsg;
++
++#define sz_rfbSetEncodingsMsg 4
++
++
++/*-----------------------------------------------------------------------------
++ * FramebufferUpdateRequest - request for a framebuffer update.  If incremental
++ * is true then the client just wants the changes since the last update.  If
++ * false then it wants the whole of the specified rectangle.
++ */
++
++typedef struct {
++    CARD8 type;			/* always rfbFramebufferUpdateRequest */
++    CARD8 incremental;
++    CARD16 x;
++    CARD16 y;
++    CARD16 w;
++    CARD16 h;
++} rfbFramebufferUpdateRequestMsg;
++
++#define sz_rfbFramebufferUpdateRequestMsg 10
++
++
++/*-----------------------------------------------------------------------------
++ * KeyEvent - key press or release
++ *
++ * Keys are specified using the &quot;keysym&quot; values defined by the X Window System.
++ * For most ordinary keys, the keysym is the same as the corresponding ASCII
++ * value.  Other common keys are:
++ *
++ * BackSpace		0xff08
++ * Tab			0xff09
++ * Return or Enter	0xff0d
++ * Escape		0xff1b
++ * Insert		0xff63
++ * Delete		0xffff
++ * Home			0xff50
++ * End			0xff57
++ * Page Up		0xff55
++ * Page Down		0xff56
++ * Left			0xff51
++ * Up			0xff52
++ * Right		0xff53
++ * Down			0xff54
++ * F1			0xffbe
++ * F2			0xffbf
++ * ...			...
++ * F12			0xffc9
++ * Shift		0xffe1
++ * Control		0xffe3
++ * Meta			0xffe7
++ * Alt			0xffe9
++ */
++
++typedef struct {
++    CARD8 type;			/* always rfbKeyEvent */
++    CARD8 down;			/* true if down (press), false if up */
++    CARD16 pad;
++    CARD32 key;			/* key is specified as an X keysym */
++} rfbKeyEventMsg;
++
++#define sz_rfbKeyEventMsg 8
++
++
++/*-----------------------------------------------------------------------------
++ * PointerEvent - mouse/pen move and/or button press.
++ */
++
++typedef struct {
++    CARD8 type;			/* always rfbPointerEvent */
++    CARD8 buttonMask;		/* bits 0-7 are buttons 1-8, 0=up, 1=down */
++    CARD16 x;
++    CARD16 y;
++} rfbPointerEventMsg;
++
++#define rfbButton1Mask 1
++#define rfbButton2Mask 2
++#define rfbButton3Mask 4
++
++#define sz_rfbPointerEventMsg 6
++
++
++
++/*-----------------------------------------------------------------------------
++ * ClientCutText - the client has new text in its cut buffer.
++ */
++
++typedef struct {
++    CARD8 type;			/* always rfbClientCutText */
++    CARD8 pad1;
++    CARD16 pad2;
++    CARD32 length;
++    /* followed by char text[length] */
++} rfbClientCutTextMsg;
++
++#define sz_rfbClientCutTextMsg 8
++
++
++
++/*-----------------------------------------------------------------------------
++ * Union of all client-&gt;server messages.
++ */
++
++typedef union {
++    CARD8 type;
++    rfbSetPixelFormatMsg spf;
++    rfbFixColourMapEntriesMsg fcme;
++    rfbSetEncodingsMsg se;
++    rfbFramebufferUpdateRequestMsg fur;
++    rfbKeyEventMsg ke;
++    rfbPointerEventMsg pe;
++    rfbClientCutTextMsg cct;
++} rfbClientToServerMsg;
+
+Added: trunk/freenx-server/nxviewer-passwd/include/vncauth.h
+===================================================================
+--- trunk/freenx-server/nxviewer-passwd/include/vncauth.h	2008-03-14 17:45:36 UTC (rev 527)
++++ trunk/freenx-server/nxviewer-passwd/include/vncauth.h	2008-03-14 17:54:12 UTC (rev 528)
+@@ -0,0 +1,30 @@
++/*
++ *  Copyright (C) 1999 AT&amp;T Laboratories Cambridge.  All Rights Reserved.
++ *
++ *  This is free software; you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License as published by
++ *  the Free Software Foundation; either version 2 of the License, or
++ *  (at your option) any later version.
++ *
++ *  This software is distributed in the hope that it will be useful,
++ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *  GNU General Public License for more details.
++ *
++ *  You should have received a copy of the GNU General Public License
++ *  along with this software; if not, write to the Free Software
++ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
++ *  USA.
++ */
++
++/* 
++ * vncauth.h - describes the functions provided by the vncauth library.
++ */
++
++#define MAXPWLEN 8
++#define CHALLENGESIZE 16
++
++extern int vncEncryptAndStorePasswd(char *passwd, char *fname);
++extern char *vncDecryptPasswdFromFile(char *fname);
++extern void vncRandomBytes(unsigned char *bytes);
++extern void vncEncryptBytes(unsigned char *bytes, char *passwd);
+
+Added: trunk/freenx-server/nxviewer-passwd/libvncauth/Imakefile
+===================================================================
+--- trunk/freenx-server/nxviewer-passwd/libvncauth/Imakefile	2008-03-14 17:45:36 UTC (rev 527)
++++ trunk/freenx-server/nxviewer-passwd/libvncauth/Imakefile	2008-03-14 17:54:12 UTC (rev 528)
+@@ -0,0 +1,14 @@
++
++#ifdef SunArchitecture
++EXTRA_DEFINES = -D__EXTENSIONS__
++#endif
++
++SRCS = vncauth.c d3des.c
++
++OBJS = vncauth.o d3des.o
++
++INCLUDES = -I. -I../include
++
++NormalLibraryTarget(vncauth,$(OBJS))
++
++DependTarget()
+
+Added: trunk/freenx-server/nxviewer-passwd/libvncauth/d3des.c
+===================================================================
+--- trunk/freenx-server/nxviewer-passwd/libvncauth/d3des.c	2008-03-14 17:45:36 UTC (rev 527)
++++ trunk/freenx-server/nxviewer-passwd/libvncauth/d3des.c	2008-03-14 17:54:12 UTC (rev 528)
+@@ -0,0 +1,440 @@
++/*
++ * This is D3DES (V5.09) by Richard Outerbridge with the double and
++ * triple-length support removed for use in VNC.  Also the bytebit[] array
++ * has been reversed so that the most significant bit in each byte of the
++ * key is ignored, not the least significant.
++ *
++ * These changes are:
++ *  Copyright (C) 1999 AT&amp;T Laboratories Cambridge.  All Rights Reserved.
++ *
++ * This software is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
++ */
++
++/* D3DES (V5.09) -
++ *
++ * A portable, public domain, version of the Data Encryption Standard.
++ *
++ * Written with Symantec's THINK (Lightspeed) C by Richard Outerbridge.
++ * Thanks to: Dan Hoey for his excellent Initial and Inverse permutation
++ * code;  Jim Gillogly &amp; Phil Karn for the DES key schedule code; Dennis
++ * Ferguson, Eric Young and Dana How for comparing notes; and Ray Lau,
++ * for humouring me on.
++ *
++ * Copyright (c) 1988,1989,1990,1991,1992 by Richard Outerbridge.
++ * (GEnie : OUTER; CIS : [71755,204]) Graven Imagery, 1992.
++ */
++
++#include &quot;d3des.h&quot;
++
++static void scrunch(unsigned char *, unsigned long *);
++static void unscrun(unsigned long *, unsigned char *);
++static void desfunc(unsigned long *, unsigned long *);
++static void cookey(unsigned long *);
++
++static unsigned long KnL[32] = { 0L };
++static unsigned long KnR[32] = { 0L };
++static unsigned long Kn3[32] = { 0L };
++static unsigned char Df_Key[24] = {
++	0x01,0x23,0x45,0x67,0x89,0xab,0xcd,0xef,
++	0xfe,0xdc,0xba,0x98,0x76,0x54,0x32,0x10,
++	0x89,0xab,0xcd,0xef,0x01,0x23,0x45,0x67 };
++
++static unsigned short bytebit[8]	= {
++	01, 02, 04, 010, 020, 040, 0100, 0200 };
++
++static unsigned long bigbyte[24] = {
++	0x800000L,	0x400000L,	0x200000L,	0x100000L,
++	0x80000L,	0x40000L,	0x20000L,	0x10000L,
++	0x8000L,	0x4000L,	0x2000L,	0x1000L,
++	0x800L, 	0x400L, 	0x200L, 	0x100L,
++	0x80L,		0x40L,		0x20L,		0x10L,
++	0x8L,		0x4L,		0x2L,		0x1L	};
++
++/* Use the key schedule specified in the Standard (ANSI X3.92-1981). */
++
++static unsigned char pc1[56] = {
++	56, 48, 40, 32, 24, 16,  8,	 0, 57, 49, 41, 33, 25, 17,
++	 9,  1, 58, 50, 42, 34, 26,	18, 10,  2, 59, 51, 43, 35,
++	62, 54, 46, 38, 30, 22, 14,	 6, 61, 53, 45, 37, 29, 21,
++	13,  5, 60, 52, 44, 36, 28,	20, 12,  4, 27, 19, 11,  3 };
++
++static unsigned char totrot[16] = {
++	1,2,4,6,8,10,12,14,15,17,19,21,23,25,27,28 };
++
++static unsigned char pc2[48] = {
++	13, 16, 10, 23,  0,  4,  2, 27, 14,  5, 20,  9,
++	22, 18, 11,  3, 25,  7, 15,  6, 26, 19, 12,  1,
++	40, 51, 30, 36, 46, 54, 29, 39, 50, 44, 32, 47,
++	43, 48, 38, 55, 33, 52, 45, 41, 49, 35, 28, 31 };
++
++void deskey(key, edf)	/* Thanks to James Gillogly &amp; Phil Karn! */
++unsigned char *key;
++int edf;
++{
++	register int i, j, l, m, n;
++	unsigned char pc1m[56], pcr[56];
++	unsigned long kn[32];
++
++	for ( j = 0; j &lt; 56; j++ ) {
++		l = pc1[j];
++		m = l &amp; 07;
++		pc1m[j] = (key[l &gt;&gt; 3] &amp; bytebit[m]) ? 1 : 0;
++		}
++	for( i = 0; i &lt; 16; i++ ) {
++		if( edf == DE1 ) m = (15 - i) &lt;&lt; 1;
++		else m = i &lt;&lt; 1;
++		n = m + 1;
++		kn[m] = kn[n] = 0L;
++		for( j = 0; j &lt; 28; j++ ) {
++			l = j + totrot[i];
++			if( l &lt; 28 ) pcr[j] = pc1m[l];
++			else pcr[j] = pc1m[l - 28];
++			}
++		for( j = 28; j &lt; 56; j++ ) {
++		    l = j + totrot[i];
++		    if( l &lt; 56 ) pcr[j] = pc1m[l];
++		    else pcr[j] = pc1m[l - 28];
++		    }
++		for( j = 0; j &lt; 24; j++ ) {
++			if( pcr[pc2[j]] ) kn[m] |= bigbyte[j];
++			if( pcr[pc2[j+24]] ) kn[n] |= bigbyte[j];
++			}
++		}
++	cookey(kn);
++	return;
++	}
++
++static void cookey(raw1)
++register unsigned long *raw1;
++{
++	register unsigned long *cook, *raw0;
++	unsigned long dough[32];
++	register int i;
++
++	cook = dough;
++	for( i = 0; i &lt; 16; i++, raw1++ ) {
++		raw0 = raw1++;
++		*cook	 = (*raw0 &amp; 0x00fc0000L) &lt;&lt; 6;
++		*cook	|= (*raw0 &amp; 0x00000fc0L) &lt;&lt; 10;
++		*cook	|= (*raw1 &amp; 0x00fc0000L) &gt;&gt; 10;
++		*cook++ |= (*raw1 &amp; 0x00000fc0L) &gt;&gt; 6;
++		*cook	 = (*raw0 &amp; 0x0003f000L) &lt;&lt; 12;
++		*cook	|= (*raw0 &amp; 0x0000003fL) &lt;&lt; 16;
++		*cook	|= (*raw1 &amp; 0x0003f000L) &gt;&gt; 4;
++		*cook++ |= (*raw1 &amp; 0x0000003fL);
++		}
++	usekey(dough);
++	return;
++	}
++
++void cpkey(into)
++register unsigned long *into;
++{
++	register unsigned long *from, *endp;
++
++	from = KnL, endp = &amp;KnL[32];
++	while( from &lt; endp ) *into++ = *from++;
++	return;
++	}
++
++void usekey(from)
++register unsigned long *from;
++{
++	register unsigned long *to, *endp;
++
++	to = KnL, endp = &amp;KnL[32];
++	while( to &lt; endp ) *to++ = *from++;
++	return;
++	}
++
++void des(inblock, outblock)
++unsigned char *inblock, *outblock;
++{
++	unsigned long work[2];
++
++	scrunch(inblock, work);
++	desfunc(work, KnL);
++	unscrun(work, outblock);
++	return;
++	}
++
++static void scrunch(outof, into)
++register unsigned char *outof;
++register unsigned long *into;
++{
++	*into	 = (*outof++ &amp; 0xffL) &lt;&lt; 24;
++	*into	|= (*outof++ &amp; 0xffL) &lt;&lt; 16;
++	*into	|= (*outof++ &amp; 0xffL) &lt;&lt; 8;
++	*into++ |= (*outof++ &amp; 0xffL);
++	*into	 = (*outof++ &amp; 0xffL) &lt;&lt; 24;
++	*into	|= (*outof++ &amp; 0xffL) &lt;&lt; 16;
++	*into	|= (*outof++ &amp; 0xffL) &lt;&lt; 8;
++	*into	|= (*outof   &amp; 0xffL);
++	return;
++	}
++
++static void unscrun(outof, into)
++register unsigned long *outof;
++register unsigned char *into;
++{
++	*into++ = (*outof &gt;&gt; 24) &amp; 0xffL;
++	*into++ = (*outof &gt;&gt; 16) &amp; 0xffL;
++	*into++ = (*outof &gt;&gt;  8) &amp; 0xffL;
++	*into++ =  *outof++	 &amp; 0xffL;
++	*into++ = (*outof &gt;&gt; 24) &amp; 0xffL;
++	*into++ = (*outof &gt;&gt; 16) &amp; 0xffL;
++	*into++ = (*outof &gt;&gt;  8) &amp; 0xffL;
++	*into	=  *outof	 &amp; 0xffL;
++	return;
++	}
++
++static unsigned long SP1[64] = {
++	0x01010400L, 0x00000000L, 0x00010000L, 0x01010404L,
++	0x01010004L, 0x00010404L, 0x00000004L, 0x00010000L,
++	0x00000400L, 0x01010400L, 0x01010404L, 0x00000400L,
++	0x01000404L, 0x01010004L, 0x01000000L, 0x00000004L,
++	0x00000404L, 0x01000400L, 0x01000400L, 0x00010400L,
++	0x00010400L, 0x01010000L, 0x01010000L, 0x01000404L,
++	0x00010004L, 0x01000004L, 0x01000004L, 0x00010004L,
++	0x00000000L, 0x00000404L, 0x00010404L, 0x01000000L,
++	0x00010000L, 0x01010404L, 0x00000004L, 0x01010000L,
++	0x01010400L, 0x01000000L, 0x01000000L, 0x00000400L,
++	0x01010004L, 0x00010000L, 0x00010400L, 0x01000004L,
++	0x00000400L, 0x00000004L, 0x01000404L, 0x00010404L,
++	0x01010404L, 0x00010004L, 0x01010000L, 0x01000404L,
++	0x01000004L, 0x00000404L, 0x00010404L, 0x01010400L,
++	0x00000404L, 0x01000400L, 0x01000400L, 0x00000000L,
++	0x00010004L, 0x00010400L, 0x00000000L, 0x01010004L };
++
++static unsigned long SP2[64] = {
++	0x80108020L, 0x80008000L, 0x00008000L, 0x00108020L,
++	0x00100000L, 0x00000020L, 0x80100020L, 0x80008020L,
++	0x80000020L, 0x80108020L, 0x80108000L, 0x80000000L,
++	0x80008000L, 0x00100000L, 0x00000020L, 0x80100020L,
++	0x00108000L, 0x00100020L, 0x80008020L, 0x00000000L,
++	0x80000000L, 0x00008000L, 0x00108020L, 0x80100000L,
++	0x00100020L, 0x80000020L, 0x00000000L, 0x00108000L,
++	0x00008020L, 0x80108000L, 0x80100000L, 0x00008020L,
++	0x00000000L, 0x00108020L, 0x80100020L, 0x00100000L,
++	0x80008020L, 0x80100000L, 0x80108000L, 0x00008000L,
++	0x80100000L, 0x80008000L, 0x00000020L, 0x80108020L,
++	0x00108020L, 0x00000020L, 0x00008000L, 0x80000000L,
++	0x00008020L, 0x80108000L, 0x00100000L, 0x80000020L,
++	0x00100020L, 0x80008020L, 0x80000020L, 0x00100020L,
++	0x00108000L, 0x00000000L, 0x80008000L, 0x00008020L,
++	0x80000000L, 0x80100020L, 0x80108020L, 0x00108000L };
++
++static unsigned long SP3[64] = {
++	0x00000208L, 0x08020200L, 0x00000000L, 0x08020008L,
++	0x08000200L, 0x00000000L, 0x00020208L, 0x08000200L,
++	0x00020008L, 0x08000008L, 0x08000008L, 0x00020000L,
++	0x08020208L, 0x00020008L, 0x08020000L, 0x00000208L,
++	0x08000000L, 0x00000008L, 0x08020200L, 0x00000200L,
++	0x00020200L, 0x08020000L, 0x08020008L, 0x00020208L,
++	0x08000208L, 0x00020200L, 0x00020000L, 0x08000208L,
++	0x00000008L, 0x08020208L, 0x00000200L, 0x08000000L,
++	0x08020200L, 0x08000000L, 0x00020008L, 0x00000208L,
++	0x00020000L, 0x08020200L, 0x08000200L, 0x00000000L,
++	0x00000200L, 0x00020008L, 0x08020208L, 0x08000200L,
++	0x08000008L, 0x00000200L, 0x00000000L, 0x08020008L,
++	0x08000208L, 0x00020000L, 0x08000000L, 0x08020208L,
++	0x00000008L, 0x00020208L, 0x00020200L, 0x08000008L,
++	0x08020000L, 0x08000208L, 0x00000208L, 0x08020000L,
++	0x00020208L, 0x00000008L, 0x08020008L, 0x00020200L };
++
++static unsigned long SP4[64] = {
++	0x00802001L, 0x00002081L, 0x00002081L, 0x00000080L,
++	0x00802080L, 0x00800081L, 0x00800001L, 0x00002001L,
++	0x00000000L, 0x00802000L, 0x00802000L, 0x00802081L,
++	0x00000081L, 0x00000000L, 0x00800080L, 0x00800001L,
++	0x00000001L, 0x00002000L, 0x00800000L, 0x00802001L,
++	0x00000080L, 0x00800000L, 0x00002001L, 0x00002080L,
++	0x00800081L, 0x00000001L, 0x00002080L, 0x00800080L,
++	0x00002000L, 0x00802080L, 0x00802081L, 0x00000081L,
++	0x00800080L, 0x00800001L, 0x00802000L, 0x00802081L,
++	0x00000081L, 0x00000000L, 0x00000000L, 0x00802000L,
++	0x00002080L, 0x00800080L, 0x00800081L, 0x00000001L,
++	0x00802001L, 0x00002081L, 0x00002081L, 0x00000080L,
++	0x00802081L, 0x00000081L, 0x00000001L, 0x00002000L,
++	0x00800001L, 0x00002001L, 0x00802080L, 0x00800081L,
++	0x00002001L, 0x00002080L, 0x00800000L, 0x00802001L,
++	0x00000080L, 0x00800000L, 0x00002000L, 0x00802080L };
++
++static unsigned long SP5[64] = {
++	0x00000100L, 0x02080100L, 0x02080000L, 0x42000100L,
++	0x00080000L, 0x00000100L, 0x40000000L, 0x02080000L,
++	0x40080100L, 0x00080000L, 0x02000100L, 0x40080100L,
++	0x42000100L, 0x42080000L, 0x00080100L, 0x40000000L,
++	0x02000000L, 0x40080000L, 0x40080000L, 0x00000000L,
++	0x40000100L, 0x42080100L, 0x42080100L, 0x02000100L,
++	0x42080000L, 0x40000100L, 0x00000000L, 0x42000000L,
++	0x02080100L, 0x02000000L, 0x42000000L, 0x00080100L,
++	0x00080000L, 0x42000100L, 0x00000100L, 0x02000000L,
++	0x40000000L, 0x02080000L, 0x42000100L, 0x40080100L,
++	0x02000100L, 0x40000000L, 0x42080000L, 0x02080100L,
++	0x40080100L, 0x00000100L, 0x02000000L, 0x42080000L,
++	0x42080100L, 0x00080100L, 0x42000000L, 0x42080100L,
++	0x02080000L, 0x00000000L, 0x40080000L, 0x42000000L,
++	0x00080100L, 0x02000100L, 0x40000100L, 0x00080000L,
++	0x00000000L, 0x40080000L, 0x02080100L, 0x40000100L };
++
++static unsigned long SP6[64] = {
++	0x20000010L, 0x20400000L, 0x00004000L, 0x20404010L,
++	0x20400000L, 0x00000010L, 0x20404010L, 0x00400000L,
++	0x20004000L, 0x00404010L, 0x00400000L, 0x20000010L,
++	0x00400010L, 0x20004000L, 0x20000000L, 0x00004010L,
++	0x00000000L, 0x00400010L, 0x20004010L, 0x00004000L,
++	0x00404000L, 0x20004010L, 0x00000010L, 0x20400010L,
++	0x20400010L, 0x00000000L, 0x00404010L, 0x20404000L,
++	0x00004010L, 0x00404000L, 0x20404000L, 0x20000000L,
++	0x20004000L, 0x00000010L, 0x20400010L, 0x00404000L,
++	0x20404010L, 0x00400000L, 0x00004010L, 0x20000010L,
++	0x00400000L, 0x20004000L, 0x20000000L, 0x00004010L,
++	0x20000010L, 0x20404010L, 0x00404000L, 0x20400000L,
++	0x00404010L, 0x20404000L, 0x00000000L, 0x20400010L,
++	0x00000010L, 0x00004000L, 0x20400000L, 0x00404010L,
++	0x00004000L, 0x00400010L, 0x20004010L, 0x00000000L,
++	0x20404000L, 0x20000000L, 0x00400010L, 0x20004010L };
++
++static unsigned long SP7[64] = {
++	0x00200000L, 0x04200002L, 0x04000802L, 0x00000000L,
++	0x00000800L, 0x04000802L, 0x00200802L, 0x04200800L,
++	0x04200802L, 0x00200000L, 0x00000000L, 0x04000002L,
++	0x00000002L, 0x04000000L, 0x04200002L, 0x00000802L,
++	0x04000800L, 0x00200802L, 0x00200002L, 0x04000800L,
++	0x04000002L, 0x04200000L, 0x04200800L, 0x00200002L,
++	0x04200000L, 0x00000800L, 0x00000802L, 0x04200802L,
++	0x00200800L, 0x00000002L, 0x04000000L, 0x00200800L,
++	0x04000000L, 0x00200800L, 0x00200000L, 0x04000802L,
++	0x04000802L, 0x04200002L, 0x04200002L, 0x00000002L,
++	0x00200002L, 0x04000000L, 0x04000800L, 0x00200000L,
++	0x04200800L, 0x00000802L, 0x00200802L, 0x04200800L,
++	0x00000802L, 0x04000002L, 0x04200802L, 0x04200000L,
++	0x00200800L, 0x00000000L, 0x00000002L, 0x04200802L,
++	0x00000000L, 0x00200802L, 0x04200000L, 0x00000800L,
++	0x04000002L, 0x04000800L, 0x00000800L, 0x00200002L };
++
++static unsigned long SP8[64] = {
++	0x10001040L, 0x00001000L, 0x00040000L, 0x10041040L,
++	0x10000000L, 0x10001040L, 0x00000040L, 0x10000000L,
++	0x00040040L, 0x10040000L, 0x10041040L, 0x00041000L,
++	0x10041000L, 0x00041040L, 0x00001000L, 0x00000040L,
++	0x10040000L, 0x10000040L, 0x10001000L, 0x00001040L,
++	0x00041000L, 0x00040040L, 0x10040040L, 0x10041000L,
++	0x00001040L, 0x00000000L, 0x00000000L, 0x10040040L,
++	0x10000040L, 0x10001000L, 0x00041040L, 0x00040000L,
++	0x00041040L, 0x00040000L, 0x10041000L, 0x00001000L,
++	0x00000040L, 0x10040040L, 0x00001000L, 0x00041040L,
++	0x10001000L, 0x00000040L, 0x10000040L, 0x10040000L,
++	0x10040040L, 0x10000000L, 0x00040000L, 0x10001040L,
++	0x00000000L, 0x10041040L, 0x00040040L, 0x10000040L,
++	0x10040000L, 0x10001000L, 0x10001040L, 0x00000000L,
++	0x10041040L, 0x00041000L, 0x00041000L, 0x00001040L,
++	0x00001040L, 0x00040040L, 0x10000000L, 0x10041000L };
++
++static void desfunc(block, keys)
++register unsigned long *block, *keys;
++{
++	register unsigned long fval, work, right, leftt;
++	register int round;
++
++	leftt = block[0];
++	right = block[1];
++	work = ((leftt &gt;&gt; 4) ^ right) &amp; 0x0f0f0f0fL;
++	right ^= work;
++	leftt ^= (work &lt;&lt; 4);
++	work = ((leftt &gt;&gt; 16) ^ right) &amp; 0x0000ffffL;
++	right ^= work;
++	leftt ^= (work &lt;&lt; 16);
++	work = ((right &gt;&gt; 2) ^ leftt) &amp; 0x33333333L;
++	leftt ^= work;
++	right ^= (work &lt;&lt; 2);
++	work = ((right &gt;&gt; 8) ^ leftt) &amp; 0x00ff00ffL;
++	leftt ^= work;
++	right ^= (work &lt;&lt; 8);
++	right = ((right &lt;&lt; 1) | ((right &gt;&gt; 31) &amp; 1L)) &amp; 0xffffffffL;
++	work = (leftt ^ right) &amp; 0xaaaaaaaaL;
++	leftt ^= work;
++	right ^= work;
++	leftt = ((leftt &lt;&lt; 1) | ((leftt &gt;&gt; 31) &amp; 1L)) &amp; 0xffffffffL;
++
++	for( round = 0; round &lt; 8; round++ ) {
++		work  = (right &lt;&lt; 28) | (right &gt;&gt; 4);
++		work ^= *keys++;
++		fval  = SP7[ work		 &amp; 0x3fL];
++		fval |= SP5[(work &gt;&gt;  8) &amp; 0x3fL];
++		fval |= SP3[(work &gt;&gt; 16) &amp; 0x3fL];
++		fval |= SP1[(work &gt;&gt; 24) &amp; 0x3fL];
++		work  = right ^ *keys++;
++		fval |= SP8[ work		 &amp; 0x3fL];
++		fval |= SP6[(work &gt;&gt;  8) &amp; 0x3fL];
++		fval |= SP4[(work &gt;&gt; 16) &amp; 0x3fL];
++		fval |= SP2[(work &gt;&gt; 24) &amp; 0x3fL];
++		leftt ^= fval;
++		work  = (leftt &lt;&lt; 28) | (leftt &gt;&gt; 4);
++		work ^= *keys++;
++		fval  = SP7[ work		 &amp; 0x3fL];
++		fval |= SP5[(work &gt;&gt;  8) &amp; 0x3fL];
++		fval |= SP3[(work &gt;&gt; 16) &amp; 0x3fL];
++		fval |= SP1[(work &gt;&gt; 24) &amp; 0x3fL];
++		work  = leftt ^ *keys++;
++		fval |= SP8[ work		 &amp; 0x3fL];
++		fval |= SP6[(work &gt;&gt;  8) &amp; 0x3fL];
++		fval |= SP4[(work &gt;&gt; 16) &amp; 0x3fL];
++		fval |= SP2[(work &gt;&gt; 24) &amp; 0x3fL];
++		right ^= fval;
++		}
++
++	right = (right &lt;&lt; 31) | (right &gt;&gt; 1);
++	work = (leftt ^ right) &amp; 0xaaaaaaaaL;
++	leftt ^= work;
++	right ^= work;
++	leftt = (leftt &lt;&lt; 31) | (leftt &gt;&gt; 1);
++	work = ((leftt &gt;&gt; 8) ^ right) &amp; 0x00ff00ffL;
++	right ^= work;
++	leftt ^= (work &lt;&lt; 8);
++	work = ((leftt &gt;&gt; 2) ^ right) &amp; 0x33333333L;
++	right ^= work;
++	leftt ^= (work &lt;&lt; 2);
++	work = ((right &gt;&gt; 16) ^ leftt) &amp; 0x0000ffffL;
++	leftt ^= work;
++	right ^= (work &lt;&lt; 16);
++	work = ((right &gt;&gt; 4) ^ leftt) &amp; 0x0f0f0f0fL;
++	leftt ^= work;
++	right ^= (work &lt;&lt; 4);
++	*block++ = right;
++	*block = leftt;
++	return;
++	}
++
++/* Validation sets:
++ *
++ * Single-length key, single-length plaintext -
++ * Key	  : 0123 4567 89ab cdef
++ * Plain  : 0123 4567 89ab cde7
++ * Cipher : c957 4425 6a5e d31d
++ *
++ * Double-length key, single-length plaintext -
++ * Key	  : 0123 4567 89ab cdef fedc ba98 7654 3210
++ * Plain  : 0123 4567 89ab cde7
++ * Cipher : 7f1d 0a77 826b 8aff
++ *
++ * Double-length key, double-length plaintext -
++ * Key	  : 0123 4567 89ab cdef fedc ba98 7654 3210
++ * Plain  : 0123 4567 89ab cdef 0123 4567 89ab cdff
++ * Cipher : 27a0 8440 406a df60 278f 47cf 42d6 15d7
++ *
++ * Triple-length key, single-length plaintext -
++ * Key	  : 0123 4567 89ab cdef fedc ba98 7654 3210 89ab cdef 0123 4567
++ * Plain  : 0123 4567 89ab cde7
++ * Cipher : de0b 7c06 ae5e 0ed5
++ *
++ * Triple-length key, double-length plaintext -
++ * Key	  : 0123 4567 89ab cdef fedc ba98 7654 3210 89ab cdef 0123 4567
++ * Plain  : 0123 4567 89ab cdef 0123 4567 89ab cdff
++ * Cipher : ad0d 1b30 ac17 cf07 0ed1 1c63 81e4 4de5
++ *
++ * d3des V5.0a rwo 9208.07 18:44 Graven Imagery
++ **********************************************************************/
+
+Added: trunk/freenx-server/nxviewer-passwd/libvncauth/d3des.h
+===================================================================
+--- trunk/freenx-server/nxviewer-passwd/libvncauth/d3des.h	2008-03-14 17:45:36 UTC (rev 527)
++++ trunk/freenx-server/nxviewer-passwd/libvncauth/d3des.h	2008-03-14 17:54:12 UTC (rev 528)
+@@ -0,0 +1,51 @@
++/*
++ * This is D3DES (V5.09) by Richard Outerbridge with the double and
++ * triple-length support removed for use in VNC.
++ *
++ * These changes are:
++ *  Copyright (C) 1999 AT&amp;T Laboratories Cambridge.  All Rights Reserved.
++ *
++ * This software is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
++ */
++
++/* d3des.h -
++ *
++ *	Headers and defines for d3des.c
++ *	Graven Imagery, 1992.
++ *
++ * Copyright (c) 1988,1989,1990,1991,1992 by Richard Outerbridge
++ *	(GEnie : OUTER; CIS : [71755,204])
++ */
++
++#define EN0	0	/* MODE == encrypt */
++#define DE1	1	/* MODE == decrypt */
++
++extern void deskey(unsigned char *, int);
++/*		      hexkey[8]     MODE
++ * Sets the internal key register according to the hexadecimal
++ * key contained in the 8 bytes of hexkey, according to the DES,
++ * for encryption or decryption according to MODE.
++ */
++
++extern void usekey(unsigned long *);
++/*		    cookedkey[32]
++ * Loads the internal key register with the data in cookedkey.
++ */
++
++extern void cpkey(unsigned long *);
++/*		   cookedkey[32]
++ * Copies the contents of the internal key register into the storage
++ * located at &amp;cookedkey[0].
++ */
++
++extern void des(unsigned char *, unsigned char *);
++/*		    from[8]	      to[8]
++ * Encrypts/Decrypts (according to the key currently loaded in the
++ * internal key register) one block of eight bytes at address 'from'
++ * into the block at address 'to'.  They can be the same.
++ */
++
++/* d3des.h V5.09 rwo 9208.04 15:06 Graven Imagery
++ ********************************************************************/
+
+Added: trunk/freenx-server/nxviewer-passwd/libvncauth/vncauth.c
+===================================================================
+--- trunk/freenx-server/nxviewer-passwd/libvncauth/vncauth.c	2008-03-14 17:45:36 UTC (rev 527)
++++ trunk/freenx-server/nxviewer-passwd/libvncauth/vncauth.c	2008-03-14 17:54:12 UTC (rev 528)
+@@ -0,0 +1,247 @@
++/*
++ *  Copyright (C) 1999 AT&amp;T Laboratories Cambridge.  All Rights Reserved.
++ *
++ *  This is free software; you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License as published by
++ *  the Free Software Foundation; either version 2 of the License, or
++ *  (at your option) any later version.
++ *
++ *  This software is distributed in the hope that it will be useful,
++ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *  GNU General Public License for more details.
++ *
++ *  You should have received a copy of the GNU General Public License
++ *  along with this program; if not, write to the Free Software
++ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
++ *  USA.
++ */
++
++/*
++ * vncauth.c - Functions for VNC password management and authentication.
++ */
++
++#include &lt;stdio.h&gt;
++#include &lt;stdlib.h&gt;
++#include &lt;string.h&gt;
++#include &lt;sys/types.h&gt;
++#include &lt;sys/stat.h&gt;
++#include &lt;unistd.h&gt;
++#include &lt;vncauth.h&gt;
++#include &lt;d3des.h&gt;
++
++
++/*
++ * Make sure we call srandom() only once.
++ */
++
++static int s_srandom_called = 0;
++
++/*
++ * We use a fixed key to store passwords, since we assume that our local
++ * file system is secure but nonetheless don't want to store passwords
++ * as plaintext.
++ */
++
++static unsigned char s_fixedkey[8] = {23,82,107,6,35,78,88,7};
++
++
++/*
++ * Encrypt a password and store it in a file.  Returns 0 if successful,
++ * 1 if the file could not be written.
++ *
++ * NOTE: This function is preserved only for compatibility with the original
++ * AT&amp;T VNC software.  Use vncEncryptAndStorePasswd2() instead.
++ */
++
++int
++vncEncryptAndStorePasswd(char *passwd, char *fname)
++{
++    return (vncEncryptAndStorePasswd2(passwd, NULL, fname) == 0);
++}
++
++/*
++ * Encrypt one or two passwords and store them in a file.  Returns 1 if
++ * successful, 0 if the file could not be written (note that the original
++ * vncEncryptAndStorePasswd() function returns inverse values).  The
++ * passwdViewOnly pointer may be NULL.
++ *
++ * NOTE: The file name of &quot;-&quot; denotes stdout.
++ */
++
++int
++vncEncryptAndStorePasswd2(char *passwd, char *passwdViewOnly, char *fname)
++{
++    FILE *fp;
++    int i, bytesToWrite, bytesWrote;
++    unsigned char encryptedPasswd[16] = {
++	0,0,0,0,0,0,0,0,
++	0,0,0,0,0,0,0,0
++    };
++
++    if (strcmp(fname, &quot;-&quot;) != 0) {
++      fp = fopen(fname, &quot;w&quot;);
++      if (fp == NULL) {
++	return 0;
++      }
++      chmod(fname, S_IRUSR|S_IWUSR);
++    } else {
++      fp = stdout;
++    }
++
++    strncpy(encryptedPasswd, passwd, 8);
++    if (passwdViewOnly != NULL)
++	strncpy(encryptedPasswd + 8, passwdViewOnly, 8);
++
++    /* Do encryption in-place - this way we overwrite our copies of
++       plaintext passwords. */
++
++    deskey(s_fixedkey, EN0);
++    des(encryptedPasswd, encryptedPasswd);
++    if (passwdViewOnly != NULL)
++	des(encryptedPasswd + 8, encryptedPasswd + 8);
++
++    bytesToWrite = (passwdViewOnly == NULL) ? 8 : 16;
++    bytesWrote = fwrite(encryptedPasswd, 1, bytesToWrite, fp);
++  
++    if (fp != stdout) {
++      fclose(fp);
++    }
++    return (bytesWrote == bytesToWrite);
++}
++
++
++/*
++ * Decrypt a password from a file.  Returns a pointer to a newly allocated
++ * string containing the password or a null pointer if the password could
++ * not be retrieved for some reason.
++ *
++ * NOTE: This function is preserved only for compatibility with the original
++ * AT&amp;T VNC software.  Use vncDecryptPasswdFromFile2() instead.
++ */
++
++char *
++vncDecryptPasswdFromFile(char *fname)
++{
++    char *passwd;
++
++    passwd = malloc(9);
++
++    if (passwd != NULL) {
++	if (vncDecryptPasswdFromFile2(fname, passwd, NULL) == 0) {
++	    free(passwd);
++	    passwd = NULL;
++	}
++    }
++
++    return passwd;
++}
++
++/*
++ * Decrypt one or two passwords from a file.  Returns the number of
++ * passwords read (1, 2, or 0 on error).  On success, the passwords are
++ * written into buffers passwdFullControl[] and passwdViewOnly[] if
++ * they are not NULL.  If the pointers to buffers are not NULL, then
++ * the buffers should be at least of 9 bytes length.
++ */
++
++int
++vncDecryptPasswdFromFile2(char *fname,
++			  char *passwdFullControl, char *passwdViewOnly)
++{
++    FILE *fp;
++    int i, ch;
++    char passwd[16];
++
++    if (strcmp(fname, &quot;-&quot;) != 0) {
++	if ((fp = fopen(fname,&quot;r&quot;)) == NULL)
++	    return 0;		/* Could not open the file */
++    } else {
++	fp = stdin;
++    }
++
++    for (i = 0; i &lt; 16; i++) {
++	ch = getc(fp);
++	if (ch == EOF)
++	    break;
++	passwd[i] = ch;
++    }
++
++    if (fp != stdin)
++	fclose(fp);
++
++    if (i &lt; 8)
++	return 0;		/* Could not read eight bytes */
++
++    deskey(s_fixedkey, DE1);
++
++    /* Decoding first (full-control) password */
++    if (passwdFullControl != NULL) {
++	des(passwd, passwd);
++	memcpy(passwdFullControl, passwd, 8);
++	passwdFullControl[8] = '\0';
++    }
++
++    /* Decoding second (view-only) password if available */
++    if (i == 16 &amp;&amp; passwdViewOnly != NULL) {
++	des(&amp;passwd[8], &amp;passwd[8]);
++	memcpy(passwdViewOnly, &amp;passwd[8], 8);
++	passwdViewOnly[8] = '\0';
++    }
++
++    /* Destroying our copy of clear-text passwords */
++    memset(passwd, 0, 16);
++
++    return (i &lt; 16) ? 1 : 2;
++}
++
++
++/*
++ * Generate CHALLENGESIZE random bytes for use in challenge-response
++ * authentication.
++ */
++
++void
++vncRandomBytes(unsigned char *bytes)
++{
++    int i;
++    unsigned int seed;
++
++    if (!s_srandom_called) {
++      seed = (unsigned int)time(0) ^ (unsigned int)getpid();
++      srandom(seed);
++      s_srandom_called = 1;
++    }
++
++    for (i = 0; i &lt; CHALLENGESIZE; i++) {
++	bytes[i] = (unsigned char)(random() &amp; 255);    
++    }
++}
++
++
++/*
++ * Encrypt CHALLENGESIZE bytes in memory using a password.
++ */
++
++void
++vncEncryptBytes(unsigned char *bytes, char *passwd)
++{
++    unsigned char key[8];
++    int i;
++
++    /* key is simply password padded with nulls */
++
++    for (i = 0; i &lt; 8; i++) {
++	if (i &lt; strlen(passwd)) {
++	    key[i] = passwd[i];
++	} else {
++	    key[i] = 0;
++	}
++    }
++
++    deskey(key, EN0);
++
++    for (i = 0; i &lt; CHALLENGESIZE; i += 8) {
++	des(bytes+i, bytes+i);
++    }
++}
+
+Added: trunk/freenx-server/nxviewer-passwd/nxpasswd/Imakefile
+===================================================================
+--- trunk/freenx-server/nxviewer-passwd/nxpasswd/Imakefile	2008-03-14 17:45:36 UTC (rev 527)
++++ trunk/freenx-server/nxviewer-passwd/nxpasswd/Imakefile	2008-03-14 17:54:12 UTC (rev 528)
+@@ -0,0 +1,13 @@
++
++#ifdef SunArchitecture
++EXTRA_DEFINES = -D__EXTENSIONS__
++#endif
++
++SRCS = vncpasswd.c
++INCLUDES = -I../include
++VNCAUTH_LIB = ../libvncauth/libvncauth.a
++
++all:: nxpasswd
++
++NormalProgramTarget(nxpasswd,vncpasswd.o,$(VNCAUTH_LIB),$(VNCAUTH_LIB),)
++DependTarget()
+
+Added: trunk/freenx-server/nxviewer-passwd/nxpasswd/nxpasswd.man
+===================================================================
+--- trunk/freenx-server/nxviewer-passwd/nxpasswd/nxpasswd.man	2008-03-14 17:45:36 UTC (rev 527)
++++ trunk/freenx-server/nxviewer-passwd/nxpasswd/nxpasswd.man	2008-03-14 17:54:12 UTC (rev 528)
+@@ -0,0 +1,87 @@
++'\&quot; t
++.\&quot; ** The above line should force tbl to be a preprocessor **
++.\&quot; Man page for X vncpasswd
++.\&quot;
++.\&quot; Copyright (C) 1998 <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">Marcus.Brinkmann at ruhr-uni-bochum.de</A>
++.\&quot; Copyright (C) 2000 Red Hat, Inc.
++.\&quot; Copyright (C) 2001-2003 Constantin Kaplinsky &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">const at ce.cctpu.edu.ru</A>&gt;
++.\&quot;
++.\&quot; You may distribute under the terms of the GNU General Public
++.\&quot; License as specified in the file LICENCE.TXT that comes with the
++.\&quot; TightVNC distribution.
++.\&quot;
++.TH vncpasswd 1 &quot;March 2003&quot; &quot;&quot; &quot;TightVNC&quot;
++.SH NAME
++vncpasswd \- set passwords for VNC server
++.SH SYNOPSIS
++.B vncpasswd
++.RI [\| file \|]
++.br
++.B vncpasswd
++.IR \-t
++.br
++.B vncpasswd
++.IR \-f
++.br
++.SH DESCRIPTION
++The \fBvncpasswd\fR utility should be used to create and change
++passwords for the TightVNC server authentication. \fBXvnc\fR uses such
++passwords when started with the \fB\-rfbauth\fR command-line option
++(or when started from the \fBvncserver\fR script).
++
++\fBvncpasswd\fR allows to enter either one or two passwords. The first
++password is the primary one, the second password can be used for
++view-only authentication. \fBXvnc\fR will restrict mouse and keyboard
++input from clients who authenticated with the view-only password. The
++\fBvncpasswd\fR utility asks interactively if it should set the second
++password.
++
++The password file name defaults to \fB$HOME/.vnc/passwd\fR unless the
++\fB\-t\fR command-line option was used (see the OPTIONS section
++below). The \fB$HOME/.vnc/\fR directory will be created if it does not
++exist.
++
++Each password has to be longer than five characters (unless the
++\fB\-f\fR command-line option was used, see its description below). 
++Only the first eight characters are significant. If the primary
++password is too short, the program will abort. If the view-only
++password is too short, then only the primary password will be saved.
++
++Unless a file name was provided in the command-line explicitly, this
++utility may perform certain sanity checks to prevent writing a
++password file into some hazardous place.
++
++If at least one password was saved successfully, \fBvncpasswd\fR will
++exit with status code 0. Otherwise the returned status code will be
++set to 1.
++.br
++.SH OPTIONS
++.TP
++\fB\-t\fR
++Write passwords into \fB/tmp/$USER-vnc/passwd\fR, creating the
++\fB/tmp/$USER-vnc/\fR directory if it does not exist, and checking the
++permissions on that directory (the mode must be 700). This option can
++help to improve security when your home partition may be shared via
++network (e.g. when using NFS).
++.TP
++\fB\-f\fR
++Filter mode. Read plain-text passwords from stdin, write encrypted
++versions to stdout. One or two passwords (full-control and view-only)
++can be supplied in the input stream, newline terminates a password. 
++Note that in the filter mode, short or even empty passwords will be
++silently accepted.
++.SH SEE ALSO
++\fBvncserver\fR(1), \fBXvnc\fR(1), \fBvncviewer\fR(1),
++\fBvncconnect\fR(1)
++.SH AUTHORS
++Original VNC was developed in AT&amp;T Laboratories Cambridge. TightVNC
++additions was implemented by Constantin Kaplinsky. Many other people
++participated in development, testing and support.
++
++\fBMan page authors:\fR
++.br
++Marcus Brinkmann &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">Marcus.Brinkmann at ruhr-uni-bochum.de</A>&gt;,
++.br
++Tim Waugh &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">twaugh at redhat.com</A>&gt;,
++.br
++Constantin Kaplinsky &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">const at ce.cctpu.edu.ru</A>&gt;
+
+Added: trunk/freenx-server/nxviewer-passwd/nxpasswd/vncpasswd.c
+===================================================================
+--- trunk/freenx-server/nxviewer-passwd/nxpasswd/vncpasswd.c	2008-03-14 17:45:36 UTC (rev 527)
++++ trunk/freenx-server/nxviewer-passwd/nxpasswd/vncpasswd.c	2008-03-14 17:54:12 UTC (rev 528)
+@@ -0,0 +1,301 @@
++/*
++ *  Copyright (C) 2002-2003 Constantin Kaplinsky.  All Rights Reserved.
++ *  Copyright (C) 1999 AT&amp;T Laboratories Cambridge.  All Rights Reserved.
++ *
++ *  This is free software; you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License as published by
++ *  the Free Software Foundation; either version 2 of the License, or
++ *  (at your option) any later version.
++ *
++ *  This software is distributed in the hope that it will be useful,
++ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *  GNU General Public License for more details.
++ *
++ *  You should have received a copy of the GNU General Public License
++ *  along with this software; if not, write to the Free Software
++ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
++ *  USA.
++ */
++
++/**************************************************************************/
++/*                                                                        */
++/* Copyright (c) 2001,2006 NoMachine, <A HREF="http://www.nomachine.com.">http://www.nomachine.com.</A>           */
++/*                                                                        */
++/* NXVIEWER, NX protocol compression and NX extensions to this software   */
++/* are copyright of NoMachine. Redistribution and use of the present      */
++/* software is allowed according to terms specified in the file LICENSE   */
++/* which comes in the source distribution.                                */
++/*                                                                        */
++/* Check <A HREF="http://www.nomachine.com/licensing.html">http://www.nomachine.com/licensing.html</A> for applicability.       */
++/*                                                                        */
++/* NX and NoMachine are trademarks of Medialogic S.p.A.                   */
++/*                                                                        */
++/* All rights reserved.                                                   */
++/*                                                                        */
++/**************************************************************************/
++
++/*
++ *  vncpasswd:  A standalone program which gets and verifies a password, 
++ *              encrypts it, and stores it to a file. Optionally, it does
++ *              the same for a second (view-only) password.  Always ignore
++ *              anything after 8 characters, since this is what Solaris
++ *              getpass() does anyway.
++ */
++
++#include &lt;errno.h&gt;
++#include &lt;stdio.h&gt;
++#include &lt;stdlib.h&gt;
++#include &lt;string.h&gt;
++#include &lt;sys/stat.h&gt;
++#include &lt;sys/types.h&gt;
++#include &lt;unistd.h&gt;
++#include &quot;vncauth.h&quot;
++
++static void usage(char *argv[]);
++static char *getenv_safe(char *name, size_t maxlen);
++static void mkdir_and_check(char *dirname, int be_strict);
++static int read_password(char *result);
++static int ask_password(char *result);
++
++int main(int argc, char *argv[]) 
++{
++  int read_from_stdin = 0;
++  int make_directory = 0;
++  int check_strictly = 0;
++  char passwd1[9];
++  char passwd2[9];
++  char *passwd2_ptr;
++  char yesno[2];
++  char passwdDir[256];
++  char passwdFile[256];
++
++  if (argc == 1) {
++
++    sprintf(passwdDir, &quot;%s/.vnc&quot;, getenv_safe(&quot;HOME&quot;, 240));
++    sprintf(passwdFile, &quot;%s/passwd&quot;, passwdDir);
++    read_from_stdin = 0;
++    make_directory = 1;
++    check_strictly = 0;
++
++  } else if (argc == 2 || argc == 3) {
++
++    if (strcmp(argv[1], &quot;-t&quot;) == 0) {
++      sprintf(passwdDir, &quot;/tmp/%s-vnc&quot;, getenv_safe(&quot;USER&quot;, 32));
++      sprintf(passwdFile, &quot;%s/passwd&quot;, passwdDir);
++      read_from_stdin = 0;
++      make_directory = 1;
++      check_strictly = 1;
++    } else if (strcmp(argv[1], &quot;-f&quot;) == 0) {
++      strcpy(passwdFile, &quot;-&quot;);
++      read_from_stdin = 1;
++      make_directory = 0;
++      check_strictly = 0;
++    } else {
++      if (strlen(argv[1]) &gt; 255) {
++        fprintf(stderr, &quot;Error: file name too long\n&quot;);
++        exit(1);
++      }
++      strcpy(passwdFile, argv[1]);
++      read_from_stdin = 1;
++      make_directory = 0;
++      check_strictly = 0;
++    }
++
++  } else {
++      usage(argv);
++  }
++
++  if (make_directory) {
++    fprintf(stderr, &quot;Using password file %s\n&quot;, passwdFile);
++    mkdir_and_check(passwdDir, check_strictly);
++  }
++
++  passwd2_ptr = NULL;
++
++  if (read_from_stdin) {
++
++    /* Read one or two passwords from stdin */
++    if (!read_password(passwd1)) {
++      fprintf(stderr, &quot;Could not read password\n&quot;);
++      exit(1);
++    }
++    if (read_password(passwd2)) {
++      passwd2_ptr = passwd2;
++    }
++
++  } else {
++
++    /* Ask the primary (full-control) password. */
++    if (!ask_password(passwd1)) {
++      exit(1);
++    }
++    /* Optionally, ask the second (view-only) password. */
++    /* FIXME: Is it correct to read from stdin here? */
++    fprintf(stderr, &quot;Would you like to enter a view-only password (y/n)? &quot;);
++    if (fgets(yesno, 2, stdin) != NULL &amp;&amp; strchr(&quot;Yy&quot;, yesno[0]) != NULL) {
++      if (ask_password(passwd2)) {
++        passwd2_ptr = passwd2;
++      }
++    }
++
++  }
++
++  /* Actually write the passwords. */
++  if (!vncEncryptAndStorePasswd2(passwd1, passwd2_ptr, passwdFile)) {
++    memset(passwd1, 0, strlen(passwd1));
++    memset(passwd2, 0, strlen(passwd2));
++    fprintf(stderr, &quot;Cannot write password file %s\n&quot;, passwdFile);
++    exit(1);
++  }
++
++  /* Zero the memory. */
++  memset(passwd1, 0, strlen(passwd1));
++  memset(passwd2, 0, strlen(passwd2));
++  return 0;
++}
++
++static void usage(char *argv[])
++{
++  fprintf(stderr,
++          &quot;Usage: %s [FILE]\n&quot;
++          &quot;       %s -t\n&quot;,
++          argv[0], argv[0]);
++  exit(1);
++}
++
++static char *getenv_safe(char *name, size_t maxlen)
++{
++  char *result;
++
++  result = getenv(name);
++  if (result == NULL) {
++    fprintf(stderr, &quot;Error: no %s environment variable\n&quot;, name);
++    exit(1);
++  }
++  if (strlen(result) &gt; maxlen) {
++    fprintf(stderr, &quot;Error: %s environment variable string too long\n&quot;, name);
++    exit(1);
++  }
++  return result;
++}
++
++/*
++ * Check if the specified vnc directory exists, create it if
++ * necessary, and perform a number of sanity checks.
++ */
++
++static void mkdir_and_check(char *dirname, int be_strict)
++{
++  struct stat stbuf;
++
++  if (lstat(dirname, &amp;stbuf) != 0) {
++    if (errno != ENOENT) {
++      fprintf(stderr, &quot;lstat() failed for %s: %s\n&quot;, dirname, strerror(errno));
++      exit(1);
++    }
++    fprintf(stderr, &quot;VNC directory %s does not exist, creating.\n&quot;, dirname);
++    if (mkdir(dirname, S_IRWXU) == -1) {
++      fprintf(stderr, &quot;Error creating directory %s: %s\n&quot;,
++              dirname, strerror(errno));
++      exit(1);
++    }
++  }
++
++  if (lstat(dirname, &amp;stbuf) != 0) {
++    fprintf(stderr, &quot;Error in lstat() for %s: %s\n&quot;, dirname, strerror(errno));
++    exit(1);
++  }
++  if (!S_ISDIR(stbuf.st_mode)) {
++    fprintf(stderr, &quot;Error: %s is not a directory\n&quot;, dirname);
++    exit(1);
++  }
++  if (stbuf.st_uid != getuid()) {
++    fprintf(stderr, &quot;Error: bad ownership on %s\n&quot;, dirname);
++    exit(1);
++  }
++  if (be_strict &amp;&amp; ((S_IRWXG|S_IRWXO) &amp; stbuf.st_mode)){
++    fprintf(stderr, &quot;Error: bad access modes on %s\n&quot;, dirname);
++    exit(1);
++  }
++}
++
++/*
++ * Read a password from stdin. The password is terminated either by an
++ * end of line, or by the end of stdin data. Return 1 on success, 0 on
++ * error. On success, the password will be stored in the specified
++ * 9-byte buffer.
++ */
++
++static int read_password(char *result)
++{
++  char passwd[256];
++  char *ptr;
++
++  /* Try to read the password. */
++  if (fgets(passwd, 256, stdin) == NULL)
++    return 0;
++
++  /* Remove the newline if present. */
++  ptr = strchr(passwd, '\n');
++  if (ptr != NULL)
++    *ptr = '\0';
++
++  /* Truncate if necessary. */
++  if (strlen(passwd) &gt; 8) {
++    memset(passwd + 8, 0, strlen(passwd) - 8);
++    fprintf(stderr, &quot;Warning: password truncated to the length of 8.\n&quot;);
++  }
++
++  /* Save the password and zero our copies. */
++  strcpy(result, passwd);
++  memset(passwd, 0, strlen(passwd));
++
++  return 1;
++}
++
++/*
++ * Ask a password, check its length and ask to confirm it once more. 
++ * Return 1 on success, 0 on error. On success, the password will be
++ * stored in the specified 9-byte buffer.
++ */
++
++static int ask_password(char *result)
++{
++  char *passwd;
++  char passwd_copy[9];
++
++  while (1) {  
++    passwd = getpass(&quot;Password: &quot;);
++    if (!passwd) {
++      fprintf(stderr, &quot;Can't get password: not a tty?\n&quot;);
++      return 0;
++    }   
++    if (strlen(passwd) &lt; 5) {
++      fprintf(stderr, &quot;Password too short\n&quot;);
++      return 0;
++    }   
++    if (strlen(passwd) &gt; 8) {
++      memset(passwd + 8, 0, strlen(passwd) - 8);
++      fprintf(stderr, &quot;Warning: password truncated to the length of 8.\n&quot;);
++    }
++
++    strcpy(passwd_copy, passwd);
++
++    passwd = getpass(&quot;Verify:   &quot;);
++    if (strlen(passwd) &gt; 8)
++      memset(passwd + 8, 0, strlen(passwd) - 8);
++
++    if (strcmp(passwd, passwd_copy) == 0)
++      break;                    /* success */
++
++    fprintf(stderr,&quot;Passwords do not match. Please try again.\n\n&quot;);
++  }
++
++  /* Save the password and zero our copies. */
++  strcpy(result, passwd);
++  memset(passwd, 0, strlen(passwd));
++  memset(passwd_copy, 0, strlen(passwd_copy));
++
++  return 1;
++}
+
+Added: trunk/freenx-server/nxviewer-passwd/nxpasswd/vncpasswd.c.NX.original
+===================================================================
+--- trunk/freenx-server/nxviewer-passwd/nxpasswd/vncpasswd.c.NX.original	2008-03-14 17:45:36 UTC (rev 527)
++++ trunk/freenx-server/nxviewer-passwd/nxpasswd/vncpasswd.c.NX.original	2008-03-14 17:54:12 UTC (rev 528)
+@@ -0,0 +1,301 @@
++/*
++ *  Copyright (C) 2002-2003 Constantin Kaplinsky.  All Rights Reserved.
++ *  Copyright (C) 1999 AT&amp;T Laboratories Cambridge.  All Rights Reserved.
++ *
++ *  This is free software; you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License as published by
++ *  the Free Software Foundation; either version 2 of the License, or
++ *  (at your option) any later version.
++ *
++ *  This software is distributed in the hope that it will be useful,
++ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *  GNU General Public License for more details.
++ *
++ *  You should have received a copy of the GNU General Public License
++ *  along with this software; if not, write to the Free Software
++ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
++ *  USA.
++ */
++
++/**************************************************************************/
++/*                                                                        */
++/* Copyright (c) 2001,2006 NoMachine, <A HREF="http://www.nomachine.com.">http://www.nomachine.com.</A>           */
++/*                                                                        */
++/* NXVIEWER, NX protocol compression and NX extensions to this software   */
++/* are copyright of NoMachine. Redistribution and use of the present      */
++/* software is allowed according to terms specified in the file LICENSE   */
++/* which comes in the source distribution.                                */
++/*                                                                        */
++/* Check <A HREF="http://www.nomachine.com/licensing.html">http://www.nomachine.com/licensing.html</A> for applicability.       */
++/*                                                                        */
++/* NX and NoMachine are trademarks of Medialogic S.p.A.                   */
++/*                                                                        */
++/* All rights reserved.                                                   */
++/*                                                                        */
++/**************************************************************************/
++
++/*
++ *  vncpasswd:  A standalone program which gets and verifies a password, 
++ *              encrypts it, and stores it to a file. Optionally, it does
++ *              the same for a second (view-only) password.  Always ignore
++ *              anything after 8 characters, since this is what Solaris
++ *              getpass() does anyway.
++ */
++
++#include &lt;errno.h&gt;
++#include &lt;stdio.h&gt;
++#include &lt;stdlib.h&gt;
++#include &lt;string.h&gt;
++#include &lt;sys/stat.h&gt;
++#include &lt;sys/types.h&gt;
++#include &lt;unistd.h&gt;
++#include &quot;vncauth.h&quot;
++
++static void usage(char *argv[]);
++static char *getenv_safe(char *name, size_t maxlen);
++static void mkdir_and_check(char *dirname, int be_strict);
++static int read_password(char *result);
++static int ask_password(char *result);
++
++int main(int argc, char *argv[]) 
++{
++  int read_from_stdin = 0;
++  int make_directory = 0;
++  int check_strictly = 0;
++  char passwd1[9];
++  char passwd2[9];
++  char *passwd2_ptr;
++  char yesno[2];
++  char passwdDir[256];
++  char passwdFile[256];
++
++  if (argc == 1) {
++
++    sprintf(passwdDir, &quot;%s/.vnc&quot;, getenv_safe(&quot;HOME&quot;, 240));
++    sprintf(passwdFile, &quot;%s/passwd&quot;, passwdDir);
++    read_from_stdin = 0;
++    make_directory = 1;
++    check_strictly = 0;
++
++  } else if (argc == 2 || argc == 3) {
++
++    if (strcmp(argv[1], &quot;-t&quot;) == 0) {
++      sprintf(passwdDir, &quot;/tmp/%s-vnc&quot;, getenv_safe(&quot;USER&quot;, 32));
++      sprintf(passwdFile, &quot;%s/passwd&quot;, passwdDir);
++      read_from_stdin = 0;
++      make_directory = 1;
++      check_strictly = 1;
++    } else if (strcmp(argv[1], &quot;-f&quot;) == 0) {
++      strcpy(passwdFile, &quot;-&quot;);
++      read_from_stdin = 1;
++      make_directory = 0;
++      check_strictly = 0;
++    } else {
++      if (strlen(argv[1]) &gt; 255) {
++        fprintf(stderr, &quot;Error: file name too long\n&quot;);
++        exit(1);
++      }
++      strcpy(passwdFile, argv[1]);
++      read_from_stdin = 1;
++      make_directory = 0;
++      check_strictly = 0;
++    }
++
++  } else {
++      usage(argv);
++  }
++
++  if (make_directory) {
++    fprintf(stderr, &quot;Using password file %s\n&quot;, passwdFile);
++    mkdir_and_check(passwdDir, check_strictly);
++  }
++
++  passwd2_ptr = NULL;
++
++  if (read_from_stdin) {
++
++    /* Read one or two passwords from stdin */
++    if (!read_password(passwd1)) {
++      fprintf(stderr, &quot;Could not read password\n&quot;);
++      exit(1);
++    }
++    if (read_password(passwd2)) {
++      passwd2_ptr = passwd2;
++    }
++
++  } else {
++
++    /* Ask the primary (full-control) password. */
++    if (!ask_password(passwd1)) {
++      exit(1);
++    }
++    /* Optionally, ask the second (view-only) password. */
++    /* FIXME: Is it correct to read from stdin here? */
++    fprintf(stderr, &quot;Would you like to enter a view-only password (y/n)? &quot;);
++    if (fgets(yesno, 2, stdin) != NULL &amp;&amp; strchr(&quot;Yy&quot;, yesno[0]) != NULL) {
++      if (ask_password(passwd2)) {
++        passwd2_ptr = passwd2;
++      }
++    }
++
++  }
++
++  /* Actually write the passwords. */
++  if (!vncEncryptAndStorePasswd2(passwd1, passwd2_ptr, passwdFile)) {
++    memset(passwd1, 0, strlen(passwd1));
++    memset(passwd2, 0, strlen(passwd2));
++    fprintf(stderr, &quot;Cannot write password file %s\n&quot;, passwdFile);
++    exit(1);
++  }
++
++  /* Zero the memory. */
++  memset(passwd1, 0, strlen(passwd1));
++  memset(passwd2, 0, strlen(passwd2));
++  return 0;
++}
++
++static void usage(char *argv[])
++{
++  fprintf(stderr,
++          &quot;Usage: %s [FILE]\n&quot;
++          &quot;       %s -t\n&quot;,
++          argv[0], argv[0]);
++  exit(1);
++}
++
++static char *getenv_safe(char *name, size_t maxlen)
++{
++  char *result;
++
++  result = getenv(name);
++  if (result == NULL) {
++    fprintf(stderr, &quot;Error: no %s environment variable\n&quot;, name);
++    exit(1);
++  }
++  if (strlen(result) &gt; maxlen) {
++    fprintf(stderr, &quot;Error: %s environment variable string too long\n&quot;, name);
++    exit(1);
++  }
++  return result;
++}
++
++/*
++ * Check if the specified vnc directory exists, create it if
++ * necessary, and perform a number of sanity checks.
++ */
++
++static void mkdir_and_check(char *dirname, int be_strict)
++{
++  struct stat stbuf;
++
++  if (lstat(dirname, &amp;stbuf) != 0) {
++    if (errno != ENOENT) {
++      fprintf(stderr, &quot;lstat() failed for %s: %s\n&quot;, dirname, strerror(errno));
++      exit(1);
++    }
++    fprintf(stderr, &quot;VNC directory %s does not exist, creating.\n&quot;, dirname);
++    if (mkdir(dirname, S_IRWXU) == -1) {
++      fprintf(stderr, &quot;Error creating directory %s: %s\n&quot;,
++              dirname, strerror(errno));
++      exit(1);
++    }
++  }
++
++  if (lstat(dirname, &amp;stbuf) != 0) {
++    fprintf(stderr, &quot;Error in lstat() for %s: %s\n&quot;, dirname, strerror(errno));
++    exit(1);
++  }
++  if (!S_ISDIR(stbuf.st_mode)) {
++    fprintf(stderr, &quot;Error: %s is not a directory\n&quot;, dirname);
++    exit(1);
++  }
++  if (stbuf.st_uid != getuid()) {
++    fprintf(stderr, &quot;Error: bad ownership on %s\n&quot;, dirname);
++    exit(1);
++  }
++  if (be_strict &amp;&amp; ((S_IRWXG|S_IRWXO) &amp; stbuf.st_mode)){
++    fprintf(stderr, &quot;Error: bad access modes on %s\n&quot;, dirname);
++    exit(1);
++  }
++}
++
++/*
++ * Read a password from stdin. The password is terminated either by an
++ * end of line, or by the end of stdin data. Return 1 on success, 0 on
++ * error. On success, the password will be stored in the specified
++ * 9-byte buffer.
++ */
++
++static int read_password(char *result)
++{
++  char passwd[256];
++  char *ptr;
++
++  /* Try to read the password. */
++  if (fgets(passwd, 256, stdin) == NULL)
++    return 0;
++
++  /* Remove the newline if present. */
++  ptr = strchr(passwd, '\n');
++  if (ptr != NULL)
++    *ptr = '\0';
++
++  /* Truncate if necessary. */
++  if (strlen(passwd) &gt; 8) {
++    memset(passwd + 8, 0, strlen(passwd) - 8);
++    fprintf(stderr, &quot;Warning: password truncated to the length of 8.\n&quot;);
++  }
++
++  /* Save the password and zero our copies. */
++  strcpy(result, passwd);
++  memset(passwd, 0, strlen(passwd));
++
++  return 1;
++}
++
++/*
++ * Ask a password, check its length and ask to confirm it once more. 
++ * Return 1 on success, 0 on error. On success, the password will be
++ * stored in the specified 9-byte buffer.
++ */
++
++static int ask_password(char *result)
++{
++  char *passwd;
++  char passwd_copy[9];
++
++  while (1) {  
++    passwd = getpass(&quot;Password: &quot;);
++    if (!passwd) {
++      fprintf(stderr, &quot;Can't get password: not a tty?\n&quot;);
++      return 0;
++    }   
++    if (strlen(passwd) &lt; 5) {
++      fprintf(stderr, &quot;Password too short\n&quot;);
++      return 0;
++    }   
++    if (strlen(passwd) &gt; 8) {
++      memset(passwd + 8, 0, strlen(passwd) - 8);
++      fprintf(stderr, &quot;Warning: password truncated to the length of 8.\n&quot;);
++    }
++
++    strcpy(passwd_copy, passwd);
++
++    passwd = getpass(&quot;Verify:   &quot;);
++    if (strlen(passwd) &gt; 8)
++      memset(passwd + 8, 0, strlen(passwd) - 8);
++
++    if (strcmp(passwd, passwd_copy) == 0)
++      break;                    /* success */
++
++    fprintf(stderr,&quot;Passwords do not match. Please try again.\n\n&quot;);
++  }
++
++  /* Save the password and zero our copies. */
++  strcpy(result, passwd);
++  memset(passwd, 0, strlen(passwd));
++  memset(passwd_copy, 0, strlen(passwd_copy));
++
++  return 1;
++}
+
+Added: trunk/freenx-server/nxviewer-passwd/nxpasswd/vncpasswd.c.TIGHTVNC.original
+===================================================================
+--- trunk/freenx-server/nxviewer-passwd/nxpasswd/vncpasswd.c.TIGHTVNC.original	2008-03-14 17:45:36 UTC (rev 527)
++++ trunk/freenx-server/nxviewer-passwd/nxpasswd/vncpasswd.c.TIGHTVNC.original	2008-03-14 17:54:12 UTC (rev 528)
+@@ -0,0 +1,286 @@
++/*
++ *  Copyright (C) 2002-2003 Constantin Kaplinsky.  All Rights Reserved.
++ *  Copyright (C) 1999 AT&amp;T Laboratories Cambridge.  All Rights Reserved.
++ *
++ *  This is free software; you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License as published by
++ *  the Free Software Foundation; either version 2 of the License, or
++ *  (at your option) any later version.
++ *
++ *  This software is distributed in the hope that it will be useful,
++ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *  GNU General Public License for more details.
++ *
++ *  You should have received a copy of the GNU General Public License
++ *  along with this software; if not, write to the Free Software
++ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
++ *  USA.
++ */
++
++/*
++ *  vncpasswd:  A standalone program which gets and verifies a password, 
++ *              encrypts it, and stores it to a file.  Optionally, it does
++ *              the same for a second (view-only) password.  Always ignore
++ *              anything after 8 characters, since this is what Solaris
++ *              getpass() does anyway.
++ */
++
++#include &lt;errno.h&gt;
++#include &lt;stdio.h&gt;
++#include &lt;stdlib.h&gt;
++#include &lt;string.h&gt;
++#include &lt;sys/stat.h&gt;
++#include &lt;sys/types.h&gt;
++#include &lt;unistd.h&gt;
++#include &lt;errno.h&gt;
++#include &quot;vncauth.h&quot;
++
++static void usage(char *argv[]);
++static char *getenv_safe(char *name, size_t maxlen);
++static void mkdir_and_check(char *dirname, int be_strict);
++static int read_password(char *result);
++static int ask_password(char *result);
++
++int main(int argc, char *argv[])
++{
++  int read_from_stdin = 0;
++  int make_directory = 0;
++  int check_strictly = 0;
++  char passwd1[9];
++  char passwd2[9];
++  char *passwd2_ptr;
++  char yesno[2];
++  char passwdDir[256];
++  char passwdFile[256];
++  int i;
++
++  if (argc == 1) {
++
++    sprintf(passwdDir, &quot;%s/.vnc&quot;, getenv_safe(&quot;HOME&quot;, 240));
++    sprintf(passwdFile, &quot;%s/passwd&quot;, passwdDir);
++    read_from_stdin = 0;
++    make_directory = 1;
++    check_strictly = 0;
++
++  } else if (argc == 2) {
++
++    if (strcmp(argv[1], &quot;-t&quot;) == 0) {
++      sprintf(passwdDir, &quot;/tmp/%s-vnc&quot;, getenv_safe(&quot;USER&quot;, 32));
++      sprintf(passwdFile, &quot;%s/passwd&quot;, passwdDir);
++      read_from_stdin = 0;
++      make_directory = 1;
++      check_strictly = 1;
++    } else if (strcmp(argv[1], &quot;-f&quot;) == 0) {
++      strcpy(passwdFile, &quot;-&quot;);
++      read_from_stdin = 1;
++      make_directory = 0;
++      check_strictly = 0;
++    } else {
++      if (strlen(argv[1]) &gt; 255) {
++        fprintf(stderr, &quot;Error: file name too long\n&quot;);
++        exit(1);
++      }
++      strcpy(passwdFile, argv[1]);
++      read_from_stdin = 0;
++      make_directory = 0;
++      check_strictly = 0;
++    }
++
++  } else {
++    usage(argv);
++  }
++
++  if (make_directory) {
++    fprintf(stderr, &quot;Using password file %s\n&quot;, passwdFile);
++    mkdir_and_check(passwdDir, check_strictly);
++  }
++
++  passwd2_ptr = NULL;
++
++  if (read_from_stdin) {
++
++    /* Read one or two passwords from stdin */
++    if (!read_password(passwd1)) {
++      fprintf(stderr, &quot;Could not read password\n&quot;);
++      exit(1);
++    }
++    if (read_password(passwd2)) {
++      passwd2_ptr = passwd2;
++    }
++
++  } else {
++
++    /* Ask the primary (full-control) password. */
++    if (!ask_password(passwd1)) {
++      exit(1);
++    }
++    /* Optionally, ask the second (view-only) password. */
++    /* FIXME: Is it correct to read from stdin here? */
++    fprintf(stderr, &quot;Would you like to enter a view-only password (y/n)? &quot;);
++    if (fgets(yesno, 2, stdin) != NULL &amp;&amp; strchr(&quot;Yy&quot;, yesno[0]) != NULL) {
++      if (ask_password(passwd2)) {
++        passwd2_ptr = passwd2;
++      }
++    }
++
++  }
++
++  /* Actually write the passwords. */
++  if (!vncEncryptAndStorePasswd2(passwd1, passwd2_ptr, passwdFile)) {
++    memset(passwd1, 0, strlen(passwd1));
++    memset(passwd2, 0, strlen(passwd2));
++    fprintf(stderr, &quot;Cannot write password file %s\n&quot;, passwdFile);
++    exit(1);
++  }
++
++  /* Zero the memory. */
++  memset(passwd1, 0, strlen(passwd1));
++  memset(passwd2, 0, strlen(passwd2));
++  return 0;
++}
++
++static void usage(char *argv[])
++{
++  fprintf(stderr,
++          &quot;Usage: %s [FILE]\n&quot;
++          &quot;       %s -t\n&quot;,
++          argv[0], argv[0], argv[0]);
++  exit(1);
++}
++
++static char *getenv_safe(char *name, size_t maxlen)
++{
++  char *result;
++
++  result = getenv(name);
++  if (result == NULL) {
++    fprintf(stderr, &quot;Error: no %s environment variable\n&quot;, name);
++    exit(1);
++  }
++  if (strlen(result) &gt; maxlen) {
++    fprintf(stderr, &quot;Error: %s environment variable string too long\n&quot;, name);
++    exit(1);
++  }
++  return result;
++}
++
++/*
++ * Check if the specified vnc directory exists, create it if
++ * necessary, and perform a number of sanity checks.
++ */
++
++static void mkdir_and_check(char *dirname, int be_strict)
++{
++  struct stat stbuf;
++
++  if (lstat(dirname, &amp;stbuf) != 0) {
++    if (errno != ENOENT) {
++      fprintf(stderr, &quot;lstat() failed for %s: %s\n&quot;, dirname, strerror(errno));
++      exit(1);
++    }
++    fprintf(stderr, &quot;VNC directory %s does not exist, creating.\n&quot;, dirname);
++    if (mkdir(dirname, S_IRWXU) == -1) {
++      fprintf(stderr, &quot;Error creating directory %s: %s\n&quot;,
++              dirname, strerror(errno));
++      exit(1);
++    }
++  }
++
++  if (lstat(dirname, &amp;stbuf) != 0) {
++    fprintf(stderr, &quot;Error in lstat() for %s: %s\n&quot;, dirname, strerror(errno));
++    exit(1);
++  }
++  if (!S_ISDIR(stbuf.st_mode)) {
++    fprintf(stderr, &quot;Error: %s is not a directory\n&quot;, dirname);
++    exit(1);
++  }
++  if (stbuf.st_uid != getuid()) {
++    fprintf(stderr, &quot;Error: bad ownership on %s\n&quot;, dirname);
++    exit(1);
++  }
++  if (be_strict &amp;&amp; ((S_IRWXG|S_IRWXO) &amp; stbuf.st_mode)){
++    fprintf(stderr, &quot;Error: bad access modes on %s\n&quot;, dirname);
++    exit(1);
++  }
++}
++
++/*
++ * Read a password from stdin. The password is terminated either by an
++ * end of line, or by the end of stdin data. Return 1 on success, 0 on
++ * error. On success, the password will be stored in the specified
++ * 9-byte buffer.
++ */
++
++static int read_password(char *result)
++{
++  char passwd[256];
++  char *ptr;
++
++  /* Try to read the password. */
++  if (fgets(passwd, 256, stdin) == NULL)
++    return 0;
++
++  /* Remove the newline if present. */
++  ptr = strchr(passwd, '\n');
++  if (ptr != NULL)
++    *ptr = '\0';
++
++  /* Truncate if necessary. */
++  if (strlen(passwd) &gt; 8) {
++    memset(passwd + 8, 0, strlen(passwd) - 8);
++    fprintf(stderr, &quot;Warning: password truncated to the length of 8.\n&quot;);
++  }
++
++  /* Save the password and zero our copies. */
++  strcpy(result, passwd);
++  memset(passwd, 0, strlen(passwd));
++
++  return 1;
++}
++
++/*
++ * Ask a password, check its length and ask to confirm it once more. 
++ * Return 1 on success, 0 on error. On success, the password will be
++ * stored in the specified 9-byte buffer.
++ */
++
++static int ask_password(char *result)
++{
++  char *passwd;
++  char passwd_copy[9];
++
++  while (1) {  
++    passwd = getpass(&quot;Password: &quot;);
++    if (!passwd) {
++      fprintf(stderr, &quot;Can't get password: not a tty?\n&quot;);
++      return 0;
++    }   
++    if (strlen(passwd) &lt; 6) {
++      fprintf(stderr, &quot;Password too short\n&quot;);
++      return 0;
++    }   
++    if (strlen(passwd) &gt; 8) {
++      memset(passwd + 8, 0, strlen(passwd) - 8);
++      fprintf(stderr, &quot;Warning: password truncated to the length of 8.\n&quot;);
++    }
++
++    strcpy(passwd_copy, passwd);
++
++    passwd = getpass(&quot;Verify:   &quot;);
++    if (strlen(passwd) &gt; 8)
++      memset(passwd + 8, 0, strlen(passwd) - 8);
++
++    if (strcmp(passwd, passwd_copy) == 0)
++      break;                    /* success */
++
++    fprintf(stderr,&quot;Passwords do not match. Please try again.\n\n&quot;);
++  }
++
++  /* Save the password and zero our copies. */
++  strcpy(result, passwd);
++  memset(passwd, 0, strlen(passwd));
++  memset(passwd_copy, 0, strlen(passwd_copy));
++
++  return 1;
++}
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000651.html">[Freenx-cvs] r527 - trunk/freenx-server
+</A></li>
+	<LI>Next message: <A HREF="000652.html">[Freenx-cvs] r529 - in trunk/freenx-server: . nxredir
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#672">[ date ]</a>
+              <a href="thread.html#672">[ thread ]</a>
+              <a href="subject.html#672">[ subject ]</a>
+              <a href="author.html#672">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

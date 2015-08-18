@@ -1,0 +1,188 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fabianx modified 3 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-April/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%203%20files&In-Reply-To=%3C427399CE.mailKRY18SHZH%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000134.html">
+   <LINK REL="Next"  HREF="000139.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fabianx modified 3 files</H1>
+    <B>fabianx</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%203%20files&In-Reply-To=%3C427399CE.mailKRY18SHZH%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fabianx modified 3 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Sat Apr 30 16:44:30 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000134.html">[Freenx-cvs] CVS: freenx - fux modified 2 files
+</A></li>
+        <LI>Next message: <A HREF="000139.html">[Freenx-cvs] CVS: freenx - fabianx modified 3 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#136">[ date ]</a>
+              <a href="thread.html#136">[ thread ]</a>
+              <a href="subject.html#136">[ subject ]</a>
+              <a href="author.html#136">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fabianx
+Date:      2005-04-30 14:44:30 GMT
+Modified:  .        node.conf.sample nxloadconfig nxnode
+Log:
+Better detection of $KDE_PRINTRC. Idea by Kurt Pfeifle.
+
+Revision  Changes    Path
+1.25      +3 -2      freenx/node.conf.sample
+
+
+rev 1.25, prev_rev 1.24
+Index: node.conf.sample
+===================================================================
+RCS file: /cvsroot/freenx/freenx/node.conf.sample,v
+retrieving revision 1.24
+retrieving revision 1.25
+diff -u -r1.24 -r1.25
+--- node.conf.sample	29 Apr 2005 00:17:33 -0000	1.24
++++ node.conf.sample	30 Apr 2005 14:44:30 -0000	1.25
+@@ -37,7 +37,7 @@
+ #
+ #           <A HREF="https://mail.kde.org/mailman/listinfo/freenx-knx">https://mail.kde.org/mailman/listinfo/freenx-knx</A>
+ #
+-# CVS: $Id: node.conf.sample,v 1.24 2005/04/29 00:17:33 fux Exp $
++# CVS: $Id: node.conf.sample,v 1.25 2005/04/30 14:44:30 fabianx Exp $
+ 
+ #########################################################################
+ # General FreeNX directives
+@@ -219,9 +219,10 @@
+ 
+ # FreeNX with ENABLE_KDE_CUPS=&quot;1&quot; will automatically write 
+ # $KDE_PRINTRC and put the current used port into it.
++# $KDE_PRINTRC is automatically calculated if its not set.
+ 
+ #ENABLE_KDE_CUPS=&quot;0&quot;
+-#KDE_PRINTRC=&quot;.kde/share/config/kdeprintrc&quot;
++#KDE_PRINTRC=&quot;$HOME/.kde/share/config/kdeprintrc&quot;
+ 
+ #########################################################################
+ # Path directives
+
+
+
+1.30      +4 -2      freenx/nxloadconfig
+
+
+rev 1.30, prev_rev 1.29
+Index: nxloadconfig
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxloadconfig,v
+retrieving revision 1.29
+retrieving revision 1.30
+diff -u -r1.29 -r1.30
+--- nxloadconfig	29 Apr 2005 00:17:33 -0000	1.29
++++ nxloadconfig	30 Apr 2005 14:44:30 -0000	1.30
+@@ -5,7 +5,7 @@
+ #
+ # License: GPL, version 2
+ #
+-# CVS: $Id: nxloadconfig,v 1.29 2005/04/29 00:17:33 fux Exp $
++# CVS: $Id: nxloadconfig,v 1.30 2005/04/30 14:44:30 fabianx Exp $
+ #
+ # ========================================================================
+ 
+@@ -133,7 +133,7 @@
+ ARTSD_BIN_PRELOAD=&quot;artsdsp&quot;
+ 
+ ENABLE_KDE_CUPS=&quot;0&quot;
+-KDE_PRINTRC=&quot;.kde/share/config/kdeprintrc&quot;
++KDE_PRINTRC=&quot;&quot; # Calculated
+ 
+ # Path directives
+ 
+@@ -196,6 +196,8 @@
+ [ -z &quot;$APPLICATION_LIBRARY_PATH&quot; ] &amp;&amp; APPLICATION_LIBRARY_PATH=$PATH_LIB
+ [ -z &quot;$APPLICATION_LIBRARY_PRELOAD&quot; ] &amp;&amp; APPLICATION_LIBRARY_PRELOAD=&quot;$APPLICATION_LIBRARY_PATH/libX11.so.6.2:$APPLICATION_LIBRARY_PATH/libXext.so.6.4:$APPLICATION_LIBRARY_PATH/libXcomp.so.1:$APPLICATION_LIBRARY_PATH/libXcompext.so.1:$APPLICATION_LIBRARY_PATH/libXrender.so.1.2&quot;
+ 
++[ -z &quot;$KDE_PRINTRC&quot; -a -n &quot;$KDEHOME&quot; ] &amp;&amp; KDE_PRINTRC=&quot;$KDEHOME/share/config/kdeprintrc&quot;
++[ -z &quot;$KDE_PRINTRC&quot; -a -z &quot;$KDEHOME&quot; ] &amp;&amp; KDE_PRINTRC=&quot;$HOME/.kde/share/config/kdeprintrc&quot;
+ 
+ #########################################################################
+ # Support for --check
+
+
+
+1.54      +5 -5      freenx/nxnode
+
+
+rev 1.54, prev_rev 1.53
+Index: nxnode
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxnode,v
+retrieving revision 1.53
+retrieving revision 1.54
+diff -u -r1.53 -r1.54
+--- nxnode	28 Apr 2005 22:46:56 -0000	1.53
++++ nxnode	30 Apr 2005 14:44:30 -0000	1.54
+@@ -13,7 +13,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxnode,v 1.53 2005/04/28 22:46:56 fabianx Exp $
++# CVS: $Id: nxnode,v 1.54 2005/04/30 14:44:30 fabianx Exp $
+ #
+ # 21.06.2004: - Full reconnection support
+ 
+@@ -345,12 +345,12 @@
+ 	# setup KDE
+ 	if [ &quot;$ENABLE_KDE_CUPS&quot; = &quot;1&quot; ]
+ 	then
+-		if egrep -q &quot;^Port=&quot; &quot;$HOME/$KDE_PRINTRC&quot;
++		if egrep -q &quot;^Port=&quot; &quot;$KDE_PRINTRC&quot;
+ 		then
+-			perl -pi -e &quot;s/^Port=.*/Port=$NODE_CUPSD_PORT/g&quot; &quot;$HOME/$KDE_PRINTRC&quot;
++			perl -pi -e &quot;s/^Port=.*/Port=$NODE_CUPSD_PORT/g&quot; &quot;$KDE_PRINTRC&quot;
+ 		else
+-			echo &quot;[CUPS]&quot; &gt;&gt; &quot;$HOME/$KDE_PRINTRC&quot;
+-			echo &quot;Port=$NODE_CUPSD_PORT&quot; &gt;&gt; &quot;$HOME/$KDE_PRINTRC&quot;
++			echo &quot;[CUPS]&quot; &gt;&gt; &quot;$KDE_PRINTRC&quot;
++			echo &quot;Port=$NODE_CUPSD_PORT&quot; &gt;&gt; &quot;$KDE_PRINTRC&quot;
+ 		fi
+ 	fi
+ }
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000134.html">[Freenx-cvs] CVS: freenx - fux modified 2 files
+</A></li>
+	<LI>Next message: <A HREF="000139.html">[Freenx-cvs] CVS: freenx - fabianx modified 3 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#136">[ date ]</a>
+              <a href="thread.html#136">[ thread ]</a>
+              <a href="subject.html#136">[ subject ]</a>
+              <a href="author.html#136">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

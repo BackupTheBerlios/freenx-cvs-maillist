@@ -1,0 +1,247 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r374 - in nxcl: nxcl test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-September/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r374%20-%20in%20nxcl%3A%20nxcl%20test&In-Reply-To=%3C200709111314.l8BDEewO019856%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000664.html">
+   <LINK REL="Next"  HREF="000505.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r374 - in nxcl: nxcl test</H1>
+    <B>sebjames at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r374%20-%20in%20nxcl%3A%20nxcl%20test&In-Reply-To=%3C200709111314.l8BDEewO019856%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r374 - in nxcl: nxcl test">sebjames at mail.berlios.de
+       </A><BR>
+    <I>Tue Sep 11 15:15:24 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000664.html">[Freenx-cvs] r373 - / nxcl nxcl/doc nxcl/lib nxcl/nxcl nxcl/test
+</A></li>
+        <LI>Next message: <A HREF="000505.html">[Freenx-cvs] r375 - in nxcl: lib nxcl test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#667">[ date ]</a>
+              <a href="thread.html#667">[ thread ]</a>
+              <a href="subject.html#667">[ subject ]</a>
+              <a href="author.html#667">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: sebjames
+Date: 2007-09-11 15:14:39 +0200 (Tue, 11 Sep 2007)
+New Revision: 374
+
+Modified:
+   nxcl/nxcl/nxcl.cpp
+   nxcl/test/nxcmd.cpp
+Log:
+Sorted out some extraneous debugging output in nxcl.cpp. Fixed nxcmd.cpp to actually work again.
+
+
+Modified: nxcl/nxcl/nxcl.cpp
+===================================================================
+--- nxcl/nxcl/nxcl.cpp	2007-09-11 12:48:46 UTC (rev 373)
++++ nxcl/nxcl/nxcl.cpp	2007-09-11 13:14:39 UTC (rev 374)
+@@ -179,7 +179,6 @@
+ 	if (DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER != ret) { 
+ 		/* What to do if someone else is running? Try another name? Exit? */
+ 		this-&gt;callbacks.write (&quot;There appears to be another nxcl running, won't compete. Exiting.&quot;);
+-		cout &lt;&lt; &quot;(DEBUG) ret == &quot; &lt;&lt; ret &lt;&lt; endl;
+ 		exit(1);
+ 	}
+ 	// Done getting connection to session bus
+@@ -221,7 +220,7 @@
+ 	stringstream ss;
+ 	int count = 0;
+ 
+-	this-&gt;callbacks.write (&quot;receiveSettings called&quot;);
++	this-&gt;callbacks.debug (&quot;receiveSettings called&quot;);
+ 
+ 	// loop listening for signals being emitted
+ 	while (settings_transferred == false) {
+@@ -244,7 +243,7 @@
+ 
+ 		// check if the message is a signal from the
+ 		// correct interface and with the correct name
+-		this-&gt;callbacks.write (&quot;call dbus_message_is_signal()&quot;);
++		this-&gt;callbacks.debug (&quot;call dbus_message_is_signal()&quot;);
+ 		if (dbus_message_is_signal (message, this-&gt;dbusMatchInterface.c_str(), &quot;sessionConfig&quot;)) {
+ 
+ 			if (!dbus_message_iter_init(message, &amp;args)) {
+@@ -366,7 +365,7 @@
+ 			}
+ 			settings_transferred = true;			
+ 		} else {
+-			this-&gt;callbacks.write (&quot;this message is not a signal&quot;);
++			this-&gt;callbacks.debug (&quot;this message is not a signal&quot;);
+ 		}
+ 
+ 		// Anything else required for cleanup?
+@@ -376,7 +375,7 @@
+ 		dbus_message_unref (message);
+ 
+ 	} // while()
+-	this-&gt;callbacks.write (&quot;Got the session settings over the dbus\n&quot;);
++	this-&gt;callbacks.debug (&quot;Got the session settings over the dbus\n&quot;);
+ 
+ 	if (this-&gt;nxserver.size() == 0 || this-&gt;nxuser.size() == 0) {
+ 		// We need at least these to be able to connect. Leave
+@@ -474,7 +473,7 @@
+ void
+ Nxcl::noResumableSessions (void)
+ {
+-	this-&gt;callbacks.write (&quot;noResumableSessions Called&quot;);
++	this-&gt;callbacks.debug (&quot;noResumableSessions Called&quot;);
+ 	DBusMessage *msg = dbus_message_new_signal (&quot;/org/freenx/nxcl/dbus/AvailableSession&quot;,
+ 						    this-&gt;dbusSendInterface.c_str(),
+ 						    &quot;Connecting&quot;);
+@@ -554,7 +553,7 @@
+ 	bool instruction_received = false;
+ 	stringstream ss;
+ 
+-	this-&gt;callbacks.write (&quot;receiveStartInstruction() called&quot;);
++	this-&gt;callbacks.debug (&quot;receiveStartInstruction() called&quot;);
+ 
+ 	// loop listening for signals being emitted
+ 	while (instruction_received == false) {
+@@ -579,9 +578,6 @@
+ 				cerr &lt;&lt; &quot;Argument is not int32!\n&quot;;
+ 			else {
+ 				dbus_message_iter_get_basic(&amp;args, &amp;parameter);
+-				//ss.str(&quot;&quot;);
+-				//ss &lt;&lt; parameter;
+-				//this-&gt;callbacks.write (&quot;Choice: &quot; + ss.str());
+ 				instruction_received = true;
+ 				if (parameter &lt; 0) {
+ 					// No action, start a new connection
+@@ -600,7 +596,7 @@
+ 				dbus_message_iter_get_basic(&amp;args, &amp;parameter);
+ 				ss.str(&quot;&quot;);
+ 				ss &lt;&lt; parameter;
+-				this-&gt;callbacks.write (&quot;Terminating: &quot; + ss.str());
++				this-&gt;callbacks.debug (&quot;Terminating: &quot; + ss.str());
+ 				instruction_received = true;
+ 				if (parameter &lt; 0) {
+ 					// No action, start a new connection
+
+Modified: nxcl/test/nxcmd.cpp
+===================================================================
+--- nxcl/test/nxcmd.cpp	2007-09-11 12:48:46 UTC (rev 373)
++++ nxcl/test/nxcmd.cpp	2007-09-11 13:14:39 UTC (rev 374)
+@@ -53,7 +53,7 @@
+ /*!
+  * Listen to the dbus, waiting for a signal to say either that
+  * connection is in progress, or giving us a list of possible sessions
+- * we could connect to. Return true if nxcld requires a reply such
++ * we could connect to. Return true if nxcl requires a reply such
+  * as &quot;please resume session 1&quot;.
+  */
+ static int receiveSession (DBusConnection* conn);
+@@ -115,11 +115,11 @@
+ 		dbusSendInterface = ss.str();
+ 
+ 		ss.str(&quot;&quot;);
+-		ss &lt;&lt; base &lt;&lt; &quot;nxcld&quot; &lt;&lt; i;
++		ss &lt;&lt; base &lt;&lt; &quot;nxcl&quot; &lt;&lt; i;
+ 		dbusRecvInterface = ss.str();
+ 
+ 		ss.str(&quot;&quot;);
+-		ss &lt;&lt; &quot;type='signal',interface='org.freenx.nxcl.nxcld&quot; &lt;&lt; i &lt;&lt; &quot;'&quot;;
++		ss &lt;&lt; &quot;type='signal',interface='org.freenx.nxcl.nxcl&quot; &lt;&lt; i &lt;&lt; &quot;'&quot;;
+ 		dbusMatchString = ss.str();
+ 
+ 
+@@ -145,7 +145,7 @@
+ 	stringstream arg;
+ 	arg &lt;&lt; i;		
+ 
+-	/* fork and exec the nxcld */
++	/* fork and exec the nxcl */
+ 	pid = fork();
+ 	switch (pid) {
+ 	case -1:
+@@ -155,7 +155,7 @@
+ 		// This is the CHILD process
+ 		// Allocate memory for the program arguments
+ 		// 1+ to allow space for NULL terminating pointer
+-		execl (PACKAGE_BIN_DIR&quot;/nxcld&quot;, &quot;nxcld&quot;, arg.str().c_str(), static_cast&lt;char*&gt;(NULL));
++		execl (PACKAGE_BIN_DIR&quot;/nxcl&quot;, &quot;nxcl&quot;, arg.str().c_str(), static_cast&lt;char*&gt;(NULL));
+ 		// If process returns, error occurred
+ 		theError = errno; 
+ 		// This'll get picked up by parseResponse
+@@ -165,13 +165,13 @@
+ 
+ 	default:
+ 		// This is the PARENT process
+-		cout &lt;&lt; &quot;NXCMD&gt; forked the nxcld process; continuing.\n&quot;;
++		cout &lt;&lt; &quot;NXCMD&gt; forked the nxcl process; continuing.\n&quot;;
+ 		break;
+ 	}
+ 
+ 
+ 	/* Prepare interface - add a rule for which messages we want
+-	   to see - those that are sent to us from the nxcld
++	   to see - those that are sent to us from the nxcl
+ 	   connection. */
+ 	dbus_bus_add_match(conn, dbusMatchString.c_str(), &amp;error);
+ 	dbus_connection_flush (conn);
+@@ -182,7 +182,7 @@
+ 		cout &lt;&lt; &quot;NXCMD&gt; Added match '&quot; &lt;&lt; dbusMatchString &lt;&lt; &quot;'\n&quot;;
+ 	}
+ 
+-	// Crude 2 second wait to let nxcld get going before we send
++	// Crude 2 second wait to let nxcl get going before we send
+ 	// the settings. This _must_ be more sophisticated in your
+ 	// application ;)
+ 	sleep (2);
+@@ -196,7 +196,7 @@
+ 	cfg.serverPort = 22;
+ 	cfg.sessionUser = argv[2];
+ 	cfg.sessionPass = argv[3];
+-	cfg.sessionName = &quot;nxcldtest&quot;;
++	cfg.sessionName = &quot;nxcmd&quot;;
+ 	cfg.sessionType = argv[4];
+ 	cfg.cache = 8;
+ 	cfg.images = 32;
+@@ -268,7 +268,7 @@
+ 		}
+ 	}
+ 
+-	// wait and block for nxcld process to end before exiting.
++	// wait and block for nxcl process to end before exiting.
+ 	int status = 0;
+ 	wait (&amp;status);
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000664.html">[Freenx-cvs] r373 - / nxcl nxcl/doc nxcl/lib nxcl/nxcl nxcl/test
+</A></li>
+	<LI>Next message: <A HREF="000505.html">[Freenx-cvs] r375 - in nxcl: lib nxcl test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#667">[ date ]</a>
+              <a href="thread.html#667">[ thread ]</a>
+              <a href="subject.html#667">[ subject ]</a>
+              <a href="author.html#667">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

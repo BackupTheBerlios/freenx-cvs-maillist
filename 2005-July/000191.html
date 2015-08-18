@@ -1,0 +1,312 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fabianx modified 5 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-July/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%205%20files&In-Reply-To=%3C42E79B94.mail6YR1A41YE%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000190.html">
+   <LINK REL="Next"  HREF="000192.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fabianx modified 5 files</H1>
+    <B>fabianx</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%205%20files&In-Reply-To=%3C42E79B94.mail6YR1A41YE%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fabianx modified 5 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Wed Jul 27 16:35:00 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000190.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+        <LI>Next message: <A HREF="000192.html">[Freenx-cvs] CVS: freenx - fabianx modified 4 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#191">[ date ]</a>
+              <a href="thread.html#191">[ thread ]</a>
+              <a href="subject.html#191">[ subject ]</a>
+              <a href="author.html#191">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fabianx
+Date:      2005-07-27 14:35:00 GMT
+Modified:  .        ChangeLog node.conf.sample nxloadconfig
+Modified:           nxnode-login nxserver
+Log:
+* Added secure logging - Passwords are no longer shown in log files.
+
+New configuration directive: NX_LOG_SECURE=&quot;1&quot;. Disable for more speed while using verbose logging.
+
+* Security: Certain passwords for VNC/RDP could have been visible via&#183;
+  `ps aux`.
+
+nxnode-login was changed to accept a environment variable instead.
+
+@Fux: Hope you are pleased now and I've catched all &quot;problematic&quot; variables.
+
+Revision  Changes    Path
+1.80      +3 -0      freenx/ChangeLog
+
+
+rev 1.80, prev_rev 1.79
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.79
+retrieving revision 1.80
+diff -u -r1.79 -r1.80
+--- ChangeLog	27 Jul 2005 12:50:54 -0000	1.79
++++ ChangeLog	27 Jul 2005 14:34:59 -0000	1.80
+@@ -11,6 +11,9 @@
+ 		  backend.
+ 		* Added RDP highcolor support for !M 1.5.0 client
+ 		  with !M 1.5.0 backend.
++	* Added secure logging - Passwords are no longer shown in log files.
++	* Security: Certain passwords for VNC/RDP could have been visible via 
++	  `ps aux`.
+ 
+ 16.07.2005 FreeNX 0.4.2 &quot;Solaris / Bugfix / Linux Infotag Pforzheim Edition&quot;
+ 	* Removed forwarding support via &quot;freenx.&lt;user&gt;&quot;, because it was
+
+
+
+1.31      +4 -1      freenx/node.conf.sample
+
+
+rev 1.31, prev_rev 1.30
+Index: node.conf.sample
+===================================================================
+RCS file: /cvsroot/freenx/freenx/node.conf.sample,v
+retrieving revision 1.30
+retrieving revision 1.31
+diff -u -r1.30 -r1.31
+--- node.conf.sample	27 Jul 2005 12:06:37 -0000	1.30
++++ node.conf.sample	27 Jul 2005 14:34:59 -0000	1.31
+@@ -37,7 +37,7 @@
+ #
+ #           <A HREF="https://mail.kde.org/mailman/listinfo/freenx-knx">https://mail.kde.org/mailman/listinfo/freenx-knx</A>
+ #
+-# CVS: $Id: node.conf.sample,v 1.30 2005/07/27 12:06:37 fabianx Exp $
++# CVS: $Id: node.conf.sample,v 1.31 2005/07/27 14:34:59 fabianx Exp $
+ 
+ #########################################################################
+ # General FreeNX directives
+@@ -129,6 +129,9 @@
+ # 6: Debugging information
+ # 7: stderror of some applications
+ #NX_LOG_LEVEL=0
++
++# By setting this to 0 the nxserver might be a bit faster, but passwords can be found in the log files.
++#NX_LOG_SECURE=1
+ 
+ # Before turning logging on, please make sure that NX_LOGFILE is
+ # writeable for the &quot;nx&quot; user
+
+
+
+1.39      +2 -1      freenx/nxloadconfig
+
+
+rev 1.39, prev_rev 1.38
+Index: nxloadconfig
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxloadconfig,v
+retrieving revision 1.38
+retrieving revision 1.39
+diff -u -r1.38 -r1.39
+--- nxloadconfig	27 Jul 2005 12:06:37 -0000	1.38
++++ nxloadconfig	27 Jul 2005 14:34:59 -0000	1.39
+@@ -5,7 +5,7 @@
+ #
+ # License: GPL, version 2
+ #
+-# CVS: $Id: nxloadconfig,v 1.38 2005/07/27 12:06:37 fabianx Exp $
++# CVS: $Id: nxloadconfig,v 1.39 2005/07/27 14:34:59 fabianx Exp $
+ #
+ # ========================================================================
+ 
+@@ -104,6 +104,7 @@
+ # Logging directives
+ 
+ NX_LOG_LEVEL=0
++NX_LOG_SECURE=1
+ NX_LOGFILE=/var/log/nxserver.log
+ SESSION_LOG_CLEAN=1
+ SESSION_HISTORY=2592000
+
+
+
+1.13      +3 -2      freenx/nxnode-login
+
+
+rev 1.13, prev_rev 1.12
+Index: nxnode-login
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxnode-login,v
+retrieving revision 1.12
+retrieving revision 1.13
+diff -u -r1.12 -r1.13
+--- nxnode-login	21 Mar 2005 13:00:21 -0000	1.12
++++ nxnode-login	27 Jul 2005 14:34:59 -0000	1.13
+@@ -3,7 +3,7 @@
+ # Copyright (c) 2004 by Fabian Franz.
+ # License: GPL, version 2
+ #
+-# CVS: $Id: nxnode-login,v 1.12 2005/03/21 13:00:21 jonno Exp $
++# CVS: $Id: nxnode-login,v 1.13 2005/07/27 14:34:59 fabianx Exp $
+ #
+ 
+ # Syntax: nxnode-login {ssh|su} user ssh-port executable command tosend
+@@ -14,13 +14,14 @@
+ set executable [lindex $argv 3]
+ set command [lindex $argv 4]
+ set tosend [lindex $argv 5]
++catch {set tosend $env(NXNODE_TOSEND)}
+ set command_ssh &quot;ssh&quot;
+ catch {set command_ssh $env(COMMAND_SSH)}
+ 
+ expect_user -re &quot;(.*)\n&quot; 
+ set password $expect_out(1,string)
+ 
+-set stty_init &quot;raw icrnl&quot;
++set stty_init &quot;raw icrnl -echo&quot;
+ 
+ if { &quot;$auth_method&quot;==&quot;ssh&quot; } { 
+ 	set pid [spawn -noecho $command_ssh -2 -x -l &quot;$user&quot; &quot;127.0.0.1&quot; -o &quot;NumberOfPasswordPrompts 1&quot; -p &quot;$port&quot; &quot;$executable $command&quot; ]
+
+
+
+1.68      +31 -7     freenx/nxserver
+
+
+rev 1.68, prev_rev 1.67
+Index: nxserver
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxserver,v
+retrieving revision 1.67
+retrieving revision 1.68
+diff -u -r1.67 -r1.68
+--- nxserver	27 Jul 2005 12:06:37 -0000	1.67
++++ nxserver	27 Jul 2005 14:34:59 -0000	1.68
+@@ -11,7 +11,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxserver,v 1.67 2005/07/27 12:06:37 fabianx Exp $
++# CVS: $Id: nxserver,v 1.68 2005/07/27 14:34:59 fabianx Exp $
+ #
+ 
+ # Read the config file
+@@ -404,6 +404,18 @@
+ 	[ &quot;$NX_LOG_LEVEL&quot; -ge &quot;$1&quot; -a -w &quot;$NX_LOGFILE&quot; ] &amp;&amp; shift &amp;&amp; echo &quot;$@&quot; &gt;&gt; &quot;$NX_LOGFILE&quot;
+ }
+ 
++# Log in a way that is secure for passwords / cookies / ...
++
++log_secure()
++{
++	if [ &quot;$NX_LOG_SECURE&quot; = &quot;0&quot; ]
++	then
++		log &quot;$@&quot;
++	else
++		[ &quot;$NX_LOG_LEVEL&quot; -ge &quot;$1&quot; -a -w &quot;$NX_LOGFILE&quot; ] &amp;&amp; shift &amp;&amp; echo &quot;$@ &quot; | perl -pi -e 's/--cookie=&quot;.+?&quot;/--cookie=&quot;******&quot;/g; s/--agent_password=&quot;.+?&quot;/agent_password=&quot;******&quot;/g; s/--password=&quot;.+?&quot;/password=&quot;******&quot;/g; s/cookie=.+?&amp;/cookie=******&amp;/g; s/agent_password=.+?&amp;/agent_password=******&amp;/g; s/password=.+?&amp;/password=******&amp;/g;' &gt;&gt; &quot;$NX_LOGFILE&quot;
++	fi
++}
++
+ log_tee()
+ {
+ 	[ &quot;$NX_LOG_LEVEL&quot; -ge &quot;4&quot; -a -w &quot;$NX_LOGFILE&quot; ] &amp;&amp; exec tee -a &quot;$NX_LOGFILE&quot;
+@@ -595,10 +607,10 @@
+ 	if [ &quot;$LOGIN_METHOD&quot; = &quot;SSH&quot; ]
+ 	then
+ 	    export COMMAND_SSH
+-	    echo &quot;$PASS&quot; | $PATH_BIN/nxnode-login -- ssh &quot;$USER&quot; &quot;$SSHD_PORT&quot; &quot;$PATH_BIN/nxnode&quot; &quot;$CMD&quot; &quot;$@&quot; 2&gt;&amp;1 | log_tee
++	    echo &quot;$PASS&quot; | NXNODE_TOSEND=&quot;$@&quot; $PATH_BIN/nxnode-login -- ssh &quot;$USER&quot; &quot;$SSHD_PORT&quot; &quot;$PATH_BIN/nxnode&quot; &quot;$CMD&quot; 2&gt;&amp;1 | log_tee
+ 	elif [ &quot;$LOGIN_METHOD&quot; = &quot;SU&quot; ]
+ 	then
+-	    echo &quot;$PASS&quot; | $PATH_BIN/nxnode-login -- su &quot;$USER&quot; &quot;&quot; &quot;$PATH_BIN/nxnode&quot; &quot;$CMD&quot; &quot;$@&quot; 2&gt;&amp;1 | log_tee
++	    echo &quot;$PASS&quot; | NXNODE_TOSEND=&quot;$@&quot; $PATH_BIN/nxnode-login -- su &quot;$USER&quot; &quot;&quot; &quot;$PATH_BIN/nxnode&quot; &quot;$CMD&quot; 2&gt;&amp;1 | log_tee
+ 	else 
+ 	    echo &quot;$@&quot; | $COMMAND_SSH -l &quot;$USER&quot; 127.0.0.1 -p $SSHD_PORT -x -2 -i $NX_ETC_DIR/users.id_dsa -o 'PubkeyAuthentication yes' -o 'RSAAuthentication yes' -o 'RhostsAuthentication no' -o 'PasswordAuthentication no' -o 'RhostsRSAAuthentication no' -o 'StrictHostKeyChecking no' $PATH_BIN/nxnode &quot;$CMD&quot; | log_tee
+ 	fi
+@@ -810,7 +822,7 @@
+ 	
+ 		uniqueid=$(echo $[$RANDOM*$RANDOM] | md5sum | cut -d&quot; &quot; -f1 | tr &quot;[a-z]&quot; &quot;[A-Z]&quot;)
+ 		FULL_PARAMS=&quot;$PARAMS&amp;user=$USER&amp;userip=$USERIP&amp;uniqueid=$uniqueid&amp;display=$SESS_DISPLAY&quot;
+-		log 6 &quot;$FULL_PARAMS&quot;
++		log_secure &quot;6&quot; &quot;$FULL_PARAMS&quot;
+ 
+ 		# now update the session listing
+ 		CMDLINE=&quot;a=b&amp;$FULL_PARAMS&quot;
+@@ -854,7 +866,19 @@
+ 	read CMD 2&gt;/dev/null
+ 	# FIXME?
+ 	[ &quot;$CMD&quot; = &quot;&quot; ] &amp;&amp; CMD=&quot;quit&quot;
+-	echo_x &quot;$CMD&quot;
++	
++	echo &quot;$CMD&quot;
++	
++	# Logging 
++	case &quot;$CMD&quot; in
++		startsession*|restoresession*|addmount*|addprinter*)
++			log_secure &quot;4&quot; &quot;$CMD&quot;
++		;;
++		*)
++			log &quot;4&quot; &quot;$CMD&quot;
++		;;
++	esac
++	
+ 	case &quot;$CMD&quot; in 
+ 		quit|QUIT)
+ 			echo_x &quot;Quit&quot;
+@@ -965,13 +989,13 @@
+ 		addmount*)
+ 			server_get_params $CMD
+ 			PARAMS=$SERVER_PARAMS
+-			server_nxnode_start --smbmount &quot;$USER&quot; &quot;$PARAMS&quot; 2&gt;&amp;1 | log_error &gt;/dev/null
++			server_nxnode_start --smbmount &quot;$USER&quot; &quot;$PARAMS&quot; &gt;/dev/null 2&gt;&amp;1 | log_error &gt;/dev/null
+ 			echo_x &quot;NX&gt; 719 SMB filesystem: running&quot;
+ 		;;
+ 		addprinter*)
+ 			server_get_params $CMD
+ 			PARAMS=$SERVER_PARAMS
+-			server_nxnode_start --addprinter &quot;$USER&quot; &quot;$PARAMS&quot; 2&gt;&amp;1 | log_error &gt;/dev/null
++			server_nxnode_start --addprinter &quot;$USER&quot; &quot;$PARAMS&quot; &gt;/dev/null 2&gt;&amp;1 | log_error &gt;/dev/null
+ 		;;
+ 		*)
+ 			# disabled for 1.4.0-5 snapshot client
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000190.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+	<LI>Next message: <A HREF="000192.html">[Freenx-cvs] CVS: freenx - fabianx modified 4 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#191">[ date ]</a>
+              <a href="thread.html#191">[ thread ]</a>
+              <a href="subject.html#191">[ subject ]</a>
+              <a href="author.html#191">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

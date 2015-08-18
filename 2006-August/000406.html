@@ -1,0 +1,350 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r276 - in nxclientlib: . qtnx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r276%20-%20in%20nxclientlib%3A%20.%20qtnx&In-Reply-To=%3C200608232033.k7NKXTca008944%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000405.html">
+   <LINK REL="Next"  HREF="000407.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r276 - in nxclientlib: . qtnx</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r276%20-%20in%20nxclientlib%3A%20.%20qtnx&In-Reply-To=%3C200608232033.k7NKXTca008944%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r276 - in nxclientlib: . qtnx">gwright at mail.berlios.de
+       </A><BR>
+    <I>Wed Aug 23 22:33:29 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000405.html">[Freenx-cvs] r275 - in nxclientlib: . qtnx
+</A></li>
+        <LI>Next message: <A HREF="000407.html">[Freenx-cvs] r277 - nxclientlib/qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#406">[ date ]</a>
+              <a href="thread.html#406">[ thread ]</a>
+              <a href="subject.html#406">[ subject ]</a>
+              <a href="author.html#406">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2006-08-23 22:33:29 +0200 (Wed, 23 Aug 2006)
+New Revision: 276
+
+Modified:
+   nxclientlib/nxclientlib.cpp
+   nxclientlib/nxclientlib.h
+   nxclientlib/qtnx/qtnx.pro
+   nxclientlib/qtnx/qtnxsessions.cpp
+   nxclientlib/qtnx/qtnxsettings.cpp
+   nxclientlib/qtnx/qtnxsettings.h
+   nxclientlib/qtnx/qtnxwindow.cpp
+   nxclientlib/qtnx/qtnxwindow.h
+Log:
+Custom key support
+
+
+Modified: nxclientlib/nxclientlib.cpp
+===================================================================
+--- nxclientlib/nxclientlib.cpp	2006-08-23 19:42:23 UTC (rev 275)
++++ nxclientlib/nxclientlib.cpp	2006-08-23 20:33:29 UTC (rev 276)
+@@ -55,7 +55,9 @@
+ 	}
+ 
+ 	if (publicKey == &quot;default&quot; || publicKey == &quot;supplied&quot;) {
+-		cerr &lt;&lt; tr(&quot;WARNING: Using hardcoded NoMachine public key.&quot;).toStdString() &lt;&lt; endl;
++		if (publicKey == &quot;default&quot;)
++			cerr &lt;&lt; tr(&quot;WARNING: Using hardcoded NoMachine public key.&quot;).toStdString() &lt;&lt; endl;
++		
+ 		keyFile = new QTemporaryFile;
+ 		keyFile-&gt;open();
+ 		
+@@ -133,7 +135,7 @@
+ 
+ void NXClientLib::failedLogin()
+ {
+-	emit callbackWrite(tr(&quot;Username or password incorrect&quot;));
++	emit loginFailed();
+ 	nxsshProcess.terminate();
+ }
+ 
+@@ -159,7 +161,8 @@
+ 		returnMessage = &quot;NX&gt; 299 Switching connection to: &quot;;
+ 		returnMessage += proxyData.proxyIP + &quot;:&quot; + QString::number(proxyData.port) + &quot; cookie: &quot; + proxyData.cookie + &quot;\n&quot;;
+ 		write(returnMessage);
+-	}
++	} else if (message.contains(&quot;NX&gt; 287 Redirected I/O to channel descriptors&quot;))
++		emit callbackWrite(tr(&quot;The session has been started successfully&quot;));
+ 
+ 	for (i = messages.constBegin(); i != messages.constEnd(); ++i) {
+ 		if ((*i).contains(&quot;Password&quot;)) {
+@@ -199,7 +202,8 @@
+ 		returnMessage = &quot;NX&gt; 299 Switching connection to: &quot;;
+ 		returnMessage += proxyData.proxyIP + &quot;:&quot; + QString::number(proxyData.port) + &quot; cookie: &quot; + proxyData.cookie + &quot;\n&quot;;
+ 		write(returnMessage);
+-	}
++	} else if (message.contains(&quot;NX&gt; 287 Redirected I/O to channel descriptors&quot;))
++		emit callbackWrite(tr(&quot;The session has been started successfully&quot;));
+ 
+ 	emit stderr(message);
+ }
+@@ -288,9 +292,7 @@
+ 	
+ 	nxproxyProcess.start(NXPROXY_BIN, arguments);
+ 
+-	if (nxproxyProcess.waitForStarted())
+-		emit callbackWrite(tr(&quot;Session started successfully&quot;));
+-	else
++	if (!nxproxyProcess.waitForStarted())
+ 		emit callbackWrite(tr(&quot;Session failed to start&quot;));
+ }
+ 
+
+Modified: nxclientlib/nxclientlib.h
+===================================================================
+--- nxclientlib/nxclientlib.h	2006-08-23 19:42:23 UTC (rev 275)
++++ nxclientlib/nxclientlib.h	2006-08-23 20:33:29 UTC (rev 276)
+@@ -96,6 +96,7 @@
+ 
+ 		void resumeSessions(QList&lt;NXResumeData&gt;);
+ 		void noSessions();
++		void loginFailed();
+ 	private:
+ 		bool usingHardcodedKey;
+ 		bool isFinished;
+
+Modified: nxclientlib/qtnx/qtnx.pro
+===================================================================
+--- nxclientlib/qtnx/qtnx.pro	2006-08-23 19:42:23 UTC (rev 275)
++++ nxclientlib/qtnx/qtnx.pro	2006-08-23 20:33:29 UTC (rev 276)
+@@ -2,7 +2,7 @@
+ 
+ CONFIG		+= qt warn_on debug
+ 
+-FORMS = settingsdialog.ui logindialog.ui sessionsdialog.ui
++FORMS = settingsdialog.ui logindialog.ui sessionsdialog.ui keydialog.ui
+ 
+ SOURCES = main.cpp qtnxwindow.cpp qtnxsettings.cpp qtnxsessions.cpp
+ 
+
+Modified: nxclientlib/qtnx/qtnxsessions.cpp
+===================================================================
+--- nxclientlib/qtnx/qtnxsessions.cpp	2006-08-23 19:42:23 UTC (rev 275)
++++ nxclientlib/qtnx/qtnxsessions.cpp	2006-08-23 20:33:29 UTC (rev 276)
+@@ -49,4 +49,4 @@
+ {
+ 	emit resumePressed(ui_sd.sessionsList-&gt;currentItem()-&gt;text(2));
+ 	close();
+-}
+\ No newline at end of file
++}
+
+Modified: nxclientlib/qtnx/qtnxsettings.cpp
+===================================================================
+--- nxclientlib/qtnx/qtnxsettings.cpp	2006-08-23 19:42:23 UTC (rev 275)
++++ nxclientlib/qtnx/qtnxsettings.cpp	2006-08-23 20:33:29 UTC (rev 276)
+@@ -27,6 +27,7 @@
+ QtNXSettings::QtNXSettings(QString sessionName) : QDialog()
+ {
+ 	filedesc = sessionName;
++	keyDialog = 0;
+ 	
+ 	if (!sessionName.isEmpty())
+ 		fileName = QDir::homePath() + &quot;/.qtnx/&quot; + sessionName + &quot;.nxml&quot;;
+@@ -44,6 +45,7 @@
+ 	connect(ui_sd.applyButton, SIGNAL(pressed()), this, SLOT(applyPressed()));
+ 	connect(ui_sd.okButton, SIGNAL(pressed()), this, SLOT(okPressed()));
+ 	connect(ui_sd.cancelButton, SIGNAL(pressed()), this, SLOT(cancelPressed()));
++	connect(ui_sd.setAuthKeyButton, SIGNAL(pressed()), this, SLOT(authKeyPressed()));
+ }
+ 
+ QtNXSettings::~QtNXSettings()
+@@ -168,9 +170,10 @@
+ 
+ void QtNXSettings::keyChanged(int state)
+ {
+-	if (state == Qt::Checked)
++	if (state == Qt::Checked) {
++		config.key = &quot;&quot;;
+ 		ui_sd.setAuthKeyButton-&gt;setEnabled(false);
+-	else
++	} else
+ 		ui_sd.setAuthKeyButton-&gt;setEnabled(true);
+ }
+ 
+@@ -186,6 +189,29 @@
+ 	close();
+ }
+ 
++void QtNXSettings::authKeyPressed()
++{
++	keyDialog = 0;
++	delete keyDialog;
++	keyDialog = new QDialog(this);
++	ui_kd.setupUi(keyDialog);
++	keyDialog-&gt;show();
++	QTextDocument *doc_key = new QTextDocument(config.key);
++	ui_kd.key-&gt;setDocument(doc_key);
++	
++	connect(keyDialog, SIGNAL(accepted()), this, SLOT(keyDialogAccept()));
++}
++
++void QtNXSettings::keyDialogAccept()
++{
++	
++	config.key = ui_kd.key-&gt;document()-&gt;toPlainText();
++}
++
++void QtNXSettings::keyDialogReject()
++{
++}
++
+ void QtNXSettings::applyPressed()
+ {
+ 	// File has been renamed, remove old one
+
+Modified: nxclientlib/qtnx/qtnxsettings.h
+===================================================================
+--- nxclientlib/qtnx/qtnxsettings.h	2006-08-23 19:42:23 UTC (rev 275)
++++ nxclientlib/qtnx/qtnxsettings.h	2006-08-23 20:33:29 UTC (rev 276)
+@@ -23,6 +23,7 @@
+ #include &quot;nxdata.h&quot;
+ 
+ #include &quot;ui_settingsdialog.h&quot;
++#include &quot;ui_keydialog.h&quot;
+ 
+ class QtNXSettings : public QDialog
+ {
+@@ -41,10 +42,15 @@
+ 		void cancelPressed();
+ 		void okPressed();
+ 		void setData(NXConfigData data) { config = data; };
++		void authKeyPressed();
++		void keyDialogAccept();
++		void keyDialogReject();
+ 	signals:
+ 		void closing();
+ 	private:
+ 		Ui::SettingsDialog ui_sd;
++		Ui::KeyDialog ui_kd;
++		QDialog *keyDialog;
+ 		NXConfigData config;
+ 		QString fileName;
+ 		QString filedesc;
+
+Modified: nxclientlib/qtnx/qtnxwindow.cpp
+===================================================================
+--- nxclientlib/qtnx/qtnxwindow.cpp	2006-08-23 19:42:23 UTC (rev 275)
++++ nxclientlib/qtnx/qtnxwindow.cpp	2006-08-23 20:33:29 UTC (rev 276)
+@@ -64,6 +64,11 @@
+ {
+ }
+ 
++void QtNXWindow::failedLogin()
++{
++	QMessageBox::critical(this, tr(&quot;Authentication failure&quot;), tr(&quot;You have supplied an incorrect username or password for this NX server.&quot;), QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
++	statusBar-&gt;showMessage(tr(&quot;Login failed&quot;));
++}
+ void QtNXWindow::sshContinue(QString message)
+ {
+ 	int reply = QMessageBox::question(this, tr(&quot;SSH Request&quot;), message, QMessageBox::Yes, QMessageBox::No, QMessageBox::NoButton);
+@@ -76,6 +81,7 @@
+ 
+ void QtNXWindow::startConnect()
+ {
++	QByteArray key;
+ 	QDesktopWidget dw;
+ 	QX11Info info;
+ 
+@@ -108,20 +114,28 @@
+ 	session.agentPass = config.agentPass;
+ 	session.cups = config.cups;
+ 	session.fullscreen = config.fullscreen;
+-	
+-	if (!config.key.isEmpty())
+-		session.key = config.key;
+-	else
++
++	if (!config.key.isEmpty()) {
++		key = config.key.toAscii();
++		session.key = &quot;supplied&quot;;
++	} else
+ 		session.key = &quot;default&quot;;
+ 
+ 	if (config.sessionType == &quot;unix-application&quot;)
+ 		session.customCommand = config.customCommand;
+ 
+-	if (config.encryption == false)
+-		nxClient.invokeNXSSH(session.key, config.serverHost, false, 0, config.serverPort);
+-	else
+-		nxClient.invokeNXSSH(session.key, config.serverHost, true, 0, config.serverPort);
+-		
++	if (config.encryption == false) {
++		if (session.key == &quot;supplied&quot;)
++			nxClient.invokeNXSSH(session.key, config.serverHost, false, key, config.serverPort);
++		else if (session.key == &quot;default&quot;)
++			nxClient.invokeNXSSH(session.key, config.serverHost, false, 0, config.serverPort);
++	} else {
++		if (session.key == &quot;supplied&quot;)
++			nxClient.invokeNXSSH(session.key, config.serverHost, true, key, config.serverPort);
++		else if (session.key == &quot;default&quot;)
++			nxClient.invokeNXSSH(session.key, config.serverHost, true, 0, config.serverPort);
++	}
++	
+ 	nxClient.setUsername(ui_lg.username-&gt;text());
+ 	nxClient.setPassword(ui_lg.password-&gt;text());
+ 	nxClient.setResolution(dw.screenGeometry(this).width(), dw.screenGeometry(this).height());
+@@ -130,6 +144,7 @@
+ 	connect(&amp;nxClient, SIGNAL(noSessions()), this, SLOT(noSessions()));
+ 	connect(&amp;nxClient, SIGNAL(sshRequestConfirmation(QString)), this, SLOT(sshContinue(QString)));
+ 	connect(&amp;nxClient, SIGNAL(callbackWrite(QString)), this, SLOT(updateStatusBar(QString)));
++	connect(&amp;nxClient, SIGNAL(loginFailed()), this, SLOT(failedLogin()));
+ 	//nxClient.setSession(&amp;session);
+ }
+ 
+
+Modified: nxclientlib/qtnx/qtnxwindow.h
+===================================================================
+--- nxclientlib/qtnx/qtnxwindow.h	2006-08-23 19:42:23 UTC (rev 275)
++++ nxclientlib/qtnx/qtnxwindow.h	2006-08-23 20:33:29 UTC (rev 276)
+@@ -47,6 +47,7 @@
+ 		void noSessions();
+ 		void sshContinue(QString);
+ 		void updateStatusBar(QString);
++		void failedLogin();
+ 	private:
+ 		Ui::LoginDialog ui_lg;
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000405.html">[Freenx-cvs] r275 - in nxclientlib: . qtnx
+</A></li>
+	<LI>Next message: <A HREF="000407.html">[Freenx-cvs] r277 - nxclientlib/qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#406">[ date ]</a>
+              <a href="thread.html#406">[ thread ]</a>
+              <a href="subject.html#406">[ subject ]</a>
+              <a href="author.html#406">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

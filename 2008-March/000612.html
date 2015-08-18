@@ -1,0 +1,165 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r486 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r486%20-%20freenx-server/trunk&In-Reply-To=%3C200803021202.m22C207v003499%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000611.html">
+   <LINK REL="Next"  HREF="000613.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r486 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r486%20-%20freenx-server/trunk&In-Reply-To=%3C200803021202.m22C207v003499%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r486 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Sun Mar  2 13:02:00 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000611.html">[Freenx-cvs] r485 - in freenx-server/trunk: . init.d
+</A></li>
+        <LI>Next message: <A HREF="000613.html">[Freenx-cvs] r487 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#612">[ date ]</a>
+              <a href="thread.html#612">[ thread ]</a>
+              <a href="subject.html#612">[ subject ]</a>
+              <a href="author.html#612">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-03-02 13:02:00 +0100 (Sun, 02 Mar 2008)
+New Revision: 486
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/node.conf.sample
+   freenx-server/trunk/nxloadconfig
+   freenx-server/trunk/nxnode
+Log:
+* Added the configuration key ENABLE_PULLDOWN_MENU to be able to
+  disable the pulldown menu for rootless sessions.
+(<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+- Added 2&gt; /dev/null for strings command.
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2008-03-02 10:29:52 UTC (rev 485)
++++ freenx-server/trunk/ChangeLog	2008-03-02 12:02:00 UTC (rev 486)
+@@ -40,6 +40,9 @@
+ 	* Added support for 3.1.0 and later backends. Made 2.0.0 backend the
+ 	  default and added a fallback to 1.5.0 via the same detection mechanism.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Added the configuration key ENABLE_PULLDOWN_MENU to be able to
++	  disable the pulldown menu for rootless sessions.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
+ 14.10.2007 FreeNX 0.7.1 &quot;Hip Hop Edition&quot;
+ 	* Fixed the issue that makes fonts look tiny and unreadable by default 
+
+Modified: freenx-server/trunk/node.conf.sample
+===================================================================
+--- freenx-server/trunk/node.conf.sample	2008-03-02 10:29:52 UTC (rev 485)
++++ freenx-server/trunk/node.conf.sample	2008-03-02 12:02:00 UTC (rev 486)
+@@ -152,6 +152,21 @@
+ #
+ #ENABLE_CLIPBOARD=&quot;both&quot;
+ 
++
++#
++# Enable or disable the pulldown dialog, which provides a graphical
++# way to suspend or terminate the rootless session:
++#
++# 1: Enabled. The pulldown menu is shown when the mouse pointer
++#     moves near the middle of the top boundary of a window and
++#     allows the user to suspend or terminate the session by means
++#     of an icon-click.
++#
++# 0: Disabled. The ctrl+alt+T key combination has to be issued
++#     to get the dialog for suspending or terminating the session.
++#
++#ENABLE_PULLDOWN_MENU=&quot;1&quot;
++
+ #########################################################################
+ # Logging directives
+ #########################################################################
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2008-03-02 10:29:52 UTC (rev 485)
++++ freenx-server/trunk/nxloadconfig	2008-03-02 12:02:00 UTC (rev 486)
+@@ -113,6 +113,7 @@
+ ENABLE_DESKTOP_SHARING=1
+ 
+ ENABLE_CLIPBOARD=&quot;both&quot;
++ENABLE_PULLDOWN_MENU=&quot;1&quot;
+ 
+ # Logging directives
+ 
+@@ -300,7 +301,7 @@
+ [ -z &quot;$APPLICATION_LIBRARY_PRELOAD&quot; ] &amp;&amp; APPLICATION_LIBRARY_PRELOAD=&quot;$APPLICATION_LIBRARY_PATH/libX11.so.6.2:$APPLICATION_LIBRARY_PATH/libXext.so.6.4:$APPLICATION_LIBRARY_PATH/libXcomp.so:$APPLICATION_LIBRARY_PATH/libXcompext.so:$APPLICATION_LIBRARY_PATH/libXrender.so.1.2&quot;
+ if [ -z &quot;$ENABLE_1_5_0_BACKEND&quot; ]
+ then
+-	[ -n &quot;$(strings $PATH_BIN/nxagent | egrep 'NXAGENT - Version 1.5.0')&quot; ] &amp;&amp; ENABLE_1_5_0_BACKEND=&quot;1&quot;
++	[ -n &quot;$(strings $PATH_BIN/nxagent 2&gt;/dev/null | egrep 'NXAGENT - Version 1.5.0')&quot; ] &amp;&amp; ENABLE_1_5_0_BACKEND=&quot;1&quot;
+ fi
+ 
+ if [ &quot;$ENABLE_KDE_CUPS&quot; = &quot;1&quot; ]
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2008-03-02 10:29:52 UTC (rev 485)
++++ freenx-server/trunk/nxnode	2008-03-02 12:02:00 UTC (rev 486)
+@@ -1183,6 +1183,7 @@
+ 	[ -z &quot;$nodelay&quot; ] &amp;&amp; nodelay=1
+ 
+ 	clipboard=&quot;$ENABLE_CLIPBOARD&quot;
++	menu=&quot;$ENABLE_PULLDOWN_MENU&quot;
+ 
+ 	CACHE=&quot;cache=$cache,&quot;
+ 	[ -z &quot;$cache&quot; ] &amp;&amp; CACHE=&quot;&quot;
+@@ -1196,7 +1197,7 @@
+ 	umask 0077
+ 
+ cat &lt;&lt; EOF &gt; &quot;$USER_FAKE_HOME/.nx/C-$sess_id/options&quot;
+-${keyboard:+keyboard=$keyboard,}${kbtype:+kbtype=$kbtype,}${kbload:+kbload=$kbload,}${keymap:+keymap=$keymap,}${resize:+resize=$resize,}${CACHE}${IMAGES}${PACK}link=$link,nodelay=$nodelay,type=$realtype,cleanup=0,${ACCEPT}cookie=$proxy_cookie,id=$sess_id,samba=$samba,media=$media${sync:+,sync=$sync}${cups:+,cups=$cups}${keybd:+,keybd=$keybd}${aux:+,aux=$aux}${http:+,http=$http}${rdpcolors:+,rdpcolors=$rdpcolors}${rdpcache:+,rdpcache=$rdpcache}${fullscreen:+,fullscreen=1}${clipboard:+,clipboard=$clipboard}:$display
++${keyboard:+keyboard=$keyboard,}${kbtype:+kbtype=$kbtype,}${kbload:+kbload=$kbload,}${keymap:+keymap=$keymap,}${resize:+resize=$resize,}${CACHE}${IMAGES}${PACK}link=$link,nodelay=$nodelay,type=$realtype,cleanup=0,${ACCEPT}cookie=$proxy_cookie,id=$sess_id,samba=$samba,media=$media${sync:+,sync=$sync}${cups:+,cups=$cups}${keybd:+,keybd=$keybd}${aux:+,aux=$aux}${http:+,http=$http}${rdpcolors:+,rdpcolors=$rdpcolors}${rdpcache:+,rdpcache=$rdpcache}${fullscreen:+,fullscreen=1}${clipboard:+,clipboard=$clipboard}${menu:+,menu=$menu}:$display
+ EOF
+ 	umask $OLD_UMASK
+ #samba=$samba,
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000611.html">[Freenx-cvs] r485 - in freenx-server/trunk: . init.d
+</A></li>
+	<LI>Next message: <A HREF="000613.html">[Freenx-cvs] r487 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#612">[ date ]</a>
+              <a href="thread.html#612">[ thread ]</a>
+              <a href="subject.html#612">[ subject ]</a>
+              <a href="author.html#612">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

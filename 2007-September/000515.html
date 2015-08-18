@@ -1,0 +1,980 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r386 - in nxlaunch: . lib src
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-September/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r386%20-%20in%20nxlaunch%3A%20.%20lib%20src&In-Reply-To=%3C200709172106.l8HL6PEx004144%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000514.html">
+   <LINK REL="Next"  HREF="000516.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r386 - in nxlaunch: . lib src</H1>
+    <B>sebjames at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r386%20-%20in%20nxlaunch%3A%20.%20lib%20src&In-Reply-To=%3C200709172106.l8HL6PEx004144%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r386 - in nxlaunch: . lib src">sebjames at mail.berlios.de
+       </A><BR>
+    <I>Mon Sep 17 23:06:25 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000514.html">[Freenx-cvs] r385 - nxcl
+</A></li>
+        <LI>Next message: <A HREF="000516.html">[Freenx-cvs] r387 - nxcl
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#515">[ date ]</a>
+              <a href="thread.html#515">[ thread ]</a>
+              <a href="subject.html#515">[ subject ]</a>
+              <a href="author.html#515">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: sebjames
+Date: 2007-09-17 23:06:24 +0200 (Mon, 17 Sep 2007)
+New Revision: 386
+
+Modified:
+   nxlaunch/README
+   nxlaunch/lib/callbacks_nx.c
+   nxlaunch/lib/callbacks_nx.h
+   nxlaunch/src/main.c
+   nxlaunch/src/nxconfig.glade
+   nxlaunch/src/nxlaunch.c
+   nxlaunch/src/nxlaunch.h
+Log:
+Fixed support for console and standalone applications and started working towards Windows, VNC and Shadow support 
+(these are supported in nxcl, but a bit more work is required in nxlaunch yet).
+
+
+Modified: nxlaunch/README
+===================================================================
+--- nxlaunch/README	2007-09-17 21:05:25 UTC (rev 385)
++++ nxlaunch/README	2007-09-17 21:06:24 UTC (rev 386)
+@@ -13,3 +13,15 @@
+ It would be quite possible to write a GTK client which links directly
+ to the nxcl library, but that is left as a further exercise for
+ someone.
++
++Building:
++
++If you checked out the svn code, you need to do:
++
++autoconf -is
++
++then:
++
++./configure [--enable-debug-output]
++make
++make install
+
+Modified: nxlaunch/lib/callbacks_nx.c
+===================================================================
+--- nxlaunch/lib/callbacks_nx.c	2007-09-17 21:05:25 UTC (rev 385)
++++ nxlaunch/lib/callbacks_nx.c	2007-09-17 21:06:24 UTC (rev 386)
+@@ -61,7 +61,7 @@
+ 		valid = gtk_tree_model_iter_next (GTK_TREE_MODEL (prog_list), &amp;iter);
+ 	}
+ 
+-	/* FIXME: new_iter undefined if no match is found */
++	/* new_iter undefined if no match is found */
+ 	if (have_match == TRUE) {
+ 		gtk_combo_box_set_active_iter (GTK_COMBO_BOX (widget), &amp;new_iter);		
+ 	} else {
+@@ -320,6 +320,8 @@
+ 
+ 	/* hardcoded options */
+ 	if (new_config_file == TRUE) {
++		/* FIXME: This needs to be fixed to match the system
++		   it was compiled for */
+ 		optionNode = xmlNewChild (group, NULL, BAD_CAST &quot;option&quot;, NULL);
+ 		xmlNewProp (optionNode, BAD_CAST &quot;key&quot;, BAD_CAST &quot;CUPSD path&quot;);
+ 		xmlNewProp (optionNode, BAD_CAST &quot;value&quot;, BAD_CAST &quot;/usr/sbin/cupsd&quot;);
+@@ -332,12 +334,7 @@
+ 		xmlNewProp (optionNode, BAD_CAST &quot;key&quot;, BAD_CAST &quot;Backingstore&quot;);
+ 		xmlNewProp (optionNode, BAD_CAST &quot;value&quot;, BAD_CAST &quot;when_requested&quot;);
+ 
+-		/* We don't use NX for vnc or rdp sessions so this is hardcoded to &quot;unix&quot; */
+ 		optionNode = xmlNewChild (group, NULL, BAD_CAST &quot;option&quot;, NULL);
+-		xmlNewProp (optionNode, BAD_CAST &quot;key&quot;, BAD_CAST &quot;Session&quot;);
+-		xmlNewProp (optionNode, BAD_CAST &quot;value&quot;, BAD_CAST &quot;unix&quot;); 
+-
+-		optionNode = xmlNewChild (group, NULL, BAD_CAST &quot;option&quot;, NULL);
+ 		xmlNewProp (optionNode, BAD_CAST &quot;key&quot;, BAD_CAST &quot;Use render&quot;);
+ 		xmlNewProp (optionNode, BAD_CAST &quot;value&quot;, BAD_CAST &quot;true&quot;);
+ 
+@@ -350,6 +347,10 @@
+ 	optionNode = xmlNewChild (group, NULL, BAD_CAST &quot;option&quot;, NULL);
+ 	xmlNewProp (optionNode, BAD_CAST &quot;key&quot;, BAD_CAST &quot;Desktop&quot;);
+ 	xmlNewProp (optionNode, BAD_CAST &quot;value&quot;, BAD_CAST nx_conn-&gt;Desktop);
++
++	optionNode = xmlNewChild (group, NULL, BAD_CAST &quot;option&quot;, NULL);
++	xmlNewProp (optionNode, BAD_CAST &quot;key&quot;, BAD_CAST &quot;Session&quot;);
++	xmlNewProp (optionNode, BAD_CAST &quot;value&quot;, BAD_CAST nx_conn-&gt;Session);
+ 	
+ 	optionNode = xmlNewChild (group, NULL, BAD_CAST &quot;option&quot;, NULL);
+ 	xmlNewProp (optionNode, BAD_CAST &quot;key&quot;, BAD_CAST &quot;Custom Unix Desktop&quot;);
+@@ -671,6 +672,9 @@
+ 			else if ((!xmlStrcmp (option_key, BAD_CAST &quot;Desktop&quot;))) {
+ 				strncpy (nx_conn-&gt;Desktop, (gchar *) xmlGetProp (cur, BAD_CAST &quot;value&quot;), NX_FIELDLEN-1);
+ 			}
++			else if ((!xmlStrcmp (option_key, BAD_CAST &quot;Session&quot;))) {
++				strncpy (nx_conn-&gt;Session, (gchar *) xmlGetProp (cur, BAD_CAST &quot;value&quot;), NX_FIELDLEN-1);
++			}
+ 			else if ((!xmlStrcmp (option_key, BAD_CAST &quot;Custom Unix Desktop&quot;))) {
+ 				strncpy (nx_conn-&gt;CustomUnixDesktop, (gchar *) xmlGetProp (cur, BAD_CAST &quot;value&quot;), NX_FIELDLEN-1);
+ 			}
+@@ -1175,6 +1179,7 @@
+ 	nx_conn-&gt;Geometry = g_malloc0 (NX_FIELDLEN * sizeof(gchar));
+ 	nx_conn-&gt;LinkSpeed = g_malloc0 (NX_FIELDLEN * sizeof(gchar));
+ 	nx_conn-&gt;Desktop = g_malloc0 (NX_FIELDLEN * sizeof(gchar));
++	nx_conn-&gt;Session = g_malloc0 (NX_FIELDLEN * sizeof(gchar));
+ 	nx_conn-&gt;CustomUnixDesktop = g_malloc0 (NX_FIELDLEN * sizeof(gchar));
+ 	nx_conn-&gt;XdmMode = g_malloc0 (NX_FIELDLEN * sizeof(gchar));
+ 	nx_conn-&gt;XdmHost = g_malloc0 (NX_FIELDLEN * sizeof(gchar));
+@@ -1199,6 +1204,7 @@
+ 	strcpy (nx_conn-&gt;Pass, &quot;&quot;);
+ 	strcpy (nx_conn-&gt;LinkSpeed, &quot;wan&quot;);
+ 	strcpy (nx_conn-&gt;Desktop, &quot;kde&quot;);
++	strcpy (nx_conn-&gt;Session, &quot;unix&quot;);
+ 	strcpy (nx_conn-&gt;CustomUnixDesktop, &quot;console&quot;);
+ 	strncpy (nx_conn-&gt;PublicKey, NXDefaultKey, SSLKEYLEN-1); /* Set to default */
+ 	strcpy (nx_conn-&gt;CommandLine, &quot;&quot;);
+@@ -1246,6 +1252,8 @@
+ 		g_free (nx_conn-&gt;LinkSpeed);
+ 	if (nx_conn-&gt;Desktop)
+ 		g_free (nx_conn-&gt;Desktop);
++	if (nx_conn-&gt;Session)
++		g_free (nx_conn-&gt;Session);
+ 	if (nx_conn-&gt;CustomUnixDesktop)
+ 		g_free (nx_conn-&gt;CustomUnixDesktop);
+ 	if (nx_conn-&gt;PublicKey)
+@@ -1327,37 +1335,51 @@
+ 
+ 	widget = glade_xml_get_widget (xml_glob, &quot;combobox_nx_desktop_session&quot;);
+ 
+-	if (!strncmp (nx_conn-&gt;Desktop, &quot;kde&quot;, NX_FIELDLEN)) {
+-		set_combobox (widget, &quot;KDE&quot;);
++	if (!strncmp (nx_conn-&gt;Session, &quot;unix&quot;, NX_FIELDLEN)) {
+ 
+-	} else 	if (!strncmp (nx_conn-&gt;Desktop, &quot;gnome&quot;, NX_FIELDLEN)) {
+-		set_combobox (widget, &quot;GNOME&quot;);
++		// Unix sessions
++		if (!strncmp (nx_conn-&gt;Desktop, &quot;kde&quot;, NX_FIELDLEN)) {
++			set_combobox (widget, &quot;KDE&quot;);
+ 
+-	} else 	if (!strncmp (nx_conn-&gt;Desktop, &quot;cde&quot;, NX_FIELDLEN)) {
+-		set_combobox (widget, &quot;CDE&quot;);
++		} else 	if (!strncmp (nx_conn-&gt;Desktop, &quot;gnome&quot;, NX_FIELDLEN)) {
++			set_combobox (widget, &quot;GNOME&quot;);
+ 
+-	} else 	if (!strncmp (nx_conn-&gt;Desktop, &quot;xdm&quot;, NX_FIELDLEN)) {
+-		set_combobox (widget, &quot;XDM&quot;);
++		} else 	if (!strncmp (nx_conn-&gt;Desktop, &quot;cde&quot;, NX_FIELDLEN)) {
++			set_combobox (widget, &quot;CDE&quot;);
+ 
+-	} else 	if (!strncmp (nx_conn-&gt;Desktop, &quot;console&quot;, NX_FIELDLEN)) {
++		} else 	if (!strncmp (nx_conn-&gt;Desktop, &quot;xdm&quot;, NX_FIELDLEN)) {
++			set_combobox (widget, &quot;XDM&quot;);
+ 
+-		if (!strncmp (nx_conn-&gt;CustomUnixDesktop, &quot;console&quot;, NX_FIELDLEN)) {
++		} else 	if (!strncmp (nx_conn-&gt;Desktop, &quot;console&quot;, NX_FIELDLEN)) {
+ 
+-			set_combobox (widget, _(&quot;Console&quot;));
++			if (!strncmp (nx_conn-&gt;CustomUnixDesktop, &quot;console&quot;, NX_FIELDLEN)) {
+ 
+-		} else if (!strncmp (nx_conn-&gt;CustomUnixDesktop, &quot;default&quot;, NX_FIELDLEN)) {
++				set_combobox (widget, _(&quot;Console&quot;));
+ 
+-			set_combobox (widget, _(&quot;Default X client script on server&quot;));
++			} else if (!strncmp (nx_conn-&gt;CustomUnixDesktop, &quot;default&quot;, NX_FIELDLEN)) {
+ 
+-		} else if (!strncmp (nx_conn-&gt;CustomUnixDesktop, &quot;application&quot;, NX_FIELDLEN)) {
++				set_combobox (widget, _(&quot;Default X client script on server&quot;));
+ 
+-			set_combobox (widget, _(&quot;Custom command&quot;));
++			} else if (!strncmp (nx_conn-&gt;CustomUnixDesktop, &quot;application&quot;, NX_FIELDLEN)) {
++
++				set_combobox (widget, _(&quot;Custom command&quot;));
++			} else {
++				set_combobox (widget, _(&quot;Console&quot;));
++			}
++
+ 		} else {
+-			set_combobox (widget, _(&quot;Console&quot;));
++			set_combobox (widget, &quot;KDE&quot;);
+ 		}
+ 
+-	} else {
+-		set_combobox (widget, &quot;KDE&quot;);
++	} else if (!strncmp (nx_conn-&gt;Session, &quot;windows&quot;, NX_FIELDLEN)) {
++		// Windows
++		set_combobox (widget, &quot;Windows&quot;);
++	} else if (!strncmp (nx_conn-&gt;Session, &quot;vnc&quot;, NX_FIELDLEN)) {
++		// VNC
++		set_combobox (widget, &quot;VNC&quot;);
++	} else if (!strncmp (nx_conn-&gt;Session, &quot;shadow&quot;, NX_FIELDLEN)) {
++		// Shadow sessions
++		set_combobox (widget, &quot;Shadow&quot;);
+ 	}
+ 
+ 	widget = glade_xml_get_widget (xml_glob, &quot;entry_nx_custom_command&quot;);
+@@ -1622,34 +1644,57 @@
+ 
+ 	if (strstr (str, _(&quot;KDE&quot;))) {
+ 		strncpy (nx_conn-&gt;Desktop, &quot;kde&quot;, NX_FIELDLEN);
++		strncpy (nx_conn-&gt;Session, &quot;unix&quot;, NX_FIELDLEN);
+ 		strncpy (nx_conn-&gt;CustomUnixDesktop, &quot;console&quot;, NX_FIELDLEN);
+ 
+ 	} else if (strstr (str, _(&quot;GNOME&quot;))) {
+ 		strncpy (nx_conn-&gt;Desktop, &quot;gnome&quot;, NX_FIELDLEN);
++		strncpy (nx_conn-&gt;Session, &quot;unix&quot;, NX_FIELDLEN);
+ 		strncpy (nx_conn-&gt;CustomUnixDesktop, &quot;console&quot;, NX_FIELDLEN);
+ 
+ 	} else if (strstr (str, _(&quot;CDE&quot;))) {
+ 		strncpy (nx_conn-&gt;Desktop, &quot;cde&quot;, NX_FIELDLEN);
++		strncpy (nx_conn-&gt;Session, &quot;unix&quot;, NX_FIELDLEN);
+ 		strncpy (nx_conn-&gt;CustomUnixDesktop, &quot;console&quot;, NX_FIELDLEN);
+ 
+ 	} else if (strstr (str, _(&quot;XDM&quot;))) {
+ 		strncpy (nx_conn-&gt;Desktop, &quot;xdm&quot;, NX_FIELDLEN);
++		strncpy (nx_conn-&gt;Session, &quot;unix&quot;, NX_FIELDLEN);
+ 		strncpy (nx_conn-&gt;CustomUnixDesktop, &quot;console&quot;, NX_FIELDLEN);
+ 
+ 	} else if (strstr (str, _(&quot;Console&quot;))) {
+ 		strncpy (nx_conn-&gt;Desktop, &quot;console&quot;, NX_FIELDLEN);
++		strncpy (nx_conn-&gt;Session, &quot;unix&quot;, NX_FIELDLEN);
+ 		strncpy (nx_conn-&gt;CustomUnixDesktop, &quot;console&quot;, NX_FIELDLEN);
+ 
+ 	} else if (strstr (str, _(&quot;Default X client script on server&quot;))) {
+ 		strncpy (nx_conn-&gt;Desktop, &quot;console&quot;, NX_FIELDLEN);
++		strncpy (nx_conn-&gt;Session, &quot;unix&quot;, NX_FIELDLEN);
+ 		strncpy (nx_conn-&gt;CustomUnixDesktop, &quot;default&quot;, NX_FIELDLEN);
+ 
+ 	} else if (strstr (str, _(&quot;Custom command&quot;))) {
+ 		strncpy (nx_conn-&gt;Desktop, &quot;console&quot;, NX_FIELDLEN);
++		strncpy (nx_conn-&gt;Session, &quot;unix&quot;, NX_FIELDLEN);
+ 		strncpy (nx_conn-&gt;CustomUnixDesktop, &quot;application&quot;, NX_FIELDLEN);
+ 
++	} else if (strstr (str, _(&quot;Windows&quot;))) {
++		strncpy (nx_conn-&gt;Desktop, &quot;console&quot;, NX_FIELDLEN);
++		strncpy (nx_conn-&gt;Session, &quot;windows&quot;, NX_FIELDLEN);
++		strncpy (nx_conn-&gt;CustomUnixDesktop, &quot;application&quot;, NX_FIELDLEN);
++
++	} else if (strstr (str, _(&quot;VNC&quot;))) {
++		strncpy (nx_conn-&gt;Desktop, &quot;console&quot;, NX_FIELDLEN);
++		strncpy (nx_conn-&gt;Session, &quot;vnc&quot;, NX_FIELDLEN);
++		strncpy (nx_conn-&gt;CustomUnixDesktop, &quot;application&quot;, NX_FIELDLEN);
++
++	} else if (strstr (str, _(&quot;Shadow&quot;))) {
++		strncpy (nx_conn-&gt;Desktop, &quot;console&quot;, NX_FIELDLEN);
++		strncpy (nx_conn-&gt;Session, &quot;shadow&quot;, NX_FIELDLEN);
++		strncpy (nx_conn-&gt;CustomUnixDesktop, &quot;application&quot;, NX_FIELDLEN);
++
+ 	} else {
+ 		strncpy (nx_conn-&gt;Desktop, &quot;kde&quot;, NX_FIELDLEN);
++		strncpy (nx_conn-&gt;Session, &quot;unix&quot;, NX_FIELDLEN);
+ 		strncpy (nx_conn-&gt;CustomUnixDesktop, &quot;console&quot;, NX_FIELDLEN);
+ 	}
+ 
+
+Modified: nxlaunch/lib/callbacks_nx.h
+===================================================================
+--- nxlaunch/lib/callbacks_nx.h	2007-09-17 21:05:25 UTC (rev 385)
++++ nxlaunch/lib/callbacks_nx.h	2007-09-17 21:06:24 UTC (rev 386)
+@@ -91,8 +91,9 @@
+ 
+ 	/* Configurable variables in the desktop page */
+ 	gchar * Desktop;                // NXCL:sessionType
++	gchar * Session;                // New - matches XML file.
+ 	gchar * CustomUnixDesktop;      // NXCL:in customCommand
+-	gchar * CommandLine;            // NXCL:customeCommand and sessionType?
++	gchar * CommandLine;            // NXCL:customCommand and sessionType?
+ 	gboolean VirtualDesktop; /* if false, then &quot;Floating Window&quot; is true */ // NXCL:
+ 	gboolean XAgentEncoding;        // NXCL:?
+ 	gboolean UseTaint;              // NXCL:?
+@@ -144,7 +145,7 @@
+ &quot;&lt;option key=\&quot;Hide Full Screen Info\&quot; value=\&quot;false\&quot; /&gt;\n&quot;
+ &quot;&lt;option key=\&quot;Last session\&quot; value=\&quot;Nx1\&quot; /&gt;\n&quot;
+ &quot;&lt;option key=\&quot;Permit Root Login\&quot; value=\&quot;false\&quot; /&gt;\n&quot;
+-&quot;&lt;option key=\&quot;Personal NX dir\&quot; value=\&quot;/etc/persistent/hc/.nx\&quot; /&gt;\n&quot;
++&quot;&lt;option key=\&quot;Personal NX dir\&quot; value=\&quot;~/.nx\&quot; /&gt;\n&quot;
+ &quot;&lt;option key=\&quot;Remove old sessions\&quot; value=\&quot;true\&quot; /&gt;\n&quot;
+ &quot;&lt;option key=\&quot;System NX dir\&quot; value=\&quot;/opt/nx\&quot; /&gt;\n&quot;
+ &quot;&lt;/group&gt;\n&quot;
+
+Modified: nxlaunch/src/main.c
+===================================================================
+--- nxlaunch/src/main.c	2007-09-17 21:05:25 UTC (rev 385)
++++ nxlaunch/src/main.c	2007-09-17 21:06:24 UTC (rev 386)
+@@ -121,6 +121,7 @@
+ 					 G_TYPE_STRING,
+ 					 G_TYPE_STRING,
+ 					 G_TYPE_STRING,
++					 G_TYPE_STRING,
+ 					 G_TYPE_BOOLEAN,
+ 					 G_TYPE_BOOLEAN,
+ 					 G_TYPE_BOOLEAN,
+
+Modified: nxlaunch/src/nxconfig.glade
+===================================================================
+--- nxlaunch/src/nxconfig.glade	2007-09-17 21:05:25 UTC (rev 385)
++++ nxlaunch/src/nxconfig.glade	2007-09-17 21:06:24 UTC (rev 386)
+@@ -2,7 +2,6 @@
+ &lt;!DOCTYPE glade-interface SYSTEM &quot;<A HREF="http://glade.gnome.org/glade-2.0.dtd">http://glade.gnome.org/glade-2.0.dtd</A>&quot;&gt;
+ 
+ &lt;glade-interface&gt;
+-&lt;requires lib=&quot;gnome&quot;/&gt;
+ 
+ &lt;widget class=&quot;GtkDialog&quot; id=&quot;conn_new_nx&quot;&gt;
+   &lt;property name=&quot;title&quot; translatable=&quot;yes&quot;&gt;NX Connection Details&lt;/property&gt;
+@@ -17,6 +16,8 @@
+   &lt;property name=&quot;skip_pager_hint&quot;&gt;False&lt;/property&gt;
+   &lt;property name=&quot;type_hint&quot;&gt;GDK_WINDOW_TYPE_HINT_DIALOG&lt;/property&gt;
+   &lt;property name=&quot;gravity&quot;&gt;GDK_GRAVITY_NORTH_WEST&lt;/property&gt;
++  &lt;property name=&quot;focus_on_map&quot;&gt;True&lt;/property&gt;
++  &lt;property name=&quot;urgency_hint&quot;&gt;False&lt;/property&gt;
+   &lt;property name=&quot;has_separator&quot;&gt;True&lt;/property&gt;
+   &lt;signal name=&quot;delete_event&quot; handler=&quot;gtk_widget_hide&quot; object=&quot;conn_new_nx&quot; last_modification_time=&quot;Fri, 14 Oct 2005 14:18:27 GMT&quot;/&gt;
+ 
+@@ -166,6 +167,10 @@
+ 		      &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
+ 		      &lt;property name=&quot;xpad&quot;&gt;0&lt;/property&gt;
+ 		      &lt;property name=&quot;ypad&quot;&gt;0&lt;/property&gt;
++		      &lt;property name=&quot;ellipsize&quot;&gt;PANGO_ELLIPSIZE_NONE&lt;/property&gt;
++		      &lt;property name=&quot;width_chars&quot;&gt;-1&lt;/property&gt;
++		      &lt;property name=&quot;single_line_mode&quot;&gt;False&lt;/property&gt;
++		      &lt;property name=&quot;angle&quot;&gt;0&lt;/property&gt;
+ 		    &lt;/widget&gt;
+ 		    &lt;packing&gt;
+ 		      &lt;property name=&quot;type&quot;&gt;label_item&lt;/property&gt;
+@@ -227,6 +232,10 @@
+ 				  &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
+ 				  &lt;property name=&quot;xpad&quot;&gt;0&lt;/property&gt;
+ 				  &lt;property name=&quot;ypad&quot;&gt;0&lt;/property&gt;
++				  &lt;property name=&quot;ellipsize&quot;&gt;PANGO_ELLIPSIZE_NONE&lt;/property&gt;
++				  &lt;property name=&quot;width_chars&quot;&gt;-1&lt;/property&gt;
++				  &lt;property name=&quot;single_line_mode&quot;&gt;False&lt;/property&gt;
++				  &lt;property name=&quot;angle&quot;&gt;0&lt;/property&gt;
+ 				&lt;/widget&gt;
+ 				&lt;packing&gt;
+ 				  &lt;property name=&quot;left_attach&quot;&gt;0&lt;/property&gt;
+@@ -277,6 +286,10 @@
+ 				      &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
+ 				      &lt;property name=&quot;xpad&quot;&gt;0&lt;/property&gt;
+ 				      &lt;property name=&quot;ypad&quot;&gt;0&lt;/property&gt;
++				      &lt;property name=&quot;ellipsize&quot;&gt;PANGO_ELLIPSIZE_NONE&lt;/property&gt;
++				      &lt;property name=&quot;width_chars&quot;&gt;-1&lt;/property&gt;
++				      &lt;property name=&quot;single_line_mode&quot;&gt;False&lt;/property&gt;
++				      &lt;property name=&quot;angle&quot;&gt;0&lt;/property&gt;
+ 				    &lt;/widget&gt;
+ 				    &lt;packing&gt;
+ 				      &lt;property name=&quot;padding&quot;&gt;0&lt;/property&gt;
+@@ -327,6 +340,10 @@
+ 				  &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
+ 				  &lt;property name=&quot;xpad&quot;&gt;0&lt;/property&gt;
+ 				  &lt;property name=&quot;ypad&quot;&gt;0&lt;/property&gt;
++				  &lt;property name=&quot;ellipsize&quot;&gt;PANGO_ELLIPSIZE_NONE&lt;/property&gt;
++				  &lt;property name=&quot;width_chars&quot;&gt;-1&lt;/property&gt;
++				  &lt;property name=&quot;single_line_mode&quot;&gt;False&lt;/property&gt;
++				  &lt;property name=&quot;angle&quot;&gt;0&lt;/property&gt;
+ 				&lt;/widget&gt;
+ 				&lt;packing&gt;
+ 				  &lt;property name=&quot;left_attach&quot;&gt;0&lt;/property&gt;
+@@ -425,6 +442,10 @@
+ 				  &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
+ 				  &lt;property name=&quot;xpad&quot;&gt;0&lt;/property&gt;
+ 				  &lt;property name=&quot;ypad&quot;&gt;0&lt;/property&gt;
++				  &lt;property name=&quot;ellipsize&quot;&gt;PANGO_ELLIPSIZE_NONE&lt;/property&gt;
++				  &lt;property name=&quot;width_chars&quot;&gt;-1&lt;/property&gt;
++				  &lt;property name=&quot;single_line_mode&quot;&gt;False&lt;/property&gt;
++				  &lt;property name=&quot;angle&quot;&gt;0&lt;/property&gt;
+ 				&lt;/widget&gt;
+ 				&lt;packing&gt;
+ 				  &lt;property name=&quot;padding&quot;&gt;0&lt;/property&gt;
+@@ -490,6 +511,10 @@
+ 					      &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
+ 					      &lt;property name=&quot;xpad&quot;&gt;0&lt;/property&gt;
+ 					      &lt;property name=&quot;ypad&quot;&gt;0&lt;/property&gt;
++					      &lt;property name=&quot;ellipsize&quot;&gt;PANGO_ELLIPSIZE_NONE&lt;/property&gt;
++					      &lt;property name=&quot;width_chars&quot;&gt;-1&lt;/property&gt;
++					      &lt;property name=&quot;single_line_mode&quot;&gt;False&lt;/property&gt;
++					      &lt;property name=&quot;angle&quot;&gt;0&lt;/property&gt;
+ 					    &lt;/widget&gt;
+ 					    &lt;packing&gt;
+ 					      &lt;property name=&quot;padding&quot;&gt;0&lt;/property&gt;
+@@ -533,6 +558,10 @@
+ 		      &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
+ 		      &lt;property name=&quot;xpad&quot;&gt;0&lt;/property&gt;
+ 		      &lt;property name=&quot;ypad&quot;&gt;0&lt;/property&gt;
++		      &lt;property name=&quot;ellipsize&quot;&gt;PANGO_ELLIPSIZE_NONE&lt;/property&gt;
++		      &lt;property name=&quot;width_chars&quot;&gt;-1&lt;/property&gt;
++		      &lt;property name=&quot;single_line_mode&quot;&gt;False&lt;/property&gt;
++		      &lt;property name=&quot;angle&quot;&gt;0&lt;/property&gt;
+ 		    &lt;/widget&gt;
+ 		    &lt;packing&gt;
+ 		      &lt;property name=&quot;type&quot;&gt;label_item&lt;/property&gt;
+@@ -664,6 +693,10 @@
+ 			      &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
+ 			      &lt;property name=&quot;xpad&quot;&gt;0&lt;/property&gt;
+ 			      &lt;property name=&quot;ypad&quot;&gt;0&lt;/property&gt;
++			      &lt;property name=&quot;ellipsize&quot;&gt;PANGO_ELLIPSIZE_NONE&lt;/property&gt;
++			      &lt;property name=&quot;width_chars&quot;&gt;-1&lt;/property&gt;
++			      &lt;property name=&quot;single_line_mode&quot;&gt;False&lt;/property&gt;
++			      &lt;property name=&quot;angle&quot;&gt;0&lt;/property&gt;
+ 			    &lt;/widget&gt;
+ 			    &lt;packing&gt;
+ 			      &lt;property name=&quot;padding&quot;&gt;0&lt;/property&gt;
+@@ -689,6 +722,10 @@
+ 		      &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
+ 		      &lt;property name=&quot;xpad&quot;&gt;0&lt;/property&gt;
+ 		      &lt;property name=&quot;ypad&quot;&gt;0&lt;/property&gt;
++		      &lt;property name=&quot;ellipsize&quot;&gt;PANGO_ELLIPSIZE_NONE&lt;/property&gt;
++		      &lt;property name=&quot;width_chars&quot;&gt;-1&lt;/property&gt;
++		      &lt;property name=&quot;single_line_mode&quot;&gt;False&lt;/property&gt;
++		      &lt;property name=&quot;angle&quot;&gt;0&lt;/property&gt;
+ 		    &lt;/widget&gt;
+ 		    &lt;packing&gt;
+ 		      &lt;property name=&quot;type&quot;&gt;label_item&lt;/property&gt;
+@@ -721,6 +758,10 @@
+ 	      &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
+ 	      &lt;property name=&quot;xpad&quot;&gt;0&lt;/property&gt;
+ 	      &lt;property name=&quot;ypad&quot;&gt;0&lt;/property&gt;
++	      &lt;property name=&quot;ellipsize&quot;&gt;PANGO_ELLIPSIZE_NONE&lt;/property&gt;
++	      &lt;property name=&quot;width_chars&quot;&gt;-1&lt;/property&gt;
++	      &lt;property name=&quot;single_line_mode&quot;&gt;False&lt;/property&gt;
++	      &lt;property name=&quot;angle&quot;&gt;0&lt;/property&gt;
+ 	    &lt;/widget&gt;
+ 	    &lt;packing&gt;
+ 	      &lt;property name=&quot;type&quot;&gt;tab&lt;/property&gt;
+@@ -766,9 +807,14 @@
+ GNOME
+ CDE
+ XDM
++Shadow
++Windows
++VNC
+ Console
+ Default X client script on server
+ Custom command&lt;/property&gt;
++			      &lt;property name=&quot;add_tearoffs&quot;&gt;False&lt;/property&gt;
++			      &lt;property name=&quot;focus_on_click&quot;&gt;True&lt;/property&gt;
+ 			      &lt;signal name=&quot;changed&quot; handler=&quot;on_combobox_nx_desktop_session_changed&quot; last_modification_time=&quot;Thu, 13 Apr 2006 12:26:55 GMT&quot;/&gt;
+ 			    &lt;/widget&gt;
+ 			    &lt;packing&gt;
+@@ -823,6 +869,10 @@
+ 					      &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
+ 					      &lt;property name=&quot;xpad&quot;&gt;0&lt;/property&gt;
+ 					      &lt;property name=&quot;ypad&quot;&gt;0&lt;/property&gt;
++					      &lt;property name=&quot;ellipsize&quot;&gt;PANGO_ELLIPSIZE_NONE&lt;/property&gt;
++					      &lt;property name=&quot;width_chars&quot;&gt;-1&lt;/property&gt;
++					      &lt;property name=&quot;single_line_mode&quot;&gt;False&lt;/property&gt;
++					      &lt;property name=&quot;angle&quot;&gt;0&lt;/property&gt;
+ 					    &lt;/widget&gt;
+ 					    &lt;packing&gt;
+ 					      &lt;property name=&quot;padding&quot;&gt;0&lt;/property&gt;
+@@ -972,6 +1022,10 @@
+ 				  &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
+ 				  &lt;property name=&quot;xpad&quot;&gt;0&lt;/property&gt;
+ 				  &lt;property name=&quot;ypad&quot;&gt;0&lt;/property&gt;
++				  &lt;property name=&quot;ellipsize&quot;&gt;PANGO_ELLIPSIZE_NONE&lt;/property&gt;
++				  &lt;property name=&quot;width_chars&quot;&gt;-1&lt;/property&gt;
++				  &lt;property name=&quot;single_line_mode&quot;&gt;False&lt;/property&gt;
++				  &lt;property name=&quot;angle&quot;&gt;0&lt;/property&gt;
+ 				&lt;/widget&gt;
+ 				&lt;packing&gt;
+ 				  &lt;property name=&quot;type&quot;&gt;label_item&lt;/property&gt;
+@@ -1019,6 +1073,8 @@
+ Broadcast an XDM query
+ Get a list of available X display managers
+ &lt;/property&gt;
++					  &lt;property name=&quot;add_tearoffs&quot;&gt;False&lt;/property&gt;
++					  &lt;property name=&quot;focus_on_click&quot;&gt;True&lt;/property&gt;
+ 					  &lt;signal name=&quot;changed&quot; handler=&quot;on_combobox_nx_xdm_mode_changed&quot; last_modification_time=&quot;Thu, 13 Apr 2006 12:58:45 GMT&quot;/&gt;
+ 					&lt;/widget&gt;
+ 					&lt;packing&gt;
+@@ -1047,6 +1103,10 @@
+ 					      &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
+ 					      &lt;property name=&quot;xpad&quot;&gt;0&lt;/property&gt;
+ 					      &lt;property name=&quot;ypad&quot;&gt;0&lt;/property&gt;
++					      &lt;property name=&quot;ellipsize&quot;&gt;PANGO_ELLIPSIZE_NONE&lt;/property&gt;
++					      &lt;property name=&quot;width_chars&quot;&gt;-1&lt;/property&gt;
++					      &lt;property name=&quot;single_line_mode&quot;&gt;False&lt;/property&gt;
++					      &lt;property name=&quot;angle&quot;&gt;0&lt;/property&gt;
+ 					    &lt;/widget&gt;
+ 					    &lt;packing&gt;
+ 					      &lt;property name=&quot;padding&quot;&gt;0&lt;/property&gt;
+@@ -1088,6 +1148,10 @@
+ 					      &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
+ 					      &lt;property name=&quot;xpad&quot;&gt;0&lt;/property&gt;
+ 					      &lt;property name=&quot;ypad&quot;&gt;0&lt;/property&gt;
++					      &lt;property name=&quot;ellipsize&quot;&gt;PANGO_ELLIPSIZE_NONE&lt;/property&gt;
++					      &lt;property name=&quot;width_chars&quot;&gt;-1&lt;/property&gt;
++					      &lt;property name=&quot;single_line_mode&quot;&gt;False&lt;/property&gt;
++					      &lt;property name=&quot;angle&quot;&gt;0&lt;/property&gt;
+ 					    &lt;/widget&gt;
+ 					    &lt;packing&gt;
+ 					      &lt;property name=&quot;padding&quot;&gt;0&lt;/property&gt;
+@@ -1141,6 +1205,10 @@
+ 				  &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
+ 				  &lt;property name=&quot;xpad&quot;&gt;0&lt;/property&gt;
+ 				  &lt;property name=&quot;ypad&quot;&gt;0&lt;/property&gt;
++				  &lt;property name=&quot;ellipsize&quot;&gt;PANGO_ELLIPSIZE_NONE&lt;/property&gt;
++				  &lt;property name=&quot;width_chars&quot;&gt;-1&lt;/property&gt;
++				  &lt;property name=&quot;single_line_mode&quot;&gt;False&lt;/property&gt;
++				  &lt;property name=&quot;angle&quot;&gt;0&lt;/property&gt;
+ 				&lt;/widget&gt;
+ 				&lt;packing&gt;
+ 				  &lt;property name=&quot;type&quot;&gt;label_item&lt;/property&gt;
+@@ -1171,6 +1239,10 @@
+ 		      &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
+ 		      &lt;property name=&quot;xpad&quot;&gt;0&lt;/property&gt;
+ 		      &lt;property name=&quot;ypad&quot;&gt;0&lt;/property&gt;
++		      &lt;property name=&quot;ellipsize&quot;&gt;PANGO_ELLIPSIZE_NONE&lt;/property&gt;
++		      &lt;property name=&quot;width_chars&quot;&gt;-1&lt;/property&gt;
++		      &lt;property name=&quot;single_line_mode&quot;&gt;False&lt;/property&gt;
++		      &lt;property name=&quot;angle&quot;&gt;0&lt;/property&gt;
+ 		    &lt;/widget&gt;
+ 		    &lt;packing&gt;
+ 		      &lt;property name=&quot;type&quot;&gt;label_item&lt;/property&gt;
+@@ -1230,6 +1302,10 @@
+ 				  &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
+ 				  &lt;property name=&quot;xpad&quot;&gt;0&lt;/property&gt;
+ 				  &lt;property name=&quot;ypad&quot;&gt;0&lt;/property&gt;
++				  &lt;property name=&quot;ellipsize&quot;&gt;PANGO_ELLIPSIZE_NONE&lt;/property&gt;
++				  &lt;property name=&quot;width_chars&quot;&gt;-1&lt;/property&gt;
++				  &lt;property name=&quot;single_line_mode&quot;&gt;False&lt;/property&gt;
++				  &lt;property name=&quot;angle&quot;&gt;0&lt;/property&gt;
+ 				&lt;/widget&gt;
+ 				&lt;packing&gt;
+ 				  &lt;property name=&quot;padding&quot;&gt;0&lt;/property&gt;
+@@ -1247,6 +1323,8 @@
+ 1280 x 1024
+ Custom
+ Full Screen&lt;/property&gt;
++				  &lt;property name=&quot;add_tearoffs&quot;&gt;False&lt;/property&gt;
++				  &lt;property name=&quot;focus_on_click&quot;&gt;True&lt;/property&gt;
+ 				  &lt;signal name=&quot;changed&quot; handler=&quot;on_combobox_nx_window_size_changed&quot; last_modification_time=&quot;Thu, 13 Apr 2006 12:28:43 GMT&quot;/&gt;
+ 				&lt;/widget&gt;
+ 				&lt;packing&gt;
+@@ -1283,6 +1361,10 @@
+ 				  &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
+ 				  &lt;property name=&quot;xpad&quot;&gt;0&lt;/property&gt;
+ 				  &lt;property name=&quot;ypad&quot;&gt;0&lt;/property&gt;
++				  &lt;property name=&quot;ellipsize&quot;&gt;PANGO_ELLIPSIZE_NONE&lt;/property&gt;
++				  &lt;property name=&quot;width_chars&quot;&gt;-1&lt;/property&gt;
++				  &lt;property name=&quot;single_line_mode&quot;&gt;False&lt;/property&gt;
++				  &lt;property name=&quot;angle&quot;&gt;0&lt;/property&gt;
+ 				&lt;/widget&gt;
+ 				&lt;packing&gt;
+ 				  &lt;property name=&quot;padding&quot;&gt;0&lt;/property&gt;
+@@ -1324,6 +1406,10 @@
+ 				  &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
+ 				  &lt;property name=&quot;xpad&quot;&gt;0&lt;/property&gt;
+ 				  &lt;property name=&quot;ypad&quot;&gt;0&lt;/property&gt;
++				  &lt;property name=&quot;ellipsize&quot;&gt;PANGO_ELLIPSIZE_NONE&lt;/property&gt;
++				  &lt;property name=&quot;width_chars&quot;&gt;-1&lt;/property&gt;
++				  &lt;property name=&quot;single_line_mode&quot;&gt;False&lt;/property&gt;
++				  &lt;property name=&quot;angle&quot;&gt;0&lt;/property&gt;
+ 				&lt;/widget&gt;
+ 				&lt;packing&gt;
+ 				  &lt;property name=&quot;padding&quot;&gt;0&lt;/property&gt;
+@@ -1375,6 +1461,10 @@
+ 		      &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
+ 		      &lt;property name=&quot;xpad&quot;&gt;0&lt;/property&gt;
+ 		      &lt;property name=&quot;ypad&quot;&gt;0&lt;/property&gt;
++		      &lt;property name=&quot;ellipsize&quot;&gt;PANGO_ELLIPSIZE_NONE&lt;/property&gt;
++		      &lt;property name=&quot;width_chars&quot;&gt;-1&lt;/property&gt;
++		      &lt;property name=&quot;single_line_mode&quot;&gt;False&lt;/property&gt;
++		      &lt;property name=&quot;angle&quot;&gt;0&lt;/property&gt;
+ 		    &lt;/widget&gt;
+ 		    &lt;packing&gt;
+ 		      &lt;property name=&quot;type&quot;&gt;label_item&lt;/property&gt;
+@@ -1421,6 +1511,8 @@
+ PNG
+ JPEG
+ X Bitmap&lt;/property&gt;
++			      &lt;property name=&quot;add_tearoffs&quot;&gt;False&lt;/property&gt;
++			      &lt;property name=&quot;focus_on_click&quot;&gt;True&lt;/property&gt;
+ 			      &lt;signal name=&quot;changed&quot; handler=&quot;on_combobox_nx_image_encoding_changed&quot; last_modification_time=&quot;Tue, 18 Apr 2006 12:29:08 GMT&quot;/&gt;
+ 			    &lt;/widget&gt;
+ 			    &lt;packing&gt;
+@@ -1443,6 +1535,10 @@
+ 			      &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
+ 			      &lt;property name=&quot;xpad&quot;&gt;0&lt;/property&gt;
+ 			      &lt;property name=&quot;ypad&quot;&gt;0&lt;/property&gt;
++			      &lt;property name=&quot;ellipsize&quot;&gt;PANGO_ELLIPSIZE_NONE&lt;/property&gt;
++			      &lt;property name=&quot;width_chars&quot;&gt;-1&lt;/property&gt;
++			      &lt;property name=&quot;single_line_mode&quot;&gt;False&lt;/property&gt;
++			      &lt;property name=&quot;angle&quot;&gt;0&lt;/property&gt;
+ 			    &lt;/widget&gt;
+ 			    &lt;packing&gt;
+ 			      &lt;property name=&quot;padding&quot;&gt;0&lt;/property&gt;
+@@ -1488,6 +1584,10 @@
+ 		      &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
+ 		      &lt;property name=&quot;xpad&quot;&gt;0&lt;/property&gt;
+ 		      &lt;property name=&quot;ypad&quot;&gt;0&lt;/property&gt;
++		      &lt;property name=&quot;ellipsize&quot;&gt;PANGO_ELLIPSIZE_NONE&lt;/property&gt;
++		      &lt;property name=&quot;width_chars&quot;&gt;-1&lt;/property&gt;
++		      &lt;property name=&quot;single_line_mode&quot;&gt;False&lt;/property&gt;
++		      &lt;property name=&quot;angle&quot;&gt;0&lt;/property&gt;
+ 		    &lt;/widget&gt;
+ 		    &lt;packing&gt;
+ 		      &lt;property name=&quot;type&quot;&gt;label_item&lt;/property&gt;
+@@ -1550,6 +1650,10 @@
+ 		      &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
+ 		      &lt;property name=&quot;xpad&quot;&gt;0&lt;/property&gt;
+ 		      &lt;property name=&quot;ypad&quot;&gt;0&lt;/property&gt;
++		      &lt;property name=&quot;ellipsize&quot;&gt;PANGO_ELLIPSIZE_NONE&lt;/property&gt;
++		      &lt;property name=&quot;width_chars&quot;&gt;-1&lt;/property&gt;
++		      &lt;property name=&quot;single_line_mode&quot;&gt;False&lt;/property&gt;
++		      &lt;property name=&quot;angle&quot;&gt;0&lt;/property&gt;
+ 		    &lt;/widget&gt;
+ 		    &lt;packing&gt;
+ 		      &lt;property name=&quot;type&quot;&gt;label_item&lt;/property&gt;
+@@ -1582,6 +1686,10 @@
+ 	      &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
+ 	      &lt;property name=&quot;xpad&quot;&gt;0&lt;/property&gt;
+ 	      &lt;property name=&quot;ypad&quot;&gt;0&lt;/property&gt;
++	      &lt;property name=&quot;ellipsize&quot;&gt;PANGO_ELLIPSIZE_NONE&lt;/property&gt;
++	      &lt;property name=&quot;width_chars&quot;&gt;-1&lt;/property&gt;
++	      &lt;property name=&quot;single_line_mode&quot;&gt;False&lt;/property&gt;
++	      &lt;property name=&quot;angle&quot;&gt;0&lt;/property&gt;
+ 	    &lt;/widget&gt;
+ 	    &lt;packing&gt;
+ 	      &lt;property name=&quot;type&quot;&gt;tab&lt;/property&gt;
+@@ -1613,6 +1721,8 @@
+   &lt;property name=&quot;skip_pager_hint&quot;&gt;False&lt;/property&gt;
+   &lt;property name=&quot;type_hint&quot;&gt;GDK_WINDOW_TYPE_HINT_DIALOG&lt;/property&gt;
+   &lt;property name=&quot;gravity&quot;&gt;GDK_GRAVITY_CENTER&lt;/property&gt;
++  &lt;property name=&quot;focus_on_map&quot;&gt;True&lt;/property&gt;
++  &lt;property name=&quot;urgency_hint&quot;&gt;False&lt;/property&gt;
+ 
+   &lt;child&gt;
+     &lt;widget class=&quot;GtkVBox&quot; id=&quot;vbox62&quot;&gt;
+@@ -1721,6 +1831,10 @@
+ 			  &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
+ 			  &lt;property name=&quot;xpad&quot;&gt;0&lt;/property&gt;
+ 			  &lt;property name=&quot;ypad&quot;&gt;0&lt;/property&gt;
++			  &lt;property name=&quot;ellipsize&quot;&gt;PANGO_ELLIPSIZE_NONE&lt;/property&gt;
++			  &lt;property name=&quot;width_chars&quot;&gt;-1&lt;/property&gt;
++			  &lt;property name=&quot;single_line_mode&quot;&gt;False&lt;/property&gt;
++			  &lt;property name=&quot;angle&quot;&gt;0&lt;/property&gt;
+ 			&lt;/widget&gt;
+ 			&lt;packing&gt;
+ 			  &lt;property name=&quot;padding&quot;&gt;0&lt;/property&gt;
+@@ -1793,6 +1907,10 @@
+ 			  &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
+ 			  &lt;property name=&quot;xpad&quot;&gt;0&lt;/property&gt;
+ 			  &lt;property name=&quot;ypad&quot;&gt;0&lt;/property&gt;
++			  &lt;property name=&quot;ellipsize&quot;&gt;PANGO_ELLIPSIZE_NONE&lt;/property&gt;
++			  &lt;property name=&quot;width_chars&quot;&gt;-1&lt;/property&gt;
++			  &lt;property name=&quot;single_line_mode&quot;&gt;False&lt;/property&gt;
++			  &lt;property name=&quot;angle&quot;&gt;0&lt;/property&gt;
+ 			&lt;/widget&gt;
+ 			&lt;packing&gt;
+ 			  &lt;property name=&quot;padding&quot;&gt;0&lt;/property&gt;
+@@ -1864,6 +1982,10 @@
+ 			  &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
+ 			  &lt;property name=&quot;xpad&quot;&gt;0&lt;/property&gt;
+ 			  &lt;property name=&quot;ypad&quot;&gt;0&lt;/property&gt;
++			  &lt;property name=&quot;ellipsize&quot;&gt;PANGO_ELLIPSIZE_NONE&lt;/property&gt;
++			  &lt;property name=&quot;width_chars&quot;&gt;-1&lt;/property&gt;
++			  &lt;property name=&quot;single_line_mode&quot;&gt;False&lt;/property&gt;
++			  &lt;property name=&quot;angle&quot;&gt;0&lt;/property&gt;
+ 			&lt;/widget&gt;
+ 			&lt;packing&gt;
+ 			  &lt;property name=&quot;padding&quot;&gt;0&lt;/property&gt;
+@@ -1893,6 +2015,7 @@
+   &lt;property name=&quot;local_only&quot;&gt;False&lt;/property&gt;
+   &lt;property name=&quot;select_multiple&quot;&gt;False&lt;/property&gt;
+   &lt;property name=&quot;show_hidden&quot;&gt;True&lt;/property&gt;
++  &lt;property name=&quot;do_overwrite_confirmation&quot;&gt;False&lt;/property&gt;
+   &lt;property name=&quot;title&quot; translatable=&quot;yes&quot;&gt;Locate SSL Public Key text file&lt;/property&gt;
+   &lt;property name=&quot;type&quot;&gt;GTK_WINDOW_TOPLEVEL&lt;/property&gt;
+   &lt;property name=&quot;window_position&quot;&gt;GTK_WIN_POS_CENTER_ON_PARENT&lt;/property&gt;
+@@ -1905,6 +2028,8 @@
+   &lt;property name=&quot;skip_pager_hint&quot;&gt;False&lt;/property&gt;
+   &lt;property name=&quot;type_hint&quot;&gt;GDK_WINDOW_TYPE_HINT_DIALOG&lt;/property&gt;
+   &lt;property name=&quot;gravity&quot;&gt;GDK_GRAVITY_CENTER&lt;/property&gt;
++  &lt;property name=&quot;focus_on_map&quot;&gt;True&lt;/property&gt;
++  &lt;property name=&quot;urgency_hint&quot;&gt;False&lt;/property&gt;
+ 
+   &lt;child internal-child=&quot;vbox&quot;&gt;
+     &lt;widget class=&quot;GtkVBox&quot; id=&quot;dialog-vbox7&quot;&gt;
+@@ -1970,6 +2095,8 @@
+   &lt;property name=&quot;skip_pager_hint&quot;&gt;False&lt;/property&gt;
+   &lt;property name=&quot;type_hint&quot;&gt;GDK_WINDOW_TYPE_HINT_DIALOG&lt;/property&gt;
+   &lt;property name=&quot;gravity&quot;&gt;GDK_GRAVITY_NORTH_WEST&lt;/property&gt;
++  &lt;property name=&quot;focus_on_map&quot;&gt;True&lt;/property&gt;
++  &lt;property name=&quot;urgency_hint&quot;&gt;False&lt;/property&gt;
+   &lt;property name=&quot;has_separator&quot;&gt;True&lt;/property&gt;
+ 
+   &lt;child internal-child=&quot;vbox&quot;&gt;
+@@ -2033,6 +2160,10 @@
+ 	  &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
+ 	  &lt;property name=&quot;xpad&quot;&gt;8&lt;/property&gt;
+ 	  &lt;property name=&quot;ypad&quot;&gt;13&lt;/property&gt;
++	  &lt;property name=&quot;ellipsize&quot;&gt;PANGO_ELLIPSIZE_NONE&lt;/property&gt;
++	  &lt;property name=&quot;width_chars&quot;&gt;-1&lt;/property&gt;
++	  &lt;property name=&quot;single_line_mode&quot;&gt;False&lt;/property&gt;
++	  &lt;property name=&quot;angle&quot;&gt;0&lt;/property&gt;
+ 	&lt;/widget&gt;
+ 	&lt;packing&gt;
+ 	  &lt;property name=&quot;padding&quot;&gt;0&lt;/property&gt;
+
+Modified: nxlaunch/src/nxlaunch.c
+===================================================================
+--- nxlaunch/src/nxlaunch.c	2007-09-17 21:05:25 UTC (rev 385)
++++ nxlaunch/src/nxlaunch.c	2007-09-17 21:06:24 UTC (rev 386)
+@@ -225,7 +225,7 @@
+ 	GtkTreeSelection * selected;
+ 	GtkTreeIter iter;
+ 	GtkTreeModel * tree_model;
+-	gchar * name;
++	gchar * name = NULL;
+ 
+ 	/* Get iter for current row and update connection list. */
+ 	list_tree = GTK_TREE_VIEW (glade_xml_get_widget (xml_nxlaunch_glob, &quot;treeview_nxconnection&quot;));
+@@ -287,6 +287,7 @@
+ 				    CONN_LINKSPEED,         nx_conn-&gt;LinkSpeed,
+ 				    CONN_PUBLICKEY,         nx_conn-&gt;PublicKey,
+ 				    CONN_DESKTOP,           nx_conn-&gt;Desktop,
++				    CONN_SESSION,           nx_conn-&gt;Session,
+ 				    CONN_CUSTOMUNIXDESKTOP, nx_conn-&gt;CustomUnixDesktop,
+ 				    CONN_COMMANDLINE,       nx_conn-&gt;CommandLine,
+ 				    CONN_VIRTUALDESKTOP,    nx_conn-&gt;VirtualDesktop ? TRUE : FALSE,
+@@ -506,6 +507,7 @@
+ 						    CONN_LINKSPEED,         nx_conn-&gt;LinkSpeed,
+ 						    CONN_PUBLICKEY,         nx_conn-&gt;PublicKey,
+ 						    CONN_DESKTOP,           nx_conn-&gt;Desktop,
++						    CONN_SESSION,           nx_conn-&gt;Session,
+ 						    CONN_CUSTOMUNIXDESKTOP, nx_conn-&gt;CustomUnixDesktop,
+ 						    CONN_COMMANDLINE,       nx_conn-&gt;CommandLine,
+ 						    CONN_VIRTUALDESKTOP,    nx_conn-&gt;VirtualDesktop ? TRUE : FALSE,
+@@ -570,7 +572,7 @@
+ 							   &quot;text&quot;, CONN_CONNECTIONNAME,
+ 							   NULL);
+ 	gtk_tree_view_column_set_resizable (column, TRUE);
+-	g_object_set (renderer, &quot;width&quot;, 200, NULL);
++	g_object_set (renderer, &quot;width&quot;, 160, NULL);
+ 	gtk_tree_view_append_column (list_tree, column);
+ 
+ 
+@@ -590,9 +592,17 @@
+ 	g_object_set (renderer, &quot;width&quot;, 60, NULL);
+ 	gtk_tree_view_append_column (list_tree, column);
+ 
+-	/* Type column */
++	/* Session column */
+ 	renderer = gtk_cell_renderer_text_new ();
+-	column = gtk_tree_view_column_new_with_attributes (_(&quot;Session Type&quot;), renderer,
++	column = gtk_tree_view_column_new_with_attributes (_(&quot;Session&quot;), renderer,
++							   &quot;text&quot;, CONN_SESSION,
++							   NULL);
++	g_object_set (renderer, &quot;width&quot;, 60, NULL);
++	gtk_tree_view_append_column (list_tree, column);
++
++	/* Desktop column */
++	renderer = gtk_cell_renderer_text_new ();
++	column = gtk_tree_view_column_new_with_attributes (_(&quot;Desktop&quot;), renderer,
+ 							   &quot;text&quot;, CONN_DESKTOP,
+ 							   NULL);
+ 	g_object_set (renderer, &quot;width&quot;, 60, NULL);
+@@ -676,18 +686,54 @@
+ 		return -1;
+ 	}
+ 
+-	int media=0, enc=0, fs=0, cups=0;
++	int media=0, enc=0, fs=0, cups=0, vdesk=0;
+ 	if (nx_conn-&gt;enableSound == TRUE) { media = 1; }
+ 	if (nx_conn-&gt;EnableSSLOnly == TRUE) { enc = 1; }
+ 	if (nx_conn-&gt;FullScreen == TRUE) { fs = 1; }
+ 	if (nx_conn-&gt;IPPPrinting == TRUE) { cups = 1; }
++	if (nx_conn-&gt;VirtualDesktop == TRUE) { vdesk = 1; }
+ 	int cache = 8, images = 24, render = 1;
+ 	const char * backingstore = &quot;when_requested&quot;;
+ 	/* FIXME: Would like to store these in the .nxs file */
+ 	const char * keyboard = &quot;&quot;;
+ 	const char * kbtype = &quot;&quot;;
+-	printerr (&quot;Sending settings for connection %s, to Server %s\n&quot;,
++
++	printerr (&quot;NXLAUNCH&gt; Sending settings for connection %s, to Server %s\n&quot;,
+ 		  nx_conn-&gt;ConnectionName, nx_conn-&gt;ServerHost);
++
++	/* We have to translate the Desktop setting a bit - adding
++	 * unix- to the start of some of them. We're likely to need to
++	 * add to this logic for full functionality. */
++	char * session_type = NULL;
++	session_type = g_malloc0 (NX_FIELDLEN * sizeof (char));
++	if ( !strcmp (nx_conn-&gt;Session, &quot;unix&quot;) ) {
++		
++		if ( !strcmp (nx_conn-&gt;Desktop, &quot;gnome&quot;) || 
++		     !strcmp (nx_conn-&gt;Desktop, &quot;kde&quot;) || 
++		     !strcmp (nx_conn-&gt;Desktop, &quot;cde&quot;) || 
++		     !strcmp (nx_conn-&gt;Desktop, &quot;xdm&quot;) ) {
++			snprintf (session_type, NX_FIELDLEN, &quot;unix-%s&quot;, nx_conn-&gt;Desktop);
++
++		} else if (!strcmp (nx_conn-&gt;Desktop, &quot;console&quot;) ) {
++
++			if (!strcmp (nx_conn-&gt;CustomUnixDesktop, &quot;application&quot;) ) {
++				snprintf (session_type, NX_FIELDLEN, &quot;unix-application&quot;);
++			} else {
++				snprintf (session_type, NX_FIELDLEN, &quot;unix-console&quot;);
++			}
++		}
++	} else if ( !strcmp (nx_conn-&gt;Session, &quot;shadow&quot;) ) {
++
++		snprintf (session_type, NX_FIELDLEN, &quot;shadow&quot;);
++
++	} else if ( !strcmp (nx_conn-&gt;Session, &quot;windows&quot;) ) {
++		printerr (&quot;NXLAUNCH&gt; FIXME Add windows support (with agentServer etc)\n&quot;);
++
++	} else if ( !strcmp (nx_conn-&gt;Session, &quot;vnc&quot;) ) {
++		printerr (&quot;NXLAUNCH&gt; FIXME Add vnc support (with agentServer etc)\n&quot;);
++
++	}
++
+ 	dbus_message_append_args 
+ 		(message,
+ 		 DBUS_TYPE_STRING, &amp;nx_conn-&gt;ServerHost,     //0
+@@ -695,7 +741,7 @@
+ 		 DBUS_TYPE_STRING, &amp;nx_conn-&gt;User,           //2
+ 		 DBUS_TYPE_STRING, &amp;nx_conn-&gt;Pass,
+ 		 DBUS_TYPE_STRING, &amp;nx_conn-&gt;ConnectionName, //4
+-		 DBUS_TYPE_STRING, &amp;nx_conn-&gt;Desktop,        // FIXME - but not exactly.. If Desktop == gnome, sessionType == unix-gnome.
++		 DBUS_TYPE_STRING, &amp;session_type,   
+ 		 DBUS_TYPE_INT32,  &amp;cache,                //6
+ 		 DBUS_TYPE_INT32,  &amp;images,
+ 		 DBUS_TYPE_STRING, &amp;nx_conn-&gt;LinkSpeed,      //8
+@@ -715,8 +761,9 @@
+ 		 DBUS_TYPE_INT32,  &amp;enc,                  //22
+ 		 DBUS_TYPE_INT32,  &amp;fs,
+ 		 DBUS_TYPE_STRING, &amp;nx_conn-&gt;CommandLine,    //24
++		 DBUS_TYPE_INT32,  &amp;vdesk,
+ 		 DBUS_TYPE_INVALID);
+-	printerr (&quot;Sent settings to server\n&quot;);
++
+ 	/* Send the signal */
+ 	if (!dbus_connection_send (bus, message, NULL)) {
+ 		printerr (&quot;NXLAUNCH&gt; Out Of Memory!\n&quot;);
+@@ -726,7 +773,7 @@
+ 	/* Clean up */
+ 	dbus_message_unref (message);
+ 	dbus_connection_flush (bus);
+-	printerr (&quot;Returning\n&quot;);
++	g_free (session_type);
+ 	return 1;
+ }
+ 
+@@ -1197,15 +1244,11 @@
+ 	printerr (&quot;NXLAUNCH&gt; %s() called\n&quot;, __FUNCTION__);
+ 
+ 	if (nx_conn_glob == NULL) {
+-		printerr (&quot;NXLAUNCH&gt; Reading the active connection from the tree model\n&quot;);
+ 		nx_conn = g_malloc0 (sizeof (struct nx_connection));
+ 		getActiveConnection (nx_conn);
+ 	} else { /* we already populated nx_conn in launch_named_connection() */
+-		printerr (&quot;NXLAUNCH&gt; Using global nx_conn pointer, which is 0x%x\n&quot;, 
+-			  (unsigned int)nx_conn_glob);
+ 		nx_conn = nx_conn_glob;
+ 		nx_conn_glob = NULL;
+-		printerr (&quot;NXLAUNCH&gt; nx_conn is still 0x%x\n&quot;, (int)nx_conn);
+ 	}
+ 
+ 	/* Read the password into nx_conn-&gt;Pass, mallocing if necessary */
+@@ -1213,7 +1256,13 @@
+ 	if (!(nx_conn-&gt;Pass = g_try_realloc (nx_conn-&gt;Pass, NX_FIELDLEN * sizeof(gchar)))) {
+ 		printerr (&quot;NXLAUNCH&gt; Failed g_try_realloc\n&quot;);
+ 	}
+-	strncpy (nx_conn-&gt;Pass, gtk_entry_get_text (GTK_ENTRY (widget)),  NX_FIELDLEN);
++	if (strlen (gtk_entry_get_text (GTK_ENTRY(widget))) &gt; 0) {
++		strncpy (nx_conn-&gt;Pass, gtk_entry_get_text (GTK_ENTRY (widget)),  NX_FIELDLEN);
++	} else {
++		printerr (&quot;NXLAUNCH&gt; Zero length password\n&quot;);
++		// FIXME: Need better user feedback here.
++		return;
++	}
+ 
+ 	/* Hide the password window (this may not happen until this
+ 	 * callback returns, which is not what we want, really) */
+@@ -1266,6 +1315,7 @@
+ 				    CONN_LINKSPEED,         &amp;nx_conn-&gt;LinkSpeed,//
+ 				    CONN_PUBLICKEY,         &amp;nx_conn-&gt;PublicKey,//
+ 				    CONN_DESKTOP,           &amp;nx_conn-&gt;Desktop,//
++				    CONN_SESSION,           &amp;nx_conn-&gt;Session,//
+ 				    CONN_CUSTOMUNIXDESKTOP, &amp;nx_conn-&gt;CustomUnixDesktop,//
+ 				    CONN_COMMANDLINE,       &amp;nx_conn-&gt;CommandLine,//
+ 				    CONN_VIRTUALDESKTOP,    &amp;nx_conn-&gt;VirtualDesktop,
+@@ -1338,6 +1388,7 @@
+ 					    CONN_LINKSPEED,         &amp;nx_conn-&gt;LinkSpeed,
+ 					    CONN_PUBLICKEY,         &amp;nx_conn-&gt;PublicKey,
+ 					    CONN_DESKTOP,           &amp;nx_conn-&gt;Desktop,
++					    CONN_SESSION,           &amp;nx_conn-&gt;Session,
+ 					    CONN_CUSTOMUNIXDESKTOP, &amp;nx_conn-&gt;CustomUnixDesktop,
+ 					    CONN_COMMANDLINE,       &amp;nx_conn-&gt;CommandLine,
+ 					    CONN_VIRTUALDESKTOP,    &amp;nx_conn-&gt;VirtualDesktop,
+@@ -1396,20 +1447,9 @@
+ void launch_connection (struct nx_connection * nx_conn)
+ {
+ 	GtkWidget * widget;
+-	gchar temp[32];
+ 
+ 	printerr (&quot;%s() called\n&quot;, __FUNCTION__);
+ 
+-	/* FIXME
+-	 * Not quite sure what to do with nx_conn-&gt;Desktop
+-	 * here. Mostly, gnome goes to unix-gnome, kde to unix-kde and
+-	 * so on, but not sure what sessionType should be for console,
+-	 * custom and RDP/VNC sessions.
+-	 * For now, apply this hack:
+-	 */
+-	snprintf (temp, 31, &quot;unix-%s&quot;, nx_conn-&gt;Desktop);
+-	snprintf (nx_conn-&gt;Desktop, 255, &quot;%s&quot;, temp);
+-
+ 	execNxcl();
+ 	sendNxclSettings (nx_conn);
+ 	callReceiveSession (FALSE);
+
+Modified: nxlaunch/src/nxlaunch.h
+===================================================================
+--- nxlaunch/src/nxlaunch.h	2007-09-17 21:05:25 UTC (rev 385)
++++ nxlaunch/src/nxlaunch.h	2007-09-17 21:06:24 UTC (rev 386)
+@@ -73,6 +73,7 @@
+ 	CONN_LINKSPEED,
+ 	CONN_PUBLICKEY,
+ 	CONN_DESKTOP,
++	CONN_SESSION,
+ 	CONN_CUSTOMUNIXDESKTOP,
+ 	CONN_COMMANDLINE,
+ 	CONN_VIRTUALDESKTOP,
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000514.html">[Freenx-cvs] r385 - nxcl
+</A></li>
+	<LI>Next message: <A HREF="000516.html">[Freenx-cvs] r387 - nxcl
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#515">[ date ]</a>
+              <a href="thread.html#515">[ thread ]</a>
+              <a href="subject.html#515">[ subject ]</a>
+              <a href="author.html#515">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

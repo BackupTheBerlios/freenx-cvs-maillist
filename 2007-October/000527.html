@@ -1,0 +1,390 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r398 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-October/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r398%20-%20freenx-server/trunk&In-Reply-To=%3C200710141804.l9EI4gH9017505%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000526.html">
+   <LINK REL="Next"  HREF="000528.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r398 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r398%20-%20freenx-server/trunk&In-Reply-To=%3C200710141804.l9EI4gH9017505%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r398 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Sun Oct 14 20:04:42 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000526.html">[Freenx-cvs] r397 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000528.html">[Freenx-cvs] r399 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#527">[ date ]</a>
+              <a href="thread.html#527">[ thread ]</a>
+              <a href="subject.html#527">[ subject ]</a>
+              <a href="author.html#527">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-10-14 20:04:40 +0200 (Sun, 14 Oct 2007)
+New Revision: 398
+
+Added:
+   freenx-server/trunk/nxdesktop_helper
+   freenx-server/trunk/nxviewer_helper
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/node.conf.sample
+   freenx-server/trunk/nxloadconfig
+   freenx-server/trunk/nxnode
+   freenx-server/trunk/nxserver
+Log:
+* Added experimental support for usage of external rdesktop and
+  vncviewer programs.
+  This is for example needed for 3.0.0 backend.
+  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-10-14 14:32:45 UTC (rev 397)
++++ freenx-server/trunk/ChangeLog	2007-10-14 18:04:40 UTC (rev 398)
+@@ -64,6 +64,10 @@
+ 	* Renamed nxclient to nxdialog and setup the necessary environment
+ 	  variable for nxagent to find it.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>, Thanks to NoMachine for giving this hint)
++	* Added experimental support for usage of external rdesktop and
++	  vncviewer programs.	  
++	  This is for example needed for 3.0.0 backend.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
+ 07.07.2007 FreeNX 0.7.0 &quot;Jornade SPL Edition VI+1&quot;
+ 	* Fixed the printing support for CUPS 1.2.
+
+Modified: freenx-server/trunk/node.conf.sample
+===================================================================
+--- freenx-server/trunk/node.conf.sample	2007-10-14 14:32:45 UTC (rev 397)
++++ freenx-server/trunk/node.conf.sample	2007-10-14 18:04:40 UTC (rev 398)
+@@ -406,6 +406,19 @@
+ # The tool to generate md5sums with
+ #COMMAND_MD5SUM=md5sum
+ 
++# The key that contains the name of the complete path of the 'rdesktop' command.
++#COMMAND_RDESKTOP=rdesktop
++
++# The key that contains the name of the complete path of the 'vncviewer' command.
++#COMMAND_VNCVIEWER=vncviewer
++
++# The key that contains the name of the complete path of the 'vncpasswd' command.
++# By default the builtin nxpasswd is used.
++#COMMAND_VNCPASSWD=&quot;$PATH_BIN/nxpasswd&quot;
++
++# The key that contains the name of the complete path of the 'x11vnc' command.
++#COMMAND_X11VNC=x11vnc
++
+ #########################################################################
+ # Misc directives
+ #########################################################################
+@@ -464,3 +477,20 @@
+ 
+ # Extra options to nxproxy. See !M documentation for useful parameters.
+ #PROXY_EXTRA_OPTIONS=&quot;&quot;
++
++# In case you want to use an external 'rdesktop' command
++# set this to &quot;1&quot;.
++# 
++# If nxdesktop cannot be found this is set automatically to &quot;1&quot;.
++#ENABLE_EXTERNAL_NXDESKTOP=&quot;0&quot;
++
++# This configuration variable determines if 'rdesktop' command should be run with -k keyboard option
++# or if the keyboard should be autodetected.
++#
++#ENABLE_EXTERNAL_NXDESKTOP_KEYBOARD=&quot;1&quot;
++
++# In case you want to use an external 'nxviewer' command
++# set this to &quot;1&quot;.
++# 
++# If nxviewer cannot be found this is set automatically to &quot;1&quot;.
++#ENABLE_EXTERNAL_NXVIEWER=&quot;0&quot;
+
+Added: freenx-server/trunk/nxdesktop_helper
+===================================================================
+--- freenx-server/trunk/nxdesktop_helper	2007-10-14 14:32:45 UTC (rev 397)
++++ freenx-server/trunk/nxdesktop_helper	2007-10-14 18:04:40 UTC (rev 398)
+@@ -0,0 +1,22 @@
++#!/bin/sh
++#
++# nxdesktop_helper - Small helper for external rdesktop program as needed by NX 3.0.0 backend.
++#
++# Copyright (c) 2007 by Fabian Franz &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">freenx at fabian-franz.de</A>&gt;
++#
++# License: GPL, v2
++#
++# SVN: $Id $
++#
++
++[ -z &quot;$COMMAND_RDESKTOP&quot; ] &amp;&amp; COMMAND_RDESKTOP=&quot;rdesktop&quot;
++
++# setup commandline
++set -- -f -u &quot;$agent_user&quot; -k &quot;$agent_keyboard&quot; -d &quot;$agent_domain&quot; &quot;$agent_server&quot;
++
++if [ -n &quot;$agent_password&quot; ]
++then
++	echo $agent_password | $COMMAND_RDESKTOP -p - &quot;$@&quot;
++else
++	$COMMAND_RDESKTOP &quot;$@&quot;
++fi
+
+
+Property changes on: freenx-server/trunk/nxdesktop_helper
+___________________________________________________________________
+Name: svn:executable
+   + *
+Name: svn:keywords
+   + Id
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2007-10-14 14:32:45 UTC (rev 397)
++++ freenx-server/trunk/nxloadconfig	2007-10-14 18:04:40 UTC (rev 398)
+@@ -72,7 +72,7 @@
+ # the name of the authorized keys file for ssh
+ SSH_AUTHORIZED_KEYS=&quot;authorized_keys2&quot;
+ 
+-# retest values like xauth, netcat
++# retest values like xauth, netcat and checks for nxdesktop/nxviewer availability
+ # set to 0 if you are sure, you set the right values
+ 
+ NXCONFIG_RETEST=1
+@@ -185,6 +185,10 @@
+ COMMAND_CUPSD=/usr/sbin/cupsd
+ COMMAND_MD5SUM=&quot;openssl md5&quot;
+ COMMAND_PERL=perl
++COMMAND_RDESKTOP=&quot;rdesktop&quot;
++COMMAND_VNCVIEWER=&quot;vncviewer&quot;
++COMMAND_VNCPASSWD=&quot;$PATH_BIN/nxpasswd&quot;
++COMMAND_X11VNC=&quot;x11vnc&quot;
+ 
+ # Misc directives
+ 
+@@ -204,6 +208,9 @@
+ AGENT_FONT_SERVER=&quot;&quot;
+ PROXY_TCP_NODELAY=&quot;&quot;
+ PROXY_EXTRA_OPTIONS=&quot;&quot;
++ENABLE_EXTERNAL_NXDESKTOP=&quot;0&quot;
++ENABLE_EXTERNAL_NXDESKTOP_KEYBOARD=&quot;1&quot;
++ENABLE_EXTERNAL_NXVIEWER=&quot;0&quot;
+ 
+ ############################################################################
+ # OS specific directives
+@@ -257,6 +264,9 @@
+ then
+ 	{ ! mywhich &quot;$COMMAND_XAUTH&quot; &amp;&amp; which xauth; } &gt;/dev/null 2&gt;&amp;1 &amp;&amp; COMMAND_XAUTH=$(which xauth)
+ 	{ ! mywhich &quot;$COMMAND_NETCAT&quot; &amp;&amp; which nc; } &gt;/dev/null 2&gt;&amp;1 &amp;&amp; COMMAND_NETCAT=$(which nc)
++	{ ! mywhich &quot;$PATH_BIN/nxdesktop&quot;; } &gt;/dev/null 2&gt;&amp;1 &amp;&amp; ENABLE_EXTERNAL_NXDESKTOP=&quot;1&quot;
++	{ ! mywhich &quot;$PATH_BIN/nxviewer&quot;; } &gt;/dev/null 2&gt;&amp;1 &amp;&amp; ENABLE_EXTERNAL_NXVIEWER=&quot;1&quot;
++	{ ! mywhich &quot;$COMMAND_VNCPASSWD&quot; &amp;&amp; which vncpasswd; } &gt;/dev/null 2&gt;&amp;1 &amp;&amp; COMMAND_VNCPASSWD=$(which vncpasswd)
+ fi
+ 
+ #########################################################################
+@@ -314,14 +324,31 @@
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;PATH_BIN=$PATH_BIN\&quot;&quot;
+ 	# Check for NX agents ...
+ 	
+-	[ ! -f &quot;$PATH_BIN/nxagent&quot; ] &amp;&amp; \
++	[ ! -x &quot;$PATH_BIN/nxagent&quot; ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Could not find nxagent in $PATH_BIN. Please install some OSS components.&quot;
++	
++	if [ &quot;ENABLE_EXTERNAL_NXDESKTOP&quot; = &quot;1&quot; ]
++	then
++		[ ! mywhich &quot;$COMMAND_RDESKTOP&quot; &gt;/dev/null 2&gt;&amp;1 ] &amp;&amp; \
++			WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Could not find COMMAND_RDESKTOP=$COMMAND_RDESKTOP. RDP sessions won't work.&quot;
++	else
++		[ ! -x &quot;$PATH_BIN/nxdesktop&quot; ] &amp;&amp; \
++			WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Could not find nxdesktop in $PATH_BIN. RDP sessions won't work.&quot;
++	fi
+ 		
+-	[ ! -f &quot;$PATH_BIN/nxdesktop&quot; ] &amp;&amp; \
+-		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Could not find nxdesktop in $PATH_BIN. RDP sessions won't work.&quot;
+-		
+-	[ ! -f &quot;$PATH_BIN/nxviewer&quot; ] &amp;&amp; \
+-		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Could not find nxviewer in $PATH_BIN. VNC sessions won't work.&quot;
++	if [ &quot;ENABLE_EXTERNAL_NXVIEWER&quot; = &quot;1&quot; ]
++	then
++		[ ! mywhich &quot;$COMMAND_VNCVIEWER&quot; &gt;/dev/null 2&gt;&amp;1 ] &amp;&amp; \
++			WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Could not find COMMAND_VNCVIEWER=$COMMAND_VNCVIEWER. VNC sessions won't work.&quot;
++		[ ! mywhich &quot;$COMMAND_VNCPASSWD&quot; &gt;/dev/null 2&gt;&amp;1 ] &amp;&amp; \
++			WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Could not find COMMAND_VNCPASSWD=$COMMAND_VNCPASSWD. VNC sessions won't work.&quot;
++	else
++		[ ! -x &quot;$PATH_BIN/nxviewer&quot; ] &amp;&amp; \
++			WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Could not find nxviewer in $PATH_BIN. VNC sessions won't work.&quot;
++	fi
++	
++	[ ! mywhich &quot;$COMMAND_X11VNC&quot; &gt;/dev/null 2&gt;&amp;1 ] &amp;&amp; \
++			WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Could not find COMMAND_X11VNC=$COMMAND_X11VNC. VNC mirror sessions won't work.&quot;
+ 
+ 	# Check for paths
+ 		
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2007-10-14 14:32:45 UTC (rev 397)
++++ freenx-server/trunk/nxnode	2007-10-14 18:04:40 UTC (rev 398)
+@@ -1096,6 +1096,34 @@
+ 	host=$(getparam host)
+ 	mirrordisplay=$(getparam mirrordisplay)
+ 	mirrorhost=$(getparam mirrorhost)
++	
++	sess_id=&quot;$SERVER_NAME-$display-$uniqueid&quot;
++	NXSESSION_DIRECTORY=&quot;$USER_FAKE_HOME/.nx/C-$sess_id&quot;
++	
++	# export the agent_* options for the helper scripts
++	if [ &quot;$(getparam freenx_export_agents)&quot; = &quot;1&quot; ]
++	then
++		export agent_user
++		export agent_password
++		export agent_server
++		export agent_domain
++		agent_keyboard=&quot;&quot;
++		[ &quot;ENABLE_EXTERNAL_NXDESKTOP_KEYBOARD&quot; = &quot;1&quot; ] &amp;&amp; agent_keyboard=$(echo &quot;$keyboard&quot; | cut -d'/' -f2)
++		export agent_keyboard
++		export NXSESSION_DIRECTORY
++		export AGENT_EXTRA_OPTIONS_RFB
++		export AGENT_EXTRA_OPTIONS_RDP
++		export COMMAND_RDESKTOP
++		export COMMAND_VNCVIEWER
++		export COMMAND_VNCPASSWD
++		export COMMAND_X11VNC
++		export PATH_BIN
++		export mirrordisplay
++		export mirrorhost
++		# We do not want to suspend such a session
++		# as RDP/RFB are both suspendable as well
++		ENABLE_PERSISTENT_SESSION=&quot;&quot;
++	fi
+ 
+ 	fullscreen=$(getparam fullscreen)
+ 	[ &quot;$geometry&quot; = &quot;fullscreen&quot; ] &amp;&amp; fullscreen=&quot;1&quot;
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2007-10-14 14:32:45 UTC (rev 397)
++++ freenx-server/trunk/nxserver	2007-10-14 18:04:40 UTC (rev 398)
+@@ -1144,6 +1144,28 @@
+ 		CMDLINE=$PARAMS
+ 	fi
+ 	
++	if [ &quot;$ACTION&quot; = &quot;start&quot; ]
++	then
++
++		# Hack for external RDP/RFB agents
++
++		if [ &quot;$ENABLE_EXTERNAL_NXDESKTOP&quot; = &quot;1&quot; -a &quot;$(getparam type)&quot; = &quot;windows&quot; ]
++		then
++			type=&quot;unix-application&quot;
++			application=&quot;$PATH_BIN/nxdesktop_helper&quot;
++			PARAMS=&quot;$PARAMS&amp;type=$type&amp;application=$application&amp;freenx_export_agents=1&quot;
++			CMDLINE=$PARAMS
++		fi
++		 
++		if [ &quot;$ENABLE_EXTERNAL_NXVIEWER&quot; = &quot;1&quot; -a &quot;$(getparam type)&quot; = &quot;vnc&quot; ]
++		then
++			type=&quot;unix-application&quot;
++			application=&quot;$PATH_BIN/nxviewer_helper&quot;
++			PARAMS=&quot;$PARAMS&amp;type=$type&amp;application=$application&amp;freenx_export_agents=1&quot;
++			CMDLINE=$PARAMS
++		fi
++	fi
++	
+ 	# If we can't get the userip and SSHD_CHECK_IP is set to 1
+ 	# we bail out.
+ 	if [ -z &quot;$SSH_CLIENT&quot; -a -z &quot;$SSH2_CLIENT&quot; ]
+
+Added: freenx-server/trunk/nxviewer_helper
+===================================================================
+--- freenx-server/trunk/nxviewer_helper	2007-10-14 14:32:45 UTC (rev 397)
++++ freenx-server/trunk/nxviewer_helper	2007-10-14 18:04:40 UTC (rev 398)
+@@ -0,0 +1,39 @@
++#!/bin/sh
++#
++# nxviewer_helper - Small helper for external vncviewer program as needed by NX 3.0.0 backend.
++#
++# Copyright (c) 2007 by Fabian Franz &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">freenx at fabian-franz.de</A>&gt;
++#
++# License: GPL, v2
++#
++# SVN: $Id $
++#
++
++[ -z &quot;$COMMAND_VNCVIEWER&quot; ] &amp;&amp; COMMAND_VNCVIEWER=&quot;vncviewer&quot;
++[ -z &quot;$COMMAND_VNCPASSWD&quot; ] &amp;&amp; COMMAND_VNCPASSWD=&quot;$PATH_BIN/nxpasswd&quot;
++[ -z &quot;$COMMAND_X11VNC&quot; ] &amp;&amp; COMMAND_X11VNC=&quot;x11vnc&quot;
++
++mkdir -p &quot;$NXSESSION_DIRECTORY/scripts/&quot;
++echo &quot;$agent_password&quot; | $COMMAND_VNCPASSWD &quot;$NXSESSION_DIRECTORY/scripts/.passwd&quot; doit
++
++# Start x11vnc
++if [ -n &quot;$mirrordisplay&quot; ]
++then
++	(
++		unset XAUTHORITY
++		# Note: No &quot;-accept popup&quot; as its the same user and with that password
++		#       he could do already more than -accept popup would allow.
++		DISPLAY=&quot;$mirrorhost:$mirrordisplay.0&quot; $COMMAND_X11VNC -timeout 120 -once -rfbauth &quot;$NXSESSION_DIRECTORY/scripts/.passwd&quot; &gt;&quot;$NXSESSION_DIRECTORY/scripts/.vnc_port&quot; &amp;
++	)
++	sleep 1
++	agent_port=$(cat &quot;$NXSESSION_DIRECTORY/scripts/.vnc_port&quot; | egrep &quot;^PORT=&quot; | cut -d'=' -f 2)
++	[ -z &quot;agent_port&quot; ] &amp;&amp; agent_port=&quot;0&quot;
++	# note the :: is not a mistake, but rather a hint for nxviewer to use this as a port and not
++	# interpret it as a display.
++	agent_server=&quot;127.0.0.1::$agent_port&quot;
++	rm -f &quot;$NXSESSION_DIRECTORY/scripts/.vnc_port&quot;
++fi
++
++# Start the vncviewer
++
++exec $COMMAND_VNCVIEWER -passwd &quot;$NXSESSION_DIRECTORY/scripts/.passwd&quot; -fullscreen &quot;$agent_server&quot; $AGENT_EXTRA_OPTIONS_RFB
+
+
+Property changes on: freenx-server/trunk/nxviewer_helper
+___________________________________________________________________
+Name: svn:executable
+   + *
+Name: svn:keywords
+   + Id
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000526.html">[Freenx-cvs] r397 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000528.html">[Freenx-cvs] r399 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#527">[ date ]</a>
+              <a href="thread.html#527">[ thread ]</a>
+              <a href="subject.html#527">[ subject ]</a>
+              <a href="author.html#527">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,407 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r252 - in nxclientlib: . qt-test test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r252%20-%20in%20nxclientlib%3A%20.%20qt-test%20test&In-Reply-To=%3C200608041350.k74Doq68004482%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000382.html">
+   <LINK REL="Next"  HREF="000384.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r252 - in nxclientlib: . qt-test test</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r252%20-%20in%20nxclientlib%3A%20.%20qt-test%20test&In-Reply-To=%3C200608041350.k74Doq68004482%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r252 - in nxclientlib: . qt-test test">gwright at mail.berlios.de
+       </A><BR>
+    <I>Fri Aug  4 15:50:52 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000382.html">[Freenx-cvs] r251 - nxclientlib
+</A></li>
+        <LI>Next message: <A HREF="000384.html">[Freenx-cvs] r253 - in nxclientlib: . qt-test test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#383">[ date ]</a>
+              <a href="thread.html#383">[ thread ]</a>
+              <a href="subject.html#383">[ subject ]</a>
+              <a href="author.html#383">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2006-08-04 15:50:49 +0200 (Fri, 04 Aug 2006)
+New Revision: 252
+
+Modified:
+   nxclientlib/nxclientlib.cpp
+   nxclientlib/nxclientlib.h
+   nxclientlib/nxsession.cpp
+   nxclientlib/nxsession.h
+   nxclientlib/qt-test/qtnxwindow.cpp
+   nxclientlib/qt-test/qtnxwindow.h
+   nxclientlib/test/main.cpp
+Log:
+I broke something.
+
+
+Modified: nxclientlib/nxclientlib.cpp
+===================================================================
+--- nxclientlib/nxclientlib.cpp	2006-08-04 02:17:12 UTC (rev 251)
++++ nxclientlib/nxclientlib.cpp	2006-08-04 13:50:49 UTC (rev 252)
+@@ -219,7 +219,7 @@
+ 	session.setContinue(auth);
+ }
+ 
+-void NXClientLib::setSession(NXSessionData nxSession)
++void NXClientLib::setSession(NXSessionData *nxSession)
+ {
+ 	session.setSession(nxSession);
+ }
+
+Modified: nxclientlib/nxclientlib.h
+===================================================================
+--- nxclientlib/nxclientlib.h	2006-08-04 02:17:12 UTC (rev 251)
++++ nxclientlib/nxclientlib.h	2006-08-04 13:50:49 UTC (rev 252)
+@@ -64,7 +64,7 @@
+ 		void setRender(bool render) { session.setRender(render); };
+ 		void allowSSHConnect(bool auth);
+ 
+-		void setSession(NXSessionData);
++		void setSession(NXSessionData *);
+ 
+ 		void invokeProxy();
+ 
+
+Modified: nxclientlib/nxsession.cpp
+===================================================================
+--- nxclientlib/nxsession.cpp	2006-08-04 02:17:12 UTC (rev 251)
++++ nxclientlib/nxsession.cpp	2006-08-04 13:50:49 UTC (rev 252)
+@@ -110,7 +110,7 @@
+ 		case LIST_SESSIONS:
+ 			if (response == 105) {
+ 				// Get a list of the available sessions on the server
+-				returnMessage = &quot;listsession --user=\&quot;&quot; + nxUsername + &quot;\&quot; --status=\&quot;suspended,running\&quot; --geometry=\&quot;&quot; + xRes + &quot;x&quot; + yRes + &quot;+&quot; + renderSet + &quot;\&quot; --type=\&quot;&quot; + type + &quot;\&quot;&quot;;
++				returnMessage = &quot;listsession --user=\&quot;&quot; + nxUsername + &quot;\&quot; --status=\&quot;suspended,running\&quot; --geometry=\&quot;&quot; + xRes + &quot;x&quot; + yRes + renderSet + &quot;\&quot; --type=\&quot;&quot; + type + &quot;\&quot;&quot;;
+ 				stage++;
+ 			}
+ 			break;
+@@ -125,48 +125,48 @@
+ 				int media = 0;
+ 				int render = 0;
+ 
+-				if (sessionData.media)
++				if (sessionData-&gt;media)
+ 					media = 1;
+-				if (sessionData.render)
++				if (sessionData-&gt;render)
+ 					render = 1;
+-					
+-				if (sessionData.suspended) {
++
++				if (sessionData-&gt;suspended) {
+ 					// These are the session parameters that NoMachine's client sends for resume
+-					returnMessage = &quot;restoresession --id=\&quot;&quot; + QString(sessionData.id) +
+-					&quot;\&quot; --session=\&quot;&quot; + sessionData.sessionName +
+-					&quot;\&quot; --type=\&quot;&quot; + sessionData.sessionType +
+-					&quot;\&quot; --cache=\&quot;&quot; + QString::number(sessionData.cache) +
+-					&quot;M\&quot; --images=\&quot;&quot; + QString::number(sessionData.images) +
++					returnMessage = &quot;restoresession --id=\&quot;&quot; + QString::fromStdString(sessionData-&gt;id) +
++					&quot;\&quot; --session=\&quot;&quot; + QString::fromStdString(sessionData-&gt;sessionName) +
++					&quot;\&quot; --type=\&quot;&quot; + QString::fromStdString(sessionData-&gt;sessionType) +
++					&quot;\&quot; --cache=\&quot;&quot; + QString::number(sessionData-&gt;cache) +
++					&quot;M\&quot; --images=\&quot;&quot; + QString::number(sessionData-&gt;images) +
+ 					&quot;M\&quot; --cookie=\&quot;&quot; + generateCookie() +
+-					&quot;\&quot; --link=\&quot;&quot; + sessionData.linkType +
+-					&quot;\&quot; --kbtype=\&quot;&quot; + sessionData.kbtype +
++					&quot;\&quot; --link=\&quot;&quot; + QString::fromStdString(sessionData-&gt;linkType) +
++					&quot;\&quot; --kbtype=\&quot;&quot; + QString::fromStdString(sessionData-&gt;kbtype) +
+ 					&quot;\&quot; --nodelay=\&quot;1\&quot; --encryption=\&quot;&quot; + QString::number(encryption) +
+-					&quot;\&quot; --backingstore=\&quot;&quot; + sessionData.backingstore +
+-					&quot;\&quot; --geometry=\&quot;&quot; + sessionData.geometry +
+-					&quot;\&quot; --media=\&quot;&quot; + sessionData.media +
+-					&quot;\&quot; --agent_server=\&quot;&quot; + sessionData.agentServer +
+-					&quot;\&quot; --agent_user=\&quot;&quot; + sessionData.agentUser +
+-					&quot;\&quot; --agent_password=\&quot;&quot; + sessionData.agentPass + &quot;\&quot;&quot;;
++					&quot;\&quot; --backingstore=\&quot;&quot; + QString::fromStdString(sessionData-&gt;backingstore) +
++					&quot;\&quot; --geometry=\&quot;&quot; + QString::fromStdString(sessionData-&gt;geometry) +
++					&quot;\&quot; --media=\&quot;&quot; + QString::number(media) +
++					&quot;\&quot; --agent_server=\&quot;&quot; + QString::fromStdString(sessionData-&gt;agentServer) +
++					&quot;\&quot; --agent_user=\&quot;&quot; + QString::fromStdString(sessionData-&gt;agentUser) +
++					&quot;\&quot; --agent_password=\&quot;&quot; + QString::fromStdString(sessionData-&gt;agentPass) + &quot;\&quot;&quot;;
+ 					stage++;
+ 				} else {
+-					returnMessage = &quot;startsession --session=\&quot;&quot; + QString(sessionData.sessionName) +
+-					&quot;\&quot; --type=\&quot;&quot; + sessionData.sessionType +
+-					&quot;\&quot; --cache=\&quot;&quot; + QString::number(sessionData.cache) +
+-					&quot;M\&quot; --images=\&quot;&quot; + QString::number(sessionData.images) +
++					returnMessage = &quot;startsession --session=\&quot;&quot; + QString::fromStdString(sessionData-&gt;sessionName) +
++					&quot;\&quot; --type=\&quot;&quot; + QString::fromStdString(sessionData-&gt;sessionType) +
++					&quot;\&quot; --cache=\&quot;&quot; + QString::number(sessionData-&gt;cache) +
++					&quot;M\&quot; --images=\&quot;&quot; + QString::number(sessionData-&gt;images) +
+ 					&quot;M\&quot; --cookie=\&quot;&quot; + generateCookie() +
+-					&quot;\&quot; --link=\&quot;&quot; + sessionData.linkType +
++					&quot;\&quot; --link=\&quot;&quot; + QString::fromStdString(sessionData-&gt;linkType) +
+ 					&quot;\&quot; --render=\&quot;&quot; + QString::number(render) +
+ 					&quot;\&quot; --encryption=\&quot;&quot; + QString::number(encryption) +
+-					&quot;\&quot; --backingstore=\&quot;&quot; + sessionData.backingstore +
+-					&quot;\&quot; --imagecompressionmethod=\&quot;&quot; + QString::number(sessionData.imageCompressionMethod) +
+-					&quot;\&quot; --geometry=\&quot;&quot; + sessionData.geometry +
+-					&quot;\&quot; --screeninfo=\&quot;&quot; + xRes + &quot;x&quot; + yRes + &quot;x&quot; + depth + &quot;+&quot; + renderSet +
+-					&quot;\&quot; --keyboard=\&quot;&quot; + sessionData.keyboard +
+-					&quot;\&quot; --kbtype=\&quot;&quot; + sessionData.kbtype +
++					&quot;\&quot; --backingstore=\&quot;&quot; + QString::fromStdString(sessionData-&gt;backingstore) +
++					&quot;\&quot; --imagecompressionmethod=\&quot;&quot; + QString::number(sessionData-&gt;imageCompressionMethod) +
++					&quot;\&quot; --geometry=\&quot;&quot; + QString::fromStdString(sessionData-&gt;geometry) +
++					&quot;\&quot; --screeninfo=\&quot;&quot; + xRes + &quot;x&quot; + yRes + &quot;x&quot; + depth + renderSet +
++					&quot;\&quot; --keyboard=\&quot;&quot; + QString::fromStdString(sessionData-&gt;keyboard) +
++					&quot;\&quot; --kbtype=\&quot;&quot; + QString::fromStdString(sessionData-&gt;kbtype) +
+ 					&quot;\&quot; --media=\&quot;&quot; + QString::number(media) +
+-					&quot;\&quot; --agent_server=\&quot;&quot; + sessionData.agentServer +
+-					&quot;\&quot; --agent_user=\&quot;&quot; + sessionData.agentUser +
+-					&quot;\&quot; --agent_password=\&quot;&quot; + sessionData.agentPass + &quot;\&quot;&quot;;
++					&quot;\&quot; --agent_server=\&quot;&quot; + QString::fromStdString(sessionData-&gt;agentServer) +
++					&quot;\&quot; --agent_user=\&quot;&quot; + QString::fromStdString(sessionData-&gt;agentUser) +
++					&quot;\&quot; --agent_password=\&quot;&quot; + QString::fromStdString(sessionData-&gt;agentPass) + &quot;\&quot;&quot;;
+ 					stage++;
+ 				}
+ 			}
+@@ -182,7 +182,7 @@
+ 		return 0;
+ }
+ 
+-void NXSession::setSession(NXSessionData session)
++void NXSession::setSession(NXSessionData *session)
+ {
+ 	sessionData = session;
+ 	sessionSet = true;
+
+Modified: nxclientlib/nxsession.h
+===================================================================
+--- nxclientlib/nxsession.h	2006-08-04 02:17:12 UTC (rev 251)
++++ nxclientlib/nxsession.h	2006-08-04 13:50:49 UTC (rev 252)
+@@ -28,37 +28,37 @@
+ #include &lt;unistd.h&gt;
+ 
+ struct NXSessionData {
+-	const char *sessionName;
+-	const char *sessionType;
++	std::string sessionName;
++	std::string sessionType;
+ 	int cache;
+ 	int images;
+-	const char *linkType;
++	std::string linkType;
+ 	bool render;
+-	const char *backingstore;
++	std::string backingstore;
+ 	int imageCompressionMethod;
+ 	int imageCompressionLevel;
+-	const char *geometry;
+-	const char *keyboard;
+-	const char *kbtype;
++	std::string geometry;
++	std::string keyboard;
++	std::string kbtype;
+ 	bool media;
+-	const char *agentServer;
+-	const char *agentUser;
+-	const char *agentPass;
+-	const char *screenInfo;
++	std::string agentServer;
++	std::string agentUser;
++	std::string agentPass;
+ 	int cups;
+-	const char *id;
++	std::string id;
++	std::string screenInfo;
+ 	bool suspended;
+ };
+ 
+ struct NXResumeData {
+ 	int display;
+-	const char *sessionType;
+-	const char *sessionID;
+-	const char *options;
++	std::string sessionType;
++	std::string sessionID;
++	std::string options;
+ 	int depth;
+-	const char *screen;
+-	const char *available;
+-	const char *sessionName;
++	std::string screen;
++	std::string available;
++	std::string sessionName;
+ };
+ 
+ // This class is used to parse the output from the nxssh session to the server
+@@ -78,14 +78,13 @@
+ 
+ 		void setResolution(int x, int y) { xRes.setNum(x); yRes.setNum(y); };
+ 		void setDepth(int d) { depth.setNum(d); };
+-		void setRender(bool isRender) { if (isRender) renderSet = &quot;render&quot;; };
++		void setRender(bool isRender) { if (isRender) renderSet = &quot;+render&quot;; };
+ 		void setContinue(bool allow) { doSSH = allow; };
+-		void setSession(NXSessionData);
++		void setSession(NXSessionData *);
+ 		void setEncryption(bool enc) { encryption = enc; };
+ 		
+ 		QString generateCookie();
+ 		
+-		NXSessionData sessionData;
+ 
+ 	signals:
+ 		// Emitted when the initial public key authentication is successful
+@@ -118,6 +117,8 @@
+ 		QStringList resumeSessions;
+ 
+ 		std::vector&lt;NXResumeData&gt; runningSessions;
++		NXSessionData *sessionData;
++
+ };
+ 
+ #endif
+
+Modified: nxclientlib/qt-test/qtnxwindow.cpp
+===================================================================
+--- nxclientlib/qt-test/qtnxwindow.cpp	2006-08-04 02:17:12 UTC (rev 251)
++++ nxclientlib/qt-test/qtnxwindow.cpp	2006-08-04 13:50:49 UTC (rev 252)
+@@ -22,6 +22,7 @@
+ 
+ QtNXWindow::QtNXWindow() : QMainWindow()
+ {
++	session = new NXSessionData;
+ 	ui_mw.setupUi(this);
+ 	m_cb = new QtNXCallback();
+ 
+@@ -39,47 +40,47 @@
+ 	QDesktopWidget dw;
+ 	QX11Info info;
+ 	
+-	session.sessionName = ui_mw.session_name-&gt;text();
+-	session.sessionType = ui_mw.session_type-&gt;currentText();
+-	session.cache = ui_mw.cache-&gt;currentText().toInt();
+-	session.images = ui_mw.images-&gt;currentText().toInt();
+-	session.linkType = ui_mw.link_type-&gt;currentText();
++	session-&gt;sessionName = ui_mw.session_name-&gt;text().toStdString();
++	session-&gt;sessionType = ui_mw.session_type-&gt;currentText().toStdString();
++	session-&gt;cache = ui_mw.cache-&gt;currentText().toInt();
++	session-&gt;images = ui_mw.images-&gt;currentText().toInt();
++	session-&gt;linkType = ui_mw.link_type-&gt;currentText().toStdString();
+ 	
+ 	if (ui_mw.render-&gt;checkState() == 0)
+-		session.render = false;
++		session-&gt;render = false;
+ 	if (ui_mw.render-&gt;checkState() == 2)
+-		session.render = true;
++		session-&gt;render = true;
+ 	
+-	session.backingstore = &quot;when_requested&quot;;
++	session-&gt;backingstore = &quot;when_requested&quot;;
+ 
+ 	if (ui_mw.image_compression-&gt;currentText() == &quot;JPEG&quot;)
+-		session.imageCompressionMethod = -1;
++		session-&gt;imageCompressionMethod = -1;
+ 	if (ui_mw.image_compression-&gt;currentText() == &quot;RAW&quot;)
+-		session.imageCompressionMethod = 0;
++		session-&gt;imageCompressionMethod = 0;
+ 	if (ui_mw.image_compression-&gt;currentText() == &quot;PNG&quot;)
+-		session.imageCompressionMethod = 2;
++		session-&gt;imageCompressionMethod = 2;
+ 		
+-	session.imageCompressionLevel = ui_mw.jpeg_quality-&gt;value();
++	session-&gt;imageCompressionLevel = ui_mw.jpeg_quality-&gt;value();
+ 
+ 	if (ui_mw.resolution-&gt;currentText() == &quot;640x480&quot;)
+-		session.geometry = &quot;640x480+0+0&quot;;
++		session-&gt;geometry = &quot;640x480+0+0&quot;;
+ 	if (ui_mw.resolution-&gt;currentText() == &quot;800x600&quot;)
+-		session.geometry = &quot;800x600+0+0&quot;;
++		session-&gt;geometry = &quot;800x600+0+0&quot;;
+ 	if (ui_mw.resolution-&gt;currentText() == &quot;1024x768&quot;)
+-		session.geometry = &quot;1024x768+0+0&quot;;
++		session-&gt;geometry = &quot;1024x768+0+0&quot;;
+ 	if (ui_mw.resolution-&gt;currentText() == &quot;1600x1200&quot;)
+-		session.geometry = &quot;1600x1200+0+0&quot;;
++		session-&gt;geometry = &quot;1600x1200+0+0&quot;;
+ 
+-	session.keyboard = &quot;defkeymap&quot;;
+-	session.kbtype = &quot;pc102/defkeymap&quot;;
++	session-&gt;keyboard = &quot;defkeymap&quot;;
++	session-&gt;kbtype = &quot;pc102/defkeymap&quot;;
+ 	
+-	session.media = false;
+-	session.agentServer = ui_mw.rdp_server-&gt;text();
+-	session.agentUser = ui_mw.rdp_username-&gt;text();
+-	session.agentPass = ui_mw.rdp_password-&gt;text();
++	session-&gt;media = false;
++	session-&gt;agentServer = ui_mw.rdp_server-&gt;text().toStdString();
++	session-&gt;agentUser = ui_mw.rdp_username-&gt;text().toStdString();
++	session-&gt;agentPass = ui_mw.rdp_password-&gt;text().toStdString();
+ 
+-	session.screenInfo = QString::number(dw.screenGeometry(this).width()) + &quot;x&quot; + QString::number(dw.screenGeometry(this).height()) + &quot;x&quot; + QString::number(info.depth()) + &quot;render&quot;;
+-	session.suspended = false;
++	// session-&gt;screenInfo = QString::number(dw.screenGeometry(this).width()) + &quot;x&quot; + QString::number(dw.screenGeometry(this).height()) + &quot;x&quot; + QString::number(info.depth()) + &quot;render&quot;;
++	session-&gt;suspended = false;
+ 
+ 	if (ui_mw.encryption-&gt;checkState() == 0)
+ 		m_lib.invokeNXSSH(&quot;default&quot; , ui_mw.server-&gt;text().toAscii().data(), false);
+
+Modified: nxclientlib/qt-test/qtnxwindow.h
+===================================================================
+--- nxclientlib/qt-test/qtnxwindow.h	2006-08-04 02:17:12 UTC (rev 251)
++++ nxclientlib/qt-test/qtnxwindow.h	2006-08-04 13:50:49 UTC (rev 252)
+@@ -36,7 +36,7 @@
+ 	private:
+ 		Ui::MainWindow ui_mw;
+ 		NXClientLib m_lib;
+-		NXSessionData session;
++		NXSessionData *session;
+ 		QtNXCallback *m_cb;
+ };
+ 
+
+Modified: nxclientlib/test/main.cpp
+===================================================================
+--- nxclientlib/test/main.cpp	2006-08-04 02:17:12 UTC (rev 251)
++++ nxclientlib/test/main.cpp	2006-08-04 13:50:49 UTC (rev 252)
+@@ -57,7 +57,6 @@
+ 	session.agentServer = &quot;&quot;;
+ 	session.agentUser = &quot;&quot;;
+ 	session.agentPass = &quot;&quot;;
+-	session.screenInfo = &quot;800x600x24+render&quot;;
+ 	session.cups = 0;
+ 	session.suspended = false;
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000382.html">[Freenx-cvs] r251 - nxclientlib
+</A></li>
+	<LI>Next message: <A HREF="000384.html">[Freenx-cvs] r253 - in nxclientlib: . qt-test test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#383">[ date ]</a>
+              <a href="thread.html#383">[ thread ]</a>
+              <a href="subject.html#383">[ subject ]</a>
+              <a href="author.html#383">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

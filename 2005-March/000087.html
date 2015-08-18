@@ -1,0 +1,111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fabianx modified nxserver
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%20nxserver&In-Reply-To=%3C4234E00A.mail1K8112NDI%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000086.html">
+   <LINK REL="Next"  HREF="000088.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fabianx modified nxserver</H1>
+    <B>fabianx</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%20nxserver&In-Reply-To=%3C4234E00A.mail1K8112NDI%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fabianx modified nxserver">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Mon Mar 14 01:51:22 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000086.html">[Freenx-cvs] r54 - thinnx/trunk
+</A></li>
+        <LI>Next message: <A HREF="000088.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#87">[ date ]</a>
+              <a href="thread.html#87">[ thread ]</a>
+              <a href="subject.html#87">[ subject ]</a>
+              <a href="author.html#87">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fabianx
+Date:      2005-03-14 00:51:22 GMT
+Modified:  .        nxserver
+Log:
+Implemented correct usage of option-flags in listing of suspended sessions.
+
+Revision  Changes    Path
+1.42      +5 -2      freenx/nxserver
+
+
+rev 1.42, prev_rev 1.41
+Index: nxserver
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxserver,v
+retrieving revision 1.41
+retrieving revision 1.42
+diff -u -r1.41 -r1.42
+--- nxserver	13 Mar 2005 15:39:33 -0000	1.41
++++ nxserver	14 Mar 2005 00:51:21 -0000	1.42
+@@ -11,7 +11,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxserver,v 1.41 2005/03/13 15:39:33 fabianx Exp $
++# CVS: $Id: nxserver,v 1.42 2005/03/14 00:51:21 fabianx Exp $
+ #
+ 
+ # Read the config file
+@@ -232,13 +232,16 @@
+ 		if egrep -q &quot;^userName=$1$&quot; $i &amp;&amp; egrep -q &quot;^status=$2$&quot; $i #&amp;&amp; grep -q &quot;screeninfo=$3&quot; $i
+ 		then
+ 			CMDLINE=$(session_get_cmdline $i)
+-			options=&quot;-R---PSA&quot;
+ 			depth=$(getparam screeninfo | cut -d &quot;x&quot; -f3 | cut -d &quot;+&quot; -f1 )
+ 			geom=$(getparam screeninfo | cut -d &quot;x&quot; -f1,2) 
+ 			render=$(getparam screeninfo | cut -d &quot;+&quot; -f2 )
+ 			available=&quot;N/A&quot;
+ 			udepth=$(echo $3 | cut -d &quot;x&quot; -f3 | cut -d &quot;+&quot; -f1 )
+ 			urender=$(echo $3 | cut -d &quot;+&quot; -f2 )
++			[ &quot;$(getparam geometry)&quot; = &quot;fullscreen&quot; ] &amp;&amp; options=&quot;F&quot;
++			[ &quot;$(getparam geometry)&quot; = &quot;fullscreen&quot; ] || options=&quot;-&quot;
++			[ &quot;$urender&quot; = &quot;render&quot; ] &amp;&amp; options=&quot;${options}R---PSA&quot;
++			[ &quot;$urender&quot; = &quot;render&quot; ] || options=&quot;${options}----PSA&quot;
+ 			[ &quot;$udepth&quot; = &quot;$depth&quot; -a &quot;$urender&quot; = &quot;$render&quot; ] &amp;&amp; available=$(getparam status)
+ 			# FIXME: HACK !!! to keep compatibility with old snapshot version (Knoppix 3.6 based for example)
+ 			if [ -z &quot;$4&quot; -a &quot;$available&quot; != &quot;N/A&quot; ] 
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000086.html">[Freenx-cvs] r54 - thinnx/trunk
+</A></li>
+	<LI>Next message: <A HREF="000088.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#87">[ date ]</a>
+              <a href="thread.html#87">[ thread ]</a>
+              <a href="subject.html#87">[ subject ]</a>
+              <a href="author.html#87">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

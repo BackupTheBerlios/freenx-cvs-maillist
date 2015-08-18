@@ -1,0 +1,176 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r290 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r290%20-%20freenx-server/trunk&In-Reply-To=%3C200701241622.l0OGM4UV002441%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000435.html">
+   <LINK REL="Next"  HREF="000421.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r290 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r290%20-%20freenx-server/trunk&In-Reply-To=%3C200701241622.l0OGM4UV002441%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r290 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Wed Jan 24 17:22:04 CET 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000435.html">[Freenx-cvs] r289 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000421.html">[Freenx-cvs] r291 - in nx-utils: . nxcups-wrapper
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#420">[ date ]</a>
+              <a href="thread.html#420">[ thread ]</a>
+              <a href="subject.html#420">[ subject ]</a>
+              <a href="author.html#420">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-01-24 17:22:04 +0100 (Wed, 24 Jan 2007)
+New Revision: 290
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/node.conf.sample
+   freenx-server/trunk/nxloadconfig
+   freenx-server/trunk/nxnode
+Log:
+* Added cups seamless support with no &quot;use this driver?&quot; dialogs at all.
+
+Note: You need nxcupsd-wrapper on the client side.
+      Get it from nxutils repository.
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-01-24 15:51:37 UTC (rev 289)
++++ freenx-server/trunk/ChangeLog	2007-01-24 16:22:04 UTC (rev 290)
+@@ -9,6 +9,9 @@
+ 	* Added setting of CUPS_SERVER environment var.
+ 	* Added automatic downloading of PPDs, if the client supports it.
+ 	* Added configuration vars to tweak the new behaviour.
++	* Added cups seamless support with no &quot;use this driver?&quot; dialogs at all.
++	  * Note: You need nxcupsd-wrapper on the client side.
++	          Get it from nxutils repository.
+ 
+ 23.01.2007 FreeNX 0.6.0 &quot;Juliana birthday edition&quot;
+ 	* Opened the 0.6.0 branch.
+
+Modified: freenx-server/trunk/node.conf.sample
+===================================================================
+--- freenx-server/trunk/node.conf.sample	2007-01-24 15:51:37 UTC (rev 289)
++++ freenx-server/trunk/node.conf.sample	2007-01-24 16:22:04 UTC (rev 290)
+@@ -258,13 +258,23 @@
+ 
+ #ENABLE_CUPS_SERVER_EXPORT=&quot;1&quot;
+ 
++# FreeNX with ENABLE_CUPS_SEAMLESS will automatically try to download the 
++# necessary ppds from the client.
++# 
++# As the forwarding is just active as soon as nxagent is started,
++# we need a small delay of $CUPS_SEAMLESS_DELAY.
++#
++# Note: You need to use a patched cupsd on client side.
++
++#ENABLE_CUPS_SEAMLESS=&quot;0&quot;
++#CUPS_SEAMLESS_DELAY=&quot;10&quot;
++
+ # FreeNX with ENABLE_FOOMATIC will integrate the foomatic db to the list
+ # of available ppd drivers via the $COMMAND_FOOMATIC command.
+ 
+ #ENABLE_FOOMATIC=&quot;1&quot;
+ #COMMAND_FOOMATIC=&quot;/usr/lib/cups/driver/foomatic-ppdfile&quot;
+ 
+-
+ # CUPS_BACKEND and CUPS_ETC are the corresponding paths of your CUPS 
+ # installation.
+ 
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2007-01-24 15:51:37 UTC (rev 289)
++++ freenx-server/trunk/nxloadconfig	2007-01-24 16:22:04 UTC (rev 290)
+@@ -146,6 +146,8 @@
+ KDE_PRINTRC=&quot;&quot; # Calculated
+ 
+ ENABLE_CUPS_SERVER_EXPORT=&quot;1&quot;
++ENABLE_CUPS_SEAMLESS=&quot;0&quot;
++CUPS_SEAMLESS_DELAY=&quot;10&quot;
+ ENABLE_FOOMATIC=&quot;1&quot;
+ COMMAND_FOOMATIC=&quot;/usr/lib/cups/driver/foomatic-ppdfile&quot;
+ 
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2007-01-24 15:51:37 UTC (rev 289)
++++ freenx-server/trunk/nxnode	2007-01-24 16:22:04 UTC (rev 290)
+@@ -1203,10 +1203,16 @@
+ 		NAME=&quot;$printer&quot;
+ 	fi
+ 	export PATH_BIN
++
++	if [ &quot;$ENABLE_CUPS_SEAMLESS&quot; != &quot;1&quot; ]
++	then
++		MODEL=$($PATH_BIN/nxclient -printer &quot;$NAME&quot; -noautokill -display :$display)
++		[ -z &quot;$MODEL&quot; -o &quot;$MODEL&quot; = &quot;cancel: aborted&quot; ] &amp;&amp; return
++	else
++		sleep $CUPS_SEAMLESS_DELAY
++		MODEL=&quot;download_cached&quot;
++	fi
+ 	
+-	MODEL=$($PATH_BIN/nxclient -printer &quot;$NAME&quot; -noautokill -display :$display)
+-	[ -z &quot;$MODEL&quot; -o &quot;$MODEL&quot; = &quot;cancel: aborted&quot; ] &amp;&amp; return
+-	
+ 	PUBLIC=&quot;-u allow:$USER&quot;
+ 	[ &quot;$public&quot; == &quot;1&quot; ] &amp;&amp; PUBLIC=&quot;&quot;
+ 
+@@ -1215,10 +1221,10 @@
+ 		mkdir -p &quot;$USER_FAKE_HOME/.nx/config/ppd/&quot;
+ 		if [ &quot;$MODEL&quot; = &quot;download_new&quot; -o ! -r &quot;$USER_FAKE_HOME/.nx/config/ppd/$printer.ppd&quot; ]
+ 		then
+-			curl --digest -o &quot;$USER_FAKE_HOME/.nx/config/ppd/$printer.ppd&quot; &quot;<A HREF="http://$username:$password@127.0.0.1:$port/ppd/${printer">http://$username:$password@127.0.0.1:$port/ppd/${printer</A>}_nxdl.ppd&quot; &amp;&gt; $USER_FAKE_HOME/.nx/C-$sess_id/cups/curl.log
++			curl --digest -o &quot;$USER_FAKE_HOME/.nx/config/ppd/$printer.ppd&quot; &quot;<A HREF="http://$username:$password@127.0.0.1:$port/ppd/${printer">http://$username:$password@127.0.0.1:$port/ppd/${printer</A>}_nxdl.ppd&quot; &gt;&gt;$USER_FAKE_HOME/.nx/C-$sess_id/cups/curl.log 2&gt;&amp;1
+ 		RC=$?
+-		[ $RC -eq 0 ] &amp;&amp; $PATH_BIN/nxclient --message &quot;Download successful.&quot; -noautokill -display :$display
+-		[ $RC -eq 0 ] || $PATH_BIN/nxclient --message &quot;Download failed. Log is: $USER_FAKE_HOME/.nx/C-$sess_id/cups/curl.log&quot; -noautokill -display :$display
++		[ $RC -eq 0 -a &quot;$ENABLE_CUPS_SEAMLESS&quot; != &quot;1&quot; ] &amp;&amp; $PATH_BIN/nxclient --message &quot;Download successful.&quot; -noautokill -display :$display
++		[ $RC -ne 0 -a &quot;$ENABLE_CUPS_SEAMLESS&quot; != &quot;1&quot; ] &amp;&amp; $PATH_BIN/nxclient --message &quot;Download failed. Log is: $USER_FAKE_HOME/.nx/C-$sess_id/cups/curl.log&quot; -noautokill -display :$display
+ 		fi
+ 		MODEL=&quot;$USER_FAKE_HOME/.nx/config/ppd/$printer.ppd&quot;
+ 	fi
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000435.html">[Freenx-cvs] r289 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000421.html">[Freenx-cvs] r291 - in nx-utils: . nxcups-wrapper
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#420">[ date ]</a>
+              <a href="thread.html#420">[ thread ]</a>
+              <a href="subject.html#420">[ subject ]</a>
+              <a href="author.html#420">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

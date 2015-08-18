@@ -1,0 +1,149 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r384 - in nxcl: lib nxcl
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-September/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r384%20-%20in%20nxcl%3A%20lib%20nxcl&In-Reply-To=%3C200709172050.l8HKoMjn003376%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000512.html">
+   <LINK REL="Next"  HREF="000514.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r384 - in nxcl: lib nxcl</H1>
+    <B>sebjames at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r384%20-%20in%20nxcl%3A%20lib%20nxcl&In-Reply-To=%3C200709172050.l8HKoMjn003376%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r384 - in nxcl: lib nxcl">sebjames at mail.berlios.de
+       </A><BR>
+    <I>Mon Sep 17 22:50:22 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000512.html">[Freenx-cvs] r383 - nxlaunch/src
+</A></li>
+        <LI>Next message: <A HREF="000514.html">[Freenx-cvs] r385 - nxcl
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#513">[ date ]</a>
+              <a href="thread.html#513">[ thread ]</a>
+              <a href="subject.html#513">[ subject ]</a>
+              <a href="author.html#513">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: sebjames
+Date: 2007-09-17 22:50:22 +0200 (Mon, 17 Sep 2007)
+New Revision: 384
+
+Modified:
+   nxcl/lib/nxdata.h
+   nxcl/lib/nxsession.cpp
+   nxcl/nxcl/nxcl.cpp
+Log:
+Fixed console and custom command applications. Added virtualDesktop boolean to sessions - this is important when you 
+run a console or a custom command.
+
+
+
+Modified: nxcl/lib/nxdata.h
+===================================================================
+--- nxcl/lib/nxdata.h	2007-09-17 15:10:05 UTC (rev 383)
++++ nxcl/lib/nxdata.h	2007-09-17 20:50:22 UTC (rev 384)
+@@ -68,6 +68,7 @@
+ 		string key;
+ 		bool encryption;
+ 		bool fullscreen;
++		bool virtualDesktop;
+ 		string customCommand;
+ 	};
+ 
+@@ -93,6 +94,7 @@
+ 		string key;
+ 		bool encryption;
+ 		bool fullscreen;
++		bool virtualDesktop;
+ 		string customCommand;
+ 		bool suspended;
+ 		int xRes;
+
+Modified: nxcl/lib/nxsession.cpp
+===================================================================
+--- nxcl/lib/nxsession.cpp	2007-09-17 15:10:05 UTC (rev 383)
++++ nxcl/lib/nxsession.cpp	2007-09-17 20:50:22 UTC (rev 384)
+@@ -317,8 +317,24 @@
+ 						&quot;\&quot; --agent_server=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;agentServer &lt;&lt;
+ 						&quot;\&quot; --agent_user=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;agentUser &lt;&lt;
+ 						&quot;\&quot; --agent_password=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;agentPass &lt;&lt; &quot;\&quot;&quot;;
++					ss &lt;&lt; &quot; --title=\&quot;sebtest\&quot;&quot;; // testing a window title
+ 					if (this-&gt;sessionData-&gt;sessionType == &quot;unix-application&quot;) {
+ 						ss &lt;&lt; &quot; --application=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;customCommand &lt;&lt; &quot;\&quot;&quot;;
++						if (this-&gt;sessionData-&gt;virtualDesktop == true) {
++							ss &lt;&lt; &quot; --rootless=\&quot;0\&quot; --virtualdesktop=\&quot;1\&quot;&quot;;
++						} else {
++							ss &lt;&lt; &quot; --rootless=\&quot;1\&quot; --virtualdesktop=\&quot;0\&quot;&quot;;
++						}
++
++					} else if (this-&gt;sessionData-&gt;sessionType == &quot;unix-console&quot;) {
++						if (this-&gt;sessionData-&gt;virtualDesktop == true) {
++							ss &lt;&lt; &quot; --rootless=\&quot;0\&quot; --virtualdesktop=\&quot;1\&quot;&quot;;
++						} else {
++							ss &lt;&lt; &quot; --rootless=\&quot;1\&quot; --virtualdesktop=\&quot;0\&quot;&quot;;
++						}
++
++					} else if (this-&gt;sessionData-&gt;sessionType == &quot;unix-default&quot;) {
++						// ignore this - does anyone use it?
+ 					}
+ 					returnMessage = ss.str();
+ 					dbgln (&quot;session parameter command: &quot; + ss.str());
+
+Modified: nxcl/nxcl/nxcl.cpp
+===================================================================
+--- nxcl/nxcl/nxcl.cpp	2007-09-17 15:10:05 UTC (rev 383)
++++ nxcl/nxcl/nxcl.cpp	2007-09-17 20:50:22 UTC (rev 384)
+@@ -367,6 +367,9 @@
+ 					case 23:
+ 						this-&gt;sessionData.fullscreen = (iparam&gt;0) ? true : false;
+ 						break;
++					case 25:
++						this-&gt;sessionData.virtualDesktop = (iparam&gt;0) ? true : false;
++						break;
+ 					default:
+ 						this-&gt;callbacks.error (&quot;ERROR: parameter type does not match its position in the message.&quot;);
+ 						break;
+@@ -427,6 +430,7 @@
+ 	this-&gt;sessionData.suspended = false;
+ 	this-&gt;sessionData.fullscreen = false; // If true, session.geometry
+ 					  // is ignored
++	this-&gt;sessionData.virtualDesktop = false;
+ 
+ 	return;
+ }
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000512.html">[Freenx-cvs] r383 - nxlaunch/src
+</A></li>
+	<LI>Next message: <A HREF="000514.html">[Freenx-cvs] r385 - nxcl
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#513">[ date ]</a>
+              <a href="thread.html#513">[ thread ]</a>
+              <a href="subject.html#513">[ subject ]</a>
+              <a href="author.html#513">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,135 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r456 - in nxcl: . lib nxcl test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r456%20-%20in%20nxcl%3A%20.%20lib%20nxcl%20test&In-Reply-To=%3C200801300757.m0U7vaBT021113%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000581.html">
+   <LINK REL="Next"  HREF="000583.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r456 - in nxcl: . lib nxcl test</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r456%20-%20in%20nxcl%3A%20.%20lib%20nxcl%20test&In-Reply-To=%3C200801300757.m0U7vaBT021113%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r456 - in nxcl: . lib nxcl test">gwright at mail.berlios.de
+       </A><BR>
+    <I>Wed Jan 30 08:57:36 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000581.html">[Freenx-cvs] r455 - nxcl
+</A></li>
+        <LI>Next message: <A HREF="000583.html">[Freenx-cvs] r457 - nxcl
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#582">[ date ]</a>
+              <a href="thread.html#582">[ thread ]</a>
+              <a href="subject.html#582">[ subject ]</a>
+              <a href="author.html#582">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2008-01-30 08:57:35 +0100 (Wed, 30 Jan 2008)
+New Revision: 456
+
+Modified:
+   nxcl/configure.ac
+   nxcl/lib/Makefile.am
+   nxcl/nxcl/Makefile.am
+   nxcl/test/Makefile.am
+Log:
+Fix debug builds
+
+
+Modified: nxcl/configure.ac
+===================================================================
+--- nxcl/configure.ac	2008-01-30 06:58:28 UTC (rev 455)
++++ nxcl/configure.ac	2008-01-30 07:57:35 UTC (rev 456)
+@@ -99,6 +99,8 @@
+   AC_DEFINE(DEBUG, 0, Define if debugging output should be enabled)
+ fi
+ 
++AM_CONDITIONAL(DEBUG, test &quot;$nxcl_debug&quot; = yes)
++
+ dnl Do some platform checking for cygwin
+ 
+ if test &quot;$(uname -o)&quot; = Cygwin; then
+
+Modified: nxcl/lib/Makefile.am
+===================================================================
+--- nxcl/lib/Makefile.am	2008-01-30 06:58:28 UTC (rev 455)
++++ nxcl/lib/Makefile.am	2008-01-30 07:57:35 UTC (rev 456)
+@@ -1,5 +1,10 @@
+ CLEANFILES = *~
+ AM_CPPFLAGS = @PACKAGE_CFLAGS@  -DPACKAGE_BIN_DIR=\&quot;&quot;$(bindir)&quot;\&quot;
++
++if DEBUG
++    AM_CPPFLAGS += -DDEBUG
++endif
++
+ INCLUDES = -I$(top_srcdir) -I$(top_builddir)
+ lib_LTLIBRARIES = libnxcl.la
+ libnxcl_la_SOURCES = notQt.cpp nxsession.cpp nxclientlib.cpp
+
+Modified: nxcl/nxcl/Makefile.am
+===================================================================
+--- nxcl/nxcl/Makefile.am	2008-01-30 06:58:28 UTC (rev 455)
++++ nxcl/nxcl/Makefile.am	2008-01-30 07:57:35 UTC (rev 456)
+@@ -1,5 +1,9 @@
+ AM_CPPFLAGS = @PACKAGE_CFLAGS@ -DPACKAGE_DATA_DIR=\&quot;&quot;$(datadir)&quot;\&quot; -DLOCALEDIR=\&quot;$(localedir)\&quot; -DPACKAGE_BIN_DIR=\&quot;&quot;$(bindir)&quot;\&quot; $(DBUS_CFLAGS)
+ 
++if DEBUG
++    AM_CPPFLAGS += -DDEBUG
++endif
++
+ INCLUDES = -I../lib
+ bin_PROGRAMS = nxcl
+ nxcl_SOURCES = main.cpp nxcl.cpp
+
+Modified: nxcl/test/Makefile.am
+===================================================================
+--- nxcl/test/Makefile.am	2008-01-30 06:58:28 UTC (rev 455)
++++ nxcl/test/Makefile.am	2008-01-30 07:57:35 UTC (rev 456)
+@@ -6,6 +6,10 @@
+   bin_PROGRAMS += nxcmd
+ endif
+ 
++if DEBUG
++  AM_CPPFLAGS += -DDEBUG
++endif
++
+ libtest_SOURCES = libtest.cpp
+ libtest_LDADD = @PACKAGE_LIBS@ $(LIBINTL) -L../lib -lnxcl
+ notQttest_SOURCES = notQttest.cpp
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000581.html">[Freenx-cvs] r455 - nxcl
+</A></li>
+	<LI>Next message: <A HREF="000583.html">[Freenx-cvs] r457 - nxcl
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#582">[ date ]</a>
+              <a href="thread.html#582">[ thread ]</a>
+              <a href="subject.html#582">[ subject ]</a>
+              <a href="author.html#582">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

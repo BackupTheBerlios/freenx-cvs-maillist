@@ -1,0 +1,457 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r520 - trunk/freenx-client/nxcl/lib
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r520%20-%20trunk/freenx-client/nxcl/lib&In-Reply-To=%3C200803120340.m2C3e7DK011370%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000643.html">
+   <LINK REL="Next"  HREF="000645.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r520 - trunk/freenx-client/nxcl/lib</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r520%20-%20trunk/freenx-client/nxcl/lib&In-Reply-To=%3C200803120340.m2C3e7DK011370%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r520 - trunk/freenx-client/nxcl/lib">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Wed Mar 12 04:40:07 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000643.html">[Freenx-cvs] r519 - in trunk/freenx-server: . nxserver-helper
+</A></li>
+        <LI>Next message: <A HREF="000645.html">[Freenx-cvs] r521 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#644">[ date ]</a>
+              <a href="thread.html#644">[ thread ]</a>
+              <a href="subject.html#644">[ subject ]</a>
+              <a href="author.html#644">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-03-12 04:40:04 +0100 (Wed, 12 Mar 2008)
+New Revision: 520
+
+Modified:
+   trunk/freenx-client/nxcl/lib/notQt.cpp
+   trunk/freenx-client/nxcl/lib/notQt.h
+   trunk/freenx-client/nxcl/lib/nxclientlib.cpp
+   trunk/freenx-client/nxcl/lib/nxsession.cpp
+Log:
+Added usage of nxproxy with NX_COMMFD set to some filedescriptor to be able to have encrypted sessions over standard ssh without using nxssh.
+
+Still todo:
+
+- Remove workaround for sleep 2 race condition.
+- create id.key with mode 600 as else ssh does not accept it.
+- Try out user only mode with nxserver_suid.
+
+
+
+Modified: trunk/freenx-client/nxcl/lib/notQt.cpp
+===================================================================
+--- trunk/freenx-client/nxcl/lib/notQt.cpp	2008-03-11 07:06:43 UTC (rev 519)
++++ trunk/freenx-client/nxcl/lib/notQt.cpp	2008-03-12 03:40:04 UTC (rev 520)
+@@ -26,6 +26,7 @@
+ #include &lt;sys/wait.h&gt;
+ #include &lt;sys/stat.h&gt;
+ #include &lt;sys/poll.h&gt;	
++#include &lt;sys/socket.h&gt;	
+ #include &lt;signal.h&gt;
+ }
+ 
+@@ -52,7 +53,8 @@
+     progName(&quot;unknown&quot;),
+     error (NOTQPROCNOERROR),
+     pid(0),
+-    signalledStart(false)
++    signalledStart(false),
++    parentFD(-1)
+ {
+     // Set up the polling structs
+     this-&gt;p = static_cast&lt;struct pollfd*&gt;(malloc (2*sizeof (struct pollfd)));	
+@@ -62,6 +64,15 @@
+ notQProcess::~notQProcess ()
+ {
+     free (this-&gt;p);
++    if (parentFD != -1)
++    {
++    	close(parentFD);
++	parentFD=-1;
++    }
++    // FIXME: this should be closed here
++   // close (parentToChild[READING_END]);
++   // close (childToParent[WRITING_END]);
++   // close (childErrToParent[WRITING_END]);
+ }
+ 
+     void
+@@ -84,10 +95,18 @@
+     // NB: The first item in the args list should be the program name.
+     this-&gt;progName = program;
+ 
++#ifdef NXCL_USE_NXSSH
+     // Set up our pipes
+     if (pipe(parentToChild) == -1 || pipe(childToParent) == -1 || pipe(childErrToParent) == -1) {
+         return NOTQTPROCESS_FAILURE;
+     }
++#else /* We need a socketpair for that to work */
++    if (socketpair(AF_UNIX, SOCK_STREAM, 0, parentToChild) == -1 || pipe(childErrToParent) == -1)
++        return NOTQTPROCESS_FAILURE;
++    
++    childToParent[READING_END]=dup(parentToChild[WRITING_END]);
++    childToParent[WRITING_END]=dup(parentToChild[READING_END]);
++#endif
+ 
+     this-&gt;pid = fork();
+ 
+
+Modified: trunk/freenx-client/nxcl/lib/notQt.h
+===================================================================
+--- trunk/freenx-client/nxcl/lib/notQt.h	2008-03-11 07:06:43 UTC (rev 519)
++++ trunk/freenx-client/nxcl/lib/notQt.h	2008-03-12 03:40:04 UTC (rev 520)
+@@ -117,7 +117,19 @@
+ 		pid_t getPid (void) { return this-&gt;pid; }
+ 		int getError (void) { return this-&gt;error; }
+ 		void setError (int e) { this-&gt;error = e; }
++		
++		int getParentFD() 
++		{ 
++			this-&gt;parentFD = this-&gt;parentToChild[1];
++			close(this-&gt;childToParent[0]);
+ 
++			// Create new pipes
++			pipe(this-&gt;parentToChild);
++			pipe(this-&gt;childToParent);
++
++			return this-&gt;parentFD;
++		}
++
+ 		/*!
+ 		 * Setter for the callbacks.
+ 		 */
+@@ -180,6 +192,11 @@
+ 		 * Pointer to a callback object
+ 		 */
+ 		notQProcessCallbacks * callbacks;
++
++		/*! 
++		 * old parent FD for comm with child
++		 */
++		int parentFD;
+ 	};
+ 
+ 	/*!
+
+Modified: trunk/freenx-client/nxcl/lib/nxclientlib.cpp
+===================================================================
+--- trunk/freenx-client/nxcl/lib/nxclientlib.cpp	2008-03-11 07:06:43 UTC (rev 519)
++++ trunk/freenx-client/nxcl/lib/nxclientlib.cpp	2008-03-12 03:40:04 UTC (rev 520)
+@@ -8,7 +8,8 @@
+                          :     Author: Sebastian James
+                          : (C) 2008 Defuturo Ltd
+                          :     Author: George Wright
+-    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
++                         : (C) 2008 Fabian Franz
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">freenx at fabian-franz.de</A>
+  ***************************************************************************/
+ 
+ /***************************************************************************
+@@ -28,6 +29,14 @@
+ 
+ #include &lt;fstream&gt;
+ 
++// Define to use nxssh
++#if defined(NXCL_CYGWIN) || defined(NXCL_DARWIN)
++
++// FF-FIXME That does not work.
++//#define NXCL_USE_NXSSH 1
++
++#endif
++
+ extern &quot;C&quot; {
+     #include &lt;errno.h&gt;
+     #include &lt;sys/types.h&gt;
+@@ -186,10 +195,14 @@
+ 
+     // Start to build the arguments for the nxssh command.
+     // notQProcess requires that argv[0] contains the program name
++#ifdef NXCL_USE_NXSSH
+     arguments.push_back (&quot;nxssh&quot;);
+ 
+     argtmp &lt;&lt; &quot;-nx&quot;;
+     arguments.push_back (argtmp.str());
++#else
++    arguments.push_back (&quot;ssh&quot;);
++#endif
+ 
+     argtmp.str(&quot;&quot;);
+     argtmp &lt;&lt; &quot;-p&quot; &lt;&lt; port;
+@@ -215,6 +228,7 @@
+     }
+ 
+     argtmp.str(&quot;&quot;);
++    // FF-FIXME: Perhaps the user wants to login as user directly
+     argtmp &lt;&lt; &quot;nx@&quot; &lt;&lt; serverHost;
+     arguments.push_back (argtmp.str());
+ 
+@@ -227,9 +241,13 @@
+     arguments.push_back (&quot;-oRSAAuthentication no&quot;);
+     arguments.push_back (&quot;-oRhostsRSAAuthentication no&quot;);
+     arguments.push_back (&quot;-oPubkeyAuthentication yes&quot;);
++    // FF-FIXME: Perhaps the user wants to login as user directly
++    //arguments.push_back (&quot;-c nxserver&quot;);
+ 
+     if (encryption == true) {
++#ifdef NXCL_USE_NXSSH
+         arguments.push_back(&quot;-B&quot;);
++#endif
+         session.setEncryption (true);
+     } else {
+         session.setEncryption (false);
+@@ -240,10 +258,16 @@
+     // nxssh -E gives this message when called:
+     // NX&gt; 285 Enabling skip of SSH config files
+     // ...so there you have the meaning.
++#ifdef NXCL_USE_NXSSH
+     arguments.push_back (&quot;-E&quot;);
++#endif
+ 
+     // Find a path for the nxssh process using getPath()
++#ifdef NXCL_USE_NXSSH
+     string nxsshPath = this-&gt;getPath (&quot;nxssh&quot;);
++#else
++    string nxsshPath = this-&gt;getPath (&quot;ssh&quot;);
++#endif
+ 
+     this-&gt;nxsshProcess-&gt;start(nxsshPath, arguments);
+ 
+@@ -365,8 +389,9 @@
+ 
+         // On some connections this is sent via stdout instead of stderr?
+         if (proxyData.encrypted &amp;&amp; readyForProxy &amp;&amp;
+-                ((*msgiter).find(&quot;NX&gt; 999 Bye&quot;)!=string::npos)) {
+-
++                ((*msgiter).find(&quot;NX&gt; 999 Bye&quot;)!=string::npos)) 
++#ifdef NXCL_USE_NXSSH
++	{
+             // This is &quot;NX&gt; 299 Switching connection to: &quot; in
+             // version 1.5.0. This was changed in nxssh version
+             // 2.0.0-8 (see the nxssh CHANGELOG).
+@@ -388,6 +413,11 @@
+             this-&gt;externalCallbacks-&gt;connectedSuccessfullySignal();
+             this-&gt;sessionRunning = true;
+         }
++#else /* don't use nxssh, start nxproxy -stdin */
++	{
++		invokeProxy();
++	}
++#endif
+ 
+         if ((*msgiter).find(&quot;Password&quot;) != string::npos) {
+             this-&gt;externalCallbacks-&gt;write
+@@ -402,6 +432,9 @@
+                 dbgln (&quot;NXClientLib::processParseStdout: Got auth failed&quot;
+                         &quot; or capacity reached, calling this-&gt;parseSSH.&quot;);
+                 msg = this-&gt;parseSSH (*msgiter);
++#ifndef NXCL_USE_NXSSH
++		this-&gt;isFinished = true;
++#endif
+             }
+             if (msg.size() &gt; 0) {
+                 this-&gt;write (msg);
+@@ -436,7 +469,9 @@
+                 + (*msgiter) + &quot;'(end msg)&quot;);
+ 
+         if (proxyData.encrypted &amp;&amp; readyForProxy &amp;&amp;
+-                ((*msgiter).find(&quot;NX&gt; 999 Bye&quot;) != string::npos)) {
++                ((*msgiter).find(&quot;NX&gt; 999 Bye&quot;) != string::npos)) 
++#ifdef NXCL_USE_NXSSH
++	{
+ 
+             string switchCommand = &quot;NX&gt; 299 Switch connection to: &quot;;
+             stringstream ss;
+@@ -478,6 +513,11 @@
+                  _(&quot;SSH host key verification failed&quot;));
+             this-&gt;isFinished = true;
+         }
++#else /* don't use nxssh, use nxproxy -stdin */
++	{
++		invokeProxy();
++	}
++#endif
+     }
+ }
+ 
+@@ -580,21 +620,41 @@
+         this-&gt;externalCallbacks-&gt;serverCapacitySignal();
+         this-&gt;isFinished = true;
+ 
+-    } else if
++    } 
++#ifdef NXCL_USE_NXSSH
++    else if
+         (message.find (&quot;NX&gt; 204 Authentication failed.&quot;) != string::npos) {
+ 
+         this-&gt;externalCallbacks-&gt;write
+             (204, _(&quot;NX SSH Authentication Failed, finishing&quot;));
+         this-&gt;isFinished = true;
+     }
++#endif
+ 
+     if (message.find(&quot;NX&gt; 710 Session status: running&quot;) != string::npos) {
+ 
+         this-&gt;externalCallbacks-&gt;write
+             (710, _(&quot;Session status is \&quot;running\&quot;&quot;));
++    }
++
++    // FF-FIXME: This is technically incorrect as the proxy is just ready once 1002 and 1006 have 
++    // been sent.
++    if (message.find(&quot;NX&gt; 710 Session status: running&quot;) != string::npos) {
++        
++	//this-&gt;externalCallbacks-&gt;write
++        //    (1006, _(&quot;Session status is \&quot;running\&quot;&quot;));
++
++#ifdef NXCL_USE_NXSSH
+         invokeProxy();
++#else
++	if (!proxyData.encrypted)
++        	invokeProxy();
++#endif
+         session.wipeSessions();
+-        rMessage = &quot;bye\n&quot;;
++        if (proxyData.encrypted)
++	        rMessage = &quot;bye\n&quot;;
++	else
++	        rMessage = &quot;quit\n&quot;;
+     }
+ 
+     return rMessage;
+@@ -700,18 +760,24 @@
+     stringstream data;
+  
+     if (proxyData.encrypted) {
++#ifdef NXCL_USE_NXSSH
+         data &lt;&lt; &quot;nx/nx&quot; &lt;&lt; x11Display &lt;&lt; &quot;,session=session,encryption=1,cookie=&quot;
+             &lt;&lt; proxyData.cookie
+             &lt;&lt; &quot;,id=&quot; &lt;&lt; proxyData.id &lt;&lt; &quot;,listen=&quot; 
+             &lt;&lt; proxyData.port &lt;&lt; &quot;:&quot; &lt;&lt; proxyData.display &lt;&lt; &quot;\n&quot;;
+         // may also need shmem=1,shpix=1,font=1,product=...
++#else
++	data &lt;&lt; &quot;nx/nx&quot; &lt;&lt; x11Display &lt;&lt; &quot;,session=session,encryption=1,cookie=&quot;
++            &lt;&lt; proxyData.cookie
++            &lt;&lt; &quot;,id=&quot; &lt;&lt; proxyData.id &lt;&lt; &quot;:&quot; &lt;&lt; proxyData.display &lt;&lt; &quot;\n&quot;;
++#endif
+ 
+     } else {
+-        // Not tested yet
++        // Not tested yet, FF-FIXME: Test
+         data &lt;&lt; &quot;nx/nx&quot; &lt;&lt; x11Display &lt;&lt; &quot;,session=session,cookie=&quot; &lt;&lt; proxyData.cookie
+-            &lt;&lt; &quot;,id=&quot; &lt;&lt; proxyData.id
+-            // &lt;&lt; &quot;,connect=&quot; &lt;&lt; proxyData.server &lt;&lt; &quot;:&quot; &lt;&lt; proxyData.display
+-            &lt;&lt; &quot;,listen=&quot; &lt;&lt; proxyData.port &lt;&lt; &quot;:&quot; &lt;&lt; proxyData.display
++            &lt;&lt; &quot;,connect=&quot; &lt;&lt; proxyData.server &lt;&lt; &quot;:&quot; &lt;&lt; proxyData.port
++            &lt;&lt; &quot;,id=&quot; &lt;&lt; proxyData.id &lt;&lt; &quot;:&quot; &lt;&lt; proxyData.display
++            //&lt;&lt; &quot;,listen=&quot; &lt;&lt; proxyData.port &lt;&lt; &quot;:&quot; &lt;&lt; proxyData.display
+             &lt;&lt; &quot;\n&quot;;
+     }
+ 
+@@ -726,11 +792,24 @@
+     list&lt;string&gt; arguments;
+     arguments.push_back(&quot;nxproxy&quot;); // argv[0] has to be the program name
+     arguments.push_back(&quot;-S&quot;);
++
+     ss.str(&quot;&quot;);
+-    ss &lt;&lt; &quot;options=&quot; &lt;&lt; nxdir;
+-    ss &lt;&lt; &quot;:&quot; &lt;&lt; proxyData.display;
+-    arguments.push_back(ss.str());	
++    ss &lt;&lt; &quot;nx/nx,options=&quot; &lt;&lt; nxdir &lt;&lt; &quot;:&quot; &lt;&lt; proxyData.display;
+ 
++    setenv(&quot;NX_DISPLAY&quot;, ss.str().c_str(), 1);
++
++#ifndef NXCL_USE_NXSSH
++    if (proxyData.encrypted)
++    {
++    	ss.str(&quot;&quot;);
++    	ss &lt;&lt; this-&gt;nxsshProcess-&gt;getParentFD();
++	fprintf(stderr, &quot;NX_COMMFD=%d&quot;, this-&gt;nxsshProcess-&gt;getParentFD());
++    	setenv(&quot;NX_COMMFD&quot;, ss.str().c_str(), 1);
++	// FF-FIXME: need to wait for 2 secs due to race condition with &quot;bye&quot; in buffer
++	sleep(2);
++    }
++#endif
++
+     // Find a path for the nxproxy process using getPath()
+     string nxproxyPath = this-&gt;getPath (&quot;nxproxy&quot;);
+     this-&gt;nxproxyProcess-&gt;start(nxproxyPath, arguments);
+
+Modified: trunk/freenx-client/nxcl/lib/nxsession.cpp
+===================================================================
+--- trunk/freenx-client/nxcl/lib/nxsession.cpp	2008-03-11 07:06:43 UTC (rev 519)
++++ trunk/freenx-client/nxcl/lib/nxsession.cpp	2008-03-12 03:40:04 UTC (rev 520)
+@@ -69,6 +69,7 @@
+     int response = parseResponse (message);
+     string returnMessage;
+ 
++#ifdef NXCL_USE_NXSSH
+     if (response == 211) {
+         if (doSSH == true) {
+             returnMessage = &quot;yes&quot;;
+@@ -80,6 +81,7 @@
+     if (response == 204) { // Authentication failed
+         returnMessage = &quot;204&quot;;
+     }
++#endif
+ 
+     if (response == 147) { // Server capacity reached
+         returnMessage = &quot;147&quot;;
+@@ -90,6 +92,17 @@
+         case HELLO_NXCLIENT:
+             dbgln (&quot;HELLO_NXCLIENT stage&quot;);
+ 
++	    if (message.find(&quot;Are you sure you want to continue connecting (yes/no)?&quot;) != string::npos)
++            	returnMessage = &quot;yes&quot;; // FF-FIXME: Or 211?
++	    
++	    if (message.find(&quot;assword&quot;) != string::npos)
++            	returnMessage = nxPassword; // FF-FIXME: -&gt; What to do? What to do?
++	    
++	    if (message.find(&quot;Permission denied&quot;) != string::npos || 
++	            message.find(&quot;su: Authentication failure&quot;) != string::npos || 
++		    message.find(&quot;Unknown id:&quot;) != string::npos)
++                returnMessage = &quot;204&quot;; // Authentication failed
++
+             if (message.find(&quot;HELLO NXSERVER - Version&quot;) != string::npos) {
+                 this-&gt;callbacks-&gt;authenticatedSignal();
+                 returnMessage = &quot;hello NXCLIENT - Version &quot;;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000643.html">[Freenx-cvs] r519 - in trunk/freenx-server: . nxserver-helper
+</A></li>
+	<LI>Next message: <A HREF="000645.html">[Freenx-cvs] r521 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#644">[ date ]</a>
+              <a href="thread.html#644">[ thread ]</a>
+              <a href="subject.html#644">[ subject ]</a>
+              <a href="author.html#644">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

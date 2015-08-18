@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r204 - / freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r204%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200603311113.k2VBDxNg025013%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000333.html">
+   
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r204 - / freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r204%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200603311113.k2VBDxNg025013%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r204 - / freenx-server/trunk">fabianx at berlios.de
+       </A><BR>
+    <I>Fri Mar 31 13:13:59 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000333.html">[Freenx-cvs] r203 - / freenx-server/trunk
+</A></li>
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#334">[ date ]</a>
+              <a href="thread.html#334">[ thread ]</a>
+              <a href="subject.html#334">[ subject ]</a>
+              <a href="author.html#334">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2006-03-31 13:13:51 +0200 (Fri, 31 Mar 2006)
+New Revision: 204
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxserver
+Log:
+Fixed help for --restart.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:271
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:273
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-03-16 15:43:17 UTC (rev 203)
++++ freenx-server/trunk/ChangeLog	2006-03-31 11:13:51 UTC (rev 204)
+@@ -27,6 +27,7 @@
+ 	* Added correct errorcode 596 instead of 504.
+ 	* Implemented &quot;round-robin&quot; and &quot;load&quot; loadbalancing algorithms.
+ 	  Cleaned up node.conf keys.
++	* Fixed help for --restart.
+ 
+ XX.XX.2006 FreeNX 0.4.5 &quot;aKademy Edition&quot;
+ 	* Made nxsetup more user-friendly and hopefully finally failsafe.
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2006-03-16 15:43:17 UTC (rev 203)
++++ freenx-server/trunk/nxserver	2006-03-31 11:13:51 UTC (rev 204)
+@@ -1263,7 +1263,7 @@
+ 		echo &quot;--start: Start the nx server&quot; 1&gt;&amp;2
+ 		echo &quot;--stop: Stop the nx server&quot; 1&gt;&amp;2
+ 		echo &quot;--status: Show status of nx server&quot; 1&gt;&amp;2
+-		echo &quot;--restart: Restart the nx server and terminate all running sessions&quot; 1&gt;&amp;2
++		echo &quot;--restart: Restart the nx server. (start,stop)&quot; 1&gt;&amp;2
+ 		echo &quot;&quot; 1&gt;&amp;2
+ 		echo &quot;--list [ user | sessionid ]: List running sessions of user or sessionid &quot; 1&gt;&amp;2
+ 		echo &quot;--history [ user | sessionid | clear ]: Show history [ of user | sessionid ] or clear the history&quot; 1&gt;&amp;2
+@@ -1360,7 +1360,6 @@
+ {
+ 	[ -f $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS ] || cmd_abort &quot;Service was already stopped&quot;
+ 	mv $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS.disabled
+-	# TODO: Stop all running sessions
+ 	echo &quot;NX&gt; 123 Service stopped&quot;
+ }
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000333.html">[Freenx-cvs] r203 - / freenx-server/trunk
+</A></li>
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#334">[ date ]</a>
+              <a href="thread.html#334">[ thread ]</a>
+              <a href="subject.html#334">[ subject ]</a>
+              <a href="author.html#334">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,231 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r612 - trunk/freenx-server
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r612%20-%20trunk/freenx-server&In-Reply-To=%3C200808250328.m7P3SHT9021055%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000745.html">
+   
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r612 - trunk/freenx-server</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r612%20-%20trunk/freenx-server&In-Reply-To=%3C200808250328.m7P3SHT9021055%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r612 - trunk/freenx-server">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Mon Aug 25 05:28:17 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000745.html">[Freenx-cvs] r611 - trunk/freenx-server
+</A></li>
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#746">[ date ]</a>
+              <a href="thread.html#746">[ thread ]</a>
+              <a href="subject.html#746">[ subject ]</a>
+              <a href="author.html#746">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-08-25 05:28:15 +0200 (Mon, 25 Aug 2008)
+New Revision: 612
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxserver
+Log:
+* Fixed --terminate|--suspend|--force-terminate for
+  load balancing case.
+  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+* Fixed --terminate|--suspend|--force-terminate for
+  usermode case.
+  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-25 02:51:13 UTC (rev 611)
++++ trunk/freenx-server/ChangeLog	2008-08-25 03:28:15 UTC (rev 612)
+@@ -5,6 +5,12 @@
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 	* Fixed broken round-robin load balance algorithm.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Fixed --terminate|--suspend|--force-terminate for
++	  load balancing case.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Fixed --terminate|--suspend|--force-terminate for
++	  usermode case.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
+ 18.08.2008 FreeNX 0.7.3 &quot;Priscilla One Year Edition&quot;
+ 	* Opened the 0.7.3 development.
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-25 02:51:13 UTC (rev 611)
++++ trunk/freenx-server/nxserver	2008-08-25 03:28:15 UTC (rev 612)
+@@ -1961,71 +1961,71 @@
+ 	session_history &quot;$user&quot; &quot;$sessid&quot;
+ }
+ 
+-cmd_terminate()
++cmd_execute()
+ {
+-	CMD_PARAMS=$(cmd_parse_3_params &quot;$2&quot;)
+-	[ -z &quot;$CMD_PARAMS&quot; ] &amp;&amp; exit 1
+-	for i in $CMD_PARAMS;
++	cmd_host=&quot;$1&quot;
++	cmd_user=&quot;$2&quot;
++	cmd_cmd=&quot;$3&quot;
++
++	if [ &quot;$ENABLE_USERMODE_AUTHENTICATION&quot; = &quot;1&quot; ]
++	then
++		sh -c &quot;$cmd_cmd&quot;
++	elif [ &quot;$cmd_host&quot; = &quot;127.0.0.1&quot; -o &quot;$cmd_host&quot; = &quot;localhost&quot; ]
++	then
++		su - &quot;$cmd_user&quot; -c &quot;$cmd_cmd&quot;
++	else
++		ssh &quot;$cmd_host&quot; su - &quot;$cmd_user&quot; -c &quot;'$cmd_cmd'&quot;
++	fi
++}
++
++cmd_terminate_or_send()
++{
++	CMD=&quot;$1&quot;
++
++	if [ &quot;$CMD&quot; = &quot;--broadcast&quot; ]
++	then
++		CMD_PARAMS=$(session_find_all)
++		[ -z &quot;$CMD_PARAMS&quot; ] &amp;&amp; cmd_abort &quot;Error: No running session could be found.&quot;
++	else
++		CMD_PARAMS=$(cmd_parse_3_params &quot;$2&quot;)
++		[ -z &quot;$CMD_PARAMS&quot; ] &amp;&amp; exit 1
++		shift
++	fi
++	shift
++
++	for i in $CMD_PARAMS
+ 	do
+ 			CMDLINE=$(session_get_cmdline $i)
+ 			cmd_sessionid=$(getparam sessionId)
++			cmd_display=$(getparam display)
+ 			cmd_user=$(getparam userName)
+ 			cmd_type=$(getparam type)
+ 			cmd_status=$(getparam status)
++			cmd_host=$(getparam host)
+ 
+ 			# is it a &quot;good&quot; session?
+-			case &quot;$1&quot; in 
++			case &quot;$CMD&quot; in 
+ 			--suspend)
+ 				if [ &quot;$cmd_status&quot; = &quot;Running&quot; ] &amp;&amp; stringinstring &quot;unix-&quot; &quot;$cmd_type&quot;
+ 				then
+-					echo &quot;sessionid=$cmd_sessionid&quot; | su - &quot;$cmd_user&quot; -c &quot;$PATH_BIN/nxnode --suspend&quot;
++					echo &quot;sessionid=$cmd_sessionid&quot; | cmd_execute &quot;$cmd_host&quot; &quot;$cmd_user&quot; &quot;$PATH_BIN/nxnode --suspend&quot;
+ 				fi
+ 			;;
+ 			--terminate)
+-				echo &quot;sessionid=$cmd_sessionid&quot; | su - &quot;$cmd_user&quot; -c &quot;$PATH_BIN/nxnode --terminate&quot;
++				echo &quot;sessionid=$cmd_sessionid&quot; | cmd_execute &quot;$cmd_host&quot; &quot;$cmd_user&quot; &quot;$PATH_BIN/nxnode --terminate&quot;
+ 			;;
+ 			--force-terminate)
+-				echo &quot;sessionid=$cmd_sessionid&quot; | su - &quot;$cmd_user&quot; -c &quot;$PATH_BIN/nxnode --terminate&quot;
++				echo &quot;sessionid=$cmd_sessionid&quot; | cmd_execute &quot;$cmd_host&quot; &quot;$cmd_user&quot; &quot;$PATH_BIN/nxnode --terminate&quot;
+ 				session_close $cmd_sessionid
+ 			;;
+-			esac
+-	done
+-
+-}
+-
+-cmd_send()
+-{
+-	if [ &quot;$1&quot; = &quot;--broadcast&quot; ]
+-	then
+-	  CMD_PARAMS=$(session_find_all)
+-	  [ -z &quot;$CMD_PARAMS&quot; ] &amp;&amp; cmd_abort &quot;Error: No running session could be found.&quot;
+-	else
+-	  CMD_PARAMS=$(cmd_parse_3_params &quot;$2&quot;)
+-	  [ -z &quot;$CMD_PARAMS&quot; ] &amp;&amp; exit 1
+-	  shift
+-	fi
+-	shift
+-	for i in $CMD_PARAMS;
+-	do
+-			CMDLINE=$(session_get_cmdline $i)
+-			cmd_display=$(getparam display)
+-			cmd_user=$(getparam userName)
+-			cmd_type=$(getparam type)
+-			cmd_status=$(getparam status)
+-			cmd_host=$(getparam host)
+-
+-			# is it a &quot;good&quot; session?
+-			if [ &quot;$cmd_status&quot; = &quot;Running&quot; ] &amp;&amp; stringinstring &quot;unix-&quot; &quot;$cmd_type&quot;
+-			then
+-				if [ &quot;$cmd_host&quot; = &quot;127.0.0.1&quot; -o &quot;$cmd_host&quot; = &quot;localhost&quot; ]
++			--send|--broadcast)
++				# is it a &quot;good&quot; session?
++				if [ &quot;$cmd_status&quot; = &quot;Running&quot; ] &amp;&amp; stringinstring &quot;unix-&quot; &quot;$cmd_type&quot;
+ 				then
+-					su - &quot;$cmd_user&quot; -c &quot;$PATH_BIN/nxdialog --dialog ok --caption \&quot;NX Administrator Message\&quot; --message \&quot;$@\&quot; -display \&quot;:$cmd_display\&quot; &amp;&quot;
+-				else
+-					ssh $cmd_host su - &quot;$cmd_user&quot; -c &quot;'$PATH_BIN/nxdialog --dialog ok --caption \&quot;NX Administrator Message\&quot; --message \&quot;$@\&quot; -display \&quot;:$cmd_display\&quot; &amp;'&quot;
++					cmd_execute &quot;$cmd_host&quot; &quot;$cmd_user&quot; &quot;$PATH_BIN/nxdialog --dialog ok --caption \&quot;NX Administrator Message\&quot; --message \&quot;$@\&quot; -display \&quot;:$cmd_display\&quot; &amp;&quot;
+ 				fi
+-			fi
++			esac
+ 	done
+-	#nxnode_start --send &quot;$CMD_PARAMS&quot;
+ }
+ 
+ #
+@@ -2099,13 +2099,13 @@
+ 		cmd_history &quot;$@&quot;
+ 	;;
+ 	--terminate|--suspend|--force-terminate)
+-		cmd_terminate &quot;$@&quot;
++		cmd_terminate_or_send &quot;$@&quot;
+ 	;;
+ 	--cleanup)
+-		cmd_terminate &quot;--force-terminate&quot; &quot;*&quot;
++		cmd_terminate_or_send &quot;--force-terminate&quot; &quot;*&quot;
+ 	;;
+ 	--send|--broadcast)
+-		cmd_send &quot;$@&quot;
++		cmd_terminate_or_send &quot;$@&quot;
+ 	;;
+ 	*)
+ 		cmd_abort &quot;Error: Function $CMD not implemented yet.&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000745.html">[Freenx-cvs] r611 - trunk/freenx-server
+</A></li>
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#746">[ date ]</a>
+              <a href="thread.html#746">[ thread ]</a>
+              <a href="subject.html#746">[ subject ]</a>
+              <a href="author.html#746">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

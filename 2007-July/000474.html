@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r341 - freenx-redesign/server/compatibility
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-July/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r341%20-%20freenx-redesign/server/compatibility&In-Reply-To=%3C200707041436.l64Ea4X8029300%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000473.html">
+   <LINK REL="Next"  HREF="000475.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r341 - freenx-redesign/server/compatibility</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r341%20-%20freenx-redesign/server/compatibility&In-Reply-To=%3C200707041436.l64Ea4X8029300%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r341 - freenx-redesign/server/compatibility">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Wed Jul  4 16:36:04 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000473.html">[Freenx-cvs] r340 - freenx-redesign/server/compatibility
+</A></li>
+        <LI>Next message: <A HREF="000475.html">[Freenx-cvs] r342 - freenx-redesign/server/compatibility
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#474">[ date ]</a>
+              <a href="thread.html#474">[ thread ]</a>
+              <a href="subject.html#474">[ subject ]</a>
+              <a href="author.html#474">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-07-04 16:36:04 +0200 (Wed, 04 Jul 2007)
+New Revision: 341
+
+Modified:
+   freenx-redesign/server/compatibility/nxnode-login
+Log:
+Fixed nxnode-login to be more failsafe and added interactive mode.
+
+
+
+Modified: freenx-redesign/server/compatibility/nxnode-login
+===================================================================
+--- freenx-redesign/server/compatibility/nxnode-login	2007-07-04 12:43:16 UTC (rev 340)
++++ freenx-redesign/server/compatibility/nxnode-login	2007-07-04 14:36:04 UTC (rev 341)
+@@ -4,8 +4,9 @@
+ #
+ # Environment variables used:
+ #
+-# @param COMMAND_SSH The to be used command for spawning ssh.
+-# @param NODE_PUBLICKEY The to be used public key for test-nx mode.
++# @param COMMAND_SSH	Command for spawning ssh.
++# @param NODE_PUBLICKEY	Public key for test-nx mode.
++# @param NODE_PASSWORD	Password for ssh|su mode.
+ #
+ # Copyright (c) 2004-2007 by Fabian Franz.
+ #
+@@ -24,6 +25,7 @@
+ set command_ssh &quot;ssh&quot;
+ catch {set command_ssh $env(COMMAND_SSH)}
+ set host &quot;127.0.0.1&quot;
++set timeout 2
+ 
+ #
+ # Special test-nx instruction for nxsetup
+@@ -37,7 +39,6 @@
+ 	
+ 	set pid [spawn -noecho $command_ssh -2 -x -l &quot;$user&quot; &quot;$host&quot; -i &quot;$publickey&quot; -o &quot;RhostsAuthentication no&quot; -o &quot;PasswordAuthentication no&quot; -o &quot;RSAAuthentication no&quot; -o &quot;RhostsRSAAuthentication no&quot; -o &quot;PubkeyAuthentication yes&quot; -o &quot;PreferredAuthentications publickey&quot; -p &quot;$port&quot; &quot;$executable $parameters&quot; ]
+ 
+-	set timeout 2
+ 	expect {
+ 		timeout { exit 1 }
+ 		eof { exit 1 }
+@@ -55,8 +56,8 @@
+ # Log the user in via the supplied method.
+ #
+ 
+-expect_user -re &quot;(.*)\n&quot; 
+-set password $expect_out(1,string)
++set password &quot;&quot;
++catch {set password $env(NODE_PASSWORD)}
+ 
+ set stty_init &quot;raw icrnl -echo&quot;
+ 
+@@ -68,37 +69,16 @@
+ 	exit 1
+ }
+ 
+-while {1} {
+-	expect {
+-		&quot;Are you sure you want to continue connecting (yes/no)?&quot; { send &quot;yes\r&quot; }
+-		&quot;assword*:&quot;  { sleep 0.3; send &quot;$password\r&quot; }
+-		&quot;Permission denied*&quot; { exit 1 }
+-		&quot;su: Authentication failure&quot; { exit 1 }
+-		&quot;NX&gt; 1000 NXNODE - Version&quot; { 
+-			break
+-		}
+-	} 
+-}
+-
+-if { &quot;$tosend&quot;!=&quot;&quot; } { 
+-	send &quot;$tosend\r&quot;
+-}
+-
+ expect {
+-	&quot;NX&gt; 716 finished&quot; { }
+-	&quot;NX&gt; 700&quot; { 
+-			set timeout -1
+-			expect {
+-				&quot;NX&gt; 1001 Bye.&quot; { exit 0 }
+-				&quot;NX&gt; *&quot; { exp_continue }
+-			}
+-			exit 0
+-		  }
+-	&quot;NX&gt; 716 Slave mode started successfully.&quot; { interact }
+-	&quot;NX&gt; 716 Public key is already present in:&quot; { }
+-	&quot;NX&gt; 716 Public key added to:&quot; { }
+-	&quot;NX&gt; 716 Terminating session * on user request.&quot; { }
+-	&quot;NX&gt; 716 Suspending session * on user request.&quot; { }
+-	&quot;NX&gt; 500 Error: &quot; { exit 1}
+-}
+-expect &quot;NX&gt; 1001 Bye.&quot;
++	timeout { exit 1 }
++	eof { exit 1 }
++	&quot;Are you sure you want to continue connecting (yes/no)?&quot; { send &quot;yes\r&quot;; exp_continue }
++	&quot;assword*:&quot;  { sleep 0.3; send &quot;$password\r&quot;; set password &quot;&quot;; exp_continue }
++	&quot;Permission denied*&quot; { exit 1 }
++	&quot;su: Authentication failure&quot; { exit 1 }
++	&quot;NX&gt; 103&quot; {
++		interact
++		exit 0
++	}
++} 
++exit 1
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000473.html">[Freenx-cvs] r340 - freenx-redesign/server/compatibility
+</A></li>
+	<LI>Next message: <A HREF="000475.html">[Freenx-cvs] r342 - freenx-redesign/server/compatibility
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#474">[ date ]</a>
+              <a href="thread.html#474">[ thread ]</a>
+              <a href="subject.html#474">[ subject ]</a>
+              <a href="author.html#474">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

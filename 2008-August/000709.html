@@ -1,0 +1,291 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r575 - trunk/freenx-server
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r575%20-%20trunk/freenx-server&In-Reply-To=%3C200808181820.m7IIKJgQ022621%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000708.html">
+   <LINK REL="Next"  HREF="000710.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r575 - trunk/freenx-server</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r575%20-%20trunk/freenx-server&In-Reply-To=%3C200808181820.m7IIKJgQ022621%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r575 - trunk/freenx-server">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Mon Aug 18 20:20:19 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000708.html">[Freenx-cvs] r574 - trunk/freenx-server
+</A></li>
+        <LI>Next message: <A HREF="000710.html">[Freenx-cvs] r576 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#709">[ date ]</a>
+              <a href="thread.html#709">[ thread ]</a>
+              <a href="subject.html#709">[ subject ]</a>
+              <a href="author.html#709">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-08-18 20:20:18 +0200 (Mon, 18 Aug 2008)
+New Revision: 575
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxnode
+   trunk/freenx-server/nxserver
+   trunk/freenx-server/nxviewer_helper
+Log:
++       * Prepared shadowing foreign users for VNC-shadowing.
++         (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-18 17:36:35 UTC (rev 574)
++++ trunk/freenx-server/ChangeLog	2008-08-18 18:20:18 UTC (rev 575)
+@@ -108,6 +108,8 @@
+ 	* Added nxshadowacl.sample component to be able to shadow
+ 	  foreign sessions.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Prepared shadowing foreign users for VNC-shadowing.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
+ 14.03.2008 FreeNX 0.7.2 &quot;Priscilla Edition&quot;
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxnode
+===================================================================
+--- trunk/freenx-server/nxnode	2008-08-18 17:36:35 UTC (rev 574)
++++ trunk/freenx-server/nxnode	2008-08-18 18:20:18 UTC (rev 575)
+@@ -1116,9 +1116,14 @@
+ 	clientproto=$(getparam clientproto)
+ 	status=$(getparam status)
+ 	host=$(getparam host)
+-	mirrordisplay=$(getparam mirrordisplay)
+-	mirrorhost=$(getparam mirrorhost)
+ 	
++	# New NX 3.0 shadow mode related variables
++	shadowusername=$(getparam shadowusername)
++	shadowcookie=$(getparam shadowcookie)
++	shadowdisplay=$(getparam shadowdisplay)
++	shadowhost=$(getparam shadowhost)
++
++	
+ 	sess_id=&quot;$SERVER_NAME-$display-$uniqueid&quot;
+ 	NXSESSION_DIRECTORY=&quot;$USER_FAKE_HOME/.nx/C-$sess_id&quot;
+ 	
+@@ -1141,8 +1146,14 @@
+ 		export COMMAND_VNCPASSWD
+ 		export COMMAND_X11VNC
+ 		export PATH_BIN
+-		export mirrordisplay
+-		export mirrorhost
++		export shadowdisplay
++		export shadowhost
++		export shadowuser
++		export shadowcookie
++
++		export ENABLE_SESSION_SHADOWING_AUTHORIZATION
++		export ENABLE_INTERACTIVE_SESSION_SHADOWING
++
+ 		# We do not want to suspend such a session
+ 		# as RDP/RFB are both suspendable as well
+ 		ENABLE_PERSISTENT_SESSION=&quot;&quot;
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-18 17:36:35 UTC (rev 574)
++++ trunk/freenx-server/nxserver	2008-08-18 18:20:18 UTC (rev 575)
+@@ -312,10 +312,10 @@
+ 				available=&quot;Yes&quot;
+ 			fi
+ 			
+-			# We automatically offer VNC mirrored sessions for &quot;remote&quot; support
++			# We automatically offer VNC shadowed sessions for &quot;remote&quot; support
+ 			if [ &quot;$4&quot; = &quot;vnc&quot; -a &quot;$ENABLE_MIRROR_VIA_VNC&quot; = &quot;1&quot; ] &amp;&amp; stringinstring &quot;unix-&quot; &quot;$(getparam type)&quot;
+ 			then
+-				printf &quot;%-7s %-16s %32s %8s %5s %-14s %-11s %s\n&quot; &quot;$(getparam display)&quot; &quot;vnc-mirrored&quot; &quot;$(getparam sessionId)&quot; &quot;$options&quot; &quot;$depth&quot; &quot;$geom&quot; &quot;$available&quot; &quot;$(getparam sessionName) (Mirrored)&quot; &gt;&gt; $TMPFILE
++				printf &quot;%-7s %-16s %32s %8s %5s %-14s %-11s %s\n&quot; &quot;$(getparam display)&quot; &quot;vnc-shadowed&quot; &quot;$(getparam sessionId)&quot; &quot;$options&quot; &quot;$depth&quot; &quot;$geom&quot; &quot;$available&quot; &quot;$(getparam sessionName) (Mirrored)&quot; &gt;&gt; $TMPFILE
+ 			else
+ 				# only unix-* sessions can be resumed, but other session types can still be terminated
+ 				stringinstring &quot;unix-&quot; &quot;$4&quot; || available=&quot;N/A&quot;
+@@ -976,7 +976,7 @@
+ 					if [ $? -eq 0 ]
+ 					then
+ 						SHADOW_COOKIE=$(echo $CMD | cut -d: -f2 | sed 's/ //g')
+-						session_change &quot;$uniqueid&quot; &quot;shadow_cookie&quot; &quot;$SHADOW_COOKIE&quot;
++						session_change &quot;$uniqueid&quot; &quot;shadowcookie&quot; &quot;$SHADOW_COOKIE&quot;
+ 					fi
+ 				fi
+ 			;;
+@@ -1063,7 +1063,7 @@
+ 					if [ $? -eq 0 ]
+ 					then
+ 						SHADOW_COOKIE=$(echo $CMD | cut -d: -f2 | sed 's/ //g')
+-						session_change &quot;$uniqueid&quot; &quot;shadow_cookie&quot; &quot;$SHADOW_COOKIE&quot;
++						session_change &quot;$uniqueid&quot; &quot;shadowcookie&quot; &quot;$SHADOW_COOKIE&quot;
+ 					fi
+ 				fi
+ 			;;
+@@ -1247,34 +1247,38 @@
+ 	CMDLINE=$PARAMS
+ 	echo_x
+ 
+-	# special mirrored type
+-	[ &quot;$ACTION&quot; != &quot;start&quot; -a &quot;$(getparam type)&quot; = &quot;vnc&quot; ] &amp;&amp; ACTION=&quot;mirror&quot;
++	# special shadowed type
++	[ &quot;$ACTION&quot; != &quot;start&quot; -a &quot;$(getparam type)&quot; = &quot;vnc&quot; ] &amp;&amp; ACTION=&quot;shadow&quot;
+ 
+-	if [ &quot;$ACTION&quot; = &quot;mirror&quot; ]
++	if [ &quot;$ACTION&quot; = &quot;shadow&quot; ]
+ 	then
+ 		ACTION=&quot;start&quot;
+ 		uniqueid=$(getparam restore)
+ 		[ -z &quot;$uniqueid&quot; ] &amp;&amp; uniqueid=$(getparam id) # 1.4.0-5 compatibility
+ 		CMDLINE=$(session_get &quot;$uniqueid&quot; 2&gt;/dev/null)
+ 
+-		mirrordisplay=$(getparam display)
+-		mirrorhost=$(getparam host)
++		shadowdisplay=$(getparam display)
++		shadowhost=$(getparam host)
++		shadowcookie=$(getparam shadowcookie)
++		shadowuser=$(getparam userName)
+ 
+-		if [ -z &quot;$mirrordisplay&quot;  ]
++		[ &quot;$shadowcookie&quot; = &quot;none&quot; ] &amp;&amp; shadowcookie=&quot;&quot;
++
++		if [ -z &quot;$shadowdisplay&quot;  ]
+ 		then
+ 			# check for DESKTOP_SHARING_IDS
+-			mirrordisplay=$(echo $DESKTOP_SHARING_IDS | tr ' ' '\n' | egrep &quot;^$uniqueid=&quot; | cut -d'=' -f2)
+-			mirrorhost=&quot;127.0.0.1&quot;
++			shadowdisplay=$(echo $DESKTOP_SHARING_IDS | tr ' ' '\n' | egrep &quot;^$uniqueid=&quot; | cut -d'=' -f2)
++			shadowhost=&quot;127.0.0.1&quot;
+ 		fi
+ 
+-		if [ -z &quot;$mirrordisplay&quot; ]
++		if [ -z &quot;$shadowdisplay&quot; ]
+ 		then
+-			echo_x &quot;NX&gt; 596 Could not find mirrored session $uniqueid. Session failed.&quot;
++			echo_x &quot;NX&gt; 596 Could not find shadowed session $uniqueid. Session failed.&quot;
+ 			echo_x &quot;NX&gt; 596 Sharing: $DESKTOP_SHARING_IDS&quot;
+ 			return 1
+ 		fi
+ 
+-		PARAMS=&quot;$PARAMS&amp;mirrordisplay=$mirrordisplay&amp;mirrorhost=$mirrorhost&quot;
++		PARAMS=&quot;$PARAMS&amp;shadowdisplay=$shadowdisplay&amp;shadowhost=$shadowhost&quot;
+ 		CMDLINE=$PARAMS
+ 	fi
+ 	
+@@ -1356,7 +1360,7 @@
+ 	# as only $SSH_CLIENT or $SSH2_CLIENT will be set, this should work
+ 	USERIP=$(echo $SSH_CLIENT $SSH2_CLIENT | cut -d&quot; &quot; -f1 | sed 's/::<A HREF="ffff://g">ffff://g</A>')
+ 	[ -z &quot;$USERIP&quot; ] &amp;&amp; USERIP=&quot;*&quot;
+-	if [ &quot;$ACTION&quot; = &quot;start&quot; -o &quot;$ACTION&quot; = &quot;mirror&quot; ]
++	if [ &quot;$ACTION&quot; = &quot;start&quot; -o &quot;$ACTION&quot; = &quot;shadow&quot; ]
+ 	then
+ 		server_check_session_count || return 1
+ 		
+@@ -1437,7 +1441,7 @@
+ 		sessionRootlessMode=0
+ 		[ &quot;$(getparam rootless)&quot; = &quot;1&quot; ] &amp;&amp; sessionRootlessMode=1
+ 		CMDLINE=&quot;a=b&amp;$FULL_PARAMS&quot;
+-		session_add $uniqueid &quot;sessionName=$(getparam session)&amp;display=$(getparam display)&amp;status=Running&amp;startTime=$(date +%s)&amp;foreignAddress=$(getparam userip)&amp;sessionRootlessMode=$sessionRootlessMode&amp;type=$(getparam type)&amp;sessionId=$uniqueid&amp;creationTime=$(date +%s)&amp;userName=$USER&amp;serverPid=$SERVER_PID&amp;screeninfo=$(getparam screeninfo)&amp;geometry=$(getparam geometry)&amp;host=$SERVER_HOST&amp;shadow_cookie=none&quot;
++		session_add $uniqueid &quot;sessionName=$(getparam session)&amp;display=$(getparam display)&amp;status=Running&amp;startTime=$(date +%s)&amp;foreignAddress=$(getparam userip)&amp;sessionRootlessMode=$sessionRootlessMode&amp;type=$(getparam type)&amp;sessionId=$uniqueid&amp;creationTime=$(date +%s)&amp;userName=$USER&amp;serverPid=$SERVER_PID&amp;screeninfo=$(getparam screeninfo)&amp;geometry=$(getparam geometry)&amp;host=$SERVER_HOST&amp;shadowcookie=none&quot;
+ 	else
+ 		uniqueid=$(getparam restore)
+ 		[ -z &quot;$uniqueid&quot; ] &amp;&amp; uniqueid=$(getparam id) # 1.4.0-5 compatibility
+@@ -1582,8 +1586,8 @@
+ 		restoresession*)
+ 			server_startrestore_session &quot;resume&quot;
+ 		;;
+-		mirrorsession*)
+-			server_startrestore_session &quot;mirror&quot;
++		attachsession*)
++			server_startrestore_session &quot;shadow&quot;
+ 		;;
+ 
+ 		passwd)
+
+Modified: trunk/freenx-server/nxviewer_helper
+===================================================================
+--- trunk/freenx-server/nxviewer_helper	2008-08-18 17:36:35 UTC (rev 574)
++++ trunk/freenx-server/nxviewer_helper	2008-08-18 18:20:18 UTC (rev 575)
+@@ -17,23 +17,35 @@
+ echo &quot;$agent_password&quot; | $COMMAND_VNCPASSWD &quot;$NXSESSION_DIRECTORY/scripts/.passwd&quot; doit
+ 
+ # Start x11vnc
+-if [ -n &quot;$mirrordisplay&quot; ]
++if [ -n &quot;$shadowdisplay&quot; ]
+ then
+ 	(
+ 		unset XAUTHORITY
+ 
+ 		# We need to set just :0.0 in case of localhost connection.
+-		[ &quot;$mirrorhost&quot; = &quot;127.0.0.1&quot; ] &amp;&amp; mirrorhost=&quot;&quot;
++		[ &quot;$shadowhost&quot; = &quot;127.0.0.1&quot; ] &amp;&amp; shadowhost=&quot;&quot;
++			
+ 		
+-		# Note: No &quot;-accept popup&quot; as its the same user and with that password
+-		#       he could do already more than -accept popup would allow.
++		# don't use accept popup or viewonly mode  as its the same user
++		accept=&quot;&quot;
++		viewonly=&quot;&quot;
+ 		
+-		DISPLAY=&quot;$mirrorhost:$mirrordisplay.0&quot; $COMMAND_X11VNC -localhost -timeout 120 -once -rfbauth &quot;$NXSESSION_DIRECTORY/scripts/.passwd&quot; &gt;&quot;$NXSESSION_DIRECTORY/scripts/.vnc_port&quot; &amp;
++		# not the same user? So we have a shadow cookie, we add to xauth
++		if [ -n &quot;$shadowcookie&quot; ]
++		then
++			xauth add &quot;$shadowhost:$shadowdisplay&quot; MIT-MAGIC-COOKIE-1 &quot;$shadowcookie&quot;
++			[ &quot;$ENABLE_SESSION_SHADOWING_AUTHORIZATION&quot; = &quot;1&quot; ] &amp;&amp; accept=&quot;-accept popup&quot;
++			[ &quot;$ENABLE_INTERACTIVE_SESSION_SHADOWING&quot; != &quot;1&quot; ] &amp;&amp; viewonly=&quot;-viewonly&quot;
++	
++		fi
++		
++		DISPLAY=&quot;$shadowhost:$shadowdisplay&quot; $COMMAND_X11VNC -localhost $accept $viewonly -timeout 120 -once -rfbauth &quot;$NXSESSION_DIRECTORY/scripts/.passwd&quot; &gt;&quot;$NXSESSION_DIRECTORY/scripts/.vnc_port&quot; &amp;
+ 	)
+ 	sleep 2
+ 	agent_port=$(cat &quot;$NXSESSION_DIRECTORY/scripts/.vnc_port&quot; | egrep &quot;^PORT=&quot; | cut -d'=' -f 2)
+ 	[ -z &quot;agent_port&quot; ] &amp;&amp; agent_port=&quot;0&quot;
+-	# note the :: is not a mistake, but rather a hint for nxviewer to use this as a port and not
++	# note the :: is not a mistake, but rather a hint for 
++	# nxviewer to use this as a port and not
+ 	# interpret it as a display.
+ 	agent_server=&quot;127.0.0.1::$agent_port&quot;
+ 	rm -f &quot;$NXSESSION_DIRECTORY/scripts/.vnc_port&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000708.html">[Freenx-cvs] r574 - trunk/freenx-server
+</A></li>
+	<LI>Next message: <A HREF="000710.html">[Freenx-cvs] r576 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#709">[ date ]</a>
+              <a href="thread.html#709">[ thread ]</a>
+              <a href="subject.html#709">[ subject ]</a>
+              <a href="author.html#709">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

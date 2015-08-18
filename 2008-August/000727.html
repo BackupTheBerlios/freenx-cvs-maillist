@@ -1,0 +1,165 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r593 - trunk/freenx-utils/nxpublickey
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r593%20-%20trunk/freenx-utils/nxpublickey&In-Reply-To=%3C200808231414.m7NEEusn005470%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000726.html">
+   <LINK REL="Next"  HREF="000728.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r593 - trunk/freenx-utils/nxpublickey</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r593%20-%20trunk/freenx-utils/nxpublickey&In-Reply-To=%3C200808231414.m7NEEusn005470%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r593 - trunk/freenx-utils/nxpublickey">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Sat Aug 23 16:14:56 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000726.html">[Freenx-cvs] r592 - trunk/freenx-utils/nxpublickey
+</A></li>
+        <LI>Next message: <A HREF="000728.html">[Freenx-cvs] r594 - trunk/freenx-utils/nxpublickey
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#727">[ date ]</a>
+              <a href="thread.html#727">[ thread ]</a>
+              <a href="subject.html#727">[ subject ]</a>
+              <a href="author.html#727">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-08-23 16:14:56 +0200 (Sat, 23 Aug 2008)
+New Revision: 593
+
+Added:
+   trunk/freenx-utils/nxpublickey/nxssh-wrapper
+Log:
+Added the ultimate nxssh wrapper, which does always work if either usermdoe or suid are available.
+
+
+
+Copied: trunk/freenx-utils/nxpublickey/nxssh-wrapper (from rev 591, trunk/freenx-utils/nxpublickey/nxssh-usermode-pw)
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-usermode-pw	2008-08-23 13:55:22 UTC (rev 591)
++++ trunk/freenx-utils/nxpublickey/nxssh-wrapper	2008-08-23 14:14:56 UTC (rev 593)
+@@ -0,0 +1,87 @@
++#!/bin/bash
++#
++# Simple wrapper for nxssh for freenx-usermode with password from nxclient.
++#
++# Copyright (c) 2005-2008 by Fabian Franz.
++#
++# License: GPL
++#
++
++CONN=$(echo &quot;$@&quot; | sed 's/.*nx@//g' | cut -d&quot; &quot; -f1)
++
++unset NXWRAP
++case &quot;$CONN&quot; in *@*) NXWRAP=1 ;; esac
++
++	cat &lt;&lt;EOF
++NX&gt; 203 NXSSH running with pid: $$
++NX&gt; 200 Connected to address: 127.0.0.1 on port: 22
++NX&gt; 202 Authenticating user: nx
++NX&gt; 208 Using auth method: publickey
++EOF
++
++export REMOTE_COMMAND='if [ -x /usr/NX/bin/nxserver-suid -a -u /usr/NX/bin/nxserver-suid ]; then unset SSH_CLIENT SSH_CLIENT2; export SSH_CLIENT=&quot;127.0.0.1 56404 127.0.0.1 22&quot;; /usr/NX/bin/nxserver-suid; elif [ -x ~/NX4U/bin/nxserver-usermode ]; then ~/NX4U/bin/nxserver-usermode ; else echo &quot;NX&gt; 404 Service not available.&quot;; fi'
++
++echo &quot;HELLO NXSERVER - Version 3.2.0 OS (GPL Edition)&quot;	
++
++if [ &quot;$NXWRAP&quot; != &quot;1&quot; ]
++then
++	# Login stage
++	while true
++	do
++		echo -n &quot;NX&gt; 105 &quot;
++		read CMD
++		# FIXME?
++		[ &quot;$CMD&quot; = &quot;&quot; ] &amp;&amp; CMD=&quot;quit&quot;
++		echo &quot;$CMD&quot;
++		
++		case &quot;$CMD&quot; in 
++			quit|QUIT)
++				echo &quot;Quit&quot;
++				echo &quot;NX&gt; 999 Bye&quot;
++				exit 0
++			;;
++			exit|EXIT)
++				echo &quot;Exit&quot;
++				echo &quot;NX&gt; 999 Bye&quot;
++				exit 0
++			;;
++			bye|BYE)
++				echo &quot;Bye&quot;
++				echo &quot;NX&gt; 999 Bye&quot;
++				exit 0
++			;;
++			hello*|HELLO*)
++				PROTO=$(echo $CMD | sed 's/.*Version \(.*\)/\1/g')
++				echo &quot;NX&gt; 134 Accepted protocol: $PROTO&quot;
++			;;
++			&quot;set auth_mode*&quot;|&quot;SET AUTH_MODE*&quot;)
++				if [ &quot;$CMD&quot; = &quot;set auth_mode password&quot; -o &quot;$CMD&quot; = &quot;SET AUTH_MODE PASSWORD&quot; ]
++				then
++					echo &quot;Set auth_mode: password&quot;
++				else
++					echo &quot;NX&gt; 500 ERROR: unknown auth mode ''&quot;
++				fi
++			;;
++			login|LOGIN)
++				LOGIN_SUCCESS=&quot;0&quot;
++				
++				echo -n &quot;NX&gt; 101 User: &quot;
++				read USER2
++				echo $USER2
++				
++				echo -n &quot;NX&gt; 102 Password: &quot;
++				break
++			;;
++		esac
++	done
++
++	exec $(dirname $0)/nxssh.orig -nxstdinpass &quot;$USER2@$CONN&quot; -x -2 -B -o &quot;NumberOfPasswordPrompts 1&quot; sh -c &quot;$REMOTE_COMMAND&quot; || {
++                echo &quot;NX&gt; 404 ERROR: wrong password or login.&quot;
++                echo &quot;NX&gt; 999 Bye&quot;
++                exit 1
++             }
++else # do wrap it
++	export SSH_ASKPASS=/usr/bin/ssh-askpass
++
++	exec $(dirname $0)/nxssh.orig &quot;$CONN&quot; -x -2 -B sh -c &quot;$REMOTE_COMMAND&quot;
++fi
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000726.html">[Freenx-cvs] r592 - trunk/freenx-utils/nxpublickey
+</A></li>
+	<LI>Next message: <A HREF="000728.html">[Freenx-cvs] r594 - trunk/freenx-utils/nxpublickey
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#727">[ date ]</a>
+              <a href="thread.html#727">[ thread ]</a>
+              <a href="subject.html#727">[ subject ]</a>
+              <a href="author.html#727">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

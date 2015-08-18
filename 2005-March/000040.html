@@ -1,0 +1,175 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - jonno modified 3 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20jonno%20modified%203%20files&In-Reply-To=%3C423044B9.mailBKQ11LZ8Y%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000039.html">
+   <LINK REL="Next"  HREF="000041.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - jonno modified 3 files</H1>
+    <B>jonno</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20jonno%20modified%203%20files&In-Reply-To=%3C423044B9.mailBKQ11LZ8Y%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - jonno modified 3 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Thu Mar 10 13:59:37 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000039.html">[Freenx-cvs] CVS: freenx - jonno modified 2 files
+</A></li>
+        <LI>Next message: <A HREF="000041.html">[Freenx-cvs] CVS: freenx - jonno modified 3 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#40">[ date ]</a>
+              <a href="thread.html#40">[ thread ]</a>
+              <a href="subject.html#40">[ subject ]</a>
+              <a href="author.html#40">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      jonno
+Date:      2005-03-10 12:59:37 GMT
+Modified:  .        node.conf.sample nxloadconfig nxserver
+Log:
+Added support to forward to non-standard ssh port (config directive SERVER_FORWARD_PORT)
+
+Revision  Changes    Path
+1.7       +2 -1      freenx/node.conf.sample
+
+
+rev 1.7, prev_rev 1.6
+Index: node.conf.sample
+===================================================================
+RCS file: /cvsroot/freenx/freenx/node.conf.sample,v
+retrieving revision 1.6
+retrieving revision 1.7
+diff -u -r1.6 -r1.7
+--- node.conf.sample	10 Mar 2005 11:00:25 -0000	1.6
++++ node.conf.sample	10 Mar 2005 12:59:37 -0000	1.7
+@@ -37,7 +37,7 @@
+ #
+ #           <A HREF="https://mail.kde.org/mailman/listinfo/freenx-knx">https://mail.kde.org/mailman/listinfo/freenx-knx</A>
+ #
+-# CVS: $Id: node.conf.sample,v 1.6 2005/03/10 11:00:25 fabianx Exp $
++# CVS: $Id: node.conf.sample,v 1.7 2005/03/10 12:59:37 jonno Exp $
+ 
+ #########################################################################
+ # FreeNX specific node.conf directives
+@@ -96,6 +96,7 @@
+ 
+ #ENABLE_SERVER_FORWARD=&quot;0&quot;
+ #SERVER_FORWARD_HOST=&quot;&quot;
++#SERVER_FORWARD_PORT=22
+ #SERVER_FORWARD_KEY=&quot;/usr/NX/share/client.id_dsa.key&quot;
+ 
+ # FreeNX with ENABLE_NOMACHINE_FORWARD=&quot;1&quot; will automatically forward all
+
+
+
+1.9       +4 -1      freenx/nxloadconfig
+
+
+rev 1.9, prev_rev 1.8
+Index: nxloadconfig
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxloadconfig,v
+retrieving revision 1.8
+retrieving revision 1.9
+diff -u -r1.8 -r1.9
+--- nxloadconfig	10 Mar 2005 12:47:48 -0000	1.8
++++ nxloadconfig	10 Mar 2005 12:59:37 -0000	1.9
+@@ -5,7 +5,7 @@
+ #
+ # License: GPL, version 2
+ #
+-# CVS: $Id: nxloadconfig,v 1.8 2005/03/10 12:47:48 jonno Exp $
++# CVS: $Id: nxloadconfig,v 1.9 2005/03/10 12:59:37 jonno Exp $
+ #
+ # ========================================================================
+ 
+@@ -90,6 +90,7 @@
+ 
+ ENABLE_SERVER_FORWARD=&quot;0&quot;
+ SERVER_FORWARD_HOST=&quot;&quot;
++SERVER_FORWARD_PORT=22
+ SERVER_FORWARD_KEY=&quot;/usr/NX/share/client.id_dsa.key&quot;
+ 
+ ENABLE_NOMACHINE_FORWARD=&quot;0&quot;
+@@ -219,6 +220,8 @@
+ 		# Any ideas on how I can check for a VALID host is velcome!
+ 		# In my private scripts I use 'resolveip -q' and check if output conforms to [0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}, 
+ 		# but resolveip is part of mysql, and I don't think I should add that dependancy...
++	[ &quot;$ENABLE_SERVER_FORWARD&quot; = &quot;1&quot; -a -z $(echo &quot;$SERVER_FORWARD_PORT&quot; | egrep &quot;^[0-9]*$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SERVER_FORWARD_PORT=$SERVER_FORWARD_PORT\&quot;&quot;
+ 	[ &quot;$ENABLE_SERVER_FORWARD&quot; = &quot;1&quot; -a ! -e &quot;$SERVER_FORWARD_KEY&quot; ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SERVER_FORWARD_KEY=$SERVER_FORWARD_KEY\&quot;&quot;
+ 	
+
+
+
+1.29      +2 -2      freenx/nxserver
+
+
+rev 1.29, prev_rev 1.28
+Index: nxserver
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxserver,v
+retrieving revision 1.28
+retrieving revision 1.29
+diff -u -r1.28 -r1.29
+--- nxserver	10 Mar 2005 11:00:25 -0000	1.28
++++ nxserver	10 Mar 2005 12:59:37 -0000	1.29
+@@ -11,7 +11,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxserver,v 1.28 2005/03/10 11:00:25 fabianx Exp $
++# CVS: $Id: nxserver,v 1.29 2005/03/10 12:59:37 jonno Exp $
+ #
+ 
+ # Read the config file
+@@ -419,7 +419,7 @@
+ if [ &quot;$ENABLE_SERVER_FORWARD&quot; = &quot;1&quot; -a -n &quot;$SERVER_FORWARD_HOST&quot; ]
+ then
+ 	log &quot;Forwarding connection to $SERVER_FORWARD_HOST with secret key $SERVER_FORWARD_KEY.&quot;
+-	ssh -i &quot;$SERVER_FORWARD_KEY&quot; nx@&quot;$SERVER_FORWARD_HOST&quot;
++	ssh -i &quot;$SERVER_FORWARD_KEY&quot; &quot;nx@$SERVER_FORWARD_HOST:$SERVER_FORWARD_PORT&quot;
+ 	exit 0
+ fi
+ 
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000039.html">[Freenx-cvs] CVS: freenx - jonno modified 2 files
+</A></li>
+	<LI>Next message: <A HREF="000041.html">[Freenx-cvs] CVS: freenx - jonno modified 3 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#40">[ date ]</a>
+              <a href="thread.html#40">[ thread ]</a>
+              <a href="subject.html#40">[ subject ]</a>
+              <a href="author.html#40">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

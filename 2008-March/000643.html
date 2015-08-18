@@ -1,0 +1,174 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r519 - in trunk/freenx-server: . nxserver-helper
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r519%20-%20in%20trunk/freenx-server%3A%20.%20nxserver-helper&In-Reply-To=%3C200803110706.m2B76ii5019810%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000642.html">
+   <LINK REL="Next"  HREF="000644.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r519 - in trunk/freenx-server: . nxserver-helper</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r519%20-%20in%20trunk/freenx-server%3A%20.%20nxserver-helper&In-Reply-To=%3C200803110706.m2B76ii5019810%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r519 - in trunk/freenx-server: . nxserver-helper">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Tue Mar 11 08:06:44 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000642.html">[Freenx-cvs] r518 - trunk/freenx-redesign/server/utility
+</A></li>
+        <LI>Next message: <A HREF="000644.html">[Freenx-cvs] r520 - trunk/freenx-client/nxcl/lib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#643">[ date ]</a>
+              <a href="thread.html#643">[ thread ]</a>
+              <a href="subject.html#643">[ subject ]</a>
+              <a href="author.html#643">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-03-11 08:06:43 +0100 (Tue, 11 Mar 2008)
+New Revision: 519
+
+Modified:
+   trunk/freenx-server/nxserver
+   trunk/freenx-server/nxserver-helper/nxserver-helper.c
+Log:
+Changed COMM_FD to COMMFD and SERVER_FD to SERVERFD to be compatible with redesign syntax.
+
+
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-03-11 07:04:10 UTC (rev 518)
++++ trunk/freenx-server/nxserver	2008-03-11 07:06:43 UTC (rev 519)
+@@ -504,7 +504,7 @@
+ 	then
+ 		log 3 &quot;Info: Closing connection to slave with pid $NXNODE_LOGIN_SLAVE.&quot;
+ 		# send quit command
+-		echo &quot;--quit&quot; &gt;&amp;$NX_COMM_FD
++		echo &quot;--quit&quot; &gt;&amp;$NX_COMMFD
+ 
+ 		# kill process
+ 		kill &quot;$NXNODE_LOGIN_SLAVE&quot;
+@@ -526,11 +526,11 @@
+ 		if [ -z &quot;$NXNODE_LOGIN_SLAVE&quot; -a -z &quot;$NX_TRUSTED_USER&quot; ]
+ 		then
+ 			# Send password
+-			echo &quot;$PASS&quot; &gt;&amp;$NX_COMM_FD
++			echo &quot;$PASS&quot; &gt;&amp;$NX_COMMFD
+ 
+ 			# Connect to NXNODE
+ 			
+-			( $PATH_BIN/nxnode-login &quot;$1&quot; &quot;$2&quot; &quot;$3&quot; &quot;$4&quot; &quot;$5&quot; &quot;--slave&quot; &lt;&amp;$NX_SERVER_FD &gt;&amp;$NX_SERVER_FD 2&gt;&amp;$NX_SERVER_FD || echo &quot;FREENX&gt; 716 Slave mode failed to start.&quot; &gt;&amp;$NX_SERVER_FD )  &amp;
++			( $PATH_BIN/nxnode-login &quot;$1&quot; &quot;$2&quot; &quot;$3&quot; &quot;$4&quot; &quot;$5&quot; &quot;--slave&quot; &lt;&amp;$NX_SERVERFD &gt;&amp;$NX_SERVERFD 2&gt;&amp;$NX_SERVERFD || echo &quot;FREENX&gt; 716 Slave mode failed to start.&quot; &gt;&amp;$NX_SERVERFD )  &amp;
+ 			NXNODE_LOGIN_SLAVE=&quot;$!&quot;
+ 			disown $!
+ 
+@@ -539,7 +539,7 @@
+ 			NXNODE_SLAVE_STARTED=&quot;&quot;
+ 			
+ 			# FIXME: Make timeout configurable
+-			while read -t 10 line &lt;&amp;$NX_COMM_FD
++			while read -t 10 line &lt;&amp;$NX_COMMFD
+ 			do
+ 				log 6 &quot;$line&quot;
+ 				case &quot;$line&quot; in
+@@ -565,14 +565,14 @@
+ 		
+ 		#send CMD to nxnode
+ 		
+-		echo &quot;$6&quot; &gt;&amp;$NX_COMM_FD
+-		[ -n &quot;$NXNODE_TOSEND&quot; ] &amp;&amp; echo &quot;$NXNODE_TOSEND&quot; &gt;&amp;$NX_COMM_FD
++		echo &quot;$6&quot; &gt;&amp;$NX_COMMFD
++		[ -n &quot;$NXNODE_TOSEND&quot; ] &amp;&amp; echo &quot;$NXNODE_TOSEND&quot; &gt;&amp;$NX_COMMFD
+ 
+ 		NXNODE_RETURN=&quot;1&quot;
+ 
+ 		if [ -z &quot;$NXNODE_READER&quot; ]
+ 		then
+-			while read line &lt;&amp;$NX_COMM_FD
++			while read line &lt;&amp;$NX_COMMFD
+ 			do
+ 				log 6 &quot;nxnode_reader: $line&quot;
+ 				echo &quot;$line&quot;
+@@ -625,7 +625,7 @@
+ NXNODE_LOGIN_SLAVE_ENABLED=&quot;0&quot;
+ NXNODE_LOGIN_SLAVE=&quot;&quot;
+ 
+-if [ &quot;$ENABLE_SLAVE_MODE&quot; = &quot;1&quot; -a &quot;$NXSERVER_HELPER_ACTIVE&quot; != &quot;1&quot; ]
++if [ &quot;$ENABLE_SLAVE_MODE&quot; = &quot;1&quot; -a &quot;$NXSERVER_HELPER_ACTIVE&quot; != &quot;1&quot; -a -z &quot;$NX_TRUSTED_USER&quot; ]
+ then
+ 	export SSH_ORIGINAL_COMMAND
+ 	export NXSERVER_HELPER_ACTIVE=&quot;1&quot;
+@@ -636,7 +636,7 @@
+ 
+ if [ &quot;$ENABLE_SLAVE_MODE&quot; = &quot;1&quot; -a &quot;$NXSERVER_HELPER_ACTIVE&quot; = &quot;1&quot; ]
+ then
+-	log 3 &quot;Info: Using fds #$NX_SERVER_FD and #$NX_COMM_FD for communication with nxnode.&quot;
++	log 3 &quot;Info: Using fds #$NX_SERVERFD and #$NX_COMMFD for communication with nxnode.&quot;
+ 	NXNODE_LOGIN_SLAVE_ENABLED=&quot;1&quot;
+ fi
+ 
+@@ -659,7 +659,7 @@
+ 	LOGIN_SUCCESS=&quot;1&quot;
+ 	LOGIN_METHOD=&quot;SU&quot;
+ 
+-	log 3 &quot;Info: Using fd #$NX_COMM_FD for communication with trusted user ($USER) established nxnode.&quot;
++	log 3 &quot;Info: Using fd #$NX_COMMFD for communication with trusted user ($USER) established nxnode.&quot;
+ 	
+ 	# Reread the config files (so that $USER.node.conf get sourced)
+ 	. $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig) --userconf
+
+Modified: trunk/freenx-server/nxserver-helper/nxserver-helper.c
+===================================================================
+--- trunk/freenx-server/nxserver-helper/nxserver-helper.c	2008-03-11 07:04:10 UTC (rev 518)
++++ trunk/freenx-server/nxserver-helper/nxserver-helper.c	2008-03-11 07:06:43 UTC (rev 519)
+@@ -22,11 +22,11 @@
+ 	
+ 	// This fd can be used by the server for spawning the node
+ 	snprintf(buf, 1022, &quot;%d&quot;, fds[1]);
+-	setenv(&quot;NX_SERVER_FD&quot;, buf, 1);
++	setenv(&quot;NX_SERVERFD&quot;, buf, 1);
+ 	
+ 	// This fd can be used for communication with the node
+ 	snprintf(buf, 1022, &quot;%d&quot;, fds[0]);
+-	setenv(&quot;NX_COMM_FD&quot;, buf, 1);
++	setenv(&quot;NX_COMMFD&quot;, buf, 1);
+ 
+ 	// We do not trust this user, he still has to login
+ 	unsetenv(&quot;NX_TRUSTED_USER&quot;);
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000642.html">[Freenx-cvs] r518 - trunk/freenx-redesign/server/utility
+</A></li>
+	<LI>Next message: <A HREF="000644.html">[Freenx-cvs] r520 - trunk/freenx-client/nxcl/lib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#643">[ date ]</a>
+              <a href="thread.html#643">[ thread ]</a>
+              <a href="subject.html#643">[ subject ]</a>
+              <a href="author.html#643">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

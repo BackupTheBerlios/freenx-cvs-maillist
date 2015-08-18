@@ -1,0 +1,237 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r452 - qtnx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r452%20-%20qtnx&In-Reply-To=%3C200801300501.m0U51Zd9024937%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000577.html">
+   <LINK REL="Next"  HREF="000579.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r452 - qtnx</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r452%20-%20qtnx&In-Reply-To=%3C200801300501.m0U51Zd9024937%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r452 - qtnx">gwright at mail.berlios.de
+       </A><BR>
+    <I>Wed Jan 30 06:01:35 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000577.html">[Freenx-cvs] r451 - nxcl/lib
+</A></li>
+        <LI>Next message: <A HREF="000579.html">[Freenx-cvs] r453 - qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#578">[ date ]</a>
+              <a href="thread.html#578">[ thread ]</a>
+              <a href="subject.html#578">[ subject ]</a>
+              <a href="author.html#578">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2008-01-30 06:01:33 +0100 (Wed, 30 Jan 2008)
+New Revision: 452
+
+Modified:
+   qtnx/README
+   qtnx/qtnx.pro
+   qtnx/qtnxwindow.cpp
+Log:
+OS X builds
+
+
+Modified: qtnx/README
+===================================================================
+--- qtnx/README	2008-01-29 19:09:40 UTC (rev 451)
++++ qtnx/README	2008-01-30 05:01:33 UTC (rev 452)
+@@ -43,7 +43,8 @@
+ 
+ &amp;&amp; !defined(Q_CYGWIN_WIN)
+ 
+-You can then build Qt without any trouble by following those instructions. 
++You can then build Qt without any trouble by following those instructions. Ensure
++you also build the XML module and install qmake and mkspecs.
+ 
+ Afterwards, set QTDIR to point to wherever you installed Qt to, and set the
+ PATH to point to QTDIR/bin as well:
+@@ -55,3 +56,16 @@
+ 
+ $ qmake
+ $ make
++
++Mac OS X Builds
++---------------
++
++Ensure that you have a build of Qt 4 on OS X, then run qmake from $QTDIR/bin.
++
++Standard procedure then follows:
++
++$ qmake
++$ make
++
++You can then put statically linked versions of nxssh and nxproxy and id.key in
++qtnx.app/Contents/MacOS - it should then all just work.
+
+Modified: qtnx/qtnx.pro
+===================================================================
+--- qtnx/qtnx.pro	2008-01-29 19:09:40 UTC (rev 451)
++++ qtnx/qtnx.pro	2008-01-30 05:01:33 UTC (rev 452)
+@@ -1,6 +1,6 @@
+ TEMPLATE	= app
+ 
+-CONFIG		+= qt warn_on debug
++CONFIG		+= static qt warn_on release
+ 
+ FORMS = settingsdialog.ui logindialog.ui sessionsdialog.ui keydialog.ui logwindow.ui
+ 
+@@ -10,11 +10,19 @@
+ 
+ INCLUDEPATH	+= $(QTDIR)/include
+ 
+-QMAKE_CXXFLAGS += $$system(pkg-config --cflags nxcl)
++!macx {
++    QMAKE_CXXFLAGS += $$system(pkg-config --cflags nxcl)
+ 
++    LIBS += $$system(pkg-config --libs nxcl)
++}
++
++macx {
++    QMAKE_CXXFLAGS += -I/usr/local/include/nxcl
++    LIBS += -lnxcl
++}
++
+ DEPENDPATH	+= $(QTDIR)/include
+ 
+-LIBS += $$system(pkg-config --libs nxcl)
+ 
+ QT += ui xml
+ 
+
+Modified: qtnx/qtnxwindow.cpp
+===================================================================
+--- qtnx/qtnxwindow.cpp	2008-01-29 19:09:40 UTC (rev 451)
++++ qtnx/qtnxwindow.cpp	2008-01-30 05:01:33 UTC (rev 452)
+@@ -24,6 +24,10 @@
+ #include &lt;QFile&gt;
+ #include &lt;QMessageBox&gt;
+ 
++#ifdef Q_WS_MAC
++    #include &lt;CoreFoundation/CFBundle.h&gt;
++#endif
++
+ using namespace nxcl;
+ using namespace std;
+ 
+@@ -36,6 +40,25 @@
+ 
+     setupUI();
+ 
++#ifdef Q_WS_MAC
++    // We ship nxproxy and nxssh in qtnx.app/Contents/MacOS
++    CFURLRef appUrlRef = CFBundleCopyBundleURL(CFBundleGetMainBundle());
++    CFStringRef macPath = CFURLCopyFileSystemPath(appUrlRef,
++            kCFURLPOSIXPathStyle);
++
++    const char *pathPtr = CFStringGetCStringPtr(macPath,
++            CFStringGetSystemEncoding());
++
++    CFRelease(appUrlRef);
++    CFRelease(macPath);
++
++    stringstream binaryPath;
++    binaryPath &lt;&lt; pathPtr &lt;&lt; &quot;/Contents/MacOS&quot;;
++    cout &lt;&lt; binaryPath.str() &lt;&lt; endl;
++
++    nxClient.setCustomPath(binaryPath.str());
++#endif
++
+     QDir dir(QDir::homePath()+&quot;/.qtnx&quot;,&quot;*.nxml&quot;);
+ 
+     for (unsigned int i=0;i&lt;dir.count();i++) {
+@@ -113,40 +136,43 @@
+ 
+ void QtNXWindow::handleProgress(int id, QString message)
+ {
++    if (!message.isEmpty())
++        message = &quot;: &quot; + message;
++
+     switch (id) {
+         case NXCL_PROCESS_STARTED:
+-            updateStatusBar(&quot;Process started&quot;);
++            updateStatusBar(tr(&quot;Process started&quot;));
+             break;
+         case NXCL_PROCESS_EXITED:
+-            updateStatusBar(&quot;Process exited&quot;);
++            updateStatusBar(tr(&quot;Process exited&quot;));
+             break;
+         case NXCL_AUTH_FAILED:
+-            updateStatusBar(&quot;Invalid authentication key&quot;);
++            updateStatusBar(tr(&quot;Invalid authentication key&quot;));
+             break;
+         case NXCL_AUTHENTICATING:
+-            updateStatusBar(&quot;Authenticating client&quot;);
++            updateStatusBar(tr(&quot;Authenticating client&quot;));
+             break;
+         case NXCL_LOGIN_FAILED:
+-            updateStatusBar(&quot;Invalid username or password&quot;);
++            updateStatusBar(tr(&quot;Invalid username or password&quot;));
+             failedLogin();
+             break;
+         case NXCL_HOST_KEY_VERIFAILED:
+-            updateStatusBar(&quot;Host key verification failed&quot;);
++            updateStatusBar(tr(&quot;Host key verification failed&quot;));
+             break;
+         case NXCL_INVOKE_PROXY:
+-            updateStatusBar(&quot;Starting NX proxy&quot;);
++            updateStatusBar(tr(&quot;Starting NX proxy&quot;));
+             break;
+         case NXCL_STARTING:
+-            updateStatusBar(&quot;Starting session&quot;);
++            updateStatusBar(tr(&quot;Starting session&quot;));
+             break;
+         case NXCL_FINISHED:
+-            updateStatusBar(&quot;Finished connecting&quot;);
++            updateStatusBar(tr(&quot;Finished connecting&quot;));
+             break;
+         case NXCL_ALIVE:
+-            updateStatusBar(&quot;NX session active&quot;);
++            updateStatusBar(tr(&quot;NX session active&quot;));
+             break;
+         case NXCL_PROCESS_ERROR:
+-            updateStatusBar(&quot;Process error&quot;);
++            updateStatusBar(tr(&quot;Process error&quot;));
+             break;
+         default:
+             break;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000577.html">[Freenx-cvs] r451 - nxcl/lib
+</A></li>
+	<LI>Next message: <A HREF="000579.html">[Freenx-cvs] r453 - qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#578">[ date ]</a>
+              <a href="thread.html#578">[ thread ]</a>
+              <a href="subject.html#578">[ subject ]</a>
+              <a href="author.html#578">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

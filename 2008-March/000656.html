@@ -1,0 +1,368 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r533 - in tags/freenx-server: . FreeNX-0.7.2	FreeNX-0.7.2/nxredir FreeNX-0.7.2/nxserver-helper
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r533%20-%20in%20tags/freenx-server%3A%20.%20FreeNX-0.7.2%0A%09FreeNX-0.7.2/nxredir%20FreeNX-0.7.2/nxserver-helper&In-Reply-To=%3C200803142147.m2ELlmYl018142%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000655.html">
+   <LINK REL="Next"  HREF="000657.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r533 - in tags/freenx-server: . FreeNX-0.7.2	FreeNX-0.7.2/nxredir FreeNX-0.7.2/nxserver-helper</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r533%20-%20in%20tags/freenx-server%3A%20.%20FreeNX-0.7.2%0A%09FreeNX-0.7.2/nxredir%20FreeNX-0.7.2/nxserver-helper&In-Reply-To=%3C200803142147.m2ELlmYl018142%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r533 - in tags/freenx-server: . FreeNX-0.7.2	FreeNX-0.7.2/nxredir FreeNX-0.7.2/nxserver-helper">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Fri Mar 14 22:47:48 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000655.html">[Freenx-cvs] r532 - trunk/freenx-server
+</A></li>
+        <LI>Next message: <A HREF="000657.html">[Freenx-cvs] r534 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#656">[ date ]</a>
+              <a href="thread.html#656">[ thread ]</a>
+              <a href="subject.html#656">[ subject ]</a>
+              <a href="author.html#656">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-03-14 22:47:47 +0100 (Fri, 14 Mar 2008)
+New Revision: 533
+
+Added:
+   tags/freenx-server/FreeNX-0.7.2/
+   tags/freenx-server/FreeNX-0.7.2/AUTHORS
+   tags/freenx-server/FreeNX-0.7.2/CONTRIB
+   tags/freenx-server/FreeNX-0.7.2/COPYING
+   tags/freenx-server/FreeNX-0.7.2/ChangeLog
+   tags/freenx-server/FreeNX-0.7.2/INSTALL
+   tags/freenx-server/FreeNX-0.7.2/Makefile
+   tags/freenx-server/FreeNX-0.7.2/gentoo-nomachine.diff
+   tags/freenx-server/FreeNX-0.7.2/init.d/
+   tags/freenx-server/FreeNX-0.7.2/node.conf.sample
+   tags/freenx-server/FreeNX-0.7.2/nxacl.sample
+   tags/freenx-server/FreeNX-0.7.2/nxcheckload.sample
+   tags/freenx-server/FreeNX-0.7.2/nxcups-gethost
+   tags/freenx-server/FreeNX-0.7.2/nxdesktop_helper
+   tags/freenx-server/FreeNX-0.7.2/nxdialog
+   tags/freenx-server/FreeNX-0.7.2/nxkeygen
+   tags/freenx-server/FreeNX-0.7.2/nxloadconfig
+   tags/freenx-server/FreeNX-0.7.2/nxnode
+   tags/freenx-server/FreeNX-0.7.2/nxnode-login
+   tags/freenx-server/FreeNX-0.7.2/nxprint
+   tags/freenx-server/FreeNX-0.7.2/nxredir/
+   tags/freenx-server/FreeNX-0.7.2/nxredir/Makefile
+   tags/freenx-server/FreeNX-0.7.2/nxredir/nxredir
+   tags/freenx-server/FreeNX-0.7.2/nxredir/nxredir.c
+   tags/freenx-server/FreeNX-0.7.2/nxredir/nxsmb
+   tags/freenx-server/FreeNX-0.7.2/nxserver
+   tags/freenx-server/FreeNX-0.7.2/nxserver-helper/
+   tags/freenx-server/FreeNX-0.7.2/nxserver-helper/nxserver-helper.c
+   tags/freenx-server/FreeNX-0.7.2/nxsetup
+   tags/freenx-server/FreeNX-0.7.2/nxviewer-passwd/
+   tags/freenx-server/FreeNX-0.7.2/nxviewer_helper
+Removed:
+   tags/freenx-server/FreeNX-0.7.2/branches/
+   tags/freenx-server/FreeNX-0.7.2/nxredir/Makefile
+   tags/freenx-server/FreeNX-0.7.2/nxredir/nxredir
+   tags/freenx-server/FreeNX-0.7.2/nxredir/nxredir.c
+   tags/freenx-server/FreeNX-0.7.2/nxredir/nxsmb
+   tags/freenx-server/FreeNX-0.7.2/nxserver-helper/nxserver-helper.c
+   tags/freenx-server/FreeNX-0.7.2/tags/
+   tags/freenx-server/FreeNX-0.7.2/trunk/
+Log:
+Released FreeNX 0.7.2 &quot;Priscilla Edition&quot;.
+
+
+
+Copied: tags/freenx-server/FreeNX-0.7.2 (from rev 502, trunk/freenx-server)
+
+Copied: tags/freenx-server/FreeNX-0.7.2/AUTHORS (from rev 512, trunk/freenx-server/AUTHORS)
+
+Copied: tags/freenx-server/FreeNX-0.7.2/CONTRIB (from rev 512, trunk/freenx-server/CONTRIB)
+
+Copied: tags/freenx-server/FreeNX-0.7.2/COPYING (from rev 512, trunk/freenx-server/COPYING)
+
+Copied: tags/freenx-server/FreeNX-0.7.2/ChangeLog (from rev 532, trunk/freenx-server/ChangeLog)
+
+Copied: tags/freenx-server/FreeNX-0.7.2/INSTALL (from rev 529, trunk/freenx-server/INSTALL)
+
+Copied: tags/freenx-server/FreeNX-0.7.2/Makefile (from rev 530, trunk/freenx-server/Makefile)
+
+Copied: tags/freenx-server/FreeNX-0.7.2/gentoo-nomachine.diff (from rev 521, trunk/freenx-server/gentoo-nomachine.diff)
+
+Copied: tags/freenx-server/FreeNX-0.7.2/init.d (from rev 512, trunk/freenx-server/init.d)
+
+Copied: tags/freenx-server/FreeNX-0.7.2/node.conf.sample (from rev 526, trunk/freenx-server/node.conf.sample)
+
+Copied: tags/freenx-server/FreeNX-0.7.2/nxacl.sample (from rev 531, trunk/freenx-server/nxacl.sample)
+
+Copied: tags/freenx-server/FreeNX-0.7.2/nxcheckload.sample (from rev 512, trunk/freenx-server/nxcheckload.sample)
+
+Copied: tags/freenx-server/FreeNX-0.7.2/nxcups-gethost (from rev 512, trunk/freenx-server/nxcups-gethost)
+
+Copied: tags/freenx-server/FreeNX-0.7.2/nxdesktop_helper (from rev 512, trunk/freenx-server/nxdesktop_helper)
+
+Copied: tags/freenx-server/FreeNX-0.7.2/nxdialog (from rev 512, trunk/freenx-server/nxdialog)
+
+Copied: tags/freenx-server/FreeNX-0.7.2/nxkeygen (from rev 512, trunk/freenx-server/nxkeygen)
+
+Copied: tags/freenx-server/FreeNX-0.7.2/nxloadconfig (from rev 532, trunk/freenx-server/nxloadconfig)
+
+Copied: tags/freenx-server/FreeNX-0.7.2/nxnode (from rev 524, trunk/freenx-server/nxnode)
+
+Copied: tags/freenx-server/FreeNX-0.7.2/nxnode-login (from rev 512, trunk/freenx-server/nxnode-login)
+
+Copied: tags/freenx-server/FreeNX-0.7.2/nxprint (from rev 512, trunk/freenx-server/nxprint)
+
+Copied: tags/freenx-server/FreeNX-0.7.2/nxredir (from rev 512, trunk/freenx-server/nxredir)
+
+Deleted: tags/freenx-server/FreeNX-0.7.2/nxredir/Makefile
+===================================================================
+--- trunk/freenx-server/nxredir/Makefile	2008-03-10 23:01:03 UTC (rev 512)
++++ tags/freenx-server/FreeNX-0.7.2/nxredir/Makefile	2008-03-14 21:47:47 UTC (rev 533)
+@@ -1,19 +0,0 @@
+-all: libnxredir.so.0
+-
+-CC=gcc
+-CFLAGS=-g -O2 -Wall -fPIC
+-
+-libnxredir.so.0: nxredir.o
+-	$(CC) -fPIC $(CFLAGS) -nostdlib -shared -o libnxredir.so.0 nxredir.o -ldl -lc
+-
+-clean:
+-	rm -f libnxredir.so.0
+-	rm -f *.o
+-
+-install: all
+-	install -m755 libnxredir.so.0 $(DESTDIR)/usr/lib
+-	install -m755 nxredir $(DESTDIR)/usr/bin
+-	install -m755 nxsmb $(DESTDIR)/usr/lib/cups/backend/
+-	ldconfig
+-
+-.PHONY: clean install
+
+Copied: tags/freenx-server/FreeNX-0.7.2/nxredir/Makefile (from rev 529, trunk/freenx-server/nxredir/Makefile)
+
+Deleted: tags/freenx-server/FreeNX-0.7.2/nxredir/nxredir
+===================================================================
+--- trunk/freenx-server/nxredir/nxredir	2008-03-10 23:01:03 UTC (rev 512)
++++ tags/freenx-server/FreeNX-0.7.2/nxredir/nxredir	2008-03-14 21:47:47 UTC (rev 533)
+@@ -1,16 +0,0 @@
+-#!/bin/sh
+-
+-if [ -z &quot;$NXCUPS_PORT&quot; -a -z &quot;$NXSAMBA_PORT&quot; ]
+-then
+-	echo &quot;nxredir: Redirect standard ports to nxproxy&quot;
+-	echo &quot;&quot;
+-	echo &quot;Usage: export NXCUPS_PORT='where_cups_is_running'&quot;
+-	echo &quot;       export NXSAMBA_PORT='where_samba_is_running'&quot;
+-	exit 0
+-fi
+-
+-LD_PRELOAD=&quot;/usr/lib/libnxredir.so.0:$LD_PRELOAD&quot;
+-export LD_PRELOAD
+-
+-# invoke the program with the args given
+-exec &quot;$@&quot;
+
+Copied: tags/freenx-server/FreeNX-0.7.2/nxredir/nxredir (from rev 529, trunk/freenx-server/nxredir/nxredir)
+
+Deleted: tags/freenx-server/FreeNX-0.7.2/nxredir/nxredir.c
+===================================================================
+--- trunk/freenx-server/nxredir/nxredir.c	2008-03-10 23:01:03 UTC (rev 512)
++++ tags/freenx-server/FreeNX-0.7.2/nxredir/nxredir.c	2008-03-14 21:47:47 UTC (rev 533)
+@@ -1,64 +0,0 @@
+-/*
+- * libnxredir - Redirect certain ports to other forwarded ports.
+- *
+- * Copyright (c) 2005 by Fabian Franz.
+- *
+- * License: GPL
+- *
+- */
+-
+-char *progname = &quot;libnxredir&quot;;              /* Name used in err msgs    */
+-
+-#define _GNU_SOURCE
+-
+-/* Header Files */
+-#include &lt;stdio.h&gt;
+-#include &lt;stdlib.h&gt;
+-#include &lt;unistd.h&gt;
+-#include &lt;dlfcn.h&gt;
+-#include &lt;sys/types.h&gt;
+-#include &lt;sys/socket.h&gt;
+-#include &lt;string.h&gt;
+-#include &lt;strings.h&gt;
+-#include &lt;netinet/in.h&gt;
+-#include &lt;arpa/inet.h&gt;
+-#include &lt;sys/poll.h&gt;
+-#include &lt;sys/time.h&gt;
+-#include &lt;pwd.h&gt;
+-#include &lt;errno.h&gt;
+-#include &lt;fcntl.h&gt;
+-#include &lt;stdarg.h&gt;
+-
+-#include &lt;sys/un.h&gt;
+-
+-#define CONNECT_SIGNATURE int __fd, const struct sockaddr * __addr, socklen_t __len
+-
+-static int (*realconnect)(CONNECT_SIGNATURE);
+-
+-/* Exported Function Prototypes */
+-void _init(void);
+-
+-int connect(CONNECT_SIGNATURE);
+-
+-void _init(void) 
+-{
+-        realconnect = dlsym(RTLD_NEXT, &quot;connect&quot;);
+-}
+-
+-int connect(CONNECT_SIGNATURE) 
+-{
+-	if (realconnect == NULL) {
+-                perror(&quot;Unresolved symbol: connect\n&quot;);
+-                return(-1);
+-        }
+-
+-	/* CUPS */
+-	if ((getenv(&quot;NXCUPS_PORT&quot;) != NULL) &amp;&amp; ((struct sockaddr_in*)__addr)-&gt;sin_port==htons(631))
+-		((struct sockaddr_in*)__addr)-&gt;sin_port=htons(atoi(getenv(&quot;NXCUPS_PORT&quot;)));
+-
+-	/* SAMBA */
+-	if ((getenv(&quot;NXSAMBA_PORT&quot;) != NULL) &amp;&amp; (((struct sockaddr_in*)__addr)-&gt;sin_port==htons(139) || ((struct sockaddr_in*)__addr)-&gt;sin_port==htons(445)))
+-		((struct sockaddr_in*)__addr)-&gt;sin_port=htons(atoi(getenv(&quot;NXSAMBA_PORT&quot;)));
+-
+-	return realconnect(__fd, __addr, __len);
+-}
+
+Copied: tags/freenx-server/FreeNX-0.7.2/nxredir/nxredir.c (from rev 516, trunk/freenx-server/nxredir/nxredir.c)
+
+Deleted: tags/freenx-server/FreeNX-0.7.2/nxredir/nxsmb
+===================================================================
+--- trunk/freenx-server/nxredir/nxsmb	2008-03-10 23:01:03 UTC (rev 512)
++++ tags/freenx-server/FreeNX-0.7.2/nxredir/nxsmb	2008-03-14 21:47:47 UTC (rev 533)
+@@ -1,45 +0,0 @@
+-#!/bin/sh
+-#
+-# nxsmb: Small wrapper for the SMB backend to be able to print to CIFS or SMB ports directly.
+-#
+-# Copyright (c) 2008 by Fabian Franz.
+-#
+-#
+-
+-# turn on DEBUG?
+-#set -x -v
+-
+-NXREDIR_LIBRARY=&quot;/usr/lib/libnxredir.so.0&quot;
+-COMMAND_SMB=&quot;/usr/lib/cups/backend/smb&quot;
+-
+-PORT=$(echo $DEVICE_URI | cut -d/ -f3 | cut -d@ -f2 | cut -d: -f2)
+-PROTOCOL=$(echo $DEVICE_URI | cut -d/ -f4)
+-PRINTER=$(echo $DEVICE_URI | cut -d/ -f5)
+-
+-if [ -z &quot;$PRINTER&quot; ] # old style setup
+-then
+-	echo &quot;Warning: Not using nxredir library. The DEVICE_URI is not in the right format.&quot;
+-	exec &quot;$COMMAND_SMB&quot; &quot;$@&quot;
+-fi
+-
+-if [ ! -x &quot;$NXREDIR_LIBRARY&quot; ]
+-then
+-	# repair DEVICE_URI
+-	DEVICE_URI=$(echo $DEVICE_URI | sed &quot;s|/$PROTOCOL/|/$PRINTER|g&quot;)
+-	echo &quot;Error: Not using nxredir library. $NXREDIR_LIBRARY could not be found or is not executable.&quot;
+-	exec &quot;$COMMAND_SMB&quot; &quot;$@&quot;
+-fi
+-
+-if [ &quot;$PROTOCOL&quot; = &quot;cifs&quot; -o &quot;$PROTOCOL&quot; = &quot;CIFS&quot; ]
+-then
+-	REAL_PORT=&quot;445&quot;
+-else
+-	REAL_PORT=&quot;139&quot;
+-fi
+-
+-DEVICE_URI=$(echo $DEVICE_URI | sed &quot;s|:$PORT/$PROTOCOL/|:$REAL_PORT/|g&quot;)
+-
+-export NXSAMBA_PORT=&quot;$PORT&quot;
+-export LD_PRELOAD=&quot;$NXREDIR_LIBRARY${LD_PRELOAD:+:$LD_PRELOAD}&quot;
+-
+-exec &quot;$COMMAND_SMB&quot; &quot;$@&quot;
+
+Copied: tags/freenx-server/FreeNX-0.7.2/nxredir/nxsmb (from rev 529, trunk/freenx-server/nxredir/nxsmb)
+
+Copied: tags/freenx-server/FreeNX-0.7.2/nxserver (from rev 531, trunk/freenx-server/nxserver)
+
+Copied: tags/freenx-server/FreeNX-0.7.2/nxserver-helper (from rev 512, trunk/freenx-server/nxserver-helper)
+
+Deleted: tags/freenx-server/FreeNX-0.7.2/nxserver-helper/nxserver-helper.c
+===================================================================
+--- trunk/freenx-server/nxserver-helper/nxserver-helper.c	2008-03-10 23:01:03 UTC (rev 512)
++++ tags/freenx-server/FreeNX-0.7.2/nxserver-helper/nxserver-helper.c	2008-03-14 21:47:47 UTC (rev 533)
+@@ -1,21 +0,0 @@
+-/*
+- * Copyright (c) 2006 by Fabian Franz.
+- *
+- * License: GPL, v2
+- *
+- * SVN: $Id$
+- *
+- */
+-
+-#include &lt;sys/types.h&gt;
+-#include &lt;sys/socket.h&gt;
+-#include &lt;unistd.h&gt;
+-
+-int main(int argc, char* argv[])
+-{
+-	int fds[2];
+-
+-	socketpair(AF_UNIX, SOCK_STREAM, 0, fds);
+-	argv++;
+-	execv(argv[0], argv);
+-}
+
+Copied: tags/freenx-server/FreeNX-0.7.2/nxserver-helper/nxserver-helper.c (from rev 519, trunk/freenx-server/nxserver-helper/nxserver-helper.c)
+
+Copied: tags/freenx-server/FreeNX-0.7.2/nxsetup (from rev 512, trunk/freenx-server/nxsetup)
+
+Copied: tags/freenx-server/FreeNX-0.7.2/nxviewer-passwd (from rev 528, trunk/freenx-server/nxviewer-passwd)
+
+Copied: tags/freenx-server/FreeNX-0.7.2/nxviewer_helper (from rev 512, trunk/freenx-server/nxviewer_helper)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000655.html">[Freenx-cvs] r532 - trunk/freenx-server
+</A></li>
+	<LI>Next message: <A HREF="000657.html">[Freenx-cvs] r534 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#656">[ date ]</a>
+              <a href="thread.html#656">[ thread ]</a>
+              <a href="subject.html#656">[ subject ]</a>
+              <a href="author.html#656">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

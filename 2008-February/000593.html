@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r467 - nxcl/lib
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r467%20-%20nxcl/lib&In-Reply-To=%3C200802050148.m151mhd0013844%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000592.html">
+   <LINK REL="Next"  HREF="000594.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r467 - nxcl/lib</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r467%20-%20nxcl/lib&In-Reply-To=%3C200802050148.m151mhd0013844%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r467 - nxcl/lib">gwright at mail.berlios.de
+       </A><BR>
+    <I>Tue Feb  5 02:48:43 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000592.html">[Freenx-cvs] r466 - qtnx
+</A></li>
+        <LI>Next message: <A HREF="000594.html">[Freenx-cvs] r468 - nxcl/lib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#593">[ date ]</a>
+              <a href="thread.html#593">[ thread ]</a>
+              <a href="subject.html#593">[ subject ]</a>
+              <a href="author.html#593">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2008-02-05 02:48:43 +0100 (Tue, 05 Feb 2008)
+New Revision: 467
+
+Modified:
+   nxcl/lib/nxclientlib.cpp
+   nxcl/lib/nxclientlib.h
+Log:
+Add a connected successfully signal
+
+
+Modified: nxcl/lib/nxclientlib.cpp
+===================================================================
+--- nxcl/lib/nxclientlib.cpp	2008-02-05 01:37:40 UTC (rev 466)
++++ nxcl/lib/nxclientlib.cpp	2008-02-05 01:48:43 UTC (rev 467)
+@@ -385,6 +385,7 @@
+ 
+             this-&gt;externalCallbacks-&gt;write
+                 (287, _(&quot;The session has been started successfully&quot;));
++            this-&gt;externalCallbacks-&gt;connectedSuccessfullySignal();
+             this-&gt;sessionRunning = true;
+         }
+ 
+
+Modified: nxcl/lib/nxclientlib.h
+===================================================================
+--- nxcl/lib/nxclientlib.h	2008-02-05 01:37:40 UTC (rev 466)
++++ nxcl/lib/nxclientlib.h	2008-02-05 01:48:43 UTC (rev 467)
+@@ -64,7 +64,7 @@
+             virtual void resumeSessionsSignal (list&lt;NXResumeData&gt;) {}
+             virtual void noSessionsSignal (void) {}
+             virtual void serverCapacitySignal (void) {}
+-
++            virtual void connectedSuccessfullySignal (void) {}
+     };
+ 
+     /*!
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000592.html">[Freenx-cvs] r466 - qtnx
+</A></li>
+	<LI>Next message: <A HREF="000594.html">[Freenx-cvs] r468 - nxcl/lib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#593">[ date ]</a>
+              <a href="thread.html#593">[ thread ]</a>
+              <a href="subject.html#593">[ subject ]</a>
+              <a href="author.html#593">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

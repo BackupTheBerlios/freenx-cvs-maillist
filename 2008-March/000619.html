@@ -1,0 +1,142 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r493 - freenx-server/trunk/nxredir
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r493%20-%20freenx-server/trunk/nxredir&In-Reply-To=%3C200803051311.m25DBuYD026229%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000618.html">
+   <LINK REL="Next"  HREF="000620.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r493 - freenx-server/trunk/nxredir</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r493%20-%20freenx-server/trunk/nxredir&In-Reply-To=%3C200803051311.m25DBuYD026229%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r493 - freenx-server/trunk/nxredir">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Wed Mar  5 14:11:56 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000618.html">[Freenx-cvs] r492 - freenx-server/trunk/nxredir
+</A></li>
+        <LI>Next message: <A HREF="000620.html">[Freenx-cvs] r494 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#619">[ date ]</a>
+              <a href="thread.html#619">[ thread ]</a>
+              <a href="subject.html#619">[ subject ]</a>
+              <a href="author.html#619">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-03-05 14:11:55 +0100 (Wed, 05 Mar 2008)
+New Revision: 493
+
+Added:
+   freenx-server/trunk/nxredir/nxsmb
+Modified:
+   freenx-server/trunk/nxredir/Makefile
+Log:
+- Added nxsmb new backend.
+
+- Added nxsmb to Makefile, used install instead of copy.
+
+
+
+Modified: freenx-server/trunk/nxredir/Makefile
+===================================================================
+--- freenx-server/trunk/nxredir/Makefile	2008-03-04 04:10:53 UTC (rev 492)
++++ freenx-server/trunk/nxredir/Makefile	2008-03-05 13:11:55 UTC (rev 493)
+@@ -11,8 +11,9 @@
+ 	rm -f *.o
+ 
+ install: all
+-	cp -a libnxredir.so.0 $(DESTDIR)/usr/lib
+-	cp -a nxredir $(DESTDIR)/usr/bin
++	install -m755 libnxredir.so.0 $(DESTDIR)/usr/lib
++	install -m755 nxredir $(DESTDIR)/usr/bin
++	install -m755 nxsmb $(DESTDIR)/usr/lib/cups/backend/
+ 	ldconfig
+ 
+ .PHONY: clean install
+
+Added: freenx-server/trunk/nxredir/nxsmb
+===================================================================
+--- freenx-server/trunk/nxredir/nxsmb	2008-03-04 04:10:53 UTC (rev 492)
++++ freenx-server/trunk/nxredir/nxsmb	2008-03-05 13:11:55 UTC (rev 493)
+@@ -0,0 +1,37 @@
++#!/bin/sh
++#
++# nxsmb: Small wrapper for the SMB backend to be able to print to CIFS or SMB ports directly.
++#
++# Copyright (c) 2008 by Fabian Franz.
++#
++#
++
++# turn on DEBUG?
++#set -x -v
++
++NXREDIR_LIBRARY=&quot;/usr/lib/libnxredir.so.0&quot;
++COMMAND_SMB=&quot;/usr/lib/cups/backend/smb&quot;
++
++PORT=$(echo $DEVICE_URI | cut -d/ -f3 | cut -d@ -f2 | cut -d: -f2 | cut -d- -f1)
++REAL_PORT=$(echo $DEVICE_URI | cut -d/ -f3 | cut -d@ -f2 | cut -d: -f2 | cut -d- -f2)
++
++if [ -z &quot;$PORT&quot; -o &quot;$PORT&quot; = &quot;$REALPORT&quot; ] # old style setup
++then
++	echo &quot;Warning: Not using nxredir library. The DEVICE_URI is not in the right format.&quot;
++	exec &quot;$COMMAND_SMB&quot; &quot;$@&quot;
++fi
++
++if [ ! -x &quot;$NXREDIR_LIBRARY&quot; ]
++then
++	# repair DEVICE_URI
++	DEVICE_URI=$(echo $DEVICE_URI | sed &quot;s|:$PORT-$REAL_PORT/|:$PORT/|g&quot;)
++	echo &quot;Error: Not using nxredir library. $NXREDIR_LIBRARY could not be found or is not executable.&quot;
++	exec &quot;$COMMAND_SMB&quot; &quot;$@&quot;
++fi
++
++DEVICE_URI=$(echo $DEVICE_URI | sed &quot;s|:$PORT-$REAL_PORT/|:$REAL_PORT/|g&quot;)
++
++export NXSAMBA_PORT=&quot;$PORT&quot;
++export LD_PRELOAD=&quot;$NXREDIR_LIBRARY${LD_PRELOAD:+:$LD_PRELOAD}&quot;
++
++exec &quot;$COMMAND_SMB&quot; &quot;$@&quot;
+
+
+Property changes on: freenx-server/trunk/nxredir/nxsmb
+___________________________________________________________________
+Name: svn:executable
+   + *
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000618.html">[Freenx-cvs] r492 - freenx-server/trunk/nxredir
+</A></li>
+	<LI>Next message: <A HREF="000620.html">[Freenx-cvs] r494 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#619">[ date ]</a>
+              <a href="thread.html#619">[ thread ]</a>
+              <a href="subject.html#619">[ subject ]</a>
+              <a href="author.html#619">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

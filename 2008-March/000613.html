@@ -1,0 +1,105 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r487 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r487%20-%20freenx-server/trunk&In-Reply-To=%3C200803021228.m22CS9Dk019029%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000612.html">
+   <LINK REL="Next"  HREF="000614.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r487 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r487%20-%20freenx-server/trunk&In-Reply-To=%3C200803021228.m22CS9Dk019029%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r487 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Sun Mar  2 13:28:09 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000612.html">[Freenx-cvs] r486 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000614.html">[Freenx-cvs] r488 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#613">[ date ]</a>
+              <a href="thread.html#613">[ thread ]</a>
+              <a href="subject.html#613">[ subject ]</a>
+              <a href="author.html#613">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-03-02 13:28:09 +0100 (Sun, 02 Mar 2008)
+New Revision: 487
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxserver
+Log:
+* Fixed a small bug in nxserver when password has spaces at the end or
+  beginning.
+  (Dimitar Paskov)
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2008-03-02 12:02:00 UTC (rev 486)
++++ freenx-server/trunk/ChangeLog	2008-03-02 12:28:09 UTC (rev 487)
+@@ -43,6 +43,9 @@
+ 	* Added the configuration key ENABLE_PULLDOWN_MENU to be able to
+ 	  disable the pulldown menu for rootless sessions.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Fixed a small bug in nxserver when password has spaces at the end or
++	  beginning.
++	  (Dimitar Paskov)
+ 
+ 14.10.2007 FreeNX 0.7.1 &quot;Hip Hop Edition&quot;
+ 	* Fixed the issue that makes fonts look tiny and unreadable by default 
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2008-03-02 12:02:00 UTC (rev 486)
++++ freenx-server/trunk/nxserver	2008-03-02 12:28:09 UTC (rev 487)
+@@ -671,7 +671,10 @@
+ 			echo_x $USER
+ 			
+ 			echo_x -n &quot;NX&gt; 102 Password: &quot;
++			old_ifs=&quot;$IFS&quot;
++			export IFS=$'\n'
+ 			read -s PASS
++			export IFS=&quot;$old_ifs&quot;
+ 			echo_x &quot;&quot;
+ 			log 6 -n &quot;Info: Auth method: &quot;
+ 			
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000612.html">[Freenx-cvs] r486 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000614.html">[Freenx-cvs] r488 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#613">[ date ]</a>
+              <a href="thread.html#613">[ thread ]</a>
+              <a href="subject.html#613">[ subject ]</a>
+              <a href="author.html#613">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

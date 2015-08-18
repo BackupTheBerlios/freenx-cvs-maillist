@@ -1,0 +1,265 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r529 - in trunk/freenx-server: . nxredir
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r529%20-%20in%20trunk/freenx-server%3A%20.%20nxredir&In-Reply-To=%3C200803142052.m2EKqmEo011318%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000672.html">
+   <LINK REL="Next"  HREF="000653.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r529 - in trunk/freenx-server: . nxredir</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r529%20-%20in%20trunk/freenx-server%3A%20.%20nxredir&In-Reply-To=%3C200803142052.m2EKqmEo011318%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r529 - in trunk/freenx-server: . nxredir">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Fri Mar 14 21:52:48 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000672.html">[Freenx-cvs] r528 - in trunk/freenx-server: . nxviewer-passwd	nxviewer-passwd/include nxviewer-passwd/libvncauth	nxviewer-passwd/nxpasswd
+</A></li>
+        <LI>Next message: <A HREF="000653.html">[Freenx-cvs] r530 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#652">[ date ]</a>
+              <a href="thread.html#652">[ thread ]</a>
+              <a href="subject.html#652">[ subject ]</a>
+              <a href="author.html#652">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-03-14 21:52:47 +0100 (Fri, 14 Mar 2008)
+New Revision: 529
+
+Added:
+   trunk/freenx-server/Makefile
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/INSTALL
+   trunk/freenx-server/nxredir/Makefile
+   trunk/freenx-server/nxredir/nxredir
+   trunk/freenx-server/nxredir/nxsmb
+Log:
+* Added a Makefile so FreeNX can be build and installed via.
+  $ make
+  $ # edit nxloadconfig to point where it should install to
+  $ make install
+  Hereby FreeNX is installed to where nxloadconfig points and
+  static paths in nxredir and nxsmb are adjusted accordingly.
+  So if you want it to be in /usr/NX/ be sure to apply
+  gentoo-nomachine.diff first or edit nxloadconfig manually.
+  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-03-14 17:54:12 UTC (rev 528)
++++ trunk/freenx-server/ChangeLog	2008-03-14 20:52:47 UTC (rev 529)
+@@ -93,6 +93,15 @@
+ 	  tightvnc vncpasswd part, which is necessary for FreeNX to work
+ 	  with standard vncviewer.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Added a Makefile so FreeNX can be build and installed via.
++	  $ make
++	  $ # edit nxloadconfig to point where it should install to
++	  $ make install
++	  Hereby FreeNX is installed to where nxloadconfig points and
++	  static paths in nxredir and nxsmb are adjusted accordingly.
++	  So if you want it to be in /usr/NX/ be sure to apply
++	  gentoo-nomachine.diff first or edit nxloadconfig manually.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
+ 14.10.2007 FreeNX 0.7.1 &quot;Hip Hop Edition&quot;
+ 	* Fixed the issue that makes fonts look tiny and unreadable by default 
+
+Modified: trunk/freenx-server/INSTALL
+===================================================================
+--- trunk/freenx-server/INSTALL	2008-03-14 17:54:12 UTC (rev 528)
++++ trunk/freenx-server/INSTALL	2008-03-14 20:52:47 UTC (rev 529)
+@@ -32,6 +32,8 @@
+ 
+ You must apply the gentoo-nomachine.diff and then copy the files to /usr/NX/bin and /usr/NX/lib.
+ 
++Here is a howto:
++
+ Get all sources from www.nomachine.com/sources.php
+ 
+ Untar all sources, install all dependencies then do:
+@@ -65,7 +67,24 @@
+ # build binaries and libs included in FreeNX distribution
+ 
+   $ cd freenx-&lt;version&gt;
++  $ patch -p0 &lt; gentoo-nomachine.diff
++  $ make
++  $ make install
+ 
++You should also install the nxclient from NoMachine or install Xdialog. 
++
++Then you need to run 'nxsetup --install' and follow the instructions given.
++
++Have Fun!
++
++Best regards,
++
++Fabian
++
++--
++
++Old way without Makefile (instead of make; make install):
++
+ # nxredir
+ 
+   $ cd nxredir
+@@ -101,12 +120,4 @@
+ 
+   $ cp -a freenx*/node.conf.sample ${NXPREFIX}/etc/
+ 
+-You should also install the nxclient from NoMachine or install Xdialog. 
+-
+-Then you need to run 'nxsetup --install' and follow the instructions given.
+-
+-If you use 1.5.0 as backend be sure to set ENABLE_1_5_0_BACKEND to 1 in node.conf or nxloadconfig.
+-
+---
+-
+ SVN: $Id$
+
+Added: trunk/freenx-server/Makefile
+===================================================================
+--- trunk/freenx-server/Makefile	2008-03-14 17:54:12 UTC (rev 528)
++++ trunk/freenx-server/Makefile	2008-03-14 20:52:47 UTC (rev 529)
+@@ -0,0 +1,26 @@
++.PHONY: all install
++
++SUBDIRS=nxredir nxviewer-passwd nxserver-helper
++PROGRAMS=nxcheckload.sample nxcups-gethost nxdesktop_helper nxdialog nxkeygen nxloadconfig nxnode nxnode-login nxprint nxserver nxserver-helper/nxserver-helper nxsetup nxviewer_helper nxviewer-passwd/nxpasswd/nxpasswd
++
++all:
++	( cd nxviewer-passwd; xmkmf; make Makefiles; make depend; cd ..)
++	for i in $(SUBDIRS) ; \
++	do\
++		echo &quot;making&quot; all &quot;in $$i...&quot;; \
++	        $(MAKE) -C $$i  all;\
++	done
++
++install:
++	. nxloadconfig;\
++	install -m755 -d $(DESTDIR)/$$PATH_BIN/ ;\
++	install -m755 -d $(DESTDIR)/$$PATH_LIB/ ;\
++	install -m755 -d $(DESTDIR)/$$NX_ETC_DIR/ ;\
++	install -m755 -d $(DESTDIR)/$$CUPS_BACKEND/ ;\
++	for i in $(PROGRAMS) ; \
++	do\
++	        install -m755 $$i $(DESTDIR)/$$PATH_BIN/ ;\
++	done;\
++	export PATH_BIN PATH_LIB CUPS_BACKEND NX_VERSION;\
++	install -m644 node.conf.sample $(DESTDIR)/$$NX_ETC_DIR/ ; \
++	make -C nxredir install
+
+Modified: trunk/freenx-server/nxredir/Makefile
+===================================================================
+--- trunk/freenx-server/nxredir/Makefile	2008-03-14 17:54:12 UTC (rev 528)
++++ trunk/freenx-server/nxredir/Makefile	2008-03-14 20:52:47 UTC (rev 529)
+@@ -2,18 +2,29 @@
+ 
+ CC=gcc
+ CFLAGS=-g -O2 -Wall -fPIC
++LIBNAME=libnxredir.so.0
+ 
+ libnxredir.so.0: nxredir.o
+-	$(CC) -fPIC $(CFLAGS) -nostdlib -shared -o libnxredir.so.0 nxredir.o -ldl -lc
++	$(CC) -fPIC $(CFLAGS) -nostdlib -shared -o $(LIBNAME) nxredir.o -ldl -lc
+ 
+ clean:
+-	rm -f libnxredir.so.0
++	rm -f $(LIBNAME)
+ 	rm -f *.o
+ 
+ install: all
+-	install -m755 libnxredir.so.0 $(DESTDIR)/usr/lib
+-	install -m755 nxredir $(DESTDIR)/usr/bin
+-	install -m755 nxsmb $(DESTDIR)/usr/lib/cups/backend/
+-	ldconfig
++	# install and possibly patch paths gotten by nxloadconfig
++	if [ -n &quot;$$NX_VERSION&quot; ]; \
++	then \
++		install -m755 $(LIBNAME) $(DESTDIR)/$$PATH_LIB/ ;\
++		install -m755 nxredir $(DESTDIR)/$$PATH_BIN/ ;\
++		install -m755 nxsmb $(DESTDIR)/$$CUPS_BACKEND/ ;\
++		perl -pi -e &quot;s,PATH_LIB=.*,PATH_LIB=\&quot;$$PATH_LIB\&quot;,g&quot; $(DESTDIR)/$$PATH_BIN/nxredir ;\
++		perl -pi -e &quot;s,PATH_LIB=.*,PATH_LIB=\&quot;$$PATH_LIB\&quot;,g&quot; $(DESTDIR)/$$CUPS_BACKEND/nxsmb ;\
++		perl -pi -e &quot;s,CUPS_BACKEND=.*,CUPS_BACKEND=\&quot;$$CUPS_BACKEND\&quot;,g&quot; $(DESTDIR)/$$CUPS_BACKEND/nxsmb ;\
++	else \
++		install -m755 libnxredir.so.0 $(DESTDIR)/usr/lib ;\
++		install -m755 nxredir $(DESTDIR)/usr/bin ;\
++		install -m755 nxsmb $(DESTDIR)/usr/lib/cups/backend/ ;\
++	fi
+ 
+ .PHONY: clean install
+
+Modified: trunk/freenx-server/nxredir/nxredir
+===================================================================
+--- trunk/freenx-server/nxredir/nxredir	2008-03-14 17:54:12 UTC (rev 528)
++++ trunk/freenx-server/nxredir/nxredir	2008-03-14 20:52:47 UTC (rev 529)
+@@ -1,6 +1,7 @@
+ #!/bin/sh
+ 
+-NXREDIR_LIBRARY=&quot;/usr/lib/libnxredir.so.0&quot;
++PATH_LIB=&quot;/usr/lib/&quot;
++NXREDIR_LIBRARY=&quot;$PATH_LIB/libnxredir.so.0&quot;
+ 
+ if [ -z &quot;$NXCUPS_PORT&quot; -a -z &quot;$NXSAMBA_PORT&quot; ]
+ then
+
+Modified: trunk/freenx-server/nxredir/nxsmb
+===================================================================
+--- trunk/freenx-server/nxredir/nxsmb	2008-03-14 17:54:12 UTC (rev 528)
++++ trunk/freenx-server/nxredir/nxsmb	2008-03-14 20:52:47 UTC (rev 529)
+@@ -8,9 +8,11 @@
+ 
+ # turn on DEBUG?
+ #set -x -v
++CUPS_BACKEND=&quot;/usr/lib/cups/backend/&quot;
++PATH_LIB=&quot;/usr/lib/&quot;
+ 
+-NXREDIR_LIBRARY=&quot;/usr/lib/libnxredir.so.0&quot;
+-COMMAND_SMB=&quot;/usr/lib/cups/backend/smb&quot;
++NXREDIR_LIBRARY=&quot;$PATH_LIB/libnxredir.so.0&quot;
++COMMAND_SMB=&quot;$CUPS_BACKEND/smb&quot;
+ 
+ PORT=$(echo $DEVICE_URI | cut -d/ -f3 | cut -d@ -f2 | cut -d: -f2)
+ PROTOCOL=$(echo $DEVICE_URI | cut -d/ -f4)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000672.html">[Freenx-cvs] r528 - in trunk/freenx-server: . nxviewer-passwd	nxviewer-passwd/include nxviewer-passwd/libvncauth	nxviewer-passwd/nxpasswd
+</A></li>
+	<LI>Next message: <A HREF="000653.html">[Freenx-cvs] r530 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#652">[ date ]</a>
+              <a href="thread.html#652">[ thread ]</a>
+              <a href="subject.html#652">[ subject ]</a>
+              <a href="author.html#652">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

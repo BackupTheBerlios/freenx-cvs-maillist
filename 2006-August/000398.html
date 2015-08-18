@@ -1,0 +1,322 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r268 - in nxclientlib: . qtnx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r268%20-%20in%20nxclientlib%3A%20.%20qtnx&In-Reply-To=%3C200608162210.k7GMAeDe011326%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000397.html">
+   <LINK REL="Next"  HREF="000399.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r268 - in nxclientlib: . qtnx</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r268%20-%20in%20nxclientlib%3A%20.%20qtnx&In-Reply-To=%3C200608162210.k7GMAeDe011326%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r268 - in nxclientlib: . qtnx">gwright at mail.berlios.de
+       </A><BR>
+    <I>Thu Aug 17 00:10:40 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000397.html">[Freenx-cvs] r267 - nxclientlib/qtnx
+</A></li>
+        <LI>Next message: <A HREF="000399.html">[Freenx-cvs] r269 - nxclientlib/qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#398">[ date ]</a>
+              <a href="thread.html#398">[ thread ]</a>
+              <a href="subject.html#398">[ subject ]</a>
+              <a href="author.html#398">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2006-08-17 00:10:38 +0200 (Thu, 17 Aug 2006)
+New Revision: 268
+
+Modified:
+   nxclientlib/nxclientlib.cpp
+   nxclientlib/nxclientlib.h
+   nxclientlib/nxsession.cpp
+   nxclientlib/nxsession.h
+   nxclientlib/qtnx/qtnx.pro
+   nxclientlib/qtnx/qtnxwindow.cpp
+   nxclientlib/qtnx/qtnxwindow.h
+   nxclientlib/qtnx/sessionsdialog.ui
+Log:
+And session resume works!
+
+
+Modified: nxclientlib/nxclientlib.cpp
+===================================================================
+--- nxclientlib/nxclientlib.cpp	2006-08-16 20:38:03 UTC (rev 267)
++++ nxclientlib/nxclientlib.cpp	2006-08-16 22:10:38 UTC (rev 268)
+@@ -228,6 +228,7 @@
+ void NXClientLib::setSession(NXSessionData *nxSession)
+ {
+ 	session.setSession(nxSession);
++	write(session.parseSSH(&quot;NX&gt; 105&quot;));
+ }
+ 
+ QString NXClientLib::parseSSH(QString message)
+@@ -249,6 +250,7 @@
+ 
+ 	if (message.contains(&quot;NX&gt; 710 Session status: running&quot;)) {
+ 		invokeProxy();
++		session.wipeSessions();
+ 		returnMessage = &quot;bye\n&quot;;
+ 	}
+ 	
+
+Modified: nxclientlib/nxclientlib.h
+===================================================================
+--- nxclientlib/nxclientlib.h	2006-08-16 20:38:03 UTC (rev 267)
++++ nxclientlib/nxclientlib.h	2006-08-16 22:10:38 UTC (rev 268)
+@@ -64,6 +64,7 @@
+ 		void setSession(NXSessionData *);
+ 
+ 		void invokeProxy();
++		
+ 		QString parseSSH(QString);
+ 	public slots:
+ 		void processStarted();
+
+Modified: nxclientlib/nxsession.cpp
+===================================================================
+--- nxclientlib/nxsession.cpp	2006-08-16 20:38:03 UTC (rev 267)
++++ nxclientlib/nxsession.cpp	2006-08-16 22:10:38 UTC (rev 268)
+@@ -113,7 +113,8 @@
+ 		case LIST_SESSIONS:
+ 			if (response == 105) {
+ 				// Get a list of the available sessions on the server
+-				returnMessage = &quot;listsession --user=\&quot;&quot; + nxUsername + &quot;\&quot; --status=\&quot;suspended,running\&quot; --geometry=\&quot;&quot; + xRes + &quot;x&quot; + yRes + renderSet + &quot;\&quot; --type=\&quot;&quot; + type + &quot;\&quot;&quot;;
++				returnMessage = &quot;listsession --user=\&quot;&quot; + nxUsername +
++				&quot;\&quot; --status=\&quot;suspended,running\&quot; --geometry=\&quot;&quot; + xRes + &quot;x&quot; + yRes + renderSet + &quot;\&quot; --type=\&quot;&quot; + type + &quot;\&quot;&quot;;
+ 				stage++;
+ 			}
+ 			break;
+@@ -224,20 +225,20 @@
+ 		}
+ 	}
+ 
+-	if (rawdata.size() &lt; at+1) {
++//	if (rawdata.size() &lt; at+1) {
+ 		for (i = at+1; i &lt; rawdata.size(); ++i) {
+ 			if (!rawdata.at(i).contains(&quot;NX&gt; 148&quot;))
+ 				sessions &lt;&lt; rawdata.at(i);
+ 		}
+-	}
++//	}
+ 	
+ 	QList&lt;QStringList&gt; rawsessions;
+-
++	
+ 	for (i = 0; i &lt; sessions.size(); ++i)
+ 		rawsessions.append(sessions.at(i).simplified().split(' '));
+ 
+ 	NXResumeData resData;
+-
++	
+ 	for (i = 0; i &lt; rawsessions.size(); ++i) {
+ 		resData.display = rawsessions.at(i).at(0).toInt();
+ 		resData.sessionType = rawsessions.at(i).at(1);
+@@ -258,6 +259,12 @@
+ 	stage++;
+ }
+ 
++void NXSession::wipeSessions()
++{
++	while (!runningSessions.isEmpty()) {
++		runningSessions.removeFirst();
++	}
++}
+ 
+ QString NXSession::generateCookie()
+ {
+
+Modified: nxclientlib/nxsession.h
+===================================================================
+--- nxclientlib/nxsession.h	2006-08-16 20:38:03 UTC (rev 267)
++++ nxclientlib/nxsession.h	2006-08-16 22:10:38 UTC (rev 268)
+@@ -50,6 +50,8 @@
+ 		void setSession(NXSessionData *);
+ 		void setEncryption(bool enc) { encryption = enc; };
+ 		void resetSession();
++
++		void wipeSessions();
+ 		
+ 		QString generateCookie();
+ 	signals:
+
+Modified: nxclientlib/qtnx/qtnx.pro
+===================================================================
+--- nxclientlib/qtnx/qtnx.pro	2006-08-16 20:38:03 UTC (rev 267)
++++ nxclientlib/qtnx/qtnx.pro	2006-08-16 22:10:38 UTC (rev 268)
+@@ -4,9 +4,9 @@
+ 
+ FORMS = settingsdialog.ui logindialog.ui sessionsdialog.ui
+ 
+-SOURCES = main.cpp qtnxwindow.cpp qtnxsettings.cpp
++SOURCES = main.cpp qtnxwindow.cpp qtnxsettings.cpp qtnxsessions.cpp
+ 
+-HEADERS = qtnxwindow.h qtnxsettings.h
++HEADERS = qtnxwindow.h qtnxsettings.h qtnxsessions.h
+ 
+ INCLUDEPATH	+= $(QTDIR)/include . ..
+ 
+
+Modified: nxclientlib/qtnx/qtnxwindow.cpp
+===================================================================
+--- nxclientlib/qtnx/qtnxwindow.cpp	2006-08-16 20:38:03 UTC (rev 267)
++++ nxclientlib/qtnx/qtnxwindow.cpp	2006-08-16 22:10:38 UTC (rev 268)
+@@ -115,7 +115,9 @@
+ 	nxClient.setPassword(ui_lg.password-&gt;text());
+ 	nxClient.setResolution(dw.screenGeometry(this).width(), dw.screenGeometry(this).height());
+ 	nxClient.setDepth(info.depth());
+-	nxClient.setSession(&amp;session);
++	connect(&amp;nxClient, SIGNAL(resumeSessions(QList&lt;NXResumeData&gt;)), this, SLOT(loadResumeDialog(QList&lt;NXResumeData&gt;)));
++
++	//nxClient.setSession(&amp;session);
+ }
+ 
+ void QtNXWindow::configure()
+@@ -142,4 +144,25 @@
+ 		ui_lg.session-&gt;addItem(conn.left(conn.length()-5));
+ 	}
+ 	ui_lg.session-&gt;addItem(tr(&quot;Create new session&quot;));
+-}
+\ No newline at end of file
++}
++
++void QtNXWindow::loadResumeDialog(QList&lt;NXResumeData&gt; data)
++{
++	sessionsDialog = new QtNXSessions(data);
++	sessionsDialog-&gt;show();
++
++	connect(sessionsDialog, SIGNAL(newPressed()), this, SLOT(resumeNewPressed()));
++	connect(sessionsDialog, SIGNAL(resumePressed(QString)), this, SLOT(resumeResumePressed(QString)));
++}
++
++void QtNXWindow::resumeNewPressed()
++{
++	nxClient.setSession(&amp;session);
++}
++
++void QtNXWindow::resumeResumePressed(QString id)
++{
++	session.id = id;
++	session.suspended = true;
++	nxClient.setSession(&amp;session);
++}
+
+Modified: nxclientlib/qtnx/qtnxwindow.h
+===================================================================
+--- nxclientlib/qtnx/qtnxwindow.h	2006-08-16 20:38:03 UTC (rev 267)
++++ nxclientlib/qtnx/qtnxwindow.h	2006-08-16 22:10:38 UTC (rev 268)
+@@ -26,6 +26,7 @@
+ #include &quot;nxdata.h&quot;
+ #include &quot;nxparsexml.h&quot;
+ 
++#include &quot;qtnxsessions.h&quot;
+ #include &quot;qtnxsettings.h&quot;
+ 
+ #include &quot;ui_logindialog.h&quot;
+@@ -40,6 +41,9 @@
+ 		void startConnect();
+ 		void configure();
+ 		void configureClosed();
++		void loadResumeDialog(QList&lt;NXResumeData&gt;);
++		void resumeNewPressed();
++		void resumeResumePressed(QString);
+ 	private:
+ 		Ui::LoginDialog ui_lg;
+ 
+@@ -49,6 +53,7 @@
+ 		NXClientLib nxClient;
+ 		
+ 		QtNXSettings *settingsDialog;
++		QtNXSessions *sessionsDialog;
+ 		
+ 		QMenu *fileMenu;
+ 		QMenu *connectionMenu;
+
+Modified: nxclientlib/qtnx/sessionsdialog.ui
+===================================================================
+--- nxclientlib/qtnx/sessionsdialog.ui	2006-08-16 20:38:03 UTC (rev 267)
++++ nxclientlib/qtnx/sessionsdialog.ui	2006-08-16 22:10:38 UTC (rev 268)
+@@ -3,17 +3,17 @@
+  &lt;comment&gt;&lt;/comment&gt;
+  &lt;exportmacro&gt;&lt;/exportmacro&gt;
+  &lt;class&gt;SessionsDialog&lt;/class&gt;
+- &lt;widget class=&quot;QWidget&quot; name=&quot;SessionsDialog&quot; &gt;
++ &lt;widget class=&quot;QDialog&quot; name=&quot;SessionsDialog&quot; &gt;
+   &lt;property name=&quot;geometry&quot; &gt;
+    &lt;rect&gt;
+     &lt;x&gt;0&lt;/x&gt;
+     &lt;y&gt;0&lt;/y&gt;
+-    &lt;width&gt;746&lt;/width&gt;
+-    &lt;height&gt;278&lt;/height&gt;
++    &lt;width&gt;725&lt;/width&gt;
++    &lt;height&gt;260&lt;/height&gt;
+    &lt;/rect&gt;
+   &lt;/property&gt;
+   &lt;property name=&quot;windowTitle&quot; &gt;
+-   &lt;string&gt;Form&lt;/string&gt;
++   &lt;string&gt;Dialog&lt;/string&gt;
+   &lt;/property&gt;
+   &lt;layout class=&quot;QVBoxLayout&quot; &gt;
+    &lt;property name=&quot;margin&quot; &gt;
+@@ -23,10 +23,7 @@
+     &lt;number&gt;6&lt;/number&gt;
+    &lt;/property&gt;
+    &lt;item&gt;
+-    &lt;widget class=&quot;QTableWidget&quot; name=&quot;sessionsList&quot; &gt;
+-     &lt;property name=&quot;sortingEnabled&quot; &gt;
+-      &lt;bool&gt;false&lt;/bool&gt;
+-     &lt;/property&gt;
++    &lt;widget class=&quot;QTreeWidget&quot; name=&quot;sessionsList&quot; &gt;
+      &lt;column&gt;
+       &lt;property name=&quot;text&quot; &gt;
+        &lt;string&gt;Display&lt;/string&gt;
+@@ -44,11 +41,6 @@
+      &lt;/column&gt;
+      &lt;column&gt;
+       &lt;property name=&quot;text&quot; &gt;
+-       &lt;string&gt;New Column&lt;/string&gt;
+-      &lt;/property&gt;
+-     &lt;/column&gt;
+-     &lt;column&gt;
+-      &lt;property name=&quot;text&quot; &gt;
+        &lt;string&gt;Colour Depth&lt;/string&gt;
+       &lt;/property&gt;
+      &lt;/column&gt;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000397.html">[Freenx-cvs] r267 - nxclientlib/qtnx
+</A></li>
+	<LI>Next message: <A HREF="000399.html">[Freenx-cvs] r269 - nxclientlib/qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#398">[ date ]</a>
+              <a href="thread.html#398">[ thread ]</a>
+              <a href="subject.html#398">[ subject ]</a>
+              <a href="author.html#398">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

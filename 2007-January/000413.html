@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r283 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r283%20-%20freenx-server/trunk&In-Reply-To=%3C200701230215.l0N2FTAi010953%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000414.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r283 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r283%20-%20freenx-server/trunk&In-Reply-To=%3C200701230215.l0N2FTAi010953%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r283 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Tue Jan 23 03:15:29 CET 2007</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000414.html">[Freenx-cvs] r284 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#413">[ date ]</a>
+              <a href="thread.html#413">[ thread ]</a>
+              <a href="subject.html#413">[ subject ]</a>
+              <a href="author.html#413">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-01-23 03:15:28 +0100 (Tue, 23 Jan 2007)
+New Revision: 283
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxloadconfig
+Log:
+* Added version 2.1.0 support.
+* Fixed LD_LIBRARY_PRELOAD default path in nxloadconfig.
+* Added autodetection of backend.
+
+Prepared for release.
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-09-23 09:38:53 UTC (rev 282)
++++ freenx-server/trunk/ChangeLog	2007-01-23 02:15:28 UTC (rev 283)
+@@ -1,4 +1,4 @@
+-xx.xx.2006 FreeNX 0.6.0
++23.01.2007 FreeNX 0.6.0 &quot;Juliana birthday edition&quot;
+ 	* Opened the 0.6.0 branch.
+ 	* Added nxnode slave mode.
+ 	* General code cleanup.
+@@ -14,6 +14,9 @@
+ 	* Added example script for &quot;load&quot; based loadbalancing.
+ 	* Fixed spaces in parameters for NX Client 2.0.0.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">ssycplkbocve at spammotel.com</A>)
++	* Added version 2.1.0 support.
++	* Fixed LD_LIBRARY_PRELOAD default path in nxloadconfig.
++	* Added autodetection of backend.
+ 
+ 01.07.2006 FreeNX 0.5.0 &quot;UKUUG 2006 Edition&quot;
+ 	* Opened the 0.5.0 branch.
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2006-09-23 09:38:53 UTC (rev 282)
++++ freenx-server/trunk/nxloadconfig	2007-01-23 02:15:28 UTC (rev 283)
+@@ -52,7 +52,7 @@
+ # DO NOT TOUCH unless you REALLY know what you are doing
+ #########################################################################
+ 
+-NX_VERSION=1.5.0-60-SVN
++NX_VERSION=1.5.0-60
+ NX_LICENSE=&quot;OS (GPL)&quot;
+ 
+ # Where can different nx components be found
+@@ -171,7 +171,7 @@
+ 
+ # Misc directives
+ 
+-ENABLE_2_0_0_BACKEND=&quot;0&quot;
++ENABLE_2_0_0_BACKEND=&quot;&quot;
+ ENABLE_AUTORECONNECT=&quot;0&quot;
+ ENABLE_AUTORECONNECT_BEFORE_140=&quot;1&quot;
+ EXPORT_USERIP=&quot;0&quot;
+@@ -263,7 +263,12 @@
+ [ -z &quot;$AGENT_LIBRARY_PATH&quot; ] &amp;&amp; AGENT_LIBRARY_PATH=$PATH_LIB
+ [ -z &quot;$PROXY_LIBRARY_PATH&quot; ] &amp;&amp; PROXY_LIBRARY_PATH=$PATH_LIB
+ [ -z &quot;$APPLICATION_LIBRARY_PATH&quot; ] &amp;&amp; APPLICATION_LIBRARY_PATH=$PATH_LIB
+-[ -z &quot;$APPLICATION_LIBRARY_PRELOAD&quot; ] &amp;&amp; APPLICATION_LIBRARY_PRELOAD=&quot;$APPLICATION_LIBRARY_PATH/libX11.so.6.2:$APPLICATION_LIBRARY_PATH/libXext.so.6.4:$APPLICATION_LIBRARY_PATH/libXcomp.so.1:$APPLICATION_LIBRARY_PATH/libXcompext.so.1:$APPLICATION_LIBRARY_PATH/libXrender.so.1.2&quot;
++[ -z &quot;$APPLICATION_LIBRARY_PRELOAD&quot; ] &amp;&amp; APPLICATION_LIBRARY_PRELOAD=&quot;$APPLICATION_LIBRARY_PATH/libX11.so.6.2:$APPLICATION_LIBRARY_PATH/libXext.so.6.4:$APPLICATION_LIBRARY_PATH/libXcomp.so:$APPLICATION_LIBRARY_PATH/libXcompext.so.1:$APPLICATION_LIBRARY_PATH/libXrender.so.1.2&quot;
++if [ -z &quot;$ENABLE_2_0_0_BACKEND&quot; ]
++then
++	ENABLE_2_0_0_BACKEND=&quot;1&quot;
++	[ -z &quot;$(strings $PATH_BIN/nxagent | egrep 'NXAGENT - Version 2.[01].0')&quot; ] &amp;&amp; ENABLE_2_0_0_BACKEND=&quot;0&quot;
++fi 
+ 
+ [ -z &quot;$KDE_PRINTRC&quot; -a -n &quot;$KDEHOME&quot; ] &amp;&amp; KDE_PRINTRC=&quot;$KDEHOME/share/config/kdeprintrc&quot;
+ [ -z &quot;$KDE_PRINTRC&quot; -a -z &quot;$KDEHOME&quot; ] &amp;&amp; KDE_PRINTRC=&quot;$HOME/.kde/share/config/kdeprintrc&quot;
+@@ -504,8 +509,8 @@
+ 	[ -z $(echo &quot;$ENABLE_ROOTLESS_MODE&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_ROOTLESS_MODE=$ENABLE_ROOTLESS_MODE\&quot;&quot;
+ 
+-	[ -z &quot;$(strings $PATH_BIN/nxagent | egrep 'NXAGENT - Version 1.5.0|NXAGENT - Version 2.0.0')&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Could not find 1.5.0 or 2.0.0 version string in nxagent. NX 1.5.0 or 2.0.0 backend is needed for this version of FreeNX.&quot;
++	[ -z &quot;$(strings $PATH_BIN/nxagent | egrep 'NXAGENT - Version 1.5.0|NXAGENT - Version 2.[01].0')&quot; ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Could not find 1.5.0 or 2.[01].0 version string in nxagent. NX 1.5.0 or 2.[01].0 backend is needed for this version of FreeNX.&quot;
+ 		
+ 	[ -z $(echo &quot;$ENABLE_USESSION&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_USESSION=$ENABLE_USESSION\&quot;&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000414.html">[Freenx-cvs] r284 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#413">[ date ]</a>
+              <a href="thread.html#413">[ thread ]</a>
+              <a href="subject.html#413">[ subject ]</a>
+              <a href="author.html#413">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

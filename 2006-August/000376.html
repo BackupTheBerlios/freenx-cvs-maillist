@@ -1,0 +1,120 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r245 - nxclientlib
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r245%20-%20nxclientlib&In-Reply-To=%3C200608031846.k73Ik1kC003530%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000375.html">
+   <LINK REL="Next"  HREF="000377.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r245 - nxclientlib</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r245%20-%20nxclientlib&In-Reply-To=%3C200608031846.k73Ik1kC003530%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r245 - nxclientlib">gwright at mail.berlios.de
+       </A><BR>
+    <I>Thu Aug  3 20:46:01 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000375.html">[Freenx-cvs] r244 - in nxclientlib: . test
+</A></li>
+        <LI>Next message: <A HREF="000377.html">[Freenx-cvs] r246 - nxclientlib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#376">[ date ]</a>
+              <a href="thread.html#376">[ thread ]</a>
+              <a href="subject.html#376">[ subject ]</a>
+              <a href="author.html#376">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2006-08-03 20:45:57 +0200 (Thu, 03 Aug 2006)
+New Revision: 245
+
+Modified:
+   nxclientlib/nxclientlib.cpp
+   nxclientlib/nxclientlib.h
+Log:
+Use TCP port number as specified in <A HREF="http://www.nomachine.com/ar/view.php?ar_id=AR12B00115">http://www.nomachine.com/ar/view.php?ar_id=AR12B00115</A>
+
+
+Modified: nxclientlib/nxclientlib.cpp
+===================================================================
+--- nxclientlib/nxclientlib.cpp	2006-08-03 18:28:45 UTC (rev 244)
++++ nxclientlib/nxclientlib.cpp	2006-08-03 18:45:57 UTC (rev 245)
+@@ -159,7 +159,7 @@
+ 	if (proxyData.encrypted &amp;&amp; isFinished &amp;&amp; message.contains(&quot;NX&gt; 999 Bye&quot;)) {
+ 		QString returnMessage;
+ 		returnMessage = &quot;NX&gt; 299 Switching connection to: &quot;;
+-		returnMessage += proxyData.proxyIP + &quot;:33057&quot; + &quot; cookie: &quot; + proxyData.cookie + &quot;\n&quot;;
++		returnMessage += proxyData.proxyIP + &quot;:&quot; + QString::number(proxyData.port) + &quot; cookie: &quot; + proxyData.cookie + &quot;\n&quot;;
+ 		write(returnMessage);
+ 	}
+ 
+@@ -207,6 +207,7 @@
+ 		proxyData.id = message.right(message.length() - 20);
+ 	} else if (message.contains(&quot;NX&gt; 705 Session display: &quot;)) {
+ 		proxyData.display = message.right(message.length() - 24).toInt();
++		proxyData.port = proxyData.display + 4000;
+ 	} else if (message.contains(&quot;NX&gt; 706 Agent cookie: &quot;)) {
+ 		proxyData.cookie = message.right(message.length() - 22);
+ 	} else if (message.contains(&quot;NX&gt; 702 Proxy IP: &quot;)) {
+@@ -232,7 +233,11 @@
+ 	options.setFileName(QDir::homePath() + &quot;/.nx/S-&quot; + proxyData.id + &quot;/options&quot;);
+ 
+ 	QString data;
+-	data = &quot;nx,session=session,cookie=&quot; + proxyData.cookie + &quot;,root=&quot; + QDir::homePath() + &quot;/.nx,id=&quot; + proxyData.id + &quot;,listen=33057:&quot; + QString::number(proxyData.display) + &quot;\n&quot;;
++	if (proxyData.encrypted)
++		data = &quot;nx,session=session,cookie=&quot; + proxyData.cookie + &quot;,root=&quot; + QDir::homePath() + &quot;/.nx,id=&quot; + proxyData.id + &quot;,listen=&quot; + QString::number(proxyData.port) + &quot;:&quot; + QString::number(proxyData.display) + &quot;\n&quot;;
++	else
++		data = &quot;nx,session=session,cookie=&quot; + proxyData.cookie + &quot;,root=&quot; + QDir::homePath() + &quot;/.nx,id=&quot; + proxyData.id + &quot;:&quot; + QString::number(proxyData.display) + &quot;\n&quot;;
++	
+ 	options.open(QIODevice::WriteOnly);
+ 	options.write(data.toAscii());
+ 	options.close();
+
+Modified: nxclientlib/nxclientlib.h
+===================================================================
+--- nxclientlib/nxclientlib.h	2006-08-03 18:28:45 UTC (rev 244)
++++ nxclientlib/nxclientlib.h	2006-08-03 18:45:57 UTC (rev 245)
+@@ -34,6 +34,7 @@
+ 	QString cookie;
+ 	QString proxyIP;
+ 	bool encrypted;
++	int port;
+ };
+ 
+ class NXClientLib : public QObject
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000375.html">[Freenx-cvs] r244 - in nxclientlib: . test
+</A></li>
+	<LI>Next message: <A HREF="000377.html">[Freenx-cvs] r246 - nxclientlib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#376">[ date ]</a>
+              <a href="thread.html#376">[ thread ]</a>
+              <a href="subject.html#376">[ subject ]</a>
+              <a href="author.html#376">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

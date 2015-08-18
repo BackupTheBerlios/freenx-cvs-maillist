@@ -1,0 +1,139 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r121 - freenx-server/branches/FreeNX-0.4
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r121%20-%20freenx-server/branches/FreeNX-0.4&In-Reply-To=%3C200508100105.j7A15VDF029448%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000247.html">
+   <LINK REL="Next"  HREF="000249.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r121 - freenx-server/branches/FreeNX-0.4</H1>
+    <B>Fabian Franz at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r121%20-%20freenx-server/branches/FreeNX-0.4&In-Reply-To=%3C200508100105.j7A15VDF029448%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r121 - freenx-server/branches/FreeNX-0.4">fabianx at berlios.de
+       </A><BR>
+    <I>Wed Aug 10 03:05:31 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000247.html">[Freenx-cvs] r120 - freenx-server/branches/FreeNX-0.4
+</A></li>
+        <LI>Next message: <A HREF="000249.html">[Freenx-cvs] r122 - freenx-server/branches/FreeNX-0.4
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#248">[ date ]</a>
+              <a href="thread.html#248">[ thread ]</a>
+              <a href="subject.html#248">[ subject ]</a>
+              <a href="author.html#248">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2005-08-10 03:04:58 +0200 (Wed, 10 Aug 2005)
+New Revision: 121
+
+Modified:
+   freenx-server/branches/FreeNX-0.4/nxloadconfig
+   freenx-server/branches/FreeNX-0.4/nxsetup
+Log:
+Added lots of tests to nxloadconfig, which are enforced as checks for nxsetup now.
+
+
+Modified: freenx-server/branches/FreeNX-0.4/nxloadconfig
+===================================================================
+--- freenx-server/branches/FreeNX-0.4/nxloadconfig	2005-08-10 00:27:52 UTC (rev 120)
++++ freenx-server/branches/FreeNX-0.4/nxloadconfig	2005-08-10 01:04:58 UTC (rev 121)
+@@ -258,6 +258,19 @@
+ 	
+ 	[ ! -d &quot;$PATH_BIN&quot; ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;PATH_BIN=$PATH_BIN\&quot;&quot;
++	# Check for NX agents ...
++	
++	[ ! -f &quot;$PATH_BIN/nxagent&quot; ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Could not find nxagent in $PATH_BIN. Please install some OSS components.&quot;
++		
++	[ ! -f &quot;$PATH_BIN/nxdesktop&quot; ] &amp;&amp; \
++		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Could not find nxdesktop in $PATH_BIN. RDP sessions won't work.&quot;
++		
++	[ ! -f &quot;$PATH_BIN/nxviewer&quot; ] &amp;&amp; \
++		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Could not find nxviewer in $PATH_BIN. VNC sessions won't work.&quot;
++
++	# Check for paths
++		
+ 	[ ! -d &quot;$PATH_LIB&quot; ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;PATH_LIB=$PATH_LIB\&quot;&quot;
+ 	[ ! -d &quot;$NX_ETC_DIR&quot; ] &amp;&amp; \
+@@ -467,7 +480,19 @@
+ 
+ 	[ -z $(echo &quot;$ENABLE_ROOTLESS_MODE&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_ROOTLESS_MODE=$ENABLE_ROOTLESS_MODE\&quot;&quot;
++		
++	[ -z $(echo &quot;$ENABLE_1_5_0_BACKEND&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_1_5_0_BACKEND=$ENABLE_1_5_0_BACKEND\&quot;&quot;
++		
++	[ &quot;$ENABLE_ROOTLESS_MODE&quot; = &quot;1&quot; -a &quot;$ENABLE_1_5_0_BACKEND&quot; = &quot;0&quot; ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Rootless mode can just be used with 1.5.0 backend.&quot;
+ 
++	[ &quot;$ENABLE_1_5_0_BACKEND&quot; = &quot;1&quot; -a -z &quot;$(strings $PATH_BIN/nxagent | grep 'NXAGENT - Version 1.5.0')&quot; ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Could not find 1.5.0 version string in nxagent. NX 1.5.0 backend option must be used with 1.5.0 OSS components.&quot;
++
++	[ &quot;$ENABLE_1_5_0_BACKEND&quot; = &quot;0&quot; -a -n &quot;$(strings $PATH_BIN/nxagent | grep 'NXAGENT - Version 1.5.0')&quot; ] &amp;&amp; \
++		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: 1.5.0 OSS components found, but ENABLE_1_5_0 backend option is not set.&quot;
++
+ 	[ -z $(echo &quot;$ENABLE_USESSION&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_USESSION=$ENABLE_USESSION\&quot;&quot;
+ 	[ &quot;$ENABLE_USESSION&quot; = &quot;1&quot; ] &amp;&amp; ! which &quot;$COMMAND_SESSREG&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+
+Modified: freenx-server/branches/FreeNX-0.4/nxsetup
+===================================================================
+--- freenx-server/branches/FreeNX-0.4/nxsetup	2005-08-10 00:27:52 UTC (rev 120)
++++ freenx-server/branches/FreeNX-0.4/nxsetup	2005-08-10 01:04:58 UTC (rev 121)
+@@ -307,7 +307,7 @@
+ 	echo &quot;----&gt; Testing your nxserver configuration ...&quot;
+ 	. $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig) --check
+ 	echo &quot;&lt;---- done&quot;
+-	
++	echo &quot;&quot;
+ 	echo &quot;----&gt; Testing your nxserver connection ...&quot;
+ 	
+ 	CONNECTION=&quot;&quot;
+@@ -340,6 +340,7 @@
+ 		exit 1
+ 	fi
+ 	echo &quot;&lt;--- done&quot;
++	echo &quot;&quot;
+ }
+ 
+ uninstall_nx() 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000247.html">[Freenx-cvs] r120 - freenx-server/branches/FreeNX-0.4
+</A></li>
+	<LI>Next message: <A HREF="000249.html">[Freenx-cvs] r122 - freenx-server/branches/FreeNX-0.4
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#248">[ date ]</a>
+              <a href="thread.html#248">[ thread ]</a>
+              <a href="subject.html#248">[ subject ]</a>
+              <a href="author.html#248">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

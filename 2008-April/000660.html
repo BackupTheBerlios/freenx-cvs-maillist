@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r537 - trunk/freenx-server
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-April/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r537%20-%20trunk/freenx-server&In-Reply-To=%3C200804012029.m31KTs2C030563%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000661.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r537 - trunk/freenx-server</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r537%20-%20trunk/freenx-server&In-Reply-To=%3C200804012029.m31KTs2C030563%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r537 - trunk/freenx-server">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Tue Apr  1 22:29:54 CEST 2008</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000661.html">[Freenx-cvs] r538 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#660">[ date ]</a>
+              <a href="thread.html#660">[ thread ]</a>
+              <a href="subject.html#660">[ subject ]</a>
+              <a href="author.html#660">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-04-01 22:29:53 +0200 (Tue, 01 Apr 2008)
+New Revision: 537
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxnode
+Log:
+* Added -nolisten tcp to nxagent invocation.
+  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>, idea by  pappy- (Gentoo))
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-03-27 18:54:08 UTC (rev 536)
++++ trunk/freenx-server/ChangeLog	2008-04-01 20:29:53 UTC (rev 537)
+@@ -4,6 +4,8 @@
+ 	  to auth.log via syslog (3). This can be disabled by 
+ 	  setting ENABLE_LOG_FAILED_LOGINS=&quot;0&quot;.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Added -nolisten tcp to nxagent invocation.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>, idea by  pappy- (Gentoo))
+ 
+ 14.03.2008 FreeNX 0.7.2 &quot;Priscilla Edition&quot;
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxnode
+===================================================================
+--- trunk/freenx-server/nxnode	2008-03-27 18:54:08 UTC (rev 536)
++++ trunk/freenx-server/nxnode	2008-04-01 20:29:53 UTC (rev 537)
+@@ -525,7 +525,7 @@
+ 		
+ 		# Start the agent
+ 		
+-		PATH=&quot;$PATH_BIN:$PATH&quot; $PATH_BIN/nxagent $P $R -name &quot;NX - $user@$SERVER_NAME:$display - $session (GPL Edition)&quot; -option &quot;$USER_FAKE_HOME/.nx/C-$sess_id/options&quot; $K $G $B $FP $AGENT_EXTRA_OPTIONS_X :$display 2&gt;&amp;3 &amp;
++		PATH=&quot;$PATH_BIN:$PATH&quot; $PATH_BIN/nxagent $P $R -nolisten tcp -name &quot;NX - $user@$SERVER_NAME:$display - $session (GPL Edition)&quot; -option &quot;$USER_FAKE_HOME/.nx/C-$sess_id/options&quot; $K $G $B $FP $AGENT_EXTRA_OPTIONS_X :$display 2&gt;&amp;3 &amp;
+ 	fi
+ 	
+ 	#
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000661.html">[Freenx-cvs] r538 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#660">[ date ]</a>
+              <a href="thread.html#660">[ thread ]</a>
+              <a href="subject.html#660">[ subject ]</a>
+              <a href="author.html#660">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

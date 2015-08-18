@@ -1,0 +1,108 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r564 - trunk/freenx-server
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r564%20-%20trunk/freenx-server&In-Reply-To=%3C200808052252.m75MqWiW013551%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000697.html">
+   <LINK REL="Next"  HREF="000699.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r564 - trunk/freenx-server</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r564%20-%20trunk/freenx-server&In-Reply-To=%3C200808052252.m75MqWiW013551%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r564 - trunk/freenx-server">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Wed Aug  6 00:52:32 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000697.html">[Freenx-cvs] r563 - trunk/freenx-server
+</A></li>
+        <LI>Next message: <A HREF="000699.html">[Freenx-cvs] r565 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#698">[ date ]</a>
+              <a href="thread.html#698">[ thread ]</a>
+              <a href="subject.html#698">[ subject ]</a>
+              <a href="author.html#698">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-08-06 00:52:30 +0200 (Wed, 06 Aug 2008)
+New Revision: 564
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxdesktop_helper
+Log:
+* Allow passwords with special chars by using new url_decode on
+  agent_password. (Closes: #10248)
+  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-05 22:26:11 UTC (rev 563)
++++ trunk/freenx-server/ChangeLog	2008-08-05 22:52:30 UTC (rev 564)
+@@ -66,8 +66,10 @@
+ 	* Allow passwords with '\' by changing read -s to read -r -s.
+ 	  (Closes: #10699)
+ 	  (Patch by <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">rpfuller at bat.berlios.de</A>, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Allow passwords with special chars by using new url_decode on
++	  agent_password. (Closes: #10248)
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
+-
+ 14.03.2008 FreeNX 0.7.2 &quot;Priscilla Edition&quot;
+ 	* Opened the 0.7.2 development.
+ 	* Fixed the display of local sessions to display only 
+
+Modified: trunk/freenx-server/nxdesktop_helper
+===================================================================
+--- trunk/freenx-server/nxdesktop_helper	2008-08-05 22:26:11 UTC (rev 563)
++++ trunk/freenx-server/nxdesktop_helper	2008-08-05 22:52:30 UTC (rev 564)
+@@ -33,6 +33,10 @@
+ # Remove urlencoding
+ windows_app=$(url_decode &quot;$windows_app&quot;)
+ 
++# we need to do this twice as nxclient is doing this twice ... uh ...
++agent_password=$(url_decode &quot;$agent_password&quot;)
++agent_password=$(url_decode &quot;$agent_password&quot;)
++
+ # setup commandline
+ set -- -u &quot;$agent_user&quot; -k &quot;$agent_keyboard&quot; -d &quot;$agent_domain&quot; -f -s &quot;$windows_app&quot; $AGENT_EXTRA_OPTIONS_RDP &quot;$agent_server&quot;
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000697.html">[Freenx-cvs] r563 - trunk/freenx-server
+</A></li>
+	<LI>Next message: <A HREF="000699.html">[Freenx-cvs] r565 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#698">[ date ]</a>
+              <a href="thread.html#698">[ thread ]</a>
+              <a href="subject.html#698">[ subject ]</a>
+              <a href="author.html#698">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

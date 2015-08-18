@@ -1,0 +1,250 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r472 - nxcl/lib
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r472%20-%20nxcl/lib&In-Reply-To=%3C200802050736.m157axAf030568%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000597.html">
+   <LINK REL="Next"  HREF="000599.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r472 - nxcl/lib</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r472%20-%20nxcl/lib&In-Reply-To=%3C200802050736.m157axAf030568%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r472 - nxcl/lib">gwright at mail.berlios.de
+       </A><BR>
+    <I>Tue Feb  5 08:36:59 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000597.html">[Freenx-cvs] r471 - qtnx
+</A></li>
+        <LI>Next message: <A HREF="000599.html">[Freenx-cvs] r473 - qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#598">[ date ]</a>
+              <a href="thread.html#598">[ thread ]</a>
+              <a href="subject.html#598">[ subject ]</a>
+              <a href="author.html#598">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2008-02-05 08:36:58 +0100 (Tue, 05 Feb 2008)
+New Revision: 472
+
+Modified:
+   nxcl/lib/nxclientlib.cpp
+Log:
+Windows support - working
+
+
+Modified: nxcl/lib/nxclientlib.cpp
+===================================================================
+--- nxcl/lib/nxclientlib.cpp	2008-02-05 02:46:11 UTC (rev 471)
++++ nxcl/lib/nxclientlib.cpp	2008-02-05 07:36:58 UTC (rev 472)
+@@ -685,7 +685,7 @@
+ 
+     string x11Display = &quot;&quot;;
+ 
+-#if NXCL_DARWIN
++#if NXCL_DARWIN || NXCL_CYGWIN
+     x11Display = &quot;,display=:0.0&quot;;
+ #endif
+ 
+@@ -742,106 +742,101 @@
+     // Invoke NXWin.exe on Windows machines
+ 
+     // See if XAUTHORITY path is set
++
+     stringstream xauthority;
+ 
+-    xauthority &lt;&lt; getenv(&quot;XAUTHORITY&quot;);
++    xauthority &lt;&lt; getenv(&quot;HOME&quot;) &lt;&lt; &quot;/.Xauthority&quot;;
+ 
+-    if (xauthority.str().empty()) {
+-        // We hardcode XAUTHORITY to $HOME/.Xauthority
+-        xauthority &lt;&lt; getenv(&quot;HOME&quot;) &lt;&lt; &quot;/.Xauthority&quot;;
+-    }
++    // Now we set the environment variable
++    setenv(&quot;XAUTHORITY&quot;, xauthority.str().c_str(), 1);
+ 
+-    // Now we add a cookie to this auth file
+-
+-    char hostname[256];
+-
+-    gethostname(hostname, 256);
+-
+-    string cookie = getSession()-&gt;generateCookie();
+-    stringstream domain;
+-
+-    domain &lt;&lt; getenv(&quot;HOME&quot;) &lt;&lt; &quot;:0.0&quot;;
+-
+-    list&lt;string&gt; nxauthArguments;
+-
+-    // These arguments taken from the 2X GPL client
+-    // We're going to assume that nxauth is in PATH
+-    nxauthArguments.push_back(&quot;nxauth&quot;);
+-    nxauthArguments.push_back(&quot;-i&quot;);
+-    nxauthArguments.push_back(&quot;-f&quot;);
+-    nxauthArguments.push_back(xauthority.str());
+-    nxauthArguments.push_back(&quot;add&quot;);
+-    nxauthArguments.push_back(domain.str());
+-    nxauthArguments.push_back(&quot;MIT-MAGIC-COOKIE-1&quot;);
+-    nxauthArguments.push_back(cookie);
+-
+-    this-&gt;nxauthProcess-&gt;setCallbacks (&amp;callbacks);
+-
+-    this-&gt;nxauthProcess-&gt;start(&quot;nxauth&quot;, nxauthArguments);
+-
+-    if (this-&gt;nxauthProcess-&gt;waitForStarted() == false) {
+-        this-&gt;externalCallbacks-&gt;write
+-            (NXCL_PROCESS_ERROR, _(&quot;Error starting nxauth!&quot;));
+-        this-&gt;isFinished = true;
+-    }
+-
+     // Now we actually start NXWin.exe
+-
+     list&lt;string&gt; nxwinArguments;
+ 
+     // Arguments taken from 2X
+     nxwinArguments.push_back(&quot;NXWin&quot;);
+-    nxwinArguments.push_back(&quot;-auth&quot;);
+ 
+-    stringstream xauthPath;
+-    xauthPath &lt;&lt; &quot;'&quot; &lt;&lt; xauthority.str() &lt;&lt; &quot;'&quot;;
+-
+-    nxwinArguments.push_back(xauthPath.str());
+     nxwinArguments.push_back(&quot;-nowinkill&quot;);
+     nxwinArguments.push_back(&quot;-clipboard&quot;);
+     nxwinArguments.push_back(&quot;-noloadxkb&quot;);
++    nxwinArguments.push_back(&quot;-agent&quot;);
++    nxwinArguments.push_back(&quot;-hide&quot;);
++    nxwinArguments.push_back(&quot;-noreset&quot;);
++    nxwinArguments.push_back(&quot;-nolisten&quot;);
++    nxwinArguments.push_back(&quot;tcp&quot;);
+ 
+     // TODO: If rootless, append &quot;-multiwindow&quot; and &quot;-hide&quot; but only
+     // hide if not restoring
+ 
+-    // Now we set up the font paths. By default this is $PWD/usr/X11R6/...
++    // Now we set up the font paths. By default this is $NX_SYSTEM/usr/X11R6/...
+ 
+     stringstream fontPath;
+ 
+-    fontPath &lt;&lt; &quot;\&quot;&quot; &lt;&lt; &quot;usr/X11R6/lib/X11/fonts/TTF&quot; &lt;&lt; &quot;\&quot;,&quot;
+-        &lt;&lt; &quot;\&quot;&quot; &lt;&lt; &quot;usr/X11R6/lib/X11/fonts/misc&quot; &lt;&lt; &quot;\&quot;,&quot;
+-        &lt;&lt; &quot;\&quot;&quot; &lt;&lt; &quot;usr/X11R6/lib/X11/fonts/Speedo&quot; &lt;&lt; &quot;\&quot;,&quot;
+-        &lt;&lt; &quot;\&quot;&quot; &lt;&lt; &quot;usr/X11R6/lib/X11/fonts/Type1&quot; &lt;&lt; &quot;\&quot;,&quot;
+-        &lt;&lt; &quot;\&quot;&quot; &lt;&lt; &quot;usr/X11R6/lib/X11/fonts/75dpi&quot; &lt;&lt; &quot;\&quot;,&quot;
+-        &lt;&lt; &quot;\&quot;&quot; &lt;&lt; &quot;usr/X11R6/lib/X11/fonts/100dpi&quot; &lt;&lt; &quot;\&quot;&quot;;
++    fontPath &lt;&lt; getenv(&quot;NX_SYSTEM&quot;) &lt;&lt; &quot;/X11R6/lib/X11/fonts/base,&quot;
++        &lt;&lt; getenv(&quot;NX_SYSTEM&quot;) &lt;&lt; &quot;/X11R6/lib/X11/fonts/TTF&quot;;
+ 
+     nxwinArguments.push_back(&quot;-fp&quot;);
+     nxwinArguments.push_back(fontPath.str());
+-    nxwinArguments.push_back(&quot;-agent&quot;);
+-    nxwinArguments.push_back(&quot;-emulate3buttons&quot;);
+-    nxwinArguments.push_back(&quot;-hide&quot;);
+-    nxwinArguments.push_back(&quot;-noreset&quot;);
++
+     nxwinArguments.push_back(&quot;-name&quot;);
+     nxwinArguments.push_back(&quot;NXWin&quot;);
+-    nxwinArguments.push_back(&quot;0&quot;);
++    nxwinArguments.push_back(&quot;:0&quot;);
+ 
+     nxwinArguments.push_back(&quot;-screen&quot;);
+     nxwinArguments.push_back(&quot;0&quot;);
+ 
+-    char* dimensions = strtok(const_cast&lt;char*&gt;(resolution.c_str()), &quot;x&quot;);
++    nxwinArguments.push_back(resolution);
+ 
+-    while (dimensions != NULL) {
+-        nxwinArguments.push_back(dimensions);
+-        dimensions = strtok(NULL, &quot;x&quot;);
+-    }
++    nxwinArguments.push_back(&quot;:0&quot;);
++    nxwinArguments.push_back(&quot;-nokeyhook&quot;);
+ 
+-    this-&gt;x11Process-&gt;start(&quot;nxwin&quot;, nxwinArguments);
++    string nxwinPath = this-&gt;getPath(&quot;nxwin&quot;);
+ 
++    this-&gt;x11Process-&gt;start(nxwinPath, nxwinArguments);
++
++    this-&gt;x11Probe = true;
++
+     if (this-&gt;x11Process-&gt;waitForStarted() == false) {
+         this-&gt;externalCallbacks-&gt;write
+             (NXCL_PROCESS_ERROR, _(&quot;Error starting nxwin!&quot;));
+         this-&gt;isFinished = true;
+     }
++
++    this-&gt;x11Probe = false;
++
++    list&lt;string&gt; nxauthArguments;
++
++    char hostname[256];
++
++    gethostname(hostname, 256);
++
++    string cookie = getSession()-&gt;generateCookie();
++    cookie.resize(32);
++
++    stringstream domain;
++
++    domain &lt;&lt; hostname &lt;&lt; &quot;/unix:0&quot;;
++
++    // These arguments taken from the 2X GPL client
++    // We're going to assume that nxauth is in PATH
++    nxauthArguments.push_back(&quot;nxauth&quot;);
++    nxauthArguments.push_back(&quot;-i&quot;);
++    nxauthArguments.push_back(&quot;-f&quot;);
++    nxauthArguments.push_back(xauthority.str());
++    nxauthArguments.push_back(&quot;add&quot;);
++    nxauthArguments.push_back(domain.str());
++    nxauthArguments.push_back(&quot;MIT-MAGIC-COOKIE-1&quot;);
++    nxauthArguments.push_back(cookie);
++
++    this-&gt;nxauthProcess-&gt;setCallbacks (&amp;callbacks);
++
++    this-&gt;nxauthProcess-&gt;start(&quot;nxauth&quot;, nxauthArguments);
++
++    if (this-&gt;nxauthProcess-&gt;waitForStarted() == false) {
++        this-&gt;externalCallbacks-&gt;write
++            (NXCL_PROCESS_ERROR, _(&quot;Error starting nxauth!&quot;));
++        this-&gt;isFinished = true;
++    }
+ #endif
+ }
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000597.html">[Freenx-cvs] r471 - qtnx
+</A></li>
+	<LI>Next message: <A HREF="000599.html">[Freenx-cvs] r473 - qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#598">[ date ]</a>
+              <a href="thread.html#598">[ thread ]</a>
+              <a href="subject.html#598">[ subject ]</a>
+              <a href="author.html#598">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

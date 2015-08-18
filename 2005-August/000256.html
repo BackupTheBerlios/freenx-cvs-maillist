@@ -1,0 +1,169 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r129 - / freenx-server/branches/FreeNX-0.4
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r129%20-%20/%20freenx-server/branches/FreeNX-0.4&In-Reply-To=%3C200508190803.j7J83GV7026996%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000255.html">
+   <LINK REL="Next"  HREF="000257.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r129 - / freenx-server/branches/FreeNX-0.4</H1>
+    <B>Thorsten Sandfuchs at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r129%20-%20/%20freenx-server/branches/FreeNX-0.4&In-Reply-To=%3C200508190803.j7J83GV7026996%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r129 - / freenx-server/branches/FreeNX-0.4">fux at berlios.de
+       </A><BR>
+    <I>Fri Aug 19 10:03:16 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000255.html">[Freenx-cvs] r128 - / freenx-server/branches/FreeNX-0.4
+</A></li>
+        <LI>Next message: <A HREF="000257.html">[Freenx-cvs] r130 - / freenx-server/branches/FreeNX-0.4
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#256">[ date ]</a>
+              <a href="thread.html#256">[ thread ]</a>
+              <a href="subject.html#256">[ subject ]</a>
+              <a href="author.html#256">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fux
+Date: 2005-08-19 10:02:59 +0200 (Fri, 19 Aug 2005)
+New Revision: 129
+
+Modified:
+   /
+   freenx-server/branches/FreeNX-0.4/ChangeLog
+   freenx-server/branches/FreeNX-0.4/nxloadconfig
+   freenx-server/branches/FreeNX-0.4/nxsetup
+Log:
+implemented --ignore-errors on nxloadconfig/nxsetup for broken setups
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1280
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1282
+
+Modified: freenx-server/branches/FreeNX-0.4/ChangeLog
+===================================================================
+--- freenx-server/branches/FreeNX-0.4/ChangeLog	2005-08-18 20:45:27 UTC (rev 128)
++++ freenx-server/branches/FreeNX-0.4/ChangeLog	2005-08-19 08:02:59 UTC (rev 129)
+@@ -2,6 +2,7 @@
+ 	* Made nxsetup more user-friendly and hopefully finally failsafe.
+ 	* Added --agent to nxnode/nxserver to allow easier debugging.
+ 	* Added addgroup/groupadd to nxsetup
++	* Added --ignore-errors support on nxsetup/nxloadconfig
+ 
+ 06.08.2005 FreeNX 0.4.4 &quot;UKUUG Enterprise Edition&quot;
+ 	* Added ENABLE_1_5_0_BACKEND configuration directive:
+
+Modified: freenx-server/branches/FreeNX-0.4/nxloadconfig
+===================================================================
+--- freenx-server/branches/FreeNX-0.4/nxloadconfig	2005-08-18 20:45:27 UTC (rev 128)
++++ freenx-server/branches/FreeNX-0.4/nxloadconfig	2005-08-19 08:02:59 UTC (rev 129)
+@@ -16,12 +16,14 @@
+ HELP=&quot;no&quot;
+ CHECK=&quot;no&quot;
+ USERCONF=&quot;no&quot;
++NXLCFG_IGNORE_ERRORS=&quot;no&quot;
+ 
+ while [ &quot;$1&quot; ]
+ do
+ 	case &quot;$1&quot; in
+ 		--help) HELP=&quot;yes&quot;; shift ;;
+ 		--check) CHECK=&quot;yes&quot;; shift ;;
++		--ignore-errors) NXLCFG_IGNORE_ERRORS=&quot;yes&quot;; shift;;
+ 		--userconf) USERCONF=&quot;yes&quot; ; 
+ 					case &quot;$2&quot; in
+ 						&quot;&quot; | --*) shift ;;
+@@ -39,6 +41,7 @@
+ 	echo &quot;        nxloadconfig [--check] [--userconf [&lt;username&gt;]]&quot;
+ 	echo
+ 	echo &quot;  --check                  Write errors to standard output.&quot;
++	echo &quot;	--ignore-errors		 just warn, and don't exit with a error, if errors occure&quot;
+ 	echo &quot;  --userconf [&lt;username&gt;]  Parse &lt;username&gt;.node.conf as well as node.conf.&quot;
+ 	echo &quot;                           Assume current user if no username is specified.&quot;
+ 	exit 0
+@@ -518,7 +521,7 @@
+ 		echo &quot;  Errors occured during config check.&quot;
+ 		echo &quot;  Please correct the configuration file.&quot;
+ 		echo
+-		exit 1
++		[ &quot;$NXLCFG_IGNORE_ERRORS&quot; = &quot;no&quot; ] &amp;&amp; echo $NXLCFG_IGNORE_ERRORS exit1 &amp;&amp; exit 1 || exit 0
+ 	elif [ &quot;$WARNING&quot; = &quot;yes&quot; ]
+ 	then
+ 		echo
+
+Modified: freenx-server/branches/FreeNX-0.4/nxsetup
+===================================================================
+--- freenx-server/branches/FreeNX-0.4/nxsetup	2005-08-18 20:45:27 UTC (rev 128)
++++ freenx-server/branches/FreeNX-0.4/nxsetup	2005-08-19 08:02:59 UTC (rev 129)
+@@ -23,12 +23,14 @@
+ SETUP_SSH2_KEY=&quot;no&quot;
+ BUILD_KNOWN_HOSTS=&quot;yes&quot;
+ AUTOMATIC=&quot;no&quot;
++IGNORE_ERRORS=&quot;no&quot;
+ 
+ while [ &quot;$1&quot; ]
+ do
+ 	case &quot;$1&quot; in
+ 		--help) HELP=&quot;yes&quot;; shift ;;
+ 		--install) INSTALL=&quot;yes&quot;; shift ;;
++		--ignore-errors) IGNORE_ERRORS=&quot;yes&quot;; shift;;
+ 		--setup-nomachine-key) SETUP_NOMACHINE_KEY=&quot;yes&quot;; shift ;;
+ 		--ssh2) SETUP_SSH2_KEY=&quot;yes&quot;; shift;;
+ 		--dont-build-known-hosts) BUILD_KNOWN_HOSTS=&quot;no&quot;; shift;;
+@@ -76,6 +78,7 @@
+ 	echo
+ 	echo &quot;  --help                 Displays this help message&quot;
+ 	echo &quot;  --install              Install nessesary files and add the nx user&quot;
++	echo &quot;	--ignore-errors	       check false configuration, but don't complain&quot;
+ 	echo &quot;  --setup-nomachine-key  Allow login with the key shipped with the NoMachine&quot;
+ 	echo &quot;                         client. This is not as secure, but it simplifies the &quot;
+ 	echo &quot;                         configuration of clients.&quot;
+@@ -322,7 +325,8 @@
+ {
+ 	echo &quot;&quot;
+ 	echo &quot;----&gt; Testing your nxserver configuration ...&quot;
+-	. $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig) --check
++	[ &quot;$IGNORE_ERRORS&quot; = &quot;yes&quot; ] &amp;&amp; $NO_ERRORS=&quot;--ignore-errors&quot;
++	. $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig) --check $NO_ERRORS
+ 	echo &quot;&lt;---- done&quot;
+ 	echo &quot;&quot;
+ 	echo &quot;----&gt; Testing your nxserver connection ...&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000255.html">[Freenx-cvs] r128 - / freenx-server/branches/FreeNX-0.4
+</A></li>
+	<LI>Next message: <A HREF="000257.html">[Freenx-cvs] r130 - / freenx-server/branches/FreeNX-0.4
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#256">[ date ]</a>
+              <a href="thread.html#256">[ thread ]</a>
+              <a href="subject.html#256">[ subject ]</a>
+              <a href="author.html#256">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

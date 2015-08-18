@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r372 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r372%20-%20freenx-server/trunk&In-Reply-To=%3C200708191544.l7JFiHkt007049%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000503.html">
+   
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r372 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r372%20-%20freenx-server/trunk&In-Reply-To=%3C200708191544.l7JFiHkt007049%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r372 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Sun Aug 19 17:44:17 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000503.html">[Freenx-cvs] r371 - in freenx-redesign/server: . utility
+</A></li>
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#504">[ date ]</a>
+              <a href="thread.html#504">[ thread ]</a>
+              <a href="subject.html#504">[ subject ]</a>
+              <a href="author.html#504">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-08-19 17:44:16 +0200 (Sun, 19 Aug 2007)
+New Revision: 372
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxkeygen
+Log:
+* Fix ownership of $SSH_AUTHORIZED_KEYS in nxkeygen, just in case
+  it is run without nxsetup.
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-08-12 06:03:41 UTC (rev 371)
++++ freenx-server/trunk/ChangeLog	2007-08-19 15:44:16 UTC (rev 372)
+@@ -40,6 +40,9 @@
+ 	  * Added an outcommented way to also use &quot;POSIX find&quot; for history
+ 	    cleaning.
+ 	  (Peter O'Gorman &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">peter at pogma.com</A>&gt;)
++	* Fix ownership of $SSH_AUTHORIZED_KEYS in nxkeygen, just in case
++	  it is run without nxsetup.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>, thx to sambiase on #nx)
+ 
+ 07.07.2007 FreeNX 0.7.0 &quot;Jornade SPL Edition VI+1&quot;
+ 	* Fixed the printing support for CUPS 1.2.
+
+Modified: freenx-server/trunk/nxkeygen
+===================================================================
+--- freenx-server/trunk/nxkeygen	2007-08-12 06:03:41 UTC (rev 371)
++++ freenx-server/trunk/nxkeygen	2007-08-19 15:44:16 UTC (rev 372)
+@@ -56,6 +56,10 @@
+ 	echo -n &quot;no-port-forwarding,no-agent-forwarding,command=\&quot;$PATH_BIN/nxserver\&quot; &quot; &gt;$NX_KEY_DIR/$SSH_AUTHORIZED_KEYS
+ 	cat ${NX_SERVER_KEY} &gt;&gt; $NX_KEY_DIR/$SSH_AUTHORIZED_KEYS
+ 
++	# Fix ownership of $SSH_AUTHORIZED_KEYS, just in case nxkeygen is run without nxsetup.
++
++	chown nx:root $NX_KEY_DIR/$SSH_AUTHORIZED_KEYS
++
+ 	# now tell the user what to do
+ 
+ 	echo &quot;Unique key generated; your users must install&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000503.html">[Freenx-cvs] r371 - in freenx-redesign/server: . utility
+</A></li>
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#504">[ date ]</a>
+              <a href="thread.html#504">[ thread ]</a>
+              <a href="subject.html#504">[ subject ]</a>
+              <a href="author.html#504">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

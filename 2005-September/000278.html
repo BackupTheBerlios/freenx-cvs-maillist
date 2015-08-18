@@ -1,0 +1,368 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r151 - in freenx-website: . manke
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r151%20-%20in%20freenx-website%3A%20.%20manke&In-Reply-To=%3C200509010217.j812HJA3031714%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000279.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r151 - in freenx-website: . manke</H1>
+    <B>Fabian Franz at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r151%20-%20in%20freenx-website%3A%20.%20manke&In-Reply-To=%3C200509010217.j812HJA3031714%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r151 - in freenx-website: . manke">fabianx at berlios.de
+       </A><BR>
+    <I>Thu Sep  1 04:17:19 CEST 2005</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000279.html">[Freenx-cvs] r152 - freenx-website/manke
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#278">[ date ]</a>
+              <a href="thread.html#278">[ thread ]</a>
+              <a href="subject.html#278">[ subject ]</a>
+              <a href="author.html#278">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2005-09-01 04:17:03 +0200 (Thu, 01 Sep 2005)
+New Revision: 151
+
+Added:
+   freenx-website/manke/
+   freenx-website/manke/index.html
+   freenx-website/manke/nxapplet.jar
+   freenx-website/manke/testdrive.nxs
+Log:
+Test for Manke on XP.
+
+
+Added: freenx-website/manke/index.html
+===================================================================
+--- freenx-website/manke/index.html	2005-08-31 20:42:30 UTC (rev 150)
++++ freenx-website/manke/index.html	2005-09-01 02:17:03 UTC (rev 151)
+@@ -0,0 +1,169 @@
++&lt;!--
++/**************************************************************************/
++/*                                                                        */
++/* Copyright (c) 2004, 2005 NoMachine, <A HREF="http://www.nomachine.com.">http://www.nomachine.com.</A>          */
++/*                                                                        */
++/* NXAPPLET, NX protocol compression and NX extensions to this software   */
++/* are copyright of NoMachine. Redistribution and use of the present      */
++/* software is allowed according to terms specified in the file LICENSE   */
++/* which comes in the source distribution.                                */
++/*                                                                        */
++/* Check <A HREF="http://www.nomachine.com/licensing.html">http://www.nomachine.com/licensing.html</A> for applicability.       */
++/*                                                                        */
++/* NX and NoMachine are trademarks of Medialogic S.p.A.                   */
++/*                                                                        */
++/* All rights reserved.                                                   */
++/*                                                                        */
++/**************************************************************************/
++
++This file is provided as an example, you can freely personalize it to fit
++your needs.
++--&gt;
++
++&lt;HTML&gt;
++    &lt;HEAD&gt;
++        &lt;META HTTP-EQUIV=&quot;expires&quot; CONTENT=&quot;0&quot;&gt;
++        &lt;META HTTP-EQUIV=&quot;Pragma&quot; CONTENT=&quot;no-cache&quot;&gt;
++        &lt;META HTTP-EQUIV=&quot;Cache-Control&quot; CONTENT=&quot;no-cache&quot;&gt;
++    &lt;/HEAD&gt;
++
++    &lt;BODY&gt;
++        &lt;SCRIPT LANGUAGE=&quot;Javascript1.1&quot;&gt;
++            &lt;!-- hide JavaScript from non-JavaScript browsers--&gt;
++            SOWIN = (navigator.userAgent.toLowerCase().indexOf(&quot;win&quot;) &gt; -1) ? 1 : 0;
++            SOMAC = (navigator.userAgent.toLowerCase().indexOf(&quot;mac&quot;) &gt; -1) ? 1 : 0;
++            SOLIN = (navigator.userAgent.toLowerCase().indexOf(&quot;linux&quot;) &gt; -1) ? 1 : 0;
++            SOSOL = (navigator.userAgent.toLowerCase().indexOf(&quot;Solaris&quot;) &gt; -1) ? 1 : 0;
++            SOALT = (!SOWIN &amp;&amp; !SOMAC &amp;&amp; !SOLIN &amp;&amp; !SOSOL) ? 1 : 0;
++            var agt=navigator.userAgent.toLowerCase();
++            var is_nav = ((agt.indexOf('mozilla')!=-1) &amp;&amp; (agt.indexOf('spoofer')==-1) &amp;&amp; (agt.indexOf('compatible') == -1) &amp;&amp; (agt.indexOf('opera')==-1) &amp;&amp; (agt.indexOf('webtv')==-1) &amp;&amp; (agt.indexOf('hotjava')==-1));
++            var is_ie = ((agt.indexOf(&quot;msie&quot;) != -1) &amp;&amp; (agt.indexOf(&quot;opera&quot;) == -1));
++            var pluginDetected = false;
++
++            if (is_nav &amp;&amp; !SOMAC)
++            {
++                for (i = 0; i &lt; navigator.plugins.length; i++)
++                {
++                if (navigator.plugins[i].description.indexOf(&quot;Java&quot;) != -1)
++                    {
++                        pluginDetected = true;
++                        document.writeln('&lt;APPLET ARCHIVE=&quot;nxapplet.jar&quot;  CODE=&quot;NXApplet.class&quot; NAME= &quot;nxapplet&quot; width=&quot;400&quot; height=&quot;300&quot;&gt;');
++                        break;
++                    }
++                }
++            if (pluginDetected == false)
++            {
++                document.write(&quot;&lt;BR&gt;You haven't a suitable Java Plugin installed.&quot;);
++                document.write(&quot;&lt;BR&gt;Please, download and install the jre from the Sun site:&quot;);
++                if (SOWIN) document.write('&lt;a href=&quot;' + '<A HREF="http://plugindoc.mozdev.org/windows.html#Java">http://plugindoc.mozdev.org/windows.html#Java</A>&quot;&gt;Click here to download the plugin&lt;/a&gt;');
++                if (SOLIN) document.write('&lt;a href=&quot;' + '<A HREF="http://plugindoc.mozdev.org/linux.html#Java">http://plugindoc.mozdev.org/linux.html#Java</A>&quot;&gt;Click here to download the plugin&lt;/a&gt;');
++            }
++        }
++        else if (is_ie &amp;&amp; SOWIN)
++        {
++            document.writeln('&lt;OBJECT classid=&quot;clsid:8AD9C840-044E-11D1-B3E9-00805F499D93&quot; width=&quot;400&quot; height=&quot;300&quot; align=&quot;baseline&quot; codebase=&quot;<A HREF="http://java.sun.com/products/plugin/autodl/jinstall-1_3_0_05-win.cab#Version=1,3,0,05">http://java.sun.com/products/plugin/autodl/jinstall-1_3_0_05-win.cab#Version=1,3,0,05</A>&quot;&gt;');
++        }
++        else if ((is_nav || is_ie) &amp;&amp; SOMAC)
++        {
++            if(navigator.plugins)
++            {
++                navigator.plugins.refresh(false);
++            }
++            if(navigator.mimeTypes)
++            {
++                for (i=0; i &lt; navigator.mimeTypes.length; i++)
++                {
++                    if ((navigator.mimeTypes[i].type != null) &amp;&amp; (navigator.mimeTypes[i].type.indexOf(&quot;application/x-java-applet&quot;) != -1))
++                    {
++                        pluginDetected = true;
++                        break;
++                    }
++                }
++            }
++            if (pluginDetected)
++            {
++                document.writeln('&lt;APPLET ARCHIVE=&quot;nxapplet.jar&quot;  CODE=&quot;NXApplet.class&quot; NAME= &quot;nxapplet&quot; width=&quot;400&quot; height=&quot;300&quot;&gt;');
++            }
++            else
++            {
++                document.write(&quot;&lt;BR&gt;You haven't a suitable Java Plugin installed.&quot;);
++                document.write(&quot;&lt;BR&gt;Please, download and install the jre from the Sun site:&quot;);
++                document.write('&lt;a href=&quot;' + '<A HREF="http://developer.apple.com/java/download/">http://developer.apple.com/java/download/</A>&quot;&gt;Click here to download the plugin&lt;/a&gt;');
++            }
++        }
++        else if(!is_nav &amp;&amp; !is_ie)
++        {
++            document.writeln('&lt;APPLET ARCHIVE=&quot;nxapplet.jar&quot;  CODE=&quot;NXApplet.class&quot; NAME= &quot;nxapplet&quot; width=&quot;400&quot; height=&quot;300&quot;&gt;');
++        }
++
++            // end hide JavaScript
++        &lt;/SCRIPT&gt;
++        &lt;PARAM NAME=&quot;boxbgcolor&quot; VALUE=&quot;236, 235, 229&quot;&gt;
++        &lt;PARAM NAME=&quot;progressbar&quot; VALUE=&quot;true&quot;&gt;
++        &lt;PARAM NAME=&quot;boxmessage&quot; VALUE=&quot;Please wait while Java applet loads...&quot;&gt;
++        &lt;PARAM NAME=&quot;BaseUrl&quot; VALUE=&quot;&quot;&gt;
++        &lt;PARAM NAME=&quot;BackgroundsUrl&quot; VALUE=&quot;<A HREF="http://debian.tu-bs.de/knoppix/nx/nxplugin/Java/images/backgrounds/">http://debian.tu-bs.de/knoppix/nx/nxplugin/Java/images/backgrounds/</A>&quot;&gt;
++        &lt;PARAM NAME=&quot;Background1&quot; VALUE=&quot;background-1.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;Background2&quot; VALUE=&quot;background-2.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;Background3&quot; VALUE=&quot;background-3.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;Background4&quot; VALUE=&quot;background-2.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;Background5&quot; VALUE=&quot;background-4.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;Background6&quot; VALUE=&quot;background-4.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;Background7&quot; VALUE=&quot;background-5.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;Background8&quot; VALUE=&quot;background-6.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;Background9&quot; VALUE=&quot;background-7.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;StringsUrl&quot; VALUE=&quot;<A HREF="http://debian.tu-bs.de/knoppix/nx/nxplugin/Java/images/strings/">http://debian.tu-bs.de/knoppix/nx/nxplugin/Java/images/strings/</A>&quot;&gt;
++        &lt;PARAM NAME=&quot;String1&quot; VALUE=&quot;string-1.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;String2&quot; VALUE=&quot;string-2.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;String3&quot; VALUE=&quot;string-3.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;String4&quot; VALUE=&quot;string-4.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;String5&quot; VALUE=&quot;string-5.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;String6&quot; VALUE=&quot;string-6.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;ErrorsUrl&quot; VALUE=&quot;<A HREF="http://debian.tu-bs.de/knoppix/nx/nxplugin/Java/images/errors/">http://debian.tu-bs.de/knoppix/nx/nxplugin/Java/images/errors/</A>&quot;&gt;
++        &lt;PARAM NAME=&quot;Error1&quot; VALUE=&quot;error-1.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;Error2&quot; VALUE=&quot;error-2.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;Error3&quot; VALUE=&quot;error-3.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;Error4&quot; VALUE=&quot;error-4.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;Error5&quot; VALUE=&quot;error-5.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;Error6&quot; VALUE=&quot;error-6.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;Error7&quot; VALUE=&quot;error-7.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;Error8&quot; VALUE=&quot;error-8.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;Error9&quot; VALUE=&quot;error-9.gif&quot;&gt;
++    	&lt;PARAM NAME=&quot;Error10&quot; VALUE=&quot;error-10.gif&quot;&gt;
++
++        &lt;PARAM NAME=&quot;ButtonsUrl&quot; VALUE=&quot;<A HREF="http://debian.tu-bs.de/knoppix/nx/nxplugin/Java/images/buttons/">http://debian.tu-bs.de/knoppix/nx/nxplugin/Java/images/buttons/</A>&quot;&gt;
++        &lt;PARAM NAME=&quot;Cancel&quot; VALUE=&quot;cancel.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;CancelOver&quot; VALUE=&quot;cancel-over.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;CancelActive&quot; VALUE=&quot;cancel-active.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;Continue&quot; VALUE=&quot;continue.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;ContinueOver&quot; VALUE=&quot;continue-over.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;ContinueActive&quot; VALUE=&quot;continue-active.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;Download&quot; VALUE=&quot;download.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;DownloadOver&quot; VALUE=&quot;download-over.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;DownloadActive&quot; VALUE=&quot;download-active.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;Run&quot; VALUE=&quot;run.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;RunOver&quot; VALUE=&quot;run-over.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;RunActive&quot; VALUE=&quot;run-active.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;Details&quot; VALUE=&quot;details.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;DetailsOver&quot; VALUE=&quot;details-over.gif&quot;&gt;
++        &lt;PARAM NAME=&quot;DetailsActive&quot; VALUE=&quot;details-active.gif&quot;&gt;
++
++        &lt;PARAM NAME=&quot;RedirectUrl&quot; VALUE=&quot;<A HREF="http://freenx.berlios.de/manke/">http://freenx.berlios.de/manke/</A>&quot;&gt;
++        &lt;PARAM NAME=&quot;SessionUrl&quot; VALUE=&quot;<A HREF="http://freenx.berlios.de/manke/testdrive.nxs">http://freenx.berlios.de/manke/testdrive.nxs</A>&quot;&gt;
++        &lt;PARAM NAME=&quot;SessionName&quot; VALUE=&quot;testdrive.nxs&quot;&gt;
++        &lt;PARAM NAME=&quot;LinuxClientUrl&quot; VALUE=&quot;<A HREF="http://debian.tu-bs.de/knoppix/nx/nxplugin/Linux/client.zip">http://debian.tu-bs.de/knoppix/nx/nxplugin/Linux/client.zip</A>&quot;&gt;
++        &lt;PARAM NAME=&quot;LinuxClientVersion&quot; VALUE = &quot;1.5.0-97&quot;&gt;
++        &lt;PARAM NAME=&quot;WindowsClientUrl&quot; VALUE=&quot;<A HREF="http://debian.tu-bs.de/knoppix/nx/nxplugin/Windows/client.zip">http://debian.tu-bs.de/knoppix/nx/nxplugin/Windows/client.zip</A>&quot;&gt;
++        &lt;PARAM NAME=&quot;WindowsClientVersion&quot; VALUE = &quot;1.5.0-97&quot;&gt;
++        &lt;PARAM NAME=&quot;MacOSClientUrl&quot; VALUE=&quot;<A HREF="http://debian.tu-bs.de/knoppix/nx/nxplugin/MacOSX/client.zip">http://debian.tu-bs.de/knoppix/nx/nxplugin/MacOSX/client.zip</A>&quot;&gt;
++        &lt;PARAM NAME=&quot;MacOSClientVersion&quot; VALUE = &quot;1.5.0-97&quot;&gt;
++        &lt;PARAM NAME=&quot;SolarisClientUrl&quot; VALUE=&quot;<A HREF="http://debian.tu-bs.de/knoppix/nx/nxplugin/Solaris/client.zip">http://debian.tu-bs.de/knoppix/nx/nxplugin/Solaris/client.zip</A>&quot;&gt;
++        &lt;PARAM NAME=&quot;SolarisClientVersion&quot; VALUE = &quot;1.5.0-97&quot;&gt;
++	&lt;PARAM NAME=&quot;archive&quot; VALUE=&quot;nxapplet.jar&quot;&gt;
++	&lt;PARAM NAME=&quot;code&quot; VALUE=&quot;NXApplet.class&quot;&gt;
++        &lt;PARAM NAME=&quot;type&quot; VALUE=&quot;application/x-java-applet;version=1.2&quot;&gt;
++        &lt;/OBJECT&gt;
++        &lt;/APPLET&gt;
++    &lt;/BODY&gt;
++
++&lt;/HTML&gt;
+
+Added: freenx-website/manke/nxapplet.jar
+===================================================================
+--- freenx-website/manke/nxapplet.jar	2005-08-31 20:42:30 UTC (rev 150)
++++ freenx-website/manke/nxapplet.jar	2005-09-01 02:17:03 UTC (rev 151)
+@@ -0,0 +1 @@
++link ../nxplugin-common/nxapplet.jar
+\ No newline at end of file
+
+
+Property changes on: freenx-website/manke/nxapplet.jar
+___________________________________________________________________
+Name: svn:special
+   + *
+
+Added: freenx-website/manke/testdrive.nxs
+===================================================================
+--- freenx-website/manke/testdrive.nxs	2005-08-31 20:42:30 UTC (rev 150)
++++ freenx-website/manke/testdrive.nxs	2005-09-01 02:17:03 UTC (rev 151)
+@@ -0,0 +1,101 @@
++&lt;!DOCTYPE NXClientSettings&gt;
++&lt;NXClientSettings application=&quot;nxclient&quot; version=&quot;1.3&quot; &gt;
++&lt;group name=&quot;Advanced&quot; &gt;
++&lt;option key=&quot;Cache size&quot; value=&quot;8&quot; /&gt;
++&lt;option key=&quot;Cache size on disk&quot; value=&quot;32&quot; /&gt;
++&lt;option key=&quot;Current keyboard&quot; value=&quot;true&quot; /&gt;
++&lt;option key=&quot;Custom keyboard layout&quot; value=&quot;us&quot; /&gt;
++&lt;option key=&quot;Disable TCP no-delay&quot; value=&quot;false&quot; /&gt;
++&lt;option key=&quot;Disable ZLIB stream compression&quot; value=&quot;false&quot; /&gt;
++&lt;option key=&quot;Enable SSL encryption&quot; value=&quot;true&quot; /&gt;
++&lt;option key=&quot;Restore cache&quot; value=&quot;true&quot; /&gt;
++&lt;option key=&quot;StreamCompression&quot; value=&quot;&quot; /&gt;
++&lt;/group&gt;
++&lt;group name=&quot;Environment&quot; &gt;
++&lt;option key=&quot;CUPSD path&quot; value=&quot;/usr/sbin/cupsd&quot; /&gt;
++&lt;/group&gt;
++&lt;group name=&quot;General&quot; &gt;
++&lt;option key=&quot;Automatic reconnect&quot; value=&quot;true&quot; /&gt;
++&lt;option key=&quot;Backingstore&quot; value=&quot;when_requested&quot; /&gt;
++&lt;option key=&quot;Command line&quot; value=&quot;&quot; /&gt;
++&lt;option key=&quot;Custom Unix Desktop&quot; value=&quot;console&quot; /&gt;
++&lt;option key=&quot;Desktop&quot; value=&quot;kde&quot; /&gt;
++&lt;option key=&quot;Link speed&quot; value=&quot;modem&quot; /&gt;
++&lt;option key=&quot;Remember password&quot; value=&quot;false&quot; /&gt;
++&lt;option key=&quot;Resolution&quot; value=&quot;available&quot; /&gt;
++&lt;option key=&quot;Resolution height&quot; value=&quot;600&quot; /&gt;
++&lt;option key=&quot;Resolution width&quot; value=&quot;800&quot; /&gt;
++&lt;option key=&quot;Server host&quot; value=&quot;testdrive.nomachine.com&quot; /&gt;
++&lt;option key=&quot;Server port&quot; value=&quot;22&quot; /&gt;
++&lt;option key=&quot;Session&quot; value=&quot;unix&quot; /&gt;
++&lt;option key=&quot;Use default image encoding&quot; value=&quot;0&quot; /&gt;
++&lt;option key=&quot;Use render&quot; value=&quot;true&quot; /&gt;
++&lt;option key=&quot;Use taint&quot; value=&quot;true&quot; /&gt;
++&lt;option key=&quot;Virtual desktop&quot; value=&quot;false&quot; /&gt;
++&lt;option key=&quot;XAgent encoding&quot; value=&quot;true&quot; /&gt;
++&lt;option key=&quot;displaySaveOnExit&quot; value=&quot;true&quot; /&gt;
++&lt;option key=&quot;xdm broadcast port&quot; value=&quot;177&quot; /&gt;
++&lt;option key=&quot;xdm list host&quot; value=&quot;localhost&quot; /&gt;
++&lt;option key=&quot;xdm list port&quot; value=&quot;177&quot; /&gt;
++&lt;option key=&quot;xdm mode&quot; value=&quot;server decide&quot; /&gt;
++&lt;option key=&quot;xdm query host&quot; value=&quot;localhost&quot; /&gt;
++&lt;option key=&quot;xdm query port&quot; value=&quot;177&quot; /&gt;
++&lt;/group&gt;
++&lt;group name=&quot;Images&quot; &gt;
++&lt;option key=&quot;Disable JPEG Compression&quot; value=&quot;0&quot; /&gt;
++&lt;option key=&quot;Disable all image optimisations&quot; value=&quot;false&quot; /&gt;
++&lt;option key=&quot;Image Compression Type&quot; value=&quot;1&quot; /&gt;
++&lt;option key=&quot;Image Encoding Type&quot; value=&quot;0&quot; /&gt;
++&lt;option key=&quot;Image JPEG Encoding&quot; value=&quot;false&quot; /&gt;
++&lt;option key=&quot;JPEG Quality&quot; value=&quot;0&quot; /&gt;
++&lt;option key=&quot;RDP optimization for low-bandwidth link&quot; value=&quot;false&quot; /&gt;
++&lt;option key=&quot;Reduce colors to&quot; value=&quot;&quot; /&gt;
++&lt;option key=&quot;Use PNG Compression&quot; value=&quot;false&quot; /&gt;
++&lt;option key=&quot;VNC images compression&quot; value=&quot;0&quot; /&gt;
++&lt;option key=&quot;Windows Image Compression&quot; value=&quot;1&quot; /&gt;
++&lt;/group&gt;
++&lt;group name=&quot;Login&quot; &gt;
++&lt;option key=&quot;Auth&quot; value=&quot;EMPTY_PASSWORD&quot; /&gt;
++&lt;option key=&quot;Public Key&quot; value=&quot;-----BEGIN DSA PRIVATE KEY-----
++MIIBuwIBAAKBgQCXv9AzQXjxvXWC1qu3CdEqskX9YomTfyG865gb4D02ZwWuRU/9
++C3I9/bEWLdaWgJYXIcFJsMCIkmWjjeSZyTmeoypI1iLifTHUxn3b7WNWi8AzKcVF
++aBsBGiljsop9NiD1mEpA0G+nHHrhvTXz7pUvYrsrXcdMyM6rxqn77nbbnwIVALCi
++xFdHZADw5KAVZI7r6QatEkqLAoGBAI4L1TQGFkq5xQ/nIIciW8setAAIyrcWdK/z
++5/ZPeELdq70KDJxoLf81NL/8uIc4PoNyTRJjtT3R4f8Az1TsZWeh2+ReCEJxDWgG
++fbk2YhRqoQTtXPFsI4qvzBWct42WonWqyyb1bPBHk+JmXFscJu5yFQ+JUVNsENpY
+++Gkz3HqTAoGANlgcCuA4wrC+3Cic9CFkqiwO/Rn1vk8dvGuEQqFJ6f6LVfPfRTfa
++QU7TGVLk2CzY4dasrwxJ1f6FsT8DHTNGnxELPKRuLstGrFY/PR7KeafeFZDf+fJ3
++mbX5nxrld3wi5titTnX+8s4IKv29HJguPvOK/SI7cjzA+SqNfD7qEo8CFDIm1xRf
++8xAPsSKs6yZ6j1FNklfu
++-----END DSA PRIVATE KEY-----
++&quot; /&gt;
++&lt;option key=&quot;User&quot; value=&quot;&quot; /&gt;
++&lt;/group&gt;
++&lt;group name=&quot;Services&quot; &gt;
++&lt;option key=&quot;Audio&quot; value=&quot;false&quot; /&gt;
++&lt;option key=&quot;IPPPort&quot; value=&quot;631&quot; /&gt;
++&lt;option key=&quot;IPPPrinting&quot; value=&quot;false&quot; /&gt;
++&lt;option key=&quot;Shares&quot; value=&quot;false&quot; /&gt;
++&lt;/group&gt;
++&lt;group name=&quot;VNC Session&quot; &gt;
++&lt;option key=&quot;Display&quot; value=&quot;0&quot; /&gt;
++&lt;option key=&quot;Password&quot; value=&quot;EMPTY_PASSWORD&quot; /&gt;
++&lt;option key=&quot;Remember&quot; value=&quot;false&quot; /&gt;
++&lt;option key=&quot;Server&quot; value=&quot;&quot; /&gt;
++&lt;/group&gt;
++&lt;group name=&quot;Windows Session&quot; &gt;
++&lt;option key=&quot;Application&quot; value=&quot;&quot; /&gt;
++&lt;option key=&quot;Authentication&quot; value=&quot;1&quot; /&gt;
++&lt;option key=&quot;Color Depth&quot; value=&quot;8&quot; /&gt;
++&lt;option key=&quot;Domain&quot; value=&quot;&quot; /&gt;
++&lt;option key=&quot;Image Cache&quot; value=&quot;true&quot; /&gt;
++&lt;option key=&quot;Password&quot; value=&quot;EMPTY_PASSWORD&quot; /&gt;
++&lt;option key=&quot;Remember&quot; value=&quot;true&quot; /&gt;
++&lt;option key=&quot;Run application&quot; value=&quot;false&quot; /&gt;
++&lt;option key=&quot;Server&quot; value=&quot;&quot; /&gt;
++&lt;option key=&quot;User&quot; value=&quot;&quot; /&gt;
++&lt;/group&gt;
++&lt;group name=&quot;share chosen&quot; &gt;
++&lt;option key=&quot;Share number&quot; value=&quot;0&quot; /&gt;
++&lt;/group&gt;
++&lt;/NXClientSettings&gt;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000279.html">[Freenx-cvs] r152 - freenx-website/manke
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#278">[ date ]</a>
+              <a href="thread.html#278">[ thread ]</a>
+              <a href="subject.html#278">[ subject ]</a>
+              <a href="author.html#278">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

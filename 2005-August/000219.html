@@ -1,0 +1,194 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fabianx modified 4 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%204%20files&In-Reply-To=%3C42EF93B4.mail47Z134QGL%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000218.html">
+   <LINK REL="Next"  HREF="000220.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fabianx modified 4 files</H1>
+    <B>fabianx</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%204%20files&In-Reply-To=%3C42EF93B4.mail47Z134QGL%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fabianx modified 4 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Tue Aug  2 17:39:32 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000218.html">[Freenx-cvs] CVS: freenx - fabianx modified 3 files
+</A></li>
+        <LI>Next message: <A HREF="000220.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#219">[ date ]</a>
+              <a href="thread.html#219">[ thread ]</a>
+              <a href="subject.html#219">[ subject ]</a>
+              <a href="author.html#219">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fabianx
+Date:      2005-08-02 15:39:32 GMT
+Modified:  .        ChangeLog node.conf.sample nxloadconfig nxserver
+Log:
+* Made automatic timeout configurable.
+  (Patch by &quot;Ed Warnicke&quot; &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">eaw at cisco.com</A>&gt;)
+
+Revision  Changes    Path
+1.91      +2 -0      freenx/ChangeLog
+
+
+rev 1.91, prev_rev 1.90
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.90
+retrieving revision 1.91
+diff -u -r1.90 -r1.91
+--- ChangeLog	2 Aug 2005 15:20:18 -0000	1.90
++++ ChangeLog	2 Aug 2005 15:39:32 -0000	1.91
+@@ -12,6 +12,8 @@
+ 	                 &quot;Ed Warnicke&quot;       &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">eaw at cisco.com</A>&gt;)
+ 	* Set sleeps to 60 instead of 10 seconds, removed one wrong trap.
+ 	  (Suggestion by &quot;Sunil&quot; &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">funtoos at yahoo.com</A>&gt;)
++	* Made automatic timeout configurable.
++	  (Patch by &quot;Ed Warnicke&quot; &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">eaw at cisco.com</A>&gt;)
+ 
+ 28.07.2005 FreeNX 0.4.3 &quot;NoMachine 1.5.0 Edition&quot;
+ 	* Fixed reconnection problems with !M 1.5.0 client.
+
+
+
+1.35      +5 -1      freenx/node.conf.sample
+
+
+rev 1.35, prev_rev 1.34
+Index: node.conf.sample
+===================================================================
+RCS file: /cvsroot/freenx/freenx/node.conf.sample,v
+retrieving revision 1.34
+retrieving revision 1.35
+diff -u -r1.34 -r1.35
+--- node.conf.sample	29 Jul 2005 17:05:21 -0000	1.34
++++ node.conf.sample	2 Aug 2005 15:39:32 -0000	1.35
+@@ -37,7 +37,7 @@
+ #
+ #           <A HREF="https://mail.kde.org/mailman/listinfo/freenx-knx">https://mail.kde.org/mailman/listinfo/freenx-knx</A>
+ #
+-# CVS: $Id: node.conf.sample,v 1.34 2005/07/29 17:05:21 fux Exp $
++# CVS: $Id: node.conf.sample,v 1.35 2005/08/02 15:39:32 fabianx Exp $
+ 
+ #########################################################################
+ # General FreeNX directives
+@@ -351,6 +351,10 @@
+ #AGENT_EXTRA_OPTIONS_RFB=&quot;&quot;
+ #AGENT_EXTRA_OPTIONS_RDP=&quot;&quot;
+ #AGENT_EXTRA_OPTIONS_X=&quot;&quot;
++
++# The number of seconds we wait for the nxagent to start before
++# deciding startup has failed
++#AGENT_STARTUP_TIMEOUT=&quot;60&quot;
+ 
+ # The font server the agent will use. If set to &quot;&quot; no font server is used.
+ # For this to do any good, the client has to have the same font server set
+
+
+
+1.43      +2 -1      freenx/nxloadconfig
+
+
+rev 1.43, prev_rev 1.42
+Index: nxloadconfig
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxloadconfig,v
+retrieving revision 1.42
+retrieving revision 1.43
+diff -u -r1.42 -r1.43
+--- nxloadconfig	2 Aug 2005 14:51:43 -0000	1.42
++++ nxloadconfig	2 Aug 2005 15:39:32 -0000	1.43
+@@ -5,7 +5,7 @@
+ #
+ # License: GPL, version 2
+ #
+-# CVS: $Id: nxloadconfig,v 1.42 2005/08/02 14:51:43 fabianx Exp $
++# CVS: $Id: nxloadconfig,v 1.43 2005/08/02 15:39:32 fabianx Exp $
+ #
+ # ========================================================================
+ 
+@@ -174,6 +174,7 @@
+ AGENT_EXTRA_OPTIONS_RFB=&quot;&quot;
+ AGENT_EXTRA_OPTIONS_RDP=&quot;&quot;
+ AGENT_EXTRA_OPTIONS_X=&quot;&quot;
++AGENT_STARTUP_TIMEOUT=&quot;60&quot;
+ AGENT_FONT_SERVER=&quot;&quot;
+ PROXY_TCP_NODELAY=&quot;0&quot;
+ PROXY_EXTRA_OPTIONS=&quot;&quot;
+
+
+
+1.74      +2 -2      freenx/nxserver
+
+
+rev 1.74, prev_rev 1.73
+Index: nxserver
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxserver,v
+retrieving revision 1.73
+retrieving revision 1.74
+diff -u -r1.73 -r1.74
+--- nxserver	2 Aug 2005 15:20:18 -0000	1.73
++++ nxserver	2 Aug 2005 15:39:32 -0000	1.74
+@@ -11,7 +11,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxserver,v 1.73 2005/08/02 15:20:18 fabianx Exp $
++# CVS: $Id: nxserver,v 1.74 2005/08/02 15:39:32 fabianx Exp $
+ #
+ 
+ # Read the config file
+@@ -872,7 +872,7 @@
+ 	fi
+ 
+ 	# now start the node
+-	(sleep 60; exit 1) &amp;
++	(sleep $AGENT_STARTUP_TIMEOUT; exit 1) &amp;
+ 	SERVER_WAIT_PID=$!
+ 	server_nxnode_start_wait --&quot;$ACTION&quot;session $USER &quot;$FULL_PARAMS&quot; &amp;
+ 	SERVER_PID=$!
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000218.html">[Freenx-cvs] CVS: freenx - fabianx modified 3 files
+</A></li>
+	<LI>Next message: <A HREF="000220.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#219">[ date ]</a>
+              <a href="thread.html#219">[ thread ]</a>
+              <a href="subject.html#219">[ subject ]</a>
+              <a href="author.html#219">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,183 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r270 - in nxclientlib: . qtnx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r270%20-%20in%20nxclientlib%3A%20.%20qtnx&In-Reply-To=%3C200608162231.k7GMVbZC014775%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000399.html">
+   <LINK REL="Next"  HREF="000401.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r270 - in nxclientlib: . qtnx</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r270%20-%20in%20nxclientlib%3A%20.%20qtnx&In-Reply-To=%3C200608162231.k7GMVbZC014775%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r270 - in nxclientlib: . qtnx">gwright at mail.berlios.de
+       </A><BR>
+    <I>Thu Aug 17 00:31:37 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000399.html">[Freenx-cvs] r269 - nxclientlib/qtnx
+</A></li>
+        <LI>Next message: <A HREF="000401.html">[Freenx-cvs] r271 - nxclientlib/qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#400">[ date ]</a>
+              <a href="thread.html#400">[ thread ]</a>
+              <a href="subject.html#400">[ subject ]</a>
+              <a href="author.html#400">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2006-08-17 00:31:35 +0200 (Thu, 17 Aug 2006)
+New Revision: 270
+
+Modified:
+   nxclientlib/nxclientlib.cpp
+   nxclientlib/nxclientlib.h
+   nxclientlib/nxsession.cpp
+   nxclientlib/nxsession.h
+   nxclientlib/qtnx/qtnxwindow.cpp
+   nxclientlib/qtnx/qtnxwindow.h
+Log:
+Looks like I broke starting a new session without suspended ones.
+
+
+Modified: nxclientlib/nxclientlib.cpp
+===================================================================
+--- nxclientlib/nxclientlib.cpp	2006-08-16 22:21:59 UTC (rev 269)
++++ nxclientlib/nxclientlib.cpp	2006-08-16 22:31:35 UTC (rev 270)
+@@ -35,6 +35,8 @@
+ 	connect(&amp;session, SIGNAL(loginFailed()), this, SLOT(failedLogin()));
+ 	connect(&amp;session, SIGNAL(finished()), this, SLOT(finished()));
+ 	connect(&amp;session, SIGNAL(sessionsSignal(QList&lt;NXResumeData&gt;)), this, SLOT(suspendedSessions(QList&lt;NXResumeData&gt;)));
++	connect(&amp;session, SIGNAL(noSessions()), this, SLOT(noSuspendedSessions()));
++	
+ 	connect(&amp;nxproxyProcess, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(reset()));
+ }
+ 
+@@ -281,3 +283,8 @@
+ 	arguments &lt;&lt; &quot;-S&quot; &lt;&lt; &quot;options=&quot; + options.fileName() + &quot;:&quot; + QString::number(proxyData.display);
+ 	nxproxyProcess.start(NXPROXY_BIN, arguments);
+ }
++
++void NXClientLib::noSuspendedSessions()
++{
++	emit noSessions();
++}
+
+Modified: nxclientlib/nxclientlib.h
+===================================================================
+--- nxclientlib/nxclientlib.h	2006-08-16 22:21:59 UTC (rev 269)
++++ nxclientlib/nxclientlib.h	2006-08-16 22:31:35 UTC (rev 270)
+@@ -79,6 +79,7 @@
+ 		void finished() { isFinished = true; };
+ 		void suspendedSessions(QList&lt;NXResumeData&gt; resumeData) { emit resumeSessions(resumeData); };
+ 		void reset();
++		void noSuspendedSessions();
+ 	signals:
+ 		// General messages about status
+ 		void callbackWrite(QString);
+@@ -94,6 +95,7 @@
+ 		void stdin(QString);
+ 
+ 		void resumeSessions(QList&lt;NXResumeData&gt;);
++		void noSessions();
+ 	private:
+ 		bool usingHardcodedKey;
+ 		bool isFinished;
+
+Modified: nxclientlib/nxsession.cpp
+===================================================================
+--- nxclientlib/nxsession.cpp	2006-08-16 22:21:59 UTC (rev 269)
++++ nxclientlib/nxsession.cpp	2006-08-16 22:31:35 UTC (rev 270)
+@@ -254,6 +254,8 @@
+ 	if (runningSessions.size() != 0) {
+ 		suspendedSessions = true;
+ 		emit sessionsSignal(runningSessions);
++	} else {
++		emit noSessions();
+ 	}
+ 	
+ 	stage++;
+
+Modified: nxclientlib/nxsession.h
+===================================================================
+--- nxclientlib/nxsession.h	2006-08-16 22:21:59 UTC (rev 269)
++++ nxclientlib/nxsession.h	2006-08-16 22:31:35 UTC (rev 270)
+@@ -60,6 +60,7 @@
+ 		void loginFailed();
+ 		void finished();
+ 		void sessionsSignal(QList&lt;NXResumeData&gt;);
++		void noSessions();
+ 	private:
+ 		bool doSSH;
+ 		bool suspendedSessions;
+
+Modified: nxclientlib/qtnx/qtnxwindow.cpp
+===================================================================
+--- nxclientlib/qtnx/qtnxwindow.cpp	2006-08-16 22:21:59 UTC (rev 269)
++++ nxclientlib/qtnx/qtnxwindow.cpp	2006-08-16 22:31:35 UTC (rev 270)
+@@ -116,7 +116,7 @@
+ 	nxClient.setResolution(dw.screenGeometry(this).width(), dw.screenGeometry(this).height());
+ 	nxClient.setDepth(info.depth());
+ 	connect(&amp;nxClient, SIGNAL(resumeSessions(QList&lt;NXResumeData&gt;)), this, SLOT(loadResumeDialog(QList&lt;NXResumeData&gt;)));
+-
++	connect(&amp;nxClient, SIGNAL(noSessions()), this, SLOT(noSessions()));
+ 	//nxClient.setSession(&amp;session);
+ }
+ 
+@@ -167,3 +167,8 @@
+ 	session.suspended = true;
+ 	nxClient.setSession(&amp;session);
+ }
++
++void QtNXWindow::noSessions()
++{
++	nxClient.setSession(&amp;session);
++}
+
+Modified: nxclientlib/qtnx/qtnxwindow.h
+===================================================================
+--- nxclientlib/qtnx/qtnxwindow.h	2006-08-16 22:21:59 UTC (rev 269)
++++ nxclientlib/qtnx/qtnxwindow.h	2006-08-16 22:31:35 UTC (rev 270)
+@@ -44,6 +44,7 @@
+ 		void loadResumeDialog(QList&lt;NXResumeData&gt;);
+ 		void resumeNewPressed();
+ 		void resumeResumePressed(QString);
++		void noSessions();
+ 	private:
+ 		Ui::LoginDialog ui_lg;
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000399.html">[Freenx-cvs] r269 - nxclientlib/qtnx
+</A></li>
+	<LI>Next message: <A HREF="000401.html">[Freenx-cvs] r271 - nxclientlib/qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#400">[ date ]</a>
+              <a href="thread.html#400">[ thread ]</a>
+              <a href="subject.html#400">[ subject ]</a>
+              <a href="author.html#400">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

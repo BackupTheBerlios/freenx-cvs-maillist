@@ -1,0 +1,627 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r322 - nx-utils/nxspeex
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r322%20-%20nx-utils/nxspeex&In-Reply-To=%3C200702071545.l17FjZwx031070%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000455.html">
+   <LINK REL="Next"  HREF="000457.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r322 - nx-utils/nxspeex</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r322%20-%20nx-utils/nxspeex&In-Reply-To=%3C200702071545.l17FjZwx031070%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r322 - nx-utils/nxspeex">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Wed Feb  7 16:45:35 CET 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000455.html">[Freenx-cvs] r321 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000457.html">[Freenx-cvs] r323 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#456">[ date ]</a>
+              <a href="thread.html#456">[ thread ]</a>
+              <a href="subject.html#456">[ subject ]</a>
+              <a href="author.html#456">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-02-07 16:45:35 +0100 (Wed, 07 Feb 2007)
+New Revision: 322
+
+Added:
+   nx-utils/nxspeex/nxvorbis.c
+Log:
+Added nxvorbis esd proxy.
+
+
+
+Added: nx-utils/nxspeex/nxvorbis.c
+===================================================================
+--- nx-utils/nxspeex/nxvorbis.c	2007-02-06 20:23:15 UTC (rev 321)
++++ nx-utils/nxspeex/nxvorbis.c	2007-02-07 15:45:35 UTC (rev 322)
+@@ -0,0 +1,549 @@
++/*
++ * nxvorbis.c - A nx esd proxy for low bandwidth vorbis encoded transmission of data.
++ *
++ * Copyright (c) 2007 by Fabian Franz &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">freenx at fabian-franz.de</A>&gt;.
++ *
++ * License: GPL, v2
++ *
++ */
++
++#include &lt;unistd.h&gt;
++#include &lt;stdlib.h&gt;
++#include &lt;stdio.h&gt;
++#include &lt;esd.h&gt;
++#include &lt;sys/types.h&gt;
++#include &lt;sys/socket.h&gt;
++#include &lt;sys/time.h&gt;
++#include &lt;time.h&gt;
++
++#include &lt;vorbis/codec.h&gt;
++#include &lt;vorbis/vorbisenc.h&gt;
++
++#define READSIZE 1024
++
++/* After how many frames should we resync with server? */
++#define DEFAULT_DO_SYNC_SEQ	20
++
++/* #define DEBUG 1 */
++
++int esd_set_socket_buffers( int sock, int src_format,
++		            int src_rate, int base_rate );
++
++int do_fwd(int from, int to, void* buf, size_t count)
++{
++        ssize_t len;
++
++	len=read(from, buf, count);
++        return write(to, buf, len);
++}
++
++typedef struct {
++  ogg_int64_t  bytes;
++  ogg_int64_t  b_o_s;
++  ogg_int64_t  e_o_s;
++
++  ogg_int64_t  granulepos;
++
++  ogg_int64_t  packetno;
++
++} nx_ogg_packet;
++
++int do_read_complete(int from, void* buf, size_t count);
++
++int do_read_op(int from, ogg_packet* op)
++{
++	nx_ogg_packet nxop;
++
++	if (do_read_complete(from, &amp;nxop, sizeof(nxop)) != sizeof(nxop))
++		return 0;
++
++	op-&gt;bytes=nxop.bytes;
++	op-&gt;b_o_s=nxop.b_o_s;
++	op-&gt;granulepos=nxop.granulepos;
++	op-&gt;packetno=nxop.packetno;
++
++	op-&gt;packet=malloc(op-&gt;bytes+1);
++
++	if (do_read_complete(from, op-&gt;packet, op-&gt;bytes) != op-&gt;bytes)
++		return 0;
++	return 1;
++}
++
++int do_write_op(int to, ogg_packet* op)
++{
++	nx_ogg_packet nxop;
++
++	nxop.bytes=op-&gt;bytes;
++	nxop.b_o_s=op-&gt;b_o_s;
++	nxop.granulepos=op-&gt;granulepos;
++	nxop.packetno=op-&gt;packetno;
++	
++	if (write(to, &amp;nxop, sizeof(nxop)) != sizeof(nxop))
++		return 0;
++	if (write(to, op-&gt;packet, op-&gt;bytes) != op-&gt;bytes)
++		return 0;
++	return 1;
++}
++
++void do_sockopts(int sock, int buf_size)
++{
++	int sz=buf_size;
++	setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &amp;sz, sizeof(sz));
++	setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &amp;sz, sizeof(sz));
++}
++
++int do_read_complete(int from, void* buf, size_t count)
++{
++	size_t erg, len=0;
++	
++	do
++	{
++		erg=read(from, buf+len, count-len);
++		if (erg &lt;= 0)
++			break;
++		len+=erg;
++	}
++	while (len &lt; count);
++
++	return len;
++}
++
++
++int do_read_samples(int from, float** buffer, int samples, esd_format_t format)
++{
++	int i,j;
++	int samplesize=(format &amp; ESD_BITS16)?16:8;
++	int channels=(format &amp; ESD_STEREO)?2:1;
++
++        int sampbyte = samplesize / 8;
++        signed char *buf = alloca(samples*sampbyte*channels);
++	size_t erg, len=0, count=samples*sampbyte*channels;
++
++	do
++	{
++		erg=read(from, buf+len, count-len);
++		if (erg &lt;= 0)
++			return len / (sampbyte*channels);
++		len+=erg;
++	}
++	while (len &lt; count);
++
++	/* Now do the conversion */
++
++	if (samplesize == 16)
++	{
++		/* FIXME: Big endian */
++		for(i = 0; i &lt; samples; i++)
++			for(j=0; j &lt; channels; j++)
++				buffer[j][i] = ((buf[i*2*channels + 2*j + 1]&lt;&lt;8) | 
++							(buf[i*2*channels + 2*j] &amp; 0xff))/32768.0f;
++	}
++	else 
++	{
++		fprintf(stderr, &quot;8 Bits unsupported for now.&quot;);
++		return 0;
++#if 0
++                unsigned char *bufu = (unsigned char *)buf;
++		for(i = 0; i &lt; samples; i++)
++			for(j=0; j &lt; channels; j++)
++				buffer[j][i]=((int)(bufu[i*channels + j])-128)/128.0f;
++#endif
++	}
++	
++	return samples;
++}
++
++
++
++int do_encode(int client, int server, esd_format_t format, int speed, char* ident)
++{
++	/* Encoder specific variables */
++	ogg_packet       op;
++	vorbis_dsp_state vd;
++	vorbis_block     vb;
++	vorbis_info      vi;
++	vorbis_comment   vc; /* struct that stores all the bitstream user comments */
++
++	unsigned int do_sync_seq=DEFAULT_DO_SYNC_SEQ;
++	unsigned int seqNr=0;
++	
++	/* Configuration variables */
++	/* FIXME: Depend on NX setting */
++	float quality=0.3;
++	
++	/* Encoder initialisation */
++	vorbis_info_init(&amp;vi);
++	vorbis_comment_init(&amp;vc);
++
++	vorbis_encode_setup_vbr(&amp;vi, (format &amp; ESD_STEREO)?2:1 , speed, quality);
++	vorbis_encode_setup_init(&amp;vi);
++
++	/* Now, set up the analysis engine, stream encoder, and other
++	 *            preparation before the encoding begins.
++	 *                     
++	 */
++
++	vorbis_analysis_init(&amp;vd,&amp;vi);
++	vorbis_block_init(&amp;vd,&amp;vb);
++
++	fprintf(stderr, &quot;Analysis ok\n&quot;);
++
++	/* Send all three headers */
++	{
++                ogg_packet header_main;
++		ogg_packet header_comments;
++		ogg_packet header_codebooks;
++
++		/* Build the packets */
++		vorbis_analysis_headerout(&amp;vd,&amp;vc, &amp;header_main,&amp;header_comments,&amp;header_codebooks);
++		
++		if (!do_write_op(server, &amp;header_main))
++			goto out;
++		if (!do_write_op(server, &amp;header_comments))
++			goto out;
++		if (!do_write_op(server, &amp;header_codebooks))
++			goto out;
++										
++	}
++	fprintf(stderr, &quot;Header ok\n&quot;);
++	
++	/* Lower the latency */
++	
++	//do_sockopts(client, frame_size2 * (((format &amp; ESD_BITS16)?16:8) / 8) * 4);
++	esd_set_socket_buffers(client, format, speed, 44100);
++	do_sockopts(server, 200);
++
++	/* Send do_sync_seq to decoder */
++	if (write(server, &amp;do_sync_seq, sizeof(do_sync_seq)) != sizeof(do_sync_seq))
++		goto out;
++
++	/* Main encoding loop */
++
++	while (1)
++	{
++		unsigned int newSeq;
++		float **buffer = vorbis_analysis_buffer(&amp;vd, READSIZE);
++		long samples_read = do_read_samples(client, buffer, READSIZE, format);
++
++		if (samples_read != READSIZE)
++			break;
++
++		/* Tell the library how many samples (per channel) we wrote
++		 * into the supplied buffer */
++		vorbis_analysis_wrote(&amp;vd, samples_read);
++
++		while(vorbis_analysis_blockout(&amp;vd,&amp;vb)==1)
++                {
++
++                        /* Do the main analysis, creating a packet */
++                        vorbis_analysis(&amp;vb, NULL);
++                        vorbis_bitrate_addblock(&amp;vb);
++
++                        while(vorbis_bitrate_flushpacket(&amp;vd, &amp;op))
++                        {
++
++				if (write(server, &amp;seqNr, sizeof(seqNr)) != sizeof(seqNr))
++					goto out;
++#ifdef DEBUG
++				fprintf(stderr, &quot;Encoder SeqNr: %d\n&quot;, seqNr);
++#endif
++		
++				if (seqNr % do_sync_seq == 0)
++					if (do_read_complete(server, &amp;newSeq, sizeof(newSeq)) != sizeof(newSeq))
++						goto out;
++
++				seqNr++;
++				if (!do_write_op(server, &amp;op))
++					goto out;
++                        }
++                }
++
++
++	}
++
++out:
++	/* Encoder shutdown */
++        vorbis_block_clear(&amp;vb);
++        vorbis_dsp_clear(&amp;vd);
++        vorbis_info_clear(&amp;vi);
++
++	return 0;
++}
++
++#if 0
++int do_write_samples(int to, short* sbuf, int frame_size, int bits)
++{
++	unsigned char buf[2*MAX_FRAME_SIZE+1];
++	short *s;
++	int i;	
++	size_t erg, len=0, count=frame_size*(bits/8);
++	
++	s=(short*)buf;
++	
++	/* FIXME: Unsupported */
++	if (bits == 8)
++	{
++		fprintf(stderr, &quot;8 Bits unsupported for now.&quot;);
++		return 0;
++	}
++
++	/* FIXME: Endian? */
++	for (i=0;i&lt;frame_size;i++)
++		s[i]=(short)sbuf[i];
++
++	if (frame_size &gt; 2*MAX_FRAME_SIZE)
++	{
++		fprintf(stderr, &quot;Error: frame_size too big!&quot;);
++		exit(1);
++	}
++	
++	do
++	{
++		erg=write(to, buf+len, count-len);
++		if (erg &lt;= 0)
++			return len;
++		len+=erg;
++	}
++	while (len &lt; count);
++
++	/* Now do the conversion */
++
++	return frame_size;
++}
++#endif
++
++ogg_int16_t convbuffer[4096]; /* take 8k out of the data segment, not the stack */
++int convsize=4096;
++
++int do_decode(int client, int server, esd_format_t format, int speed, char* ident)
++{
++	/* Decoder specific variables */
++	ogg_packet       op; /* one raw packet of data for decode */
++	vorbis_info      vi; /* struct that stores all the static vorbis bitstream settings */
++	vorbis_comment   vc; /* struct that stores all the bitstream user comments */
++	vorbis_dsp_state vd; /* central working state for the packet-&gt;PCM decoder */
++	vorbis_block     vb; /* local working space for packet-&gt;PCM decode */
++	unsigned int do_sync_seq=DEFAULT_DO_SYNC_SEQ;
++	
++	/* Configuration variables */
++	/* FIXME: Depend on NX setting and read from network */
++	
++	/* Encoder initialisation */
++	vorbis_info_init(&amp;vi);
++        vorbis_comment_init(&amp;vc);
++	
++	/* Read all three headers */
++	{
++		ogg_packet header_main;
++		ogg_packet header_comments;
++		ogg_packet header_codebooks;
++
++		/* Build the packets */
++		
++		if (!do_read_op(client, &amp;header_main))
++			goto out;
++		if (!do_read_op(client, &amp;header_comments))
++			goto out;
++		if (!do_read_op(client, &amp;header_codebooks))
++			goto out;
++		vorbis_synthesis_headerin(&amp;vi,&amp;vc,&amp;header_main);
++		vorbis_synthesis_headerin(&amp;vi,&amp;vc,&amp;header_comments);
++		vorbis_synthesis_headerin(&amp;vi,&amp;vc,&amp;header_codebooks);
++		if (header_main.packet)
++			free(header_main.packet);
++		if (header_comments.packet)
++			free(header_comments.packet);
++		if (header_codebooks.packet)
++			free(header_codebooks.packet);
++	}
++
++	/* Throw the comments plus a few lines about the bitstream we're
++	*        decoding */
++	{
++		char **ptr=vc.user_comments;
++		while(*ptr){
++			fprintf(stderr,&quot;%s\n&quot;,*ptr);
++			++ptr;
++		}
++		fprintf(stderr,&quot;\nBitstream is %d channel, %ldHz\n&quot;,vi.channels,vi.rate);
++		fprintf(stderr,&quot;Encoded by: %s\n\n&quot;,vc.vendor);
++	}
++
++	convsize=4096/vi.channels;
++
++	vorbis_synthesis_init(&amp;vd,&amp;vi); /* central decode state */
++	vorbis_block_init(&amp;vd,&amp;vb);     
++
++	/* Lower the latency a bit */
++	//do_sockopts(client, 200);
++	do_sockopts(server, vi.channels * convsize * (((format &amp; ESD_BITS16)?16:8) / 8));
++	//esd_set_socket_buffers(server, format, speed, 44100);
++	//
++	
++	/* Get do_sync_seq from encoder */
++	if (do_read_complete(client, &amp;do_sync_seq, sizeof(do_sync_seq)) != sizeof(do_sync_seq))
++		goto out;
++
++	/* Main decoding loop */
++
++	while (1)
++	{
++		float **pcm;
++		int samples;
++		unsigned int seqNr = 0;
++		
++		if (do_read_complete(client, &amp;seqNr, sizeof(seqNr)) != sizeof(seqNr))
++			break;
++#ifdef DEBUG	
++		fprintf(stderr, &quot;SeqNr: %d\n&quot;, seqNr);
++#endif
++
++		if (seqNr % do_sync_seq == 0)
++			if (write(client, &amp;seqNr, sizeof(seqNr)) != sizeof(seqNr))
++				break;
++		
++		if (!do_read_op(client, &amp;op))
++			break;
++
++		if(vorbis_synthesis(&amp;vb,&amp;op)==0) /* test for success! */
++			vorbis_synthesis_blockin(&amp;vd,&amp;vb);
++
++		if (op.packet)
++			free(op.packet);
++
++		/*
++		
++		**pcm is a multichannel float vector.  In stereo, for
++		example, pcm[0] is left, and pcm[1] is right.  samples is
++		the size of each channel.  Convert the float values
++		(-1.&lt;=range&lt;=1.) to whatever PCM format and write it out */
++
++		while((samples=vorbis_synthesis_pcmout(&amp;vd,&amp;pcm))&gt;0)
++		{
++			int j, i;
++			int clipflag=0;
++			int bout=(samples&lt;convsize?samples:convsize);
++
++			/* convert floats to 16 bit signed ints (host order) and interleave */
++			for(i=0;i&lt;vi.channels;i++)
++			{
++				ogg_int16_t *ptr=convbuffer+i;
++				float  *mono=pcm[i];
++				for(j=0;j&lt;bout;j++)
++				{
++#if 1
++					int val=mono[j]*32767.f;
++#else					/* optional dither */
++					int val=mono[j]*32767.f+drand48()-0.5f;
++#endif
++					/* might as well guard against clipping */
++					if(val&gt;32767)
++					{
++						val=32767;
++						clipflag=1;
++					}
++					if(val&lt;-32768)
++					{
++						val=-32768;
++						clipflag=1;
++					}
++					*ptr=val;
++					ptr+=vi.channels;
++				}
++			}
++
++			if(clipflag)
++				fprintf(stderr,&quot;Clipping in frame %ld\n&quot;,(long)(vd.sequence));
++			
++			write(server, convbuffer,2*vi.channels*bout);
++
++			vorbis_synthesis_read(&amp;vd,bout); /* tell libvorbis how many samples we actually consumed */
++		}
++	}
++
++out:
++	/* Decoder shutdown */
++	vorbis_block_clear(&amp;vb);
++	vorbis_dsp_clear(&amp;vd);
++	vorbis_comment_clear(&amp;vc);
++	
++	vorbis_info_clear(&amp;vi);  /* must be called last */
++
++	return 0;
++}
++
++int do_child(int client, int server, int encode)
++{
++	esd_format_t format;
++	int speed;
++	char ident[ESD_NAME_MAX+1];
++
++	read(client, &amp;format, sizeof(format));
++	read(client, &amp;speed, sizeof(speed));
++	read(client, ident, ESD_NAME_MAX);
++
++	write(server, &amp;format, sizeof(format));
++	write(server, &amp;speed, sizeof(speed));
++	write(server, ident, ESD_NAME_MAX);
++
++	if (encode)
++		return do_encode(client, server, format, speed, ident);
++	else
++		return do_decode(client, server, format, speed, ident);
++	
++	/* Should never get here */
++	
++	return -1;
++}
++
++int main(int argc, char** argv)
++{
++	char buf[255];
++	int reply;
++	int proto;
++	
++	int client=6;
++	int server=7;
++	
++
++        do_fwd(client, server, buf, ESD_KEY_LEN);
++        do_fwd(client, server, buf, sizeof(int));
++
++	do_fwd(server, client, &amp;reply, sizeof(reply));
++	//reply=1;
++	//write(client, &amp;reply, sizeof(reply));
++
++	/* Server will close connection anyway */
++	if (reply != 1)
++		exit(1);
++
++	while (read(client, &amp;proto, sizeof(proto)) == sizeof(proto))
++	{
++		write(server, &amp;proto, sizeof(proto));
++
++#ifdef DEBUG
++		fprintf(stderr, &quot;proto = %d\n&quot;, proto);
++#endif
++
++	 	switch(proto)
++		{
++			case ESD_PROTO_SERVER_INFO:
++				do_fwd(client, server, buf, sizeof(int));
++				do_fwd(server, client, buf, sizeof(int)+sizeof(esd_format_t)+sizeof(int));
++				break;
++			case ESD_PROTO_LATENCY:
++				do_fwd(server, client, buf, sizeof(int));
++				break;
++			case ESD_PROTO_STREAM_PLAY:
++				do_child(client, server, (argc &gt; 1 &amp;&amp; argv[1][0] == 'e'));
++				exit(0);
++				break;
++			default:
++				close(client);
++				close(server);
++				exit(1);
++		}
++	}
++
++	exit(1);
++}
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000455.html">[Freenx-cvs] r321 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000457.html">[Freenx-cvs] r323 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#456">[ date ]</a>
+              <a href="thread.html#456">[ thread ]</a>
+              <a href="subject.html#456">[ subject ]</a>
+              <a href="author.html#456">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

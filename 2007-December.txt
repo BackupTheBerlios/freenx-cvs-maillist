@@ -1,0 +1,52 @@
+From sebjames at mail.berlios.de  Tue Dec 18 21:47:23 2007
+From: sebjames at mail.berlios.de (sebjames at BerliOS)
+Date: Tue, 18 Dec 2007 21:47:23 +0100
+Subject: [Freenx-cvs] r427 - nxcl/lib
+Message-ID: <200712182047.lBIKlNFK018197@sheep.berlios.de>
+
+Author: sebjames
+Date: 2007-12-18 21:47:23 +0100 (Tue, 18 Dec 2007)
+New Revision: 427
+
+Modified:
+   nxcl/lib/nxclientlib.cpp
+   nxcl/lib/nxsession.cpp
+Log:
+Patch from David Gross at the University of Strasbourg which will 
+make nxcl work with freenx. Thanks David!
+
+
+Modified: nxcl/lib/nxclientlib.cpp
+===================================================================
+--- nxcl/lib/nxclientlib.cpp	2007-11-15 15:17:24 UTC (rev 426)
++++ nxcl/lib/nxclientlib.cpp	2007-12-18 20:47:23 UTC (rev 427)
+@@ -203,6 +203,7 @@
+ 		this->keyFile->close();
+ 
+ 	} else {
++		this->keyFile = NULL;
+ 		argtmp.str("");
+ 		argtmp << "-i" << publicKey;
+ 		arguments.push_back (argtmp.str());
+
+Modified: nxcl/lib/nxsession.cpp
+===================================================================
+--- nxcl/lib/nxsession.cpp	2007-11-15 15:17:24 UTC (rev 426)
++++ nxcl/lib/nxsession.cpp	2007-12-18 20:47:23 UTC (rev 427)
+@@ -165,11 +165,11 @@
+ 					// client and see
+ 					// ~/.nx/temp/(pid)/sshlog for
+ 					// connection details
+-					ss << "Listsession --type=\"shadow\"";
++					ss << "listsession --type=\"shadow\"";
+ 
+ 				} else {
+ 
+-					ss << "Listsession --user=\"" << nxUsername
++					ss << "listsession --user=\"" << nxUsername
+ 					   << "\" --status=\"suspended,running\" --geometry=\"" 
+ 					   << this->sessionData->xRes << "x"
+ 					   << this->sessionData->yRes << "x" 
+
+
+

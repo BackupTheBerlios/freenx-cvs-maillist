@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r417 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-November/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r417%20-%20freenx-server/trunk&In-Reply-To=%3C200711090127.lA91RCKT018731%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000544.html">
+   <LINK REL="Next"  HREF="000546.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r417 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r417%20-%20freenx-server/trunk&In-Reply-To=%3C200711090127.lA91RCKT018731%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r417 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Fri Nov  9 02:27:12 CET 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000544.html">[Freenx-cvs] r416 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000546.html">[Freenx-cvs] r418 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#545">[ date ]</a>
+              <a href="thread.html#545">[ thread ]</a>
+              <a href="subject.html#545">[ subject ]</a>
+              <a href="author.html#545">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-11-09 02:27:12 +0100 (Fri, 09 Nov 2007)
+New Revision: 417
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxnode
+Log:
+* Invoke curl with --proxy &quot;&quot; for automatic download of ppd files.
+  (Wolfgang Schweer &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">schweer at cityweb.de</A>&gt;)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-11-03 15:30:10 UTC (rev 416)
++++ freenx-server/trunk/ChangeLog	2007-11-09 01:27:12 UTC (rev 417)
+@@ -11,6 +11,8 @@
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 	* Added catching of exception after failed nscd command.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Invoke curl with --proxy &quot;&quot; for automatic download of ppd files.
++	  (Wolfgang Schweer &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">schweer at cityweb.de</A>&gt;)
+ 
+ 14.10.2007 FreeNX 0.7.1 &quot;Hip Hop Edition&quot;
+ 	* Fixed the issue that makes fonts look tiny and unreadable by default 
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2007-11-03 15:30:10 UTC (rev 416)
++++ freenx-server/trunk/nxnode	2007-11-09 01:27:12 UTC (rev 417)
+@@ -1372,7 +1372,7 @@
+ 		mkdir -p &quot;$USER_FAKE_HOME/.nx/config/ppd/&quot;
+ 		if [ &quot;$MODEL&quot; = &quot;download_new&quot; -o ! -r &quot;$USER_FAKE_HOME/.nx/config/ppd/$printer.ppd&quot; ]
+ 		then
+-			curl --digest -o &quot;$USER_FAKE_HOME/.nx/config/ppd/$printer.ppd&quot; &quot;<A HREF="http://$username:$password@127.0.0.1:$port/ppd/${printer">http://$username:$password@127.0.0.1:$port/ppd/${printer</A>}_nxdl.ppd&quot; &gt;&gt;&quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/curl.log&quot; 2&gt;&amp;1
++			curl --proxy &quot;&quot; --digest -o &quot;$USER_FAKE_HOME/.nx/config/ppd/$printer.ppd&quot; &quot;<A HREF="http://$username:$password@127.0.0.1:$port/ppd/${printer">http://$username:$password@127.0.0.1:$port/ppd/${printer</A>}_nxdl.ppd&quot; &gt;&gt;&quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/curl.log&quot; 2&gt;&amp;1
+ 		RC=$?
+ 		[ $RC -eq 0 -a &quot;$ENABLE_CUPS_SEAMLESS&quot; != &quot;1&quot; ] &amp;&amp; $PATH_BIN/nxdialog --message &quot;Download successful.&quot; -display :$display
+ 		[ $RC -ne 0 -a &quot;$ENABLE_CUPS_SEAMLESS&quot; != &quot;1&quot; ] &amp;&amp; $PATH_BIN/nxdialog --message &quot;Download failed. Log is: $USER_FAKE_HOME/.nx/C-$sess_id/cups/curl.log&quot; -display :$display
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000544.html">[Freenx-cvs] r416 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000546.html">[Freenx-cvs] r418 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#545">[ date ]</a>
+              <a href="thread.html#545">[ thread ]</a>
+              <a href="subject.html#545">[ subject ]</a>
+              <a href="author.html#545">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

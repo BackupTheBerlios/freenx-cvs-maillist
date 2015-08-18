@@ -1,0 +1,346 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r496 - qtnx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r496%20-%20qtnx&In-Reply-To=%3C200803051601.m25G1LOD011060%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000621.html">
+   <LINK REL="Next"  HREF="000623.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r496 - qtnx</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r496%20-%20qtnx&In-Reply-To=%3C200803051601.m25G1LOD011060%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r496 - qtnx">gwright at mail.berlios.de
+       </A><BR>
+    <I>Wed Mar  5 17:01:21 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000621.html">[Freenx-cvs] r495 - in freenx-server/trunk: . nxredir
+</A></li>
+        <LI>Next message: <A HREF="000623.html">[Freenx-cvs] r497 - qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#622">[ date ]</a>
+              <a href="thread.html#622">[ thread ]</a>
+              <a href="subject.html#622">[ subject ]</a>
+              <a href="author.html#622">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2008-03-05 17:01:21 +0100 (Wed, 05 Mar 2008)
+New Revision: 496
+
+Modified:
+   qtnx/logindialog.ui
+   qtnx/qtnxwindow.cpp
+   qtnx/qtnxwindow.h
+Log:
+Link type setting on the login dialog
+
+
+Modified: qtnx/logindialog.ui
+===================================================================
+--- qtnx/logindialog.ui	2008-03-05 13:57:12 UTC (rev 495)
++++ qtnx/logindialog.ui	2008-03-05 16:01:21 UTC (rev 496)
+@@ -13,21 +13,6 @@
+    &lt;string&gt;QtNX&lt;/string&gt;
+   &lt;/property&gt;
+   &lt;layout class=&quot;QVBoxLayout&quot; &gt;
+-   &lt;property name=&quot;spacing&quot; &gt;
+-    &lt;number&gt;6&lt;/number&gt;
+-   &lt;/property&gt;
+-   &lt;property name=&quot;leftMargin&quot; &gt;
+-    &lt;number&gt;9&lt;/number&gt;
+-   &lt;/property&gt;
+-   &lt;property name=&quot;topMargin&quot; &gt;
+-    &lt;number&gt;9&lt;/number&gt;
+-   &lt;/property&gt;
+-   &lt;property name=&quot;rightMargin&quot; &gt;
+-    &lt;number&gt;9&lt;/number&gt;
+-   &lt;/property&gt;
+-   &lt;property name=&quot;bottomMargin&quot; &gt;
+-    &lt;number&gt;9&lt;/number&gt;
+-   &lt;/property&gt;
+    &lt;item&gt;
+     &lt;widget class=&quot;QLabel&quot; name=&quot;logo&quot; &gt;
+      &lt;property name=&quot;text&quot; &gt;
+@@ -40,21 +25,6 @@
+    &lt;/item&gt;
+    &lt;item&gt;
+     &lt;layout class=&quot;QHBoxLayout&quot; &gt;
+-     &lt;property name=&quot;spacing&quot; &gt;
+-      &lt;number&gt;6&lt;/number&gt;
+-     &lt;/property&gt;
+-     &lt;property name=&quot;leftMargin&quot; &gt;
+-      &lt;number&gt;0&lt;/number&gt;
+-     &lt;/property&gt;
+-     &lt;property name=&quot;topMargin&quot; &gt;
+-      &lt;number&gt;0&lt;/number&gt;
+-     &lt;/property&gt;
+-     &lt;property name=&quot;rightMargin&quot; &gt;
+-      &lt;number&gt;0&lt;/number&gt;
+-     &lt;/property&gt;
+-     &lt;property name=&quot;bottomMargin&quot; &gt;
+-      &lt;number&gt;0&lt;/number&gt;
+-     &lt;/property&gt;
+      &lt;item&gt;
+       &lt;layout class=&quot;QVBoxLayout&quot; &gt;
+        &lt;property name=&quot;spacing&quot; &gt;
+@@ -97,21 +67,6 @@
+      &lt;/item&gt;
+      &lt;item&gt;
+       &lt;layout class=&quot;QVBoxLayout&quot; &gt;
+-       &lt;property name=&quot;spacing&quot; &gt;
+-        &lt;number&gt;6&lt;/number&gt;
+-       &lt;/property&gt;
+-       &lt;property name=&quot;leftMargin&quot; &gt;
+-        &lt;number&gt;0&lt;/number&gt;
+-       &lt;/property&gt;
+-       &lt;property name=&quot;topMargin&quot; &gt;
+-        &lt;number&gt;0&lt;/number&gt;
+-       &lt;/property&gt;
+-       &lt;property name=&quot;rightMargin&quot; &gt;
+-        &lt;number&gt;0&lt;/number&gt;
+-       &lt;/property&gt;
+-       &lt;property name=&quot;bottomMargin&quot; &gt;
+-        &lt;number&gt;0&lt;/number&gt;
+-       &lt;/property&gt;
+        &lt;item&gt;
+         &lt;widget class=&quot;QLineEdit&quot; name=&quot;username&quot; &gt;
+          &lt;property name=&quot;minimumSize&quot; &gt;
+@@ -136,14 +91,47 @@
+         &lt;/widget&gt;
+        &lt;/item&gt;
+        &lt;item&gt;
+-        &lt;widget class=&quot;QComboBox&quot; name=&quot;session&quot; &gt;
+-         &lt;property name=&quot;sizePolicy&quot; &gt;
+-          &lt;sizepolicy vsizetype=&quot;Fixed&quot; hsizetype=&quot;MinimumExpanding&quot; &gt;
+-           &lt;horstretch&gt;0&lt;/horstretch&gt;
+-           &lt;verstretch&gt;0&lt;/verstretch&gt;
+-          &lt;/sizepolicy&gt;
+-         &lt;/property&gt;
+-        &lt;/widget&gt;
++        &lt;layout class=&quot;QHBoxLayout&quot; &gt;
++         &lt;item&gt;
++          &lt;widget class=&quot;QComboBox&quot; name=&quot;session&quot; &gt;
++           &lt;property name=&quot;sizePolicy&quot; &gt;
++            &lt;sizepolicy vsizetype=&quot;Fixed&quot; hsizetype=&quot;MinimumExpanding&quot; &gt;
++             &lt;horstretch&gt;0&lt;/horstretch&gt;
++             &lt;verstretch&gt;0&lt;/verstretch&gt;
++            &lt;/sizepolicy&gt;
++           &lt;/property&gt;
++          &lt;/widget&gt;
++         &lt;/item&gt;
++         &lt;item&gt;
++          &lt;widget class=&quot;QComboBox&quot; name=&quot;link&quot; &gt;
++           &lt;item&gt;
++            &lt;property name=&quot;text&quot; &gt;
++             &lt;string&gt;Modem&lt;/string&gt;
++            &lt;/property&gt;
++           &lt;/item&gt;
++           &lt;item&gt;
++            &lt;property name=&quot;text&quot; &gt;
++             &lt;string&gt;ISDN&lt;/string&gt;
++            &lt;/property&gt;
++           &lt;/item&gt;
++           &lt;item&gt;
++            &lt;property name=&quot;text&quot; &gt;
++             &lt;string&gt;ADSL&lt;/string&gt;
++            &lt;/property&gt;
++           &lt;/item&gt;
++           &lt;item&gt;
++            &lt;property name=&quot;text&quot; &gt;
++             &lt;string&gt;WAN&lt;/string&gt;
++            &lt;/property&gt;
++           &lt;/item&gt;
++           &lt;item&gt;
++            &lt;property name=&quot;text&quot; &gt;
++             &lt;string&gt;LAN&lt;/string&gt;
++            &lt;/property&gt;
++           &lt;/item&gt;
++          &lt;/widget&gt;
++         &lt;/item&gt;
++        &lt;/layout&gt;
+        &lt;/item&gt;
+       &lt;/layout&gt;
+      &lt;/item&gt;
+@@ -151,21 +139,6 @@
+    &lt;/item&gt;
+    &lt;item&gt;
+     &lt;layout class=&quot;QHBoxLayout&quot; &gt;
+-     &lt;property name=&quot;spacing&quot; &gt;
+-      &lt;number&gt;6&lt;/number&gt;
+-     &lt;/property&gt;
+-     &lt;property name=&quot;leftMargin&quot; &gt;
+-      &lt;number&gt;0&lt;/number&gt;
+-     &lt;/property&gt;
+-     &lt;property name=&quot;topMargin&quot; &gt;
+-      &lt;number&gt;0&lt;/number&gt;
+-     &lt;/property&gt;
+-     &lt;property name=&quot;rightMargin&quot; &gt;
+-      &lt;number&gt;0&lt;/number&gt;
+-     &lt;/property&gt;
+-     &lt;property name=&quot;bottomMargin&quot; &gt;
+-      &lt;number&gt;0&lt;/number&gt;
+-     &lt;/property&gt;
+      &lt;item&gt;
+       &lt;widget class=&quot;QPushButton&quot; name=&quot;configureButton&quot; &gt;
+        &lt;property name=&quot;text&quot; &gt;
+
+Modified: qtnx/qtnxwindow.cpp
+===================================================================
+--- qtnx/qtnxwindow.cpp	2008-03-05 13:57:12 UTC (rev 495)
++++ qtnx/qtnxwindow.cpp	2008-03-05 16:01:21 UTC (rev 496)
+@@ -55,11 +55,15 @@
+ 
+     ui_lg.session-&gt;addItem(tr(&quot;Create new session&quot;));
+ 
++    parseXML();
++
+     connect(ui_lg.connectButton, SIGNAL(pressed()), this, SLOT(startConnect()));
+     connect(ui_lg.password, SIGNAL(returnPressed()), this, SLOT(startConnect()));
+ 
+     connect(ui_lg.configureButton, SIGNAL(pressed()), this, SLOT(configure()));
+ 
++    connect(ui_lg.session, SIGNAL(currentIndexChanged(QString)), this, SLOT(updateLinkType(QString)));
++
+     connect(processProbe, SIGNAL(timeout()), this, SLOT(handleTimeout()));
+ 
+     connect(&amp;callback, SIGNAL(logging(QString)), this, SLOT(handleLogging(QString)));
+@@ -80,6 +84,11 @@
+     connect(&amp;callback, SIGNAL(connectedSuccessfully()), this, SLOT(quit()));
+ }
+ 
++void QtNXWindow::updateLinkType(QString sessionName)
++{
++    parseXML();
++}
++
+ QtNXWindow::~QtNXWindow()
+ {
+     delete m_NXClient;
+@@ -236,21 +245,24 @@
+ {
+     string key = &quot;&quot;;
+ 
+-    NXParseXML handler;
+-    handler.setData(&amp;config);
++    parseXML();
+ 
+-    QFile file(QDir::homePath() + &quot;/.qtnx/&quot; +
+-            ui_lg.session-&gt;currentText() + &quot;.nxml&quot;);
++    if (config.sessionType == &quot;unix-application&quot;)
++        session.customCommand = config.customCommand;
+ 
+-    QXmlInputSource inputSource(&amp;file);
++    setDefaultData();
+ 
+-    QXmlSimpleReader reader;
+-    reader.setContentHandler(&amp;handler);
+-    reader.setErrorHandler(&amp;handler);
+-    reader.parse(inputSource);
++    if (ui_lg.link-&gt;currentText() == tr(&quot;Modem&quot;))
++        session.linkType = &quot;modem&quot;;
++    else if (ui_lg.link-&gt;currentText() == tr(&quot;ISDN&quot;))
++        session.linkType = &quot;isdn&quot;;
++    else if (ui_lg.link-&gt;currentText() == tr(&quot;ADSL&quot;))
++        session.linkType = &quot;adsl&quot;;
++    else if (ui_lg.link-&gt;currentText() == tr(&quot;WAN&quot;))
++        session.linkType = &quot;wan&quot;;
++    else if (ui_lg.link-&gt;currentText() == tr(&quot;LAN&quot;))
++        session.linkType = &quot;lan&quot;;
+ 
+-    setDefaultData();
+-
+     if (!config.key.empty()) {
+         key = config.key;
+         session.key = &quot;supplied&quot;;
+@@ -350,6 +362,33 @@
+     }
+ }
+ 
++void QtNXWindow::parseXML()
++{
++    NXParseXML handler;
++    handler.setData(&amp;config);
++
++    QFile file(QDir::homePath() + &quot;/.qtnx/&quot; +
++            ui_lg.session-&gt;currentText() + &quot;.nxml&quot;);
++
++    QXmlInputSource inputSource(&amp;file);
++
++    QXmlSimpleReader reader;
++    reader.setContentHandler(&amp;handler);
++    reader.setErrorHandler(&amp;handler);
++    reader.parse(inputSource);
++
++    if (config.linkType == &quot;modem&quot;)
++        ui_lg.link-&gt;setCurrentIndex(ui_lg.link-&gt;findText(tr(&quot;Modem&quot;)));
++    else if (config.linkType == &quot;isdn&quot;)
++        ui_lg.link-&gt;setCurrentIndex(ui_lg.link-&gt;findText(tr(&quot;ISDN&quot;)));
++    else if (config.linkType == &quot;adsl&quot;)
++        ui_lg.link-&gt;setCurrentIndex(ui_lg.link-&gt;findText(tr(&quot;ADSL&quot;)));
++    else if (config.linkType == &quot;wan&quot;)
++        ui_lg.link-&gt;setCurrentIndex(ui_lg.link-&gt;findText(tr(&quot;WAN&quot;)));
++    else if (config.linkType == &quot;lan&quot;)
++        ui_lg.link-&gt;setCurrentIndex(ui_lg.link-&gt;findText(tr(&quot;LAN&quot;)));
++}
++
+ void QtNXWindow::configure()
+ {
+     if (ui_lg.session-&gt;currentText() == tr(&quot;Create new session&quot;))
+
+Modified: qtnx/qtnxwindow.h
+===================================================================
+--- qtnx/qtnxwindow.h	2008-03-05 13:57:12 UTC (rev 495)
++++ qtnx/qtnxwindow.h	2008-03-05 16:01:21 UTC (rev 496)
+@@ -105,6 +105,7 @@
+         void startConnect();
+         void configure();
+         void configureClosed(QString);
++        void updateLinkType(QString);
+ 
+         // Callback handlers
+         void handleSuspendedSessions(QList&lt;NXResumeData&gt;);
+@@ -127,6 +128,7 @@
+         void setupUI();
+         void setDefaultData();
+         void initialiseClient();
++        void parseXML();
+         void reinitialiseClient();
+ 
+         int getWidth();
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000621.html">[Freenx-cvs] r495 - in freenx-server/trunk: . nxredir
+</A></li>
+	<LI>Next message: <A HREF="000623.html">[Freenx-cvs] r497 - qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#622">[ date ]</a>
+              <a href="thread.html#622">[ thread ]</a>
+              <a href="subject.html#622">[ subject ]</a>
+              <a href="author.html#622">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

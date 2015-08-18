@@ -1,0 +1,503 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fabianx modified 2 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%202%20files&In-Reply-To=%3C420F724E.mailF0W11XO15%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000005.html">
+   <LINK REL="Next"  HREF="000007.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fabianx modified 2 files</H1>
+    <B>fabianx</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%202%20files&In-Reply-To=%3C420F724E.mailF0W11XO15%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fabianx modified 2 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Sun Feb 13 16:29:18 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000005.html">[Freenx-cvs] CVS: freenx - fabianx modified nxnode
+</A></li>
+        <LI>Next message: <A HREF="000007.html">[Freenx-cvs] CVS: freenx - fabianx modified 4 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6">[ date ]</a>
+              <a href="thread.html#6">[ thread ]</a>
+              <a href="subject.html#6">[ subject ]</a>
+              <a href="author.html#6">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fabianx
+Date:      2005-02-13 15:29:18 GMT
+Modified:  .        ChangeLog nxsetup
+Log:
+Added nxsetup --uninstall.
+Rewrote nxsetup with much more features.
+
+Patch by Jon Severinsson &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">jonno at users.berlios.de</A>&gt;.
+
+Revision  Changes    Path
+1.12      +2 -0      freenx/ChangeLog
+
+
+rev 1.12, prev_rev 1.11
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.11
+retrieving revision 1.12
+diff -u -r1.11 -r1.12
+--- ChangeLog	13 Feb 2005 14:22:56 -0000	1.11
++++ ChangeLog	13 Feb 2005 15:29:18 -0000	1.12
+@@ -17,6 +17,8 @@
+ 	  it will be standard in NX 1.5.0.
+ 	* Added &quot;floating window&quot; support by just nxproxy/nxproxy connection
+ 	  and added configuration directive to enable rootless mode.
++	* Added nxsetup --uninstall and added more feature to nxsetup.
++	  Note: You need to use nxsetup --install for installation now.
+ 
+ 20.11.2004 FreeNX 0.2.7 &quot;Skolelinux Edition&quot;
+ 	* Fix nxserver to work again with KNX-Client. ('\r' is evil)
+
+
+
+1.9       +227 -120  freenx/nxsetup
+
+
+rev 1.9, prev_rev 1.8
+Index: nxsetup
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxsetup,v
+retrieving revision 1.8
+retrieving revision 1.9
+diff -u -r1.8 -r1.9
+--- nxsetup	12 Feb 2005 14:44:21 -0000	1.8
++++ nxsetup	13 Feb 2005 15:29:18 -0000	1.9
+@@ -1,21 +1,58 @@
+ #!/bin/bash
+ 
+-# Coypright (c) 2004 by Fabian Franz.
++# Coypright (c) 2004-2005 by Fabian Franz &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">freenx at fabian-franz.de</A>&gt;.
++#                    2005 by Jon Severinsson &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">jonno at users.berlios.de</A>&gt;.
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxsetup,v 1.8 2005/02/12 14:44:21 fabianx Exp $ 
++# CVS: $Id: nxsetup,v 1.9 2005/02/13 15:29:18 fabianx Exp $ 
+ #
+ 
++HELP=&quot;no&quot;
++INSTALL=&quot;no&quot;
+ SETUP_NOMACHINE_KEY=&quot;no&quot;
++CLEAN=&quot;no&quot;
++UNINSTALL=&quot;no&quot;
++PURGE=&quot;no&quot;
++
++while [ &quot;$1&quot; ]
++do
++	case &quot;$1&quot; in
++		--help) HELP=&quot;yes&quot;; shift ;;
++		--install) INSTALL=&quot;yes&quot;; shift ;;
++		--setup-nomachine-key) SETUP_NOMACHINE_KEY=&quot;yes&quot;; shift ;;
++		--clean) CLEAN=&quot;yes&quot;; shift ;;
++		--uninstall) UNINSTALL=&quot;yes&quot;; shift ;;
++		--purge) PURGE=&quot;yes&quot;; shift ;;
++		--) shift ; break ;;
++		*) echo &quot;Invalid flag $1&quot; ; HELP=&quot;yes&quot;; shift ; break ;;
++	esac
++done
++
++#Check for invalid combinations:
++[ &quot;$INSTALL&quot; = &quot;yes&quot; -a &quot;$UNINSTALL&quot; = &quot;yes&quot; ] &amp;&amp; HELP=&quot;yes&quot;
++[ &quot;$INSTALL&quot; = &quot;no&quot; -a &quot;$UNINSTALL&quot; = &quot;no&quot; ] &amp;&amp; HELP=&quot;yes&quot;
++[ &quot;$INSTALL&quot; = &quot;yes&quot; -a &quot;$CLEAN&quot; = &quot;no&quot; -a &quot;$PURGE&quot; = &quot;yes&quot; ] &amp;&amp; HELP=&quot;yes&quot;
++[ &quot;$UNINSTALL&quot; = &quot;yes&quot; -a &quot;$SETUP_NOMACHINE_KEY&quot; = &quot;yes&quot; ] &amp;&amp; HELP=&quot;yes&quot;
++[ &quot;$UNINSTALL&quot; = &quot;yes&quot; -a &quot;$CLEAN&quot; = &quot;yes&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+ 
+-if [ &quot;$1&quot; = &quot;--help&quot; ]
++if [ &quot;$HELP&quot; = &quot;yes&quot; ]
+ then
+ 	echo &quot;nxsetup - Setup the FreeNX server.&quot;
+-	echo &quot;Syntax: nxsetup [--setup-nomachine-key]&quot;
+-	echo &quot;  --setup-nomachine-key   Allow login with the key shipped with the NoMachine client.&quot;
+-	echo &quot;                        This can be a security risk. So it is not recommended.&quot;
+-	echo &quot;                        Use this option on your own risk.&quot;
++	echo &quot;Syntax: nxsetup --help&quot;
++	echo &quot;        nxsetup --install [--setup-nomachine-key] [--clean [--purge]]&quot;
++	echo &quot;        nxsetup --uninstall [--purge]&quot;
++	echo
++	echo &quot;  --help                 Displays this help message&quot;
++	echo &quot;  --install              Install nessesary files and add the nx user&quot;
++	echo &quot;  --setup-nomachine-key  Allow login with the key shipped with the NoMachine&quot;
++	echo &quot;                         client. This is not as secure, but it simplifies the &quot;
++	echo &quot;                         configuration of clients.&quot;
++	echo &quot;                         Use this option at your own risk.&quot;
++	echo &quot;  --clean                Performs an uninstall prior to the installation&quot;
++	echo &quot;  --uninstall            Remove log and session files, as well as the nx user&quot;
++	echo &quot;  --purge                Uninstall will remove extra configuration files and ssh&quot;
++	echo &quot;                         keys as well. Note that node.conf will always be saved.&quot;
+ 	exit 0
+ fi
+ 
+@@ -25,142 +62,212 @@
+ 	exit 1
+ fi
+ 
+-set -e
+-
+-if [ &quot;$1&quot; = &quot;--setup-nomachine-key&quot; ]
+-then
+-	SETUP_NOMACHINE_KEY=&quot;yes&quot;
+-fi
+-
+ # Read the config file
+ echo -n &quot;Searching for nxserver binary...&quot;
+ export $(grep ^NX_CONFIG_FILE= $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxserver))
+ echo &quot;done&quot;
+ . $NX_CONFIG_FILE
+ 
+-if [ &quot;$(pidof sshd)&quot; = &quot;&quot; ]
+-then 
+-	echo -n &quot;Starting ssh service ...&quot;
+-	# Generate Host keys if they are not available, yet
+-	[ -e /etc/ssh/ssh_host_rsa_key ] || ssh-keygen -q -t rsa -f /etc/ssh/ssh_host_rsa_key -C '' -N ''
+-	[ -e /etc/ssh/ssh_host_dsa_key ] || ssh-keygen -q -t dsa -f /etc/ssh/ssh_host_dsa_key -C '' -N ''
+-	/etc/init.d/ssh start
++install_nx()
++{
++	set -e
++	
++	if [ &quot;$(pidof sshd)&quot; = &quot;&quot; ]
++	then 
++		echo -n &quot;Starting ssh service ...&quot;
++		# Generate Host keys if they are not available, yet
++		[ -e /etc/ssh/ssh_host_rsa_key ] || ssh-keygen -q -t rsa -f /etc/ssh/ssh_host_rsa_key -C '' -N ''
++		[ -e /etc/ssh/ssh_host_dsa_key ] || ssh-keygen -q -t dsa -f /etc/ssh/ssh_host_dsa_key -C '' -N ''
++		/etc/init.d/ssh start
++		echo &quot;done&quot;
++	fi
++	
++	echo -n &quot;Setting up $NX_ETC_DIR ...&quot;
++	mkdir -p $NX_ETC_DIR
++	touch $NX_ETC_DIR/passwords $NX_ETC_DIR/passwords.orig
++	chmod 600 $NX_ETC_DIR/passwords $NX_ETC_DIR/passwords.orig
+ 	echo &quot;done&quot;
+-fi
+-
+-echo -n &quot;Setting up $NX_ETC_DIR ...&quot;
+-mkdir -p $NX_ETC_DIR
+-touch $NX_ETC_DIR/passwords $NX_ETC_DIR/passwords.orig
+-chmod 600 $NX_ETC_DIR/passwords $NX_ETC_DIR/passwords.orig
+-echo &quot;done&quot;
+-
+-if [ ! -f $NX_ETC_DIR/users.id_dsa ]
+-then
+-	ssh-keygen -f $NX_ETC_DIR/users.id_dsa -t dsa -N &quot;&quot;
+-fi
+-
+-echo -n &quot;Setting up $NX_SESS_DIR ...&quot;
+-mkdir -p $NX_SESS_DIR/closed $NX_SESS_DIR/running $NX_SESS_DIR/failed
+-chmod 700 $NX_SESS_DIR/*
+-echo &quot;done&quot;
+-
+-echo -n &quot;Setting up $NX_LOGFILE ...&quot;
+-mkdir -p $(dirname &quot;$NX_LOGFILE&quot;)
+-touch &quot;$NX_LOGFILE&quot;
+-chmod 600 &quot;$NX_LOGFILE&quot;
+-echo &quot;done&quot;
+-
+-if ! { getent passwd | egrep -q &quot;^nx:&quot;; }
+-then
+-	echo -n &quot;Setting up user nx ...&quot;
++	
++	if [ ! -f $NX_ETC_DIR/users.id_dsa ]
++	then
++		ssh-keygen -f $NX_ETC_DIR/users.id_dsa -t dsa -N &quot;&quot;
++	fi
++	
++	echo -n &quot;Setting up $NX_SESS_DIR ...&quot;
++	mkdir -p $NX_SESS_DIR/closed $NX_SESS_DIR/running $NX_SESS_DIR/failed
++	chmod 700 $NX_SESS_DIR/*
++	echo &quot;done&quot;
++	
++	echo -n &quot;Setting up $NX_LOGFILE ...&quot;
++	mkdir -p $(dirname &quot;$NX_LOGFILE&quot;)
++	touch &quot;$NX_LOGFILE&quot;
++	chmod 600 &quot;$NX_LOGFILE&quot;
++	echo &quot;done&quot;
++	
++	if ! { getent passwd | egrep -q &quot;^nx:&quot;; }
++	then
++		echo -n &quot;Setting up user nx ...&quot;
++		useradd -d $NX_HOME_DIR -s $PATH_BIN/nxserver nx
++		echo &quot;done&quot;
++	fi
++	
++	echo -n &quot;Setting up known_hosts and $NX_AUTHORIZED_KEYS_FILE ...&quot;
++	
++	SETUP_NX_KEY=&quot;no&quot;
++	
+ 	mkdir -p $NX_HOME_DIR/.ssh
+ 	chmod 700 $NX_HOME_DIR/ $NX_HOME_DIR/.ssh
+-	useradd -d $NX_HOME_DIR -s $PATH_BIN/nxserver nx
+-	echo &quot;done&quot;
+-fi
+-
+-echo -n &quot;Setting up known_hosts and $NX_AUTHORIZED_KEYS_FILE ...&quot;
+-
+-SETUP_NX_KEY=&quot;no&quot;
+-
+-if [ ! -f $NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE ]
+-then
+-	SETUP_NX_KEY=&quot;yes&quot;
+-	if [ &quot;$SETUP_NOMACHINE_KEY&quot; = &quot;yes&quot; ]
++	
++	if [ ! -f $NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE ]
+ 	then
+-		cat &lt;&lt; EOF &gt;$NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE
++		SETUP_NX_KEY=&quot;yes&quot;
++		if [ &quot;$SETUP_NOMACHINE_KEY&quot; = &quot;yes&quot; ]
++		then
++			cat &lt;&lt; EOF &gt;$NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE
+ ssh-dss AAAAB3NzaC1kc3MAAACBAJe/0DNBePG9dYLWq7cJ0SqyRf1iiZN/IbzrmBvgPTZnBa5FT/0Lcj39sRYt1paAlhchwUmwwIiSZaON5JnJOZ6jKkjWIuJ9MdTGfdvtY1aLwDMpxUVoGwEaKWOyin02IPWYSkDQb6cceuG9NfPulS9iuytdx0zIzqvGqfvudtufAAAAFQCwosRXR2QA8OSgFWSO6+kGrRJKiwAAAIEAjgvVNAYWSrnFD+cghyJbyx60AAjKtxZ0r/Pn9k94Qt2rvQoMnGgt/zU0v/y4hzg+g3JNEmO1PdHh/wDPVOxlZ6Hb5F4IQnENaAZ9uTZiFGqhBO1c8Wwjiq/MFZy3jZaidarLJvVs8EeT4mZcWxwm7nIVD4lRU2wQ2lj4aTPcepMAAACANlgcCuA4wrC+3Cic9CFkqiwO/Rn1vk8dvGuEQqFJ6f6LVfPfRTfaQU7TGVLk2CzY4dasrwxJ1f6FsT8DHTNGnxELPKRuLstGrFY/PR7KeafeFZDf+fJ3mbX5nxrld3wi5titTnX+8s4IKv29HJguPvOK/SI7cjzA+SqNfD7qEo8= <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">root at nettuno</A>
+ EOF
+-	else
+-		# generate a new key, backup the old and copy it to $NX_AUTHORIZED_KEYS_FILE
+-		$PATH_BIN/nxkeygen
++		else
++			# generate a new key, backup the old and copy it to $NX_AUTHORIZED_KEYS_FILE
++			$PATH_BIN/nxkeygen
++		fi
+ 	fi
+-fi
+-
+-if [ ! -f $NX_HOME_DIR/.ssh/known_hosts ]
+-then
+-	echo -n &quot;127.0.0.1 &quot; &gt; $NX_HOME_DIR/.ssh/known_hosts
+-	cat /etc/ssh/ssh_host_rsa_key.pub &gt;&gt; $NX_HOME_DIR/.ssh/known_hosts
+-fi
+-
+-echo &quot;done&quot;
++	
++	if [ ! -f $NX_HOME_DIR/.ssh/known_hosts ]
++	then
++		echo -n &quot;127.0.0.1 &quot; &gt; $NX_HOME_DIR/.ssh/known_hosts
++		cat /etc/ssh/ssh_host_rsa_key.pub &gt;&gt; $NX_HOME_DIR/.ssh/known_hosts
++	fi
++	
++	echo &quot;done&quot;
++	
++	echo -n &quot;Setting up permissions ...&quot;
++	chown -R nx:root $NX_SESS_DIR
++	chown -R nx:root $NX_ETC_DIR
++	chown -R nx:root $NX_HOME_DIR
++	chown nx:root &quot;$NX_LOGFILE&quot;
++	echo &quot;done&quot;
++}
+ 
+-echo -n &quot;Setting up permissions ...&quot;
+-chown -R nx:root $NX_SESS_DIR
+-chown -R nx:root $NX_ETC_DIR
+-chown -R nx:root $NX_HOME_DIR
+-chown nx:root &quot;$NX_LOGFILE&quot;
+-echo &quot;done&quot;
++uninstall_nx() 
++{
++	if { getent passwd | egrep -q &quot;^nx:&quot;; }
++	then
++		echo -n &quot;Removing user nx ...&quot;
++		userdel nx
++		echo &quot;done&quot;
++	fi
++	
++	if [ -e &quot;$NX_SESS_DIR&quot; ]
++	then
++		echo -n &quot;Removing session database ...&quot;
++		rm -f -r $NX_SESS_DIR/closed $NX_SESS_DIR/running $NX_SESS_DIR/failed 2&gt;/dev/null
++		rmdir -p $NX_SESS_DIR 2&gt;/dev/null
++		echo &quot;done&quot;
++	fi
++	
++	if [ -e &quot;$NX_LOGFILE&quot; ] 
++	then
++		echo -n &quot;Removing loggfile ...&quot;
++		rm -f &quot;$NX_LOGFILE&quot; 2&gt;/dev/null
++		rmdir -p $(dirname &quot;$NX_LOGFILE&quot;) 2&gt;/dev/null
++		echo &quot;done&quot;
++	fi
++	
++	if [ &quot;$PURGE&quot; = &quot;yes&quot; -a -e &quot;$NX_HOME_DIR&quot; ]
++	then
++		echo -n &quot;Removing nx home directory ...&quot;
++		rm -f -r &quot;$NX_HOME_DIR&quot; 2&gt;/dev/null
++		rmdir -p $(dirname &quot;$NX_HOME_DIR&quot;) 2&gt;/dev/null
++		echo &quot;done&quot;
++	fi
++	
++	if [ &quot;$PURGE&quot; = &quot;yes&quot; -a -e &quot;$NX_ETC_DIR&quot; ]
++	then
++		echo -n &quot;Removing configuration files ...&quot;
++		rm -f &quot;$NX_ETC_DIR/passwords&quot; &quot;$NX_ETC_DIR/passwords.orig&quot; &quot;$NX_ETC_DIR/users.id_dsa&quot; &quot;$NX_ETC_DIR/users.id_dsa.pub&quot; 2&gt;/dev/null
++		for i in `ls $NX_ETC_DIR/*.node.conf 2&gt;/dev/null` ;
++		do
++			rm -f &quot;$i&quot; 2&gt;/dev/null;
++		done
++		echo &quot;done&quot;
++	fi
++}
+ 
+-echo &quot;Ok, nxserver is ready.&quot;
+-echo &quot;&quot;
+-if [ &quot;$ENABLE_SSH_AUTHENTICATION&quot; = &quot;1&quot; -o &quot;$ENABLE_SU_AUTHENTICATION&quot; = &quot;1&quot; ]
++if [ &quot;$INSTALL&quot; = &quot;yes&quot; ]
+ then
+-	echo &quot;PAM authentication enabled:&quot;
+-	if [ &quot;$ENABLE_USER_DB&quot; = &quot;1&quot; ]
++	#Perform cleanup?
++	[ &quot;$CLEAN&quot; = &quot;yes&quot; ] &amp;&amp; uninstall_nx
++	
++	install_nx
++	
++	echo &quot;Ok, nxserver is ready.&quot;
++	echo 
++	if [ &quot;$ENABLE_SSH_AUTHENTICATION&quot; = &quot;1&quot; -o &quot;$ENABLE_SU_AUTHENTICATION&quot; = &quot;1&quot; ]
+ 	then
+-		echo &quot;  Users will be able to login with their normal passwords,&quot;
+-		echo &quot;  but they have to be registered in the nx database to do so.&quot;
++		echo &quot;PAM authentication enabled:&quot;
++		if [ &quot;$ENABLE_USER_DB&quot; = &quot;1&quot; ]
++		then
++			echo &quot;  Users will be able to login with their normal passwords,&quot;
++			echo &quot;  but they have to be registered in the nx database to do so.&quot;
++			echo &quot;  To add new users to the nx database do:&quot;
++			echo &quot;    nxserver --adduser &lt;username&gt;&quot;
++		else
++			echo &quot;  All users will be able to login with their normal passwords.&quot;
++		fi
++		echo
++		if [ &quot;$ENABLE_SSH_AUTHENTICATION&quot; = &quot;1&quot; -a &quot;$ENABLE_SU_AUTHENTICATION&quot; = &quot;1&quot; ]
++		then
++			echo &quot;  Both SSH and SU authentication is enabled.&quot;
++			echo &quot;  This does work, but is redundant.&quot;
++			echo &quot;  Please check if this is realy what you intended.&quot;
++		elif [ &quot;$ENABLE_SSH_AUTHENTICATION&quot; = &quot;1&quot; ]
++		then
++			echo &quot;  PAM authentication will be done through SSH.&quot;
++			echo &quot;  Please ensure that SSHD on localhost accepts password authentication.&quot;
++		else
++			echo &quot;  PAM authentication will be done through SU.&quot;
++			echo &quot;  Please ensure that the user &quot;nx&quot; is a member of the wheel group.&quot;
++		fi
++	else
++		echo &quot;PAM authentication disabled.&quot;
++		echo &quot;  Only users in the nx database will be able to log in.&quot;
++		echo
+ 		echo &quot;  To add new users to the nx database do:&quot;
+ 		echo &quot;    nxserver --adduser &lt;username&gt;&quot;
+-	else
+-		echo &quot;  All users will be able to login with their normal passwords.&quot;
++		echo &quot;  Afterwards change the password with:&quot;
++		echo &quot;    nxserver --passwd &lt;username&gt;&quot;
+ 	fi
+ 	echo
+-	if [ &quot;$ENABLE_SSH_AUTHENTICATION&quot; = &quot;1&quot; -a &quot;$ENABLE_SU_AUTHENTICATION&quot; = &quot;1&quot; ]
++	echo &quot;  You can change this behaviour in the $NX_CONFIG_FILE file.&quot;
++	
++	if [ &quot;$SETUP_NOMACHINE_KEY&quot; = &quot;no&quot; -a &quot;$SETUP_NX_KEY&quot; = &quot;yes&quot; ]
+ 	then
+-		echo &quot;  Both SSH and SU authentication is enabled.&quot;
+-		echo &quot;  This does work, but is redundant.&quot;
+-		echo &quot;  Please check if this is realy what you intended.&quot;
+-	elif [ &quot;$ENABLE_SSH_AUTHENTICATION&quot; = &quot;1&quot; ]
++		echo
++		echo &quot;Warning: Clients will not be able to login to this server with the standard key.&quot;
++		echo &quot;         Please replace /usr/NX/share/client.id_dsa.key on all clients you want&quot;
++		echo &quot;         to use with $NX_HOME_DIR/.ssh/client.id_dsa.key&quot;
++		echo &quot;         and protect it accordingly.&quot;
++		echo
++		echo &quot;         If you really want to use the NoMachine key please remove&quot;
++		echo &quot;         '$NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE'&quot;
++		echo &quot;         and then run this script with the --setup-nomachine-key parameter.&quot;
++	fi
++	
++	echo &quot;Have Fun!&quot;
++elif [ &quot;$UNINSTALL&quot; = &quot;yes&quot; ]
++then
++	uninstall_nx
++	
++	echo &quot;Ok, nxserver is uninstalled&quot;
++	echo 
++	if [ &quot;$PURGE&quot; = &quot;yes&quot; ]
+ 	then
+-		echo &quot;  PAM authentication will be done through SSH.&quot;
+-		echo &quot;  Please ensure that SSHD on localhost accepts password authentication.&quot;
++		echo &quot;To complete the uninstallation process, remove the nx scripts in $PATH_BIN&quot;
++		echo &quot;and the $NX_CONFIG_FILE configuration file.&quot;
+ 	else
+-		echo &quot;  PAM authentication will be done through SU.&quot;
+-		echo &quot;  Please ensure that the user &quot;nx&quot; is a member of the wheel group.&quot;
++		echo &quot;To complete the uninstallation process, remove the nx scripts in $PATH_BIN&quot;
++		echo
++		echo &quot;Configuration files and ssh keys are saved in case you would like to reinstall&quot;
++		echo &quot;freenx at a later time. To remove them, please run 'nxsetup --uninstall --purge'&quot;
+ 	fi
+-else
+-	echo &quot;PAM authentication disabled.&quot;
+-	echo &quot;  Only users in the nx database will be able to log in.&quot;
+-	echo
+-	echo &quot;  To add new users to the nx database do:&quot;
+-	echo &quot;    nxserver --adduser &lt;username&gt;&quot;
+-	echo &quot;  Afterwards change the password with:&quot;
+-	echo &quot;    nxserver --passwd &lt;username&gt;&quot;
+ fi
+-echo
+-echo &quot;  You can change this behaviour in the $NX_CONFIG_FILE file.&quot;
+-
+-if [ &quot;$SETUP_NOMACHINE_KEY&quot; = &quot;no&quot; -a &quot;$SETUP_NX_KEY&quot; = &quot;yes&quot; ]
+-then
+-	echo &quot;&quot;
+-	echo &quot;Warning: Clients will not be able to login to this server with the standard key.&quot;
+-	echo &quot;         Please replace /usr/NX/share/client.id_dsa.key on all clients you want&quot;
+-	echo &quot;         to use with the private key from $NX_HOME_DIR/.ssh/client.id_dsa.key and&quot;
+-	echo &quot;         protect it accordingly.&quot;
+-	echo &quot;&quot;
+-	echo &quot;If you really want to use the NoMachine key please remove $NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE and run this script with the parameter --setup-nomachine-key again.&quot;
+-fi
+-
+-echo &quot;Have Fun!&quot;
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000005.html">[Freenx-cvs] CVS: freenx - fabianx modified nxnode
+</A></li>
+	<LI>Next message: <A HREF="000007.html">[Freenx-cvs] CVS: freenx - fabianx modified 4 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6">[ date ]</a>
+              <a href="thread.html#6">[ thread ]</a>
+              <a href="subject.html#6">[ subject ]</a>
+              <a href="author.html#6">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

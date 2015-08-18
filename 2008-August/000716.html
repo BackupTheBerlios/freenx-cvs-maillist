@@ -1,0 +1,243 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r582 - trunk/freenx-website
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r582%20-%20trunk/freenx-website&In-Reply-To=%3C200808220136.m7M1a8T3013104%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000715.html">
+   <LINK REL="Next"  HREF="000717.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r582 - trunk/freenx-website</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r582%20-%20trunk/freenx-website&In-Reply-To=%3C200808220136.m7M1a8T3013104%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r582 - trunk/freenx-website">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Fri Aug 22 03:36:08 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000715.html">[Freenx-cvs] r581 - tags/freenx-server
+</A></li>
+        <LI>Next message: <A HREF="000717.html">[Freenx-cvs] r583 - in trunk/freenx-website: . alte_seite
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#716">[ date ]</a>
+              <a href="thread.html#716">[ thread ]</a>
+              <a href="subject.html#716">[ subject ]</a>
+              <a href="author.html#716">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-08-22 03:36:07 +0200 (Fri, 22 Aug 2008)
+New Revision: 582
+
+Modified:
+   trunk/freenx-website/home.inc
+   trunk/freenx-website/index.php
+   trunk/freenx-website/info.inc
+Log:
+Updated website for 0.7.3 release.
+
+
+
+Modified: trunk/freenx-website/home.inc
+===================================================================
+--- trunk/freenx-website/home.inc	2008-08-22 00:46:14 UTC (rev 581)
++++ trunk/freenx-website/home.inc	2008-08-22 01:36:07 UTC (rev 582)
+@@ -12,6 +12,135 @@
+ 	&lt;/h2&gt;
+ 	&lt;h3&gt;
+ 		&lt;a
++	href=&quot;&quot;&gt;FreeNX
++	0.7.3 &quot;Priscilla One Year Edition&quot; Released&lt;/a&gt;
++        - Sunday, 18/08/08 - 
++	[&lt;a title=&quot;Download&quot;
++	href=&quot;<A HREF="http://prdownload.berlios.de/freenx/freenx-0.7.3.tar.gz">http://prdownload.berlios.de/freenx/freenx-0.7.3.tar.gz</A>&quot;&gt;Download&lt;/a&gt;]
++	&lt;/h3&gt;
++	&lt;pre&gt;
++18.08.2008 FreeNX 0.7.3 &quot;Priscilla One Year Edition&quot;
++        * Opened the 0.7.3 development.
++        * Added logging of failed authentication attempts
++          to auth.log via syslog (3). This can be disabled by
++          setting ENABLE_LOG_FAILED_LOGINS=&quot;0&quot;.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Added -nolisten tcp to nxagent invocation.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>, idea by  pappy- (Gentoo))
++        * Used bash for all tasks as 'sh' might be not what we want
++          on standard ubuntu.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>, thx to tan (IRC))
++        * Finally fixed mv not working for failed or terminated
++          sessions.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>, Terje Andersen &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">terander at guard.zapto.org</A>&gt;)
++        * Added patch from 2005 to enable reconnect to 24-bit display via
++          32-bit or vice versa. Oops :)
++          (Sunil &lt;funtoos at yahoo.com&gt; )
++        * Added 3.2.0 as a backend version for nxloadconfig.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Added configuration key ENABLE_SOURCE_BASH_PROFILE for toggling of
++          sourcing ~/.bash_profile.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Added /usr/bin/xauth as default key and used /usr/X11R6/bin/xauth as
++          fallback.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Fixed Makefile to stop on all errors.
++          (Idea by Hai Zaar &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">haizaar at gmail.com</A>&gt;, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Changed the default for ENABLE_PASSDB_AUTHENTICATION. If you had
++          added a user with different password via --adduser consider
++          re-activating this option in node.conf.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Added constraints for passdb based commands. They are only available
++          when ENABLE_PASSDB_AUTHENTICATION=&quot;1&quot; else a friendly error message
++          is shown. This should help with users using old tutorials.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Added unix-console patch. Added default handler as unix-default with
++          a fallback to xterm,
++          (Idea by Jens Hatlak &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">jh at junetz.de</A>&gt;, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Fixed external rdesktop keyboards: A &quot;$&quot; was missing.
++          (Bug by Phil Stricker &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">stril at gmx.de</A>&gt;, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Added workaround for &quot;ch&quot; keyboard layout to nxdesktop_helper,
++          which NXClient 3.2.0 means as de-ch.
++          (Bug by Phil Stricker &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">stril at gmx.de</A>&gt;, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Added clean target to Makefile.
++          (Based on patch by Ubuntu FreeNX-Team, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Use :0.0 if mirrorhost is 127.0.0.1 and add -localhost for
++          enhanced security. Also increase sleep timeout for slow machines.
++          (Based on Patch by Jeremy Wilkins &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">wjeremy at shaw.ca</A>&gt;, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Allow RDP &quot;Run application&quot; sessions to work correctly.
++          (David Corral &lt; <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">davefury at gmail.com</A> &gt; &amp; the Silice Telecom staff,
++           <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Merge Xresources on startup of session.
++          (Jeremy Wilkins &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">wjeremy at shaw.ca</A>&gt;)
++        * Added nx-session-launcher from Ubuntu FreeNX-Team to use FreeNX with
++          ConsoleKit.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">marceloshima at gmail.com</A>, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Moved logging functions to a more appropriate place.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Finally fixed the bug when NX Client was stopped on &quot;Negotiating
++          link parameters&quot; and failed session after first session suspend.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Fixed missing &quot;fi&quot; statement. In fact it was a missing &quot;;;&quot;.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Used source instead of &quot;.&quot; for Makefile. (Closes: #13954)
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Allow passwords with '\' by changing read -s to read -r -s.
++          (Closes: #10699)
++          (Patch by <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">rpfuller at bat.berlios.de</A>, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Allow passwords with special chars by using new url_decode on
++          agent_password. (Closes: #10248)
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Fixed start/stop exit codes.
++          (Patch by Gentoo Portage, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Finally checked for all service ports. (cups, media, samba)
++          and also checked it on the host where the load balancing actually
++          leads to.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Fixed broken fallback logic if SSH_CLIENT variables cannot be read
++          correctly.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Overhauled the usermode:
++                * There are now two modes of operation.
++                - One statically setting the
++                  ENABLE_USERMODE_AUTHENTICATION key
++                  in node.conf. (old behavior)
++                - Or using nxserver-usermode as startup
++                  binary, which directly goes into the 103 stage.
++                * Fixed using commandline parameters like --cleanup
++                  for static usermode.
++                * Enabled the root commandline parameters in usermode.
++                * Fixed usage of &quot;nx&quot; user as normal user in usermode.
++                * Disabled slave mode and load balancing for usermode.
++                * Fixed creation of the logfile directory.
++                * Fixed nxnode usage of SSH_CLIENT using fallback mechanism.
++          (Patch by <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">nbartos at bat.berlios.de</A>, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Added disabled nxserver-suid wrapper with help from Google. To
++          enable it uncomment the suid_install target in Makefile.
++          ( Alistair Riddoch &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">alriddoch at google.com</A>&gt;, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Automatically disabled slave mode, when load balancing is activated.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Made ENABLE_SLAVE_MODE=&quot;1&quot; the new default as its faster
++          and more reliable. If you encounter any problems with it,
++          disable it in node.conf.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Changed type for external agents to windows-helper or vnc-helper
++          so that those sessions can be mirrored / shadowed as well.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Added nxshadowacl.sample component to be able to shadow
++          foreign sessions.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Prepared shadowing foreign users for VNC-shadowing.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Added shadow support to --listsession command.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Added shadow mode as nxagent target.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Fixed shadow mode and made it usable.
++          (Patch by Amin Shehata &lt;amino7 at yahoo dot com&gt;, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	&lt;/pre&gt;
++
++	&lt;h3&gt;
++		&lt;a
+ 	href=&quot;<A HREF="http://mail.kde.org/pipermail/freenx-knx/2007-October/005959.html">http://mail.kde.org/pipermail/freenx-knx/2007-October/005959.html</A>&quot;&gt;FreeNX
+ 	0.7.1 Released&lt;/a&gt; 
+         - Sunday, 14/10/07 - 
+
+Modified: trunk/freenx-website/index.php
+===================================================================
+--- trunk/freenx-website/index.php	2008-08-22 00:46:14 UTC (rev 581)
++++ trunk/freenx-website/index.php	2008-08-22 01:36:07 UTC (rev 582)
+@@ -22,7 +22,7 @@
+ 					&lt;h2&gt;
+ 						FreeNX
+ 					&lt;/h2&gt;
+-					&lt;a href=&quot;<A HREF="http://openfacts.berlios.de/index-en.phtml?title=FreeNX_FAQ">http://openfacts.berlios.de/index-en.phtml?title=FreeNX_FAQ</A>&quot;&gt;
++					&lt;a href=&quot;<A HREF="http://openfacts2.berlios.de/wikien/index.php/BerliosProject:FreeNX_-_FAQ">http://openfacts2.berlios.de/wikien/index.php/BerliosProject:FreeNX_-_FAQ</A>&quot;&gt;
+ 						Frequently Asked Questions (FAQ)
+ 					&lt;/a&gt;
+ 					&lt;a href=&quot;info.php&quot;&gt;
+
+Modified: trunk/freenx-website/info.inc
+===================================================================
+--- trunk/freenx-website/info.inc	2008-08-22 00:46:14 UTC (rev 581)
++++ trunk/freenx-website/info.inc	2008-08-22 01:36:07 UTC (rev 582)
+@@ -26,7 +26,7 @@
+ 			General FreeNX FAQ
+ 		&lt;/dt&gt;
+ 		&lt;dd&gt;
+-			&lt;a href=&quot;<A HREF="http://openfacts.berlios.de/index-en.phtml?title=FreeNX_FAQ">http://openfacts.berlios.de/index-en.phtml?title=FreeNX_FAQ</A>&quot;&gt;<A HREF="http://openfacts.berlios.de/index-en.phtml?title=FreeNX_FAQ&lt;/a">http://openfacts.berlios.de/index-en.phtml?title=FreeNX_FAQ&lt;/a</A>&gt;
++			&lt;a href=&quot;<A HREF="http://openfacts2.berlios.de/wikien/index.php/BerliosProject:FreeNX_-_FAQ">http://openfacts2.berlios.de/wikien/index.php/BerliosProject:FreeNX_-_FAQ</A>&quot;&gt;<A HREF="http://openfacts2.berlios.de/wikien/index.php/BerliosProject:FreeNX_-_FAQ&lt;/a">http://openfacts2.berlios.de/wikien/index.php/BerliosProject:FreeNX_-_FAQ&lt;/a</A>&gt;
+ 		&lt;/dd&gt;
+ 		&lt;dd&gt;
+ 			&lt;a href=&quot;<A HREF="http://www.gnomeuser.org/documents/howto/nx.html">http://www.gnomeuser.org/documents/howto/nx.html</A>&quot;&gt;<A HREF="http://www.gnomeuser.org/documents/howto/nx.html&lt;/a">http://www.gnomeuser.org/documents/howto/nx.html&lt;/a</A>&gt;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000715.html">[Freenx-cvs] r581 - tags/freenx-server
+</A></li>
+	<LI>Next message: <A HREF="000717.html">[Freenx-cvs] r583 - in trunk/freenx-website: . alte_seite
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#716">[ date ]</a>
+              <a href="thread.html#716">[ thread ]</a>
+              <a href="subject.html#716">[ subject ]</a>
+              <a href="author.html#716">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

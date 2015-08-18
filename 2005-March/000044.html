@@ -1,0 +1,167 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fabianx modified 3 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%203%20files&In-Reply-To=%3C4230E224.mailNFR11PP26%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000043.html">
+   <LINK REL="Next"  HREF="000045.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fabianx modified 3 files</H1>
+    <B>fabianx</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%203%20files&In-Reply-To=%3C4230E224.mailNFR11PP26%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fabianx modified 3 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Fri Mar 11 01:11:16 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000043.html">[Freenx-cvs] CVS: freenx - fabianx modified 5 files
+</A></li>
+        <LI>Next message: <A HREF="000045.html">[Freenx-cvs] CVS: freenx - fabianx modified 3 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#44">[ date ]</a>
+              <a href="thread.html#44">[ thread ]</a>
+              <a href="subject.html#44">[ subject ]</a>
+              <a href="author.html#44">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fabianx
+Date:      2005-03-11 00:11:16 GMT
+Modified:  .        Tag: FreeNX-0_3_0-bugfixes ChangeLog nxloadconfig
+Modified:           nxnode
+Log:
+Fixed keyboard mapping problems.
+
+Revision  Changes    Path
+No                   revision
+
+
+
+No                   revision
+
+
+
+1.16.2.1  +4 -1      freenx/ChangeLog
+
+
+rev 1.16.2.1, prev_rev 1.16
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.16
+retrieving revision 1.16.2.1
+diff -u -r1.16 -r1.16.2.1
+--- ChangeLog	2 Mar 2005 14:17:43 -0000	1.16
++++ ChangeLog	11 Mar 2005 00:11:15 -0000	1.16.2.1
+@@ -1,4 +1,7 @@
+-14.02.2005 FreeNX 0.3.0-WIP
++11.03.2005 FreeNX 0.3.1
++	* Fixed keyboard mapping problems.
++
++05.03.2005 FreeNX 0.3.0
+ 	* Initial CVS checkin.
+ 	* Added unix-default as session type - by Kalev Lember 
+ 	  &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">kalev at smartlink.ee</A>&gt;
+
+
+
+1.4.2.1   +2 -2      freenx/nxloadconfig
+
+
+rev 1.4.2.1, prev_rev 1.4
+Index: nxloadconfig
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxloadconfig,v
+retrieving revision 1.4
+retrieving revision 1.4.2.1
+diff -u -r1.4 -r1.4.2.1
+--- nxloadconfig	2 Mar 2005 14:17:43 -0000	1.4
++++ nxloadconfig	11 Mar 2005 00:11:15 -0000	1.4.2.1
+@@ -5,7 +5,7 @@
+ #
+ # License: GPL, version 2
+ #
+-# CVS: $Id: nxloadconfig,v 1.4 2005/03/02 14:17:43 fabianx Exp $
++# CVS: $Id: nxloadconfig,v 1.4.2.1 2005/03/11 00:11:15 fabianx Exp $
+ #
+ # ========================================================================
+ 
+@@ -14,7 +14,7 @@
+ # DO NOT TOUCH unless you REALLY know what you are doing
+ #########################################################################
+ 
+-NX_VERSION=1.4.0-03-CVS
++NX_VERSION=1.4.0-03
+ NX_LICENSE=&quot;OS (GPL)&quot;
+ 
+ # Where can different nx components be found
+
+
+
+1.23.2.1  +2 -1      freenx/nxnode
+
+
+rev 1.23.2.1, prev_rev 1.23
+Index: nxnode
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxnode,v
+retrieving revision 1.23
+retrieving revision 1.23.2.1
+diff -u -r1.23 -r1.23.2.1
+--- nxnode	17 Feb 2005 15:59:31 -0000	1.23
++++ nxnode	11 Mar 2005 00:11:15 -0000	1.23.2.1
+@@ -13,7 +13,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxnode,v 1.23 2005/02/17 15:59:31 fabianx Exp $
++# CVS: $Id: nxnode,v 1.23.2.1 2005/03/11 00:11:15 fabianx Exp $
+ #
+ # 21.06.2004: - Full reconnection support
+ 
+@@ -168,6 +168,7 @@
+ 	# backwards compatibility
+ 	K=&quot;&quot;
+ 	[ -n &quot;$keyboard&quot; ] &amp;&amp; K=&quot;-keyboard $keyboard&quot;
++	[ -n &quot;$kbtype&quot; ] &amp;&amp; K=&quot;-kbtype $kbtype&quot;
+ 	B=&quot;&quot;
+ 	[ -n &quot;$backingstore&quot; ] &amp;&amp; B=&quot;-bs $backingstore&quot;
+ 	G=&quot;&quot;
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000043.html">[Freenx-cvs] CVS: freenx - fabianx modified 5 files
+</A></li>
+	<LI>Next message: <A HREF="000045.html">[Freenx-cvs] CVS: freenx - fabianx modified 3 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#44">[ date ]</a>
+              <a href="thread.html#44">[ thread ]</a>
+              <a href="subject.html#44">[ subject ]</a>
+              <a href="author.html#44">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

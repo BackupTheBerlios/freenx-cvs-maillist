@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r333 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-April/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r333%20-%20freenx-server/trunk&In-Reply-To=%3C200704201759.l3KHxBJO002617%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r333 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r333%20-%20freenx-server/trunk&In-Reply-To=%3C200704201759.l3KHxBJO002617%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r333 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Fri Apr 20 19:59:11 CEST 2007</I>
+    <P><UL>
+        
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#467">[ date ]</a>
+              <a href="thread.html#467">[ thread ]</a>
+              <a href="subject.html#467">[ subject ]</a>
+              <a href="author.html#467">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-04-20 19:59:07 +0200 (Fri, 20 Apr 2007)
+New Revision: 333
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxnode
+Log:
++       * Fixed smb mounting in case nxclient sends the wrong port.
++         (Patch by Jan Lockenvitz &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">jan.lockenvitz.ext at siemens.com</A>&gt;)
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-03-07 23:47:53 UTC (rev 332)
++++ freenx-server/trunk/ChangeLog	2007-04-20 17:59:07 UTC (rev 333)
+@@ -34,6 +34,8 @@
+ 	* Fixed --broadcast.
+ 	* Added &quot;passwd -u nx&quot; to nxsetup to fix slackware.
+ 	* Fixed respecting of enconding settings in case of rootless mode.
++	* Fixed smb mounting in case nxclient sends the wrong port. 
++	  (Patch by Jan Lockenvitz &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">jan.lockenvitz.ext at siemens.com</A>&gt;)
+ 
+ 23.01.2007 FreeNX 0.6.0 &quot;Juliana birthday edition&quot;
+ 	* Opened the 0.6.0 branch.
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2007-03-07 23:47:53 UTC (rev 332)
++++ freenx-server/trunk/nxnode	2007-04-20 17:59:07 UTC (rev 333)
+@@ -692,6 +692,16 @@
+ 		fi
+ 
+ 		#
++		# Catch NXAGENT SMB Port (sometimes the port differs from what we got from nxserver)
++		#
++		
++		if stringinstring &quot;Info: Listening for SMB connections on port&quot; &quot;$line&quot;
++		then
++			SMBMOUNT_PORT=$(echo $line | cut -d&quot;'&quot; -f2)
++			echo &quot;$SMBMOUNT_PORT&quot; &gt;&quot;$USER_FAKE_HOME/.nx/C-$sess_id/scripts/mport&quot;
++		fi
++
++		#
+ 		# Session messages
+ 		#
+ 
+@@ -1177,16 +1187,24 @@
+ 	share=$(getparam share)
+ 	computername=$(getparam computername)
+ 	dir=$(getparam dir | sed 's|$(SHARES)|MyShares|g')
+-	rdir=$(getparam dir | sed 's|$(SHARES)/||g')
++	# rdir=$(getparam dir | sed 's|$(SHARES)/||g')
+ 	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | rev|cut -d&quot;-&quot; -f2| rev)
+ 	mkdir -p &quot;$HOME/$dir&quot;
+-	error=$(PASSWD=&quot;$password&quot; &quot;$COMMAND_SMBMOUNT&quot; &quot;//$computername/$rdir&quot; &quot;$HOME/$dir&quot; -o username=&quot;$username,ip=127.0.0.1,port=$port&quot; 2&gt;&amp;1)
++	# wait up to 30 sec until nxagent has opened the listener port for samba connections
++	for (( i=30; $i; --i ))
++	do
++		[ -f &quot;$USER_FAKE_HOME/.nx/C-$SERVER_NAME-$display-$sessionid/scripts/mport&quot; ] &amp;&amp; break
++		sleep 1
++	done
++	# sometimes the samba port we get from nxserver is not the right one, so let's get it from nxagent
++	port=$(cat &quot;$USER_FAKE_HOME/.nx/C-$SERVER_NAME-$display-$sessionid/scripts/mport&quot;)
++	error=$(PASSWD=&quot;$password&quot; &quot;$COMMAND_SMBMOUNT&quot; &quot;//$computername/$share&quot; &quot;$HOME/$dir&quot; -o username=&quot;$username,ip=127.0.0.1,port=$port&quot; 2&gt;&amp;1)
+ 	if [ $? -eq 0 ]
+ 	then
+-		$PATH_BIN/nxclient -dialog ok -caption &quot;NXServer Message&quot; -message &quot;Info: Share: '//$computername/$rdir' mounted on: '$HOME/$dir'&quot; -noautokill -display :$display &amp;
++		$PATH_BIN/nxclient -dialog ok -caption &quot;NXServer Message&quot; -message &quot;Info: Share: '//$computername/$share' mounted on: '$HOME/$dir'&quot; -noautokill -display :$display &amp;
+ 		echo &quot;$HOME/$dir&quot; &gt;&gt; &quot;$USER_FAKE_HOME/.nx/C-$SERVER_NAME-$display-$sessionid/scripts/mpoint&quot;
+ 	else
+-		$PATH_BIN/nxclient -dialog ok -caption &quot;NXServer Message&quot; -message &quot;Info: Share: '//$computername/$rdir' failed to mount: $error&quot; -noautokill -display :$display &amp;
++		$PATH_BIN/nxclient -dialog ok -caption &quot;NXServer Message&quot; -message &quot;Info: Share: '//$computername/$share' failed to mount: $error&quot; -noautokill -display :$display &amp;
+ 	fi
+ }
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#467">[ date ]</a>
+              <a href="thread.html#467">[ thread ]</a>
+              <a href="subject.html#467">[ subject ]</a>
+              <a href="author.html#467">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

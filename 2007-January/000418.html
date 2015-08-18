@@ -1,0 +1,353 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r288 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r288%20-%20freenx-server/trunk&In-Reply-To=%3C200701241446.l0OEkCA7028327%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000417.html">
+   <LINK REL="Next"  HREF="000419.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r288 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r288%20-%20freenx-server/trunk&In-Reply-To=%3C200701241446.l0OEkCA7028327%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r288 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Wed Jan 24 15:46:12 CET 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000417.html">[Freenx-cvs] r287 - freenx-website
+</A></li>
+        <LI>Next message: <A HREF="000419.html">[Freenx-cvs] r289 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#418">[ date ]</a>
+              <a href="thread.html#418">[ thread ]</a>
+              <a href="subject.html#418">[ subject ]</a>
+              <a href="author.html#418">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-01-24 15:46:11 +0100 (Wed, 24 Jan 2007)
+New Revision: 288
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxclient
+   freenx-server/trunk/nxloadconfig
+   freenx-server/trunk/nxnode
+   freenx-server/trunk/nxprint
+   freenx-server/trunk/nxserver
+Log:
+        * Fixed the printing support for CUPS 1.2.
+          Older versions of CUPS are no longer supported.
+          * Note: You might need to do: chmod 755
+                  /usr/lib/cups/backend/{ipp, http}
+        * Added foomatic support.
+          * Note: You might need to do: ln -s /usr/bin/foomatic-ppdfile
+                  /usr/lib/cups/driver/
+        * Added setting of CUPS_SERVER environment var.
+        * Added automatic downloading of PPDs, if the client supports it.
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-01-23 04:04:03 UTC (rev 287)
++++ freenx-server/trunk/ChangeLog	2007-01-24 14:46:11 UTC (rev 288)
+@@ -1,3 +1,14 @@
++xx.xx.2007 FreeNX 0.6.1
++	* Fixed the printing support for CUPS 1.2.
++	  Older versions of CUPS are no longer supported.
++	  * Note: You might need to do: chmod 755
++		  /usr/lib/cups/backend/{ipp, http}
++	* Added foomatic support.
++	  * Note: You might need to do: ln -s /usr/bin/foomatic-ppdfile
++	          /usr/lib/cups/driver/
++	* Added setting of CUPS_SERVER environment var.
++	* Added automatic downloading of PPDs, if the client supports it.
++
+ 23.01.2007 FreeNX 0.6.0 &quot;Juliana birthday edition&quot;
+ 	* Opened the 0.6.0 branch.
+ 	* Added nxnode slave mode.
+
+Modified: freenx-server/trunk/nxclient
+===================================================================
+--- freenx-server/trunk/nxclient	2007-01-23 04:04:03 UTC (rev 287)
++++ freenx-server/trunk/nxclient	2007-01-24 14:46:11 UTC (rev 288)
+@@ -251,7 +251,7 @@
+ # xdialog_printer_configure_driver vendor old_driver
+ xdialog_printer_configure_driver()
+ {
+-	IFS='|' XDIALOG_LIST=( $(utility_printer getextdrvlist &quot;$1&quot; | sed 's/$/|off/g; /'&quot;$2&quot;'/ s/|off/|on/g' | tr '\n' '|') )
++	IFS='|' XDIALOG_LIST=( $(utility_printer getextdrvlist &quot;$1&quot; | sed 's,$,|off,g; /'&quot;$(basename $2)&quot;'/ s,|off,|on,g' | tr '\n' '|') )
+ 	$DIALOG --stdout --title &quot;$DIALOG_CAPTION&quot; --radiolist &quot;$DIALOG_MESSAGE&quot; 0 0 6 &quot;${XDIALOG_LIST[@]}&quot;
+ }
+ 
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2007-01-23 04:04:03 UTC (rev 287)
++++ freenx-server/trunk/nxloadconfig	2007-01-24 14:46:11 UTC (rev 288)
+@@ -52,7 +52,7 @@
+ # DO NOT TOUCH unless you REALLY know what you are doing
+ #########################################################################
+ 
+-NX_VERSION=1.5.0-60
++NX_VERSION=1.5.0-61
+ NX_LICENSE=&quot;OS (GPL)&quot;
+ 
+ # Where can different nx components be found
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2007-01-23 04:04:03 UTC (rev 287)
++++ freenx-server/trunk/nxnode	2007-01-24 14:46:11 UTC (rev 288)
+@@ -283,6 +283,8 @@
+ 		fi
+ 	fi
+ 
++	[ &quot;$cups&quot; = &quot;1&quot; ] &amp;&amp; export CUPS_SERVER=$USER_FAKE_HOME/.nx/C-$sess_id/cups/cups.sock
++
+ 	#
+ 	# Do we need to PRELOAD any libraries?
+ 	#	
+@@ -551,12 +553,13 @@
+ 	let NODE_CUPSD_PORT=$display+9000 # offset 9000 for userspace cupsd's
+ 	export NODE_CUPSD_PORT
+ 	
++	export NODE_CUPSD_SOCKET=&quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/cups.sock&quot;
++	
+ 	mkdir -p &quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/&quot;
+ 	[ -e &quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd&quot; ] &amp;&amp; return
+ 	touch &quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd&quot;
+ 	
+-	mkdir -p &quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/spool/tmp&quot; &quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/spool/certs&quot; &quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/ppd&quot;
+-	ln -sf spool/certs &quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/certs&quot;
++	mkdir -p &quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/spool/tmp&quot; &quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/spool/certs&quot; &quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/ppd&quot; &quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/cache&quot;
+ 
+ cat &lt;&lt;EOF &gt; $USER_FAKE_HOME/.nx/C-$sess_id/cups/cupsd.conf
+ AccessLog /dev/null
+@@ -566,15 +569,27 @@
+ TempDir $USER_FAKE_HOME/.nx/C-$sess_id/cups/spool/tmp
+ RequestRoot $USER_FAKE_HOME/.nx/C-$sess_id/cups/spool
+ ServerRoot $USER_FAKE_HOME/.nx/C-$sess_id/cups/
+-Port $NODE_CUPSD_PORT
++StateDir $USER_FAKE_HOME/.nx/C-$sess_id/cups/
++CacheDir $USER_FAKE_HOME/.nx/C-$sess_id/cups/cache
++
++Listen $NODE_CUPSD_SOCKET
+ Browsing Off
+ ServerName localhost
++PidFile $USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd
+ 
+ &lt;Location /&gt;
+ Order Deny,Allow
+ Deny From All
+ Allow from 127.0.0.1
+ &lt;/Location&gt;
++
++# Allow everything for anonymous, because we are protected through UNIX socket
++&lt;Policy default&gt;
++  &lt;Limit All&gt;
++    AuthType None
++    Order deny,allow
++  &lt;/Limit&gt;
++&lt;/Policy&gt;
+ EOF
+ 
+ 	touch &quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/printers.conf&quot; &quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/classes.conf&quot;
+@@ -583,20 +598,17 @@
+ 	cp -af &quot;$CUPS_ETC&quot;/mime.* &quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/&quot;
+ 
+ 	# start cupsd
+-	$COMMAND_CUPSD -f -c &quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/cupsd.conf&quot; &amp;&gt;/dev/null &lt;/dev/null &amp;
+-	NODE_CUPSD_PID=$!
+-	sleep 3
+-	echo $NODE_CUPSD_PID &gt;&quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd&quot;
++	$COMMAND_CUPSD -c &quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/cupsd.conf&quot; &amp;&gt;/dev/null &lt;/dev/null
+ 
+ 	# setup KDE
+ 	if [ &quot;$ENABLE_KDE_CUPS&quot; = &quot;1&quot; -a -e &quot;$KDE_PRINTRC&quot; ]
+ 	then
+-		if egrep -q &quot;^Port=&quot; &quot;$KDE_PRINTRC&quot;
++		if egrep -q &quot;^Host=&quot; &quot;$KDE_PRINTRC&quot;
+ 		then
+-			perl -pi -e 's/^Port=.*/Port='&quot;$NODE_CUPSD_PORT&quot;'/g' &quot;$KDE_PRINTRC&quot;
++			perl -pi -e 's/^Host=.*/Host='&quot;$NODE_CUPSD_SOCKET&quot;'/g' &quot;$KDE_PRINTRC&quot;
+ 		else
+ 			echo &quot;[CUPS]&quot; &gt;&gt; &quot;$KDE_PRINTRC&quot;
+-			echo &quot;Port=$NODE_CUPSD_PORT&quot; &gt;&gt; &quot;$KDE_PRINTRC&quot;
++			echo &quot;Host=$NODE_CUPSD_SOCKET&quot; &gt;&gt; &quot;$KDE_PRINTRC&quot;
+ 		fi
+ 	fi
+ }
+@@ -614,10 +626,10 @@
+ 	[ -n &quot;$NODE_CUPSD_PID&quot; ] &amp;&amp; kill -0 $NODE_CUPSD_PID &amp;&amp; kill -HUP $NODE_CUPSD_PID
+ }
+ 
+-node_cupsd_get_port()
++node_cupsd_get_socket()
+ {
+ 	node_cupsd_setup
+-	echo $NODE_CUPSD_PORT
++	echo $NODE_CUPSD_SOCKET
+ }
+ 
+ node_umount_smb()
+@@ -1180,25 +1192,46 @@
+ 	sess_id=&quot;$SERVER_NAME-$display-$sessionid&quot;
+ 	
+ 	# this will also setup the userspace cupsd
+-	IPP_PORT=$(node_cupsd_get_port)
+-	export IPP_PORT
++	export CUPS_SERVER=$(node_cupsd_get_socket)
+ 	
+ 	if [ &quot;$type&quot; = &quot;smb&quot; ]
+ 	then
+-		DEVICE_URI=&quot;<A HREF="smb://$username:$password@localhost:$port/$share">smb://$username:$password@localhost:$port/$share</A>&quot;
++		DEVICE_URI=&quot;<A HREF="smb://$username:$password@127.0.0.1:$port/$share">smb://$username:$password@127.0.0.1:$port/$share</A>&quot;
+ 		NAME=&quot;$share&quot;
+ 	else
+-		DEVICE_URI=&quot;<A HREF="ipp://$username:$password@localhost:$port/printers/$printer">ipp://$username:$password@localhost:$port/printers/$printer</A>&quot;
++		DEVICE_URI=&quot;<A HREF="ipp://$username:$password@127.0.0.1:$port/printers/$printer">ipp://$username:$password@127.0.0.1:$port/printers/$printer</A>&quot;
+ 		NAME=&quot;$printer&quot;
+ 	fi
++	export PATH_BIN
+ 	
+ 	MODEL=$($PATH_BIN/nxclient -printer &quot;$NAME&quot; -noautokill -display :$display)
+ 	[ -z &quot;$MODEL&quot; -o &quot;$MODEL&quot; = &quot;cancel: aborted&quot; ] &amp;&amp; return
+ 	
+ 	PUBLIC=&quot;-u allow:$USER&quot;
+ 	[ &quot;$public&quot; == &quot;1&quot; ] &amp;&amp; PUBLIC=&quot;&quot;
+-	lpadmin -p &quot;$NAME&quot; -E -v &quot;$DEVICE_URI&quot; -m &quot;$MODEL&quot; $PUBLIC
+-	[ &quot;$defaultPrinter&quot; = &quot;1&quot; ] &amp;&amp; lpadmin -d &quot;$NAME&quot;
++
++	if [ &quot;$MODEL&quot; = &quot;download_new&quot; -o &quot;$MODEL&quot; = &quot;download_cached&quot; ]
++	then
++		mkdir -p &quot;$USER_FAKE_HOME/.nx/config/ppd/&quot;
++		if [ &quot;$MODEL&quot; = &quot;download_new&quot; -o ! -r &quot;$USER_FAKE_HOME/.nx/config/ppd/$printer.ppd&quot; ]
++		then
++			curl --digest -o &quot;$USER_FAKE_HOME/.nx/config/ppd/$printer.ppd&quot; &quot;<A HREF="http://$username:$password@127.0.0.1:$port/ppd/${printer">http://$username:$password@127.0.0.1:$port/ppd/${printer</A>}_nxdl.ppd&quot; &amp;&gt; $USER_FAKE_HOME/.nx/C-$sess_id/cups/curl.log
++		RC=$?
++		[ $RC -eq 0 ] &amp;&amp; $PATH_BIN/nxclient --message &quot;Download successful.&quot; -noautokill -display :$display
++		[ $RC -eq 0 ] || $PATH_BIN/nxclient --message &quot;Download failed. Log is: $USER_FAKE_HOME/.nx/C-$sess_id/cups/curl.log&quot; -noautokill -display :$display
++		fi
++		MODEL=&quot;$USER_FAKE_HOME/.nx/config/ppd/$printer.ppd&quot;
++	fi
++	
++	if [ ! -r &quot;$MODEL&quot; ]
++	then
++		# Foomatic and co
++		/usr/sbin/lpadmin -p &quot;$NAME&quot; -E -v &quot;$DEVICE_URI&quot; -m &quot;$MODEL&quot; $PUBLIC
++	else
++		/usr/sbin/lpadmin -p &quot;$NAME&quot; -E -v &quot;$DEVICE_URI&quot; -P &quot;$MODEL&quot; $PUBLIC
++	fi
++
++	[ &quot;$defaultPrinter&quot; = &quot;1&quot; ] &amp;&amp; /usr/sbin/lpadmin -d &quot;$NAME&quot;
+ }
+ 
+ nxnode_func()
+
+Modified: freenx-server/trunk/nxprint
+===================================================================
+--- freenx-server/trunk/nxprint	2007-01-23 04:04:03 UTC (rev 287)
++++ freenx-server/trunk/nxprint	2007-01-24 14:46:11 UTC (rev 288)
+@@ -9,8 +9,8 @@
+ # SVN: $Id$
+ #
+ 
+-# disable foomatic by default
+-FOOMATIC=&quot;no&quot;
++# enable foomatic by default
++FOOMATIC=&quot;yes&quot;
+ 
+ HELP=&quot;no&quot;
+ DRIVERS=&quot;no&quot;
+@@ -35,7 +35,7 @@
+ 	echo &quot;&quot;
+         echo &quot;Syntax: nxprint --help&quot;
+         echo &quot;        nxprint --drivers&quot;
+-        echo &quot;        nxprint --printes&quot;
++        echo &quot;        nxprint --printers&quot;
+         echo
+         echo &quot;  --drivers                prints a list of available CUPS drivers&quot;
+         echo &quot;  --printers               prints a list of available CUPS printers&quot;
+@@ -45,21 +45,22 @@
+ if [ &quot;$DRIVERS&quot; = &quot;yes&quot; ]
+ then
+ 	echo &quot;driver|Raw|Raw Queue|raw&quot;
++	echo &quot;driver|Download (CUPS)|Download from CUPS server (cached)|download_cached&quot;
++	echo &quot;driver|Download (CUPS)|Download from CUPS server (redownload)|download_new&quot;
+ 	{ 
+-        cd /usr/share/cups/model
+-        awk -F '&quot;' '/*Manufacturer:/ { a[FILENAME]=$2 }
+-                    /*NickName:/ { b[FILENAME]=$2 } 
++        cd /usr/share/ppd/
++        awk -F '&quot;' '/\*Manufacturer:/ { a[FILENAME]=$2 }
++                    /\*NickName:/ { b[FILENAME]=$2 } 
+                     END { 
+                        for (i in a) 
+-                          print &quot;driver|&quot; (a[i]==&quot;ESP&quot;?substr(b[i],0,index(b[i],&quot; &quot;)-1):a[i]) &quot;|&quot;b[i]&quot;|&quot;i
+-                    }' *.ppd
+-        } | sort
++                          print &quot;driver|&quot; (a[i]==&quot;ESP&quot;?substr(b[i],0,index(b[i],&quot; &quot;)-1):a[i]) &quot;|&quot;b[i]&quot;|&quot;i&quot;|en&quot;
++                    }' $(find -name &quot;*.ppd&quot;)
+ 
+-	if [ $FOOMATIC=&quot;yes&quot; ]
++	if [ &quot;$FOOMATIC&quot; = &quot;yes&quot; ]
+ 	then
+-		# TODO: Add support for foomatic-style ppds
+-		:
++		foomatic-ppdfile list | awk -F'&quot;' '{ A=&quot;&quot;; if ($4 == &quot;HP&quot;) { B=substr($6,index($6,&quot; &quot;)+1); A=&quot; &quot;substr(B,0,index(B,&quot; &quot;)); } printf(&quot;driver|%s%s|%s|%s|%s\n&quot;,$4,A,$6,$2,substr($3,2)) } '
+ 	fi
++	} | sort
+ fi
+ 
+ if [ &quot;$PRINTERS&quot; = &quot;yes&quot; ]
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2007-01-23 04:04:03 UTC (rev 287)
++++ freenx-server/trunk/nxserver	2007-01-24 14:46:11 UTC (rev 288)
+@@ -1340,6 +1340,7 @@
+ 			PARAMS=$SERVER_PARAMS
+ 			# TODO: This redirecion is crap here.
+ 			server_nxnode_start --addprinter &quot;$USER&quot; &quot;$PARAMS&quot; &gt;/dev/null 2&gt;&amp;1 | log_error &gt;/dev/null
++			echo_x &quot;NX&gt; 719 CUPS printer: running&quot;
+ 		;;
+ 		*)
+ 			# disabled for 1.4.0-5 snapshot client
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000417.html">[Freenx-cvs] r287 - freenx-website
+</A></li>
+	<LI>Next message: <A HREF="000419.html">[Freenx-cvs] r289 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#418">[ date ]</a>
+              <a href="thread.html#418">[ thread ]</a>
+              <a href="subject.html#418">[ subject ]</a>
+              <a href="author.html#418">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

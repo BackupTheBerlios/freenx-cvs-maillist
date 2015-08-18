@@ -1,0 +1,149 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r183 - / freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r183%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200603072333.k27NX9Rp027605%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000308.html">
+   <LINK REL="Next"  HREF="000310.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r183 - / freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r183%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200603072333.k27NX9Rp027605%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r183 - / freenx-server/trunk">fabianx at berlios.de
+       </A><BR>
+    <I>Wed Mar  8 00:33:09 CET 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000308.html">[Freenx-cvs] r182 - / freenx-website
+</A></li>
+        <LI>Next message: <A HREF="000310.html">[Freenx-cvs] r183 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#309">[ date ]</a>
+              <a href="thread.html#309">[ thread ]</a>
+              <a href="subject.html#309">[ subject ]</a>
+              <a href="author.html#309">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2006-03-08 00:33:08 +0100 (Wed, 08 Mar 2006)
+New Revision: 183
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxnode
+Log:
+Fixed --terminate / --suspend when hostname has a '-' in it.
+(Blindauer Emmanuel &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">freenx at mooby.net</A>&gt;)
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:229
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:231
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-03-07 21:45:44 UTC (rev 182)
++++ freenx-server/trunk/ChangeLog	2006-03-07 23:33:08 UTC (rev 183)
+@@ -12,6 +12,9 @@
+ 	* Fixed one more stray tail process and being able to
+ 	  cleanup after a hopelessly failed reconnection. (i.e. agent died)
+ 	* Fixed detection of xauth.
++	* Fixed --terminate / --suspend when hostname has a '-' in it.
++	  (Emmanuel Blindauer &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">freenx at mooby.net</A>&gt;)
++	
+ 
+ XX.XX.2006 FreeNX 0.4.5 &quot;aKademy Edition&quot;
+ 	* Made nxsetup more user-friendly and hopefully finally failsafe.
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2006-03-07 21:45:44 UTC (rev 182)
++++ freenx-server/trunk/nxnode	2006-03-07 23:33:08 UTC (rev 183)
+@@ -94,7 +94,7 @@
+ 		fi
+ 	fi
+ 	# remove possible leftover display ...
+-	display=$(echo $1 | cut -d&quot;-&quot; -f2)
++	display=$(echo $1 | rev | cut -d&quot;-&quot; -f2 | rev)
+ 	rm -f /tmp/.X$display-lock
+ 	rm -f /tmp/.X11-unix/X$display
+ 	
+@@ -779,7 +779,7 @@
+ {
+ 	sessionid=$(getparam_sessionid)
+ 	echo &quot;NX&gt; 716 Terminating session $sessionid on user request.&quot;
+-	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | cut -d&quot;-&quot; -f3)
++	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | rev |cut -d&quot;-&quot; -f2 |rev)
+ 	node_terminate_session &quot;$SERVER_NAME-$display-$sessionid&quot;
+ }
+ 
+@@ -787,7 +787,7 @@
+ {
+ 	sessionid=$(getparam_sessionid)
+ 	echo &quot;NX&gt; 716 Suspending session $sessionid on user request.&quot;
+-	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | cut -d&quot;-&quot; -f3)
++	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | rev | cut -d&quot;-&quot; -f2 |rev)
+ 	node_suspend_session &quot;$SERVER_NAME-$display-$sessionid&quot;
+ }
+ 
+@@ -801,7 +801,7 @@
+ 	computername=$(getparam computername)
+ 	dir=$(getparam dir | sed 's|$(SHARES)|MyShares|g')
+ 	rdir=$(getparam dir | sed 's|$(SHARES)/||g')
+-	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | cut -d&quot;-&quot; -f3)
++	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | rev|cut -d&quot;-&quot; -f2| rev)
+ 	mkdir -p &quot;$HOME/$dir&quot;
+ 	ERROR=$(PASSWD=&quot;$password&quot; &quot;$COMMAND_SMBMOUNT&quot; &quot;//$computername/$rdir&quot; &quot;$HOME/$dir&quot; -o username=&quot;$username,ip=127.0.0.1,port=$port&quot; 2&gt;&amp;1)
+ 	if [ $? -eq 0 ]
+@@ -826,7 +826,7 @@
+ 	public=$(getparam public)
+ 	model=$(getparam model)
+ 	defaultPrinter=$(getparam defaultPrinter)
+-	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | cut -d&quot;-&quot; -f3)
++	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | rev | cut -d&quot;-&quot; -f3 | rev)
+ 	sess_id=&quot;$SERVER_NAME-$display-$sessionid&quot;
+ 	# this will also setup the userspace cupsd
+ 	IPP_PORT=$(node_cupsd_get_port)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000308.html">[Freenx-cvs] r182 - / freenx-website
+</A></li>
+	<LI>Next message: <A HREF="000310.html">[Freenx-cvs] r183 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#309">[ date ]</a>
+              <a href="thread.html#309">[ thread ]</a>
+              <a href="subject.html#309">[ subject ]</a>
+              <a href="author.html#309">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,415 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r83 - nx-utils/nxsocks/nxsocksd
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-July/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r83%20-%20nx-utils/nxsocks/nxsocksd&In-Reply-To=%3C200507311753.j6VHr4Xc009712%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000206.html">
+   <LINK REL="Next"  HREF="000208.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r83 - nx-utils/nxsocks/nxsocksd</H1>
+    <B>Fabian Franz at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r83%20-%20nx-utils/nxsocks/nxsocksd&In-Reply-To=%3C200507311753.j6VHr4Xc009712%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r83 - nx-utils/nxsocks/nxsocksd">fabianx at berlios.de
+       </A><BR>
+    <I>Sun Jul 31 19:53:04 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000206.html">[Freenx-cvs] r82 - nx-utils/nxsocks/nxsocksd
+</A></li>
+        <LI>Next message: <A HREF="000208.html">[Freenx-cvs] r84 - nx-utils/nxsocks/nxsocksd
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#207">[ date ]</a>
+              <a href="thread.html#207">[ thread ]</a>
+              <a href="subject.html#207">[ subject ]</a>
+              <a href="author.html#207">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2005-07-31 19:52:57 +0200 (Sun, 31 Jul 2005)
+New Revision: 83
+
+Modified:
+   nx-utils/nxsocks/nxsocksd/Makefile.in
+   nx-utils/nxsocks/nxsocksd/README
+   nx-utils/nxsocks/nxsocksd/configure
+   nx-utils/nxsocks/nxsocksd/configure.in
+   nx-utils/nxsocks/nxsocksd/lib.c
+   nx-utils/nxsocks/nxsocksd/main.c
+   nx-utils/nxsocks/nxsocksd/nxsocksd.1.in
+   nx-utils/nxsocks/nxsocksd/resolv.c
+   nx-utils/nxsocks/nxsocksd/socks.c
+   nx-utils/nxsocks/nxsocksd/thread.c
+   nx-utils/nxsocks/nxsocksd/udp.c
+Log:
+NX'fied the package.
+
+
+Modified: nx-utils/nxsocks/nxsocksd/Makefile.in
+===================================================================
+--- nx-utils/nxsocks/nxsocksd/Makefile.in	2005-07-31 17:49:06 UTC (rev 82)
++++ nx-utils/nxsocks/nxsocksd/Makefile.in	2005-07-31 17:52:57 UTC (rev 83)
+@@ -1,4 +1,4 @@
+-#  usocksd - user specific SOCKS5 daemon    Prototype for the -*- Makefile -*-
++#  nxsocksd - user specific SOCKS5 daemon    Prototype for the -*- Makefile -*-
+ #
+ #  Copyright 1997 Olaf Titz &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">olaf at bigred.inka.de</A>&gt;
+ #
+@@ -26,11 +26,11 @@
+ bindir	= @bindir@
+ mandir	= @mandir@
+ 
+-PROGS	= usocksd
+-MANS	= usocksd.1
++PROGS	= nxsocksd
++MANS	= nxsocksd.1
+ OBJS	= main.o socks.o udp.o resolv.o thread.o lib.o
+ 
+-SRCS	= README usocksd.1.in Makefile.in configure configure.in config.h.in \
++SRCS	= README nxsocksd.1.in Makefile.in configure configure.in config.h.in \
+ 		socks.h udp.h thread.h lib.h resolv.h log.h stats.h \
+ 		socks.c udp.c thread.c lib.c resolv.c main.c aquery.c \
+ 		install-sh COPYING
+@@ -38,8 +38,8 @@
+ 
+ all: $(PROGS)
+ 
+-usocksd: $(OBJS)
+-	$(CC) $(LDFLAGS) -o usocksd $(OBJS) $(LIBS)
++nxsocksd: $(OBJS)
++	$(CC) $(LDFLAGS) -o nxsocksd $(OBJS) $(LIBS)
+ 
+ aquery: aquery.o resolv.o thread.o lib.o
+ 	$(CC) $(LDFLAGS) -o aquery aquery.o resolv.o thread.o lib.o $(LIBS)
+@@ -57,17 +57,17 @@
+ 
+ distclean: clean
+ 	rm -f config.cache config.h config.log config.status \
+-		Makefile usocksd.1 TAGS
++		Makefile nxsocksd.1 TAGS
+ 
+ Checksums: $(SRCS)
+ 	makechecksums $(SRCS) &gt; Checksums
+ 
+ shar: $(SRCSC)
+-	cd .. &amp;&amp; shar $(SRCSC:%=usocksd/%) &gt; usocksd.shar
++	cd .. &amp;&amp; shar $(SRCSC:%=nxsocksd/%) &gt; nxsocksd.shar
+ 
+ tgz: $(SRCSC)
+-	cd .. &amp;&amp; ln -sf usocksd <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">usocksd- at VERSION</A>@ &amp;&amp; \
+-	  tar czf <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">usocksd- at VERSION</A>@.tar.gz $(SRCSC:%=<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">usocksd- at VERSION</A>@/%)
++	cd .. &amp;&amp; ln -sf nxsocksd <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">nxsocksd- at VERSION</A>@ &amp;&amp; \
++	  tar czf <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">nxsocksd- at VERSION</A>@.tar.gz $(SRCSC:%=<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">nxsocksd- at VERSION</A>@/%)
+ 
+ configure: configure.in
+ 	autoconf
+
+Modified: nx-utils/nxsocks/nxsocksd/README
+===================================================================
+--- nx-utils/nxsocks/nxsocksd/README	2005-07-31 17:49:06 UTC (rev 82)
++++ nx-utils/nxsocks/nxsocksd/README	2005-07-31 17:52:57 UTC (rev 83)
+@@ -1,3 +1,7 @@
++This program was adapted for usage by NX by Fabian Franz.
++
++If the user nxsocksd is used, connections are restricted to localhost and certain ports.
++--------
+ This is a small SOCKS5 server. While the usual &quot;socksd&quot; runs as a
+ system service, perhaps on a firewall machine with no users, this one
+ is intended to be run by users themselves.
+@@ -9,10 +13,10 @@
+ 
+ 2. User is on an insecure network and wants all network traffic to be
+ enrypted using &quot;ssh&quot;, and has access to a machine running &quot;sshd&quot; on a
+-more secure network. &quot;usocksd&quot; contains special provisions for this
++more secure network. &quot;nxsocksd&quot; contains special provisions for this
+ situation.
+ 
+-More information on how to run &quot;usocksd&quot; is in the man page.
++More information on how to run &quot;nxsocksd&quot; is in the man page.
+ 
+ Installation: sh ./configure; make; make install.
+ configure takes additional arguments --enable-debug, --enable-norelax
+
+Modified: nx-utils/nxsocks/nxsocksd/configure
+===================================================================
+--- nx-utils/nxsocks/nxsocksd/configure	2005-07-31 17:49:06 UTC (rev 82)
++++ nx-utils/nxsocks/nxsocksd/configure	2005-07-31 17:52:57 UTC (rev 83)
+@@ -2147,7 +2147,7 @@
+ ac_given_srcdir=$srcdir
+ ac_given_INSTALL=&quot;$INSTALL&quot;
+ 
+-trap 'rm -fr `echo &quot;Makefile usocksd.1 config.h&quot; | sed &quot;s/:[^ ]*//g&quot;` conftest*; exit 1' 1 2 15
++trap 'rm -fr `echo &quot;Makefile nxsocksd.1 config.h&quot; | sed &quot;s/:[^ ]*//g&quot;` conftest*; exit 1' 1 2 15
+ EOF
+ cat &gt;&gt; $CONFIG_STATUS &lt;&lt;EOF
+ 
+@@ -2233,7 +2233,7 @@
+ 
+ cat &gt;&gt; $CONFIG_STATUS &lt;&lt;EOF
+ 
+-CONFIG_FILES=\${CONFIG_FILES-&quot;Makefile usocksd.1&quot;}
++CONFIG_FILES=\${CONFIG_FILES-&quot;Makefile nxsocksd.1&quot;}
+ EOF
+ cat &gt;&gt; $CONFIG_STATUS &lt;&lt;\EOF
+ for ac_file in .. $CONFIG_FILES; do if test &quot;x$ac_file&quot; != x..; then
+
+Modified: nx-utils/nxsocks/nxsocksd/configure.in
+===================================================================
+--- nx-utils/nxsocks/nxsocksd/configure.in	2005-07-31 17:49:06 UTC (rev 82)
++++ nx-utils/nxsocks/nxsocksd/configure.in	2005-07-31 17:52:57 UTC (rev 83)
+@@ -1,4 +1,4 @@
+-dnl     configure.in for usocksd. This is -*-fundamental-*-
++dnl     configure.in for nxsocksd. This is -*-fundamental-*-
+ dnl     Copyright 1997 Olaf Titz &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">olaf at bigred.inka.de</A>&gt;
+ 
+ dnl     Process this file with autoconf to produce a configure script.
+@@ -183,5 +183,5 @@
+ AC_DEFINE_UNQUOTED(VERSION, &quot;$VERSION&quot;)
+ AC_DEFINE_UNQUOTED(DATE, &quot;$DATE&quot;)
+ 
+-AC_OUTPUT(Makefile usocksd.1)
++AC_OUTPUT(Makefile nxsocksd.1)
+ dnl AC_CONFIG_SUBDIRS(libresolv)
+
+Modified: nx-utils/nxsocks/nxsocksd/lib.c
+===================================================================
+--- nx-utils/nxsocks/nxsocksd/lib.c	2005-07-31 17:49:06 UTC (rev 82)
++++ nx-utils/nxsocks/nxsocksd/lib.c	2005-07-31 17:52:57 UTC (rev 83)
+@@ -1,5 +1,5 @@
+ /*
+-   usocksd - user specific SOCKS5 daemon
++   nxsocksd - user specific SOCKS5 daemon
+ 
+    lib.c - convenience functions
+ 
+
+Modified: nx-utils/nxsocks/nxsocksd/main.c
+===================================================================
+--- nx-utils/nxsocks/nxsocksd/main.c	2005-07-31 17:49:06 UTC (rev 82)
++++ nx-utils/nxsocks/nxsocksd/main.c	2005-07-31 17:52:57 UTC (rev 83)
+@@ -1,5 +1,5 @@
+ /*
+-   usocksd - user specific SOCKS5 daemon
++   nxsocksd - user specific SOCKS5 daemon
+ 
+    main.c - initialization, listening socket, ident lookup
+ 
+@@ -441,7 +441,7 @@
+     setunbuf(stdout);
+     setunbuf(stderr);
+     memset(&amp;pm, 0, sizeof(pm));
+-    printf(&quot;usocksd version &quot; VERSION &quot; (c) Olaf Titz 1997-1999\n&quot;);
++    printf(&quot;nxsocksd version &quot; VERSION &quot; (c) Olaf Titz 1997-1999\n&quot;);
+     while((n=getopt(argc, argv, &quot;p:a:u:i:U:d:f:&quot;))!=EOF) {
+ 	switch(n) {
+ 	case 'p': port=atoi(optarg); break;
+
+Modified: nx-utils/nxsocks/nxsocksd/nxsocksd.1.in
+===================================================================
+--- nx-utils/nxsocks/nxsocksd/nxsocksd.1.in	2005-07-31 17:49:06 UTC (rev 82)
++++ nx-utils/nxsocks/nxsocksd/nxsocksd.1.in	2005-07-31 17:52:57 UTC (rev 83)
+@@ -1,5 +1,5 @@
+ .\&quot; -*- nroff -*-
+-.\&quot; $Id: usocksd.1.in,v 1.3 1999/05/13 22:28:11 olaf Exp $
++.\&quot; $Id: nxsocksd.1.in,v 1.3 1999/05/13 22:28:11 olaf Exp $
+ .\&quot;
+ .\&quot; Configuration options
+ .ds D @DEBUG@
+@@ -8,9 +8,9 @@
+ .\&quot;
+ .TH USOCKSD 1 &quot;HaDiNet Software&quot;
+ .SH NAME
+-usocksd \- user specific SOCKS5 daemon
++nxsocksd \- user specific SOCKS5 daemon
+ .SH SYNOPSIS
+-.B usocksd
++.B nxsocksd
+ [
+ .BI \-p &quot; port&quot;
+ ]
+@@ -30,17 +30,17 @@
+ .BI \-d &quot; debuglevel&quot;
+ ]\}
+ .SH DESCRIPTION
+-.B usocksd
++.B nxsocksd
+ is a lightweight SOCKS5 daemon. It is intended to be run by the user
+ who wants to use the SOCKS service and facilitates the use of an
+ .B ssh
+ TCP port redirection to run the SOCKS protocol over.
+-.B usocksd
++.B nxsocksd
+ is useful in situations where the user has access to a host with less
+ restricted connectivity than his own machine, or where the user\'s
+ own machine is on an insecure network and all connections should be
+ encrypted.
+-.B usocksd
++.B nxsocksd
+ implements all documented commands, the address types
+ .I IPv4 Address
+ and
+@@ -100,13 +100,13 @@
+ .nf
+ \fCssh -L1080:relayhost:12345 relayhost\\
+ .br
+- &quot;usocksd -p12345 -arelayhost -umyhost -Ufred&quot;\fP
++ &quot;nxsocksd -p12345 -arelayhost -umyhost -Ufred&quot;\fP
+ .fi
+ .PP
+ where
+ .I relayhost
+ is the host where
+-.B usocksd
++.B nxsocksd
+ runs and
+ .I myhost
+ is the client's host. Note the coincidence of the host name and port
+@@ -123,14 +123,14 @@
+ .I relayhost
+ itself. This is the reason why a regular SOCKS5 server can not be used
+ for UDP in this situation (and the original incentive for writing
+-.BR usocksd ).
++.BR nxsocksd ).
+ The SOCKS clients will use password authentication as user
+ .IR fred.
+ The password to use is read from standard input.
+ Neither user name nor password need to coincide with the real user
+ name and password on any of the machines involved.
+ .PP
+-.B usocksd
++.B nxsocksd
+ terminates when it encounters EOF on standard input. All other input
+ on stdin is ignored. If the password should be read from a file
+ instead of standard input, the proper way of invocation is
+@@ -139,10 +139,10 @@
+ \fCcat ~/.socks-password - |\\
+  ssh -L1080:relayhost:12345 relayhost\\
+ .br
+- &quot;usocksd -p12345 -arelayhost -umyhost -Ufred&quot;\fP
++ &quot;nxsocksd -p12345 -arelayhost -umyhost -Ufred&quot;\fP
+ .fi
+ .PP
+-.B usocksd
++.B nxsocksd
+ does not spawn any child processes,
+ .if '\*F'1' \{\
+ except for the extended
+@@ -174,7 +174,7 @@
+ applies to diagnostic output if the standard output and standard error
+ channels run on a socket or pipe which can block.
+ .PP
+-.B usocksd
++.B nxsocksd
+ does not fully support multi-homed servers. Support for multi-homed
+ clients may depend on the client's SOCKS library.
+ .PP
+@@ -191,7 +191,7 @@
+ assumed that all allowed clients connect to each other directly.
+ .PP
+ There should be a more elegant method of killing an
+-.B usocksd
++.B nxsocksd
+ started via
+ .B ssh
+ than the EOF handling.
+@@ -204,7 +204,7 @@
+ The reference implementation SOCKS
+ daemon by NEC includes undocumented commands for these applications.
+ .ie '\*F'1' \{\
+-.B usocksd
++.B nxsocksd
+ supports these by calling the
+ .B ping
+ or
+@@ -212,7 +212,7 @@
+ programs on the host where it runs. \}
+ .el \{\
+ These are not supported by this configuration of
+-.BR usocksd . \}
++.BR nxsocksd . \}
+ .SH VERSION
+ @VERSION@ as of @<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">DATE at .</A>
+ .SH AUTHOR
+
+Modified: nx-utils/nxsocks/nxsocksd/resolv.c
+===================================================================
+--- nx-utils/nxsocks/nxsocksd/resolv.c	2005-07-31 17:49:06 UTC (rev 82)
++++ nx-utils/nxsocks/nxsocksd/resolv.c	2005-07-31 17:52:57 UTC (rev 83)
+@@ -1,5 +1,5 @@
+ /*
+-   usocksd - user specific SOCKS5 daemon
++   nxsocksd - user specific SOCKS5 daemon
+ 
+    resolv.c - asynchronous domain name resolver
+ 
+
+Modified: nx-utils/nxsocks/nxsocksd/socks.c
+===================================================================
+--- nx-utils/nxsocks/nxsocksd/socks.c	2005-07-31 17:49:06 UTC (rev 82)
++++ nx-utils/nxsocks/nxsocksd/socks.c	2005-07-31 17:52:57 UTC (rev 83)
+@@ -1,5 +1,5 @@
+ /*
+-   usocksd - user specific SOCKS5 daemon
++   nxsocksd - user specific SOCKS5 daemon
+ 
+    socks.c - SOCKS5 protocol dialog handler, TCP connection handler
+ 
+
+Modified: nx-utils/nxsocks/nxsocksd/thread.c
+===================================================================
+--- nx-utils/nxsocks/nxsocksd/thread.c	2005-07-31 17:49:06 UTC (rev 82)
++++ nx-utils/nxsocks/nxsocksd/thread.c	2005-07-31 17:52:57 UTC (rev 83)
+@@ -1,5 +1,5 @@
+ /*
+-   usocksd - user specific SOCKS5 daemon
++   nxsocksd - user specific SOCKS5 daemon
+ 
+    thread.c - generic I/O multiplexing module
+ 
+
+Modified: nx-utils/nxsocks/nxsocksd/udp.c
+===================================================================
+--- nx-utils/nxsocks/nxsocksd/udp.c	2005-07-31 17:49:06 UTC (rev 82)
++++ nx-utils/nxsocks/nxsocksd/udp.c	2005-07-31 17:52:57 UTC (rev 83)
+@@ -1,5 +1,5 @@
+ /*
+-   usocksd - user specific SOCKS5 daemon
++   nxsocksd - user specific SOCKS5 daemon
+ 
+    udp.c - UDP proxy
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000206.html">[Freenx-cvs] r82 - nx-utils/nxsocks/nxsocksd
+</A></li>
+	<LI>Next message: <A HREF="000208.html">[Freenx-cvs] r84 - nx-utils/nxsocks/nxsocksd
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#207">[ date ]</a>
+              <a href="thread.html#207">[ thread ]</a>
+              <a href="subject.html#207">[ subject ]</a>
+              <a href="author.html#207">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

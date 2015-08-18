@@ -1,0 +1,107 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r184 - / freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r184%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200603082058.k28Kw0MF026675%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000311.html">
+   <LINK REL="Next"  HREF="000313.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r184 - / freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r184%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200603082058.k28Kw0MF026675%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r184 - / freenx-server/trunk">fabianx at berlios.de
+       </A><BR>
+    <I>Wed Mar  8 21:58:00 CET 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000311.html">[Freenx-cvs] r183 - / freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000313.html">[Freenx-cvs] r185 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#312">[ date ]</a>
+              <a href="thread.html#312">[ thread ]</a>
+              <a href="subject.html#312">[ subject ]</a>
+              <a href="author.html#312">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2006-03-08 21:57:59 +0100 (Wed, 08 Mar 2006)
+New Revision: 184
+
+Modified:
+   /
+   freenx-server/trunk/nxnode
+Log:
+Added kbload and keymap, made nxnode honor setting of keybd channel again as its actually sent by the client.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:231
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:233
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2006-03-07 23:33:08 UTC (rev 183)
++++ freenx-server/trunk/nxnode	2006-03-08 20:57:59 UTC (rev 184)
+@@ -638,7 +638,9 @@
+ 	
+ 	# nxclient &gt; 1.5.0-106 variables
+ 	resize=$(getparam resize)
+-	keybd=1
++	keybd=$(getparam keybd)
++	kbload=$(getparam kbload)
++	keymap=$(getparam keymap)
+ 	rootless=0
+ 	
+ 	# Its still the clients decision
+@@ -703,7 +705,7 @@
+ 	umask 0077
+ 
+ cat &lt;&lt; EOF &gt; $USER_FAKE_HOME/.nx/C-$sess_id/options
+-${kbtype:+kbtype=$kbtype,}${resize:+resize=$resize,}${CACHE}${IMAGES}${PACK}link=$link,type=$type,cleanup=0,${ACCEPT}cookie=$proxy_cookie,id=$sess_id,samba=$samba,media=$media${sync:+,sync=$sync}${cups:+,cups=$cups}${keybd:+,keybd=$keybd}${rdpcolors:+,rdpcolors=$rdpcolors}${rdpcache:+,rdpcache=$rdpcache}${fullscreen:+,fullscreen=1}:$display
++${kbtype:+kbtype=$kbtype,}${kbload:+kbload=$kbload,}${keymap:+keymap=$keymap,}${resize:+resize=$resize,}${CACHE}${IMAGES}${PACK}link=$link,type=$type,cleanup=0,${ACCEPT}cookie=$proxy_cookie,id=$sess_id,samba=$samba,media=$media${sync:+,sync=$sync}${cups:+,cups=$cups}${keybd:+,keybd=$keybd}${rdpcolors:+,rdpcolors=$rdpcolors}${rdpcache:+,rdpcache=$rdpcache}${fullscreen:+,fullscreen=1}:$display
+ EOF
+ 	umask $OLD_UMASK
+ #samba=$samba,
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000311.html">[Freenx-cvs] r183 - / freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000313.html">[Freenx-cvs] r185 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#312">[ date ]</a>
+              <a href="thread.html#312">[ thread ]</a>
+              <a href="subject.html#312">[ subject ]</a>
+              <a href="author.html#312">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r521 - trunk/freenx-server
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r521%20-%20trunk/freenx-server&In-Reply-To=%3C200803140958.m2E9wIiP030464%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000644.html">
+   <LINK REL="Next"  HREF="000646.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r521 - trunk/freenx-server</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r521%20-%20trunk/freenx-server&In-Reply-To=%3C200803140958.m2E9wIiP030464%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r521 - trunk/freenx-server">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Fri Mar 14 10:58:18 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000644.html">[Freenx-cvs] r520 - trunk/freenx-client/nxcl/lib
+</A></li>
+        <LI>Next message: <A HREF="000646.html">[Freenx-cvs] r522 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#645">[ date ]</a>
+              <a href="thread.html#645">[ thread ]</a>
+              <a href="subject.html#645">[ subject ]</a>
+              <a href="author.html#645">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-03-14 10:58:17 +0100 (Fri, 14 Mar 2008)
+New Revision: 521
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/gentoo-nomachine.diff
+   trunk/freenx-server/nxloadconfig
+Log:
+* Added detection of backend version and added this output
+  to version string.
+  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-03-12 03:40:04 UTC (rev 520)
++++ trunk/freenx-server/ChangeLog	2008-03-14 09:58:17 UTC (rev 521)
+@@ -67,6 +67,9 @@
+ 	  With single sign on session startup is a lot faster. This is true 
+ 	  especially if there are many printers and files to be shared.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Added detection of backend version and added this output 
++	  to version string.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
+ 14.10.2007 FreeNX 0.7.1 &quot;Hip Hop Edition&quot;
+ 	* Fixed the issue that makes fonts look tiny and unreadable by default 
+
+Modified: trunk/freenx-server/gentoo-nomachine.diff
+===================================================================
+--- trunk/freenx-server/gentoo-nomachine.diff	2008-03-12 03:40:04 UTC (rev 520)
++++ trunk/freenx-server/gentoo-nomachine.diff	2008-03-14 09:58:17 UTC (rev 521)
+@@ -1,7 +1,7 @@
+ --- nxloadconfig.old	2005-02-14 01:08:56.482546352 +0100
+ +++ nxloadconfig	2005-02-14 01:09:40.109913984 +0100
+ @@ -56,12 +56,12 @@
+- NX_LICENSE=&quot;OS (GPL)&quot;
++ NX_LICENSE=&quot;OS (GPL, using backend: %BACKEND%)&quot;
+  
+  # Where can different nx components be found
+ -NX_DIR=/usr
+
+Modified: trunk/freenx-server/nxloadconfig
+===================================================================
+--- trunk/freenx-server/nxloadconfig	2008-03-12 03:40:04 UTC (rev 520)
++++ trunk/freenx-server/nxloadconfig	2008-03-14 09:58:17 UTC (rev 521)
+@@ -53,7 +53,7 @@
+ #########################################################################
+ 
+ NX_VERSION=2.1.0-72-SVN
+-NX_LICENSE=&quot;OS (GPL)&quot;
++NX_LICENSE=&quot;OS (GPL, using backend: %BACKEND%)&quot;
+ 
+ # Where can different nx components be found
+ NX_DIR=/usr
+@@ -301,9 +301,17 @@
+ [ -z &quot;$PROXY_LIBRARY_PATH&quot; ] &amp;&amp; PROXY_LIBRARY_PATH=$PATH_LIB
+ [ -z &quot;$APPLICATION_LIBRARY_PATH&quot; ] &amp;&amp; APPLICATION_LIBRARY_PATH=$PATH_LIB
+ [ -z &quot;$APPLICATION_LIBRARY_PRELOAD&quot; ] &amp;&amp; APPLICATION_LIBRARY_PRELOAD=&quot;$APPLICATION_LIBRARY_PATH/libX11.so.6.2:$APPLICATION_LIBRARY_PATH/libXext.so.6.4:$APPLICATION_LIBRARY_PATH/libXcomp.so:$APPLICATION_LIBRARY_PATH/libXcompext.so:$APPLICATION_LIBRARY_PATH/libXrender.so.1.2&quot;
++
++NX_BACKEND_VERSION=$(strings $PATH_BIN/nxagent 2&gt;/dev/null | egrep 'NXAGENT - Version' | sed 's/.*Version //g')
++
++[ &quot;$ENABLE_1_5_0_BACKEND&quot; = &quot;1&quot; ] &amp;&amp; NX_BACKEND_VERSION=&quot;1.5.0&quot; # forced the backend
++
++[ -z &quot;$NX_BACKEND_VERSION&quot; ] &amp;&amp; NX_BACKEND_VERSION=&quot;not detected&quot;
++NX_LICENSE=$(echo $NX_LICENSE | sed &quot;s/%BACKEND%/$NX_BACKEND_VERSION/g&quot;)
++
+ if [ -z &quot;$ENABLE_1_5_0_BACKEND&quot; ]
+ then
+-	[ -n &quot;$(strings $PATH_BIN/nxagent 2&gt;/dev/null | egrep 'NXAGENT - Version 1.5.0')&quot; ] &amp;&amp; ENABLE_1_5_0_BACKEND=&quot;1&quot;
++	[ &quot;$NX_BACKEND_VERSION&quot; = &quot;1.5.0&quot; ] &amp;&amp; ENABLE_1_5_0_BACKEND=&quot;1&quot;
+ fi
+ 
+ if [ &quot;$ENABLE_KDE_CUPS&quot; = &quot;1&quot; ]
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000644.html">[Freenx-cvs] r520 - trunk/freenx-client/nxcl/lib
+</A></li>
+	<LI>Next message: <A HREF="000646.html">[Freenx-cvs] r522 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#645">[ date ]</a>
+              <a href="thread.html#645">[ thread ]</a>
+              <a href="subject.html#645">[ subject ]</a>
+              <a href="author.html#645">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

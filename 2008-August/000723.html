@@ -1,0 +1,101 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r589 - trunk/freenx-utils/nxpublickey
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r589%20-%20trunk/freenx-utils/nxpublickey&In-Reply-To=%3C200808231349.m7NDnQXw002037%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000722.html">
+   <LINK REL="Next"  HREF="000724.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r589 - trunk/freenx-utils/nxpublickey</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r589%20-%20trunk/freenx-utils/nxpublickey&In-Reply-To=%3C200808231349.m7NDnQXw002037%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r589 - trunk/freenx-utils/nxpublickey">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Sat Aug 23 15:49:26 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000722.html">[Freenx-cvs] r588 - trunk/freenx-utils/nxpublickey
+</A></li>
+        <LI>Next message: <A HREF="000724.html">[Freenx-cvs] r590 - trunk/freenx-utils/nxpublickey
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#723">[ date ]</a>
+              <a href="thread.html#723">[ thread ]</a>
+              <a href="subject.html#723">[ subject ]</a>
+              <a href="author.html#723">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-08-23 15:49:25 +0200 (Sat, 23 Aug 2008)
+New Revision: 589
+
+Modified:
+   trunk/freenx-utils/nxpublickey/nxssh-usermode-pw
+Log:
+Fixed error case.
+
+
+
+Modified: trunk/freenx-utils/nxpublickey/nxssh-usermode-pw
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-usermode-pw	2008-08-23 13:38:42 UTC (rev 588)
++++ trunk/freenx-utils/nxpublickey/nxssh-usermode-pw	2008-08-23 13:49:25 UTC (rev 589)
+@@ -1,8 +1,8 @@
+ #!/bin/bash
+ #
+-# Simple wrapper for nxssh for freenx-usermode.
++# Simple wrapper for nxssh for freenx-usermode with password from nxclient.
+ #
+-# Copyright (c) 2005 by Fabian Franz.
++# Copyright (c) 2005-2008 by Fabian Franz.
+ #
+ # License: GPL
+ #
+@@ -75,7 +75,11 @@
+ 
+ 	export SSH_ASKPASS=/usr/bin/ssh-askpass
+ 
+-	exec $(dirname $0)/nxssh.orig -nxstdinpass $CONN -x -2 -B sh -c &quot;~/NX4U/bin/nxserver-usermode&quot;
++	exec $(dirname $0)/nxssh.orig -nxstdinpass $CONN -x -2 -B -o &quot;NumberOfPasswordPrompts 1&quot; sh -c &quot;~/NX4U/bin/nxserver-usermode&quot; || {
++                echo &quot;NX&gt; 404 ERROR: wrong password or login.&quot;
++                echo &quot;NX&gt; 999 Bye&quot;
++                exit 1
++             }
+ else
+ 	exec $(dirname $0)/nxssh.orig &quot;$@&quot;
+ fi
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000722.html">[Freenx-cvs] r588 - trunk/freenx-utils/nxpublickey
+</A></li>
+	<LI>Next message: <A HREF="000724.html">[Freenx-cvs] r590 - trunk/freenx-utils/nxpublickey
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#723">[ date ]</a>
+              <a href="thread.html#723">[ thread ]</a>
+              <a href="subject.html#723">[ subject ]</a>
+              <a href="author.html#723">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

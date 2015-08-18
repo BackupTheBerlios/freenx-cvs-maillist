@@ -1,0 +1,1599 @@
+From fabianx at berlios.de  Thu Sep  1 04:17:19 2005
+From: fabianx at berlios.de (Fabian Franz at BerliOS)
+Date: Thu, 1 Sep 2005 04:17:19 +0200
+Subject: [Freenx-cvs] r151 - in freenx-website: . manke
+Message-ID: <200509010217.j812HJA3031714@sheep.berlios.de>
+
+Author: fabianx
+Date: 2005-09-01 04:17:03 +0200 (Thu, 01 Sep 2005)
+New Revision: 151
+
+Added:
+   freenx-website/manke/
+   freenx-website/manke/index.html
+   freenx-website/manke/nxapplet.jar
+   freenx-website/manke/testdrive.nxs
+Log:
+Test for Manke on XP.
+
+
+Added: freenx-website/manke/index.html
+===================================================================
+--- freenx-website/manke/index.html	2005-08-31 20:42:30 UTC (rev 150)
++++ freenx-website/manke/index.html	2005-09-01 02:17:03 UTC (rev 151)
+@@ -0,0 +1,169 @@
++<!--
++/**************************************************************************/
++/*                                                                        */
++/* Copyright (c) 2004, 2005 NoMachine, http://www.nomachine.com.          */
++/*                                                                        */
++/* NXAPPLET, NX protocol compression and NX extensions to this software   */
++/* are copyright of NoMachine. Redistribution and use of the present      */
++/* software is allowed according to terms specified in the file LICENSE   */
++/* which comes in the source distribution.                                */
++/*                                                                        */
++/* Check http://www.nomachine.com/licensing.html for applicability.       */
++/*                                                                        */
++/* NX and NoMachine are trademarks of Medialogic S.p.A.                   */
++/*                                                                        */
++/* All rights reserved.                                                   */
++/*                                                                        */
++/**************************************************************************/
++
++This file is provided as an example, you can freely personalize it to fit
++your needs.
++-->
++
++<HTML>
++    <HEAD>
++        <META HTTP-EQUIV="expires" CONTENT="0">
++        <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
++        <META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
++    </HEAD>
++
++    <BODY>
++        <SCRIPT LANGUAGE="Javascript1.1">
++            <!-- hide JavaScript from non-JavaScript browsers-->
++            SOWIN = (navigator.userAgent.toLowerCase().indexOf("win") > -1) ? 1 : 0;
++            SOMAC = (navigator.userAgent.toLowerCase().indexOf("mac") > -1) ? 1 : 0;
++            SOLIN = (navigator.userAgent.toLowerCase().indexOf("linux") > -1) ? 1 : 0;
++            SOSOL = (navigator.userAgent.toLowerCase().indexOf("Solaris") > -1) ? 1 : 0;
++            SOALT = (!SOWIN && !SOMAC && !SOLIN && !SOSOL) ? 1 : 0;
++            var agt=navigator.userAgent.toLowerCase();
++            var is_nav = ((agt.indexOf('mozilla')!=-1) && (agt.indexOf('spoofer')==-1) && (agt.indexOf('compatible') == -1) && (agt.indexOf('opera')==-1) && (agt.indexOf('webtv')==-1) && (agt.indexOf('hotjava')==-1));
++            var is_ie = ((agt.indexOf("msie") != -1) && (agt.indexOf("opera") == -1));
++            var pluginDetected = false;
++
++            if (is_nav && !SOMAC)
++            {
++                for (i = 0; i < navigator.plugins.length; i++)
++                {
++                if (navigator.plugins[i].description.indexOf("Java") != -1)
++                    {
++                        pluginDetected = true;
++                        document.writeln('<APPLET ARCHIVE="nxapplet.jar"  CODE="NXApplet.class" NAME= "nxapplet" width="400" height="300">');
++                        break;
++                    }
++                }
++            if (pluginDetected == false)
++            {
++                document.write("<BR>You haven't a suitable Java Plugin installed.");
++                document.write("<BR>Please, download and install the jre from the Sun site:");
++                if (SOWIN) document.write('<a href="' + 'http://plugindoc.mozdev.org/windows.html#Java">Click here to download the plugin</a>');
++                if (SOLIN) document.write('<a href="' + 'http://plugindoc.mozdev.org/linux.html#Java">Click here to download the plugin</a>');
++            }
++        }
++        else if (is_ie && SOWIN)
++        {
++            document.writeln('<OBJECT classid="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93" width="400" height="300" align="baseline" codebase="http://java.sun.com/products/plugin/autodl/jinstall-1_3_0_05-win.cab#Version=1,3,0,05">');
++        }
++        else if ((is_nav || is_ie) && SOMAC)
++        {
++            if(navigator.plugins)
++            {
++                navigator.plugins.refresh(false);
++            }
++            if(navigator.mimeTypes)
++            {
++                for (i=0; i < navigator.mimeTypes.length; i++)
++                {
++                    if ((navigator.mimeTypes[i].type != null) && (navigator.mimeTypes[i].type.indexOf("application/x-java-applet") != -1))
++                    {
++                        pluginDetected = true;
++                        break;
++                    }
++                }
++            }
++            if (pluginDetected)
++            {
++                document.writeln('<APPLET ARCHIVE="nxapplet.jar"  CODE="NXApplet.class" NAME= "nxapplet" width="400" height="300">');
++            }
++            else
++            {
++                document.write("<BR>You haven't a suitable Java Plugin installed.");
++                document.write("<BR>Please, download and install the jre from the Sun site:");
++                document.write('<a href="' + 'http://developer.apple.com/java/download/">Click here to download the plugin</a>');
++            }
++        }
++        else if(!is_nav && !is_ie)
++        {
++            document.writeln('<APPLET ARCHIVE="nxapplet.jar"  CODE="NXApplet.class" NAME= "nxapplet" width="400" height="300">');
++        }
++
++            // end hide JavaScript
++        </SCRIPT>
++        <PARAM NAME="boxbgcolor" VALUE="236, 235, 229">
++        <PARAM NAME="progressbar" VALUE="true">
++        <PARAM NAME="boxmessage" VALUE="Please wait while Java applet loads...">
++        <PARAM NAME="BaseUrl" VALUE="">
++        <PARAM NAME="BackgroundsUrl" VALUE="http://debian.tu-bs.de/knoppix/nx/nxplugin/Java/images/backgrounds/">
++        <PARAM NAME="Background1" VALUE="background-1.gif">
++        <PARAM NAME="Background2" VALUE="background-2.gif">
++        <PARAM NAME="Background3" VALUE="background-3.gif">
++        <PARAM NAME="Background4" VALUE="background-2.gif">
++        <PARAM NAME="Background5" VALUE="background-4.gif">
++        <PARAM NAME="Background6" VALUE="background-4.gif">
++        <PARAM NAME="Background7" VALUE="background-5.gif">
++        <PARAM NAME="Background8" VALUE="background-6.gif">
++        <PARAM NAME="Background9" VALUE="background-7.gif">
++        <PARAM NAME="StringsUrl" VALUE="http://debian.tu-bs.de/knoppix/nx/nxplugin/Java/images/strings/">
++        <PARAM NAME="String1" VALUE="string-1.gif">
++        <PARAM NAME="String2" VALUE="string-2.gif">
++        <PARAM NAME="String3" VALUE="string-3.gif">
++        <PARAM NAME="String4" VALUE="string-4.gif">
++        <PARAM NAME="String5" VALUE="string-5.gif">
++        <PARAM NAME="String6" VALUE="string-6.gif">
++        <PARAM NAME="ErrorsUrl" VALUE="http://debian.tu-bs.de/knoppix/nx/nxplugin/Java/images/errors/">
++        <PARAM NAME="Error1" VALUE="error-1.gif">
++        <PARAM NAME="Error2" VALUE="error-2.gif">
++        <PARAM NAME="Error3" VALUE="error-3.gif">
++        <PARAM NAME="Error4" VALUE="error-4.gif">
++        <PARAM NAME="Error5" VALUE="error-5.gif">
++        <PARAM NAME="Error6" VALUE="error-6.gif">
++        <PARAM NAME="Error7" VALUE="error-7.gif">
++        <PARAM NAME="Error8" VALUE="error-8.gif">
++        <PARAM NAME="Error9" VALUE="error-9.gif">
++    	<PARAM NAME="Error10" VALUE="error-10.gif">
++
++        <PARAM NAME="ButtonsUrl" VALUE="http://debian.tu-bs.de/knoppix/nx/nxplugin/Java/images/buttons/">
++        <PARAM NAME="Cancel" VALUE="cancel.gif">
++        <PARAM NAME="CancelOver" VALUE="cancel-over.gif">
++        <PARAM NAME="CancelActive" VALUE="cancel-active.gif">
++        <PARAM NAME="Continue" VALUE="continue.gif">
++        <PARAM NAME="ContinueOver" VALUE="continue-over.gif">
++        <PARAM NAME="ContinueActive" VALUE="continue-active.gif">
++        <PARAM NAME="Download" VALUE="download.gif">
++        <PARAM NAME="DownloadOver" VALUE="download-over.gif">
++        <PARAM NAME="DownloadActive" VALUE="download-active.gif">
++        <PARAM NAME="Run" VALUE="run.gif">
++        <PARAM NAME="RunOver" VALUE="run-over.gif">
++        <PARAM NAME="RunActive" VALUE="run-active.gif">
++        <PARAM NAME="Details" VALUE="details.gif">
++        <PARAM NAME="DetailsOver" VALUE="details-over.gif">
++        <PARAM NAME="DetailsActive" VALUE="details-active.gif">
++
++        <PARAM NAME="RedirectUrl" VALUE="http://freenx.berlios.de/manke/">
++        <PARAM NAME="SessionUrl" VALUE="http://freenx.berlios.de/manke/testdrive.nxs">
++        <PARAM NAME="SessionName" VALUE="testdrive.nxs">
++        <PARAM NAME="LinuxClientUrl" VALUE="http://debian.tu-bs.de/knoppix/nx/nxplugin/Linux/client.zip">
++        <PARAM NAME="LinuxClientVersion" VALUE = "1.5.0-97">
++        <PARAM NAME="WindowsClientUrl" VALUE="http://debian.tu-bs.de/knoppix/nx/nxplugin/Windows/client.zip">
++        <PARAM NAME="WindowsClientVersion" VALUE = "1.5.0-97">
++        <PARAM NAME="MacOSClientUrl" VALUE="http://debian.tu-bs.de/knoppix/nx/nxplugin/MacOSX/client.zip">
++        <PARAM NAME="MacOSClientVersion" VALUE = "1.5.0-97">
++        <PARAM NAME="SolarisClientUrl" VALUE="http://debian.tu-bs.de/knoppix/nx/nxplugin/Solaris/client.zip">
++        <PARAM NAME="SolarisClientVersion" VALUE = "1.5.0-97">
++	<PARAM NAME="archive" VALUE="nxapplet.jar">
++	<PARAM NAME="code" VALUE="NXApplet.class">
++        <PARAM NAME="type" VALUE="application/x-java-applet;version=1.2">
++        </OBJECT>
++        </APPLET>
++    </BODY>
++
++</HTML>
+
+Added: freenx-website/manke/nxapplet.jar
+===================================================================
+--- freenx-website/manke/nxapplet.jar	2005-08-31 20:42:30 UTC (rev 150)
++++ freenx-website/manke/nxapplet.jar	2005-09-01 02:17:03 UTC (rev 151)
+@@ -0,0 +1 @@
++link ../nxplugin-common/nxapplet.jar
+\ No newline at end of file
+
+
+Property changes on: freenx-website/manke/nxapplet.jar
+___________________________________________________________________
+Name: svn:special
+   + *
+
+Added: freenx-website/manke/testdrive.nxs
+===================================================================
+--- freenx-website/manke/testdrive.nxs	2005-08-31 20:42:30 UTC (rev 150)
++++ freenx-website/manke/testdrive.nxs	2005-09-01 02:17:03 UTC (rev 151)
+@@ -0,0 +1,101 @@
++<!DOCTYPE NXClientSettings>
++<NXClientSettings application="nxclient" version="1.3" >
++<group name="Advanced" >
++<option key="Cache size" value="8" />
++<option key="Cache size on disk" value="32" />
++<option key="Current keyboard" value="true" />
++<option key="Custom keyboard layout" value="us" />
++<option key="Disable TCP no-delay" value="false" />
++<option key="Disable ZLIB stream compression" value="false" />
++<option key="Enable SSL encryption" value="true" />
++<option key="Restore cache" value="true" />
++<option key="StreamCompression" value="" />
++</group>
++<group name="Environment" >
++<option key="CUPSD path" value="/usr/sbin/cupsd" />
++</group>
++<group name="General" >
++<option key="Automatic reconnect" value="true" />
++<option key="Backingstore" value="when_requested" />
++<option key="Command line" value="" />
++<option key="Custom Unix Desktop" value="console" />
++<option key="Desktop" value="kde" />
++<option key="Link speed" value="modem" />
++<option key="Remember password" value="false" />
++<option key="Resolution" value="available" />
++<option key="Resolution height" value="600" />
++<option key="Resolution width" value="800" />
++<option key="Server host" value="testdrive.nomachine.com" />
++<option key="Server port" value="22" />
++<option key="Session" value="unix" />
++<option key="Use default image encoding" value="0" />
++<option key="Use render" value="true" />
++<option key="Use taint" value="true" />
++<option key="Virtual desktop" value="false" />
++<option key="XAgent encoding" value="true" />
++<option key="displaySaveOnExit" value="true" />
++<option key="xdm broadcast port" value="177" />
++<option key="xdm list host" value="localhost" />
++<option key="xdm list port" value="177" />
++<option key="xdm mode" value="server decide" />
++<option key="xdm query host" value="localhost" />
++<option key="xdm query port" value="177" />
++</group>
++<group name="Images" >
++<option key="Disable JPEG Compression" value="0" />
++<option key="Disable all image optimisations" value="false" />
++<option key="Image Compression Type" value="1" />
++<option key="Image Encoding Type" value="0" />
++<option key="Image JPEG Encoding" value="false" />
++<option key="JPEG Quality" value="0" />
++<option key="RDP optimization for low-bandwidth link" value="false" />
++<option key="Reduce colors to" value="" />
++<option key="Use PNG Compression" value="false" />
++<option key="VNC images compression" value="0" />
++<option key="Windows Image Compression" value="1" />
++</group>
++<group name="Login" >
++<option key="Auth" value="EMPTY_PASSWORD" />
++<option key="Public Key" value="-----BEGIN DSA PRIVATE KEY-----
++MIIBuwIBAAKBgQCXv9AzQXjxvXWC1qu3CdEqskX9YomTfyG865gb4D02ZwWuRU/9
++C3I9/bEWLdaWgJYXIcFJsMCIkmWjjeSZyTmeoypI1iLifTHUxn3b7WNWi8AzKcVF
++aBsBGiljsop9NiD1mEpA0G+nHHrhvTXz7pUvYrsrXcdMyM6rxqn77nbbnwIVALCi
++xFdHZADw5KAVZI7r6QatEkqLAoGBAI4L1TQGFkq5xQ/nIIciW8setAAIyrcWdK/z
++5/ZPeELdq70KDJxoLf81NL/8uIc4PoNyTRJjtT3R4f8Az1TsZWeh2+ReCEJxDWgG
++fbk2YhRqoQTtXPFsI4qvzBWct42WonWqyyb1bPBHk+JmXFscJu5yFQ+JUVNsENpY
+++Gkz3HqTAoGANlgcCuA4wrC+3Cic9CFkqiwO/Rn1vk8dvGuEQqFJ6f6LVfPfRTfa
++QU7TGVLk2CzY4dasrwxJ1f6FsT8DHTNGnxELPKRuLstGrFY/PR7KeafeFZDf+fJ3
++mbX5nxrld3wi5titTnX+8s4IKv29HJguPvOK/SI7cjzA+SqNfD7qEo8CFDIm1xRf
++8xAPsSKs6yZ6j1FNklfu
++-----END DSA PRIVATE KEY-----
++" />
++<option key="User" value="" />
++</group>
++<group name="Services" >
++<option key="Audio" value="false" />
++<option key="IPPPort" value="631" />
++<option key="IPPPrinting" value="false" />
++<option key="Shares" value="false" />
++</group>
++<group name="VNC Session" >
++<option key="Display" value="0" />
++<option key="Password" value="EMPTY_PASSWORD" />
++<option key="Remember" value="false" />
++<option key="Server" value="" />
++</group>
++<group name="Windows Session" >
++<option key="Application" value="" />
++<option key="Authentication" value="1" />
++<option key="Color Depth" value="8" />
++<option key="Domain" value="" />
++<option key="Image Cache" value="true" />
++<option key="Password" value="EMPTY_PASSWORD" />
++<option key="Remember" value="true" />
++<option key="Run application" value="false" />
++<option key="Server" value="" />
++<option key="User" value="" />
++</group>
++<group name="share chosen" >
++<option key="Share number" value="0" />
++</group>
++</NXClientSettings>
+
+
+
+From fabianx at berlios.de  Thu Sep  1 04:20:19 2005
+From: fabianx at berlios.de (Fabian Franz at BerliOS)
+Date: Thu, 1 Sep 2005 04:20:19 +0200
+Subject: [Freenx-cvs] r152 - freenx-website/manke
+Message-ID: <200509010220.j812KJE7031847@sheep.berlios.de>
+
+Author: fabianx
+Date: 2005-09-01 04:19:58 +0200 (Thu, 01 Sep 2005)
+New Revision: 152
+
+Modified:
+   freenx-website/manke/index.html
+Log:
+Test.
+
+
+Modified: freenx-website/manke/index.html
+===================================================================
+--- freenx-website/manke/index.html	2005-09-01 02:17:03 UTC (rev 151)
++++ freenx-website/manke/index.html	2005-09-01 02:19:58 UTC (rev 152)
+@@ -160,7 +160,7 @@
+         <PARAM NAME="SolarisClientUrl" VALUE="http://debian.tu-bs.de/knoppix/nx/nxplugin/Solaris/client.zip">
+         <PARAM NAME="SolarisClientVersion" VALUE = "1.5.0-97">
+ 	<PARAM NAME="archive" VALUE="nxapplet.jar">
+-	<PARAM NAME="code" VALUE="NXApplet.class">
++	<PARAM NAME="code" VALUE="nxapplet.class">
+         <PARAM NAME="type" VALUE="application/x-java-applet;version=1.2">
+         </OBJECT>
+         </APPLET>
+
+
+
+From pipitas at berlios.de  Fri Sep  2 10:26:22 2005
+From: pipitas at berlios.de (Kurt Pfeifle at BerliOS)
+Date: Fri, 2 Sep 2005 10:26:22 +0200
+Subject: [Freenx-cvs] r153 - freenx-website/intern/press
+Message-ID: <200509020826.j828QM5L005082@sheep.berlios.de>
+
+Author: pipitas
+Date: 2005-09-02 10:26:20 +0200 (Fri, 02 Sep 2005)
+New Revision: 153
+
+Modified:
+   freenx-website/intern/press/akademy-release.txt
+Log:
+2nd version; exact quotes by Coolo and Martin still missing.
+
+
+Modified: freenx-website/intern/press/akademy-release.txt
+===================================================================
+--- freenx-website/intern/press/akademy-release.txt	2005-09-01 02:19:58 UTC (rev 152)
++++ freenx-website/intern/press/akademy-release.txt	2005-09-02 08:26:20 UTC (rev 153)
+@@ -1,137 +1,262 @@
+-This annoucement tries to follow the "Marketing for Geeks" guide, which was recently showcasted by Aaron and Waldo on akademy 2005 KDE conference. 
++This annoucement is inspired by the "Marketing for Geeks" guide, which 
++was recently showcasted by Aaron and Waldo at akademy 2005, the KDE 
++contributor conference in Malaga/Spain. 
+ 
+-Malaga, 30th August, aKademy conference,
+ 
+-The FreeNX team is proud to release a new version of the remote desktop access server software FreeNX.
++Malaga, 30th August, aKademy 2005 conference.
+ 
+-This release features for you:
++The FreeNX Developer Team is proud to release a new version of FreeNX,
++the remote desktop access software. 
+ 
+-* Easiest installation ever
++* FreeNX is known to work on Linux, FreeBSD and Solaris. 
++* FreeNX provides efficient access to remote applications with a 
++  graphical user interface (GUI). 
++* FreeNX works well even over dialup modem links. 
++* FreeNX connects client computers to Linux or Unix GUI applications
++  as well as to MS Windows. 
++* FreeNX works very well with the NoMachine NX Client (available for 
++  Linux, Windows and Solaris). 
++  
+ 
+-* Work better, faster, and more colorful (NX 1.5.0)
+-	* Resizable Desktop.
+-	* Fast single application mode.
+-	* Truecolor Windows Sessions.
+ 
+-* Use it in restricted environments
++What FreeNX can do for different users -- some real world use cases:
++====================================================================
+ 
+-* Easily get help for your problems
++* a travelling salesman can access his own desktop (at home or at his
++  offic) from the hotel room, using a modem (or better) connection.
+ 
+-* Better support for big corporate environments
++* a helpdesk technician can display any GUI application of a LAN user
++  to his own screen and help to properly set up its configuration or
++  troubleshoot it.
+ 
+-* Lots of bugfixes, more stability and improved security
++* a university system administrator can set up a cost efficient and
++  Linux Desktop Application Server for students to connect to from
++  classes or from home.
+ 
++* a KDE developer can showcase his latest code to co-maintainers and
++  usability experts in action without them needing to compile it by
++  themselves.
++
++* an IT consultancy company can offer its customers more flexible
++  scenarios when planning and implementing migrations from MS Windows
++  to Linux. 
++
++
++What parts FreeNX is composed of:
++=================================
++
++The FreeNX remote desktop server software *requires* the NX Core 
++components developed by NoMachine.com who have released that source
++code under the GPL license. 
++
++The NoMachine source code needs to be compiled for your platform by 
++yourself or by your Linux distribution so that FreeNX can work. 
++NoMachine Core NX components are available in version 1.4.0 or 1.5.0. 
++We recommend to use 1.5.0 for better performance and more features. 
++
++NoMachine also offer a commercial package of ready-made NX server 
++software for several OS platforms, including support and several 
++add-ons useful for enterprise level installations.
++
++
++What improvements this release brings to current FreeNX users:
++==============================================================
++
++* it now sports the most easy installation we ever had
++* it now works better and faster than ever, and is more colorful
++* it now has a resizable remote desktop
++* it now has a fast single application mode
++* it now supports truecolor remote MS Windows sessions
++* it now can be installed without having root privileges
++* it is now easier to troubleshoot in case of problems
++* it now better supports big corporate environments
++* it contains many fixes for known bugs
++* it is more stable than previous releases
++* it has been improved on security
++
++
+ And last but not least:
+ 
+-THE
++* FreeNX 0.5.0 ships with the first official FreeNX background picture
++  (useful as a wallpaper)
+ 
+-* First official FreeNX background picture
+ 
+-What customers say about FreeNX at aKademy in Malaga, Spain:
++What FreeNX users at "aKademy" had to say this about the release:
++=================================================================
+ 
+-[FIXME: Approve those two statements]
++KDE/Konqueror developer Daniel Teske says: "It was easy to install, 
++easy to use and it is blazingly fast. I was working here from Spain 
++on my home machine in Germany without any problems."
+ 
+-KDE/Konqueror developer Daniel Teske says: "It was easy to install, easy to use and it is blazingly fast. I was working here from Spain on my home machine in Germany without any problems."
++Stephan Kulow (KDE 3.5 Release Coordinator) was using it since Day 2 
++of aKademy: ["I was working in my company all day long once I had it 
++installed".]
+ 
+-Stephan Kulow was using it since day 2 of aKademy: "I was working in my company all day long once I had it installed".
++Martin Konold (architect of the Kolab groupware server which already 
++successfully replaced several MS Exchange installations) told us this: 
++["The upcoming NX4Myhome which I had the pleasure to preview, will help 
++FreeNX to conquer the market of ssh-X. FreeNX is just so much faster. 
++I compared the output of a big textfile via cat, NX was 3 times as 
++fast than a normal ssh connection."]
+ 
+-Martin Konold says: "The NX4Myhome will help FreeNX to conquer the market of ssh-X. FreeNX is just so much faster. I compared the output of a big textfile via cat, NX was 3 times as fast as a normal ssh connection."
+-
+ [FIXME: More statements?]
+ 
++
+ Now let us give you some details about the new release:
+ 
++
+ Easiest installation ever
+ -------------------------
+ 
+-The setup program of FreeNX 0.4.5 is now interactive, checks for a correct configuration and has automatic self-tests and a help system.
++The "nxsetup" program of FreeNX 0.4.5 now...
++  ...works by default in an interactive way
++  ...checks for a correct configuration 
++  ...conducts automatic self-tests 
++  ...offers a help system.
+ 
+-Important changes:
++Important changes compared to previous releases:
+ 
+-* nxsetup is now interactive. Use --auto to disable this.
+-* NoMachine key is now the default, but the user still has to confirm it.
+-  [FIXME]
+-* nxsetup checks for a correct configuration file. Use --ignore-errors to continue nxsetup even when the check fails.
+-* If the automatic self-test fails nxsetup reminds the user of some common pitfalls.
++* since "nxsetup" is now interactive, there is a "--auto" commandline 
++  parameter to support the old behaviour you may be accustomed to
++* since "nxsetup" now uses the NoMachine key by default, the user 
++  installing FreeNX has to confirm its use
++* since "nxsetup" now checks for a correct configuration file, there is 
++  a "--ignore-errors" commandline parameter to continue nxsetup even 
++  if the check fails
++* since "nxsetup" now runs an automatic self-test, it also reminds the 
++  user of some common pitfalls.
+ 
+-Work better, faster, and more colorful (NX 1.5.0)
+--------------------------------------------------
+ 
+-FreeNX 0.4.5 has full support for the most important 1.5.0 features.
++Better, faster, and more colorful (NX 1.5.0)
++--------------------------------------------
+ 
+-Your virtual Desktop is now resizable. Just drag the borders and if you want to switch to/from fullscreen mode just press Ctrl+Alt+F.
++FreeNX 0.4.5 has full support for the most important features 
++introduced into the 1.5.0 NoMachine Core NX components (not working
++with the 1.4.0 version):
+ 
+-FreeNX 0.4.5 supports the fast single application mode. To enable this feature, set ENABLE_ROOTLESS_MODE="1" in node.conf. From your client select a Unix-Custom "Floating windows" session and booh: You are up and running remote applications blazingly fast. 
++* your full remote desktop is now resizable if displayed in windowed 
++  mode.  Just drag the borders with the mouse to change its size.
++* your full remote desktop can now easily toggled between windowed and
++  fullscreen  mode. Just press the key combination [Ctrl]+[Alt]+[f].
++* your remote single application windows now supports the same fast
++  speed that the full remote desktop always had. To use this feature...
++    ...on the FreeNX-0.4.5 server set ENABLE_ROOTLESS_MODE="1" in the 
++       "node.conf" configuration file, and
++    ...in the NoMachine NX Client follow these steps:
++       --> click "Configure..."
++       --> select the "General" tab
++       --> locate and go to the "Desktop" box (middle box)
++       --> select "Unix" and "Custom" session type
++       --> click "Settings..."
++       --> enable "Run the following command" radio button
++       --> type in the application's startup command, click "OK" twice
++           and login. 
++* your remote access to Windows Terminal Server sessions can now be run
++  in "Truecolor" mode. Just use the 1.5.0 version of the NoMachine NX 
++  Client and follow these steps to set it up:
++       --> click "Configure..."
++       --> select the "General" tab
++       --> locate and go to the "Desktop" box (middle box)
++       --> select the "Windows" session type 
++       --> locate and go to the "Display" box (bottom box)
++       --> select "Use custom settings"
++       --> click "Modify..."
++       --> locate and go to the "Allowed colors" box (top box)
++       --> move the slider to the "16M" position
+ 
+-Truecolor Windows Sessions are now supported by FreeNX. Just use the 1.5.0 client and select from the Display-box "Use custom settings, Modify, Allowed Colors '16M'".
+ 
+-Use FreeNX in restricted environments
+--------------------------------------
++Install FreeNX without root privileges (usermode installation)
++--------------------------------------------------------------
+ 
+ Imagine the following scenario:
+ 
+-You have a really nice remote access to a machine in your company and you would love to use FreeNX to do your everyday work. But the problem is: You do not have root access and so you can't use it. FreeNX 0.4.5 enables you do to it nevertheless.
++* you have a user account on a Linux machine where you can run a KDE
++  desktop if you sit in front of it
++* you can remotely access the machine via an SSH login in shell-only
++  mode
++* you do not possess root privileges on the machine, and therefor you
++  cannot install the standard FreeNX server.
+ 
+-You can install FreeNX 0.4.5 in a special mode to access it directly via your user account. The only problem remaining is patching the client and setting it all up.
++FreeNX-0.4.5 now supports a "usermode" installation via remote SSH 
++access into your home directory. 
+ 
+-Fux has explained this in detail in a howto available from:
++FreeNX Development Team member Thorsten Sandfuchs has explained the
++steps to follow in detail in a separate HOWTO. It is available from:
+ 
+-http://openfacts.berlios.de/index-en.phtml?title=FreeNX_Howto
++   http://openfacts.berlios.de/index-en.phtml?title=FreeNX_Howto
+ 
+-FreeNX plans to ship ready-made plug-and-play binary distributions of NX4MyHome as soon as all tests are finished.
++The FreeNX Development Team plans to ship ready-made binary packages
++of this option (probably named "NX4MyHome") which support a more easy
++mode of installation as soon as all tests are finished. For now you 
++have to follow the instructions supplied by the link above.
+ 
+-Easily get help for your problems
+----------------------------------
+ 
+-We have several scenarios that come up over and over again. There are many different distributions all doing things a bit different. But you can't give "test this" and "test that" instructions without knowing a lot about the environment of the user.
++Easier troubleshooting in case of problems
++------------------------------------------
+ 
+-For example starting up nxagent over a ssh -X connection to test if the basic functionality works can now be done via:
++In the past FreeNX users experienced several problem scenarios that 
++came up over and over again. There are many different distributions
++shipping FreeNX packaged by them, each doing things a bit different. 
++But we can't give detailed "test this" and "do that" instructions 
++without knowing a lot about the environment of a user experiencing
++problems with the FreeNX package provided by his distro.
+ 
+-nxserver --agent :1000
++For example starting up nxagent over a ssh -X connection to test if 
++the basic functionality works can now be done with this simple command:
+ 
+-instead of:
++   nxserver --agent :1000
+ 
+-LD_LIBRARY_PATH=/where/nx/libs/live /where/nxagent/is :1000
++instead of formerly:
+ 
+-It should now be a lot easier to give advise.
++   LD_LIBRARY_PATH=/path/to/nxlibs/dir /path/to/nxagent :1000
+ 
++It should now be a lot easier to give advice in case of problems.
++
++
+ Better support for big corporate environments
+ ---------------------------------------------
+ 
+-Thanks to the help of Google and Cisco employees FreeNX does now work also in environments where you have 1000 users or more.
++Thanks to help and patches of Google and Cisco employees, FreeNX now 
++does work also in environments where there are 1000 users or more.
+ 
+-Technically speaking: getent does no longer retrieve the whole database and grep through it, but directly query for the information needed.
++The previous authentications code suffered from the flaw that it did
++retrieve the whole passwd database and grep through it to find a user. 
++Now it directly queries for the information needed using getent.
+ 
++
+ Lots of bugfixes, more stability and improved security
+ ------------------------------------------------------
+ 
+-We also again had several bugfixes:
++This release contains several bugfixes:
+ 
+-	* Fixed support for CUPS forwarding.
+-	* Fixed resume with 1.5.0 client.
++* Fixed support for CUPS forwarding
++* Fixed resume with the 1.5.0 NoMachine NX Client
+ 
+ Stability has been increased in the following fields:
+ 
+-	* Reconnection support. (Yes, again)
++* Reconnection support (Yes, again)
+ 
+ Security issues / concerns have been fixed regarding the following topics:
+ 
+-        * Certain passwords for VNC/RDP could have been visible via `ps aux`.
+-	* Privacy of passwords is assured. They are no longer shown in log files or re-transmitted to the client.
+-	* $USER_FAKE_HOME/.nx is now protected.
+-	* The client is no longer able to overwrite parameters set by the server.
++* Certain passwords for VNC and RDP type session under certain 
++  conditions were visible via `ps aux`. All known cases are fixed.
++* Passwords are no longer shown in log files or re-transmitted to the 
++  client.
++* ${USER_FAKE_HOME}/.nx is now protected against access by other users.
++* The NX client is no longer able to overwrite parameters set by the 
++  NX server.
+  
+-And last but not least:
+ 
+-THE
+-
+ First official FreeNX background picture
+ ----------------------------------------
+ 
+-This release for the first time features a really nice background picture. Show your appreciation of FreeNX and use it on one of your desktops as a background. 
+-
++This release for the first time ships a PNG graphic file, meant to be 
++used as a desktop wallpaper. You can now show your appreciation for 
++FreeNX by using it for at least one of your desktops as a background. 
+ Whenever you show off FreeNX, be sure to use it and spread the word!
+ 
+-For the FreeNX team,
+ 
+-Fabian
++For the FreeNX Development Team,
++
++Fabian Franz
++Kurt Pfeifle
+
+
+
+From pipitas at berlios.de  Fri Sep  2 21:41:04 2005
+From: pipitas at berlios.de (Kurt Pfeifle at BerliOS)
+Date: Fri, 2 Sep 2005 21:41:04 +0200
+Subject: [Freenx-cvs] r154 - freenx-server/branches/FreeNX-0.4
+Message-ID: <200509021941.j82Jf4WG022468@sheep.berlios.de>
+
+Author: pipitas
+Date: 2005-09-02 21:41:03 +0200 (Fri, 02 Sep 2005)
+New Revision: 154
+
+Modified:
+   freenx-server/branches/FreeNX-0.4/nxsetup
+Log:
+Fixed typos and some messages given to users. I think
+nxsetup needs more testing. Next release should probably
+be a "snapshot" only.
+
+
+Modified: freenx-server/branches/FreeNX-0.4/nxsetup
+===================================================================
+--- freenx-server/branches/FreeNX-0.4/nxsetup	2005-09-02 08:26:20 UTC (rev 153)
++++ freenx-server/branches/FreeNX-0.4/nxsetup	2005-09-02 19:41:03 UTC (rev 154)
+@@ -57,11 +57,12 @@
+ if [ "$INSTALL" = "no" -a "$UNINSTALL" = "no" -a "$AUTOMATIC" = "no" -a "$HELP" = "no" ]
+ then
+ 	echo "------> You did select no action."
+-	echo "        FreeNX guesses that you want to _install_ the"
+-	echo "        server."
+-	echo "        Use --help to get help contents."
++	echo "        FreeNX guesses that you want to _install_ the server."
++	echo "        Type \"y\" to abort the installation at this point in time."
++	echo "        \"N\" is the default and continues installation."
++	echo "        Use \"${0} --help\" to get more detailed help hints."
+ 	echo ""
+-	echo -n "Do you want to abort now? [y/N] "
++	echo -n " Do you want to abort now? [y/N] "
+ 	read -n 1 CHOICE
+ 	echo
+ 	[ "$CHOICE" = "y" ] || INSTALL="yes"
+@@ -76,22 +77,26 @@
+ 	echo "        nxsetup --install [--setup-nomachine-key] [--uid <nummber>] [--clean [--purge]]"
+ 	echo "        nxsetup --uninstall [--purge]"
+ 	echo
+-	echo "  --help                 Displays this help message"
+-	echo "  --install              Install nessesary files and add the nx user"
+-	echo "	--ignore-errors	       check false configuration, but don't complain"
++	echo "  --help                 Display this help message."
++	echo "  --install              Install necessary files and add the special user \"nx\"."
++	echo "  --ignore-errors        Check for false configuration, but don't complain."
+ 	echo "  --setup-nomachine-key  Allow login with the key shipped with the NoMachine"
+-	echo "                         client. This is not as secure, but it simplifies the "
+-	echo "                         configuration of clients."
++	echo "                         client. This is fairly secure, and it simplifies the "
++	echo "                         configuration of clients. (Using a custom key pair."
++	echo "                         increases security even more, but complicates the"
++	echo "                         configuration of clients.)"
+ 	echo "                         Use this option at your own risk."
+-	echo "  --ssh2		       Additionally create commercial pubkey-support, beware"
+-	echo "			       own _commercial_ ssh2-key is not supported!."
+-	echo "  --uid <number>         The nx user will be given the uid <number>."
+-	echo "  --gid <number>         The nx user will be given the gid <number>."
++	echo "  --ssh2                 Create additionally commercial pubkey-support; beware:"
++	echo "                         own _commercial_ ssh2-key is not supported!"
++	echo "  --uid <number>         Give the uid <number> to the user \"nx\"."
++	echo "  --gid <number>         Give the gid <number> to the user \"nx\"."
+ 	[ -n "$LOCAL_USER_OPTION" ] && echo "  --localuser            The nx user will be created locally using luseradd, for use in NIS and NISplus environments."
+-	echo "  --clean                Performs an uninstall prior to the installation"
+-	echo "  --uninstall            Remove log and session files, as well as the nx user"
+-	echo "  --purge                Uninstall will remove extra configuration files and ssh"
+-	echo "                         keys as well. Note that node.conf will always be saved."
++	echo "  --clean                Perform an uninstallation prior to installation."
++	echo "  --uninstall            Remove log and session files, as well as the special"
++	echo "                         user \"nx\"."
++	echo "  --purge                Remove extra configuration files and ssh keys when"
++	echo "                         performing a \"--uninstall\"."
++	echo "                         Note that node.conf will always be saved."
+ 	exit 0
+ fi
+ #Undocumented
+@@ -109,10 +114,11 @@
+ if [ "$INSTALL" = "yes" -a "$AUTOMATIC" = "no" -a "$SETUP_NOMACHINE_KEY" = "no" ]
+ then
+ 	echo "------> It is recommended that you use the NoMachine key for"
+-	echo "        easier setup. At the moment FreeNX would create a custom"
+-	echo "        KeyPair and expect you to setup your clients manually. "
++	echo "        easier setup. If you answer \"y\", FreeNX creates a custom"
++	echo "        KeyPair and expects you to setup your clients manually. "
++	echo "        \"N\" is default and uses the NoMachine key for installation."
+ 	echo ""
+-	echo -n "        Do you really want to use your own keys? [y/N] "
++	echo -n " Do you want to use your own custom KeyPair? [y/N] "
+ 	read -n 1 CHOICE
+ 	[ "$CHOICE" = "y" ] || SETUP_NOMACHINE_KEY="yes"
+ fi
+
+
+
+From pipitas at berlios.de  Fri Sep  2 22:18:08 2005
+From: pipitas at berlios.de (Kurt Pfeifle at BerliOS)
+Date: Fri, 2 Sep 2005 22:18:08 +0200
+Subject: [Freenx-cvs] r155 - freenx-server/branches/FreeNX-0.4
+Message-ID: <200509022018.j82KI8tQ024572@sheep.berlios.de>
+
+Author: pipitas
+Date: 2005-09-02 22:18:07 +0200 (Fri, 02 Sep 2005)
+New Revision: 155
+
+Modified:
+   freenx-server/branches/FreeNX-0.4/nxsetup
+Log:
+A few more fixes for strings (capitalisation where appropriate, 
+trying to avoid confusing "NX user" and a "special user named 
+'nx'", etc.)
+
+
+
+Modified: freenx-server/branches/FreeNX-0.4/nxsetup
+===================================================================
+--- freenx-server/branches/FreeNX-0.4/nxsetup	2005-09-02 19:41:03 UTC (rev 154)
++++ freenx-server/branches/FreeNX-0.4/nxsetup	2005-09-02 20:18:07 UTC (rev 155)
+@@ -90,7 +90,7 @@
+ 	echo "                         own _commercial_ ssh2-key is not supported!"
+ 	echo "  --uid <number>         Give the uid <number> to the user \"nx\"."
+ 	echo "  --gid <number>         Give the gid <number> to the user \"nx\"."
+-	[ -n "$LOCAL_USER_OPTION" ] && echo "  --localuser            The nx user will be created locally using luseradd, for use in NIS and NISplus environments."
++	[ -n "$LOCAL_USER_OPTION" ] && echo "  --localuser            The special user \"nx\" will be created locally using luseradd, for use in NIS and NISplus environments."
+ 	echo "  --clean                Perform an uninstallation prior to installation."
+ 	echo "  --uninstall            Remove log and session files, as well as the special"
+ 	echo "                         user \"nx\"."
+@@ -232,7 +232,7 @@
+ 	
+ 	if ! nx_user_exists
+ 	then
+-		echo -n "Setting up user nx ..."
++		echo -n "Setting up special user \"nx\" ..."
+ 		useradd_nx
+ 		echo "done"
+ 	fi
+@@ -360,7 +360,7 @@
+ 		echo 
+ 		echo "Please check your ssh setup:"
+ 		echo ""
+-		echo "	- Make sure nx is one of the AllowUsers in sshd_config."
++		echo "	- Make sure \"nx\" is one of the AllowUsers in sshd_config."
+ 		echo "	- Make sure your sshd allows public key authentication."
+ 		echo "	- Make sure your sshd is really running on port $SSHD_PORT."
+ 		echo "	- Make sure your sshd_config AuthorizedKeysFile in sshd_config is set to $SSH_AUTHORIZED_KEYS."
+@@ -374,7 +374,7 @@
+ {
+ 	if nx_user_exists
+ 	then
+-		echo -n "Removing user nx ..."
++		echo -n "Removing special user \"nx\" ..."
+ 		
+ 		if [ "$SETUP_LOCAL_USER" = "yes" ]
+ 		then
+@@ -404,7 +404,7 @@
+ 	
+ 	if [ "$PURGE" = "yes" -a -e "$NX_HOME_DIR" ]
+ 	then
+-		echo -n "Removing nx home directory ..."
++		echo -n "Removing home directory of special user \"nx\" ..."
+ 		rm -f -r "$NX_HOME_DIR" 2>/dev/null
+ 		rmdir -p $(dirname "$NX_HOME_DIR") 2>/dev/null
+ 		echo "done"
+@@ -439,8 +439,8 @@
+ 		if [ "$ENABLE_USER_DB" = "1" ]
+ 		then
+ 			echo "  Users will be able to login with their normal passwords,"
+-			echo "  but they have to be registered in the nx database to do so."
+-			echo "  To add new users to the nx database do:"
++			echo "  but they have to be registered in the NX database to do so."
++			echo "  To add new users to the NX user database do:"
+ 			echo "    nxserver --adduser <username>"
+ 		else
+ 			echo "  All users will be able to login with their normal passwords."
+@@ -461,9 +461,9 @@
+ 		fi
+ 	else
+ 		echo "PAM authentication disabled."
+-		echo "  Only users in the nx database will be able to log in."
++		echo "  Only users in the NX user database will be able to log in."
+ 		echo
+-		echo "  To add new users to the nx database do:"
++		echo "  To add new users to the NX user database do:"
+ 		echo "    nxserver --adduser <username>"
+ 		echo "  Afterwards change the password with:"
+ 		echo "    nxserver --passwd <username>"
+@@ -495,10 +495,10 @@
+ 	echo 
+ 	if [ "$PURGE" = "yes" ]
+ 	then
+-		echo "To complete the uninstallation process, remove the nx scripts in $PATH_BIN"
++		echo "To complete the uninstallation process, remove the FreeNX scripts in $PATH_BIN"
+ 		echo "and the $NX_ETC_DIR/node.conf configuration file."
+ 	else
+-		echo "To complete the uninstallation process, remove the nx scripts in $PATH_BIN"
++		echo "To complete the uninstallation process, remove the FreeNX scripts in $PATH_BIN"
+ 		echo
+ 		echo "Configuration files and ssh keys are saved in case you would like to reinstall"
+ 		echo "freenx at a later time. To remove them, please run 'nxsetup --uninstall --purge'"
+
+
+
+From pipitas at berlios.de  Fri Sep  2 22:28:10 2005
+From: pipitas at berlios.de (Kurt Pfeifle at BerliOS)
+Date: Fri, 2 Sep 2005 22:28:10 +0200
+Subject: [Freenx-cvs] r156 - freenx-server/branches/FreeNX-0.4
+Message-ID: <200509022028.j82KSArU025361@sheep.berlios.de>
+
+Author: pipitas
+Date: 2005-09-02 22:28:09 +0200 (Fri, 02 Sep 2005)
+New Revision: 156
+
+Modified:
+   freenx-server/branches/FreeNX-0.4/nxsetup
+Log:
+formatting fix (split long line into two)
+
+
+Modified: freenx-server/branches/FreeNX-0.4/nxsetup
+===================================================================
+--- freenx-server/branches/FreeNX-0.4/nxsetup	2005-09-02 20:18:07 UTC (rev 155)
++++ freenx-server/branches/FreeNX-0.4/nxsetup	2005-09-02 20:28:09 UTC (rev 156)
+@@ -90,7 +90,9 @@
+ 	echo "                         own _commercial_ ssh2-key is not supported!"
+ 	echo "  --uid <number>         Give the uid <number> to the user \"nx\"."
+ 	echo "  --gid <number>         Give the gid <number> to the user \"nx\"."
+-	[ -n "$LOCAL_USER_OPTION" ] && echo "  --localuser            The special user \"nx\" will be created locally using luseradd, for use in NIS and NISplus environments."
++	[ -n "$LOCAL_USER_OPTION" ] && \
++	echo "  --localuser            The special user \"nx\" will be created locally using"
++	echo "                         \"luseradd\", for use in NIS and NISplus environments."
+ 	echo "  --clean                Perform an uninstallation prior to installation."
+ 	echo "  --uninstall            Remove log and session files, as well as the special"
+ 	echo "                         user \"nx\"."
+
+
+
+From fabianx at berlios.de  Sat Sep  3 19:37:26 2005
+From: fabianx at berlios.de (Fabian Franz at BerliOS)
+Date: Sat, 3 Sep 2005 19:37:26 +0200
+Subject: [Freenx-cvs] r157 - / freenx-website/intern/press
+Message-ID: <200509031737.j83HbQcL003658@sheep.berlios.de>
+
+Author: fabianx
+Date: 2005-09-03 19:37:12 +0200 (Sat, 03 Sep 2005)
+New Revision: 157
+
+Modified:
+   /
+   freenx-website/intern/press/akademy-release.txt
+Log:
+Minor fixes.
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:161
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:176
+
+Modified: freenx-website/intern/press/akademy-release.txt
+===================================================================
+--- freenx-website/intern/press/akademy-release.txt	2005-09-02 20:28:09 UTC (rev 156)
++++ freenx-website/intern/press/akademy-release.txt	2005-09-03 17:37:12 UTC (rev 157)
+@@ -23,13 +23,13 @@
+ ====================================================================
+ 
+ * a travelling salesman can access his own desktop (at home or at his
+-  offic) from the hotel room, using a modem (or better) connection.
++  office) from the hotel room, using a modem (or better) connection.
+ 
+ * a helpdesk technician can display any GUI application of a LAN user
+   to his own screen and help to properly set up its configuration or
+   troubleshoot it.
+ 
+-* a university system administrator can set up a cost efficient and
++* a university system administrator can set up a cost efficient
+   Linux Desktop Application Server for students to connect to from
+   classes or from home.
+ 
+@@ -47,7 +47,7 @@
+ 
+ The FreeNX remote desktop server software *requires* the NX Core 
+ components developed by NoMachine.com who have released that source
+-code under the GPL license. 
++code under the GPL license.
+ 
+ The NoMachine source code needs to be compiled for your platform by 
+ yourself or by your Linux distribution so that FreeNX can work. 
+@@ -77,7 +77,7 @@
+ 
+ And last but not least:
+ 
+-* FreeNX 0.5.0 ships with the first official FreeNX background picture
++* FreeNX 0.4.5 ships with the first official FreeNX background picture
+   (useful as a wallpaper)
+ 
+ 
+
+
+
+From fabianx at berlios.de  Sat Sep  3 20:21:56 2005
+From: fabianx at berlios.de (Fabian Franz at BerliOS)
+Date: Sat, 3 Sep 2005 20:21:56 +0200
+Subject: [Freenx-cvs] r158 - / freenx-server/branches/FreeNX-0.4
+Message-ID: <200509031821.j83ILugd010220@sheep.berlios.de>
+
+Author: fabianx
+Date: 2005-09-03 20:21:54 +0200 (Sat, 03 Sep 2005)
+New Revision: 158
+
+Modified:
+   /
+   freenx-server/branches/FreeNX-0.4/nxloadconfig
+Log:
+Fixed version number for aKademy release.
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:176
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:178
+
+Modified: freenx-server/branches/FreeNX-0.4/nxloadconfig
+===================================================================
+--- freenx-server/branches/FreeNX-0.4/nxloadconfig	2005-09-03 17:37:12 UTC (rev 157)
++++ freenx-server/branches/FreeNX-0.4/nxloadconfig	2005-09-03 18:21:54 UTC (rev 158)
+@@ -52,7 +52,7 @@
+ # DO NOT TOUCH unless you REALLY know what you are doing
+ #########################################################################
+ 
+-NX_VERSION=1.4.0-04-CVS
++NX_VERSION=1.4.0-45-SVN
+ NX_LICENSE="OS (GPL)"
+ 
+ # Where can different nx components be found
+
+
+
+From fabianx at berlios.de  Sat Sep  3 20:22:44 2005
+From: fabianx at berlios.de (Fabian Franz at BerliOS)
+Date: Sat, 3 Sep 2005 20:22:44 +0200
+Subject: [Freenx-cvs] r159 - / freenx-server/branches/FreeNX-0.4
+Message-ID: <200509031822.j83IMiao010292@sheep.berlios.de>
+
+Author: fabianx
+Date: 2005-09-03 20:22:43 +0200 (Sat, 03 Sep 2005)
+New Revision: 159
+
+Modified:
+   /
+   freenx-server/branches/FreeNX-0.4/ChangeLog
+Log:
+Tagged release as "aKademy Edition".
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:178
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:179
+
+Modified: freenx-server/branches/FreeNX-0.4/ChangeLog
+===================================================================
+--- freenx-server/branches/FreeNX-0.4/ChangeLog	2005-09-03 18:21:54 UTC (rev 158)
++++ freenx-server/branches/FreeNX-0.4/ChangeLog	2005-09-03 18:22:43 UTC (rev 159)
+@@ -1,4 +1,4 @@
+-*****.2005 FreeNX 0.4.5 ???
++0?.09.2005 FreeNX 0.4.5 "aKademy Edition"
+ 	* Made nxsetup more user-friendly and hopefully finally failsafe.
+ 	* Added --agent to nxnode/nxserver to allow easier debugging.
+ 	* Added addgroup/groupadd to nxsetup
+
+
+
+From fabianx at berlios.de  Sun Sep  4 17:36:39 2005
+From: fabianx at berlios.de (Fabian Franz at BerliOS)
+Date: Sun, 4 Sep 2005 17:36:39 +0200
+Subject: [Freenx-cvs] r161 - / freenx-server/branches/FreeNX-0.4
+Message-ID: <200509041536.j84FadmC029190@sheep.berlios.de>
+
+Author: fabianx
+Date: 2005-09-04 17:36:37 +0200 (Sun, 04 Sep 2005)
+New Revision: 161
+
+Modified:
+   /
+   freenx-server/branches/FreeNX-0.4/nxsetup
+Log:
+Made test_nx honor the automatic flag.
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:180
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:184
+
+Modified: freenx-server/branches/FreeNX-0.4/nxsetup
+===================================================================
+--- freenx-server/branches/FreeNX-0.4/nxsetup	2005-09-03 18:24:01 UTC (rev 160)
++++ freenx-server/branches/FreeNX-0.4/nxsetup	2005-09-04 15:36:37 UTC (rev 161)
+@@ -431,7 +431,7 @@
+ 	
+ 	install_nx
+ 
+-	test_nx
++	[ "$AUTOMATIC" = "no" ] && test_nx
+ 	
+ 	echo "Ok, nxserver is ready."
+ 	echo 
+
+
+
+From fabianx at berlios.de  Sun Sep  4 17:43:22 2005
+From: fabianx at berlios.de (Fabian Franz at BerliOS)
+Date: Sun, 4 Sep 2005 17:43:22 +0200
+Subject: [Freenx-cvs] r162 - / freenx-server/trunk
+Message-ID: <200509041543.j84FhM5E030054@sheep.berlios.de>
+
+Author: fabianx
+Date: 2005-09-04 17:43:18 +0200 (Sun, 04 Sep 2005)
+New Revision: 162
+
+Modified:
+   /
+   freenx-server/trunk/
+   freenx-server/trunk/nxloadconfig
+   freenx-server/trunk/nxsetup
+Log:
+ r175 at Bluemoon:  ffranz | 2005-09-03 18:38:35 +0200
+  r137 at Bluemoon (orig r131):  svm | 2005-08-28 16:30:00 +0200
+  SVM: initializing mirror for /mirror/freenx
+  r163 at Bluemoon (orig r145):  fabianx | 2005-08-31 21:00:34 +0200
+  First draft.
+  
+  r164 at Bluemoon (orig r146):  fabianx | 2005-08-31 21:31:50 +0200
+  Fixed --ignore-errors.
+  
+  r165 at Bluemoon (orig r147):  fabianx | 2005-08-31 21:35:11 +0200
+  Made smbmount / smbumount checks optional.
+  
+  
+  r166 at Bluemoon (orig r148):  fabianx | 2005-08-31 22:06:00 +0200
+  Backup of 2nd draft.
+  
+  r167 at Bluemoon (orig r149):  fabianx | 2005-08-31 22:38:04 +0200
+  First draft ready, some statements still need to be approved.
+  
+  r168 at Bluemoon (orig r150):  fabianx | 2005-08-31 22:42:30 +0200
+  Added Martin Konold proposal quote.
+  
+  r169 at Bluemoon (orig r151):  fabianx | 2005-09-01 04:17:03 +0200
+  Test for Manke on XP.
+  
+  r170 at Bluemoon (orig r152):  fabianx | 2005-09-01 04:19:58 +0200
+  Test.
+  
+  r171 at Bluemoon (orig r153):  pipitas | 2005-09-02 10:26:20 +0200
+  2nd version; exact quotes by Coolo and Martin still missing.
+  
+  r172 at Bluemoon (orig r154):  pipitas | 2005-09-02 21:41:03 +0200
+  Fixed typos and some messages given to users. I think
+  nxsetup needs more testing. Next release should probably
+  be a "snapshot" only.
+  
+  r173 at Bluemoon (orig r155):  pipitas | 2005-09-02 22:18:07 +0200
+  A few more fixes for strings (capitalisation where appropriate, 
+  trying to avoid confusing "NX user" and a "special user named 
+  'nx'", etc.)
+  
+  
+  r174 at Bluemoon (orig r156):  pipitas | 2005-09-02 22:28:09 +0200
+  formatting fix (split long line into two)
+  
+ 
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:184
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:186
+
+
+Property changes on: freenx-server/trunk
+___________________________________________________________________
+Name: svk:merge
+   - dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx/freenx-server/branches/FreeNX-0.4:157
+   + dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx/freenx-server/branches/FreeNX-0.4:175
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2005-09-04 15:36:37 UTC (rev 161)
++++ freenx-server/trunk/nxloadconfig	2005-09-04 15:43:18 UTC (rev 162)
+@@ -452,9 +452,9 @@
+ 	! which "$COMMAND_XAUTH" >/dev/null 2>&1 && \
+ 		ERROR="yes" && echo "Error: Invalid value \"COMMAND_XAUTH=$COMMAND_XAUTH\""
+ 	! which "$COMMAND_SMBMOUNT" >/dev/null 2>&1 && \
+-		ERROR="yes" && echo "Error: Invalid value \"COMMAND_SMBMOUNT=$COMMAND_SMBMOUNT\""
++		WARNING="yes" && echo "Warning: Invalid value \"COMMAND_SMBMOUNT=$COMMAND_SMBMOUNT\". You'll not be able to use SAMBA. "
+ 	! which "$COMMAND_SMBUMOUNT" >/dev/null 2>&1 && \
+-		ERROR="yes" && echo "Error: Invalid value \"COMMAND_SMBUMOUNT=$COMMAND_SMBUMOUNT\""
++		WARNING="yes" && echo "Warning: Invalid value \"COMMAND_SMBUMOUNT=$COMMAND_SMBUMOUNT\". You'll not be able to use SAMBA."
+ 	! which "$COMMAND_NETCAT" >/dev/null 2>&1 && \
+ 		ERROR="yes" && echo "Error: Invalid value \"COMMAND_NETCAT=$COMMAND_NETCAT\""
+ 	! which "$COMMAND_SSH" >/dev/null 2>&1 && \
+
+Modified: freenx-server/trunk/nxsetup
+===================================================================
+--- freenx-server/trunk/nxsetup	2005-09-04 15:36:37 UTC (rev 161)
++++ freenx-server/trunk/nxsetup	2005-09-04 15:43:18 UTC (rev 162)
+@@ -57,11 +57,12 @@
+ if [ "$INSTALL" = "no" -a "$UNINSTALL" = "no" -a "$AUTOMATIC" = "no" -a "$HELP" = "no" ]
+ then
+ 	echo "------> You did select no action."
+-	echo "        FreeNX guesses that you want to _install_ the"
+-	echo "        server."
+-	echo "        Use --help to get help contents."
++	echo "        FreeNX guesses that you want to _install_ the server."
++	echo "        Type \"y\" to abort the installation at this point in time."
++	echo "        \"N\" is the default and continues installation."
++	echo "        Use \"${0} --help\" to get more detailed help hints."
+ 	echo ""
+-	echo -n "Do you want to abort now? [y/N] "
++	echo -n " Do you want to abort now? [y/N] "
+ 	read -n 1 CHOICE
+ 	echo
+ 	[ "$CHOICE" = "y" ] || INSTALL="yes"
+@@ -76,22 +77,28 @@
+ 	echo "        nxsetup --install [--setup-nomachine-key] [--uid <nummber>] [--clean [--purge]]"
+ 	echo "        nxsetup --uninstall [--purge]"
+ 	echo
+-	echo "  --help                 Displays this help message"
+-	echo "  --install              Install nessesary files and add the nx user"
+-	echo "	--ignore-errors	       check false configuration, but don't complain"
++	echo "  --help                 Display this help message."
++	echo "  --install              Install necessary files and add the special user \"nx\"."
++	echo "  --ignore-errors        Check for false configuration, but don't complain."
+ 	echo "  --setup-nomachine-key  Allow login with the key shipped with the NoMachine"
+-	echo "                         client. This is not as secure, but it simplifies the "
+-	echo "                         configuration of clients."
++	echo "                         client. This is fairly secure, and it simplifies the "
++	echo "                         configuration of clients. (Using a custom key pair."
++	echo "                         increases security even more, but complicates the"
++	echo "                         configuration of clients.)"
+ 	echo "                         Use this option at your own risk."
+-	echo "  --ssh2		       Additionally create commercial pubkey-support, beware"
+-	echo "			       own _commercial_ ssh2-key is not supported!."
+-	echo "  --uid <number>         The nx user will be given the uid <number>."
+-	echo "  --gid <number>         The nx user will be given the gid <number>."
+-	[ -n "$LOCAL_USER_OPTION" ] && echo "  --localuser            The nx user will be created locally using luseradd, for use in NIS and NISplus environments."
+-	echo "  --clean                Performs an uninstall prior to the installation"
+-	echo "  --uninstall            Remove log and session files, as well as the nx user"
+-	echo "  --purge                Uninstall will remove extra configuration files and ssh"
+-	echo "                         keys as well. Note that node.conf will always be saved."
++	echo "  --ssh2                 Create additionally commercial pubkey-support; beware:"
++	echo "                         own _commercial_ ssh2-key is not supported!"
++	echo "  --uid <number>         Give the uid <number> to the user \"nx\"."
++	echo "  --gid <number>         Give the gid <number> to the user \"nx\"."
++	[ -n "$LOCAL_USER_OPTION" ] && \
++	echo "  --localuser            The special user \"nx\" will be created locally using"
++	echo "                         \"luseradd\", for use in NIS and NISplus environments."
++	echo "  --clean                Perform an uninstallation prior to installation."
++	echo "  --uninstall            Remove log and session files, as well as the special"
++	echo "                         user \"nx\"."
++	echo "  --purge                Remove extra configuration files and ssh keys when"
++	echo "                         performing a \"--uninstall\"."
++	echo "                         Note that node.conf will always be saved."
+ 	exit 0
+ fi
+ #Undocumented
+@@ -109,10 +116,11 @@
+ if [ "$INSTALL" = "yes" -a "$AUTOMATIC" = "no" -a "$SETUP_NOMACHINE_KEY" = "no" ]
+ then
+ 	echo "------> It is recommended that you use the NoMachine key for"
+-	echo "        easier setup. At the moment FreeNX would create a custom"
+-	echo "        KeyPair and expect you to setup your clients manually. "
++	echo "        easier setup. If you answer \"y\", FreeNX creates a custom"
++	echo "        KeyPair and expects you to setup your clients manually. "
++	echo "        \"N\" is default and uses the NoMachine key for installation."
+ 	echo ""
+-	echo -n "        Do you really want to use your own keys? [y/N] "
++	echo -n " Do you want to use your own custom KeyPair? [y/N] "
+ 	read -n 1 CHOICE
+ 	[ "$CHOICE" = "y" ] || SETUP_NOMACHINE_KEY="yes"
+ fi
+@@ -226,7 +234,7 @@
+ 	
+ 	if ! nx_user_exists
+ 	then
+-		echo -n "Setting up user nx ..."
++		echo -n "Setting up special user \"nx\" ..."
+ 		useradd_nx
+ 		echo "done"
+ 	fi
+@@ -325,7 +333,7 @@
+ {
+ 	echo ""
+ 	echo "----> Testing your nxserver configuration ..."
+-	[ "$IGNORE_ERRORS" = "yes" ] && $NO_ERRORS="--ignore-errors"
++	[ "$IGNORE_ERRORS" = "yes" ] && NO_ERRORS="--ignore-errors"
+ 	. $(PATH=$(cd $(dirname $0) && pwd):$PATH which nxloadconfig) --check $NO_ERRORS
+ 	echo "<---- done"
+ 	echo ""
+@@ -354,7 +362,7 @@
+ 		echo 
+ 		echo "Please check your ssh setup:"
+ 		echo ""
+-		echo "	- Make sure nx is one of the AllowUsers in sshd_config."
++		echo "	- Make sure \"nx\" is one of the AllowUsers in sshd_config."
+ 		echo "	- Make sure your sshd allows public key authentication."
+ 		echo "	- Make sure your sshd is really running on port $SSHD_PORT."
+ 		echo "	- Make sure your sshd_config AuthorizedKeysFile in sshd_config is set to $SSH_AUTHORIZED_KEYS."
+@@ -368,7 +376,7 @@
+ {
+ 	if nx_user_exists
+ 	then
+-		echo -n "Removing user nx ..."
++		echo -n "Removing special user \"nx\" ..."
+ 		
+ 		if [ "$SETUP_LOCAL_USER" = "yes" ]
+ 		then
+@@ -398,7 +406,7 @@
+ 	
+ 	if [ "$PURGE" = "yes" -a -e "$NX_HOME_DIR" ]
+ 	then
+-		echo -n "Removing nx home directory ..."
++		echo -n "Removing home directory of special user \"nx\" ..."
+ 		rm -f -r "$NX_HOME_DIR" 2>/dev/null
+ 		rmdir -p $(dirname "$NX_HOME_DIR") 2>/dev/null
+ 		echo "done"
+@@ -433,8 +441,8 @@
+ 		if [ "$ENABLE_USER_DB" = "1" ]
+ 		then
+ 			echo "  Users will be able to login with their normal passwords,"
+-			echo "  but they have to be registered in the nx database to do so."
+-			echo "  To add new users to the nx database do:"
++			echo "  but they have to be registered in the NX database to do so."
++			echo "  To add new users to the NX user database do:"
+ 			echo "    nxserver --adduser <username>"
+ 		else
+ 			echo "  All users will be able to login with their normal passwords."
+@@ -455,9 +463,9 @@
+ 		fi
+ 	else
+ 		echo "PAM authentication disabled."
+-		echo "  Only users in the nx database will be able to log in."
++		echo "  Only users in the NX user database will be able to log in."
+ 		echo
+-		echo "  To add new users to the nx database do:"
++		echo "  To add new users to the NX user database do:"
+ 		echo "    nxserver --adduser <username>"
+ 		echo "  Afterwards change the password with:"
+ 		echo "    nxserver --passwd <username>"
+@@ -489,10 +497,10 @@
+ 	echo 
+ 	if [ "$PURGE" = "yes" ]
+ 	then
+-		echo "To complete the uninstallation process, remove the nx scripts in $PATH_BIN"
++		echo "To complete the uninstallation process, remove the FreeNX scripts in $PATH_BIN"
+ 		echo "and the $NX_ETC_DIR/node.conf configuration file."
+ 	else
+-		echo "To complete the uninstallation process, remove the nx scripts in $PATH_BIN"
++		echo "To complete the uninstallation process, remove the FreeNX scripts in $PATH_BIN"
+ 		echo
+ 		echo "Configuration files and ssh keys are saved in case you would like to reinstall"
+ 		echo "freenx at a later time. To remove them, please run 'nxsetup --uninstall --purge'"
+
+
+
+From fabianx at berlios.de  Sun Sep  4 17:43:41 2005
+From: fabianx at berlios.de (Fabian Franz at BerliOS)
+Date: Sun, 4 Sep 2005 17:43:41 +0200
+Subject: [Freenx-cvs] r163 - / freenx-server/trunk
+Message-ID: <200509041543.j84FhfS9030185@sheep.berlios.de>
+
+Author: fabianx
+Date: 2005-09-04 17:43:40 +0200 (Sun, 04 Sep 2005)
+New Revision: 163
+
+Modified:
+   /
+   freenx-server/trunk/
+Log:
+ r178 at Bluemoon:  ffranz | 2005-09-03 19:45:19 +0200
+ Fixed version number for aKademy release.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:186
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:187
+
+
+Property changes on: freenx-server/trunk
+___________________________________________________________________
+Name: svk:merge
+   - dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx/freenx-server/branches/FreeNX-0.4:175
+   + dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx/freenx-server/branches/FreeNX-0.4:178
+
+
+
+From fabianx at berlios.de  Sun Sep  4 17:44:00 2005
+From: fabianx at berlios.de (Fabian Franz at BerliOS)
+Date: Sun, 4 Sep 2005 17:44:00 +0200
+Subject: [Freenx-cvs] r164 - / freenx-server/trunk
+Message-ID: <200509041544.j84Fi0lO030248@sheep.berlios.de>
+
+Author: fabianx
+Date: 2005-09-04 17:43:58 +0200 (Sun, 04 Sep 2005)
+New Revision: 164
+
+Modified:
+   /
+   freenx-server/trunk/
+   freenx-server/trunk/ChangeLog
+Log:
+ r179 at Bluemoon:  ffranz | 2005-09-03 19:46:23 +0200
+ Tagged release as "aKademy Edition".
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:187
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:188
+
+
+Property changes on: freenx-server/trunk
+___________________________________________________________________
+Name: svk:merge
+   - dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx/freenx-server/branches/FreeNX-0.4:178
+   + dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx/freenx-server/branches/FreeNX-0.4:179
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2005-09-04 15:43:40 UTC (rev 163)
++++ freenx-server/trunk/ChangeLog	2005-09-04 15:43:58 UTC (rev 164)
+@@ -4,7 +4,7 @@
+ 	* Completely removed support for 1.4.0 backend.
+ 	* Rootless mode is now the default.
+ 
+-*****.2005 FreeNX 0.4.5 ???
++0?.09.2005 FreeNX 0.4.5 "aKademy Edition"
+ 	* Made nxsetup more user-friendly and hopefully finally failsafe.
+ 	* Added --agent to nxnode/nxserver to allow easier debugging.
+ 	* Added addgroup/groupadd to nxsetup
+
+
+
+From fabianx at berlios.de  Sun Sep  4 17:44:20 2005
+From: fabianx at berlios.de (Fabian Franz at BerliOS)
+Date: Sun, 4 Sep 2005 17:44:20 +0200
+Subject: [Freenx-cvs] r165 - / freenx-server/trunk
+Message-ID: <200509041544.j84FiKOL030309@sheep.berlios.de>
+
+Author: fabianx
+Date: 2005-09-04 17:44:18 +0200 (Sun, 04 Sep 2005)
+New Revision: 165
+
+Modified:
+   /
+   freenx-server/trunk/
+   freenx-server/trunk/nxsetup
+Log:
+ r184 at Bluemoon:  ffranz | 2005-09-04 17:36:32 +0200
+ Made test_nx honor the automatic flag.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:188
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:189
+
+
+Property changes on: freenx-server/trunk
+___________________________________________________________________
+Name: svk:merge
+   - dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx/freenx-server/branches/FreeNX-0.4:179
+   + dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx/freenx-server/branches/FreeNX-0.4:184
+
+Modified: freenx-server/trunk/nxsetup
+===================================================================
+--- freenx-server/trunk/nxsetup	2005-09-04 15:43:58 UTC (rev 164)
++++ freenx-server/trunk/nxsetup	2005-09-04 15:44:18 UTC (rev 165)
+@@ -431,7 +431,7 @@
+ 	
+ 	install_nx
+ 
+-	test_nx
++	[ "$AUTOMATIC" = "no" ] && test_nx
+ 	
+ 	echo "Ok, nxserver is ready."
+ 	echo 
+
+
+
+From pipitas at berlios.de  Sun Sep  4 22:58:13 2005
+From: pipitas at berlios.de (Kurt Pfeifle at BerliOS)
+Date: Sun, 4 Sep 2005 22:58:13 +0200
+Subject: [Freenx-cvs] r166 - freenx-website/intern/press
+Message-ID: <200509042058.j84KwDjt032433@sheep.berlios.de>
+
+Author: pipitas
+Date: 2005-09-04 22:58:11 +0200 (Sun, 04 Sep 2005)
+New Revision: 166
+
+Modified:
+   freenx-website/intern/press/akademy-release.txt
+Log:
+removed Coolo's "quote" for now
+
+
+Modified: freenx-website/intern/press/akademy-release.txt
+===================================================================
+--- freenx-website/intern/press/akademy-release.txt	2005-09-04 15:44:18 UTC (rev 165)
++++ freenx-website/intern/press/akademy-release.txt	2005-09-04 20:58:11 UTC (rev 166)
+@@ -88,20 +88,15 @@
+ easy to use and it is blazingly fast. I was working here from Spain 
+ on my home machine in Germany without any problems."
+ 
+-Stephan Kulow (KDE 3.5 Release Coordinator) was using it since Day 2 
+-of aKademy: ["I was working in my company all day long once I had it 
+-installed".]
+-
+ Martin Konold (architect of the Kolab groupware server which already 
+-successfully replaced several MS Exchange installations) told us this: 
+-["The upcoming NX4Myhome which I had the pleasure to preview, will help 
+-FreeNX to conquer the market of ssh-X. FreeNX is just so much faster. 
+-I compared the output of a big textfile via cat, NX was 3 times as 
+-fast than a normal ssh connection."]
++successfully replaced several MS Exchange installations) told us this,
++after having seen a preview of NX4MyHome: "I am deeply impressed by 
++the ease of use and the performance of NX4Myhome. FreeNX manages to 
++do the impossible: it even speeds up command line operations by a 
++factor of three or more while offering the same security as ssh with 
++full suspend and resume functionality."
+ 
+-[FIXME: More statements?]
+ 
+-
+ Now let us give you some details about the new release:
+ 
+ 
+@@ -116,13 +111,13 @@
+ 
+ Important changes compared to previous releases:
+ 
+-* since "nxsetup" is now interactive, there is a "--auto" commandline 
+-  parameter to support the old behaviour you may be accustomed to
++* since "nxsetup" is now interactive, we added an "--auto" commandline 
++  parameter to support the old behaviour you may be accustomed to;
+ * since "nxsetup" now uses the NoMachine key by default, the user 
+-  installing FreeNX has to confirm its use
++  installing FreeNX has to confirm its use;
+ * since "nxsetup" now checks for a correct configuration file, there is 
+   a "--ignore-errors" commandline parameter to continue nxsetup even 
+-  if the check fails
++  if the check fails;
+ * since "nxsetup" now runs an automatic self-test, it also reminds the 
+   user of some common pitfalls.
+ 
+
+
+

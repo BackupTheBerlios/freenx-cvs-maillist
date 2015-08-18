@@ -1,0 +1,304 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r454 - nxcl/lib
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r454%20-%20nxcl/lib&In-Reply-To=%3C200801300645.m0U6jdTV016343%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000579.html">
+   <LINK REL="Next"  HREF="000581.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r454 - nxcl/lib</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r454%20-%20nxcl/lib&In-Reply-To=%3C200801300645.m0U6jdTV016343%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r454 - nxcl/lib">gwright at mail.berlios.de
+       </A><BR>
+    <I>Wed Jan 30 07:45:39 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000579.html">[Freenx-cvs] r453 - qtnx
+</A></li>
+        <LI>Next message: <A HREF="000581.html">[Freenx-cvs] r455 - nxcl
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#580">[ date ]</a>
+              <a href="thread.html#580">[ thread ]</a>
+              <a href="subject.html#580">[ subject ]</a>
+              <a href="author.html#580">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2008-01-30 07:45:39 +0100 (Wed, 30 Jan 2008)
+New Revision: 454
+
+Modified:
+   nxcl/lib/nxclientlib.cpp
+   nxcl/lib/nxclientlib.h
+Log:
+Fix X11 loading on OS X
+
+
+Modified: nxcl/lib/nxclientlib.cpp
+===================================================================
+--- nxcl/lib/nxclientlib.cpp	2008-01-30 06:45:12 UTC (rev 453)
++++ nxcl/lib/nxclientlib.cpp	2008-01-30 06:45:39 UTC (rev 454)
+@@ -153,13 +153,13 @@
+ 
+     this-&gt;pNxsshProcess = &amp;this-&gt;nxsshProcess;
+     this-&gt;pNxproxyProcess = &amp;this-&gt;nxproxyProcess;
+-    this-&gt;pNxwinProcess = &amp;this-&gt;nxwinProcess;
++    this-&gt;pX11Process = &amp;this-&gt;x11Process;
+     this-&gt;pNxauthProcess = &amp;this-&gt;nxauthProcess;
+ 
+     /* Set up callback pointers */
+     this-&gt;nxsshProcess.setCallbacks (&amp;callbacks);
+     this-&gt;nxproxyProcess.setCallbacks (&amp;callbacks);
+-    this-&gt;nxwinProcess.setCallbacks (&amp;callbacks);
++    this-&gt;x11Process.setCallbacks (&amp;callbacks);
+     this-&gt;nxauthProcess.setCallbacks (&amp;callbacks);
+     this-&gt;session.setCallbacks (&amp;callbacks);
+     this-&gt;callbacks.setParent (this);
+@@ -246,10 +246,6 @@
+     // Find a path for the nxssh process using getPath()
+     string nxsshPath = this-&gt;getPath (&quot;nxssh&quot;);
+ 
+-#ifdef NXCL_DARWIN
+-    nxsshPath = &quot;open-x11&quot;;
+-#endif
+-
+     this-&gt;nxsshProcess.start(nxsshPath, arguments);
+ 
+     if (this-&gt;nxsshProcess.waitForStarted() == false) {
+@@ -608,7 +604,7 @@
+     this-&gt;externalCallbacks-&gt;write
+         (NXCL_INVOKE_PROXY, _(&quot;Starting NX session&quot;));
+ 
+-#ifdef NXCL_CYGWIN
++#if NXCL_CYGWIN
+     NXSessionData* sessionData = getSession()-&gt;getSessionData();
+ 
+     stringstream resolution;
+@@ -621,6 +617,32 @@
+     startX11(resolution.str(), &quot;&quot;);
+ #endif
+ 
++#if NXCL_DARWIN
++    // Let's run open -a X11 to fire up X
++    list&lt;string&gt; x11Arguments;
++
++    x11Arguments.push_back(&quot;open&quot;);
++    x11Arguments.push_back(&quot;-a&quot;);
++    x11Arguments.push_back(&quot;X11&quot;);
++
++    string openPath = this-&gt;getPath(&quot;open&quot;);
++    
++    this-&gt;x11Process.start(openPath, x11Arguments);
++
++    this-&gt;x11Probe = true;
++    
++    if (this-&gt;x11Process.waitForStarted() == false) {
++        this-&gt;externalCallbacks-&gt;write
++            (NXCL_PROCESS_ERROR, _(&quot;Error starting X11!&quot;));
++        this-&gt;isFinished = true;
++    }
++    
++    this-&gt;x11Probe = false;
++
++    // Horrendous hack - must fix
++    for (int i = 0; i &lt; 32768; i++) {};
++#endif
++
+     int e;
+     char * home;
+ 
+@@ -660,9 +682,16 @@
+         }
+     }
+ 
++    string x11Display = &quot;&quot;;
++
++#if NXCL_DARWIN
++    x11Display = &quot;,display=:0.0&quot;;
++#endif
++
+     stringstream data;
++ 
+     if (proxyData.encrypted) {
+-        data &lt;&lt; &quot;nx/nx,session=session,encryption=1,cookie=&quot;
++        data &lt;&lt; &quot;nx/nx&quot; &lt;&lt; x11Display &lt;&lt; &quot;,session=session,encryption=1,cookie=&quot;
+             &lt;&lt; proxyData.cookie
+             &lt;&lt; &quot;,root=&quot; &lt;&lt; home &lt;&lt; &quot;/.nx&quot;
+             &lt;&lt; &quot;,id=&quot; &lt;&lt; proxyData.id &lt;&lt; &quot;,listen=&quot; 
+@@ -671,10 +700,11 @@
+ 
+     } else {
+         // Not tested yet
+-        data &lt;&lt; &quot;nx,session=session,cookie=&quot; &lt;&lt; proxyData.cookie
++        data &lt;&lt; &quot;nx/nx&quot; &lt;&lt; x11Display &lt;&lt; &quot;,session=session,cookie=&quot; &lt;&lt; proxyData.cookie
+             &lt;&lt; &quot;,root=&quot; &lt;&lt; home
+             &lt;&lt; &quot;/.nx,id=&quot; &lt;&lt; proxyData.id
+-            &lt;&lt; &quot;,connect=&quot; &lt;&lt; proxyData.server &lt;&lt; &quot;:&quot; &lt;&lt; proxyData.display
++            // &lt;&lt; &quot;,connect=&quot; &lt;&lt; proxyData.server &lt;&lt; &quot;:&quot; &lt;&lt; proxyData.display
++            &lt;&lt; &quot;,listen=&quot; &lt;&lt; proxyData.port &lt;&lt; &quot;:&quot; &lt;&lt; proxyData.display
+             &lt;&lt; &quot;\n&quot;;
+     }
+ 
+@@ -687,9 +717,6 @@
+ 
+     // Build arguments for the call to the nxproxy command
+     list&lt;string&gt; arguments;
+-#ifdef NXCL_DARWIN
+-    arguments.push_back(&quot;open-x11&quot;); // We open X11 apps on OS X with this script
+-#endif
+     arguments.push_back(&quot;nxproxy&quot;); // argv[0] has to be the program name
+     arguments.push_back(&quot;-S&quot;);
+     ss.str(&quot;&quot;);
+@@ -710,7 +737,7 @@
+ 
+ void NXClientLib::startX11 (string resolution, string name)
+ {
+-#ifdef NXCL_CYGWIN
++#if NXCL_CYGWIN
+     // Invoke NXWin.exe on Windows machines
+ 
+     // See if XAUTHORITY path is set
+@@ -807,9 +834,9 @@
+         dimensions = strtok(NULL, &quot;x&quot;);
+     }
+ 
+-    this-&gt;nxwinProcess.start(&quot;nxwin&quot;, nxwinArguments);
++    this-&gt;x11Process.start(&quot;nxwin&quot;, nxwinArguments);
+ 
+-    if (this-&gt;nxwinProcess.waitForStarted() == false) {
++    if (this-&gt;x11Process.waitForStarted() == false) {
+         this-&gt;externalCallbacks-&gt;write
+             (NXCL_PROCESS_ERROR, _(&quot;Error starting nxwin!&quot;));
+         this-&gt;isFinished = true;
+@@ -839,6 +866,19 @@
+         return prog;
+     }
+ 
++    // We'll check the custom search path first
++    stringstream pathTest;
++    pathTest &lt;&lt; customPath &lt;&lt; &quot;/&quot; &lt;&lt; prog;
++
++    memset (buf, 0, sizeof(struct stat));
++    stat (pathTest.str().c_str(), buf);
++
++    if (S_ISREG (buf-&gt;st_mode) || S_ISLNK (buf-&gt;st_mode)) {
++        // Found in custom path
++        free(buf);
++        return pathTest.str();
++    }
++
+     path = PACKAGE_BIN_DIR&quot;/&quot; + prog;
+     memset (buf, 0, sizeof(struct stat));
+     stat (path.c_str(), buf);
+
+Modified: nxcl/lib/nxclientlib.h
+===================================================================
+--- nxcl/lib/nxclientlib.h	2008-01-30 06:45:12 UTC (rev 453)
++++ nxcl/lib/nxclientlib.h	2008-01-30 06:45:39 UTC (rev 454)
+@@ -186,6 +186,14 @@
+             void write (string data);
+ 
+             /*!
++             * Sets a custom binary search path
++             */
++            void setCustomPath(string path)
++            {
++                this-&gt;customPath = path;
++            }
++            
++            /*!
+              * Passes auth to this-&gt;session.setContinue()
+              */
+             void allowSSHConnect (bool auth);
+@@ -232,8 +240,13 @@
+ 
+             void runSession (void);
+ 
+-	    void startX11(string resolution, string name);
++            void startX11 (string resolution, string name);
+ 
++            bool needX11Probe (void)
++            {
++                return x11Probe;
++            }
++            
+             // public slots:
+             //@{
+             void doneAuth (void);
+@@ -308,9 +321,9 @@
+                 return this-&gt;pNxproxyProcess;
+             }
+ 
+-	    notQProcess* getNXWinProcess (void)
+-	    {
+-                return this-&gt;pNxwinProcess;
++            notQProcess* getX11Process (void)
++            {
++                return this-&gt;pX11Process;
+             }
+ 
+             notQProcess* getNXAuthProcess (void)
+@@ -362,6 +375,12 @@
+             string getPath (string prog);
+ 
+             /*!
++             * Custom search path
++             */
++            string customPath;
++
++            bool x11Probe;
++            /*!
+              * Set true when the program is ready to end, e.g if
+              * authentication failed, nxssh failed to start amoung
+              * other reasons.
+@@ -401,10 +420,10 @@
+             notQProcess nxproxyProcess;
+             notQProcess* pNxproxyProcess;
+             /*!
+-             * The nxwin process object
++             * The X11 process object
+              */
+-            notQProcess nxwinProcess;
+-            notQProcess* pNxwinProcess;
++            notQProcess x11Process;
++            notQProcess* pX11Process;
+             /*!
+              * The nxauth process object
+              */
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000579.html">[Freenx-cvs] r453 - qtnx
+</A></li>
+	<LI>Next message: <A HREF="000581.html">[Freenx-cvs] r455 - nxcl
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#580">[ date ]</a>
+              <a href="thread.html#580">[ thread ]</a>
+              <a href="subject.html#580">[ subject ]</a>
+              <a href="author.html#580">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

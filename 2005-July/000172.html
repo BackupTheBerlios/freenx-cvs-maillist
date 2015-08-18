@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r72 - in nx-utils: . nxpublickey
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-July/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r72%20-%20in%20nx-utils%3A%20.%20nxpublickey&In-Reply-To=%3C200507050031.j650V7VN017334%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000171.html">
+   <LINK REL="Next"  HREF="000173.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r72 - in nx-utils: . nxpublickey</H1>
+    <B>Fabian Franz at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r72%20-%20in%20nx-utils%3A%20.%20nxpublickey&In-Reply-To=%3C200507050031.j650V7VN017334%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r72 - in nx-utils: . nxpublickey">fabianx at berlios.de
+       </A><BR>
+    <I>Tue Jul  5 02:31:07 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000171.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+        <LI>Next message: <A HREF="000173.html">[Freenx-cvs] CVS: freenx - fabianx modified node.conf.sample
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#172">[ date ]</a>
+              <a href="thread.html#172">[ thread ]</a>
+              <a href="subject.html#172">[ subject ]</a>
+              <a href="author.html#172">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2005-07-05 02:30:22 +0200 (Tue, 05 Jul 2005)
+New Revision: 72
+
+Added:
+   nx-utils/nxpublickey/
+   nx-utils/nxpublickey/allow_agent_forwarding_with_B.diff
+   nx-utils/nxpublickey/nxssh
+Log:
+Initial import into SVN.
+
+
+Added: nx-utils/nxpublickey/allow_agent_forwarding_with_B.diff
+===================================================================
+--- nx-utils/nxpublickey/allow_agent_forwarding_with_B.diff	2005-07-03 18:28:57 UTC (rev 71)
++++ nx-utils/nxpublickey/allow_agent_forwarding_with_B.diff	2005-07-05 00:30:22 UTC (rev 72)
+@@ -0,0 +1,13 @@
++--- channels.c.old	2005-07-05 02:22:18.000000000 +0200
+++++ channels.c	2005-07-05 02:14:06.000000000 +0200
++@@ -3098,6 +3098,10 @@
++ 
++ int nx_check_channel_input(Channel *channel, char *data, int *length, int limit)
++ {
+++	if (strcmp(channel-&gt;ctype,&quot;authentication agent connection&quot;)==0)
+++		return 0;
+++		
+++	
++         debug(&quot;NX&gt; 285 Going to check input for descriptor: %d&quot;, channel-&gt;rfd);
++ 
++         /*
+
+Added: nx-utils/nxpublickey/nxssh
+===================================================================
+--- nx-utils/nxpublickey/nxssh	2005-07-03 18:28:57 UTC (rev 71)
++++ nx-utils/nxpublickey/nxssh	2005-07-05 00:30:22 UTC (rev 72)
+@@ -0,0 +1,56 @@
++#!/bin/bash
++#
++# Simple wrapper for nxssh.
++#
++# Copyright (c) 2005 by Fabian Franz.
++#
++# License: GPL
++#
++
++# unset them first to avoid that we forward a &quot;secret&quot; key to the remote host
++unset SSH_AGENT_PID SSH_AUTH_SOCK
++
++NXSSH_REMOTE_HOST=&quot;$HOME/.ssh/nx/&quot;$(echo &quot;$@&quot; | sed 's/.*nx@//g' | cut -d&quot; &quot; -f1)&quot;&quot;
++
++# Are there keys for this server?
++
++if [ -e &quot;$NXSSH_REMOTE_HOST&quot; ]
++then
++	export SSH_AUTH_SOCK=&quot;$NXSSH_REMOTE_HOST.sock&quot;
++	set -- &quot;$@&quot; -o &quot;ForwardAgent yes&quot;
++
++	# Check if there is already an agent running for this host
++
++	if [ -S &quot;$SSH_AUTH_SOCK&quot; ]
++	then
++		NXSSH_AGENT=&quot;yes&quot;
++		# Is it still alive?
++		ssh-add -l &gt;/dev/null 2&gt;/dev/null 
++		[ $? -eq 2 ] &amp;&amp; rm -f &quot;$SSH_AUTH_SOCK&quot;
++	fi
++
++	# So lets start one
++	if [ ! -S &quot;$SSH_AUTH_SOCK&quot; ]
++	then
++		ssh-agent -a &quot;$SSH_AUTH_SOCK&quot; &gt;/dev/null 2&gt;/dev/null
++
++		# Setup secret key(s)
++		if [ -d &quot;$NXSSH_REMOTE_HOST&quot; ]
++		then
++		(
++		
++			cd $NXSSH_REMOTE_HOST; 
++			for i in $(echo *)
++			do
++				[ -f $i ] || continue
++				ssh-add &quot;$NXSSH_REMOTE_HOST/$i&quot; &lt;/dev/null &gt;/dev/null 2&gt;/dev/null
++			done
++		
++		)
++		else
++			ssh-add &quot;$NXSSH_REMOTE_HOST&quot; &lt;/dev/null &gt;/dev/null 2&gt;/dev/null
++		fi
++	fi
++fi
++
++exec $(dirname $0)/nxssh.orig &quot;$@&quot;
+
+
+Property changes on: nx-utils/nxpublickey/nxssh
+___________________________________________________________________
+Name: svn:executable
+   + 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000171.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+	<LI>Next message: <A HREF="000173.html">[Freenx-cvs] CVS: freenx - fabianx modified node.conf.sample
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#172">[ date ]</a>
+              <a href="thread.html#172">[ thread ]</a>
+              <a href="subject.html#172">[ subject ]</a>
+              <a href="author.html#172">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,101 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r427 - nxcl/lib
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-December/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r427%20-%20nxcl/lib&In-Reply-To=%3C200712182047.lBIKlNFK018197%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r427 - nxcl/lib</H1>
+    <B>sebjames at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r427%20-%20nxcl/lib&In-Reply-To=%3C200712182047.lBIKlNFK018197%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r427 - nxcl/lib">sebjames at mail.berlios.de
+       </A><BR>
+    <I>Tue Dec 18 21:47:23 CET 2007</I>
+    <P><UL>
+        
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#555">[ date ]</a>
+              <a href="thread.html#555">[ thread ]</a>
+              <a href="subject.html#555">[ subject ]</a>
+              <a href="author.html#555">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: sebjames
+Date: 2007-12-18 21:47:23 +0100 (Tue, 18 Dec 2007)
+New Revision: 427
+
+Modified:
+   nxcl/lib/nxclientlib.cpp
+   nxcl/lib/nxsession.cpp
+Log:
+Patch from David Gross at the University of Strasbourg which will 
+make nxcl work with freenx. Thanks David!
+
+
+Modified: nxcl/lib/nxclientlib.cpp
+===================================================================
+--- nxcl/lib/nxclientlib.cpp	2007-11-15 15:17:24 UTC (rev 426)
++++ nxcl/lib/nxclientlib.cpp	2007-12-18 20:47:23 UTC (rev 427)
+@@ -203,6 +203,7 @@
+ 		this-&gt;keyFile-&gt;close();
+ 
+ 	} else {
++		this-&gt;keyFile = NULL;
+ 		argtmp.str(&quot;&quot;);
+ 		argtmp &lt;&lt; &quot;-i&quot; &lt;&lt; publicKey;
+ 		arguments.push_back (argtmp.str());
+
+Modified: nxcl/lib/nxsession.cpp
+===================================================================
+--- nxcl/lib/nxsession.cpp	2007-11-15 15:17:24 UTC (rev 426)
++++ nxcl/lib/nxsession.cpp	2007-12-18 20:47:23 UTC (rev 427)
+@@ -165,11 +165,11 @@
+ 					// client and see
+ 					// ~/.nx/temp/(pid)/sshlog for
+ 					// connection details
+-					ss &lt;&lt; &quot;Listsession --type=\&quot;shadow\&quot;&quot;;
++					ss &lt;&lt; &quot;listsession --type=\&quot;shadow\&quot;&quot;;
+ 
+ 				} else {
+ 
+-					ss &lt;&lt; &quot;Listsession --user=\&quot;&quot; &lt;&lt; nxUsername
++					ss &lt;&lt; &quot;listsession --user=\&quot;&quot; &lt;&lt; nxUsername
+ 					   &lt;&lt; &quot;\&quot; --status=\&quot;suspended,running\&quot; --geometry=\&quot;&quot; 
+ 					   &lt;&lt; this-&gt;sessionData-&gt;xRes &lt;&lt; &quot;x&quot;
+ 					   &lt;&lt; this-&gt;sessionData-&gt;yRes &lt;&lt; &quot;x&quot; 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#555">[ date ]</a>
+              <a href="thread.html#555">[ thread ]</a>
+              <a href="subject.html#555">[ subject ]</a>
+              <a href="author.html#555">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

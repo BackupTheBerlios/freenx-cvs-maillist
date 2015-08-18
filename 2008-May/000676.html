@@ -1,0 +1,104 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r542 - trunk/freenx-server
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-May/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r542%20-%20trunk/freenx-server&In-Reply-To=%3C200805061432.m46EWKid003731%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000675.html">
+   <LINK REL="Next"  HREF="000677.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r542 - trunk/freenx-server</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r542%20-%20trunk/freenx-server&In-Reply-To=%3C200805061432.m46EWKid003731%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r542 - trunk/freenx-server">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Tue May  6 16:32:20 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000675.html">[Freenx-cvs] r541 - trunk/freenx-server
+</A></li>
+        <LI>Next message: <A HREF="000677.html">[Freenx-cvs] r543 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#676">[ date ]</a>
+              <a href="thread.html#676">[ thread ]</a>
+              <a href="subject.html#676">[ subject ]</a>
+              <a href="author.html#676">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-05-06 16:32:19 +0200 (Tue, 06 May 2008)
+New Revision: 542
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxloadconfig
+Log:
+* Added 3.2.0 as a backend version for nxloadconfig.
+(<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-05-06 13:29:58 UTC (rev 541)
++++ trunk/freenx-server/ChangeLog	2008-05-06 14:32:19 UTC (rev 542)
+@@ -15,6 +15,8 @@
+ 	* Added patch from 2005 to enable reconnect to 24-bit display via
+ 	  32-bit or vice versa. Oops :)
+ 	  (Sunil &lt;funtoos at yahoo.com&gt; )
++	* Added 3.2.0 as a backend version for nxloadconfig.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
+ 14.03.2008 FreeNX 0.7.2 &quot;Priscilla Edition&quot;
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxloadconfig
+===================================================================
+--- trunk/freenx-server/nxloadconfig	2008-05-06 13:29:58 UTC (rev 541)
++++ trunk/freenx-server/nxloadconfig	2008-05-06 14:32:19 UTC (rev 542)
+@@ -600,8 +600,8 @@
+ 	[ -z $(echo &quot;$ENABLE_ROOTLESS_MODE&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_ROOTLESS_MODE=$ENABLE_ROOTLESS_MODE\&quot;&quot;
+ 
+-	[ -z &quot;$(strings $PATH_BIN/nxagent | egrep 'NXAGENT - Version 1.5.0|NXAGENT - Version 2.[01].0|NXAGENT - Version 3.[01].0')&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Could not find 1.5.0 or 2.[01].0 or 3.[01].0 version string in nxagent. NX 1.5.0 or 2.[01].0 or 3.[01].0 backend is needed for this version of FreeNX.&quot;
++	[ -z &quot;$(strings $PATH_BIN/nxagent | egrep 'NXAGENT - Version 1.5.0|NXAGENT - Version 2.[01].0|NXAGENT - Version 3.[012].0')&quot; ] &amp;&amp; \
++		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Error: Could not find 1.5.0 or 2.[01].0 or 3.[01].0 version string in nxagent. NX 1.5.0 or 2.[01].0 or 3.[012].0 backend is needed for this version of FreeNX.&quot;
+ 		
+ 	[ -z $(echo &quot;$ENABLE_USESSION&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_USESSION=$ENABLE_USESSION\&quot;&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000675.html">[Freenx-cvs] r541 - trunk/freenx-server
+</A></li>
+	<LI>Next message: <A HREF="000677.html">[Freenx-cvs] r543 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#676">[ date ]</a>
+              <a href="thread.html#676">[ thread ]</a>
+              <a href="subject.html#676">[ subject ]</a>
+              <a href="author.html#676">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r168 - / freenx-server/tags/FreeNX-0.4.5
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r168%20-%20/%20freenx-server/tags/FreeNX-0.4.5&In-Reply-To=%3C200603060304.k2634iQc020566%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000295.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r168 - / freenx-server/tags/FreeNX-0.4.5</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r168%20-%20/%20freenx-server/tags/FreeNX-0.4.5&In-Reply-To=%3C200603060304.k2634iQc020566%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r168 - / freenx-server/tags/FreeNX-0.4.5">fabianx at berlios.de
+       </A><BR>
+    <I>Mon Mar  6 04:04:44 CET 2006</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000295.html">[Freenx-cvs] r169 - / freenx-server/tags/FreeNX-0.4.5
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#294">[ date ]</a>
+              <a href="thread.html#294">[ thread ]</a>
+              <a href="subject.html#294">[ subject ]</a>
+              <a href="author.html#294">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2006-03-06 04:04:35 +0100 (Mon, 06 Mar 2006)
+New Revision: 168
+
+Modified:
+   /
+   freenx-server/tags/FreeNX-0.4.5/
+   freenx-server/tags/FreeNX-0.4.5/nxsetup
+Log:
+ <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">r194 at Bluemoon</A>:  ffranz | 2005-09-04 17:45:59 +0200
+  <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">r184 at Bluemoon</A>:  ffranz | 2005-09-04 17:36:32 +0200
+  Made test_nx honor the automatic flag.
+ 
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:189
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:194
+
+
+Property changes on: freenx-server/tags/FreeNX-0.4.5
+___________________________________________________________________
+Name: svk:merge
+   + dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx/freenx-server/branches/FreeNX-0.4:184
+
+Modified: freenx-server/tags/FreeNX-0.4.5/nxsetup
+===================================================================
+--- freenx-server/tags/FreeNX-0.4.5/nxsetup	2006-02-12 13:30:39 UTC (rev 167)
++++ freenx-server/tags/FreeNX-0.4.5/nxsetup	2006-03-06 03:04:35 UTC (rev 168)
+@@ -431,7 +431,7 @@
+ 	
+ 	install_nx
+ 
+-	test_nx
++	[ &quot;$AUTOMATIC&quot; = &quot;no&quot; ] &amp;&amp; test_nx
+ 	
+ 	echo &quot;Ok, nxserver is ready.&quot;
+ 	echo 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000295.html">[Freenx-cvs] r169 - / freenx-server/tags/FreeNX-0.4.5
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#294">[ date ]</a>
+              <a href="thread.html#294">[ thread ]</a>
+              <a href="subject.html#294">[ subject ]</a>
+              <a href="author.html#294">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,287 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fabianx modified nxclient
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%20nxclient&In-Reply-To=%3C424218E7.mailHXU1E1JR7%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000113.html">
+   <LINK REL="Next"  HREF="000116.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fabianx modified nxclient</H1>
+    <B>fabianx</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%20nxclient&In-Reply-To=%3C424218E7.mailHXU1E1JR7%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fabianx modified nxclient">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Thu Mar 24 02:33:27 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000113.html">[Freenx-cvs] r60 - thinnx/trunk/thinnx
+</A></li>
+        <LI>Next message: <A HREF="000116.html">[Freenx-cvs] r61 - thinnx/trunk/thinnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#115">[ date ]</a>
+              <a href="thread.html#115">[ thread ]</a>
+              <a href="subject.html#115">[ subject ]</a>
+              <a href="author.html#115">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fabianx
+Date:      2005-03-24 01:33:26 GMT
+Modified:  .        nxclient
+Log:
+Added initial support for --printer &lt;printername&gt; to nxclient.
+
+Note: The support is not finished yet as the &quot;Configure&quot; dialog still needs to be created.
+
+Also added some more comments where suitable.
+
+Revision  Changes    Path
+1.4       +131 -2    freenx/nxclient
+
+
+rev 1.4, prev_rev 1.3
+Index: nxclient
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxclient,v
+retrieving revision 1.3
+retrieving revision 1.4
+diff -u -r1.3 -r1.4
+--- nxclient	11 Feb 2005 15:43:33 -0000	1.3
++++ nxclient	24 Mar 2005 01:33:19 -0000	1.4
+@@ -9,7 +9,7 @@
+ #       but we set it to a &quot;good value&quot; anyway in case 
+ #       it does check it someday.
+ #
+-# CVS: $Id: nxclient,v 1.3 2005/02/11 15:43:33 fabianx Exp $
++# CVS: $Id: nxclient,v 1.4 2005/03/24 01:33:19 fabianx Exp $
+ #
+ # ========================================================================
+ 
+@@ -19,7 +19,7 @@
+ [ -x &quot;$NXCLIENT&quot; -a &quot;$(file -bi $NXCLIENT)&quot; != 'application/x-shellscript' ] \
+ 	&amp;&amp; exec ${NXCLIENT} &quot;$@&quot;
+ 
+-TEMP=`getopt -a -o d: --long local,noautokill,dialog:,caption:,message:,display: -n $(basename $0) -- &quot;$@&quot;`
++TEMP=`getopt -a -o d: --long local,noautokill,dialog:,caption:,message:,display:,printer: -n $(basename $0) -- &quot;$@&quot;`
+ 
+ if [ $? != 0 ] ; then echo &quot;Terminating...&quot; &gt;&amp;2 ; exit 1 ; fi
+ 
+@@ -31,6 +31,7 @@
+ DIALOG_MESSAGE=&quot;&quot;
+ DIALOG_LOCAL=&quot;&quot;
+ DIALOG_NOAUTOKILL=&quot;&quot;
++DIALOG_PRINTER=&quot;&quot;
+ 
+ while true
+ do
+@@ -41,6 +42,7 @@
+ 		--local) DIALOG_LOCAL=&quot;yes&quot;; shift ;;
+ 		--noautokill) DIALOG_NOAUTOKILL=&quot;yes&quot;; shift ;;
+ 		--display) DISPLAY=&quot;$2&quot;; shift 2 ;;
++		--printer) DIALOG_PRINTER=&quot;$2&quot;; shift 2 ; break ;;
+ 		--) shift ; break ;;
+                 *) echo &quot;Internal error!&quot; ; exit 1; ;;
+ 	esac
+@@ -48,6 +50,9 @@
+ 
+ export DISPLAY
+ 
++# if --printer is set, the dialog type is overridden
++[ -n &quot;$DIALOG_PRINTER&quot; ] &amp;&amp; DIALOG_TYPE=&quot;printer&quot;
++
+ if [ -x /usr/bin/Xdialog ] 
+ then
+ 	dialog_interface=&quot;xdialog&quot;
+@@ -58,6 +63,62 @@
+ 	[ -z &quot;$xmessage&quot; ] &amp;&amp; xmessage=&quot;/usr/X11R6/bin/xmessage&quot;
+ fi
+ 
++#
++# utility functions for all interfaces
++#
++
++# utility_printer &quot;get|set|getlist|getvendlist|getdrvlist&quot;
++#
++#	get &lt;name&gt; - gets the current driver for name
++#	set &lt;name&gt; &lt;driver&gt; &lt;description&gt; - sets the current driver and description for name
++#	getvendlist - gets a list of vendors
++#	getdrvlist &lt;vendor&gt; - gets a list of drivers for vendor
++#	getlist - gets a list of drivers
++
++#
++# drivers.cache has the following format:
++#	
++#	driver|&lt;printername&gt;|&lt;ppdfile&gt;|&lt;description&gt;
++#
++
++#
++# Example: IFS='|' DEFAULT_PRINTER=( $(utility_printer get &lt;myprinter&gt;) )
++# 	  
++#	You can then select ${DEFAULT_PRINTER[1]} for &lt;printername&gt;.
++# 
++
++utility_printer()
++{
++	UTILITY_DRIVERS_CACHE=&quot;$HOME/.nx/config/drivers.cache&quot;
++	[ -n &quot;$USER_FAKE_HOME&quot; ] &amp;&amp; UTILITY_DRIVERS_CACHE=&quot;$USER_FAKE_HOME/.nx/config/drivers.cache&quot;
++	UTILITY_NXPRINT=&quot;nxprint&quot;
++	[ -n &quot;$PATH_BIN&quot; ] &amp;&amp; UTILITY_NXPRINT=&quot;$PATH_BIN/nxprint&quot;
++	case &quot;$1&quot; in 
++		get)
++			grep &quot;driver|$2|&quot; &quot;$UTILITY_DRIVERS_CACHE&quot; 2&gt;/dev/null
++		;;
++		set)
++			# FIXME: Handle possible race conditions?
++			grep -v &quot;driver|$2|&quot; &quot;$UTILITY_DRIVERS_CACHE&quot; 2&gt;/dev/null &gt; $UTILITY_DRIVERS_CACHE.tmp
++			echo &quot;driver|$2|$3|$4&quot; &gt;&gt; $UTILITY_DRIVERS_CACHE.tmp
++			mv -f $UTILITY_DRIVERS_CACHE.tmp $UTILITY_DRIVERS_CACHE
++		;;
++		getvendlist)
++			$UTILITY_NXPRINT -d | awk -F'|' '{ print $2 }' | uniq
++		;;
++		getdrvlist)
++			$UTILITY_NXPRINT -d | awk -F'|' '($2==&quot;'$2'&quot;) { print $4 }'
++		;;
++		getlist)
++			$UTILITY_NXPRINT -d
++		;;
++	esac
++}
++
++#
++# xmessage dialog interface
++#
++
+ xmessage_ok()
+ {
+ 	$xmessage -buttons &quot;Ok:0&quot; -center &quot;$DIALOG_MESSAGE&quot;
+@@ -85,6 +146,20 @@
+ 	return 0 # Give cancel on close ...
+ }
+ 
++xmessage_printer_ask()
++{
++	$xmessage -buttons &quot;Ok:0,Configure:1,Cancel:2&quot; -center &quot;$DIALOG_MESSAGE&quot;
++}
++
++xmessage_printer()
++{
++	:
++}
++
++#
++# xdialog interface
++#
++
+ xdialog_ok()
+ {
+ 	$DIALOG --title &quot;$DIALOG_CAPTION&quot; --msgbox &quot;$DIALOG_MESSAGE&quot; 0 0
+@@ -121,6 +196,54 @@
+         return 0 # Give cancel on close ...
+ }
+ 
++xdialog_printer_ask()
++{
++		$DIALOG --title &quot;$DIALOG_CAPTION&quot; --buttons-style text --ok-label &quot;Ok&quot; --cancel-label &quot;Configure&quot; --yesno &quot;$DIALOG_MESSAGE\n\nClose window to cancel.&quot; 400x250
++	RC=$?
++	[ $RC -eq 255 ] &amp;&amp; return 2
++	return $RC
++}
++
++xdialog_printer()
++{
++	:
++}
++
++#
++# helper functions
++#
++
++helper_dialog_printer()
++{
++	IFS=&quot;|&quot; PRINTER_INFORMATION=( $(utility_printer get &quot;$DIALOG_PRINTER&quot;) )
++	PRINTER_CONFIGURE=&quot;yes&quot;
++	[ -z &quot;$DIALOG_CAPTION&quot; ] &amp;&amp; DIALOG_CAPTION=&quot;NX Printer configuration for $DIALOG_PRINTER&quot;
++	
++	# Do we have old printer information present?
++	if [ -n &quot;$PRINTER_INFORMATION&quot; ]
++	then
++		DIALOG_MESSAGE=$(echo -e &quot;Found driver for printer $DIALOG_PRINTER.\n\nOld choice was: ${PRINTER_INFORMATION[3]}.\n\nIf you want to keep the settings click on 'Ok' \n- else click on 'Configure'.&quot;) ${dialog_interface}_printer_ask
++		RC=$?
++		# bail out with exit code 2 in case the user cancelled the operation
++		[ $RC -eq 2 ] &amp;&amp; exit 2
++		[ $RC -eq 0 ] &amp;&amp; PRINTER_CONFIGURE=&quot;no&quot;
++	fi
++
++	if [ &quot;$PRINTER_CONFIGURE&quot; = &quot;yes&quot; ]
++	then
++		DIALOG_MESSAGE=&quot;Not implemented.&quot; ${dialog_interface}_ok
++	fi
++
++	# echo the choosen &lt;ppdfile&gt; to stdout
++	echo &quot;${PRINTER_INFORMATION[2]}&quot;
++			
++	exit 0
++}
++
++#
++# main case statement
++#
++
+ case $DIALOG_TYPE in 
+ 	ok)
+ 		${dialog_interface}_ok
+@@ -137,9 +260,15 @@
+ 	quit)
+ 		${dialog_interface}_quit
+ 	;;
++	printer)
++		helper_dialog_printer
++	;;
+ esac
+ 
++#
+ # Time for exit code checks :)
++#
++
+ RC=$?
+ 	[ $RC -eq 2 ] &amp;&amp; kill -TERM $PPID
+ 	[ $RC -eq 3 ] &amp;&amp; kill -HUP $PPID
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000113.html">[Freenx-cvs] r60 - thinnx/trunk/thinnx
+</A></li>
+	<LI>Next message: <A HREF="000116.html">[Freenx-cvs] r61 - thinnx/trunk/thinnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#115">[ date ]</a>
+              <a href="thread.html#115">[ thread ]</a>
+              <a href="subject.html#115">[ subject ]</a>
+              <a href="author.html#115">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

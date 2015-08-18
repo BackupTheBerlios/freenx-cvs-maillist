@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r316 - nx-utils/nxspeex
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r316%20-%20nx-utils/nxspeex&In-Reply-To=%3C200702060736.l167aNXv006488%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000449.html">
+   <LINK REL="Next"  HREF="000451.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r316 - nx-utils/nxspeex</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r316%20-%20nx-utils/nxspeex&In-Reply-To=%3C200702060736.l167aNXv006488%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r316 - nx-utils/nxspeex">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Tue Feb  6 08:36:23 CET 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000449.html">[Freenx-cvs] r315 - nx-utils/nxspeex
+</A></li>
+        <LI>Next message: <A HREF="000451.html">[Freenx-cvs] r317 - nx-utils/nxspeex
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#450">[ date ]</a>
+              <a href="thread.html#450">[ thread ]</a>
+              <a href="subject.html#450">[ subject ]</a>
+              <a href="author.html#450">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-02-06 08:36:18 +0100 (Tue, 06 Feb 2007)
+New Revision: 316
+
+Modified:
+   nx-utils/nxspeex/nxspeex.c
+Log:
+Added denoise filter and enabled it by default.
+
+
+
+Modified: nx-utils/nxspeex/nxspeex.c
+===================================================================
+--- nx-utils/nxspeex/nxspeex.c	2007-02-06 07:23:29 UTC (rev 315)
++++ nx-utils/nxspeex/nxspeex.c	2007-02-06 07:36:18 UTC (rev 316)
+@@ -19,6 +19,7 @@
+ #include &lt;speex/speex.h&gt;
+ #include &lt;speex/speex_stereo.h&gt;
+ #include &lt;speex/speex_callbacks.h&gt;
++#include &lt;speex/speex_preprocess.h&gt;
+ 
+ #define MAX_FRAME_SIZE 2000
+ #define MAX_FRAME_BYTES 2000
+@@ -150,6 +151,7 @@
+ 	void *enc_state;
+ 	SpeexBits bits;
+ 	const SpeexMode* mode = NULL;
++	SpeexPreprocessState *preprocess = NULL;
+ 	int frame_size, frame_size2;
+ 	unsigned int seqNr = 0;
+ 	
+@@ -157,6 +159,7 @@
+ 	/* FIXME: Depend on NX setting */
+ 	int modeID = SPEEX_MODEID_UWB;
+ 	int complexity=3;
++	int denoise_enabled=1;
+ 	
+ 	/* Encoder initialisation */
+ 	speex_bits_init(&amp;bits);
+@@ -175,7 +178,11 @@
+ 	esd_set_socket_buffers(client, format, speed, 44100);
+ 	do_sockopts(server, 200);
+ 
+-	/* FIXME: Add denoise */
++	if (denoise_enabled)
++	{
++		preprocess = speex_preprocess_state_init(frame_size, speed);
++		speex_preprocess_ctl(preprocess, SPEEX_PREPROCESS_SET_DENOISE, &amp;denoise_enabled);
++	}
+ 
+ 	/* Main encoding loop */
+ 
+@@ -192,6 +199,9 @@
+ 		speex_bits_reset(&amp;bits); 
+ 		if (format &amp; ESD_STEREO)
+ 			speex_encode_stereo_int(input, frame_size, &amp;bits);
++
++		if (preprocess)
++			speex_preprocess(preprocess, input, NULL);
+ 			
+ 		speex_encode_int(enc_state, input, &amp;bits);
+ 		nbBytes = speex_bits_write(&amp;bits, output, MAX_FRAME_BYTES);
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000449.html">[Freenx-cvs] r315 - nx-utils/nxspeex
+</A></li>
+	<LI>Next message: <A HREF="000451.html">[Freenx-cvs] r317 - nx-utils/nxspeex
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#450">[ date ]</a>
+              <a href="thread.html#450">[ thread ]</a>
+              <a href="subject.html#450">[ subject ]</a>
+              <a href="author.html#450">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

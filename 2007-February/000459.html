@@ -1,0 +1,450 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r325 - in nxclientlib: . maemonx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r325%20-%20in%20nxclientlib%3A%20.%20maemonx&In-Reply-To=%3C200702180443.l1I4h0fA008818%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000458.html">
+   <LINK REL="Next"  HREF="000460.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r325 - in nxclientlib: . maemonx</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r325%20-%20in%20nxclientlib%3A%20.%20maemonx&In-Reply-To=%3C200702180443.l1I4h0fA008818%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r325 - in nxclientlib: . maemonx">gwright at mail.berlios.de
+       </A><BR>
+    <I>Sun Feb 18 05:43:00 CET 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000458.html">[Freenx-cvs] r324 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000460.html">[Freenx-cvs] r326 - nxclientlib/maemonx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#459">[ date ]</a>
+              <a href="thread.html#459">[ thread ]</a>
+              <a href="subject.html#459">[ subject ]</a>
+              <a href="author.html#459">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2007-02-18 05:43:00 +0100 (Sun, 18 Feb 2007)
+New Revision: 325
+
+Added:
+   nxclientlib/maemonx/
+   nxclientlib/maemonx/maemonx.pro
+   nxclientlib/maemonx/main.cpp
+   nxclientlib/maemonx/mainwindow.cpp
+   nxclientlib/maemonx/mainwindow.h
+   nxclientlib/maemonx/nxhandler.cpp
+   nxclientlib/maemonx/nxhandler.h
+   nxclientlib/maemonx/settingsdialog.cpp
+   nxclientlib/maemonx/settingsdialog.h
+Modified:
+   nxclientlib/nxclientlib.pro
+Log:
+Initial import of maemonx - an NX client for the Nokia 770/N800. It doesn't do anything yet, there's just a GUI and no functional code.
+
+
+Added: nxclientlib/maemonx/maemonx.pro
+===================================================================
+--- nxclientlib/maemonx/maemonx.pro	2007-02-12 04:15:10 UTC (rev 324)
++++ nxclientlib/maemonx/maemonx.pro	2007-02-18 04:43:00 UTC (rev 325)
+@@ -0,0 +1,21 @@
++TEMPLATE	= app
++
++CONFIG		+= qt warn_on debug
++
++SOURCES = main.cpp mainwindow.cpp settingsdialog.cpp nxhandler.cpp
++
++HEADERS = mainwindow.h settingsdialog.h nxhandler.h
++
++INCLUDEPATH	+= $(QTDIR)/include . ..
++
++DEPENDPATH	+= $(QTDIR)/include
++
++LIBPATH += ..
++
++QMAKE_CXXFLAGS_DEBUG += $$system(pkg-config --cflags gtk+-2.0 hildon-libs)
++
++QT = core xml
++
++LIBS	= -lnxclientlib $$system(pkg-config --libs gtk+-2.0 hildon-libs)
++
++TARGET		= maemonx
+
+Added: nxclientlib/maemonx/main.cpp
+===================================================================
+--- nxclientlib/maemonx/main.cpp	2007-02-12 04:15:10 UTC (rev 324)
++++ nxclientlib/maemonx/main.cpp	2007-02-18 04:43:00 UTC (rev 325)
+@@ -0,0 +1,53 @@
++/***************************************************************************
++                                  main.cpp
++                             -------------------
++    begin                : Saturday February 17th 2007
++    copyright            : (C) 2007 by George Wright
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++#include &lt;hildon-widgets/hildon-program.h&gt;
++#include &lt;gtk/gtkmain.h&gt;
++
++#include &quot;mainwindow.h&quot;
++
++static void destroy(GtkWidget *widget, gpointer data);
++
++int main(int argc, char **argv)
++{
++	HildonProgram *program;
++	HildonWindow *window;
++
++	gtk_init(&amp;argc, &amp;argv);
++
++	program = HILDON_PROGRAM(hildon_program_get_instance());
++	g_set_application_name(&quot;NX Client&quot;);
++
++	window = HILDON_WINDOW(hildon_window_new());
++
++  g_signal_connect(G_OBJECT(window), &quot;destroy&quot;, G_CALLBACK(destroy), NULL);
++
++	hildon_program_add_window(program, window);
++	
++	setup_gui(GTK_WIDGET(window));
++
++	gtk_widget_show_all(GTK_WIDGET(window));
++
++	gtk_main();
++
++	return 0;
++}
++
++static void destroy(GtkWidget *widget, gpointer data)
++{
++    gtk_main_quit();
++}
+
+Added: nxclientlib/maemonx/mainwindow.cpp
+===================================================================
+--- nxclientlib/maemonx/mainwindow.cpp	2007-02-12 04:15:10 UTC (rev 324)
++++ nxclientlib/maemonx/mainwindow.cpp	2007-02-18 04:43:00 UTC (rev 325)
+@@ -0,0 +1,92 @@
++/***************************************************************************
++                                mainwindow.cpp
++                             -------------------
++    begin                : Saturday 17th February 2007
++    copyright            : (C) 2007 by George Wright
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++#include &quot;mainwindow.h&quot;
++#include &quot;nxhandler.h&quot;
++
++#include &lt;stdio.h&gt;
++
++GtkWidget *username_input;
++GtkWidget *password_input;
++GtkWidget *sessions_combo;
++
++GtkWidget *login_button;
++GtkWidget *config_button;
++
++GtkWidget *fixed_layout;
++GtkWidget *main_layout;
++GtkWidget *separator;
++
++void setup_gui(GtkWidget *window)
++{
++    main_layout = gtk_vbox_new(FALSE, 10);
++
++    fixed_layout = gtk_layout_new(NULL, NULL);
++    gtk_layout_set_size(GTK_LAYOUT(fixed_layout), 300, 20);
++    gtk_container_add(GTK_CONTAINER(window), main_layout);
++
++    gtk_box_pack_start(GTK_BOX(main_layout), fixed_layout, TRUE, FALSE, 0);
++    
++    username_input = gtk_entry_new();
++    password_input = gtk_entry_new();
++
++    sessions_combo = gtk_combo_box_new_text();
++
++    separator = gtk_hseparator_new();
++
++    config_button = gtk_button_new_with_label(&quot;Configure&quot;);
++    login_button = gtk_button_new_with_label(&quot;Login&quot;);
++
++    g_signal_connect(G_OBJECT(config_button), &quot;clicked&quot;, G_CALLBACK(config_clicked), NULL);
++    g_signal_connect(G_OBJECT(login_button), &quot;clicked&quot;, G_CALLBACK(login_clicked), NULL);
++
++    gtk_combo_box_append_text(GTK_COMBO_BOX(sessions_combo), &quot;Foo&quot;);
++
++    gtk_entry_set_visibility(GTK_ENTRY(password_input), FALSE);
++
++    gtk_widget_set_size_request(password_input, 400, 30);
++    gtk_widget_set_size_request(username_input, 400, 30);
++    gtk_widget_set_size_request(sessions_combo, 400, 30);
++
++    gtk_widget_set_size_request(config_button, 150, 50);
++    gtk_widget_set_size_request(login_button, 150, 50);
++    gtk_widget_set_size_request(fixed_layout, 672, 220);
++    gtk_widget_set_size_request(separator, 600, 0);
++
++    gtk_layout_put(GTK_LAYOUT(fixed_layout), username_input, 236, 0);
++    gtk_layout_put(GTK_LAYOUT(fixed_layout), password_input, 236, 50);
++    gtk_layout_put(GTK_LAYOUT(fixed_layout), sessions_combo, 236, 100);
++
++    gtk_layout_put(GTK_LAYOUT(fixed_layout), gtk_label_new(&quot;Username:&quot;), 36, 0);
++    gtk_layout_put(GTK_LAYOUT(fixed_layout), gtk_label_new(&quot;Password:&quot;), 36, 50);
++    gtk_layout_put(GTK_LAYOUT(fixed_layout), gtk_label_new(&quot;Session:&quot;), 36, 100);
++
++    gtk_layout_put(GTK_LAYOUT(fixed_layout), separator, 20, 150);
++
++    gtk_layout_put(GTK_LAYOUT(fixed_layout), config_button, 36, 170);
++    gtk_layout_put(GTK_LAYOUT(fixed_layout), login_button, 486, 170);
++}
++
++static void config_clicked(GtkWidget *widget, gpointer data)
++{
++    printf(&quot;Lalala config pressed\n&quot;);
++}
++
++static void login_clicked(GtkWidget *widget, gpointer data)
++{
++    printf(&quot;Lalala login pressed\n&quot;);
++}
+
+Added: nxclientlib/maemonx/mainwindow.h
+===================================================================
+--- nxclientlib/maemonx/mainwindow.h	2007-02-12 04:15:10 UTC (rev 324)
++++ nxclientlib/maemonx/mainwindow.h	2007-02-18 04:43:00 UTC (rev 325)
+@@ -0,0 +1,32 @@
++/***************************************************************************
++                                mainwindow.h
++                             -------------------
++    begin                : Saturday 17th February 2007
++    copyright            : (C) 2007 by George Wright
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++/* The main function which creates all the GUI components */
++
++#ifndef MAINWINDOW_H
++#define MAINWINDOW_H
++
++#include &lt;gtk/gtk.h&gt;
++
++void setup_gui(GtkWidget *window);
++
++/* Callback functions */
++
++static void config_clicked(GtkWidget *widget, gpointer data);
++static void login_clicked(GtkWidget *widget, gpointer data);
++
++#endif
+
+Added: nxclientlib/maemonx/nxhandler.cpp
+===================================================================
+--- nxclientlib/maemonx/nxhandler.cpp	2007-02-12 04:15:10 UTC (rev 324)
++++ nxclientlib/maemonx/nxhandler.cpp	2007-02-18 04:43:00 UTC (rev 325)
+@@ -0,0 +1,28 @@
++/***************************************************************************
++                                nxhandler.cpp
++                             -------------------
++    begin                : Saturday 17th February 2007
++    copyright            : (C) 2007 by George Wright
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++/* The main function which creates all the GUI components */
++
++#include &quot;nxhandler.h&quot;
++
++NXHandler::NXHandler()
++{
++}
++
++NXHandler::~NXHandler()
++{
++}
+
+Added: nxclientlib/maemonx/nxhandler.h
+===================================================================
+--- nxclientlib/maemonx/nxhandler.h	2007-02-12 04:15:10 UTC (rev 324)
++++ nxclientlib/maemonx/nxhandler.h	2007-02-18 04:43:00 UTC (rev 325)
+@@ -0,0 +1,33 @@
++/***************************************************************************
++                                nxhandler.h
++                             -------------------
++    begin                : Saturday 17th February 2007
++    copyright            : (C) 2007 by George Wright
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++/* The main function which creates all the GUI components */
++
++#ifndef NXHANDLER_H
++#define NXHANDLER_H
++
++#include &lt;QObject&gt;
++
++class NXHandler : public QObject
++{
++    Q_OBJECT
++    public:
++        NXHandler();
++        ~NXHandler();
++};
++#endif
++
+
+Added: nxclientlib/maemonx/settingsdialog.cpp
+===================================================================
+--- nxclientlib/maemonx/settingsdialog.cpp	2007-02-12 04:15:10 UTC (rev 324)
++++ nxclientlib/maemonx/settingsdialog.cpp	2007-02-18 04:43:00 UTC (rev 325)
+@@ -0,0 +1,23 @@
++/***************************************************************************
++                             settingsdialog.cpp
++                             -------------------
++    begin                : Saturday 17th February 2007
++    copyright            : (C) 2007 by George Wright
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++#include &quot;settingsdialog.h&quot;
++
++void create_settings(GtkWidget *window)
++{
++
++}
+
+Added: nxclientlib/maemonx/settingsdialog.h
+===================================================================
+--- nxclientlib/maemonx/settingsdialog.h	2007-02-12 04:15:10 UTC (rev 324)
++++ nxclientlib/maemonx/settingsdialog.h	2007-02-18 04:43:00 UTC (rev 325)
+@@ -0,0 +1,27 @@
++/***************************************************************************
++                               settingsdialog.h
++                             -------------------
++    begin                : Saturday 17th February 2007
++    copyright            : (C) 2007 by George Wright
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++/* The main function which creates all the GUI components */
++
++#ifndef SETTINGSDIALOG_H
++#define SETTINGSDIALOG_H
++
++#include &lt;gtk/gtk.h&gt;
++
++void create_settings(GtkWidget *window);
++
++#endif
+
+Modified: nxclientlib/nxclientlib.pro
+===================================================================
+--- nxclientlib/nxclientlib.pro	2007-02-12 04:15:10 UTC (rev 324)
++++ nxclientlib/nxclientlib.pro	2007-02-18 04:43:00 UTC (rev 325)
+@@ -12,4 +12,4 @@
+ 
+ QT		= core xml
+ 
+-TARGET		= nxclientlib
+\ No newline at end of file
++TARGET		= nxclientlib
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000458.html">[Freenx-cvs] r324 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000460.html">[Freenx-cvs] r326 - nxclientlib/maemonx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#459">[ date ]</a>
+              <a href="thread.html#459">[ thread ]</a>
+              <a href="subject.html#459">[ subject ]</a>
+              <a href="author.html#459">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

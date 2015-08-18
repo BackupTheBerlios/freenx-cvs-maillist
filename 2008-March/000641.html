@@ -1,0 +1,410 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r517 - in trunk/freenx-server: . nxserver-helper
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r517%20-%20in%20trunk/freenx-server%3A%20.%20nxserver-helper&In-Reply-To=%3C200803110555.m2B5tc3d028551%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000640.html">
+   <LINK REL="Next"  HREF="000642.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r517 - in trunk/freenx-server: . nxserver-helper</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r517%20-%20in%20trunk/freenx-server%3A%20.%20nxserver-helper&In-Reply-To=%3C200803110555.m2B5tc3d028551%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r517 - in trunk/freenx-server: . nxserver-helper">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Tue Mar 11 06:55:38 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000640.html">[Freenx-cvs] r516 - trunk/freenx-server/nxredir
+</A></li>
+        <LI>Next message: <A HREF="000642.html">[Freenx-cvs] r518 - trunk/freenx-redesign/server/utility
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#641">[ date ]</a>
+              <a href="thread.html#641">[ thread ]</a>
+              <a href="subject.html#641">[ subject ]</a>
+              <a href="author.html#641">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-03-11 06:55:27 +0100 (Tue, 11 Mar 2008)
+New Revision: 517
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/node.conf.sample
+   trunk/freenx-server/nxloadconfig
+   trunk/freenx-server/nxnode
+   trunk/freenx-server/nxserver
+   trunk/freenx-server/nxserver-helper/nxserver-helper.c
+Log:
+* Made the slave mode finally functional. With that slave mode it is
+ possible to do a single sign on instead of the multiple logins used
+ before. It is also possible to use a suid wrapper to login as user.
+ With single sign on session startup is a lot faster. This is true
+ especially if there are many printers and files to be shared.
+(<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+This is also the basis for importing nxserver_suid from redesign.
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-03-11 01:58:52 UTC (rev 516)
++++ trunk/freenx-server/ChangeLog	2008-03-11 05:55:27 UTC (rev 517)
+@@ -61,6 +61,12 @@
+ 	* Added usage of nxredir library to forward port 139,445 to the
+ 	  client side forwarded SMB port.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Made the slave mode finally functional. With that slave mode it is
++	  possible to do a single sign on instead of the multiple logins used
++	  before. It is also possible to use a suid wrapper to login as user.
++	  With single sign on session startup is a lot faster. This is true 
++	  especially if there are many printers and files to be shared.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
+ 14.10.2007 FreeNX 0.7.1 &quot;Hip Hop Edition&quot;
+ 	* Fixed the issue that makes fonts look tiny and unreadable by default 
+
+Modified: trunk/freenx-server/node.conf.sample
+===================================================================
+--- trunk/freenx-server/node.conf.sample	2008-03-11 01:58:52 UTC (rev 516)
++++ trunk/freenx-server/node.conf.sample	2008-03-11 05:55:27 UTC (rev 517)
+@@ -92,6 +92,19 @@
+ #    is not provided.
+ #SSHD_CHECK_IP=&quot;0&quot;
+ 
++# If ENABLE_SLAVE_MODE=&quot;1&quot; the user will be just logged in _once_ and the 
++# communication is done via nxnode slave mode.
++#
++# This is useful for one time passwords or to have less traffic in utmp 
++# and wtmp.
++#
++# Also session startup times are much faster in slave mode. This is true especially 
++# if many printers or shares have to be added.
++#
++# For this to work the binary nxserver-helper has to be installed in 
++# PATH_BIN.
++#
++#ENABLE_SLAVE_MODE=&quot;0&quot;
+ 
+ #########################################################################
+ # Restriction directives
+
+Modified: trunk/freenx-server/nxloadconfig
+===================================================================
+--- trunk/freenx-server/nxloadconfig	2008-03-11 01:58:52 UTC (rev 516)
++++ trunk/freenx-server/nxloadconfig	2008-03-11 05:55:27 UTC (rev 517)
+@@ -98,6 +98,7 @@
+ ENABLE_FORCE_ENCRYPTION=&quot;0&quot;
+ SSHD_CHECK_IP=&quot;0&quot;
+ 
++ENABLE_SLAVE_MODE=&quot;0&quot;
+ 
+ # Restriction directives
+ 
+
+Modified: trunk/freenx-server/nxnode
+===================================================================
+--- trunk/freenx-server/nxnode	2008-03-11 01:58:52 UTC (rev 516)
++++ trunk/freenx-server/nxnode	2008-03-11 05:55:27 UTC (rev 517)
+@@ -26,8 +26,12 @@
+ # -----------------------------------------------------------------------------
+ #
+ 
+-echo &quot;NX&gt; 1000 NXNODE - Version $NX_VERSION $NX_LICENSE&quot;
++DELIM=&quot;NX&gt;&quot;
+ 
++[ -n &quot;$2&quot; ] &amp;&amp; DELIM=&quot;NX-$2&gt;&quot;
++
++echo &quot;$DELIM 1000 NXNODE - Version $NX_VERSION $NX_LICENSE&quot;
++
+ if [ &quot;$1&quot; != &quot;--check&quot; -a &quot;$1&quot; != &quot;--setkey&quot; -a &quot;$1&quot; != &quot;--agent&quot; -a &quot;$1&quot; != &quot;--slave&quot; ]
+ then 
+ 	read CMDLINE
+@@ -1300,7 +1304,7 @@
+ cmd_node_terminate()
+ {
+ 	sessionid=$(getparam_sessionid)
+-	echo &quot;NX&gt; 716 Terminating session $sessionid on user request.&quot;
++	echo &quot;$DELIM 716 Terminating session $sessionid on user request.&quot;
+ 	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | awk 'BEGIN {FS=&quot;-&quot;} {i=NF-1; print $i}')
+ 	node_terminate_session &quot;$SERVER_NAME-$display-$sessionid&quot;
+ }
+@@ -1308,7 +1312,7 @@
+ cmd_node_suspend()
+ {
+ 	sessionid=$(getparam_sessionid)
+-	echo &quot;NX&gt; 716 Suspending session $sessionid on user request.&quot;
++	echo &quot;$DELIM 716 Suspending session $sessionid on user request.&quot;
+ 	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | awk 'BEGIN {FS=&quot;-&quot;} {i=NF-1; print $i}') 
+ 	node_suspend_session &quot;$SERVER_NAME-$display-$sessionid&quot;
+ }
+@@ -1480,23 +1484,28 @@
+ then
+ 	# New slave mode accepts more than 1 command at a time
+ 	echo &quot;NX&gt; 716 Slave mode started successfully.&quot;
+-	
++	NODE_SESSION=&quot;&quot;
++
+ 	while read CMD
+ 	do
+-		set -- &quot;$CMD&quot;
+-		if [ &quot;$1&quot; != &quot;--check&quot; -a &quot;$1&quot; != &quot;--setkey&quot; -a &quot;$1&quot; != &quot;--agent&quot; ]
++		[ &quot;$CMD&quot; = &quot;--quit&quot; ] &amp;&amp; break
++		
++		if [ &quot;$CMD&quot; != &quot;--check&quot; -a &quot;$CMD&quot; != &quot;--setkey&quot; -a &quot;$CMD&quot; != &quot;--agent&quot; ]
+ 		then 
+ 			read CMDLINE
+ 
+ 			CMDLINE=&quot;a=b&amp;$CMDLINE&quot;
+ 		fi
+ 		
+-		if [ &quot;$1&quot; = &quot;--startsession&quot; -o &quot;$1&quot; = &quot;--resumesession&quot; ]
++		if [ &quot;$CMD&quot; = &quot;--startsession&quot; -o &quot;$CMD&quot; = &quot;--resumesession&quot; ]
+ 		then
+ 			export SLAVE_PID=$$
+ 			( echo $CMDLINE | &quot;$0&quot; &quot;$CMD&quot;; kill $SLAVE_PID ) &amp;
++			NODE_SESSION=&quot;$!&quot;
+ 		else
+-			( echo $CMDLINE | &quot;$0&quot; &quot;$CMD&quot; ) &amp;
++			DELIM=&quot;&quot;
++			[ -n &quot;$NODE_SESSION&quot; ] &amp;&amp; DELIM=&quot;$NODE_SESSION-&gt;$CMD&quot;
++			( echo $CMDLINE | &quot;$0&quot; &quot;$CMD&quot; &quot;$DELIM&quot; ) &amp;
+ 		fi
+ 
+ 	done
+@@ -1504,4 +1513,4 @@
+ 	nxnode_func &quot;$@&quot;
+ fi
+ 
+-echo &quot;NX&gt; 1001 Bye.&quot;
++echo &quot;$DELIM 1001 Bye.&quot;
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-03-11 01:58:52 UTC (rev 516)
++++ trunk/freenx-server/nxserver	2008-03-11 05:55:27 UTC (rev 517)
+@@ -502,9 +502,15 @@
+ {
+ 	if [ -n &quot;$NXNODE_LOGIN_SLAVE&quot; ]
+ 	then
++		log 3 &quot;Info: Closing connection to slave with pid $NXNODE_LOGIN_SLAVE.&quot;
++		# send quit command
++		echo &quot;--quit&quot; &gt;&amp;$NX_COMM_FD
++
++		# kill process
+ 		kill &quot;$NXNODE_LOGIN_SLAVE&quot;
+ 		sleep 2
+ 		kill -0 &quot;$NXNODE_LOGIN_SLAVE&quot; &amp;&amp; kill -9 &quot;$NXNODE_LOGIN_SLAVE&quot;
++		unset NXNODE_LOGIN_SLAVE
+ 	fi
+ }
+ 
+@@ -517,43 +523,58 @@
+ 	then
+ 		NXNODE_TOSEND=&quot;$NXNODE_TOSEND&quot; echo $PASS | $PATH_BIN/nxnode-login &quot;$@&quot;
+ 	else
+-		if [ -z &quot;$NXNODE_LOGIN_SLAVE&quot; ]
++		if [ -z &quot;$NXNODE_LOGIN_SLAVE&quot; -a -z &quot;$NX_TRUSTED_USER&quot; ]
+ 		then
+ 			# Send password
+-			echo &quot;$PASS&quot; &gt;&amp;4 
++			echo &quot;$PASS&quot; &gt;&amp;$NX_COMM_FD
+ 
+ 			# Connect to NXNODE
+ 			
+-			$PATH_BIN/nxnode-login &quot;$1&quot; &quot;$2&quot; &quot;$3&quot; &quot;$4&quot; &quot;$5&quot; &quot;--slave&quot; &lt;&amp;3 &gt;&amp;3 2&gt;&amp;3 &amp;
++			( $PATH_BIN/nxnode-login &quot;$1&quot; &quot;$2&quot; &quot;$3&quot; &quot;$4&quot; &quot;$5&quot; &quot;--slave&quot; &lt;&amp;$NX_SERVER_FD &gt;&amp;$NX_SERVER_FD 2&gt;&amp;$NX_SERVER_FD || echo &quot;FREENX&gt; 716 Slave mode failed to start.&quot; &gt;&amp;$NX_SERVER_FD )  &amp;
+ 			NXNODE_LOGIN_SLAVE=&quot;$!&quot;
+ 			disown $!
+ 
+ 			trap nxnode_login_stop_slave EXIT
++
++			NXNODE_SLAVE_STARTED=&quot;&quot;
+ 			
+-			while read line &lt;&amp;4
++			# FIXME: Make timeout configurable
++			while read -t 10 line &lt;&amp;$NX_COMM_FD
+ 			do
+ 				log 6 &quot;$line&quot;
+ 				case &quot;$line&quot; in
+ 					&quot;NX&gt; 716 Slave mode started successfully.&quot;)
++						NXNODE_SLAVE_STARTED=&quot;1&quot;
+ 						break
+ 					;;
++					&quot;FREENX&gt; 716 Slave mode failed to start.&quot;)
++						break
++					;;
+ 				esac
+ 			done
+ 
+-			# TODO: KILL the slave node at end of session
++			if [ -z &quot;$NXNODE_SLAVE_STARTED&quot; ]
++			then
++				# stop it, if it still exists
++				nxnode_login_stop_slave 
++				unset NXNODE_LOGIN_SLAVE
++				# return an error
++				return 1
++			fi
+ 		fi
+ 		
+ 		#send CMD to nxnode
+ 		
+-		echo &quot;$6&quot; &gt;&amp;4
+-		[ -n &quot;$NXNODE_TOSEND&quot; ] &amp;&amp; echo &quot;$NXNODE_TOSEND&quot; &gt;&amp;4
++		echo &quot;$6&quot; &gt;&amp;$NX_COMM_FD
++		[ -n &quot;$NXNODE_TOSEND&quot; ] &amp;&amp; echo &quot;$NXNODE_TOSEND&quot; &gt;&amp;$NX_COMM_FD
+ 
+ 		NXNODE_RETURN=&quot;1&quot;
+ 
+ 		if [ -z &quot;$NXNODE_READER&quot; ]
+ 		then
+-			while read line &lt;&amp;4
++			while read line &lt;&amp;$NX_COMM_FD
+ 			do
++				log 6 &quot;nxnode_reader: $line&quot;
+ 				echo &quot;$line&quot;
+ 				case &quot;$line&quot; in
+ 					&quot;NX&gt; 716&quot;*) 
+@@ -575,8 +596,6 @@
+ 	NXNODE_READER=&quot;1&quot;
+ }
+ 
+-#ENABLE_NXNODE_SLAVE_MODE=&quot;1&quot;
+-
+ # Start!
+ [ &quot;$NX_LOG_LEVEL&quot; -ge &quot;1&quot; ] &amp;&amp; touch &quot;$NX_LOGFILE&quot; &gt;/dev/null 2&gt;&amp;1
+ log 3 &quot;-- NX SERVER START: $@ - ORIG_COMMAND=$SSH_ORIGINAL_COMMAND&quot;
+@@ -606,20 +625,47 @@
+ NXNODE_LOGIN_SLAVE_ENABLED=&quot;0&quot;
+ NXNODE_LOGIN_SLAVE=&quot;&quot;
+ 
+-if [ &quot;$ENABLE_NXNODE_SLAVE_MODE&quot; = &quot;1&quot; -a &quot;$NXSERVER_HELPER_ACTIVE&quot; != &quot;1&quot; ]
++if [ &quot;$ENABLE_SLAVE_MODE&quot; = &quot;1&quot; -a &quot;$NXSERVER_HELPER_ACTIVE&quot; != &quot;1&quot; ]
+ then
+ 	export SSH_ORIGINAL_COMMAND
+ 	export NXSERVER_HELPER_ACTIVE=&quot;1&quot;
+ 	exec $PATH_BIN/nxserver-helper &quot;$0&quot;
+ 	log 1 &quot;Error: Execution of $PATH_BIN/nxserver-helper failed. Disabling slave mode of nxnode.&quot;
++	export NXSERVER_HELPER_ACTIVE=&quot;0&quot;
+ fi
+ 
+-if [ &quot;$ENABLE_NXNODE_SLAVE_MODE&quot; = &quot;1&quot; -a &quot;$NXSERVER_HELPER_ACTIVE&quot; = &quot;1&quot; ]
++if [ &quot;$ENABLE_SLAVE_MODE&quot; = &quot;1&quot; -a &quot;$NXSERVER_HELPER_ACTIVE&quot; = &quot;1&quot; ]
+ then
+-	log 3 &quot;Info: Using fds #3 and #4 for communication with nxnode.&quot;
++	log 3 &quot;Info: Using fds #$NX_SERVER_FD and #$NX_COMM_FD for communication with nxnode.&quot;
+ 	NXNODE_LOGIN_SLAVE_ENABLED=&quot;1&quot;
+ fi
+ 
++if [ -n &quot;$NX_TRUSTED_USER&quot; -a -n &quot;$NX_COMMFD&quot; ]
++then
++	NXNODE_LOGIN_SLAVE_ENABLED=&quot;1&quot;
++	USER=$NX_TRUSTED_USER
++	
++	# check that communication works
++	nxnode_login &quot;&quot; -- su &quot;$USER&quot; &quot;&quot; &quot;$PATH_BIN/nxnode&quot; --check 2&gt;&amp;1 &gt;/dev/null
++
++	if [ $? -ne 0 ]
++	then
++		log 1 &quot;Error: Could not establish communication with trusted user ($USER) nxnode.&quot;
++		echo_x &quot;NX&gt; 404 ERROR: wrong password or login&quot;
++		echo_x &quot;NX&gt; 999 Bye&quot;
++		exit 1
++	fi
++	
++	LOGIN_SUCCESS=&quot;1&quot;
++	LOGIN_METHOD=&quot;SU&quot;
++
++	log 3 &quot;Info: Using fd #$NX_COMM_FD for communication with trusted user ($USER) established nxnode.&quot;
++	
++	# Reread the config files (so that $USER.node.conf get sourced)
++	. $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig) --userconf
++	echo_x &quot;NX&gt; 103 Welcome to: $SERVER_NAME user: $USER&quot;
++else
++
+ echo_x &quot;HELLO NXSERVER - Version $NX_VERSION $NX_LICENSE&quot;
+ 
+ # Login stage
+@@ -747,6 +793,11 @@
+ 	esac
+ done
+ 
++fi
++
++# Add the slave mode shutdown trap (just in case)
++[ -n &quot;$NXNODE_LOGIN_SLAVE&quot; ] &amp;&amp; trap nxnode_login_stop_slave EXIT
++
+ # remove old session infos from history
+ session_cleanup
+ 
+
+Modified: trunk/freenx-server/nxserver-helper/nxserver-helper.c
+===================================================================
+--- trunk/freenx-server/nxserver-helper/nxserver-helper.c	2008-03-11 01:58:52 UTC (rev 516)
++++ trunk/freenx-server/nxserver-helper/nxserver-helper.c	2008-03-11 05:55:27 UTC (rev 517)
+@@ -10,12 +10,27 @@
+ #include &lt;sys/types.h&gt;
+ #include &lt;sys/socket.h&gt;
+ #include &lt;unistd.h&gt;
++#include &lt;stdio.h&gt;
++#include &lt;stdlib.h&gt;
+ 
+ int main(int argc, char* argv[])
+ {
+ 	int fds[2];
++	char buf[1024];
+ 
+ 	socketpair(AF_UNIX, SOCK_STREAM, 0, fds);
++	
++	// This fd can be used by the server for spawning the node
++	snprintf(buf, 1022, &quot;%d&quot;, fds[1]);
++	setenv(&quot;NX_SERVER_FD&quot;, buf, 1);
++	
++	// This fd can be used for communication with the node
++	snprintf(buf, 1022, &quot;%d&quot;, fds[0]);
++	setenv(&quot;NX_COMM_FD&quot;, buf, 1);
++
++	// We do not trust this user, he still has to login
++	unsetenv(&quot;NX_TRUSTED_USER&quot;);
++
+ 	argv++;
+ 	execv(argv[0], argv);
+ }
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000640.html">[Freenx-cvs] r516 - trunk/freenx-server/nxredir
+</A></li>
+	<LI>Next message: <A HREF="000642.html">[Freenx-cvs] r518 - trunk/freenx-redesign/server/utility
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#641">[ date ]</a>
+              <a href="thread.html#641">[ thread ]</a>
+              <a href="subject.html#641">[ subject ]</a>
+              <a href="author.html#641">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

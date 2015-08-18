@@ -1,0 +1,1074 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r231 - / freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-July/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r231%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200607050203.k6523nvt006895%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000359.html">
+   <LINK REL="Next"  HREF="000361.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r231 - / freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r231%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200607050203.k6523nvt006895%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r231 - / freenx-server/trunk">fabianx at berlios.de
+       </A><BR>
+    <I>Wed Jul  5 04:03:49 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000359.html">[Freenx-cvs] r230 - / freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000361.html">[Freenx-cvs] r232 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#360">[ date ]</a>
+              <a href="thread.html#360">[ thread ]</a>
+              <a href="subject.html#360">[ subject ]</a>
+              <a href="author.html#360">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2006-07-05 04:03:45 +0200 (Wed, 05 Jul 2006)
+New Revision: 231
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxnode
+   freenx-server/trunk/nxnode-login
+Log:
+- Huge code cleanup of nxnode.
+
+- Some comments to nxnode-login.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:248
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:250
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-07-05 00:06:46 UTC (rev 230)
++++ freenx-server/trunk/ChangeLog	2006-07-05 02:03:45 UTC (rev 231)
+@@ -2,6 +2,7 @@
+ 	* Opened the 0.6.0 branch.
+ 	* Added nxnode slave mode.
+ 	* General code cleanup.
++		* Huge cleanup of nxnode.
+ 	* Removed &quot;no-x11-forwarding&quot; from keys to allow client to use the
+ 	  faster interactive sessions.
+ 	* Fixed nxsetup automatic testing of sessions and cleared up
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2006-07-05 00:06:46 UTC (rev 230)
++++ freenx-server/trunk/nxnode	2006-07-05 02:03:45 UTC (rev 231)
+@@ -20,6 +20,12 @@
+ # Read the config file
+ . $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig) --userconf
+ 
++#
++# -----------------------------------------------------------------------------
++# Startup of nxnode
++# -----------------------------------------------------------------------------
++#
++
+ echo &quot;NX&gt; 1000 NXNODE - Version $NX_VERSION $NX_LICENSE&quot;
+ 
+ if [ &quot;$1&quot; != &quot;--check&quot; -a &quot;$1&quot; != &quot;--setkey&quot; -a &quot;$1&quot; != &quot;--agent&quot; -a &quot;$1&quot; != &quot;--slave&quot; ]
+@@ -29,21 +35,30 @@
+ 	CMDLINE=&quot;a=b&amp;$CMDLINE&quot;
+ fi
+ 
+-# --------
++#
++# -----------------------------------------------------------------------------
++# Various helper functions
++# -----------------------------------------------------------------------------
++#
+ 
+-# following two functions are Copyright by Klaus Knopper
+-
+-# same for strings
+-stringinstring(){
+-case &quot;$2&quot; in *$1*) return 0;; esac
+-return 1
++stringinstring()
++{
++	case &quot;$2&quot; in
++		*$1*)
++			return 0
++		;;
++	esac
++	
++	return 1
+ }
+ 
+-# Reread boot command line; echo last parameter's argument or return false.
+-getparam(){
+-stringinstring &quot;&amp;$1=&quot; &quot;$CMDLINE&quot; || return 1
+-echo &quot;$CMDLINE&quot; |  tr &quot;&amp;&quot; &quot;\n&quot; | egrep &quot;^&quot;$1&quot;=&quot; | awk -F= '{ VAL=$2 } END { print VAL }'
+-return 0
++getparam()
++{
++	stringinstring &quot;&amp;$1=&quot; &quot;$CMDLINE&quot; || return 1
++	
++	echo &quot;$CMDLINE&quot; |  tr &quot;&amp;&quot; &quot;\n&quot; | egrep &quot;^&quot;$1&quot;=&quot; | awk -F= '{ VAL=$2 } END { print VAL }'
++	
++	return 0
+ }
+ 
+ find_app()
+@@ -52,117 +67,186 @@
+ 	which $1 2&gt;/dev/null
+ }
+ 
+-getparam_user()
+-{
+-	[ $UID -eq 0 ] &amp;&amp; echo $(getparam user)
+-	[ $UID -eq 0 ] || $(whoami)
+-}
+-
+-node_abort()
+-{
+-	echo &quot;$@&quot; 1&gt;&amp;2
+-	exit 1
+-}
+-
+ getparam_sessionid()
+ {
+ 	sessionid=$(getparam sessionid)
+ 	
+ 	[ -n &quot;$sessionid&quot; ] || sessionid=$(getparam session_id)
+-	[ -n &quot;$sessionid&quot; ] || node_abort &quot;NX&gt; 500 Error: missing parameter session id&quot;
++	if [ -z &quot;$sessionid&quot; ]
++	then
++		echo &quot;NX&gt; 500 Error: Fatal - Missing parameter session id.&quot; 1&gt;&amp;2
++		exit 1
++	fi
++	
+ 	echo $sessionid
+ }
+ 
++#
++# -----------------------------------------------------------------------------
++# Node functions module
++# -----------------------------------------------------------------------------
++#
+ 
++#
++# node_terminate_agent &lt;session id&gt;
++#
++
+ node_terminate_agent()
+ {
+-	AGENT_PID=$(cat $USER_FAKE_HOME/.nx/C-$1/pids/agent 2&gt;/dev/null)
+-	[ -n &quot;$AGENT_PID&quot; ] &amp;&amp; kill $AGENT_PID 2&gt;/dev/null
++	NODE_AGENT_PID=$(cat &quot;$USER_FAKE_HOME/.nx/C-$1/pids/agent&quot; 2&gt;/dev/null)
++	[ -n &quot;$NODE_AGENT_PID&quot; ] &amp;&amp; kill $NODE_AGENT_PID 2&gt;/dev/null
+ }
+ 
++#
++# node_terminate_session &lt;session id&gt;
++#
++#	Used local vars: $virtualdesktop, $rootless
++#
++#	Used config vars: $COMMAND_XAUTH, $SESSION_LOG_CLEAN
++#
++
+ node_terminate_session()
+ {
++	#
++	# Cleanup session
++	#
++
+ 	[ -d &quot;$USER_FAKE_HOME/.nx/C-$1/&quot; ] || return
+-	AGENT_PID=$(cat $USER_FAKE_HOME/.nx/C-$1/pids/agent 2&gt;/dev/null)
+-	if [ -n &quot;$AGENT_PID&quot; ]
+-	then 
+-		kill $AGENT_PID 2&gt;/dev/null
++
++	# Kill nxagent
++	
++	NODE_AGENT_PID=$(cat &quot;$USER_FAKE_HOME/.nx/C-$1/pids/agent&quot; 2&gt;/dev/null)
++	
++	if [ -n &quot;$NODE_AGENT_PID&quot; ]
++	then
++		kill $NODE_AGENT_PID 2&gt;/dev/null
+ 		if ! [ &quot;$virtualdesktop&quot; = &quot;0&quot; -a &quot;$rootless&quot; != &quot;1&quot; ]
+ 		then
+ 			sleep 1
+-			kill -0 $AGENT_PID 2&gt;/dev/null &amp;&amp; kill -9 $AGENT_PID 2&gt;/dev/null
++			kill -0 $NODE_AGENT_PID 2&gt;/dev/null &amp;&amp; kill -9 $NODE_AGENT_PID 2&gt;/dev/null
+ 		fi
+ 	fi
+-	# remove possible leftover display ...
+-	display=$(echo $1 | rev | cut -d&quot;-&quot; -f2 | rev)
+-	rm -f /tmp/.X$display-lock
+-	rm -f /tmp/.X11-unix/X$display
++
++	# Remove display information
+ 	
+-	# remove cookie
+-	$COMMAND_XAUTH -v source $USER_FAKE_HOME/.nx/C-$1/scripts/authority &gt;/dev/null 2&gt;&amp;1
+-	[ &quot;$SESSION_LOG_CLEAN&quot; = &quot;1&quot; ] &amp;&amp; rm -rf $USER_FAKE_HOME/.nx/C-$1/
+-	[ &quot;$SESSION_LOG_CLEAN&quot; = &quot;0&quot; -a &quot;$2&quot; = &quot;failed&quot; ] &amp;&amp; mv $USER_FAKE_HOME/.nx/C-$1/ $USER_FAKE_HOME/.nx/F-C-$1/
+-	[ &quot;$SESSION_LOG_CLEAN&quot; = &quot;0&quot; -a &quot;$2&quot; != &quot;failed&quot; ] &amp;&amp; mv $USER_FAKE_HOME/.nx/C-$1/ $USER_FAKE_HOME/.nx/T-C-$1/
++	NODE_DISPLAY=$(echo $1 | rev | cut -d&quot;-&quot; -f2 | rev)
++	rm -f /tmp/.X$NODE_DISPLAY-lock
++	rm -f /tmp/.X11-unix/X$NODE_DISPLAY
++	
++	# Remove magic cookie information
++	
++	$COMMAND_XAUTH -v source &quot;$USER_FAKE_HOME/.nx/C-$1/scripts/authority&quot; &gt;/dev/null 2&gt;&amp;1
++
++	# Preserve or remove session information
++	
++	[ &quot;$SESSION_LOG_CLEAN&quot; = &quot;1&quot; ] &amp;&amp; rm -rf &quot;$USER_FAKE_HOME/.nx/C-$1/&quot;
++	
++	[ &quot;$SESSION_LOG_CLEAN&quot; = &quot;0&quot; -a &quot;$2&quot; = &quot;failed&quot; ] &amp;&amp; mv &quot;$USER_FAKE_HOME/.nx/C-$1/&quot; &quot;$USER_FAKE_HOME/.nx/F-C-$1/&quot;
++	[ &quot;$SESSION_LOG_CLEAN&quot; = &quot;0&quot; -a &quot;$2&quot; != &quot;failed&quot; ] &amp;&amp; mv &quot;$USER_FAKE_HOME/.nx/C-$1/&quot; &quot;$USER_FAKE_HOME/.nx/T-C-$1/&quot;
+ }
+ 
++#
++# node_fail_restore_session &lt;session id&gt;
++#
++
++# TODO: Kill still running tail -f process.
++
+ node_fail_restore_session()
+ {
+ 	echo &quot;NX&gt; 1004 Error: Could not resume session. nxagent process could not be found.&quot;
+-	node_terminate_session &quot;$sess_id&quot; &quot;failed&quot;
++	node_terminate_session &quot;$1&quot; &quot;failed&quot;
+ 	exit 1
+ }
+ 
++#
++# node_suspend_session &lt;session id&gt;
++#
++
+ node_suspend_session()
+ {
+-	AGENT_PID=$(cat $USER_FAKE_HOME/.nx/C-$1/pids/agent 2&gt;/dev/null)
+-	if [ -n &quot;$AGENT_PID&quot; ]
+-	then 
+-		kill -0 $AGENT_PID || return 1
+-		kill -HUP $AGENT_PID &amp;&amp; return 0
++	NODE_AGENT_PID=$(cat &quot;$USER_FAKE_HOME/.nx/C-$1/pids/agent&quot; 2&gt;/dev/null)
++
++	if [ -n &quot;$NODE_AGENT_PID&quot; ]
++	then
++		kill -0 $NODE_AGENT_PID || return 1
++		kill -HUP $NODE_AGENT_PID &amp;&amp; return 0
+ 	fi
++
+ 	return 1
+ }
+ 
+-# ---------
+-#stringinstring &quot;$CMD&quot;
++#
++# node_find_application &lt;type&gt;
++#
++#	Used config vars: $COMMAND_START_KDE, $COMMAND_START_GNOME,
++#			  $COMMAND_START_CDE, $COMMAND_XTERM, $USER_X_STARTUP_SCRIPT,
++#			  $DEFAULT_X_SESSION
+ 
+-node_start_applications()
++node_find_application()
+ {
+-	# close input and output file descriptors
+-	exec 0&lt;&amp;-
+-	exec 1&gt;&amp;-
+-	exec 2&gt;&amp;-
+-	
+-	. /etc/profile
+-	[ -f ~/.bash_profile ] &amp;&amp; . ~/.bash_profile
++	NODE_STARTX=&quot;&quot;
+ 
+-	mkdir -p $USER_FAKE_HOME/.nx/C-$sess_id/pids/
+-
+-	STARTX=&quot;&quot;
+-	case $type in
++	case $1 in
+ 		unix-kde)
+-			STARTX=$COMMAND_START_KDE
++			NODE_STARTX=$COMMAND_START_KDE
+ 		;;
+ 		unix-gnome)
+-			STARTX=$COMMAND_START_GNOME
++			NODE_STARTX=$COMMAND_START_GNOME
+ 		;;
+ 		unix-cde)
+-			STARTX=$COMMAND_START_CDE
++			NODE_STARTX=$COMMAND_START_CDE
+ 		;;
+ 		unix-application)
+ 			[ &quot;$application&quot; = &quot;xterm&quot; ] &amp;&amp; application=&quot;$COMMAND_XTERM&quot;
+-			STARTX=$application
++			NODE_STARTX=$application
+ 		;;
+ 		unix-default)
+ 			if [ -x &quot;$HOME/$USER_X_STARTUP_SCRIPT&quot; ]; then
+-				STARTX=&quot;$HOME/$USER_X_STARTUP_SCRIPT&quot;
++				NODE_STARTX=&quot;$HOME/$USER_X_STARTUP_SCRIPT&quot;
+ 			elif which &quot;$DEFAULT_X_SESSION&quot; &gt;/dev/null 2&gt;&amp;1 ; then
+-				STARTX=&quot;$DEFAULT_X_SESSION&quot;
++				NODE_STARTX=&quot;$DEFAULT_X_SESSION&quot;
+ 			fi
+ 		;;
+ 	esac
+-	[ -n &quot;$STARTX&quot; ] || return
+ 
++	echo &quot;$NODE_STARTX&quot;
++}
++
++#
++# node_start_applications
++#
++#	Used local vars: $type, $application, $sess_id, $mediahelper,
++#		         $virtualdesktop, $rootless, $display
++#
++#	Used config vars: &lt;several&gt;
++#
++
++node_start_applications()
++{
++	# close input and output file descriptors
++	exec 0&lt;&amp;-
++	exec 1&gt;&amp;-
++	exec 2&gt;&amp;-
++
++	#
++	# Prepare application startup
++	#
++	
++	. /etc/profile
++	[ -f ~/.bash_profile ] &amp;&amp; . ~/.bash_profile
++
++	mkdir -p &quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/&quot;
++
++	#
++	# Which application do we start?
++	#
++
++	NODE_APPLICATION=$(node_find_application &quot;$type&quot;)
++
++	#
++	# Check if we want to use a mediahelper
++	#
++
+ 	if [ &quot;$mediahelper&quot; = &quot;esd&quot; ]
+ 	then
+ 		# Set Espeaker variable
+@@ -175,9 +259,8 @@
+ 		# Check for config file directive
+ 		if [ &quot;$ENABLE_ESD_PRELOAD&quot; = &quot;1&quot; -a -x &quot;$(find_app $ESD_BIN_PRELOAD)&quot; ]
+ 		then
+-			STARTX=&quot;$ESD_BIN_PRELOAD $STARTX&quot;
+-			
+-			echo &quot;Info: NXNODE - Using $ESD_BIN_PRELOAD wrapper script.&quot; &gt;&gt; $USER_FAKE_HOME/.nx/C-$sess_id/session
++			NODE_APPLICATION=&quot;$ESD_BIN_PRELOAD $NODE_APPLICATION&quot;
++			echo &quot;Info: NXNODE - Using $ESD_BIN_PRELOAD wrapper script.&quot; &gt;&gt; &quot;$USER_FAKE_HOME/.nx/C-$sess_id/session&quot;
+ 		fi
+ 	elif [ &quot;$mediahelper&quot; = &quot;artsd&quot; ]
+ 	then
+@@ -185,36 +268,85 @@
+ 		echo -n &quot;GlobalComm=Arts::X11GlobalComm&quot; &gt; $HOME/.mcoprc
+ 		if [ &quot;$ENABLE_ARTSD_PRELOAD&quot; = &quot;1&quot; -a -x &quot;$(find_app $ARTSD_BIN_PRELOAD)&quot; ]
+ 		then
+-			STARTX=&quot;$ARTSD_BIN_PRELOAD $STARTX&quot;
+-			echo &quot;Info: NXNODE - Using $ARTSD_BIN_PRELOAD wrapper script.&quot; &gt;&gt; $USER_FAKE_HOME/.nx/C-$sess_id/session
++			NODE_APPLICATION=&quot;$ARTSD_BIN_PRELOAD $NODE_APPLICATION&quot;
++			echo &quot;Info: NXNODE - Using $ARTSD_BIN_PRELOAD wrapper script.&quot; &gt;&gt; &quot;$USER_FAKE_HOME/.nx/C-$sess_id/session&quot;
+ 		fi
+ 	fi
+ 
++	#
++	# Do we need to PRELOAD any libraries?
++	#	
++
+ 	[ &quot;$virtualdesktop&quot; = &quot;0&quot; -a &quot;$rootless&quot; != &quot;1&quot; ] &amp;&amp; export LD_PRELOAD=&quot;$APPLICATION_LIBRARY_PRELOAD:$LD_PRELOAD&quot;
++
++	#
++	# Should we start a window manager?
++	#
++	
+ 	if [ &quot;$virtualdesktop&quot; = &quot;1&quot; -a &quot;$type&quot; = &quot;unix-application&quot; -a &quot;$DEFAULT_X_WM&quot; != &quot;&quot; -a -x &quot;$(find_app $DEFAULT_X_WM)&quot; ]
+ 	then
+-		DISPLAY=unix:$display $DEFAULT_X_WM &gt;&gt;$USER_FAKE_HOME/.nx/C-$sess_id/session 2&gt;&amp;1 &amp;
+-		WM_PID=$!
++		DISPLAY=unix:$display $DEFAULT_X_WM &gt;&gt;&quot;$USER_FAKE_HOME/.nx/C-$sess_id/session&quot; 2&gt;&amp;1 &amp;
++		NODE_WM_PID=$!
+ 	fi
+-	DISPLAY=unix:$display $STARTX &gt;&gt;$USER_FAKE_HOME/.nx/C-$sess_id/session 2&gt;&amp;1 &amp;
+-	APP_PID=$!
+-	mkdir -p $USER_FAKE_HOME/.nx/C-$sess_id/pids/
+-	echo &quot;$APP_PID&quot; &gt; $USER_FAKE_HOME/.nx/C-$sess_id/pids/applications
+-	wait $APP_PID
+-	if [ -n &quot;$WM_PID&quot; ]
++
++	#
++	# Startup the application
++	#
++	
++	DISPLAY=unix:$display $STARTX &gt;&gt;&quot;$USER_FAKE_HOME/.nx/C-$sess_id/session&quot; 2&gt;&amp;1 &amp;
++	NODE_APP_PID=$!
++	
++	mkdir -p &quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/&quot;
++	echo &quot;$NODE_APP_PID&quot; &gt;&quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/applications&quot;
++	wait $NODE_APP_PID
++
++	#
++	# Kill or wait for the started window manager
++	#	
++	
++	if [ -n &quot;$NODE_WM_PID&quot; ]
+ 	then
+ 		# kill the WM after application is finished?
+-		[ &quot;$KILL_DEFAULT_X_WM&quot; = &quot;1&quot; ] &amp;&amp; kill $WM_PID 2&gt;/dev/null
++		[ &quot;$KILL_DEFAULT_X_WM&quot; = &quot;1&quot; ] &amp;&amp; kill $NODE_WM_PID 2&gt;/dev/null
+ 		# or just wait until it finishes?
+-		[ &quot;$KILL_DEFAULT_X_WM&quot; = &quot;1&quot; ] || wait $WM_PID
++		[ &quot;$KILL_DEFAULT_X_WM&quot; = &quot;1&quot; ] || wait $NODE_WM_PID
+ 	fi
+-	rm -f $USER_FAKE_HOME/.nx/C-$sess_id/pids/applications
++	rm -f &quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/applications&quot;
+ 
+ 	# Do not terminate agent in case of rootless agent mode.
+ 	# The agent times out after a while by itself anyway.
+-	[ &quot;$virtualdesktop&quot; = &quot;1&quot; -o &quot;$rootless&quot; != &quot;1&quot; ] &amp;&amp; node_terminate_agent $sess_id
++	
++	[ &quot;$virtualdesktop&quot; = &quot;1&quot; -o &quot;$rootless&quot; != &quot;1&quot; ] &amp;&amp; node_terminate_agent &quot;$sess_id&quot;
+ }
+ 
++#
++# node_persistent_session
++#
++#	Is the user allowed to run a persistent session?
++#
++
++node_agent_persistent_session()
++{
++	P=&quot;-nopersistent&quot;
++	OLD_IFS=$IFS
++	IFS=&quot;,&quot;
++	[ &quot;$ENABLE_PERSISTENT_SESSION&quot; = &quot;all&quot; ] &amp;&amp; P=&quot;-persistent&quot;
++	[ &quot;$ENABLE_PERSISTENT_SESSION&quot; = &quot;all&quot; ] || for USERNAME in $ENABLE_PERSISTENT_SESSION; do
++		[ &quot;${USERNAME:0:1}&quot; != &quot;@&quot; ] &amp;&amp; [ &quot;$USER&quot; = &quot;$USERNAME&quot; ] &amp;&amp; P=&quot;-persistent&quot; &amp;&amp; break ;
++		[ &quot;${USERNAME:0:1}&quot; = &quot;@&quot; ] &amp;&amp; [ -z $(groups &quot;$USER&quot; | egrep &quot;^${USERNAME:1}:&quot;) ] &amp;&amp; P=&quot;-persistent&quot; &amp;&amp; break ;
++	done
++	for USERNAME in $DISABLE_PERSISTENT_SESSION; do
++		[ &quot;${USERNAME:0:1}&quot; != &quot;@&quot; ] &amp;&amp; [ &quot;$USER&quot; = &quot;$USERNAME&quot; ] &amp;&amp; P=&quot;-nopersistent&quot; &amp;&amp; break ;
++		[ &quot;${USERNAME:0:1}&quot; = &quot;@&quot; ] &amp;&amp; [ -z $(groups &quot;$USER&quot; | egrep &quot;^${USERNAME:1}:&quot;) ] &amp;&amp; P=&quot;-nopersistent&quot; &amp;&amp; break ;
++	done
++	IFS=$OLD_IFS
++	echo &quot;$P&quot;
++}
++
++#
++# node_start_agent
++#
++
+ node_start_agent()
+ {
+ 	# Ok, now we do some wicked fd magic.
+@@ -243,42 +375,83 @@
+ 	
+ 	{
+ 
++	#
++	# Setup environment
++	#
++
+ 	export DISPLAY=&quot;nx/nx,options=$USER_FAKE_HOME/.nx/C-$sess_id/options:$display&quot;
+ 	export XAUTHORITY=&quot;$USER_FAKE_HOME/.nx/C-$sess_id/authority&quot;
+ 	export HOME=&quot;$USER_FAKE_HOME&quot;
++
++	#
++	# Setup optional parameters for nxagent
++	#
++
++	# keyboard
+ 	
++	K=&quot;&quot;
+ 	# backwards compatibility
+-	K=&quot;&quot;
+ 	[ -n &quot;$keyboard&quot; ] &amp;&amp; K=&quot;-keyboard $keyboard&quot;
+ 	[ -n &quot;$kbtype&quot; ] &amp;&amp; K=&quot;-kbtype $kbtype&quot;
++
++	# backingstore
++	
+ 	B=&quot;&quot;
+ 	[ -n &quot;$backingstore&quot; -a &quot;$ENABLE_2_0_0_BACKEND&quot; != &quot;1&quot; ] &amp;&amp; B=&quot;-bs $backingstore&quot;
++
++	# geometry
++	
+ 	G=&quot;&quot;
+ 	[ -n &quot;$geometry&quot; ] &amp;&amp; G=&quot;-geometry $geometry&quot;
++
++	# type of session
++	
+ 	R=&quot;-D&quot;
+ 	[ &quot;$rootless&quot; = &quot;1&quot; ] &amp;&amp; R=&quot;-R&quot;
++
++	# Setup fullscreen parameters
++	
+ 	vncfullscreen=&quot;&quot;
+ 	[ &quot;$geometry&quot; = &quot;fullscreen&quot; -a &quot;$type&quot; = &quot;vnc&quot; ] &amp;&amp; vncfullscreen=&quot;-fullscreen&quot; &amp;&amp; G=&quot;&quot;
++	
+ 	[ &quot;$geometry&quot; = &quot;fullscreen&quot; -a &quot;$type&quot; = &quot;windows&quot; ] &amp;&amp; G=&quot;-geometry `echo $screeninfo | cut -d&quot;x&quot; -f1,2`&quot;
+ 
++	#
++	# Start the wanted nxagent
++	#
++
+ 	if [ &quot;$type&quot; = &quot;windows&quot; ]
+ 	then
+ 		# nxdesktop session (Windows RDP)
++
+ 		[ &quot;$SET_LD_LIBRARY_PATH&quot; = &quot;1&quot; ] &amp;&amp; export LD_LIBRARY_PATH=&quot;$AGENT_LIBRARY_PATH:$LD_LIBRARY_PATH&quot;
++		# Setup optional parameters
++		
+ 		U=&quot;&quot;
+ 		P=&quot;&quot;
+ 		D=&quot;&quot;
+ 		[ -n &quot;$agent_user&quot; ] &amp;&amp; U=&quot;-u $agent_user&quot;
+ 		[ -n &quot;$agent_password&quot; ] &amp;&amp; P=&quot;-p -&quot;
+ 		[ -n &quot;$agent_domain&quot; ] &amp;&amp; D=&quot;-d $agent_domain&quot;
++
++		# Start the agent
++		
+ 		echo &quot;$agent_password&quot; | $PATH_BIN/nxdesktop -name &quot;NX - $user@$SERVER_NAME:$display - $session (GPL Edition)&quot; -option &quot;$USER_FAKE_HOME/.nx/C-$sess_id/options&quot; $K $G $U $P $D $agent_server $AGENT_EXTRA_OPTIONS_RDP 2&gt;&amp;3 &amp;
++
+ 	elif [ &quot;$type&quot; = &quot;vnc&quot; ]
+ 	then
+ 		# nxviewer session (VNC RFP)
++		
+ 		[ &quot;$SET_LD_LIBRARY_PATH&quot; = &quot;1&quot; ] &amp;&amp; export LD_LIBRARY_PATH=&quot;$AGENT_LIBRARY_PATH:$LD_LIBRARY_PATH&quot;
+-		mkdir -p $USER_FAKE_HOME/.nx/C-$sess_id/scripts/
+-		echo &quot;$agent_password&quot; | $PATH_BIN/nxpasswd $USER_FAKE_HOME/.nx/C-$sess_id/scripts/.passwd doit
++		# Setup password
++		
++		mkdir -p &quot;$USER_FAKE_HOME/.nx/C-$sess_id/scripts/&quot;
++		echo &quot;$agent_password&quot; | $PATH_BIN/nxpasswd &quot;$USER_FAKE_HOME/.nx/C-$sess_id/scripts/.passwd&quot; doit
++		
++		# Start the agent
++		
+ 		$PATH_BIN/nxviewer -encodings tight hextile copyrect raw -passwd $USER_FAKE_HOME/.nx/C-$sess_id/scripts/.passwd -name &quot;NX - $user@$SERVER_NAME:$display - $session (GPL Edition)&quot; -option &quot;$USER_FAKE_HOME/.nx/C-$sess_id/options&quot; $vncfullscreen $G $K $agent_server $AGENT_EXTRA_OPTIONS_RFB 2&gt;&amp;3 &amp;
++
+ 	elif [ &quot;$R&quot; = &quot;-R&quot; -a &quot;$rootless&quot; != &quot;1&quot; ]
+ 	then
+ 		# nxproxy single application mode session
+@@ -287,76 +460,94 @@
+ 	else
+ 		# nxagent session (X11)
+ 		[ &quot;$SET_LD_LIBRARY_PATH&quot; = &quot;1&quot; ] &amp;&amp; export LD_LIBRARY_PATH=&quot;$AGENT_LIBRARY_PATH:$LD_LIBRARY_PATH&quot;
+-		P=&quot;-nopersistent&quot;
+-		OLD_IFS=$IFS
+-		IFS=&quot;,&quot;
+-		[ &quot;$ENABLE_PERSISTENT_SESSION&quot; = &quot;all&quot; ] &amp;&amp; P=&quot;-persistent&quot;
+-		[ &quot;$ENABLE_PERSISTENT_SESSION&quot; = &quot;all&quot; ] || for USERNAME in $ENABLE_PERSISTENT_SESSION; do
+-			[ &quot;${USERNAME:0:1}&quot; != &quot;@&quot; ] &amp;&amp; [ &quot;$USER&quot; = &quot;$USERNAME&quot; ] &amp;&amp; P=&quot;-persistent&quot; &amp;&amp; break ;
+-			[ &quot;${USERNAME:0:1}&quot; = &quot;@&quot; ] &amp;&amp; [ -z $(groups &quot;$USER&quot; | egrep &quot;^${USERNAME:1}:&quot;) ] &amp;&amp; P=&quot;-persistent&quot; &amp;&amp; break ;
+-		done
+-		for USERNAME in $DISABLE_PERSISTENT_SESSION; do
+-			[ &quot;${USERNAME:0:1}&quot; != &quot;@&quot; ] &amp;&amp; [ &quot;$USER&quot; = &quot;$USERNAME&quot; ] &amp;&amp; P=&quot;-nopersistent&quot; &amp;&amp; break ;
+-			[ &quot;${USERNAME:0:1}&quot; = &quot;@&quot; ] &amp;&amp; [ -z $(groups &quot;$USER&quot; | egrep &quot;^${USERNAME:1}:&quot;) ] &amp;&amp; P=&quot;-nopersistent&quot; &amp;&amp; break ;
+-		done
+-		IFS=$OLD_IFS
++		
++		# Setup optional parameters
++
++		P=$(node_agent_persistent_session)
+ 		FP=&quot;&quot;
+ 		[ -n &quot;$AGENT_FONT_SERVER&quot; ] &amp;&amp; FP=&quot;-fp $AGENT_FONT_SERVER&quot;
+-		PATH=&quot;$PATH_BIN:$PATH&quot; $PATH_BIN/nxagent $P $R -name &quot;NX - $user@$SERVER_NAME:$display - $session (GPL Edition)&quot; -option &quot;$USER_FAKE_HOME/.nx/C-$sess_id/options&quot; $K $G $B $FP :$display $AGENT_EXTRA_OPTIONS_X 2&gt;&amp;3 &amp;
++		
++		# Start the agent
++		
++		PATH=&quot;$PATH_BIN:$PATH&quot; $PATH_BIN/nxagent $P $R -name &quot;NX - $user@$SERVER_NAME:$display - $session (GPL Edition)&quot; -option &quot;$USER_FAKE_HOME/.nx/C-$sess_id/options&quot; $K $G $B $FP $AGENT_EXTRA_OPTIONS_X :$display 2&gt;&amp;3 &amp;
+ 	fi
+-	PID=$!
+-	mkdir -p $USER_FAKE_HOME/.nx/C-$sess_id/pids/
+-	echo &quot;$PID&quot; &gt; $USER_FAKE_HOME/.nx/C-$sess_id/pids/agent
+-	wait $PID
+-	AGENT_EXIT_STATUS=$?
+-	failed=&quot;&quot;
+-	if [ $AGENT_EXIT_STATUS -ne 0 ]
++	
++	#
++	# Wait for the agent
++	#
++	
++	NODE_AGENT_PID=$!
++	mkdir -p &quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/&quot;
++	echo &quot;$NODE_AGENT_PID&quot; &gt;&quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/agent&quot;
++	wait $NODE_AGENT_PID
++
++	NODE_AGENT_EXIT_STATUS=$?
++	NODE_FAILED=&quot;&quot;
++	if [ $NODE_AGENT_EXIT_STATUS -ne 0 ]
+ 	then
+ 		echo &quot;NX&gt; 1004 Error: NX Agent exited with exit status 1.&quot;
+-		failed=&quot;failed&quot;
++		NODE_FAILED=&quot;failed&quot;
+ 	fi
+ 	echo &quot;NX&gt; 1006 Session status: closed&quot;
+ 	
+-	rm -f $USER_FAKE_HOME/.nx/C-$sess_id/pids/agent
+-	node_terminate_session &quot;$sess_id&quot; $failed
++	#
++	# Cleanup session information
++	#	
+ 	
++	rm -f &quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/agent&quot;
++	node_terminate_session &quot;$sess_id&quot; &quot;$NODE_FAILED&quot;
++	
+ 	# remove possible leftovers of nxagent
+ 	rm -f /tmp/.X$display-lock
+ 	rm -f /tmp/.X11-unix/X$display
+-	} 3&gt;&amp;1 1&gt;&amp;4 | tee $USER_FAKE_HOME/.nx/C-$sess_id/session | node_start_monitor; } 4&gt;&amp;1
++	} 3&gt;&amp;1 1&gt;&amp;4 | tee &quot;$USER_FAKE_HOME/.nx/C-$sess_id/session&quot; | node_start_monitor; } 4&gt;&amp;1
+ }
+ 
+-node_kill_proxy()
+-{
+-	# Info: Proxy running in server mode with pid '5279'.
+-	PROXY_PID=$(grep &quot;Info: Proxy running in server mode with pid&quot; $USER_FAKE_HOME/.nx/C-$1/session | cut -d&quot;'&quot; -f2)
+-	sleep 2
+-	[ -n &quot;$PROXY_PID&quot; ] &amp;&amp; kill $PROXY_PID 2&gt;/dev/null
+-}
++#
++# node_cupsd_stop
++#
++#	Used local vars: $sess_id
++#
+ 
+ node_cupsd_stop()
+ {
++	#
++	# Cleanup userspace cups daemon	
++	#
++	
+ 	[ -e &quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd&quot; ] || return
++	
+ 	NODE_CUPSD_PID=$(cat &quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd&quot;)
++	
+ 	# Check for a running userspace cupsd, look if its still active 
+ 	# and kill it if so
+ 	( [ -n &quot;$NODE_CUPSD_PID&quot; ] &amp;&amp; kill -0 $NODE_CUPSD_PID &amp;&amp; kill $NODE_CUPSD_PID &amp;&amp; sleep 2 &amp;&amp; kill -0 $NODE_CUPSD_PID &amp;&amp; kill -9 $NODE_CUPSD_PID ) 2&gt;/dev/null
++	
+ 	# delete pid file
+ 	rm -f &quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd&quot;
++	
+ 	# remove all printers
+ 	echo &gt;&quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/printers.conf&quot;
+ }
+ 
++#
++# node_cupsd_setup
++#
++#	Used local vars: $sess_id, $display
++#
++
+ node_cupsd_setup()
+ {
+ 	let NODE_CUPSD_PORT=$display+9000 # offset 9000 for userspace cupsd's
+ 	export NODE_CUPSD_PORT
++	
+ 	mkdir -p &quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/&quot;
+ 	[ -e &quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd&quot; ] &amp;&amp; return
+ 	touch &quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd&quot;
+ 	
+-	mkdir -p $USER_FAKE_HOME/.nx/C-$sess_id/cups/spool/tmp $USER_FAKE_HOME/.nx/C-$sess_id/cups/spool/certs $USER_FAKE_HOME/.nx/C-$sess_id/cups/ppd
+-	ln -sf spool/certs $USER_FAKE_HOME/.nx/C-$sess_id/cups/certs
++	mkdir -p &quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/spool/tmp&quot; &quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/spool/certs&quot; &quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/ppd&quot;
++	ln -sf spool/certs &quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/certs&quot;
++
+ cat &lt;&lt;EOF &gt; $USER_FAKE_HOME/.nx/C-$sess_id/cups/cupsd.conf
+ AccessLog /dev/null
+ ErrorLog error_log
+@@ -375,16 +566,18 @@
+ Allow from 127.0.0.1
+ &lt;/Location&gt;
+ EOF
+-	touch $USER_FAKE_HOME/.nx/C-$sess_id/cups/printers.conf $USER_FAKE_HOME/.nx/C-$sess_id/cups/classes.conf
+ 
++	touch &quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/printers.conf&quot; &quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/classes.conf&quot;
++
+ 	# copy mime.* files
+-	cp &quot;$CUPS_ETC&quot;/mime.* &quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/&quot;
++	cp -af &quot;$CUPS_ETC&quot;/mime.* &quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/&quot;
+ 
+ 	# start cupsd
+ 	$COMMAND_CUPSD -f -c &quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/cupsd.conf&quot; &amp;&gt;/dev/null &lt;/dev/null &amp;
+-	CUPSD_PID=$!
++	NODE_CUPSD_PID=$!
+ 	sleep 3
+-	echo $CUPSD_PID &gt;&quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd&quot;
++	echo $NODE_CUPSD_PID &gt;&quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd&quot;
++
+ 	# setup KDE
+ 	if [ &quot;$ENABLE_KDE_CUPS&quot; = &quot;1&quot; -a -e &quot;$KDE_PRINTRC&quot; ]
+ 	then
+@@ -398,6 +591,12 @@
+ 	fi
+ }
+ 
++#
++# node_cupsd_reload
++#
++#	Used local vars: $sess_id
++#
++
+ node_cupsd_reload()
+ {
+ 	[ -e &quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd&quot; ] || return
+@@ -445,9 +644,8 @@
+ 
+ node_start_monitor_2_0_0()
+ {
+-	TAIL_PID=&quot;&quot;
+-	SUSPEND_STATUS=&quot;$2&quot;
+-	SESSION_STATUS=&quot;&quot;
++	NODE_TAIL_PID=&quot;&quot;
++	NODE_SUSPEND_STATUS=&quot;$2&quot;
+ 
+ 	while read line 
+ 	do
+@@ -457,7 +655,7 @@
+ 		
+ 		if stringinstring &quot;Info: tail -f running with pid&quot; &quot;$line&quot;
+ 		then
+-			TAIL_PID=$(echo $line | cut -d&quot;'&quot; -f2)
++			NODE_TAIL_PID=$(echo $line | cut -d&quot;'&quot; -f2)
+ 		fi
+ 
+ 		#
+@@ -494,10 +692,10 @@
+ 			echo &quot;NX&gt; 1005 Session status: suspended&quot;
+ 			# umount shares &amp; stop printers
+ 
+-			if [ &quot;$SUSPEND_STATUS&quot; = &quot;Running&quot; ]
++			if [ &quot;$NODE_SUSPEND_STATUS&quot; = &quot;Running&quot; ]
+ 			then
+-				node_suspend_session $sess_id
+-				SUSPEND_STATUS=&quot;&quot;
++				node_suspend_session &quot;$sess_id&quot;
++				NODE_SUSPEND_STATUS=&quot;&quot;
+ 			else
+ 				node_stop_services
+ 			fi
+@@ -509,13 +707,13 @@
+ 
+ 		if stringinstring &quot;Info: Watchdog running with pid&quot; &quot;$line&quot;
+ 		then
+-			WATCHDOG_PID=$(echo $line | cut -d&quot;'&quot; -f2)
++			NODE_WATCHDOG_PID=$(echo $line | cut -d&quot;'&quot; -f2)
+ 		fi
+ 
+ 		if stringinstring &quot;Info: Waiting the watchdog process to complete.&quot; &quot;$line&quot;
+ 		then
+ 			# Kill the watchdog
+-			kill $WATCHDOG_PID 2&gt;/dev/null
++			kill $NODE_WATCHDOG_PID 2&gt;/dev/null
+ 		fi
+ 		
+ 		#
+@@ -538,7 +736,7 @@
+ 			echo &quot;NX&gt; 718 Session restore succeded&quot;
+ 			if [ &quot;$1&quot; = &quot;restore&quot; ]
+ 			then
+-				kill $TAIL_PID
++				kill $NODE_TAIL_PID
+ 				break
+ 			fi
+ 		fi
+@@ -552,7 +750,7 @@
+ 			echo &quot;NX&gt; 596 Error: Session $1 failed. Reason was: $line&quot;
+ 			if [ &quot;$1&quot; = &quot;restore&quot; ]
+ 			then
+-				kill $TAIL_PID
++				kill $NODE_TAIL_PID
+ 				break
+ 			fi
+ 		fi
+@@ -570,9 +768,9 @@
+ 
+ node_start_monitor_1_5_0()
+ {
+-	RUNNING=0
+-	TAIL_PID=&quot;&quot;
+-	SUSPEND_STATUS=&quot;$2&quot;
++	NODE_RUNNING=0
++	NODE_TAIL_PID=&quot;&quot;
++	NODE_SUSPEND_STATUS=&quot;$2&quot;
+ 
+ 	while read line 
+ 	do
+@@ -582,28 +780,10 @@
+ 		
+ 		if stringinstring &quot;Info: tail -f running with pid&quot; &quot;$line&quot;
+ 		then
+-			TAIL_PID=$(echo $line | cut -d&quot;'&quot; -f2)
++			NODE_TAIL_PID=$(echo $line | cut -d&quot;'&quot; -f2)
+ 		fi
+ 
+ 		#
+-		# Detect nxagent syntax errors
+-		#
+-		
+-		#SYNTAX=&quot;&quot;
+-
+-		#stringinstring &quot;Unrecognized option:&quot; &quot;$line&quot; &amp;&amp; SYNTAX=&quot;yes&quot;
+-		#stringinstring &quot;NXAGENT: Fatal IO error on display&quot; &quot;$line&quot; &amp;&amp; SYNTAX=&quot;yes&quot;
+-		#stringinstring &quot;NXAGENT: Unable to open display&quot; &quot;$line&quot; &amp;&amp; SYNTAX=&quot;yes&quot;
+-		#if [ -n &quot;$SYNTAX&quot; ]
+-		#then
+-		#	kill $TAIL_PID 2&gt;/dev/null
+-		#	echo &quot;NX&gt; 1004 Error: nxagent failed to start with: $line&quot;
+-		#	[ &quot;$SESSION_LOG_CLEAN&quot; = &quot;1&quot; ] &amp;&amp; rm -rf $USER_FAKE_HOME/.nx/C-$sess_id/
+-		#	[ &quot;$SESSION_LOG_CLEAN&quot; = &quot;1&quot; ] || mv $USER_FAKE_HOME/.nx/C-$sess_id/ $USER_FAKE_HOME/.nx/F-C-$sess_id/
+-		#	break
+-		#fi
+-
+-		#
+ 		# Session suspend
+ 		#
+ 
+@@ -612,10 +792,10 @@
+ 			echo &quot;NX&gt; 1005 Session status: suspended&quot;
+ 			# umount shares &amp; stop printers
+ 
+-			if [ &quot;$SUSPEND_STATUS&quot; = &quot;Running&quot; ]
++			if [ &quot;$NODE_SUSPEND_STATUS&quot; = &quot;Running&quot; ]
+ 			then
+-				node_suspend_session $sess_id
+-				SUSPEND_STATUS=&quot;&quot;
++				node_suspend_session &quot;$sess_id&quot;
++				NODE_SUSPEND_STATUS=&quot;&quot;
+ 			else
+ 				node_stop_services
+ 			fi
+@@ -628,7 +808,7 @@
+ 		if stringinstring &quot;Info: Waiting for a further signal to complete.&quot; &quot;$line&quot;
+ 		then
+ 			# Kill the proxy
+-			kill -HUP $PROXY_PID 2&gt;/dev/null
++			kill -HUP $NODE_PROXY_PID 2&gt;/dev/null
+ 		fi
+ 		
+ 		#
+@@ -638,7 +818,7 @@
+ 		if stringinstring &quot;Info: End of session requested by &quot; &quot;$line&quot; &amp;&amp; [ &quot;$RECONNECT&quot; = &quot;0&quot; ] &amp;&amp; ! stringinstring &quot;'SIGHUP'&quot; &quot;$line&quot;
+ 		then
+ 			echo &quot;NX&gt; 1009 Session status: terminating&quot;
+-			kill -HUP $PROXY_PID 2&gt;/dev/null
++			kill -HUP $NODE_PROXY_PID 2&gt;/dev/null
+ 		fi
+ 		
+ 		#
+@@ -658,7 +838,7 @@
+ 
+ 		if stringinstring &quot;Info: Connection with remote proxy established.&quot; &quot;$line&quot;
+ 		then
+-			RUNNING=1
++			NODE_RUNNING=1
+ 		fi
+ 	
+ 		#
+@@ -667,7 +847,7 @@
+ 		
+ 		if stringinstring &quot;Info: Proxy running in server mode with pid&quot; &quot;$line&quot;
+ 		then
+-			PROXY_PID=$(echo $line | cut -d&quot;'&quot; -f2)
++			NODE_PROXY_PID=$(echo $line | cut -d&quot;'&quot; -f2)
+ 		fi
+ 		
+ 		#
+@@ -679,7 +859,7 @@
+ 			echo &quot;NX&gt; 718 Session restore succeded&quot;
+ 			if [ &quot;$1&quot; = &quot;restore&quot; ]
+ 			then
+-				kill $TAIL_PID
++				kill $NODE_TAIL_PID
+ 				break
+ 			fi
+ 		fi
+@@ -694,24 +874,10 @@
+ 			echo &quot;NX&gt; 596 Error: Session restore failed. Reason was: $line&quot;
+ 			if [ &quot;$1&quot; = &quot;restore&quot; ]
+ 			then
+-				kill $TAIL_PID
++				kill $NODE_TAIL_PID
+ 				break
+ 			fi
+ 		fi
+-
+-		#
+-		# Error handling.
+-		#
+-
+-		#if stringinstring &quot;Error: Connection with remote host&quot; &quot;$line&quot; &amp;&amp; [ &quot;$RUNNING&quot; = &quot;0&quot; ] 
+-		#then
+-		#	kill $TAIL_PID 2&gt;/dev/null
+-		#	echo &quot;NX&gt; 1004 Error:&quot;
+-		#	echo &quot;Session '$sess_id' has failed after reaching usable state.&quot;
+-		#	[ &quot;$SESSION_LOG_CLEAN&quot; = &quot;1&quot; ] &amp;&amp; rm -rf $USER_FAKE_HOME/.nx/C-$sess_id/
+-		#	[ &quot;$SESSION_LOG_CLEAN&quot; = &quot;1&quot; ] || mv $USER_FAKE_HOME/.nx/C-$sess_id/ $USER_FAKE_HOME/.nx/F-C-$sess_id/
+-		#	break
+-		#fi
+ 	done
+ 	
+ 	trap &quot;&quot; EXIT
+@@ -724,13 +890,23 @@
+ 	exit 0
+ }
+ 
++#
++# node_start_monitor &lt;start|restore&gt; &lt;Running|Suspended&gt;
++#
++
+ node_start_monitor()
+ {
+ 	[ &quot;$ENABLE_2_0_0_BACKEND&quot; = &quot;1&quot; ] &amp;&amp; node_start_monitor_2_0_0 &quot;$@&quot;
+ 	[ &quot;$ENABLE_2_0_0_BACKEND&quot; = &quot;1&quot; ] || node_start_monitor_1_5_0 &quot;$@&quot;
+ }
+ 
+-node_startsession()
++#
++# -----------------------------------------------------------------------------
++# startsession - Start a new session.
++# -----------------------------------------------------------------------------
++#
++
++startsession()
+ {
+ 
+ 	# user=knoppix&amp;userip=192.168.1.66&amp;uniqueid=6A8269CC467264EAEF6349D062689755&amp;display=1000&amp;session=lappi%5ffull&amp;type=unix%2dkde&amp;cache=8M&amp;images=32M&amp;cookie=84765070afee043cf83f85d21130145f&amp;link=lan&amp;render=1&amp;backingstore=when_requested&amp;imagecompressionmethod=0&amp;geometry=fullscreen&amp;keyboard=fr&amp;media=0&amp;samba=1&amp;agent_server=&amp;agent_user=&amp;agent_password=
+@@ -799,6 +975,8 @@
+ 	then
+ 		# we need to use the IP of the &quot;calling&quot; server now
+ 		userip=$(echo $SSH_CLIENT $SSH2_CLIENT | cut -d&quot; &quot; -f1 | sed 's/::<A HREF="ffff://g">ffff://g</A>')
++
++		# TODO: This logic is broken ... ;-)
+ 		[ -z &quot;$userip&quot; ] &amp;&amp; userip=&quot;127.0.0.1&quot;
+ 		[ -z &quot;$userip&quot; -a &quot;$host&quot; != &quot;127.0.0.1&quot; ] &amp;&amp; userip=&quot;*&quot;
+ 	fi
+@@ -889,7 +1067,7 @@
+ 	mkdir -p $USER_FAKE_HOME/.nx/C-$sess_id/pids/
+ 	echo &quot;$MONITOR_PID&quot; &gt; $USER_FAKE_HOME/.nx/C-$sess_id/pids/monitor
+ 
+-	node_suspend_session $sess_id || { echo &quot;Info: Reconnection failed: NX Agent process could not be found.&quot; &gt;&gt;$USER_FAKE_HOME'/.nx/C-'$sess_id'/session'; node_fail_restore_session; }
++	node_suspend_session $sess_id || { echo &quot;Info: Reconnection failed: NX Agent process could not be found.&quot; &gt;&gt;$USER_FAKE_HOME'/.nx/C-'$sess_id'/session'; node_fail_restore_session $sess_id; }
+ else
+ 	node_start_agent &amp;
+ 	node_start_applications &amp;
+@@ -928,6 +1106,12 @@
+ wait # for all children
+ }
+ 
++#
++# -----------------------------------------------------------------------------
++# cmd_node functions - changes lots of small variables
++# -----------------------------------------------------------------------------
++#
++
+ cmd_node_terminate()
+ {
+ 	sessionid=$(getparam_sessionid)
+@@ -956,13 +1140,13 @@
+ 	rdir=$(getparam dir | sed 's|$(SHARES)/||g')
+ 	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | rev|cut -d&quot;-&quot; -f2| rev)
+ 	mkdir -p &quot;$HOME/$dir&quot;
+-	ERROR=$(PASSWD=&quot;$password&quot; &quot;$COMMAND_SMBMOUNT&quot; &quot;//$computername/$rdir&quot; &quot;$HOME/$dir&quot; -o username=&quot;$username,ip=127.0.0.1,port=$port&quot; 2&gt;&amp;1)
++	error=$(PASSWD=&quot;$password&quot; &quot;$COMMAND_SMBMOUNT&quot; &quot;//$computername/$rdir&quot; &quot;$HOME/$dir&quot; -o username=&quot;$username,ip=127.0.0.1,port=$port&quot; 2&gt;&amp;1)
+ 	if [ $? -eq 0 ]
+ 	then
+ 		$PATH_BIN/nxclient -dialog ok -caption &quot;NXServer Message&quot; -message &quot;Info: Share: '//$computername/$rdir' mounted on: '$HOME/$dir'&quot; -noautokill -display :$display &amp;
+ 		echo &quot;$HOME/$dir&quot; &gt;&gt; &quot;$USER_FAKE_HOME/.nx/C-$SERVER_NAME-$display-$sessionid/scripts/mpoint&quot;
+ 	else
+-		$PATH_BIN/nxclient -dialog ok -caption &quot;NXServer Message&quot; -message &quot;Info: Share: '//$computername/$rdir' failed to mount: $ERROR&quot; -noautokill -display :$display &amp;
++		$PATH_BIN/nxclient -dialog ok -caption &quot;NXServer Message&quot; -message &quot;Info: Share: '//$computername/$rdir' failed to mount: $error&quot; -noautokill -display :$display &amp;
+ 	fi
+ }
+ 
+@@ -981,9 +1165,11 @@
+ 	defaultPrinter=$(getparam defaultPrinter)
+ 	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | rev | cut -d&quot;-&quot; -f2 | rev)
+ 	sess_id=&quot;$SERVER_NAME-$display-$sessionid&quot;
++	
+ 	# this will also setup the userspace cupsd
+ 	IPP_PORT=$(node_cupsd_get_port)
+ 	export IPP_PORT
++	
+ 	if [ &quot;$type&quot; = &quot;smb&quot; ]
+ 	then
+ 		DEVICE_URI=&quot;<A HREF="smb://$username:$password@localhost:$port/$share">smb://$username:$password@localhost:$port/$share</A>&quot;
+@@ -992,6 +1178,7 @@
+ 		DEVICE_URI=&quot;<A HREF="ipp://localhost:$port/printers/$printer">ipp://localhost:$port/printers/$printer</A>&quot;
+ 		NAME=&quot;$printer&quot;
+ 	fi
++	
+ 	MODEL=$($PATH_BIN/nxclient -printer &quot;$NAME&quot; -noautokill -display :$display)
+ 	[ -z &quot;$MODEL&quot; -o &quot;$MODEL&quot; = &quot;cancel: aborted&quot; ] &amp;&amp; return
+ 	
+
+Modified: freenx-server/trunk/nxnode-login
+===================================================================
+--- freenx-server/trunk/nxnode-login	2006-07-05 00:06:46 UTC (rev 230)
++++ freenx-server/trunk/nxnode-login	2006-07-05 02:03:45 UTC (rev 231)
+@@ -49,6 +49,10 @@
+ 	exit 0
+ }
+ 
++#
++# Log the user in via the supplied method.
++#
++
+ expect_user -re &quot;(.*)\n&quot; 
+ set password $expect_out(1,string)
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000359.html">[Freenx-cvs] r230 - / freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000361.html">[Freenx-cvs] r232 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#360">[ date ]</a>
+              <a href="thread.html#360">[ thread ]</a>
+              <a href="subject.html#360">[ subject ]</a>
+              <a href="author.html#360">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

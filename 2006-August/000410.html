@@ -1,0 +1,85 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r280 - nxclientlib/qtnx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r280%20-%20nxclientlib/qtnx&In-Reply-To=%3C200608242103.k7OL3CqT015832%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000409.html">
+   <LINK REL="Next"  HREF="000411.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r280 - nxclientlib/qtnx</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r280%20-%20nxclientlib/qtnx&In-Reply-To=%3C200608242103.k7OL3CqT015832%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r280 - nxclientlib/qtnx">gwright at mail.berlios.de
+       </A><BR>
+    <I>Thu Aug 24 23:03:12 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000409.html">[Freenx-cvs] r279 - nxclientlib/qtnx
+</A></li>
+        <LI>Next message: <A HREF="000411.html">[Freenx-cvs] r281 - nxclientlib/qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#410">[ date ]</a>
+              <a href="thread.html#410">[ thread ]</a>
+              <a href="subject.html#410">[ subject ]</a>
+              <a href="author.html#410">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2006-08-24 23:03:11 +0200 (Thu, 24 Aug 2006)
+New Revision: 280
+
+Modified:
+   nxclientlib/qtnx/qtnxsettings.cpp
+Log:
+Stop it from reverting to KDE everytime GNOME is selected :D
+
+
+Modified: nxclientlib/qtnx/qtnxsettings.cpp
+===================================================================
+--- nxclientlib/qtnx/qtnxsettings.cpp	2006-08-23 21:00:42 UTC (rev 279)
++++ nxclientlib/qtnx/qtnxsettings.cpp	2006-08-24 21:03:11 UTC (rev 280)
+@@ -81,7 +81,7 @@
+ 			ui_sd.type-&gt;setCurrentIndex(ui_sd.type-&gt;findText(tr(&quot;KDE&quot;)));
+ 		} else if (config.sessionType == &quot;unix-gnome&quot;) {
+ 			ui_sd.platform-&gt;setCurrentIndex(ui_sd.platform-&gt;findText(tr(&quot;UNIX&quot;)));
+-			ui_sd.type-&gt;setCurrentIndex(ui_sd.type-&gt;findText(tr(&quot;KDE&quot;)));
++			ui_sd.type-&gt;setCurrentIndex(ui_sd.type-&gt;findText(tr(&quot;GNOME&quot;)));
+ 		} else if (config.sessionType == &quot;unix-cde&quot;) {
+ 			ui_sd.platform-&gt;setCurrentIndex(ui_sd.platform-&gt;findText(tr(&quot;UNIX&quot;)));
+ 			ui_sd.type-&gt;setCurrentIndex(ui_sd.type-&gt;findText(tr(&quot;CDE&quot;)));
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000409.html">[Freenx-cvs] r279 - nxclientlib/qtnx
+</A></li>
+	<LI>Next message: <A HREF="000411.html">[Freenx-cvs] r281 - nxclientlib/qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#410">[ date ]</a>
+              <a href="thread.html#410">[ thread ]</a>
+              <a href="subject.html#410">[ subject ]</a>
+              <a href="author.html#410">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

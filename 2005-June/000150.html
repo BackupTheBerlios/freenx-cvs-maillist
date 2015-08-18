@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fabianx modified 2 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-June/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%202%20files&In-Reply-To=%3C42B8368C.mail3O51T6855%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000149.html">
+   <LINK REL="Next"  HREF="000151.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fabianx modified 2 files</H1>
+    <B>fabianx</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%202%20files&In-Reply-To=%3C42B8368C.mail3O51T6855%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fabianx modified 2 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Tue Jun 21 17:47:24 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000149.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+        <LI>Next message: <A HREF="000151.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#150">[ date ]</a>
+              <a href="thread.html#150">[ thread ]</a>
+              <a href="subject.html#150">[ subject ]</a>
+              <a href="author.html#150">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fabianx
+Date:      2005-06-21 15:47:24 GMT
+Modified:  .        ChangeLog nxserver
+Log:
+Fixed Resume on Windows with non-fullscreen sessions. (Thanks to `psycho (irc))
+
+Revision  Changes    Path
+1.56      +1 -0      freenx/ChangeLog
+
+
+rev 1.56, prev_rev 1.55
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.55
+retrieving revision 1.56
+diff -u -r1.55 -r1.56
+--- ChangeLog	20 Jun 2005 00:05:48 -0000	1.55
++++ ChangeLog	21 Jun 2005 15:47:24 -0000	1.56
+@@ -2,6 +2,7 @@
+ 	* Fixed a small security problem giving access to session database.
+ 	* Added support for 1.5.0 OSS components. (especially rootless mode)
+ 	* Fixed Filesharing over the Internet. (Thanks to <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">rogierm at users.berlios.de</A>)
++	* Fixed Resume on Windows with non-fullscreen sessions.
+ 
+ 04.05.2005 FreeNX 0.4.0 &quot;SambaXP Edition&quot;
+ 	* Opened the 0.4.0 branch.
+
+
+
+1.54      +3 -2      freenx/nxserver
+
+
+rev 1.54, prev_rev 1.53
+Index: nxserver
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxserver,v
+retrieving revision 1.53
+retrieving revision 1.54
+diff -u -r1.53 -r1.54
+--- nxserver	19 Jun 2005 23:53:17 -0000	1.53
++++ nxserver	21 Jun 2005 15:47:24 -0000	1.54
+@@ -11,7 +11,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxserver,v 1.53 2005/06/19 23:53:17 fabianx Exp $
++# CVS: $Id: nxserver,v 1.54 2005/06/21 15:47:24 fabianx Exp $
+ #
+ 
+ # Read the config file
+@@ -238,7 +238,8 @@
+ 			available=&quot;N/A&quot;
+ 			udepth=$(echo $3 | cut -d &quot;x&quot; -f3 | cut -d &quot;+&quot; -f1 )
+ 			urender=$(echo $3 | cut -d &quot;+&quot; -f2 )
+-			[ &quot;$(getparam geometry)&quot; = &quot;fullscreen&quot; ] &amp;&amp; options=&quot;F&quot;
++			options=&quot;-&quot;
++			stringinstring &quot;fullscreen&quot; &quot;$3&quot; &amp;&amp; options=&quot;F&quot;
+ 			[ &quot;$(getparam geometry)&quot; = &quot;fullscreen&quot; ] || options=&quot;-&quot;
+ 			[ &quot;$urender&quot; = &quot;render&quot; ] &amp;&amp; options=&quot;${options}R---PSA&quot;
+ 			[ &quot;$urender&quot; = &quot;render&quot; ] || options=&quot;${options}----PSA&quot;
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000149.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+	<LI>Next message: <A HREF="000151.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#150">[ date ]</a>
+              <a href="thread.html#150">[ thread ]</a>
+              <a href="subject.html#150">[ subject ]</a>
+              <a href="author.html#150">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,178 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r258 - nxclientlib
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r258%20-%20nxclientlib&In-Reply-To=%3C200608101334.k7ADYXNQ029115%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000388.html">
+   <LINK REL="Next"  HREF="000390.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r258 - nxclientlib</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r258%20-%20nxclientlib&In-Reply-To=%3C200608101334.k7ADYXNQ029115%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r258 - nxclientlib">gwright at mail.berlios.de
+       </A><BR>
+    <I>Thu Aug 10 15:34:33 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000388.html">[Freenx-cvs] r257 - nxclientlib
+</A></li>
+        <LI>Next message: <A HREF="000390.html">[Freenx-cvs] r259 - nxclientlib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#389">[ date ]</a>
+              <a href="thread.html#389">[ thread ]</a>
+              <a href="subject.html#389">[ subject ]</a>
+              <a href="author.html#389">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2006-08-10 15:34:32 +0200 (Thu, 10 Aug 2006)
+New Revision: 258
+
+Added:
+   nxclientlib/nxdata.h
+Modified:
+   nxclientlib/nxparsexml.cpp
+Log:
+Move the structs into a separate file
+
+
+Added: nxclientlib/nxdata.h
+===================================================================
+--- nxclientlib/nxdata.h	2006-08-10 00:35:37 UTC (rev 257)
++++ nxclientlib/nxdata.h	2006-08-10 13:34:32 UTC (rev 258)
+@@ -0,0 +1,85 @@
++/***************************************************************************
++                                nxdata.h
++                             -------------------
++    begin                : Wednesday 9th August 2006
++    copyright            : (C) 2006 by George Wright
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++#ifndef _NXDATA_H_
++#define _NXDATA_H_
++
++#include &lt;QString&gt;
++
++struct NXConfigData {
++	QString serverHost;
++	int serverPort;
++	QString sessionName;
++	QString sessionType;
++	int cache;
++	int images;
++	QString linkType;
++	bool render;
++	QString backingstore;
++	int imageCompressionMethod;
++	int imageCompressionLevel;
++	QString geometry;
++	QString keyboard;
++	QString kbtype;
++	bool media;
++	QString agentServer;
++	QString agentUser;
++	QString agentPass;
++	int cups;
++	QString id;
++	QString key;
++	bool encryption;
++	bool fullscreen;
++	QString customCommand;
++};
++
++struct NXSessionData {
++	QString sessionName;
++	QString sessionType;
++	int cache;
++	int images;
++	QString linkType;
++	bool render;
++	QString backingstore;
++	int imageCompressionMethod;
++	int imageCompressionLevel;
++	QString geometry;
++	QString keyboard;
++	QString kbtype;
++	bool media;
++	QString agentServer;
++	QString agentUser;
++	QString agentPass;
++	int cups;
++	QString id;
++	QString key;
++	bool suspended;
++	bool fullscreen;
++};
++
++struct NXResumeData {
++	int display;
++	QString sessionType;
++	QString sessionID;
++	QString options;
++	int depth;
++	QString screen;
++	QString available;
++	QString sessionName;
++};
++
++#endif
+
+Modified: nxclientlib/nxparsexml.cpp
+===================================================================
+--- nxclientlib/nxparsexml.cpp	2006-08-10 00:35:37 UTC (rev 257)
++++ nxclientlib/nxparsexml.cpp	2006-08-10 13:34:32 UTC (rev 258)
+@@ -15,8 +15,6 @@
+  *                                                                         *
+  ***************************************************************************/
+ 
+-enum { ADVANCED, ENVIRONMENT, GENERAL, IMAGES, LOGIN, SERVICES, VNC, WINDOWS, SHARE };
+-
+ #include &lt;iostream&gt;
+ #include &quot;nxparsexml.h&quot;
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000388.html">[Freenx-cvs] r257 - nxclientlib
+</A></li>
+	<LI>Next message: <A HREF="000390.html">[Freenx-cvs] r259 - nxclientlib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#389">[ date ]</a>
+              <a href="thread.html#389">[ thread ]</a>
+              <a href="subject.html#389">[ subject ]</a>
+              <a href="author.html#389">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

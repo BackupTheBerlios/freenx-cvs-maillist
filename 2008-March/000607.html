@@ -1,0 +1,101 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r481 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r481%20-%20freenx-server/trunk&In-Reply-To=%3C200803020953.m229r0XS015396%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000606.html">
+   <LINK REL="Next"  HREF="000608.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r481 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r481%20-%20freenx-server/trunk&In-Reply-To=%3C200803020953.m229r0XS015396%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r481 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Sun Mar  2 10:53:00 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000606.html">[Freenx-cvs] r480 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000608.html">[Freenx-cvs] r482 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#607">[ date ]</a>
+              <a href="thread.html#607">[ thread ]</a>
+              <a href="subject.html#607">[ subject ]</a>
+              <a href="author.html#607">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-03-02 10:53:00 +0100 (Sun, 02 Mar 2008)
+New Revision: 481
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxserver
+Log:
+* Fixed possible bug in nxserver when $USER is not set.
+  (Patch from Gentoo Portage)
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2008-03-02 09:46:25 UTC (rev 480)
++++ freenx-server/trunk/ChangeLog	2008-03-02 09:53:00 UTC (rev 481)
+@@ -32,6 +32,8 @@
+ 	  (Patch from Gentoo Portage)
+ 	* Run nscd only when nscd.pid is present.
+ 	  (Patch from Gentoo Portage)
++	* Fixed possible bug in nxserver when $USER is not set.
++	  (Patch from Gentoo Portage)
+ 
+ 14.10.2007 FreeNX 0.7.1 &quot;Hip Hop Edition&quot;
+ 	* Fixed the issue that makes fonts look tiny and unreadable by default 
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2008-03-02 09:46:25 UTC (rev 480)
++++ freenx-server/trunk/nxserver	2008-03-02 09:53:00 UTC (rev 481)
+@@ -426,7 +426,7 @@
+ # Main nxserver &lt;-&gt; nxclient communication module
+ #
+ 
+-if [ $USER = &quot;nxfree&quot; -o &quot;$USER&quot; = &quot;nx&quot; -o &quot;$ENABLE_USERMODE_AUTHENTICATION&quot; = &quot;1&quot; ]
++if [ &quot;$USER&quot; = &quot;nxfree&quot; -o &quot;$USER&quot; = &quot;nx&quot; -o &quot;$ENABLE_USERMODE_AUTHENTICATION&quot; = &quot;1&quot; ]
+ then
+ 
+ setup_usermode_auth()
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000606.html">[Freenx-cvs] r480 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000608.html">[Freenx-cvs] r482 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#607">[ date ]</a>
+              <a href="thread.html#607">[ thread ]</a>
+              <a href="subject.html#607">[ subject ]</a>
+              <a href="author.html#607">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

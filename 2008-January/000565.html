@@ -1,0 +1,199 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r439 - in nxcl: . nxcl test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r439%20-%20in%20nxcl%3A%20.%20nxcl%20test&In-Reply-To=%3C200801290012.m0T0CZVT019557%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000564.html">
+   <LINK REL="Next"  HREF="000566.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r439 - in nxcl: . nxcl test</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r439%20-%20in%20nxcl%3A%20.%20nxcl%20test&In-Reply-To=%3C200801290012.m0T0CZVT019557%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r439 - in nxcl: . nxcl test">gwright at mail.berlios.de
+       </A><BR>
+    <I>Tue Jan 29 01:12:35 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000564.html">[Freenx-cvs] r438 - nxcl/lib
+</A></li>
+        <LI>Next message: <A HREF="000566.html">[Freenx-cvs] r440 - nxcl
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#565">[ date ]</a>
+              <a href="thread.html#565">[ thread ]</a>
+              <a href="subject.html#565">[ subject ]</a>
+              <a href="author.html#565">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2008-01-29 01:12:34 +0100 (Tue, 29 Jan 2008)
+New Revision: 439
+
+Modified:
+   nxcl/Makefile.am
+   nxcl/configure.ac
+   nxcl/nxcl/Makefile.am
+   nxcl/test/Makefile.am
+Log:
+Add a --with(out)-nxcmd option to disable compilation of D-Bus stuff
+
+
+Modified: nxcl/Makefile.am
+===================================================================
+--- nxcl/Makefile.am	2008-01-27 02:15:24 UTC (rev 438)
++++ nxcl/Makefile.am	2008-01-29 00:12:34 UTC (rev 439)
+@@ -1,8 +1,15 @@
+ 
+ AUTOMAKE_OPTIONS = check-news dist-bzip2
+ 
+-SUBDIRS = lib nxcl test doc
++ALWAYS_SUBDIRS = lib test doc
+ 
++
++SUBDIRS = $(ALWAYS_SUBDIRS)
++
++if WITH_NXCMD
++  SUBDIRS +=  nxcl
++endif
++
+ CLEANFILES = *~
+ 
+ MAINTAINERCLEANFILES = aclocal.m4 nxcl-*.tar.gz nxcl-*.tar.bz2 nxcl-*.diff
+@@ -13,3 +20,4 @@
+ pkgconfig_DATA = nxcl.pc
+ 
+ EXTRA_DIST = nxcl.pc.in
++
+
+Modified: nxcl/configure.ac
+===================================================================
+--- nxcl/configure.ac	2008-01-27 02:15:24 UTC (rev 438)
++++ nxcl/configure.ac	2008-01-29 00:12:34 UTC (rev 439)
+@@ -1,11 +1,11 @@
+ dnl Process this file with autoconf to produce a configure script.
+-AC_PREREQ(2.59)
++AC_PREREQ(2.59c)
+ AC_INIT([nxcl], [1.0], [<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>])
+ AC_CONFIG_SRCDIR(nxcl/nxcl.cpp)
+ AC_REVISION([$Revision: 1.3 $])
+ AC_PREFIX_DEFAULT(/usr/local)
+ 
+-AM_INIT_AUTOMAKE([1.9 foreign])
++AM_INIT_AUTOMAKE([1.10 foreign])
+ 
+ AM_CONFIG_HEADER(config.h)
+ AM_MAINTAINER_MODE
+@@ -17,6 +17,7 @@
+ AC_PROG_CC
+ AC_PROG_INSTALL
+ AC_PROG_LIBTOOL
++
+ AC_CHECK_PROG(DOXYGEN, doxygen, doxygen, /bin/echo)
+ 
+ dnl check for boost library
+@@ -24,8 +25,27 @@
+ dnl AC_CHECK_LIB(boost_signals, LIB_BOOST_SIGNALS=&quot;-lboost_signals&quot;)
+ dnl AC_SUBST(LIB_BOOST_SIGNALS)
+ 
+-PKG_CHECK_MODULES(PACKAGE, dbus-1)
++AC_ARG_WITH(nxcmd, 
++        AC_HELP_STRING([--with-nxcmd], [build nxcmd]),
++        [with_nxcmd=${withval}],
++        [with_nxcmd=auto])
+ 
++AS_IF([test &quot;$with_nxcmd&quot; != no], [
++        PKG_CHECK_MODULES(DBUS, [
++                dbus-1
++                ],
++                [with_nxcmd=yes],
++                [
++                AS_IF([test &quot;$with_nxcmd&quot; = yes], [
++                        AC_MSG_ERROR([nxcmd support was requested but D-Bus libraries are not available])
++               ])
++
++               with_nxcmd=no
++               ])
++])
++
++AM_CONDITIONAL(WITH_NXCMD, test &quot;$with_nxcmd&quot; = yes)
++
+ dnl Checks for library functions.
+ AC_HEADER_STDC
+ AC_HEADER_TIME
+
+Modified: nxcl/nxcl/Makefile.am
+===================================================================
+--- nxcl/nxcl/Makefile.am	2008-01-27 02:15:24 UTC (rev 438)
++++ nxcl/nxcl/Makefile.am	2008-01-29 00:12:34 UTC (rev 439)
+@@ -1,8 +1,9 @@
+-AM_CPPFLAGS = @PACKAGE_CFLAGS@ -DPACKAGE_DATA_DIR=\&quot;&quot;$(datadir)&quot;\&quot; -DLOCALEDIR=\&quot;$(localedir)\&quot; -DPACKAGE_BIN_DIR=\&quot;&quot;$(bindir)&quot;\&quot;
++AM_CPPFLAGS = @PACKAGE_CFLAGS@ -DPACKAGE_DATA_DIR=\&quot;&quot;$(datadir)&quot;\&quot; -DLOCALEDIR=\&quot;$(localedir)\&quot; -DPACKAGE_BIN_DIR=\&quot;&quot;$(bindir)&quot;\&quot; $(DBUS_CFLAGS)
++
+ INCLUDES = -I../lib
+ bin_PROGRAMS = nxcl
+ nxcl_SOURCES = main.cpp nxcl.cpp
+ # This links to X11 so that nxcl can obtain the X server's actual screen size
+-nxcl_LDADD = @PACKAGE_LIBS@ $(LIBINTL) -L../lib -lnxcl -lX11
++nxcl_LDADD = @PACKAGE_LIBS@ $(LIBINTL) $(DBUS_LIBS) -L../lib -lnxcl -lX11
+ pkginclude_HEADERS = nxcl.h
+ 
+
+Modified: nxcl/test/Makefile.am
+===================================================================
+--- nxcl/test/Makefile.am	2008-01-27 02:15:24 UTC (rev 438)
++++ nxcl/test/Makefile.am	2008-01-29 00:12:34 UTC (rev 439)
+@@ -1,11 +1,16 @@
+-AM_CPPFLAGS = @PACKAGE_CFLAGS@ -DPACKAGE_DATA_DIR=\&quot;&quot;$(datadir)&quot;\&quot; -DLOCALEDIR=\&quot;$(localedir)\&quot; -DPACKAGE_BIN_DIR=\&quot;&quot;$(bindir)&quot;\&quot;
++AM_CPPFLAGS = @PACKAGE_CFLAGS@ -DPACKAGE_DATA_DIR=\&quot;&quot;$(datadir)&quot;\&quot; -DLOCALEDIR=\&quot;$(localedir)\&quot; -DPACKAGE_BIN_DIR=\&quot;&quot;$(bindir)&quot;\&quot; $(DBUS_CFLAGS)
+ INCLUDES = -I../lib
+-bin_PROGRAMS = libtest nxcmd notQttest
++bin_PROGRAMS = libtest notQttest
++
++if WITH_NXCMD
++  bin_PROGRAMS += nxcmd
++endif
++
+ libtest_SOURCES = libtest.cpp
+ libtest_LDADD = @PACKAGE_LIBS@ $(LIBINTL) -L../lib -lnxcl
+ notQttest_SOURCES = notQttest.cpp
+ notQttest_LDADD = @PACKAGE_LIBS@ $(LIBINTL) -L../lib -lnxcl
+ nxcmd_SOURCES = nxcmd.cpp
+-nxcmd_LDADD = @PACKAGE_LIBS@ $(LIBINTL)
++nxcmd_LDADD = @PACKAGE_LIBS@ $(LIBINTL) $(DBUS_LIBS)
+ #pkginclude_HEADERS = header.h
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000564.html">[Freenx-cvs] r438 - nxcl/lib
+</A></li>
+	<LI>Next message: <A HREF="000566.html">[Freenx-cvs] r440 - nxcl
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#565">[ date ]</a>
+              <a href="thread.html#565">[ thread ]</a>
+              <a href="subject.html#565">[ subject ]</a>
+              <a href="author.html#565">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

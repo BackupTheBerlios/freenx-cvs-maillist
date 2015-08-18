@@ -1,0 +1,230 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r289 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r289%20-%20freenx-server/trunk&In-Reply-To=%3C200701241551.l0OFpb8K032545%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000418.html">
+   <LINK REL="Next"  HREF="000431.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r289 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r289%20-%20freenx-server/trunk&In-Reply-To=%3C200701241551.l0OFpb8K032545%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r289 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Wed Jan 24 16:51:37 CET 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000418.html">[Freenx-cvs] r288 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000431.html">[Freenx-cvs] r289 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#419">[ date ]</a>
+              <a href="thread.html#419">[ thread ]</a>
+              <a href="subject.html#419">[ subject ]</a>
+              <a href="author.html#419">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-01-24 16:51:37 +0100 (Wed, 24 Jan 2007)
+New Revision: 289
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/node.conf.sample
+   freenx-server/trunk/nxclient
+   freenx-server/trunk/nxloadconfig
+   freenx-server/trunk/nxnode
+   freenx-server/trunk/nxprint
+Log:
+       * Added configuration vars to tweak the new behaviour.
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-01-24 14:46:11 UTC (rev 288)
++++ freenx-server/trunk/ChangeLog	2007-01-24 15:51:37 UTC (rev 289)
+@@ -8,6 +8,7 @@
+ 	          /usr/lib/cups/driver/
+ 	* Added setting of CUPS_SERVER environment var.
+ 	* Added automatic downloading of PPDs, if the client supports it.
++	* Added configuration vars to tweak the new behaviour.
+ 
+ 23.01.2007 FreeNX 0.6.0 &quot;Juliana birthday edition&quot;
+ 	* Opened the 0.6.0 branch.
+
+Modified: freenx-server/trunk/node.conf.sample
+===================================================================
+--- freenx-server/trunk/node.conf.sample	2007-01-24 14:46:11 UTC (rev 288)
++++ freenx-server/trunk/node.conf.sample	2007-01-24 15:51:37 UTC (rev 289)
+@@ -252,6 +252,23 @@
+ 
+ #ENABLE_KDE_CUPS=&quot;0&quot;
+ #KDE_PRINTRC=&quot;$KDEHOME/share/config/kdeprintrc&quot;
++
++# FreeNX with ENABLE_CUPS_SERVER_EXPORT=&quot;1&quot; will automatically
++# export the environment variable CUPS_SERVER.
++
++#ENABLE_CUPS_SERVER_EXPORT=&quot;1&quot;
++
++# FreeNX with ENABLE_FOOMATIC will integrate the foomatic db to the list
++# of available ppd drivers via the $COMMAND_FOOMATIC command.
++
++#ENABLE_FOOMATIC=&quot;1&quot;
++#COMMAND_FOOMATIC=&quot;/usr/lib/cups/driver/foomatic-ppdfile&quot;
++
++
++# CUPS_BACKEND and CUPS_ETC are the corresponding paths of your CUPS 
++# installation.
++
++#CUPS_BACKEND=&quot;/usr/lib/cups/backend&quot;
+ #CUPS_ETC=&quot;/etc/cups&quot;
+ 
+ #########################################################################
+
+Modified: freenx-server/trunk/nxclient
+===================================================================
+--- freenx-server/trunk/nxclient	2007-01-24 14:46:11 UTC (rev 288)
++++ freenx-server/trunk/nxclient	2007-01-24 15:51:37 UTC (rev 289)
+@@ -98,6 +98,8 @@
+ 	[ -n &quot;$USER_FAKE_HOME&quot; ] &amp;&amp; UTILITY_DRIVERS_CACHE=&quot;$USER_FAKE_HOME/.nx/config/drivers.cache&quot;
+ 	UTILITY_NXPRINT=&quot;nxprint&quot;
+ 	[ -n &quot;$PATH_BIN&quot; ] &amp;&amp; UTILITY_NXPRINT=&quot;$PATH_BIN/nxprint&quot;
++	# Export configuration vars for nxprint
++	export ENABLE_FOOMATIC COMMAND_FOOMATIC
+ 	case &quot;$1&quot; in 
+ 		get)
+ 			grep &quot;driver|$2|&quot; &quot;$UTILITY_DRIVERS_CACHE&quot; 2&gt;/dev/null
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2007-01-24 14:46:11 UTC (rev 288)
++++ freenx-server/trunk/nxloadconfig	2007-01-24 15:51:37 UTC (rev 289)
+@@ -52,7 +52,7 @@
+ # DO NOT TOUCH unless you REALLY know what you are doing
+ #########################################################################
+ 
+-NX_VERSION=1.5.0-61
++NX_VERSION=1.5.0-61-SVN
+ NX_LICENSE=&quot;OS (GPL)&quot;
+ 
+ # Where can different nx components be found
+@@ -144,6 +144,12 @@
+ 
+ ENABLE_KDE_CUPS=&quot;0&quot;
+ KDE_PRINTRC=&quot;&quot; # Calculated
++
++ENABLE_CUPS_SERVER_EXPORT=&quot;1&quot;
++ENABLE_FOOMATIC=&quot;1&quot;
++COMMAND_FOOMATIC=&quot;/usr/lib/cups/driver/foomatic-ppdfile&quot;
++
++CUPS_BACKEND=&quot;/usr/lib/cups/backend&quot;
+ CUPS_ETC=&quot;/etc/cups/&quot;
+ 
+ # Path directives
+@@ -436,6 +442,17 @@
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_KDE_CUPS=$ENABLE_KDE_CUPS\&quot;&quot;
+ 	[ &quot;$ENABLE_KDE_CUPS&quot; = &quot;1&quot; -a ! -e &quot;$KDE_PRINTRC&quot; ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;KDE_PRINTRC=$KDE_PRINTRC\&quot;&quot;
++
++
++	[ &quot;$ENABLE_FOOMATIC&quot; = &quot;1&quot; ] &amp;&amp; ! which &quot;$COMMAND_FOOMATIC&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;COMMAND_FOOMATIC=$COMMAND_FOOMATIC\&quot;&quot; \
++					  &amp;&amp; echo &quot;         Users will not be able to use foomatic.&quot;
++	[ ! -x &quot;$CUPS_BACKEND/ipp&quot; ] &amp;&amp; \
++		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: \&quot;CUPS_BACKEND/ipp\&quot; is not executable.&quot; \
++					  &amp;&amp; echo &quot;         Users will not be able to enable printing.&quot;
++	[ ! -x &quot;$CUPS_BACKEND/smb&quot; ] &amp;&amp; \
++		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: \&quot;CUPS_BACKEND/smb\&quot; is not executable.&quot; \
++					  &amp;&amp; echo &quot;         Users will not be able to enable printing.&quot;
+ 	[ ! -e &quot;$CUPS_ETC/mime.types&quot; -o ! -e &quot;$CUPS_ETC/mime.convs&quot; ] &amp;&amp; \
+ 		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;CUPS_ETC=$CUPS_ETC\&quot;&quot; \
+ 					  &amp;&amp; echo &quot;         Users will not be able to enable printing.&quot;
+@@ -483,6 +500,9 @@
+ 	! which &quot;$COMMAND_CUPSD&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;COMMAND_CUPSD=$COMMAND_CUPSD\&quot;&quot; \
+ 					  &amp;&amp; echo &quot;         Users will not be able to enable printing.&quot;
++	[ -z &quot;$(strings $COMMAND_CUPSD | egrep 'CUPS\/1.2')&quot; ] &amp;&amp; \
++		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid cupsd version of \&quot;$COMMAND_CUPSD\&quot;. Need version 1.2.&quot; \
++					  &amp;&amp; echo &quot;         Users will not be able to enable printing.&quot;
+ 	! which &quot;$COMMAND_MD5SUM&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_MD5SUM=$COMMAND_MD5SUM\&quot;&quot;
+ 
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2007-01-24 14:46:11 UTC (rev 288)
++++ freenx-server/trunk/nxnode	2007-01-24 15:51:37 UTC (rev 289)
+@@ -283,7 +283,7 @@
+ 		fi
+ 	fi
+ 
+-	[ &quot;$cups&quot; = &quot;1&quot; ] &amp;&amp; export CUPS_SERVER=$USER_FAKE_HOME/.nx/C-$sess_id/cups/cups.sock
++	[ &quot;$cups&quot; = &quot;1&quot; -a &quot;$ENABLE_CUPS_SERVER_EXPORT&quot; = &quot;1&quot; ] &amp;&amp; export CUPS_SERVER=&quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/cups.sock&quot;
+ 
+ 	#
+ 	# Do we need to PRELOAD any libraries?
+
+Modified: freenx-server/trunk/nxprint
+===================================================================
+--- freenx-server/trunk/nxprint	2007-01-24 14:46:11 UTC (rev 288)
++++ freenx-server/trunk/nxprint	2007-01-24 15:51:37 UTC (rev 289)
+@@ -9,9 +9,6 @@
+ # SVN: $Id$
+ #
+ 
+-# enable foomatic by default
+-FOOMATIC=&quot;yes&quot;
+-
+ HELP=&quot;no&quot;
+ DRIVERS=&quot;no&quot;
+ PRINTERS=&quot;no&quot;
+@@ -56,9 +53,10 @@
+                           print &quot;driver|&quot; (a[i]==&quot;ESP&quot;?substr(b[i],0,index(b[i],&quot; &quot;)-1):a[i]) &quot;|&quot;b[i]&quot;|&quot;i&quot;|en&quot;
+                     }' $(find -name &quot;*.ppd&quot;)
+ 
+-	if [ &quot;$FOOMATIC&quot; = &quot;yes&quot; ]
++	if [ &quot;$ENABLE_FOOMATIC&quot; = &quot;1&quot; ]
+ 	then
+-		foomatic-ppdfile list | awk -F'&quot;' '{ A=&quot;&quot;; if ($4 == &quot;HP&quot;) { B=substr($6,index($6,&quot; &quot;)+1); A=&quot; &quot;substr(B,0,index(B,&quot; &quot;)); } printf(&quot;driver|%s%s|%s|%s|%s\n&quot;,$4,A,$6,$2,substr($3,2)) } '
++		[ -z &quot;$COMMAND_FOOMATIC&quot; ] &amp;&amp; COMMAND_FOOMATIC=&quot;foomatic-ppdfile&quot; 
++		$COMMAND_FOOMATIC list | awk -F'&quot;' '{ A=&quot;&quot;; if ($4 == &quot;HP&quot;) { B=substr($6,index($6,&quot; &quot;)+1); A=&quot; &quot;substr(B,0,index(B,&quot; &quot;)); } printf(&quot;driver|%s%s|%s|%s|%s\n&quot;,$4,A,$6,$2,substr($3,2)) } '
+ 	fi
+ 	} | sort
+ fi
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000418.html">[Freenx-cvs] r288 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000431.html">[Freenx-cvs] r289 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#419">[ date ]</a>
+              <a href="thread.html#419">[ thread ]</a>
+              <a href="subject.html#419">[ subject ]</a>
+              <a href="author.html#419">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

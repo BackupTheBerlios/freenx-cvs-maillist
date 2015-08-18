@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r191 - / freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r191%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200603102012.k2AKCOTV014177%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000320.html">
+   <LINK REL="Next"  HREF="000322.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r191 - / freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r191%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200603102012.k2AKCOTV014177%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r191 - / freenx-server/trunk">fabianx at berlios.de
+       </A><BR>
+    <I>Fri Mar 10 21:12:24 CET 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000320.html">[Freenx-cvs] r190 - / freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000322.html">[Freenx-cvs] r192 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#321">[ date ]</a>
+              <a href="thread.html#321">[ thread ]</a>
+              <a href="subject.html#321">[ subject ]</a>
+              <a href="author.html#321">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2006-03-10 21:12:22 +0100 (Fri, 10 Mar 2006)
+New Revision: 191
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxserver
+Log:
+Fixed stale sessions:
+
+- Session suspend
+- Session resume
+- Session close =&gt; stale session in DB
+ (without any attached processes running)
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:244
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:247
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-03-09 02:23:46 UTC (rev 190)
++++ freenx-server/trunk/ChangeLog	2006-03-10 20:12:22 UTC (rev 191)
+@@ -18,6 +18,7 @@
+ 	  (&quot;Felipe Alfaro Solana&quot; &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">felipe.alfaro at gmail.com</A>&gt;)
+ 	* Added perl replacement for 'rev' function on Sun OS 5.10.
+ 	* Fixed NODE_AUTOSTART to be unable to block sessions.
++	* Fixed stale sessions introduced by the new session handling model.
+ 
+ XX.XX.2006 FreeNX 0.4.5 &quot;aKademy Edition&quot;
+ 	* Made nxsetup more user-friendly and hopefully finally failsafe.
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2006-03-09 02:23:46 UTC (rev 190)
++++ freenx-server/trunk/nxserver	2006-03-10 20:12:22 UTC (rev 191)
+@@ -358,6 +358,14 @@
+ 	session_change &quot;$1&quot; &quot;status&quot; &quot;$2&quot;
+ }
+ 
++# session_running &lt;session_id&gt;
++# return: true if running, false if not
++
++session_running()
++{
++	test -f &quot;$NX_SESS_DIR/running/sessionId'{'$1'}&quot;
++}
++
+ # session_close &lt;session_id&gt; &lt;end-time&gt;
+ 
+ session_close()
+@@ -725,7 +733,7 @@
+ 						[ &quot;$KILL_WAIT_PID&quot; = &quot;1&quot; ] &amp;&amp; kill $SERVER_WAIT_PID
+ 						KILL_WAIT_PID=0
+ 						session_status $uniqueid &quot;Running&quot;
+-						SERVER_CHANNEL=2
++						[ &quot;$SERVER_CHANNEL&quot; = &quot;1&quot; ] &amp;&amp; SERVER_CHANNEL=2
+ 					;;
+ 					*closed*)
+ 						session_close $uniqueid
+@@ -763,6 +771,9 @@
+ 	trap - EXIT
+ 	trap - SIGPIPE
+ 	
++	# Close it in case the session is still running
++	session_running $uniqueid &amp;&amp; session_close $uniqueid
++	
+ 	server_remove_usession
+ 
+ 	# remove lock file
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000320.html">[Freenx-cvs] r190 - / freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000322.html">[Freenx-cvs] r192 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#321">[ date ]</a>
+              <a href="thread.html#321">[ thread ]</a>
+              <a href="subject.html#321">[ subject ]</a>
+              <a href="author.html#321">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

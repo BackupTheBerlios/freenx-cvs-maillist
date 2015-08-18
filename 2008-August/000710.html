@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r576 - trunk/freenx-server
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r576%20-%20trunk/freenx-server&In-Reply-To=%3C200808181834.m7IIYttF023648%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000709.html">
+   <LINK REL="Next"  HREF="000711.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r576 - trunk/freenx-server</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r576%20-%20trunk/freenx-server&In-Reply-To=%3C200808181834.m7IIYttF023648%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r576 - trunk/freenx-server">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Mon Aug 18 20:34:55 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000709.html">[Freenx-cvs] r575 - trunk/freenx-server
+</A></li>
+        <LI>Next message: <A HREF="000711.html">[Freenx-cvs] r577 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#710">[ date ]</a>
+              <a href="thread.html#710">[ thread ]</a>
+              <a href="subject.html#710">[ subject ]</a>
+              <a href="author.html#710">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-08-18 20:34:55 +0200 (Mon, 18 Aug 2008)
+New Revision: 576
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxserver
+   trunk/freenx-server/nxviewer_helper
+Log:
++       * The same user is always allowed to shadow its own sessions.
++         (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-18 18:20:18 UTC (rev 575)
++++ trunk/freenx-server/ChangeLog	2008-08-18 18:34:55 UTC (rev 576)
+@@ -110,6 +110,8 @@
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 	* Prepared shadowing foreign users for VNC-shadowing.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* The same user is always allowed to shadow its own sessions.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
+ 14.03.2008 FreeNX 0.7.2 &quot;Priscilla Edition&quot;
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-18 18:20:18 UTC (rev 575)
++++ trunk/freenx-server/nxserver	2008-08-18 18:34:55 UTC (rev 576)
+@@ -1278,7 +1278,7 @@
+ 			return 1
+ 		fi
+ 
+-		PARAMS=&quot;$PARAMS&amp;shadowdisplay=$shadowdisplay&amp;shadowhost=$shadowhost&quot;
++		PARAMS=&quot;$PARAMS&amp;shadowdisplay=$shadowdisplay&amp;shadowhost=$shadowhost&amp;shadowcookie=$shadowcookie&amp;shadowuser=$shadowuser&quot;
+ 		CMDLINE=$PARAMS
+ 	fi
+ 	
+
+Modified: trunk/freenx-server/nxviewer_helper
+===================================================================
+--- trunk/freenx-server/nxviewer_helper	2008-08-18 18:20:18 UTC (rev 575)
++++ trunk/freenx-server/nxviewer_helper	2008-08-18 18:34:55 UTC (rev 576)
+@@ -34,9 +34,11 @@
+ 		if [ -n &quot;$shadowcookie&quot; ]
+ 		then
+ 			xauth add &quot;$shadowhost:$shadowdisplay&quot; MIT-MAGIC-COOKIE-1 &quot;$shadowcookie&quot;
+-			[ &quot;$ENABLE_SESSION_SHADOWING_AUTHORIZATION&quot; = &quot;1&quot; ] &amp;&amp; accept=&quot;-accept popup&quot;
+-			[ &quot;$ENABLE_INTERACTIVE_SESSION_SHADOWING&quot; != &quot;1&quot; ] &amp;&amp; viewonly=&quot;-viewonly&quot;
+-	
++			if [ &quot;$shadowuser&quot; != &quot;$USER&quot; ]
++			then
++				[ &quot;$ENABLE_SESSION_SHADOWING_AUTHORIZATION&quot; = &quot;1&quot; ] &amp;&amp; accept=&quot;-accept popup&quot;
++				[ &quot;$ENABLE_INTERACTIVE_SESSION_SHADOWING&quot; != &quot;1&quot; ] &amp;&amp; viewonly=&quot;-viewonly&quot;
++			fi
+ 		fi
+ 		
+ 		DISPLAY=&quot;$shadowhost:$shadowdisplay&quot; $COMMAND_X11VNC -localhost $accept $viewonly -timeout 120 -once -rfbauth &quot;$NXSESSION_DIRECTORY/scripts/.passwd&quot; &gt;&quot;$NXSESSION_DIRECTORY/scripts/.vnc_port&quot; &amp;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000709.html">[Freenx-cvs] r575 - trunk/freenx-server
+</A></li>
+	<LI>Next message: <A HREF="000711.html">[Freenx-cvs] r577 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#710">[ date ]</a>
+              <a href="thread.html#710">[ thread ]</a>
+              <a href="subject.html#710">[ subject ]</a>
+              <a href="author.html#710">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

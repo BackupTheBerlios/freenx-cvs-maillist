@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r123 - freenx-server/branches/FreeNX-0.4
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r123%20-%20freenx-server/branches/FreeNX-0.4&In-Reply-To=%3C200508120115.j7C1FSUU012883%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000249.html">
+   <LINK REL="Next"  HREF="000251.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r123 - freenx-server/branches/FreeNX-0.4</H1>
+    <B>Fabian Franz at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r123%20-%20freenx-server/branches/FreeNX-0.4&In-Reply-To=%3C200508120115.j7C1FSUU012883%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r123 - freenx-server/branches/FreeNX-0.4">fabianx at berlios.de
+       </A><BR>
+    <I>Fri Aug 12 03:15:28 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000249.html">[Freenx-cvs] r122 - freenx-server/branches/FreeNX-0.4
+</A></li>
+        <LI>Next message: <A HREF="000251.html">[Freenx-cvs] r124 - / freenx-server/branches/FreeNX-0.4
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#250">[ date ]</a>
+              <a href="thread.html#250">[ thread ]</a>
+              <a href="subject.html#250">[ subject ]</a>
+              <a href="author.html#250">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2005-08-12 03:14:29 +0200 (Fri, 12 Aug 2005)
+New Revision: 123
+
+Modified:
+   freenx-server/branches/FreeNX-0.4/ChangeLog
+   freenx-server/branches/FreeNX-0.4/nxnode
+   freenx-server/branches/FreeNX-0.4/nxserver
+Log:
+* Added --agent to nxnode/nxserver to allow easier debugging.
+
+Example:
+
+nxserver --agent :1000
+
+or
+
+/path/to/nxnode/nxnode --agent :1000
+
+
+Modified: freenx-server/branches/FreeNX-0.4/ChangeLog
+===================================================================
+--- freenx-server/branches/FreeNX-0.4/ChangeLog	2005-08-10 01:19:28 UTC (rev 122)
++++ freenx-server/branches/FreeNX-0.4/ChangeLog	2005-08-12 01:14:29 UTC (rev 123)
+@@ -1,5 +1,6 @@
+ *****.2005 FreeNX 0.4.5 ???
+ 	* Made nxsetup more user-friendly and hopefully finally failsafe.
++	* Added --agent to nxnode/nxserver to allow easier debugging.
+ 
+ 06.08.2005 FreeNX 0.4.4 &quot;UKUUG Enterprise Edition&quot;
+ 	* Added ENABLE_1_5_0_BACKEND configuration directive:
+
+Modified: freenx-server/branches/FreeNX-0.4/nxnode
+===================================================================
+--- freenx-server/branches/FreeNX-0.4/nxnode	2005-08-10 01:19:28 UTC (rev 122)
++++ freenx-server/branches/FreeNX-0.4/nxnode	2005-08-12 01:14:29 UTC (rev 123)
+@@ -22,7 +22,7 @@
+ 
+ echo &quot;NX&gt; 1000 NXNODE - Version $NX_VERSION $NX_LICENSE&quot;
+ 
+-if [ &quot;$1&quot; != &quot;--check&quot; -a &quot;$1&quot; != &quot;--setkey&quot; ]
++if [ &quot;$1&quot; != &quot;--check&quot; -a &quot;$1&quot; != &quot;--setkey&quot; -a &quot;$1&quot; != &quot;--agent&quot; ]
+ then 
+ 	read CMDLINE
+ 
+@@ -862,6 +862,13 @@
+ 	--check)
+ 		echo &quot;NX&gt; 716 finished&quot;
+ 	;;
++	--agent)
++		echo &quot;NX&gt; 716 Starting NX Agent ...&quot;
++		shift
++		[ &quot;$SET_LD_LIBRARY_PATH&quot; = &quot;1&quot; ] &amp;&amp; export LD_LIBRARY_PATH=&quot;$AGENT_LIBRARY_PATH:$LD_LIBRARY_PATH&quot;
++		PATH=&quot;$PATH:$PATH_BIN&quot; $PATH_BIN/nxagent -name &quot;NX Agent Test - Args: $@&quot; $@
++		echo &quot;NX&gt; 716 NX Agent exited with status: $?&quot;
++	;;
+ 	--setkey)
+ 		mkdir -m 700 -p $HOME/.ssh
+ 		if ! grep -q &quot;$(cat $NX_ETC_DIR/users.id_dsa.pub)&quot; $HOME/.ssh/$SSH_AUTHORIZED_KEYS 2&gt;/dev/null
+
+Modified: freenx-server/branches/FreeNX-0.4/nxserver
+===================================================================
+--- freenx-server/branches/FreeNX-0.4/nxserver	2005-08-10 01:19:28 UTC (rev 122)
++++ freenx-server/branches/FreeNX-0.4/nxserver	2005-08-12 01:14:29 UTC (rev 123)
+@@ -1350,6 +1350,7 @@
+ 
+ if [ $UID -ne 0 ]
+ then
++	[ &quot;$1&quot; = &quot;--agent&quot; ] &amp;&amp; exec $PATH_BIN/nxnode &quot;$@&quot;
+ 	[ &quot;$1&quot; != &quot;--passwd&quot; ] &amp;&amp; cmd_usage
+ 	cmd_user_passwd
+ 	exit 0
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000249.html">[Freenx-cvs] r122 - freenx-server/branches/FreeNX-0.4
+</A></li>
+	<LI>Next message: <A HREF="000251.html">[Freenx-cvs] r124 - / freenx-server/branches/FreeNX-0.4
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#250">[ date ]</a>
+              <a href="thread.html#250">[ thread ]</a>
+              <a href="subject.html#250">[ subject ]</a>
+              <a href="author.html#250">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

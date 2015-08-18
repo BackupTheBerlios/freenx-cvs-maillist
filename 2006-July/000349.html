@@ -1,0 +1,325 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r220 - / freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-July/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r220%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200607042202.k64M2Nd5022759%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000348.html">
+   <LINK REL="Next"  HREF="000350.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r220 - / freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r220%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200607042202.k64M2Nd5022759%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r220 - / freenx-server/trunk">fabianx at berlios.de
+       </A><BR>
+    <I>Wed Jul  5 00:02:23 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000348.html">[Freenx-cvs] r219 - / freenx-server/trunk freenx-server/trunk/nxserver-helper
+</A></li>
+        <LI>Next message: <A HREF="000350.html">[Freenx-cvs] r221 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#349">[ date ]</a>
+              <a href="thread.html#349">[ thread ]</a>
+              <a href="subject.html#349">[ subject ]</a>
+              <a href="author.html#349">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2006-07-05 00:02:22 +0200 (Wed, 05 Jul 2006)
+New Revision: 220
+
+Modified:
+   /
+   freenx-server/trunk/nxnode
+   freenx-server/trunk/nxserver
+Log:
+Added first version of nxnode slave mode.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:224
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:228
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2006-07-04 15:46:40 UTC (rev 219)
++++ freenx-server/trunk/nxnode	2006-07-04 22:02:22 UTC (rev 220)
+@@ -1055,8 +1055,9 @@
+ if [ &quot;$1&quot; = &quot;--slave&quot; ]
+ then
+ 	# New slave mode accepts more than 1 command at a time
++	echo &quot;NX&gt; 716 Slave mode started successfully.&quot;
+ 	
+-	while read CMD HANDLE
++	while read CMD
+ 	do
+ 		set -- &quot;$CMD&quot;
+ 		if [ &quot;$1&quot; != &quot;--check&quot; -a &quot;$1&quot; != &quot;--setkey&quot; -a &quot;$1&quot; != &quot;--agent&quot; ]
+@@ -1066,7 +1067,7 @@
+ 			CMDLINE=&quot;a=b&amp;$CMDLINE&quot;
+ 		fi
+ 
+-		( echo $CMDLINE | &quot;$0&quot; &quot;$CMD&quot; | sed &quot;s/^/[$HANDLE]-/g&quot; ) &amp;
++		( echo $CMDLINE | &quot;$0&quot; &quot;$CMD&quot; ) &amp;
+ 
+ 	done
+ else
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2006-07-04 15:46:40 UTC (rev 219)
++++ freenx-server/trunk/nxserver	2006-07-04 22:02:22 UTC (rev 220)
+@@ -466,6 +466,85 @@
+ 	echo &quot;$@&quot;
+ }
+ 
++
++#
++# needed for slave mode
++#
++
++nxnode_login_stop_slave()
++{
++	[ -n &quot;$NXNODE_LOGIN_SLAVE&quot; ] &amp;&amp; kill &quot;$NXNODE_LOGIN_SLAVE&quot;
++}
++
++nxnode_login()
++{
++	PASS=&quot;$1&quot;
++	shift
++
++	if [ &quot;$NXNODE_LOGIN_SLAVE_ENABLED&quot; != &quot;1&quot; ]
++	then
++		NXNODE_TOSEND=&quot;$NXNODE_TOSEND&quot; echo $PASS | $PATH_BIN/nxnode-login &quot;$@&quot;
++	else
++		if [ -z &quot;$NXNODE_LOGIN_SLAVE&quot; ]
++		then
++			# Send password
++			echo &quot;$PASS&quot; &gt;&amp;4 
++
++			# Connect to NXNODE
++			
++			$PATH_BIN/nxnode-login &quot;$1&quot; &quot;$2&quot; &quot;$3&quot; &quot;$4&quot; &quot;$5&quot; &quot;--slave&quot; &lt;&amp;3 &gt;&amp;3 2&gt;&amp;3 &amp;
++			NXNODE_LOGIN_SLAVE=&quot;$!&quot;
++			disown $!
++
++			trap nxnode_login_stop_slave EXIT
++			
++			while read line &lt;&amp;4
++			do
++				log 6 &quot;$line&quot;
++				case &quot;$line&quot; in
++					&quot;NX&gt; 716 Slave mode started successfully.&quot;)
++						break
++					;;
++				esac
++			done
++
++			# TODO: KILL the slave node at end of session
++		fi
++		
++		#send CMD to nxnode
++		
++		echo &quot;$6&quot; &gt;&amp;4
++		[ -n &quot;$NXNODE_TOSEND&quot; ] &amp;&amp; echo &quot;$NXNODE_TOSEND&quot; &gt;&amp;4
++
++		NXNODE_RETURN=&quot;1&quot;
++
++		if [ -z &quot;$NXNODE_READER&quot; ]
++		then
++			while read line &lt;&amp;4
++			do
++				echo &quot;$line&quot;
++				case &quot;$line&quot; in
++					&quot;NX&gt; 716&quot;*) 
++						NXNODE_RETURN=&quot;0&quot;
++					;;
++					&quot;NX&gt; 1001&quot;*)
++						break
++					;;
++				esac
++			done
++		fi
++		test &quot;$NXNODE_RETURN&quot; = &quot;0&quot;
++	fi
++}
++
++nxnode_login_register_reader()
++{
++	# Register a reader
++	NXNODE_READER=&quot;1&quot;
++}
++
++ENABLE_NXNODE_SLAVE_MODE=&quot;1&quot;
++
+ # Start!
+ [ &quot;$NX_LOG_LEVEL&quot; -ge &quot;1&quot; ] &amp;&amp; touch &quot;$NX_LOGFILE&quot; &gt;/dev/null 2&gt;&amp;1
+ log 3 &quot;-- NX SERVER START: $@ - ORIG_COMMAND=$SSH_ORIGINAL_COMMAND&quot;
+@@ -488,6 +567,27 @@
+ 	log 1 &quot;Error: Forwarding to NoMachine Server $NOMACHINE_SERVER failed. Using FreeNX server instead.&quot;
+ fi
+ 
++#
++# nxnode slave mode preparations
++#
++
++NXNODE_LOGIN_SLAVE_ENABLED=&quot;0&quot;
++NXNODE_LOGIN_SLAVE=&quot;&quot;
++
++if [ &quot;$ENABLE_NXNODE_SLAVE_MODE&quot; = &quot;1&quot; -a &quot;$NXSERVER_HELPER_ACTIVE&quot; != &quot;1&quot; ]
++then
++	export SSH_ORIGINAL_COMMAND
++	export NXSERVER_HELPER_ACTIVE=&quot;1&quot;
++	exec $PATH_BIN/nxserver-helper &quot;$0&quot;
++	log 1 &quot;Error: Execution of $PATH_BIN/nxserver-helper failed. Disabling slave mode of nxnode.&quot;
++fi
++
++if [ &quot;$ENABLE_NXNODE_SLAVE_MODE&quot; = &quot;1&quot; -a &quot;$NXSERVER_HELPER_ACTIVE&quot; = &quot;1&quot; ]
++then
++	log 3 &quot;Info: Using fds #3 and #4 for communication with nxnode.&quot;
++	NXNODE_LOGIN_SLAVE_ENABLED=&quot;1&quot;
++fi
++
+ echo_x &quot;HELLO NXSERVER - Version $NX_VERSION $NX_LICENSE&quot;
+ 
+ # Login stage
+@@ -567,7 +667,7 @@
+ 			then
+ 				log 6 -n &quot;ssh &quot;
+ 				export COMMAND_SSH			
+-				echo &quot;$PASS&quot; | $PATH_BIN/nxnode-login -- ssh &quot;$USER&quot; &quot;$SSHD_PORT&quot; &quot;$PATH_BIN/nxnode&quot; --check 2&gt;&amp;1 &gt;/dev/null
++				nxnode_login &quot;$PASS&quot; -- ssh &quot;$USER&quot; &quot;$SSHD_PORT&quot; &quot;$PATH_BIN/nxnode&quot; --check 2&gt;&amp;1 &gt;/dev/null
+ 				if [ $? -eq 0 ]
+ 				then
+ 					LOGIN_SUCCESS=&quot;1&quot;
+@@ -579,7 +679,7 @@
+ 			if [ &quot;$ENABLE_SU_AUTHENTICATION&quot; = &quot;1&quot; -a &quot;$LOGIN_SUCCESS&quot; = &quot;0&quot; ]
+ 			then
+ 				log 6 -n &quot;su &quot;
+-				echo &quot;$PASS&quot; | $PATH_BIN/nxnode-login -- su &quot;$USER&quot; &quot;&quot; &quot;$PATH_BIN/nxnode&quot; --check 2&gt;&amp;1 &gt;/dev/null
++				nxnode_login &quot;$PASS&quot; -- su &quot;$USER&quot; &quot;&quot; &quot;$PATH_BIN/nxnode&quot; --check 2&gt;&amp;1 &gt;/dev/null
+ 				if [ $? -eq 0 ]
+ 				then
+ 					LOGIN_SUCCESS=&quot;1&quot;
+@@ -666,10 +766,10 @@
+ 	if [ &quot;$LOGIN_METHOD&quot; = &quot;SSH&quot; ]
+ 	then
+ 	    export COMMAND_SSH
+-	    echo &quot;$PASS&quot; | NXNODE_TOSEND=&quot;$@&quot; $PATH_BIN/nxnode-login -- ssh &quot;$USER&quot; &quot;$SSHD_PORT&quot; &quot;$PATH_BIN/nxnode&quot; &quot;$CMD&quot; 2&gt;&amp;1 | log_tee
++	    NXNODE_TOSEND=&quot;$@&quot; nxnode_login &quot;$PASS&quot; -- ssh &quot;$USER&quot; &quot;$SSHD_PORT&quot; &quot;$PATH_BIN/nxnode&quot; &quot;$CMD&quot; 2&gt;&amp;1 | log_tee
+ 	elif [ &quot;$LOGIN_METHOD&quot; = &quot;SU&quot; ]
+ 	then
+-	    echo &quot;$PASS&quot; | NXNODE_TOSEND=&quot;$@&quot; $PATH_BIN/nxnode-login -- su &quot;$USER&quot; &quot;&quot; &quot;$PATH_BIN/nxnode&quot; &quot;$CMD&quot; 2&gt;&amp;1 | log_tee
++	    NXNODE_TOSEND=&quot;$@&quot; nxnode_login &quot;$PASS&quot; -- su &quot;$USER&quot; &quot;&quot; &quot;$PATH_BIN/nxnode&quot; &quot;$CMD&quot; 2&gt;&amp;1 | log_tee
+ 	elif [ &quot;$LOGIN_METHOD&quot; = &quot;USERMODE&quot; ]
+ 	then
+ 	    echo &quot;$@&quot; | $PATH_BIN/nxnode &quot;$CMD&quot; 2&gt;&amp;1 | log_tee
+@@ -707,6 +807,9 @@
+ 
+ 	# remove lock file
+ 	[ -e &quot;/tmp/.nX$SESS_DISPLAY-lock&quot; ] &amp;&amp; rm -f /tmp/.nX$SESS_DISPLAY-lock
++
++	# Kill possible slave node
++	nxnode_login_stop_slave
+ }
+ 
+ server_nxnode_start_wait()
+@@ -777,6 +880,8 @@
+ 	# remove lock file
+ 	[ -e &quot;/tmp/.nX$SESS_DISPLAY-lock&quot; ] &amp;&amp; rm -f /tmp/.nX$SESS_DISPLAY-lock
+ 
++	nxnode_login_stop_slave
++
+ 	else # $1 = restore
+ 	
+ 	KILL_WAIT_PID=1
+@@ -816,6 +921,8 @@
+ 		esac
+ 	done
+ 	
++	nxnode_login_stop_slave
++	
+ 	fi # $1 = start
+ }
+ 
+@@ -1071,9 +1178,10 @@
+ 	# now start the node
+ 	sleep $AGENT_STARTUP_TIMEOUT &amp;
+ 	SERVER_WAIT_PID=$!
+-	server_nxnode_start_wait --&quot;$ACTION&quot;session $USER &quot;$FULL_PARAMS&quot; &amp;
++	( server_nxnode_start_wait --&quot;$ACTION&quot;session $USER &quot;$FULL_PARAMS&quot; ) &amp;
+ 	SERVER_PID=$!
+ 	disown $SERVER_PID
++	
+ 	wait $SERVER_WAIT_PID
+ 	
+ 	if [ $? -eq 0 ]
+@@ -1086,6 +1194,9 @@
+ 		# FIXME: Send node signal to terminate
+ 		exit 1
+ 	fi
++	
++	# We have now an active reader
++	nxnode_login_register_reader
+ }
+ 
+ # Session stage
+@@ -1215,12 +1326,14 @@
+ 		addmount*)
+ 			server_get_params $CMD
+ 			PARAMS=$SERVER_PARAMS
++			# TODO: This redirection is crap here.
+ 			server_nxnode_start --smbmount &quot;$USER&quot; &quot;$PARAMS&quot; &gt;/dev/null 2&gt;&amp;1 | log_error &gt;/dev/null
+ 			echo_x &quot;NX&gt; 719 SMB filesystem: running&quot;
+ 		;;
+ 		addprinter*)
+ 			server_get_params $CMD
+ 			PARAMS=$SERVER_PARAMS
++			# TODO: This redirecion is crap here.
+ 			server_nxnode_start --addprinter &quot;$USER&quot; &quot;$PARAMS&quot; &gt;/dev/null 2&gt;&amp;1 | log_error &gt;/dev/null
+ 		;;
+ 		*)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000348.html">[Freenx-cvs] r219 - / freenx-server/trunk freenx-server/trunk/nxserver-helper
+</A></li>
+	<LI>Next message: <A HREF="000350.html">[Freenx-cvs] r221 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#349">[ date ]</a>
+              <a href="thread.html#349">[ thread ]</a>
+              <a href="subject.html#349">[ subject ]</a>
+              <a href="author.html#349">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

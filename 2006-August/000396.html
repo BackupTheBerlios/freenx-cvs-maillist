@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r266 - nxclientlib/qtnx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r266%20-%20nxclientlib/qtnx&In-Reply-To=%3C200608162021.k7GKL0x4000273%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000395.html">
+   <LINK REL="Next"  HREF="000397.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r266 - nxclientlib/qtnx</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r266%20-%20nxclientlib/qtnx&In-Reply-To=%3C200608162021.k7GKL0x4000273%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r266 - nxclientlib/qtnx">gwright at mail.berlios.de
+       </A><BR>
+    <I>Wed Aug 16 22:21:00 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000395.html">[Freenx-cvs] r265 - nxclientlib
+</A></li>
+        <LI>Next message: <A HREF="000397.html">[Freenx-cvs] r267 - nxclientlib/qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#396">[ date ]</a>
+              <a href="thread.html#396">[ thread ]</a>
+              <a href="subject.html#396">[ subject ]</a>
+              <a href="author.html#396">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2006-08-16 22:21:00 +0200 (Wed, 16 Aug 2006)
+New Revision: 266
+
+Modified:
+   nxclientlib/qtnx/qtnxsettings.cpp
+   nxclientlib/qtnx/qtnxwindow.cpp
+Log:
+Fix fullscreen mode
+
+
+Modified: nxclientlib/qtnx/qtnxsettings.cpp
+===================================================================
+--- nxclientlib/qtnx/qtnxsettings.cpp	2006-08-16 20:14:24 UTC (rev 265)
++++ nxclientlib/qtnx/qtnxsettings.cpp	2006-08-16 20:21:00 UTC (rev 266)
+@@ -110,9 +110,9 @@
+ 		if (config.geometry == &quot;640x480+0+0&quot;)
+ 			ui_sd.resolution-&gt;setCurrentIndex(ui_sd.resolution-&gt;findText(&quot;640x480&quot;));
+ 		else if (config.geometry == &quot;800x600+0+0&quot;)
+-			ui_sd.resolution-&gt;setCurrentIndex(ui_sd.resolution-&gt;findText(&quot;640x480&quot;));
++			ui_sd.resolution-&gt;setCurrentIndex(ui_sd.resolution-&gt;findText(&quot;800x600&quot;));
+ 		else if (config.geometry == &quot;1024x768+0+0&quot;)
+-			ui_sd.resolution-&gt;setCurrentIndex(ui_sd.resolution-&gt;findText(&quot;640x480&quot;));
++			ui_sd.resolution-&gt;setCurrentIndex(ui_sd.resolution-&gt;findText(&quot;1024x768&quot;));
+ 		else {
+ 			if (config.fullscreen) {
+ 				ui_sd.resolution-&gt;setCurrentIndex(ui_sd.resolution-&gt;findText(tr(&quot;Fullscreen&quot;)));
+@@ -230,9 +230,12 @@
+ 	if (ui_sd.resolution-&gt;currentText() == tr(&quot;Fullscreen&quot;))
+ 		config.fullscreen = true;
+ 	else if (ui_sd.resolution-&gt;currentText() == tr(&quot;Custom&quot;)) {
++		config.fullscreen = false;
+ 		config.geometry = QString::number(ui_sd.width-&gt;value()) + &quot;x&quot; + QString::number(ui_sd.height-&gt;value()) + &quot;+0+0&quot;;
+-	} else
++	} else {
++		config.fullscreen = false;
+ 		config.geometry = ui_sd.resolution-&gt;currentText() + &quot;+0+0&quot;;
++	}
+ 
+ 	if (ui_sd.encryption-&gt;checkState() == Qt::Checked)
+ 		config.encryption = true;
+
+Modified: nxclientlib/qtnx/qtnxwindow.cpp
+===================================================================
+--- nxclientlib/qtnx/qtnxwindow.cpp	2006-08-16 20:14:24 UTC (rev 265)
++++ nxclientlib/qtnx/qtnxwindow.cpp	2006-08-16 20:21:00 UTC (rev 266)
+@@ -96,6 +96,8 @@
+ 	session.agentUser = config.agentUser;
+ 	session.agentPass = config.agentPass;
+ 	session.cups = config.cups;
++	session.fullscreen = config.fullscreen;
++	
+ 	if (!config.key.isEmpty())
+ 		session.key = config.key;
+ 	else
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000395.html">[Freenx-cvs] r265 - nxclientlib
+</A></li>
+	<LI>Next message: <A HREF="000397.html">[Freenx-cvs] r267 - nxclientlib/qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#396">[ date ]</a>
+              <a href="thread.html#396">[ thread ]</a>
+              <a href="subject.html#396">[ subject ]</a>
+              <a href="author.html#396">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

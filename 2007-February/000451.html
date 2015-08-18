@@ -1,0 +1,200 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r317 - nx-utils/nxspeex
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r317%20-%20nx-utils/nxspeex&In-Reply-To=%3C200702060752.l167qnxM007915%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000450.html">
+   <LINK REL="Next"  HREF="000452.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r317 - nx-utils/nxspeex</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r317%20-%20nx-utils/nxspeex&In-Reply-To=%3C200702060752.l167qnxM007915%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r317 - nx-utils/nxspeex">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Tue Feb  6 08:52:49 CET 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000450.html">[Freenx-cvs] r316 - nx-utils/nxspeex
+</A></li>
+        <LI>Next message: <A HREF="000452.html">[Freenx-cvs] r318 - nx-utils/nxspeex
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#451">[ date ]</a>
+              <a href="thread.html#451">[ thread ]</a>
+              <a href="subject.html#451">[ subject ]</a>
+              <a href="author.html#451">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-02-06 08:52:48 +0100 (Tue, 06 Feb 2007)
+New Revision: 317
+
+Modified:
+   nx-utils/nxspeex/nxspeex.c
+Log:
+* Cleanup of some unused functions.
+
+* Added send of do_sync_seq variable to decoder.
+
+
+
+Modified: nx-utils/nxspeex/nxspeex.c
+===================================================================
+--- nx-utils/nxspeex/nxspeex.c	2007-02-06 07:36:18 UTC (rev 316)
++++ nx-utils/nxspeex/nxspeex.c	2007-02-06 07:52:48 UTC (rev 317)
+@@ -25,7 +25,7 @@
+ #define MAX_FRAME_BYTES 2000
+ 
+ /* After how many frames should we resync with server? */
+-#define DO_SYNC_SEQ	20
++#define DEFAULT_DO_SYNC_SEQ	20
+ 
+ /* #define DEBUG 1 */
+ 
+@@ -40,47 +40,6 @@
+         return write(to, buf, len);
+ }
+ 
+-int do_fwd_all(int from, int to, void* buf, size_t count)
+-{
+-	size_t erg, len=0;
+-	
+-	do
+-	{
+-		erg=do_fwd(from, to, buf+len, count-len);
+-		if (erg &lt;= 0)
+-			break;
+-		len+=erg;
+-	}
+-	while (len &lt; count);
+-	
+-	return len;
+-}
+-
+-int do_fwd_noblock(int from, int to, void* buf, size_t count)
+-{
+-	size_t erg, len=0, olen=0;
+-	
+-	do
+-	{
+-		erg=read(from, buf+len, count-len);
+-		if (erg &lt;= 0)
+-			return len;
+-		len+=erg;
+-	}
+-	while (len &lt; count);
+-
+-	do
+-	{
+-		erg=write(to, buf+olen, count-olen);
+-		if (erg &lt;= 0)
+-			break;
+-		olen+=erg;
+-	}
+-	while (olen &lt; count);
+-	
+-	return olen;
+-}
+-
+ void do_sockopts(int sock, int buf_size)
+ {
+ 	int sz=buf_size;
+@@ -154,6 +113,7 @@
+ 	SpeexPreprocessState *preprocess = NULL;
+ 	int frame_size, frame_size2;
+ 	unsigned int seqNr = 0;
++	unsigned int do_sync_seq=DEFAULT_DO_SYNC_SEQ;
+ 	
+ 	/* Configuration variables */
+ 	/* FIXME: Depend on NX setting */
+@@ -184,6 +144,10 @@
+ 		speex_preprocess_ctl(preprocess, SPEEX_PREPROCESS_SET_DENOISE, &amp;denoise_enabled);
+ 	}
+ 
++	/* Send do_sync_seq to decoder */
++	if (write(server, &amp;do_sync_seq, sizeof(do_sync_seq)) != sizeof(do_sync_seq))
++		goto out;
++
+ 	/* Main encoding loop */
+ 
+ 	while (1)
+@@ -223,6 +187,7 @@
+ 			break;
+ 	}
+ 
++out:
+ 	/* Encoder shutdown */
+ 	speex_bits_destroy(&amp;bits); 
+ 
+@@ -280,6 +245,7 @@
+ 	int frame_size, frame_size2;
+ 	SpeexCallback callback;
+ 	SpeexStereoState stereo = SPEEX_STEREO_STATE_INIT;
++	unsigned int do_sync_seq;
+ 	
+ 	/* Configuration variables */
+ 	/* FIXME: Depend on NX setting and read from network */
+@@ -307,6 +273,11 @@
+ 	//do_sockopts(client, 200);
+ 	do_sockopts(server, frame_size2 * (((format &amp; ESD_BITS16)?16:8) / 8));
+ 	//esd_set_socket_buffers(server, format, speed, 44100);
++	//
++	
++	/* Get do_sync_seq from encoder */
++	if (do_read_complete(client, &amp;do_sync_seq, sizeof(do_sync_seq)) != sizeof(do_sync_seq))
++		goto out;
+ 
+ 	/* Main decoding loop */
+ 
+@@ -323,7 +294,7 @@
+ 		fprintf(stderr, &quot;SeqNr: %d\n&quot;, seqNr);
+ #endif
+ 
+-		if (seqNr % DO_SYNC_SEQ == 0)
++		if (seqNr % do_sync_seq == 0)
+ 			if (write(client, &amp;seqNr, sizeof(seqNr)) != sizeof(seqNr))
+ 				break;
+ 		
+@@ -342,6 +313,7 @@
+ 			break;
+ 	}
+ 
++out:
+ 	/* Decoder shutdown */
+ 	speex_bits_destroy(&amp;bits); 
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000450.html">[Freenx-cvs] r316 - nx-utils/nxspeex
+</A></li>
+	<LI>Next message: <A HREF="000452.html">[Freenx-cvs] r318 - nx-utils/nxspeex
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#451">[ date ]</a>
+              <a href="thread.html#451">[ thread ]</a>
+              <a href="subject.html#451">[ subject ]</a>
+              <a href="author.html#451">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

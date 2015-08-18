@@ -1,0 +1,3453 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r433 - nxcl/lib
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r433%20-%20nxcl/lib&In-Reply-To=%3C200801071210.m07CANNx027410%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000559.html">
+   <LINK REL="Next"  HREF="000560.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r433 - nxcl/lib</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r433%20-%20nxcl/lib&In-Reply-To=%3C200801071210.m07CANNx027410%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r433 - nxcl/lib">gwright at mail.berlios.de
+       </A><BR>
+    <I>Mon Jan  7 13:11:39 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000559.html">[Freenx-cvs] r432 - qtnx
+</A></li>
+        <LI>Next message: <A HREF="000560.html">[Freenx-cvs] r434 - qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#669">[ date ]</a>
+              <a href="thread.html#669">[ thread ]</a>
+              <a href="subject.html#669">[ subject ]</a>
+              <a href="author.html#669">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2008-01-07 13:10:22 +0100 (Mon, 07 Jan 2008)
+New Revision: 433
+
+Modified:
+   nxcl/lib/nxclientlib.cpp
+   nxcl/lib/nxclientlib.h
+   nxcl/lib/nxsession.cpp
+   nxcl/lib/nxsession.h
+Log:
+Major code cleanups, remove dead code
+
+
+Modified: nxcl/lib/nxclientlib.cpp
+===================================================================
+--- nxcl/lib/nxclientlib.cpp	2008-01-07 09:44:37 UTC (rev 432)
++++ nxcl/lib/nxclientlib.cpp	2008-01-07 12:10:22 UTC (rev 433)
+@@ -6,6 +6,8 @@
+     copyright            : (C) 2006 by George Wright
+     modifications        : (C) 2007 Embedded Software Foundry Ltd. (U.K.)
+                          :     Author: Sebastian James
++                         : (C) 2008 Defuturo Ltd
++                         :     Author: George Wright
+     email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
+  ***************************************************************************/
+ 
+@@ -17,6 +19,7 @@
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  ***************************************************************************/
++
+ #include &quot;nxclientlib_i18n.h&quot;
+ #include &quot;nxclientlib.h&quot;
+ #include &quot;nxdata.h&quot;
+@@ -24,10 +27,10 @@
+ #include &lt;fstream&gt;
+ 
+ extern &quot;C&quot; {
+-#include &lt;errno.h&gt;
+-#include &lt;sys/types.h&gt;
+-#include &lt;sys/stat.h&gt;
+-#include &lt;unistd.h&gt;
++    #include &lt;errno.h&gt;
++    #include &lt;sys/types.h&gt;
++    #include &lt;sys/stat.h&gt;
++    #include &lt;unistd.h&gt;
+ }
+ 
+ /*
+@@ -53,86 +56,82 @@
+ {
+ }
+ 
+-void
+-NXClientLibCallbacks::startedSignal (string name)
++void NXClientLibCallbacks::startedSignal (string name)
+ {
+-	this-&gt;parent-&gt;externalCallbacks-&gt;write (NXCL_PROCESS_STARTED, name + _(&quot; process started&quot;));
++    this-&gt;parent-&gt;externalCallbacks-&gt;write
++        (NXCL_PROCESS_STARTED, name + _(&quot; process started&quot;));
+ }
+ 
+-void
+-NXClientLibCallbacks::processFinishedSignal (string name)
++void NXClientLibCallbacks::processFinishedSignal (string name)
+ {
+-	this-&gt;parent-&gt;externalCallbacks-&gt;write (NXCL_PROCESS_EXITED, name + _(&quot; process exited&quot;));
+-	parent-&gt;setIsFinished (true);
++    this-&gt;parent-&gt;externalCallbacks-&gt;write
++        (NXCL_PROCESS_EXITED, name + _(&quot; process exited&quot;));
++    parent-&gt;setIsFinished (true);
+ }
+ 
+-void
+-NXClientLibCallbacks::errorSignal (int error)
++void NXClientLibCallbacks::errorSignal (int error)
+ {
+-	string message;
+-	switch (error) {
+-	case NOTQPROCFAILEDTOSTART:
+-		message = _(&quot;The process failed to start&quot;);
+-		break;
+-	case NOTQPROCCRASHED:
+-		message = _(&quot;The process has crashed&quot;);
+-		break;
+-	case NOTQPROCTIMEDOUT:
+-		message = _(&quot;The process timed out&quot;);
+-		break;
+-	case NOTQPROCWRITEERR:
+-		message = _(&quot;There was an error writing to the process&quot;);
+-		break;
+-	case NOTQPROCREADERR:
+-		message = _(&quot;There was an error reading from the process&quot;);
+-		break;
+-	default:
+-		message = _(&quot;There was an unknown error with the process&quot;);
+-		break;
+-	}
+-		
+-	this-&gt;parent-&gt;externalCallbacks-&gt;error (message);
++    string message;
++    switch (error) {
++        case NOTQPROCFAILEDTOSTART:
++            message = _(&quot;The process failed to start&quot;);
++            break;
++        case NOTQPROCCRASHED:
++            message = _(&quot;The process has crashed&quot;);
++            break;
++        case NOTQPROCTIMEDOUT:
++            message = _(&quot;The process timed out&quot;);
++            break;
++        case NOTQPROCWRITEERR:
++            message = _(&quot;There was an error writing to the process&quot;);
++            break;
++        case NOTQPROCREADERR:
++            message = _(&quot;There was an error reading from the process&quot;);
++            break;
++        default:
++            message = _(&quot;There was an unknown error with the process&quot;);
++            break;
++    }
++
++    this-&gt;parent-&gt;externalCallbacks-&gt;error (message);
+ }
+ 
+-void 
+-NXClientLibCallbacks::readyReadStandardOutputSignal (void)
++void NXClientLibCallbacks::readyReadStandardOutputSignal()
+ {
+-	this-&gt;parent-&gt;processParseStdout();
++    this-&gt;parent-&gt;processParseStdout();
+ }
+ 
+-void 
+-NXClientLibCallbacks::readyReadStandardErrorSignal (void)
++void NXClientLibCallbacks::readyReadStandardErrorSignal()
+ {
+-	this-&gt;parent-&gt;processParseStderr();
++    this-&gt;parent-&gt;processParseStderr();
+ }
++
+ /*!
+  * This gets called from within the NXSession object...
+  */
+-void 
+-NXClientLibCallbacks::noSessionsSignal (void)
++void NXClientLibCallbacks::noSessionsSignal()
+ {
+-	/* ...and it calls another callback function in the client code */
+-	this-&gt;parent-&gt;externalCallbacks-&gt;noSessionsSignal();
++    this-&gt;parent-&gt;externalCallbacks-&gt;noSessionsSignal();
+ }
+-void
+-NXClientLibCallbacks::loginFailedSignal (void)
++
++void NXClientLibCallbacks::loginFailedSignal()
+ {
+-	this-&gt;parent-&gt;loginFailed();
++    this-&gt;parent-&gt;loginFailed();
+ }
+-void
+-NXClientLibCallbacks::readyForProxySignal (void)
++
++void NXClientLibCallbacks::readyForProxySignal()
+ {
+-	this-&gt;parent-&gt;readyproxy();
++    this-&gt;parent-&gt;readyproxy();
+ }
+-void
+-NXClientLibCallbacks::authenticatedSignal (void)
++
++void NXClientLibCallbacks::authenticatedSignal()
+ {
+-	this-&gt;parent-&gt;doneAuth();
++    this-&gt;parent-&gt;doneAuth();
+ }
+-void
+-NXClientLibCallbacks::sessionsSignal (list&lt;NXResumeData&gt; data)
++
++void NXClientLibCallbacks::sessionsSignal (list&lt;NXResumeData&gt; data)
+ {
+-	this-&gt;parent-&gt;externalCallbacks-&gt;resumeSessionsSignal (data);
++    this-&gt;parent-&gt;externalCallbacks-&gt;resumeSessionsSignal (data);
+ }
+ //@}
+ 
+@@ -142,508 +141,616 @@
+ //@{
+ NXClientLib::NXClientLib()
+ {
+-	this-&gt;isFinished = false;
+-	this-&gt;readyForProxy = false;
+-	this-&gt;sessionRunning = false;
+-	this-&gt;proxyData.encrypted = false;
+-	this-&gt;password = false;
++    this-&gt;isFinished = false;
++    this-&gt;readyForProxy = false;
++    this-&gt;sessionRunning = false;
++    this-&gt;proxyData.encrypted = false;
++    this-&gt;password = false;
+ 
+-	dbgln (&quot;In NXClientLib constructor&quot;);
++    dbgln (&quot;In NXClientLib constructor&quot;);
+ 
+-	this-&gt;pNxsshProcess = &amp;this-&gt;nxsshProcess;
+-	this-&gt;pNxproxyProcess = &amp;this-&gt;nxproxyProcess;
++    this-&gt;pNxsshProcess = &amp;this-&gt;nxsshProcess;
++    this-&gt;pNxproxyProcess = &amp;this-&gt;nxproxyProcess;
+ 
+-	/* Set up callback pointers */
+-	this-&gt;nxsshProcess.setCallbacks (&amp;callbacks);
+-	this-&gt;nxproxyProcess.setCallbacks (&amp;callbacks);
+-	this-&gt;session.setCallbacks (&amp;callbacks);
+-	this-&gt;callbacks.setParent (this);
++    /* Set up callback pointers */
++    this-&gt;nxsshProcess.setCallbacks (&amp;callbacks);
++    this-&gt;nxproxyProcess.setCallbacks (&amp;callbacks);
++    this-&gt;session.setCallbacks (&amp;callbacks);
++    this-&gt;callbacks.setParent (this);
+ 
+-	dbgln (&quot;Returning from NXClientLib constructor&quot;);
++    dbgln (&quot;Returning from NXClientLib constructor&quot;);
+ }
+ 
+ NXClientLib::~NXClientLib()
+ {
+-	dbgln (&quot;In NXClientLib destructor&quot;);
+-	this-&gt;nxsshProcess.terminate();
++    dbgln (&quot;In NXClientLib destructor&quot;);
++    this-&gt;nxsshProcess.terminate();
+ }
+ 
+-void NXClientLib::invokeNXSSH (string publicKey, string serverHost, bool encryption, string key, int port)
++void NXClientLib::invokeNXSSH (string publicKey, string serverHost,
++        bool encryption, string key, int port)
+ {
+-	list&lt;string&gt; arguments;
+-	stringstream argtmp;
+-	proxyData.server = serverHost;
++    list&lt;string&gt; arguments;
++    stringstream argtmp;
++    proxyData.server = serverHost;
+ 
+-	dbgln(&quot;invokeNXSSH called&quot;);
++    dbgln(&quot;invokeNXSSH called&quot;);
+ 
+-	// We use same environment for the process as was used for the
+-	// parent, so remove nxsshProcess.setEnvironment();
++    // We use same environment for the process as was used for the
++    // parent, so remove nxsshProcess.setEnvironment();
+ 
+-	// Start to build the arguments for the nxssh command.
+-	// notQProcess requires that argv[0] contains the program name
+-	arguments.push_back (&quot;nxssh&quot;);
+-	
+-	argtmp &lt;&lt; &quot;-nx&quot;;
+-	arguments.push_back (argtmp.str());
++    // Start to build the arguments for the nxssh command.
++    // notQProcess requires that argv[0] contains the program name
++    arguments.push_back (&quot;nxssh&quot;);
+ 
+-	argtmp.str(&quot;&quot;);
+-	argtmp &lt;&lt; &quot;-p&quot; &lt;&lt; port;
+-	arguments.push_back (argtmp.str());
++    argtmp &lt;&lt; &quot;-nx&quot;;
++    arguments.push_back (argtmp.str());
+ 
+-	if (publicKey == &quot;supplied&quot;) {
+-		
+-		this-&gt;keyFile = new notQTemporaryFile;
+-		this-&gt;keyFile-&gt;open();
+-		
+-		argtmp.str(&quot;&quot;);
+-		argtmp &lt;&lt; &quot;-i&quot; &lt;&lt; this-&gt;keyFile-&gt;fileName();
+-		arguments.push_back (argtmp.str());
++    argtmp.str(&quot;&quot;);
++    argtmp &lt;&lt; &quot;-p&quot; &lt;&lt; port;
++    arguments.push_back (argtmp.str());
+ 
+-		this-&gt;keyFile-&gt;write (key);			
+-		this-&gt;keyFile-&gt;close();
++    if (publicKey == &quot;supplied&quot;) {
+ 
+-	} else {
+-		this-&gt;keyFile = NULL;
+-		argtmp.str(&quot;&quot;);
+-		argtmp &lt;&lt; &quot;-i&quot; &lt;&lt; publicKey;
+-		arguments.push_back (argtmp.str());
+-	}
+-	
+-	argtmp.str(&quot;&quot;);
+-	argtmp &lt;&lt; &quot;nx@&quot; &lt;&lt; serverHost;
+-	arguments.push_back (argtmp.str());
++        this-&gt;keyFile = new notQTemporaryFile;
++        this-&gt;keyFile-&gt;open();
+ 
+-	// These options copied from the way Nomachine's client
+-	// specifies the nxssh command - they make good sense.
+-	arguments.push_back (&quot;-x&quot;);
+-	arguments.push_back (&quot;-2&quot;);
+-	arguments.push_back (&quot;-oRhostsAuthentication no&quot;);
+-	arguments.push_back (&quot;-oPasswordAuthentication no&quot;);
+-	arguments.push_back (&quot;-oRSAAuthentication no&quot;);
+-	arguments.push_back (&quot;-oRhostsRSAAuthentication no&quot;);
+-	arguments.push_back (&quot;-oPubkeyAuthentication yes&quot;);
++        argtmp.str(&quot;&quot;);
++        argtmp &lt;&lt; &quot;-i&quot; &lt;&lt; this-&gt;keyFile-&gt;fileName();
++        arguments.push_back (argtmp.str());
+ 
+-	if (encryption == true) {
+-		arguments.push_back(&quot;-B&quot;);
+-		session.setEncryption (true);
+-	} else {
+-		session.setEncryption (false);
+-	}
++        this-&gt;keyFile-&gt;write (key);			
++        this-&gt;keyFile-&gt;close();
+ 
+-	// -E appears in the call to nxssh for Nomachine's nxclient
+-	// -version 3 but not 1.5. Is it there in 2?
+-	// nxssh -E gives this message when called:
+-	// NX&gt; 285 Enabling skip of SSH config files
+-	// ...so there you have the meaning.
+-	arguments.push_back (&quot;-E&quot;);
+-	
+-	// Find a path for the nxssh process using getPath()
+-	string nxsshPath = this-&gt;getPath (&quot;nxssh&quot;);
+-	this-&gt;nxsshProcess.start(nxsshPath, arguments);
+-	if (this-&gt;nxsshProcess.waitForStarted() == false) {
+-		this-&gt;externalCallbacks-&gt;write (NXCL_PROCESS_ERROR, _(&quot;Error starting nxssh!&quot;));
+-		this-&gt;isFinished = true;
+-	}
++    } else {
++        this-&gt;keyFile = NULL;
++        argtmp.str(&quot;&quot;);
++        argtmp &lt;&lt; &quot;-i&quot; &lt;&lt; publicKey;
++        arguments.push_back (argtmp.str());
++    }
++
++    argtmp.str(&quot;&quot;);
++    argtmp &lt;&lt; &quot;nx@&quot; &lt;&lt; serverHost;
++    arguments.push_back (argtmp.str());
++
++    // These options copied from the way Nomachine's client
++    // specifies the nxssh command - they make good sense.
++    arguments.push_back (&quot;-x&quot;);
++    arguments.push_back (&quot;-2&quot;);
++    arguments.push_back (&quot;-oRhostsAuthentication no&quot;);
++    arguments.push_back (&quot;-oPasswordAuthentication no&quot;);
++    arguments.push_back (&quot;-oRSAAuthentication no&quot;);
++    arguments.push_back (&quot;-oRhostsRSAAuthentication no&quot;);
++    arguments.push_back (&quot;-oPubkeyAuthentication yes&quot;);
++
++    if (encryption == true) {
++        arguments.push_back(&quot;-B&quot;);
++        session.setEncryption (true);
++    } else {
++        session.setEncryption (false);
++    }
++
++    // -E appears in the call to nxssh for Nomachine's nxclient
++    // -version 3 but not 1.5. Is it there in 2?
++    // nxssh -E gives this message when called:
++    // NX&gt; 285 Enabling skip of SSH config files
++    // ...so there you have the meaning.
++    arguments.push_back (&quot;-E&quot;);
++
++    // Find a path for the nxssh process using getPath()
++    string nxsshPath = this-&gt;getPath (&quot;nxssh&quot;);
++    this-&gt;nxsshProcess.start(nxsshPath, arguments);
++
++    if (this-&gt;nxsshProcess.waitForStarted() == false) {
++        this-&gt;externalCallbacks-&gt;write
++            (NXCL_PROCESS_ERROR, _(&quot;Error starting nxssh!&quot;));
++        this-&gt;isFinished = true;
++    }
+ }
+ 
+ void NXClientLib::requestConfirmation (string msg)
+ {
+-	this-&gt;externalCallbacks-&gt;stdoutSignal (_(&quot;This is a placeholder method to deal with sending back a yes or a no answer. &quot;
+-						 &quot;For now, we just set this-&gt;session.setContinue(true);&quot;));
+-	this-&gt;session.setContinue(true);
++    this-&gt;externalCallbacks-&gt;stdoutSignal
++        (_(&quot;This is a placeholder method to deal with sending &quot;
++            &quot;back a yes or a no answer. &quot;
++            &quot;For now, we just set this-&gt;session.setContinue(true);&quot;));
++    this-&gt;session.setContinue(true);
+ }
+ 
+ void NXClientLib::reset()
+ {
+-	this-&gt;nxsshProcess.terminate();       
+-	this-&gt;isFinished = false;
+-	this-&gt;proxyData.encrypted = false;
+-	this-&gt;password = false;	
+-	this-&gt;session.resetSession();
++    this-&gt;nxsshProcess.terminate();
++    this-&gt;isFinished = false;
++    this-&gt;proxyData.encrypted = false;
++    this-&gt;password = false;	
++    this-&gt;session.resetSession();
+ }
+ 
+ void NXClientLib::loginFailed()
+ {
+-	this-&gt;externalCallbacks-&gt;write (NXCL_LOGIN_FAILED, _(&quot;Got \&quot;Login Failed\&quot;&quot;));
+-	this-&gt;isFinished = true;
+-	this-&gt;nxsshProcess.terminate();
++    this-&gt;externalCallbacks-&gt;write
++        (NXCL_LOGIN_FAILED, _(&quot;Got \&quot;Login Failed\&quot;&quot;));
++
++    this-&gt;isFinished = true;
++    this-&gt;nxsshProcess.terminate();
+ }
+ 
+ void NXClientLib::processParseStdout()
+ {
+-	string message = nxsshProcess.readAllStandardOutput();
++    string message = nxsshProcess.readAllStandardOutput();
+ 
+-	this-&gt;externalCallbacks-&gt;stdoutSignal (message);
++    this-&gt;externalCallbacks-&gt;stdoutSignal (message);
+ 
+-	dbgln (&quot;NXClientLib::processParseStdout() called&quot;);
++    dbgln (&quot;NXClientLib::processParseStdout() called&quot;);
+ 
+-	int response = 0;
+-	// Message 211 is sent if ssh is asking to continue with an unknown host
+-	if ((response = session.parseResponse(message)) == 211) {
+-		this-&gt;requestConfirmation (message);
+-	}
++    int response = 0;
+ 
+-	dbgln (&quot;NXClientLib::processPraseStdout(): response = &quot; &lt;&lt; response);
++    // Message 211 is sent if ssh is asking to continue with an unknown host
++    if ((response = session.parseResponse(message)) == 211) {
++        this-&gt;requestConfirmation (message);
++    }
+ 
+-	if (response == 100000) {
+-		// A program never started.
+-		this-&gt;isFinished = true;
+-		return;
+-	} else if (response &gt; 100000) {
+-		dbgln (&quot;A process crashed or exited&quot;);
+-		int pid = response - 100000;
+-		if (this-&gt;nxsshProcess.getPid() == pid) {
+-			this-&gt;nxsshProcess.setError(NOTQPROCCRASHED);
+-			this-&gt;externalCallbacks-&gt;error (_(&quot;nxsshProcess crashed or exited&quot;));
+-			this-&gt;isFinished = true;
+-		} else if (this-&gt;nxproxyProcess.getPid() == pid) {
+-			this-&gt;nxproxyProcess.setError(NOTQPROCCRASHED);
+-			this-&gt;externalCallbacks-&gt;error (_(&quot;nxproxyProcess crashed or exited&quot;));
+-			this-&gt;isFinished = true;
+-		} else {
+-			this-&gt;externalCallbacks-&gt;error (_(&quot;Warning: Don't know what crashed (in processParseStdout())&quot;));
+-		}
+-		return;
+-	}
++    dbgln (&quot;NXClientLib::processParseStdout(): response = &quot; &lt;&lt; response);
+ 
+-	// If message 204 is picked, that's authentication failed.
+-	if (response == 204) {
+-		this-&gt;externalCallbacks-&gt;write (NXCL_AUTH_FAILED,
+-						_(&quot;Got \&quot;Authentication Failed\&quot; from nxssh.\n&quot;
+-						  &quot;Please check the certificate for the first SSL &quot;
+-						  &quot;authentication stage,\n&quot;
+-						  &quot;in which the \&quot;nx\&quot; user is authenticated.&quot;));
+-		this-&gt;isFinished = true;
+-		return;
+-	}
++    if (response == 100000) {
++        // A program never started.
++        this-&gt;isFinished = true;
++        return;
++    } else if (response &gt; 100000) {
++        dbgln (&quot;A process crashed or exited&quot;);
+ 
+-	// 147 is server capacity reached
+-	if (response == 147) {
+-		this-&gt;externalCallbacks-&gt;serverCapacitySignal();
+-		this-&gt;isFinished = true;
+-		return;
+-	}
+-	
+-	dbgln (&quot;NXClientLib::processParseStdout(): The message is '&quot; + message + &quot;'(msg end)&quot;);
+-	dbgln (&quot;...and response is &quot; &lt;&lt; response);
++        int pid = response - 100000;
+ 
+-	notQtUtilities::ensureUnixNewlines (message);
+-	list&lt;string&gt; msglist;
+-	list&lt;string&gt;::iterator msgiter;
+-	notQtUtilities::splitString (message, '\n', msglist);
++        if (this-&gt;nxsshProcess.getPid() == pid) {
++            this-&gt;nxsshProcess.setError(NOTQPROCCRASHED);
+ 
+-	for (msgiter = msglist.begin(); msgiter != msglist.end(); msgiter++) {
+-		dbgln (&quot;NXClientLib::processParseStdout(): Processing the message '&quot; + (*msgiter) + &quot;'(end msg)&quot;);
+-		// On some connections this is sent via stdout instead of stderr?
+-		if (proxyData.encrypted &amp;&amp; readyForProxy &amp;&amp; ((*msgiter).find(&quot;NX&gt; 999 Bye&quot;)!=string::npos)) {
+-			// This is &quot;NX&gt; 299 Switching connection to: &quot; in
+-			// version 1.5.0. This was changed in nxssh version
+-			// 2.0.0-8 (see the nxssh CHANGELOG).
+-			string switchCommand = &quot;NX&gt; 299 Switch connection to: &quot;;
+-			stringstream ss;
+-			ss &lt;&lt; &quot;127.0.0.1:&quot; &lt;&lt; proxyData.port &lt;&lt; &quot; cookie: &quot; &lt;&lt; proxyData.cookie &lt;&lt; &quot;\n&quot;;
+-			switchCommand += ss.str();
+-			this-&gt;write (switchCommand);
+-		} else if ((*msgiter).find(&quot;NX&gt; 287 Redirected I/O to channel descriptors&quot;) != string::npos) {
+-			this-&gt;externalCallbacks-&gt;write(287, _(&quot;The session has been started successfully&quot;));
+-			this-&gt;sessionRunning = true;
+-		}
++            this-&gt;externalCallbacks-&gt;error
++                (_(&quot;nxsshProcess crashed or exited&quot;));
+ 
+-		if ((*msgiter).find(&quot;Password&quot;) != string::npos) {
+-			this-&gt;externalCallbacks-&gt;write(NXCL_AUTHENTICATING, _(&quot;Authenticating with NX server&quot;));
+-			this-&gt;password = true;
+-		}
++            this-&gt;isFinished = true;
++        } else if (this-&gt;nxproxyProcess.getPid() == pid) {
++            this-&gt;nxproxyProcess.setError(NOTQPROCCRASHED);
+ 
+-		if (!readyForProxy) {
+-			string msg = session.parseSSH (*msgiter);
+-			if (msg == &quot;204\n&quot; || msg == &quot;147\n&quot;) {
+-				// Auth failed.
+-				dbgln (&quot;NXClientLib::processParseStdout: Got auth failed or capacity reached, calling this-&gt;parseSSH.&quot;);
+-				msg = this-&gt;parseSSH (*msgiter);
+-			}
+-			if (msg.size() &gt; 0) {
+-				this-&gt;write (msg);
+-			}
+-		} else {
+-			this-&gt;write (this-&gt;parseSSH (*msgiter));
+-		}
+-	}
+-	return;
++            this-&gt;externalCallbacks-&gt;error
++                (_(&quot;nxproxyProcess crashed or exited&quot;));
++
++            this-&gt;isFinished = true;
++        } else {
++            this-&gt;externalCallbacks-&gt;error
++                (_(&quot;Warning: Don't know what crashed &quot;
++                   &quot;(in processParseStdout())&quot;));
++        }
++        return;
++    }
++
++    // If message 204 is picked, that's authentication failed.
++    if (response == 204) {
++        this-&gt;externalCallbacks-&gt;write (NXCL_AUTH_FAILED,
++                _(&quot;Got \&quot;Authentication Failed\&quot; from nxssh.\n&quot;
++                    &quot;Please check the certificate for the first SSL &quot;
++                    &quot;authentication stage,\n&quot;
++                    &quot;in which the \&quot;nx\&quot; user is authenticated.&quot;));
++        this-&gt;isFinished = true;
++        return;
++    }
++
++    // 147 is server capacity reached
++    if (response == 147) {
++        this-&gt;externalCallbacks-&gt;serverCapacitySignal();
++        this-&gt;isFinished = true;
++        return;
++    }
++
++    dbgln (&quot;NXClientLib::processParseStdout(): The message is '&quot;
++            + message + &quot;'(msg end)&quot;);
++
++    dbgln (&quot;...and response is &quot; &lt;&lt; response);
++
++    notQtUtilities::ensureUnixNewlines (message);
++
++    list&lt;string&gt; msglist;
++    list&lt;string&gt;::iterator msgiter;
++
++    notQtUtilities::splitString (message, '\n', msglist);
++
++    for (msgiter = msglist.begin(); msgiter != msglist.end(); msgiter++) {
++        dbgln (&quot;NXClientLib::processParseStdout(): Processing the message '&quot;
++                + (*msgiter) + &quot;'(end msg)&quot;);
++
++        // On some connections this is sent via stdout instead of stderr?
++        if (proxyData.encrypted &amp;&amp; readyForProxy &amp;&amp;
++                ((*msgiter).find(&quot;NX&gt; 999 Bye&quot;)!=string::npos)) {
++
++            // This is &quot;NX&gt; 299 Switching connection to: &quot; in
++            // version 1.5.0. This was changed in nxssh version
++            // 2.0.0-8 (see the nxssh CHANGELOG).
++            string switchCommand = &quot;NX&gt; 299 Switch connection to: &quot;;
++
++            stringstream ss;
++
++            ss &lt;&lt; &quot;127.0.0.1:&quot; &lt;&lt; proxyData.port &lt;&lt; &quot; cookie: &quot; &lt;&lt;
++                proxyData.cookie &lt;&lt; &quot;\n&quot;;
++            switchCommand += ss.str();
++
++            this-&gt;write (switchCommand);
++        } else if ((*msgiter).find
++                (&quot;NX&gt; 287 Redirected I/O to channel descriptors&quot;) !=
++                string::npos) {
++
++            this-&gt;externalCallbacks-&gt;write
++                (287, _(&quot;The session has been started successfully&quot;));
++            this-&gt;sessionRunning = true;
++        }
++
++        if ((*msgiter).find(&quot;Password&quot;) != string::npos) {
++            this-&gt;externalCallbacks-&gt;write
++                (NXCL_AUTHENTICATING, _(&quot;Authenticating with NX server&quot;));
++            this-&gt;password = true;
++        }
++
++        if (!readyForProxy) {
++            string msg = session.parseSSH (*msgiter);
++            if (msg == &quot;204\n&quot; || msg == &quot;147\n&quot;) {
++                // Auth failed.
++                dbgln (&quot;NXClientLib::processParseStdout: Got auth failed&quot;
++                        &quot; or capacity reached, calling this-&gt;parseSSH.&quot;);
++                msg = this-&gt;parseSSH (*msgiter);
++            }
++            if (msg.size() &gt; 0) {
++                this-&gt;write (msg);
++            }
++        } else {
++            this-&gt;write (this-&gt;parseSSH (*msgiter));
++        }
++    }
++    return;
+ }
+ 
+ void NXClientLib::processParseStderr()
+ {
+-	string message = nxsshProcess.readAllStandardError();
++    string message = nxsshProcess.readAllStandardError();
+ 
+-	dbgln (&quot;In NXClientLib::processParseStderr for message: '&quot; + message + &quot;'(msg end)&quot;);
++    dbgln (&quot;In NXClientLib::processParseStderr for message: '&quot;
++            + message + &quot;'(msg end)&quot;);
+ 
+-	this-&gt;externalCallbacks-&gt;stderrSignal (message);
++    this-&gt;externalCallbacks-&gt;stderrSignal (message);
+ 
+-	// Now we need to split the message if necessary based on the \n or \r characters
+-	notQtUtilities::ensureUnixNewlines (message);
++    // Now we need to split the message if necessary based on the
++    // \n or \r characters
++    notQtUtilities::ensureUnixNewlines (message);
+ 
+-	list&lt;string&gt; msglist;
+-	list&lt;string&gt;::iterator msgiter;
+-	notQtUtilities::splitString (message, '\n', msglist);
++    list&lt;string&gt; msglist;
++    list&lt;string&gt;::iterator msgiter;
++    notQtUtilities::splitString (message, '\n', msglist);
+ 
+-	for (msgiter=msglist.begin(); msgiter!=msglist.end(); msgiter++) {
+-		dbgln (&quot;NXClientLib::processParseStderr: Processing the message '&quot; + (*msgiter) + &quot;'(end msg)&quot;);
+-		if (proxyData.encrypted &amp;&amp; readyForProxy &amp;&amp; ((*msgiter).find(&quot;NX&gt; 999 Bye&quot;) != string::npos)) {
+-			string switchCommand = &quot;NX&gt; 299 Switch connection to: &quot;;
+-			stringstream ss;
+-			ss &lt;&lt; &quot;127.0.0.1:&quot; &lt;&lt; proxyData.port &lt;&lt; &quot; cookie: &quot; &lt;&lt; proxyData.cookie &lt;&lt; &quot;\n&quot;;
+-			switchCommand += ss.str();
+-			this-&gt;write(switchCommand);
++    for (msgiter=msglist.begin(); msgiter!=msglist.end(); msgiter++) {
+ 
+-		} else if ((*msgiter).find(&quot;NX&gt; 287 Redirected I/O to channel descriptors&quot;) != string::npos) {
+-			this-&gt;externalCallbacks-&gt;write(287, _(&quot;The session has been started successfully&quot;));
++        dbgln (&quot;NXClientLib::processParseStderr: Processing the message '&quot;
++                + (*msgiter) + &quot;'(end msg)&quot;);
+ 
+-		} else if ((*msgiter).find(&quot;NX&gt; 209 Remote host identification has changed&quot;) != string::npos) {
+-			this-&gt;externalCallbacks-&gt;write(209, _(&quot;SSH Host Key Problem&quot;));
+-			this-&gt;isFinished = true;
++        if (proxyData.encrypted &amp;&amp; readyForProxy &amp;&amp;
++                ((*msgiter).find(&quot;NX&gt; 999 Bye&quot;) != string::npos)) {
+ 
+-		} else if ((*msgiter).find(&quot;NX&gt; 280 Ignoring EOF on the monitored channel&quot;) != string::npos) {
+-			this-&gt;externalCallbacks-&gt;write(280, _(&quot;Got \&quot;NX&gt; 280 Ignoring EOF on the monitored channel\&quot; from nxssh...&quot;));
+-			this-&gt;isFinished = true;
++            string switchCommand = &quot;NX&gt; 299 Switch connection to: &quot;;
++            stringstream ss;
+ 
+-		} else if ((*msgiter).find(&quot;Host key verification failed&quot;) != string::npos) {
+-			this-&gt;externalCallbacks-&gt;write(NXCL_HOST_KEY_VERIFAILED, _(&quot;SSH host key verification failed&quot;));
+-			this-&gt;isFinished = true;			
+-		}
+-	}
++            ss &lt;&lt; &quot;127.0.0.1:&quot; &lt;&lt; proxyData.port &lt;&lt; &quot; cookie: &quot;
++                &lt;&lt; proxyData.cookie &lt;&lt; &quot;\n&quot;;
++
++            switchCommand += ss.str();
++            this-&gt;write(switchCommand);
++
++        } else if ((*msgiter).find
++                (&quot;NX&gt; 287 Redirected I/O to channel descriptors&quot;) !=
++                string::npos) {
++
++            this-&gt;externalCallbacks-&gt;write
++                (287, _(&quot;The session has been started successfully&quot;));
++
++        } else if ((*msgiter).find
++                (&quot;NX&gt; 209 Remote host identification has changed&quot;) !=
++                string::npos) {
++
++            this-&gt;externalCallbacks-&gt;write(209, _(&quot;SSH Host Key Problem&quot;));
++            this-&gt;isFinished = true;
++
++        } else if ((*msgiter).find
++                (&quot;NX&gt; 280 Ignoring EOF on the monitored channel&quot;) !=
++                string::npos) {
++
++            this-&gt;externalCallbacks-&gt;write
++                (280, _(&quot;Got \&quot;NX&gt; 280 Ignoring EOF on the monitored channel\&quot;&quot;
++                        &quot; from nxssh...&quot;));
++            this-&gt;isFinished = true;
++
++        } else if ((*msgiter).find
++                (&quot;Host key verification failed&quot;) != string::npos) {
++            this-&gt;externalCallbacks-&gt;write
++                (NXCL_HOST_KEY_VERIFAILED,
++                 _(&quot;SSH host key verification failed&quot;));
++            this-&gt;isFinished = true;
++        }
++    }
+ }
+ 
+ void NXClientLib::write (string data)
+ {
+-	if (data.size() == 0) { return; }
++    if (data.size() == 0) { return; }
+ 
+-	dbgln (&quot;Writing '&quot; &lt;&lt; data &lt;&lt; &quot;' to nxssh process.&quot;);
+-	
+-	this-&gt;nxsshProcess.writeIn(data);
++    dbgln (&quot;Writing '&quot; &lt;&lt; data &lt;&lt; &quot;' to nxssh process.&quot;);
+ 
+-	if (password) {
+-		data = &quot;********&quot;;
+-		password = false;
+-	}
++    this-&gt;nxsshProcess.writeIn(data);
+ 
+-	// Output this to the user via a signal - this is data going in to nxssh.
+-	this-&gt;externalCallbacks-&gt;stdinSignal (data);
++    if (password) {
++        data = &quot;********&quot;;
++        password = false;
++    }
++
++    // Output this to the user via a signal - this is data going in to nxssh.
++    this-&gt;externalCallbacks-&gt;stdinSignal (data);
+ }
+ 
+ void NXClientLib::doneAuth()
+ {
+-	if (this-&gt;keyFile != NULL) {
+-		this-&gt;keyFile-&gt;remove();
+-		delete this-&gt;keyFile;
+-	}
+-	return;
++    if (this-&gt;keyFile != NULL) {
++        this-&gt;keyFile-&gt;remove();
++        delete this-&gt;keyFile;
++    }
++    return;
+ }
+ 
+ void NXClientLib::allowSSHConnect (bool auth)
+ {
+-	session.setContinue (auth);
++    session.setContinue (auth);
+ }
+ 
+ void NXClientLib::setSessionData (NXSessionData *nxSessionData)
+ {
+-	session.setSessionData (nxSessionData);
+-	string a = &quot;NX&gt; 105&quot;;
+-	string d = session.parseSSH(a);
+-	if (d.size()&gt;0) {
+-		this-&gt;write(d);
+-	}
++    session.setSessionData (nxSessionData);
++    string a = &quot;NX&gt; 105&quot;;
++    string d = session.parseSSH(a);
++    if (d.size()&gt;0) {
++        this-&gt;write(d);
++    }
+ }
+ 
+ void NXClientLib::runSession ()
+ {
+-	session.runSession();
+-	string a = &quot;NX&gt; 105&quot;;
+-	string d = session.parseSSH(a);
+-	if (d.size()&gt;0) {
+-		this-&gt;write(d);
+-	}
++    session.runSession();
++    string a = &quot;NX&gt; 105&quot;;
++    string d = session.parseSSH(a);
++    if (d.size()&gt;0) {
++        this-&gt;write(d);
++    }
+ }
+ 
+ string NXClientLib::parseSSH (string message)
+ {
+-	string rMessage;
+-	string::size_type pos;
+-	rMessage = &quot;&quot;;
++    string rMessage;
++    string::size_type pos;
++    rMessage = &quot;&quot;;
+ 
+-	dbgln (&quot;NXClientLib::parseSSH called for message '&quot; + message + &quot;'&quot;);
++    dbgln (&quot;NXClientLib::parseSSH called for message '&quot; + message + &quot;'&quot;);
+ 
+-	if ((pos = message.find(&quot;NX&gt; 700 Session id: &quot;)) != string::npos) {
+-		this-&gt;externalCallbacks-&gt;write (700, _(&quot;Got a session ID&quot;));
+-		proxyData.id = message.substr(pos+20, message.length()-pos);
+-	} else if ((pos = message.find(&quot;NX&gt; 705 Session display: &quot;)) != string::npos) {
+-		stringstream portss;
+-		int portnum;
+-		portss &lt;&lt; message.substr(pos+25, message.length()-pos);
+-		portss &gt;&gt; portnum;		
+-		proxyData.display = portnum;
+-		proxyData.port = portnum + 4000;
+-	} else if ((pos = message.find(&quot;NX&gt; 706 Agent cookie: &quot;)) != string::npos) {
+-		proxyData.cookie = message.substr(pos+22, message.length()-pos);
+-		this-&gt;externalCallbacks-&gt;write (706, _(&quot;Got an agent cookie&quot;));
+-	} else if ((pos = message.find(&quot;NX&gt; 702 Proxy IP: &quot;)) != string::npos) {
+-		proxyData.proxyIP = message.substr(pos+18, message.length()-pos);
+-		this-&gt;externalCallbacks-&gt;write (702, _(&quot;Got a proxy IP&quot;));
+-	} else if (message.find(&quot;NX&gt; 707 SSL tunneling: 1&quot;) != string::npos) {
+-		this-&gt;externalCallbacks-&gt;write (702, _(&quot;All data will be SSL tunnelled&quot;));
+-		proxyData.encrypted = true;
+-	} else if (message.find(&quot;NX&gt; 147 Server capacity&quot;) != string::npos) {
+-		this-&gt;externalCallbacks-&gt;write (147, _(&quot;Got \&quot;Server Capacity Reached\&quot; from nxssh.&quot;));
+-		this-&gt;externalCallbacks-&gt;serverCapacitySignal();
+-		this-&gt;isFinished = true;
+-	} else if (message.find (&quot;NX&gt; 204 Authentication failed.&quot;) != string::npos) {
+-		this-&gt;externalCallbacks-&gt;write (204, _(&quot;NX SSH Authentication Failed, finishing&quot;));
+-		this-&gt;isFinished = true;
+-	}
++    if ((pos = message.find(&quot;NX&gt; 700 Session id: &quot;)) != string::npos) {
++        this-&gt;externalCallbacks-&gt;write (700, _(&quot;Got a session ID&quot;));
++        proxyData.id = message.substr(pos+20, message.length()-pos);
+ 
+-	if (message.find(&quot;NX&gt; 710 Session status: running&quot;) != string::npos) {
+-		this-&gt;externalCallbacks-&gt;write (710, _(&quot;Session status is \&quot;running\&quot;&quot;));
+-		invokeProxy();
+-		session.wipeSessions();
+-		rMessage = &quot;bye\n&quot;;
+-	}
++    } else if ((pos = message.find(&quot;NX&gt; 705 Session display: &quot;)) != string::npos) {
++        stringstream portss;
++        int portnum;
++        portss &lt;&lt; message.substr(pos+25, message.length()-pos);
++        portss &gt;&gt; portnum;		
++        proxyData.display = portnum;
++        proxyData.port = portnum + 4000;
+ 
+-	return rMessage;
++    } else if
++        ((pos = message.find(&quot;NX&gt; 706 Agent cookie: &quot;)) != string::npos) {
++
++        proxyData.cookie = message.substr(pos+22, message.length()-pos);
++        this-&gt;externalCallbacks-&gt;write (706, _(&quot;Got an agent cookie&quot;));
++
++    } else if
++        ((pos = message.find(&quot;NX&gt; 702 Proxy IP: &quot;)) != string::npos) {
++
++        proxyData.proxyIP = message.substr(pos+18, message.length()-pos);
++        this-&gt;externalCallbacks-&gt;write (702, _(&quot;Got a proxy IP&quot;));
++
++    } else if
++        (message.find(&quot;NX&gt; 707 SSL tunneling: 1&quot;) != string::npos) {
++
++        this-&gt;externalCallbacks-&gt;write
++            (702, _(&quot;All data will be SSL tunnelled&quot;));
++
++        proxyData.encrypted = true;
++
++    } else if (message.find(&quot;NX&gt; 147 Server capacity&quot;) != string::npos) {
++
++        this-&gt;externalCallbacks-&gt;write
++            (147, _(&quot;Got \&quot;Server Capacity Reached\&quot; from nxssh.&quot;));
++
++        this-&gt;externalCallbacks-&gt;serverCapacitySignal();
++        this-&gt;isFinished = true;
++
++    } else if
++        (message.find (&quot;NX&gt; 204 Authentication failed.&quot;) != string::npos) {
++
++        this-&gt;externalCallbacks-&gt;write
++            (204, _(&quot;NX SSH Authentication Failed, finishing&quot;));
++        this-&gt;isFinished = true;
++    }
++
++    if (message.find(&quot;NX&gt; 710 Session status: running&quot;) != string::npos) {
++
++        this-&gt;externalCallbacks-&gt;write
++            (710, _(&quot;Session status is \&quot;running\&quot;&quot;));
++        invokeProxy();
++        session.wipeSessions();
++        rMessage = &quot;bye\n&quot;;
++    }
++
++    return rMessage;
+ }
+ 
+ void NXClientLib::invokeProxy()
+ {
+-	this-&gt;externalCallbacks-&gt;write(NXCL_INVOKE_PROXY, _(&quot;Starting NX session&quot;));
+-	
+-	int e;
+-	char * home;
+-	home = getenv (&quot;HOME&quot;);
+-	stringstream ss;
+-	ss &lt;&lt; home;
+-	string nxdir = ss.str();
+-	nxdir += &quot;/.nx&quot;;
+-	// Create the .nx directory first.
+-	if (mkdir (nxdir.c_str(), 0770)) {
+-		e = errno;
+-		if (e != EEXIST) { // We don't mind .nx already
+-				   // existing, though if there is a
+-				   // _file_ called $HOME/.nx, we'll
+-				   // get errors later.
+-			this-&gt;externalCallbacks-&gt;error (_(&quot;Problem creating .nx directory&quot;));
+-		}
+-	}
+-	// Now the per session directory
+-	nxdir += &quot;/S-&quot; + proxyData.id;
+-	if (mkdir (nxdir.c_str(), 0770)) {
+-		e = errno;
+-		if (e != EEXIST) { // We don't mind .nx already
+-			this-&gt;externalCallbacks-&gt;error (_(&quot;Problem creating Session directory&quot;));
+-		}
+-	}
++    this-&gt;externalCallbacks-&gt;write
++        (NXCL_INVOKE_PROXY, _(&quot;Starting NX session&quot;));
+ 
+-	stringstream data;
+-	if (proxyData.encrypted) {
+-		data &lt;&lt; &quot;nx/nx,session=session,encryption=1,cookie=&quot; &lt;&lt; proxyData.cookie 
+-		     &lt;&lt; &quot;,root=&quot; &lt;&lt; home &lt;&lt; &quot;/.nx&quot;
+-		     &lt;&lt; &quot;,id=&quot; &lt;&lt; proxyData.id &lt;&lt; &quot;,listen=&quot; &lt;&lt; proxyData.port &lt;&lt; &quot;:&quot; &lt;&lt; proxyData.display &lt;&lt; &quot;\n&quot;;
+-		// may also need shmem=1,shpix=1,font=1,product=...
++    int e;
++    char * home;
+ 
+-	} else {
+-		// Not tested yet
+-		data &lt;&lt; &quot;nx,session=session,cookie=&quot; &lt;&lt; proxyData.cookie
+-		     &lt;&lt; &quot;,root=&quot; &lt;&lt; home
+-		     &lt;&lt; &quot;/.nx,id=&quot; &lt;&lt; proxyData.id
+-		     &lt;&lt; &quot;,connect=&quot; &lt;&lt; proxyData.server &lt;&lt; &quot;:&quot; &lt;&lt; proxyData.display &lt;&lt; &quot;\n&quot;;
+-	}
+-	
+-	// Filename is nxdir plus &quot;/options&quot;
+-	nxdir += &quot;/options&quot;;
+-	std::ofstream options;
+-	options.open (nxdir.c_str(), std::fstream::out);
+-	options &lt;&lt; data.str();
+-	options.close();
++    home = getenv (&quot;HOME&quot;);
+ 
+-	// Build arguments for the call to the nxproxy command
+-	list&lt;string&gt; arguments;
+-	arguments.push_back(&quot;nxproxy&quot;); // argv[0] has to be the program name
+-	arguments.push_back(&quot;-S&quot;);
+-	ss.str(&quot;&quot;);
+-	ss &lt;&lt; &quot;options=&quot; &lt;&lt; nxdir;
+-	ss &lt;&lt; &quot;:&quot; &lt;&lt; proxyData.display;
+-	arguments.push_back(ss.str());	
++    stringstream ss;
++    ss &lt;&lt; home;
+ 
+-	// Find a path for the nxproxy process using getPath()
+-	string nxproxyPath = this-&gt;getPath (&quot;nxproxy&quot;);
+-	this-&gt;nxproxyProcess.start(nxproxyPath, arguments);
+-	if (this-&gt;nxproxyProcess.waitForStarted() == false) {
+-		this-&gt;externalCallbacks-&gt;write (NXCL_PROCESS_ERROR, _(&quot;Error starting nxproxy!&quot;));
+-		this-&gt;isFinished = true;
+-	}
++    string nxdir = ss.str();
++
++    nxdir += &quot;/.nx&quot;;
++
++    // Create the .nx directory first.
++    if (mkdir (nxdir.c_str(), 0770)) {
++        e = errno;
++
++        if (e != EEXIST) {
++            // We don't mind .nx already
++            // existing, though if there is a
++            // _file_ called $HOME/.nx, we'll
++            // get errors later.
++            this-&gt;externalCallbacks-&gt;error
++                (_(&quot;Problem creating .nx directory&quot;));
++        }
++    }
++
++    // Now the per session directory
++    nxdir += &quot;/S-&quot; + proxyData.id;
++
++    if (mkdir (nxdir.c_str(), 0770)) {
++        e = errno;
++
++        if (e != EEXIST) {
++            // We don't mind .nx already
++            this-&gt;externalCallbacks-&gt;error
++                (_(&quot;Problem creating Session directory&quot;));
++        }
++    }
++
++    stringstream data;
++    if (proxyData.encrypted) {
++        data &lt;&lt; &quot;nx/nx,session=session,encryption=1,cookie=&quot;
++            &lt;&lt; proxyData.cookie
++            &lt;&lt; &quot;,root=&quot; &lt;&lt; home &lt;&lt; &quot;/.nx&quot;
++            &lt;&lt; &quot;,id=&quot; &lt;&lt; proxyData.id &lt;&lt; &quot;,listen=&quot; 
++            &lt;&lt; proxyData.port &lt;&lt; &quot;:&quot; &lt;&lt; proxyData.display &lt;&lt; &quot;\n&quot;;
++        // may also need shmem=1,shpix=1,font=1,product=...
++
++    } else {
++        // Not tested yet
++        data &lt;&lt; &quot;nx,session=session,cookie=&quot; &lt;&lt; proxyData.cookie
++            &lt;&lt; &quot;,root=&quot; &lt;&lt; home
++            &lt;&lt; &quot;/.nx,id=&quot; &lt;&lt; proxyData.id
++            &lt;&lt; &quot;,connect=&quot; &lt;&lt; proxyData.server &lt;&lt; &quot;:&quot; &lt;&lt; proxyData.display
++            &lt;&lt; &quot;\n&quot;;
++    }
++
++    // Filename is nxdir plus &quot;/options&quot;
++    nxdir += &quot;/options&quot;;
++    std::ofstream options;
++    options.open (nxdir.c_str(), std::fstream::out);
++    options &lt;&lt; data.str();
++    options.close();
++
++    // Build arguments for the call to the nxproxy command
++    list&lt;string&gt; arguments;
++    arguments.push_back(&quot;nxproxy&quot;); // argv[0] has to be the program name
++    arguments.push_back(&quot;-S&quot;);
++    ss.str(&quot;&quot;);
++    ss &lt;&lt; &quot;options=&quot; &lt;&lt; nxdir;
++    ss &lt;&lt; &quot;:&quot; &lt;&lt; proxyData.display;
++    arguments.push_back(ss.str());	
++
++    // Find a path for the nxproxy process using getPath()
++    string nxproxyPath = this-&gt;getPath (&quot;nxproxy&quot;);
++    this-&gt;nxproxyProcess.start(nxproxyPath, arguments);
++
++    if (this-&gt;nxproxyProcess.waitForStarted() == false) {
++        this-&gt;externalCallbacks-&gt;write
++            (NXCL_PROCESS_ERROR, _(&quot;Error starting nxproxy!&quot;));
++        this-&gt;isFinished = true;
++    }
+ }
+ 
+ bool NXClientLib::chooseResumable (int n)
+ {
+-	return (this-&gt;session.chooseResumable(n));
++    return (this-&gt;session.chooseResumable(n));
+ }
+ 
+ bool NXClientLib::terminateSession (int n)
+ {
+-	return (this-&gt;session.terminateSession(n));
++    return (this-&gt;session.terminateSession(n));
+ }
+ 
+ string NXClientLib::getPath (string prog)
+ {
+-	string path;
+-	struct stat * buf;
++    string path;
++    struct stat * buf;
+ 
+-	buf = static_cast&lt;struct stat*&gt;(malloc (sizeof (struct stat)));
+-	if (!buf) {
+-		// Malloc error.
+-		return prog;
+-	}
++    buf = static_cast&lt;struct stat*&gt;(malloc (sizeof (struct stat)));
+ 
+-	path = PACKAGE_BIN_DIR&quot;/&quot; + prog;
+-	memset (buf, 0, sizeof(struct stat));
+-	stat (path.c_str(), buf);
+-	if (S_ISREG (buf-&gt;st_mode) || S_ISLNK (buf-&gt;st_mode)) {
+-		// Found prog in PACKAGE_BIN_DIR
+-	} else {
+-		path = &quot;/usr/local/bin/&quot; + prog;
+-		memset (buf, 0, sizeof(struct stat));
+-		stat (path.c_str(), buf);
+-		if (S_ISREG (buf-&gt;st_mode) || S_ISLNK (buf-&gt;st_mode)) {
+-			// Found prog in /usr/local/bin
+-		} else {
+-			path = &quot;/usr/bin/&quot; + prog;
+-			memset (buf, 0, sizeof(struct stat));
+-			stat (path.c_str(), buf);
+-			if (S_ISREG (buf-&gt;st_mode) || 
+-			    S_ISLNK (buf-&gt;st_mode)) {
+-				// Found prog in /usr/bin
+-			} else {
+-				path = &quot;/usr/NX/bin/&quot; + prog;
+-				memset (buf, 0, sizeof(struct stat));
+-				stat (path.c_str(), buf);
+-				if (S_ISREG (buf-&gt;st_mode) || 
+-				    S_ISLNK (buf-&gt;st_mode)) {
++    if (!buf) {
++        // Malloc error.
++        return prog;
++    }
+ 
+-				} else {
+-					path = &quot;/bin/&quot; + prog;
+-					memset (buf, 0, sizeof(struct stat));
+-					stat (path.c_str(), buf);
+-					if (S_ISREG (buf-&gt;st_mode) || 
+-					    S_ISLNK (buf-&gt;st_mode)) {
+-						// Found prog in /bin
+-					} else {
+-						// Just return the
+-						// prog name.
+-						path = prog;
+-					}
+-				}
+-			}
+-		}
+-	}
++    path = PACKAGE_BIN_DIR&quot;/&quot; + prog;
++    memset (buf, 0, sizeof(struct stat));
++    stat (path.c_str(), buf);
+ 
+-	free (buf);
+-	return path;
++    if (S_ISREG (buf-&gt;st_mode) || S_ISLNK (buf-&gt;st_mode)) {
++        // Found prog in PACKAGE_BIN_DIR
++    } else {
++        path = &quot;/usr/local/bin/&quot; + prog;
++        memset (buf, 0, sizeof(struct stat));
++        stat (path.c_str(), buf);
++
++        if (S_ISREG (buf-&gt;st_mode) || S_ISLNK (buf-&gt;st_mode)) {
++            // Found prog in /usr/local/bin
++        } else {
++            path = &quot;/usr/bin/&quot; + prog;
++            memset (buf, 0, sizeof(struct stat));
++            stat (path.c_str(), buf);
++
++            if (S_ISREG (buf-&gt;st_mode) ||
++                    S_ISLNK (buf-&gt;st_mode)) {
++                // Found prog in /usr/bin
++
++            } else {
++                path = &quot;/usr/NX/bin/&quot; + prog;
++                memset (buf, 0, sizeof(struct stat));
++                stat (path.c_str(), buf);
++
++                if (S_ISREG (buf-&gt;st_mode) || 
++                        S_ISLNK (buf-&gt;st_mode)) {
++
++                } else {
++                    path = &quot;/bin/&quot; + prog;
++                    memset (buf, 0, sizeof(struct stat));
++                    stat (path.c_str(), buf);
++                    if (S_ISREG (buf-&gt;st_mode) || 
++                            S_ISLNK (buf-&gt;st_mode)) {
++                        // Found prog in /bin
++                    } else {
++                        // Just return the
++                        // prog name.
++                        path = prog;
++                    }
++                }
++            }
++        }
++    }
++
++    free (buf);
++    return path;
+ }
+ //@}
+
+Modified: nxcl/lib/nxclientlib.h
+===================================================================
+--- nxcl/lib/nxclientlib.h	2008-01-07 09:44:37 UTC (rev 432)
++++ nxcl/lib/nxclientlib.h	2008-01-07 12:10:22 UTC (rev 433)
+@@ -1,6 +1,5 @@
+-/* -*-c++-*- */
+ /***************************************************************************
+-                                nxclientlib.h
++                               nxclientlib.h
+                              -------------------
+     begin                : Sat 22nd July 2006
+     remove Qt dependency : Started June 2007
+@@ -8,6 +7,8 @@
+     copyright            : (C) 2006 by George Wright
+     modifications        : (C) 2007 Embedded Software Foundry Ltd. (U.K.)
+                          :     Author: Sebastian James
++                         : (C) 2008 Defuturo Ltd
++                         :     Author: George Wright
+     email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
+  ***************************************************************************/
+ 
+@@ -33,328 +34,389 @@
+ 
+ namespace nxcl {
+ 
+-	struct ProxyData {
+-		string id;
+-		int    display;
+-		string cookie;
+-		string proxyIP;
+-		bool   encrypted;
+-		int    port;
+-		string server;
+-	};
++    struct ProxyData {
++        string id;
++        int    display;
++        string cookie;
++        string proxyIP;
++        bool   encrypted;
++        int    port;
++        string server;
++    };
+ 
+-	/*!
+-	 * Callbacks which are to be defined by the client code of
+-	 * NXClientLib objects. In the case of nxcl, that means the
+-	 * code in the class Nxcl in nxcl.cpp.
+-	 */
+-	class NXClientLibExternalCallbacks
+-	{
+-	public:
+-		NXClientLibExternalCallbacks () {}
+-		virtual ~NXClientLibExternalCallbacks () {}
+-		virtual void write (string msg) {}
+-		virtual void write (int num, string msg) {}
+-		virtual void error (string msg) {}
+-		virtual void debug (string msg) {}
+-		virtual void stdoutSignal (string msg) {}
+-		virtual void stderrSignal (string msg) {}
+-		virtual void stdinSignal (string msg) {}
+-		virtual void resumeSessionsSignal (list&lt;NXResumeData&gt;) {}
+-		virtual void noSessionsSignal (void) {}
+-		virtual void serverCapacitySignal (void) {}
++    /*!
++     * Callbacks which are to be defined by the client code of
++     * NXClientLib objects. In the case of nxcl, that means the
++     * code in the class Nxcl in nxcl.cpp.
++     */
++    class NXClientLibExternalCallbacks
++    {
++        public:
++            NXClientLibExternalCallbacks () {}
++            virtual ~NXClientLibExternalCallbacks () {}
++            virtual void write (string msg) {}
++            virtual void write (int num, string msg) {}
++            virtual void error (string msg) {}
++            virtual void debug (string msg) {}
++            virtual void stdoutSignal (string msg) {}
++            virtual void stderrSignal (string msg) {}
++            virtual void stdinSignal (string msg) {}
++            virtual void resumeSessionsSignal (list&lt;NXResumeData&gt;) {}
++            virtual void noSessionsSignal (void) {}
++            virtual void serverCapacitySignal (void) {}
+ 
+-	};
++    };
+ 
+-	/*!
+-	 * Have to derive NXClientLib from an abstract base class,
+-	 * NXClientLibBase, so that NXClientLibCallbacks can
+-	 * hold a pointer to an NXClientLib object.
+-	 *
+-	 * The functions that are declared in NXClientLibBase are the
+-	 * ones that we want to call via this-&gt;parent in
+-	 * NXClientLibCallbacks. They're the ones that are called from
+-	 * within objects of other classes (such as this-&gt;session
+-	 * (NXSession) or this-&gt;nxsshProcess (notQProcess).
+-	 */
+-	class NXClientLibBase 
+-	{
+-	public:
+-		NXClientLibBase() {}
+-		virtual ~NXClientLibBase() {}
++    /*!
++     * Have to derive NXClientLib from an abstract base class,
++     * NXClientLibBase, so that NXClientLibCallbacks can
++     * hold a pointer to an NXClientLib object.
++     *
++     * The functions that are declared in NXClientLibBase are the
++     * ones that we want to call via this-&gt;parent in
++     * NXClientLibCallbacks. They're the ones that are called from
++     * within objects of other classes (such as this-&gt;session
++     * (NXSession) or this-&gt;nxsshProcess (notQProcess).
++     */
++    class NXClientLibBase 
++    {
++        public:
++            NXClientLibBase() {}
++            virtual ~NXClientLibBase() {}
+ 
+-		virtual void setIsFinished (bool status) {}
+-		virtual void processParseStdout (void) {}
+-		virtual void processParseStderr (void) {}
+-		virtual void loginFailed (void) {}
+-		virtual void readyproxy (void) {}
+-		virtual void doneAuth (void) {}
++            virtual void setIsFinished (bool status) {}
++            virtual void processParseStdout (void) {}
++            virtual void processParseStderr (void) {}
++            virtual void loginFailed (void) {}
++            virtual void readyproxy (void) {}
++            virtual void doneAuth (void) {}
+ 
+-		/*!
+-		 * External callbacks pointer is held in NXClientLibBase
+-		 * because NXClientLibProcessCallbacks::parent is of
+-		 * type NXClientLibBase and in NXClientLibProcessCallbacks we
+-		 * refer to this-&gt;parent-&gt;externalCallbacks-&gt;write()
+-		 */
+-		NXClientLibExternalCallbacks * externalCallbacks;
+-	};
++            /*!
++             * External callbacks pointer is held in NXClientLibBase
++             * because NXClientLibProcessCallbacks::parent is of
++             * type NXClientLibBase and in NXClientLibProcessCallbacks we
++             * refer to this-&gt;parent-&gt;externalCallbacks-&gt;write()
++             */
++            NXClientLibExternalCallbacks * externalCallbacks;
++    };
+ 
+-	/*!
+-	 * Callbacks class. This derives from several other base
+-	 * callbacks classes, defining the behaviour of the callbacks.
+-	 */
+-	class NXClientLibCallbacks : public notQProcessCallbacks, public NXSessionCallbacks
+-	{
+-	public:
+-		NXClientLibCallbacks();
+-		~NXClientLibCallbacks();
+-		
+-		/*!
+-		 * The callback signals
+-		 */
+-		//@{
+-		/*!
+-		 * From notQProcess:
+-		 */
+-		//@{
+-		void startedSignal (string name);
+-		void errorSignal (int error);
+-		void processFinishedSignal (string name);
+-		void readyReadStandardOutputSignal (void);
+-		void readyReadStandardErrorSignal (void);
+-		//@}
+-		/*!
+-		 * From NXSession:
+-		 */
+-		//@{
+-		void noSessionsSignal (void);
+-		void loginFailedSignal (void);
+-		void readyForProxySignal (void);
+-		void authenticatedSignal (void);
+-		void sessionsSignal (list&lt;NXResumeData&gt;);
+-		//@}
+-		//@}
++    /*!
++     * Callbacks class. This derives from several other base
++     * callbacks classes, defining the behaviour of the callbacks.
++     */
++    class NXClientLibCallbacks : public notQProcessCallbacks,
++        public NXSessionCallbacks
++    {
++        public:
++            NXClientLibCallbacks();
++            ~NXClientLibCallbacks();
+ 
+-		/*!
+-		 * Accessor function to set a pointer to the parent NXCLientLib object.
+-		 */
+-		void setParent (NXClientLibBase * p) { this-&gt;parent = p; }
+-	private:
+-		NXClientLibBase * parent;
+-	};
++            /*!
++             * The callback signals
++             */
++            //@{
++            /*!
++             * From notQProcess:
++             */
++            //@{
++            void startedSignal (string name);
++            void errorSignal (int error);
++            void processFinishedSignal (string name);
++            void readyReadStandardOutputSignal (void);
++            void readyReadStandardErrorSignal (void);
++            //@}
++            /*!
++             * From NXSession:
++             */
++            //@{
++            void noSessionsSignal (void);
++            void loginFailedSignal (void);
++            void readyForProxySignal (void);
++            void authenticatedSignal (void);
++            void sessionsSignal (list&lt;NXResumeData&gt;);
++            //@}
++            //@}
+ 
+-	class NXClientLib : public NXClientLibBase
+-	{
+-	public:
+-		NXClientLib();
+-		~NXClientLib();
++            /*!
++             * Accessor function to set a pointer to the parent NXCLientLib
++             * object.
++             */
++            void setParent (NXClientLibBase * p) { this-&gt;parent = p; }
++        private:
++            NXClientLibBase * parent;
++    };
+ 
+-		/*!
+-		 * Set up data and then call this-&gt;nxsshProcess.start().
+-		 * 
+-		 * \param publicKey is the path to the ssh public key
+-		 * file to authenticate with.  Pass &quot;supplied&quot; to use
+-		 * a new key, which you should then supply as the
+-		 * parameter key.
+-		 *
+-		 * \param serverHost is the hostname of the NX server to
+-		 * connect to
+-		 *
+-		 * \param encryption is whether to use an encrypted NX
+-		 * session
+-		 *
+-		 * \param key ssh key to use for authentication of the
+-		 * nx user if publicKey is &quot;supplied&quot;.
+-		 *
+-		 * \param port TCP port to use for the ssh connection.
+-		 */
+-		void invokeNXSSH (string publicKey = &quot;supplied&quot;, string serverHost = &quot;&quot;,
+-				  bool encryption = true, string key = &quot;&quot;, int port = 22);
++    class NXClientLib : public NXClientLibBase
++    {
++        public:
++            NXClientLib();
++            ~NXClientLib();
+ 
+-		/*!
+-		 * Overloaded to give callback data on write.
+-		 * 
+-		 * Writes data to this-&gt;nxsshProcess stdin and also
+-		 * out to the user via stdoutCallback
+-		 */
+-		void write (string data);
++            /*!
++             * Set up data and then call this-&gt;nxsshProcess.start().
++             * 
++             * \param publicKey is the path to the ssh public key
++             * file to authenticate with.  Pass &quot;supplied&quot; to use
++             * a new key, which you should then supply as the
++             * parameter key.
++             *
++             * \param serverHost is the hostname of the NX server to
++             * connect to
++             *
++             * \param encryption is whether to use an encrypted NX
++             * session
++             *
++             * \param key ssh key to use for authentication of the
++             * nx user if publicKey is &quot;supplied&quot;.
++             *
++             * \param port TCP port to use for the ssh connection.
++             */
++            void invokeNXSSH (string publicKey = &quot;supplied&quot;,
++                    string serverHost = &quot;&quot;,
++                    bool encryption = true,
++                    string key = &quot;&quot;,
++                    int port = 22);
+ 
+-		/*!
+-		 * Passes auth to this-&gt;session.setContinue()
+-		 */
+-		void allowSSHConnect (bool auth);
++            /*!
++             * Overloaded to give callback data on write.
++             * 
++             * Writes data to this-&gt;nxsshProcess stdin and also
++             * out to the user via stdoutCallback
++             */
++            void write (string data);
+ 
+-		/*!
+-		 * Set up data and then call this-&gt;nxproxyProcess.start()
+-		 */
+-		void invokeProxy (void);
++            /*!
++             * Passes auth to this-&gt;session.setContinue()
++             */
++            void allowSSHConnect (bool auth);
+ 
+-		/*!
+-		 * Parse a line of output from
+-		 * this-&gt;nxsshProcess. This is called when the proxy
+-		 * has started, or if NX authentication
+-		 * failed. Otherwise, this-&gt;session.parseSSH() is
+-		 * used.
+-		 */
+-		string parseSSH (string message);
++            /*!
++             * Set up data and then call this-&gt;nxproxyProcess.start()
++             */
++            void invokeProxy (void);
+ 
+-		/*!
+-		 * Read through the nx session file, and if we find a
+-		 * message saying &quot;Session: Terminating session at
+-		 * 'some date'&quot; we need to set isFinished to true.
+-		 */
+-		//void checkSession (void);
++            /*!
++             * Parse a line of output from
++             * this-&gt;nxsshProcess. This is called when the proxy
++             * has started, or if NX authentication
++             * failed. Otherwise, this-&gt;session.parseSSH() is
++             * used.
++             */
++            string parseSSH (string message);
+ 
+-		/*!
+-		 * Re-set the contents of this-&gt;session.sessionData
+-		 * with the nth choice.
+-		 *
+-		 * \return true if the nth session is resumable, false
+-		 * if not, or if there is no nth session.
+-		 */
+-		bool chooseResumable (int n); 
++            /*!
++             * Read through the nx session file, and if we find a
++             * message saying &quot;Session: Terminating session at
++             * 'some date'&quot; we need to set isFinished to true.
++             */
++            //void checkSession (void);
+ 
+-		/*!
+-		 * Re-set the contents of this-&gt;session.sessionData
+-		 * with the nth choice such that a terminate session
+-		 * message will be sent to the nxserver
+-		 *
+-		 * \return true if the nth session is terminatable, false
+-		 * if not, or if there is no nth session.
+-		 */
+-		bool terminateSession (int n);
++            /*!
++             * Re-set the contents of this-&gt;session.sessionData
++             * with the nth choice.
++             *
++             * \return true if the nth session is resumable, false
++             * if not, or if there is no nth session.
++             */
++            bool chooseResumable (int n); 
+ 
+-    void runSession (void);
++            /*!
++             * Re-set the contents of this-&gt;session.sessionData
++             * with the nth choice such that a terminate session
++             * message will be sent to the nxserver
++             *
++             * \return true if the nth session is terminatable, false
++             * if not, or if there is no nth session.
++             */
++            bool terminateSession (int n);
+ 
+-		// public slots:
+-		//@{
+-		void doneAuth (void);
+-		void loginFailed (void);
+-		void finished (void) { dbgln (&quot;Finishing up on signal&quot;); this-&gt;isFinished = true; }
+-		void readyproxy (void) { dbgln (&quot;ready for nxproxy&quot;); this-&gt;readyForProxy = true; }
+-		void reset (void);
+-		void processParseStdout (void);
+-		void processParseStderr (void);
++            void runSession (void);
+ 
+-		/*!
+-		 * SSH requests confirmation to go ahead with
+-		 * connecting (e.g. if you haven't connected to the
+-		 * host before)
+-		 */
+-		void requestConfirmation (string msg);
+-		//@}
++            // public slots:
++            //@{
++            void doneAuth (void);
++            void loginFailed (void);
++            
++            void finished (void)
++            {
++                dbgln (&quot;Finishing up on signal&quot;); this-&gt;isFinished = true;
++            }
+ 
+-		// Accessors
+-		//@{
+-		/*!
+-		 *  Set the username for NX to log in with
+-		 */
+-		void setUsername (string&amp; user) {
+-			this-&gt;nxuser = user;
+-			this-&gt;session.setUsername (this-&gt;nxuser); 
+-		}
+-		/*!
+-		 *  Set the password for NX to log in with
+-		 */
+-		void setPassword (string&amp; pass) {
+-			this-&gt;nxpass = pass;
+-			this-&gt;session.setPassword (this-&gt;nxpass); 
+-		}
++            void readyproxy (void)
++            {
++                dbgln (&quot;ready for nxproxy&quot;); this-&gt;readyForProxy = true;
++            }
+ 
+-		void setResolution (int x, int y) { this-&gt;session.setResolution(x, y); }
+-		void setDepth (int depth) { this-&gt;session.setDepth(depth); }
+-		void setRender (bool render) { this-&gt;session.setRender(render); }
+-		void setSessionData (NXSessionData *);
+-		notQProcess* getNXSSHProcess (void) { return this-&gt;pNxsshProcess; }
+-		notQProcess* getNXProxyProcess (void) { return this-&gt;pNxproxyProcess; }
+-		bool getIsFinished (void) { return this-&gt;isFinished; }
+-		bool getReadyForProxy (void) { return this-&gt;readyForProxy; }
+-		NXSession* getSession (void) { return &amp;this-&gt;session; }
+-		void setIsFinished (bool status) { this-&gt;isFinished = status; }
+-		void setExternalCallbacks (NXClientLibExternalCallbacks * cb) { this-&gt;externalCallbacks = cb; }
+-		bool getSessionRunning (void) { return this-&gt;sessionRunning; }
+-		//@}
++            void reset (void);
++            void processParseStdout (void);
++            void processParseStderr (void);
+ 
+-	private:
+-		/*!
+-		 * Try a number of different paths to try to find the
+-		 * program prog's full path.
+-		 *
+-		 * \param prog The program to find, likely to be nxssh
+-		 * or nxproxy.
+-		 *
+-		 * \return The full path; e.g. /usr/bin/nxssh
+-		 */
+-		string getPath (string prog);
++            /*!
++             * SSH requests confirmation to go ahead with
++             * connecting (e.g. if you haven't connected to the
++             * host before)
++             */
++            void requestConfirmation (string msg);
++            //@}
+ 
+-		/*!
+-		 * Set true when the program is ready to end, e.g if
+-		 * authentication failed, nxssh failed to start amoung
+-		 * other reasons.
+-		 */
+-		bool isFinished;
+-		/*!
+-		 * Set true when nxssh is ready to launch the nxproxy process.
+-		 */
+-		bool readyForProxy;
+-		/*!
+-		 * Set true when the NX session is under way. This
+-		 * means we can reduce the polling frequency right
+-		 * down to a level which won't impact on power
+-		 * consumption.
+-		 */
+-		bool sessionRunning;
+-		/*!
+-		 * Have we said we need to enter a password?
+-		 */
+-		bool password;
+-		
+-		// FIXME: I hold the actual data, and a pointer to the
+-		// data here. I tried to get rid of the pointer, and
+-		// modify main.cpp in ../nxcl and that didn't work
+-		// properly - I'm not sure why. I suppose I could get
+-		// rid of the objects here, and then call
+-		// pNxsshProcess = new notQProcess; in the
+-		// constructor...
+-		/*!
+-		 * The nxssh process object
+-		 */
+-		notQProcess nxsshProcess;
+-		notQProcess* pNxsshProcess;
+-		/*!
+-		 * The nxproxy process object
+-		 */
+-		notQProcess nxproxyProcess;
+-		notQProcess* pNxproxyProcess;
+-		/*!
+-		 * A callbacks object. This holds the various callback
+-		 * methods. The callback methods are defined here, but
+-		 * are callable from notQProcess etc.
+-		 */
+-		NXClientLibCallbacks callbacks;
+-		/*!
+-		 * A temporary file to hold the ssl key
+-		 */
+-		notQTemporaryFile *keyFile;
+-		/*!
+-		 * The NX Session object.
+-		 */
+-		NXSession session;
+-		/*!
+-		 * A structure holding information about the
+-		 * connection to be made, such as server address, port
+-		 * and id.
+-		 */
+-		ProxyData proxyData;
+-		/*!
+-		 * Username for the connection
+-		 */
+-		string nxuser;
+-		/*!
+-		 * Password for the connection
+-		 */
+-		string nxpass;
+-	};
++            // Accessors
++            //@{
++            /*!
++             *  Set the username for NX to log in with
++             */
++            void setUsername (string&amp; user)
++            {
++                this-&gt;nxuser = user;
++                this-&gt;session.setUsername (this-&gt;nxuser);
++            }
+ 
++            /*!
++             *  Set the password for NX to log in with
++             */
++            void setPassword (string&amp; pass)
++            {
++                this-&gt;nxpass = pass;
++                this-&gt;session.setPassword (this-&gt;nxpass);
++            }
++
++            void setResolution (int x, int y)
++            {
++                this-&gt;session.setResolution(x, y);
++            }
++
++            void setDepth (int depth)
++            {
++                this-&gt;session.setDepth(depth);
++            }
++
++            void setRender (bool render)
++            {
++                this-&gt;session.setRender(render);
++            }
++
++            void setSessionData (NXSessionData *);
++
++            notQProcess* getNXSSHProcess (void)
++            {
++                return this-&gt;pNxsshProcess;
++            }
++
++            notQProcess* getNXProxyProcess (void)
++            {
++                return this-&gt;pNxproxyProcess;
++            }
++
++            bool getIsFinished (void)
++            {
++                return this-&gt;isFinished;
++            }
++
++            bool getReadyForProxy (void)
++            {
++                return this-&gt;readyForProxy;
++            }
++
++            NXSession* getSession (void)
++            {
++                return &amp;this-&gt;session;
++            }
++
++            void setIsFinished (bool status)
++            {
++                this-&gt;isFinished = status;
++            }
++
++            void setExternalCallbacks (NXClientLibExternalCallbacks * cb)
++            {
++                this-&gt;externalCallbacks = cb;
++            }
++
++            bool getSessionRunning (void)
++            {
++                return this-&gt;sessionRunning;
++            }
++            //@}
++
++        private:
++            /*!
++             * Try a number of different paths to try to find the
++             * program prog's full path.
++             *
++             * \param prog The program to find, likely to be nxssh
++             * or nxproxy.
++             *
++             * \return The full path; e.g. /usr/bin/nxssh
++             */
++            string getPath (string prog);
++
++            /*!
++             * Set true when the program is ready to end, e.g if
++             * authentication failed, nxssh failed to start amoung
++             * other reasons.
++             */
++            bool isFinished;
++            /*!
++             * Set true when nxssh is ready to launch the nxproxy process.
++             */
++            bool readyForProxy;
++            /*!
++             * Set true when the NX session is under way. This
++             * means we can reduce the polling frequency right
++             * down to a level which won't impact on power
++             * consumption.
++             */
++            bool sessionRunning;
++            /*!
++             * Have we said we need to enter a password?
++             */
++            bool password;
++
++            // FIXME: I hold the actual data, and a pointer to the
++            // data here. I tried to get rid of the pointer, and
++            // modify main.cpp in ../nxcl and that didn't work
++            // properly - I'm not sure why. I suppose I could get
++            // rid of the objects here, and then call
++            // pNxsshProcess = new notQProcess; in the
++            // constructor...
++            /*!
++             * The nxssh process object
++             */
++            notQProcess nxsshProcess;
++            notQProcess* pNxsshProcess;
++            /*!
++             * The nxproxy process object
++             */
++            notQProcess nxproxyProcess;
++            notQProcess* pNxproxyProcess;
++            /*!
++             * A callbacks object. This holds the various callback
++             * methods. The callback methods are defined here, but
++             * are callable from notQProcess etc.
++             */
++            NXClientLibCallbacks callbacks;
++            /*!
++             * A temporary file to hold the ssl key
++             */
++            notQTemporaryFile *keyFile;
++            /*!
++             * The NX Session object.
++             */
++            NXSession session;
++            /*!
++             * A structure holding information about the
++             * connection to be made, such as server address, port
++             * and id.
++             */
++            ProxyData proxyData;
++            /*!
++             * Username for the connection
++             */
++            string nxuser;
++            /*!
++             * Password for the connection
++             */
++            string nxpass;
++    };
++
+ } // namespace
+ #endif
+
+Modified: nxcl/lib/nxsession.cpp
+===================================================================
+--- nxcl/lib/nxsession.cpp	2008-01-07 09:44:37 UTC (rev 432)
++++ nxcl/lib/nxsession.cpp	2008-01-07 12:10:22 UTC (rev 433)
+@@ -1,11 +1,13 @@
+ /***************************************************************************
+-                               nxsession.h
++                                nxsession.cpp
+                              -------------------
+     begin                : Wed 26th July 2006
+     modifications        : July 2007
+     copyright            : (C) 2006 by George Wright
+     modifications        : (C) 2007 Embedded Software Foundry Ltd. (U.K.)
+                          :     Author: Sebastian James
++                         : (C) 2008 Defuturo Ltd
++                         :     Author: George Wright
+     email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
+  ***************************************************************************/
+ 
+@@ -17,37 +19,37 @@
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  ***************************************************************************/
+- 
+-// Enumerated type defining the stages through which the client goes when connecting
+-enum { HELLO_NXCLIENT, ACKNOWLEDGE, SHELL_MODE, AUTH_MODE, LOGIN, LIST_SESSIONS, PARSESESSIONS, STARTSESSION, FINISHED };
+ 
+-/*
+-	0 HELLO NXCLIENT
+-	1 Acknowledgement from server
+-	2 SET SHELL_MODE SHELL
+-	3 SET AUTH_MODE PASSWORD
+-	4 login
+-	5 listsession
+-	6 resumesession/startsession
+-*/
++// Enumerated type defining the stages through which the client goes when
++// connecting
++enum { HELLO_NXCLIENT,
++    ACKNOWLEDGE,
++    SHELL_MODE,
++    AUTH_MODE,
++    LOGIN,
++    LIST_SESSIONS,
++    PARSESESSIONS,
++    STARTSESSION,
++    FINISHED };
+ 
+ #define CLIENT_VERSION &quot;3.0.0&quot;
+ 
+ #include &lt;iostream&gt;
++
++#include &quot;notQt.h&quot;
++#include &quot;nxclientlib.h&quot;
+ #include &quot;nxsession.h&quot;
+-#include &quot;nxclientlib.h&quot; // nxclientlib provides some signals used here.
+-#include &quot;notQt.h&quot;
+ 
+ using namespace std;
+ using namespace nxcl;
+ 
+-NXSession::NXSession()
++NXSession::NXSession() :
++    devurand_fd(-1),
++    stage(HELLO_NXCLIENT),
++    sessionDataSet(false),
++    nxUsername(&quot;nouser&quot;),
++    nxPassword(&quot;nopass&quot;)
+ {
+-	this-&gt;devurand_fd = -1;
+-	this-&gt;stage = 0;
+-	this-&gt;sessionDataSet = false;
+-	this-&gt;nxUsername = &quot;nouser&quot;;
+-	this-&gt;nxPassword = &quot;nopass&quot;;
+ }
+ 
+ NXSession::~NXSession()
+@@ -56,535 +58,670 @@
+ 
+ void NXSession::resetSession()
+ {
+-	this-&gt;stage = 0;
+-	this-&gt;sessionDataSet = false;
++    this-&gt;stage = 0;
++    this-&gt;sessionDataSet = false;
+ }
+ 
+ string NXSession::parseSSH(string message)
+ {
+-	dbgln (&quot;NXSession::parseSSH called for: &quot; + message);
++    dbgln (&quot;NXSession::parseSSH called for: &quot; + message);
+ 
+-	int response = parseResponse (message);
+-	string returnMessage;
+-	
+-	if (response == 211) {
+-		if (doSSH == true) {
+-			returnMessage = &quot;yes&quot;;
+-			doSSH = false;
+-		} else
+-			returnMessage = &quot;no&quot;;
+-	}
++    int response = parseResponse (message);
++    string returnMessage;
+ 
+-	if (response == 204) { // Authentication failed
+-		returnMessage = &quot;204&quot;;
+-	}
+-	
+-	if (response == 147) { // Server capacity reached
+-		returnMessage = &quot;147&quot;;
+-		this-&gt;stage = FINISHED;
+-	}
++    if (response == 211) {
++        if (doSSH == true) {
++            returnMessage = &quot;yes&quot;;
++            doSSH = false;
++        } else
++            returnMessage = &quot;no&quot;;
++    }
+ 
+-	switch (this-&gt;stage) {
+-		case HELLO_NXCLIENT:
+-			dbgln (&quot;HELLO_NXCLIENT stage&quot;);
+-			if (message.find(&quot;HELLO NXSERVER - Version&quot;) != string::npos) {
+-				this-&gt;callbacks-&gt;authenticatedSignal();
+-				returnMessage = &quot;hello NXCLIENT - Version &quot;;
+-				returnMessage.append(CLIENT_VERSION);
+-				this-&gt;stage++;
+-			}
+-			break;
+-		case ACKNOWLEDGE:
+-			dbgln (&quot;ACKNOWLEDGE stage&quot;);
+-			if (response == 105)
+-				this-&gt;stage++;
+-			break;
+-		case SHELL_MODE:
+-			dbgln (&quot;SHELL_MODE stage&quot;);
+-			if (response == 105) {
+-				returnMessage = &quot;SET SHELL_MODE SHELL&quot;;
+-				this-&gt;stage++;
+-			}
+-			break;
+-		case AUTH_MODE:
+-			dbgln (&quot;AUTH_MODE stage&quot;);
+-			if (response == 105) {
+-				returnMessage = &quot;SET AUTH_MODE PASSWORD&quot;;
+-				this-&gt;stage++;
+-			}
+-			break;
+-		case LOGIN:
+-			dbgln (&quot;LOGIN stage&quot;);
+-			switch (response) {
+-				case 105:
+-					returnMessage = &quot;login&quot;;
+-					break;
+-				case 101:
+-					returnMessage = nxUsername;
+-					break;
+-				case 102:
+-					returnMessage = nxPassword;
+-					break;
+-				case 103:
+-					this-&gt;stage++;
+-					break;
+-				case 404:
+-					this-&gt;callbacks-&gt;loginFailedSignal();
+-				}
+-			break;
+-		case LIST_SESSIONS:
+-			dbgln (&quot;LIST_SESSIONS stage&quot;);
+-			if (this-&gt;sessionData-&gt;terminate == true) {
+-				// Wait for termination
+-				dbgln (&quot;Waiting for termination&quot;);
+-				if (response == 900) {
+-					stringstream termsession;
+-					termsession &lt;&lt; &quot;NX&gt; 900 Session id: &quot; &lt;&lt; this-&gt;sessionData-&gt;id &lt;&lt; &quot; terminated.&quot;;
+-					if (message.find (termsession.str().c_str(), 0) == 0) {
+-						// Session terminated.
+-						this-&gt;sessionData-&gt;terminate = false;
+-					} else {
+-						usleep (10000);
+-					}
+-				}
++    if (response == 204) { // Authentication failed
++        returnMessage = &quot;204&quot;;
++    }
+ 
+-			} else if (response == 105) {
+-				// Get a list of the available
+-				// sessions on the server, for given
+-				// user, with given status, and any
+-				// type. Not sure if geometry is
+-				// ignored or not.
+-				stringstream ss;
+-				// We want to list suspended or running sessions, with this command:
+-				
+-				dbgln (&quot;this-&gt;resumeSessions.size() == &quot; &lt;&lt; this-&gt;resumeSessions.size());
+-				
+-				if (this-&gt;sessionData-&gt;sessionType == &quot;shadow&quot;) {
+-					// This is how to list shadow
+-					// sessions. Run NoMachine's
+-					// client and see
+-					// ~/.nx/temp/(pid)/sshlog for
+-					// connection details
+-					ss &lt;&lt; &quot;listsession --type=\&quot;shadow\&quot;&quot;;
++    if (response == 147) { // Server capacity reached
++        returnMessage = &quot;147&quot;;
++        this-&gt;stage = FINISHED;
++    }
+ 
+-				} else {
++    switch (this-&gt;stage) {
++        case HELLO_NXCLIENT:
++            dbgln (&quot;HELLO_NXCLIENT stage&quot;);
+ 
+-					ss &lt;&lt; &quot;listsession --user=\&quot;&quot; &lt;&lt; nxUsername
+-					   &lt;&lt; &quot;\&quot; --status=\&quot;suspended,running\&quot; --geometry=\&quot;&quot; 
+-					   &lt;&lt; this-&gt;sessionData-&gt;xRes &lt;&lt; &quot;x&quot;
+-					   &lt;&lt; this-&gt;sessionData-&gt;yRes &lt;&lt; &quot;x&quot; 
+-					   &lt;&lt; this-&gt;sessionData-&gt;depth 
+-					   &lt;&lt; (this-&gt;sessionData-&gt;render ? &quot;+render&quot; : &quot;&quot;) 
+-						// If you leave --type blank, you can re-connect to any sessions available.
+-					   &lt;&lt;  &quot;\&quot; --type=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;sessionType &lt;&lt; &quot;\&quot;&quot;;
+-				}
+-				
+-				returnMessage = ss.str();
+-				this-&gt;stage++;
+-			}
+-			break;
+-		case PARSESESSIONS:
+-			dbgln (&quot;PARSESESSIONS stage&quot;);
++            if (message.find(&quot;HELLO NXSERVER - Version&quot;) != string::npos) {
++                this-&gt;callbacks-&gt;authenticatedSignal();
++                returnMessage = &quot;hello NXCLIENT - Version &quot;;
++                returnMessage.append(CLIENT_VERSION);
++                this-&gt;stage++;
++            }
+ 
+-			if ((this-&gt;sessionData-&gt;sessionType == &quot;shadow&quot; &amp;&amp; response != 105) ||
+-			    (this-&gt;sessionData-&gt;sessionType != &quot;shadow&quot; &amp;&amp; response != 148)  ) {
++            break;
++        case ACKNOWLEDGE:
++            dbgln (&quot;ACKNOWLEDGE stage&quot;);
+ 
+-				dbgln (&quot;Building resumeSessions: resumeSessions.push_back(message);&quot;);
+-				this-&gt;resumeSessions.push_back(message);
++            if (response == 105)
++                this-&gt;stage++;
+ 
+-			} else if ( (this-&gt;sessionData-&gt;sessionType == &quot;shadow&quot; &amp;&amp; response == 105 ) || 
+-				    (this-&gt;sessionData-&gt;sessionType != &quot;shadow&quot; &amp;&amp; response == 148)  ) {
++            break;
++        case SHELL_MODE:
++            dbgln (&quot;SHELL_MODE stage&quot;);
+ 
+-				dbgln (&quot;Parsing resumeSessions: parseResumeSessions(resumeSessions);&quot;);
+-				parseResumeSessions (this-&gt;resumeSessions);
+-				dbgln (&quot;parseResumeSessions(resumeSessions) returned&quot;);
+-				// Now, the problem we have here, is that when
+-				// we return from the last 105 response, we
+-				// don't then get another stdout message to
+-				// act upon. So, we want to recurse back into parseSSH to get onto the STARTSESSION stage here:
+-				returnMessage = this-&gt;parseSSH (message);
+-			}
+-			break;
++            if (response == 105) {
++                returnMessage = &quot;SET SHELL_MODE SHELL&quot;;
++                this-&gt;stage++;
++            }
+ 
+-		case STARTSESSION:
+-			dbgln (&quot;STARTSESSION stage&quot;);
+-			if (response == 105 &amp;&amp; sessionDataSet) {
++            break;
++        case AUTH_MODE:
++            dbgln (&quot;AUTH_MODE stage&quot;);
+ 
+-				dbgln (&quot;response is 105 and sessionDataSet is true&quot;);;
+-				int media = 0;
+-				string fullscreen = &quot;&quot;;
+-				if (this-&gt;sessionData-&gt;media) {
+-					media = 1;
+-				}
+-				if (this-&gt;sessionData-&gt;fullscreen) {
+-					this-&gt;sessionData-&gt;geometry = &quot;fullscreen&quot;;
+-					fullscreen = &quot;+fullscreen&quot;;
+-				}
++            if (response == 105) {
++                returnMessage = &quot;SET AUTH_MODE PASSWORD&quot;;
++                this-&gt;stage++;
++            }
+ 
+-				if (this-&gt;sessionData-&gt;sessionType == &quot;shadow&quot; &amp;&amp; this-&gt;sessionData-&gt;terminate == false) {
+-					dbgln (&quot;It's a shadow session!&quot;);
+-					stringstream ss;
+-					// These are the session parameters that NoMachine's client sends for resume
+-					ss &lt;&lt; &quot;Attachsession &quot;
+-					   &lt;&lt; &quot;--link=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;linkType &lt;&lt; &quot;\&quot; &quot;
+-					   &lt;&lt; &quot;--backingstore=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;backingstore &lt;&lt; &quot;\&quot; &quot;
+-					   &lt;&lt; &quot;--encryption=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;encryption &lt;&lt; &quot;\&quot; &quot;
+-					   &lt;&lt; &quot;--cache=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;cache &lt;&lt; &quot;M\&quot; &quot;
+-					   &lt;&lt; &quot;--images=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;images &lt;&lt; &quot;M\&quot; &quot;
+-					   &lt;&lt; &quot;--shmem=\&quot;1\&quot; &quot; // probably has been autodetected from my display
+-					   &lt;&lt; &quot;--shpix=\&quot;1\&quot; &quot; // probably has been autodetected from my display
+-					   &lt;&lt; &quot;--strict=\&quot;0\&quot; &quot; // probably has been autodetected from my display
+-					   &lt;&lt; &quot;--composite=\&quot;1\&quot; &quot; // probably has been autodetected from my display
+-					   &lt;&lt; &quot;--media=\&quot;&quot; &lt;&lt; media &lt;&lt; &quot;\&quot; &quot;
+-					   &lt;&lt; &quot;--session=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;sessionName &lt;&lt; &quot;\&quot; &quot;
+-					   &lt;&lt; &quot;--type=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;sessionType &lt;&lt; &quot;\&quot; &quot;
+-					   &lt;&lt; &quot;--client=\&quot;linux\&quot; &quot; // FIXME: This may be some other OS if you compile it on Sun, Windows, etc.
+-					   &lt;&lt; &quot;--keyboard=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;keyboard &lt;&lt; &quot;\&quot; &quot;
+-					   &lt;&lt; &quot;--id=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;id &lt;&lt; &quot;\&quot; &quot;
+-					   &lt;&lt; &quot;--display=\&quot;0\&quot; &quot; // This may be the key?
+-					   &lt;&lt; &quot;--geometry=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;geometry &lt;&lt; &quot;\&quot; &quot;;
++            break;
++        case LOGIN:
++            dbgln (&quot;LOGIN stage&quot;);
+ 
+-					/* These appear not to be necessary for the shadow connection, for one reason and another.
+-					        // Not required:
+-						&quot;\&quot; --cookie=\&quot;&quot; &lt;&lt; generateCookie() &lt;&lt;
+-						// optional:
+-						&quot;\&quot; --kbtype=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;kbtype &lt;&lt;
+-						// optional:
+-						&quot;\&quot; --nodelay=\&quot;1&quot; &lt;&lt; 
+-						// These are obviously not required
+-						&quot;\&quot; --agent_server=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;agentServer &lt;&lt;
+-						&quot;\&quot; --agent_user=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;agentUser &lt;&lt;
+-						&quot;\&quot; --agent_password=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;agentPass &lt;&lt; &quot;\&quot;&quot;;
+-					*/
++            switch (response) {
++                case 105:
++                    returnMessage = &quot;login&quot;;
++                    break;
++                case 101:
++                    returnMessage = nxUsername;
++                    break;
++                case 102:
++                    returnMessage = nxPassword;
++                    break;
++                case 103:
++                    this-&gt;stage++;
++                    break;
++                case 404:
++                    this-&gt;callbacks-&gt;loginFailedSignal();
++            }
+ 
+-					returnMessage = ss.str();
+-					dbgln (&quot;session parameter command: &quot; + ss.str());
+-					this-&gt;stage++;
++            break;
++        case LIST_SESSIONS:
++            dbgln (&quot;LIST_SESSIONS stage&quot;);
+ 
+-				} else if (this-&gt;sessionData-&gt;terminate == true) {
+-					stringstream ss;
+-					// These are the session parameters that NoMachine's client sends for resume
+-					ss &lt;&lt; &quot;Terminate --sessionid=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;id &lt;&lt; &quot;\&quot;&quot;;
+-					returnMessage = ss.str();
+-					dbgln (&quot;session parameter command: &quot; + ss.str());
+-					this-&gt;stage -= 2; // Back to listsessions after terminating a session.
+-					// clear the list of sessions to resume
+-					this-&gt;resumeSessions.clear();
+-					this-&gt;runningSessions.clear();
++            if (this-&gt;sessionData-&gt;terminate == true) {
++                // Wait for termination
++                dbgln (&quot;Waiting for termination&quot;);
+ 
+-				} else if (this-&gt;sessionData-&gt;suspended) {
+-					dbgln (&quot;this-&gt;sessionData-&gt;suspended is true&quot;);
+-					stringstream ss;
+-					// These are the session parameters that NoMachine's client sends for resume
+-					ss &lt;&lt; &quot;restoresession --id=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;id &lt;&lt;
+-						&quot;\&quot; --session=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;sessionName &lt;&lt;
+-						&quot;\&quot; --type=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;sessionType &lt;&lt;
+-						&quot;\&quot; --cache=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;cache &lt;&lt;
+-						&quot;M\&quot; --images=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;images &lt;&lt;
+-						&quot;M\&quot; --cookie=\&quot;&quot; &lt;&lt; generateCookie() &lt;&lt;
+-						&quot;\&quot; --link=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;linkType &lt;&lt;
+-						&quot;\&quot; --kbtype=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;kbtype &lt;&lt;
+-						&quot;\&quot; --nodelay=\&quot;1\&quot; --encryption=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;encryption &lt;&lt;
+-						&quot;\&quot; --backingstore=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;backingstore &lt;&lt;
+-						&quot;\&quot; --geometry=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;geometry &lt;&lt;
+-						&quot;\&quot; --media=\&quot;&quot; &lt;&lt; media &lt;&lt;
+-						&quot;\&quot; --agent_server=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;agentServer &lt;&lt;
+-						&quot;\&quot; --agent_user=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;agentUser &lt;&lt;
+-						&quot;\&quot; --agent_password=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;agentPass &lt;&lt; &quot;\&quot;&quot;;
+-					returnMessage = ss.str();
+-					dbgln (&quot;session parameter command: &quot; + ss.str());
+-					this-&gt;stage++;
++                if (response == 900) {
++                    stringstream termsession;
+ 
+-				} else { 
+-					dbgln (&quot;this-&gt;sessionData-&gt;suspended is false, and it's not a shadow session.&quot;);
+-					stringstream ss;
+-					ss &lt;&lt; &quot;startsession --session=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;sessionName &lt;&lt;
+-						&quot;\&quot; --type=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;sessionType &lt;&lt;
+-						&quot;\&quot; --cache=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;cache &lt;&lt;
+-						&quot;M\&quot; --images=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;images &lt;&lt;
+-						&quot;M\&quot; --cookie=\&quot;&quot; &lt;&lt; generateCookie() &lt;&lt;
+-						&quot;\&quot; --link=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;linkType &lt;&lt;
+-						&quot;\&quot; --render=\&quot;&quot; &lt;&lt; (this-&gt;sessionData-&gt;render ? 1 : 0) &lt;&lt;
+-						&quot;\&quot; --encryption=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;encryption &lt;&lt;
+-						&quot;\&quot; --backingstore=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;backingstore &lt;&lt;
+-						&quot;\&quot; --imagecompressionmethod=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;imageCompressionMethod &lt;&lt;
+-						&quot;\&quot; --geometry=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;geometry &lt;&lt; 
+-						&quot;\&quot; --screeninfo=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;xRes &lt;&lt; &quot;x&quot; &lt;&lt; this-&gt;sessionData-&gt;yRes &lt;&lt; &quot;x&quot; &lt;&lt; this-&gt;sessionData-&gt;depth &lt;&lt; 
+-						(this-&gt;sessionData-&gt;render ? &quot;+render&quot; : &quot;&quot;) &lt;&lt; fullscreen &lt;&lt;
+-						&quot;\&quot; --keyboard=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;keyboard &lt;&lt;
+-						&quot;\&quot; --kbtype=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;kbtype &lt;&lt;
+-						&quot;\&quot; --media=\&quot;&quot; &lt;&lt; media &lt;&lt;
+-						&quot;\&quot; --agent_server=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;agentServer &lt;&lt;
+-						&quot;\&quot; --agent_user=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;agentUser &lt;&lt;
+-						&quot;\&quot; --agent_password=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;agentPass &lt;&lt; &quot;\&quot;&quot;;
+-					ss &lt;&lt; &quot; --title=\&quot;sebtest\&quot;&quot;; // testing a window title
+-					if (this-&gt;sessionData-&gt;sessionType == &quot;unix-application&quot;) {
+-						ss &lt;&lt; &quot; --application=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;customCommand &lt;&lt; &quot;\&quot;&quot;;
+-						if (this-&gt;sessionData-&gt;virtualDesktop == true) {
+-							ss &lt;&lt; &quot; --rootless=\&quot;0\&quot; --virtualdesktop=\&quot;1\&quot;&quot;;
+-						} else {
+-							ss &lt;&lt; &quot; --rootless=\&quot;1\&quot; --virtualdesktop=\&quot;0\&quot;&quot;;
+-						}
++                    termsession &lt;&lt; &quot;NX&gt; 900 Session id: &quot;
++                        &lt;&lt; this-&gt;sessionData-&gt;id
++                        &lt;&lt; &quot; terminated.&quot;;
+ 
+-					} else if (this-&gt;sessionData-&gt;sessionType == &quot;unix-console&quot;) {
+-						if (this-&gt;sessionData-&gt;virtualDesktop == true) {
+-							ss &lt;&lt; &quot; --rootless=\&quot;0\&quot; --virtualdesktop=\&quot;1\&quot;&quot;;
+-						} else {
+-							ss &lt;&lt; &quot; --rootless=\&quot;1\&quot; --virtualdesktop=\&quot;0\&quot;&quot;;
+-						}
++                    if (message.find (termsession.str().c_str(), 0) == 0) {
++                        // Session terminated.
++                        this-&gt;sessionData-&gt;terminate = false;
++                    } else {
++                        usleep (10000);
++                    }
++                }
+ 
+-					} else if (this-&gt;sessionData-&gt;sessionType == &quot;unix-default&quot;) {
+-						// ignore this - does anyone use it?
+-					}
+-					returnMessage = ss.str();
+-					dbgln (&quot;session parameter command: &quot; + ss.str());
+-					this-&gt;stage++;
+-				}
+-			} else {
+-				dbgln (&quot;either response is not 105 or sessionDataSet is false.&quot;);;				
+-			}
+-			break;
++            } else if (response == 105) {
++                // Get a list of the available sessions on the server, for
++                // given user, with given status, and any type. Not sure if
++                // geometry is ignored or not.
++                stringstream ss;
+ 
+-		case FINISHED:
+-			dbgln (&quot;FINISHED stage. Response is &quot; &lt;&lt; response 
+-			       &lt;&lt; &quot;. That should mean that session set up is complete.&quot;);
+-			this-&gt;callbacks-&gt;readyForProxySignal();
+-	}
++                // We want to list suspended or running sessions, with this
++                // command:
++                dbgln (&quot;this-&gt;resumeSessions.size() == &quot;
++                        &lt;&lt; this-&gt;resumeSessions.size());
+ 
+-	dbgln (&quot;NXSession::parseSSH, about to return a message: &quot; + returnMessage);
+-	if (!returnMessage.empty()) {
+-		returnMessage.append(&quot;\n&quot;);
+-		return returnMessage;
+-	} else
+-		return &quot;&quot;;
++                if (this-&gt;sessionData-&gt;sessionType == &quot;shadow&quot;) {
++                    // This is how to list shadow sessions. Run NoMachine's
++                    // client and see ~/.nx/temp/(pid)/sshlog for connection
++                    // details
++                    ss &lt;&lt; &quot;listsession --type=\&quot;shadow\&quot;&quot;;
++
++                } else {
++
++                    ss &lt;&lt; &quot;listsession --user=\&quot;&quot; &lt;&lt; nxUsername
++                        &lt;&lt; &quot;\&quot; --status=\&quot;suspended,running\&quot; --geometry=\&quot;&quot;
++                        &lt;&lt; this-&gt;sessionData-&gt;xRes &lt;&lt; &quot;x&quot;
++                        &lt;&lt; this-&gt;sessionData-&gt;yRes &lt;&lt; &quot;x&quot;
++                        &lt;&lt; this-&gt;sessionData-&gt;depth
++                        &lt;&lt; (this-&gt;sessionData-&gt;render ? &quot;+render&quot; : &quot;&quot;)
++
++                        // If you leave --type blank, you can re-connect to any
++                        // sessions available.
++                        &lt;&lt; &quot;\&quot; --type=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;sessionType
++                        &lt;&lt; &quot;\&quot;&quot;;
++                }
++
++                returnMessage = ss.str();
++                this-&gt;stage++;
++            }
++            break;
++        case PARSESESSIONS:
++            dbgln (&quot;PARSESESSIONS stage&quot;);
++
++            if ((this-&gt;sessionData-&gt;sessionType == &quot;shadow&quot; &amp;&amp;
++                        response != 105) ||
++                    (this-&gt;sessionData-&gt;sessionType != &quot;shadow&quot; &amp;&amp;
++                        response != 148)  ) {
++
++                dbgln (&quot;Building resumeSessions:&quot;
++                        &lt;&lt; &quot; resumeSessions.push_back(message);&quot;);
++
++                this-&gt;resumeSessions.push_back(message);
++
++            } else if ((this-&gt;sessionData-&gt;sessionType == &quot;shadow&quot; &amp;&amp;
++                        response == 105)
++                    || (this-&gt;sessionData-&gt;sessionType != &quot;shadow&quot; &amp;&amp;
++                        response == 148)) {
++
++                dbgln (&quot;Parsing resumeSessions:&quot;
++                        &lt;&lt; &quot; parseResumeSessions(resumeSessions);&quot;);
++
++                parseResumeSessions (this-&gt;resumeSessions);
++
++                dbgln (&quot;parseResumeSessions(resumeSessions) returned&quot;);
++
++                // Now, the problem we have here, is that when
++                // we return from the last 105 response, we
++                // don't then get another stdout message to
++                // act upon. So, we want to recurse back into
++                // parseSSH to get onto the STARTSESSION stage here:
++                returnMessage = this-&gt;parseSSH (message);
++            }
++            break;
++
++        case STARTSESSION:
++            dbgln (&quot;STARTSESSION stage&quot;);
++            if (response == 105 &amp;&amp; sessionDataSet) {
++
++                dbgln (&quot;response is 105 and sessionDataSet is true&quot;);;
++                int media = 0;
++                string fullscreen = &quot;&quot;;
++                if (this-&gt;sessionData-&gt;media) {
++                    media = 1;
++                }
++
++                if (this-&gt;sessionData-&gt;fullscreen) {
++                    this-&gt;sessionData-&gt;geometry = &quot;fullscreen&quot;;
++                    fullscreen = &quot;+fullscreen&quot;;
++                }
++
++                if (this-&gt;sessionData-&gt;sessionType == &quot;shadow&quot; &amp;&amp;
++                        this-&gt;sessionData-&gt;terminate == false) {
++
++                    dbgln (&quot;It's a shadow session!&quot;);
++                    stringstream ss;
++
++                    // These are the session parameters that NoMachine's client
++                    // sends for resume
++
++                    ss &lt;&lt; &quot;attachsession &quot;
++                        &lt;&lt; &quot;--link=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;linkType &lt;&lt; &quot;\&quot; &quot;
++                        &lt;&lt; &quot;--backingstore=\&quot;&quot;
++                            &lt;&lt; this-&gt;sessionData-&gt;backingstore &lt;&lt; &quot;\&quot; &quot;
++                        &lt;&lt; &quot;--encryption=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;encryption
++                            &lt;&lt; &quot;\&quot; &quot;
++                        &lt;&lt; &quot;--cache=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;cache &lt;&lt; &quot;M\&quot; &quot;
++                        &lt;&lt; &quot;--images=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;images &lt;&lt; &quot;M\&quot; &quot;
++                        // probably has been autodetected from my display
++                        &lt;&lt; &quot;--shmem=\&quot;1\&quot; &quot;
++                        // probably has been autodetected from my display
++                        &lt;&lt; &quot;--shpix=\&quot;1\&quot; &quot;
++                        // probably has been autodetected from my display
++                        &lt;&lt; &quot;--strict=\&quot;0\&quot; &quot;
++                        // probably has been autodetected from my display
++                        &lt;&lt; &quot;--composite=\&quot;1\&quot; &quot;
++                        &lt;&lt; &quot;--media=\&quot;&quot; &lt;&lt; media &lt;&lt; &quot;\&quot; &quot;
++                        &lt;&lt; &quot;--session=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;sessionName
++                            &lt;&lt; &quot;\&quot; &quot;
++                        &lt;&lt; &quot;--type=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;sessionType
++                            &lt;&lt; &quot;\&quot; &quot;
++                        // FIXME: This may be some other OS if you compile it on
++                        // Sun, Windows, etc.
++                        &lt;&lt; &quot;--client=\&quot;linux\&quot; &quot;
++                        &lt;&lt; &quot;--keyboard=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;keyboard
++                            &lt;&lt; &quot;\&quot; &quot;
++                        &lt;&lt; &quot;--id=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;id &lt;&lt; &quot;\&quot; &quot;
++                        // This may be the key?
++                        &lt;&lt; &quot;--display=\&quot;0\&quot; &quot;
++                        &lt;&lt; &quot;--geometry=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;geometry
++                            &lt;&lt; &quot;\&quot; &quot;;
++
++                    returnMessage = ss.str();
++
++                    dbgln (&quot;session parameter command: &quot; + ss.str());
++
++                    this-&gt;stage++;
++
++                } else if (this-&gt;sessionData-&gt;terminate == true) {
++
++                    stringstream ss;
++
++                    // These are the session parameters that NoMachine's client
++                    // sends for resume
++                    ss &lt;&lt; &quot;Terminate --sessionid=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;id
++                        &lt;&lt; &quot;\&quot;&quot;;
++
++                    returnMessage = ss.str();
++
++                    dbgln (&quot;session parameter command: &quot; + ss.str());
++
++                    // Back to listsessions after terminating a session.
++                    this-&gt;stage -= 2;
++
++                    // Clear the list of sessions to resume
++                    this-&gt;resumeSessions.clear();
++                    this-&gt;runningSessions.clear();
++
++                } else if (this-&gt;sessionData-&gt;suspended) {
++
++                    dbgln (&quot;this-&gt;sessionData-&gt;suspended is true&quot;);
++
++                    stringstream ss;
++
++                    // These are the session parameters that NoMachine's client
++                    // sends for resume
++                    ss &lt;&lt; &quot;restoresession --id=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;id &lt;&lt;
++                        &quot;\&quot; --session=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;sessionName &lt;&lt;
++                        &quot;\&quot; --type=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;sessionType &lt;&lt;
++                        &quot;\&quot; --cache=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;cache &lt;&lt;
++                        &quot;M\&quot; --images=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;images &lt;&lt;
++                        &quot;M\&quot; --cookie=\&quot;&quot; &lt;&lt; generateCookie() &lt;&lt;
++                        &quot;\&quot; --link=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;linkType &lt;&lt;
++                        &quot;\&quot; --kbtype=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;kbtype &lt;&lt;
++                        &quot;\&quot; --nodelay=\&quot;1\&quot; --encryption=\&quot;&quot;
++                            &lt;&lt; this-&gt;sessionData-&gt;encryption &lt;&lt;
++                        &quot;\&quot; --backingstore=\&quot;&quot;
++                            &lt;&lt; this-&gt;sessionData-&gt;backingstore &lt;&lt;
++                        &quot;\&quot; --geometry=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;geometry &lt;&lt;
++                        &quot;\&quot; --media=\&quot;&quot; &lt;&lt; media &lt;&lt;
++                        &quot;\&quot; --agent_server=\&quot;&quot;
++                            &lt;&lt; this-&gt;sessionData-&gt;agentServer &lt;&lt;
++                        &quot;\&quot; --agent_user=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;agentUser &lt;&lt;
++                        &quot;\&quot; --agent_password=\&quot;&quot;
++                            &lt;&lt; this-&gt;sessionData-&gt;agentPass &lt;&lt; &quot;\&quot;&quot;;
++
++                    returnMessage = ss.str();
++
++                    dbgln (&quot;session parameter command: &quot; + ss.str());
++
++                    this-&gt;stage++;
++
++                } else {
++
++                    dbgln (&quot;this-&gt;sessionData-&gt;suspended is false, and it's&quot; &lt;&lt;
++                            &quot; not a shadow session.&quot;);
++
++                    stringstream ss;
++
++                    ss &lt;&lt; &quot;startsession --session=\&quot;&quot;
++                            &lt;&lt; this-&gt;sessionData-&gt;sessionName
++
++                        &lt;&lt; &quot;\&quot; --type=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;sessionType
++                        &lt;&lt; &quot;\&quot; --cache=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;cache
++                        &lt;&lt; &quot;M\&quot; --images=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;images
++                        &lt;&lt; &quot;M\&quot; --cookie=\&quot;&quot; &lt;&lt; generateCookie()
++                        &lt;&lt; &quot;\&quot; --link=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;linkType
++                        &lt;&lt; &quot;\&quot; --render=\&quot;&quot;
++                            &lt;&lt; (this-&gt;sessionData-&gt;render ? 1 : 0)
++
++                        &lt;&lt; &quot;\&quot; --encryption=\&quot;&quot;
++                            &lt;&lt; this-&gt;sessionData-&gt;encryption
++
++                        &lt;&lt; &quot;\&quot; --backingstore=\&quot;&quot;
++                            &lt;&lt; this-&gt;sessionData-&gt;backingstore
++
++                        &lt;&lt; &quot;\&quot; --imagecompressionmethod=\&quot;&quot;
++                        &lt;&lt; this-&gt;sessionData-&gt;imageCompressionMethod
++                        &lt;&lt; &quot;\&quot; --geometry=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;geometry
++                        &lt;&lt; &quot;\&quot; --screeninfo=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;xRes
++                        &lt;&lt; &quot;x&quot; &lt;&lt; this-&gt;sessionData-&gt;yRes &lt;&lt; &quot;x&quot;
++                        &lt;&lt; this-&gt;sessionData-&gt;depth
++                        &lt;&lt; (this-&gt;sessionData-&gt;render ? &quot;+render&quot; : &quot;&quot;)
++                        &lt;&lt; fullscreen &lt;&lt; &quot;\&quot; --keyboard=\&quot;&quot;
++                            &lt;&lt; this-&gt;sessionData-&gt;keyboard
++
++                        &lt;&lt; &quot;\&quot; --kbtype=\&quot;&quot; &lt;&lt; this-&gt;sessionData-&gt;kbtype
++                        &lt;&lt; &quot;\&quot; --media=\&quot;&quot; &lt;&lt; media
++                        &lt;&lt; &quot;\&quot; --agent_server=\&quot;&quot;
++                            &lt;&lt; this-&gt;sessionData-&gt;agentServer
++
++                        &lt;&lt; &quot;\&quot; --agent_user=\&quot;&quot;
++                            &lt;&lt; this-&gt;sessionData-&gt;agentUser
++
++                        &lt;&lt; &quot;\&quot; --agent_password=\&quot;&quot;
++                            &lt;&lt; this-&gt;sessionData-&gt;agentPass
++
++                        &lt;&lt; &quot;\&quot;&quot;;
++
++                    ss &lt;&lt; &quot; --title=\&quot;sebtest\&quot;&quot;; // testing a window title
++
++                    if (this-&gt;sessionData-&gt;sessionType == &quot;unix-application&quot;) {
++                        ss &lt;&lt; &quot; --application=\&quot;&quot; 
++                            &lt;&lt; this-&gt;sessionData-&gt;customCommand &lt;&lt; &quot;\&quot;&quot;;
++
++                        if (this-&gt;sessionData-&gt;virtualDesktop == true) {
++                            ss &lt;&lt; &quot; --rootless=\&quot;0\&quot; --virtualdesktop=\&quot;1\&quot;&quot;;
++                        } else {
++                            ss &lt;&lt; &quot; --rootless=\&quot;1\&quot; --virtualdesktop=\&quot;0\&quot;&quot;;
++                        }
++
++                    } else if
++                        (this-&gt;sessionData-&gt;sessionType == &quot;unix-console&quot;) {
++
++                        if (this-&gt;sessionData-&gt;virtualDesktop == true) {
++                            ss &lt;&lt; &quot; --rootless=\&quot;0\&quot; --virtualdesktop=\&quot;1\&quot;&quot;;
++                        } else {
++                            ss &lt;&lt; &quot; --rootless=\&quot;1\&quot; --virtualdesktop=\&quot;0\&quot;&quot;;
++                        }
++
++                    } else if
++                        (this-&gt;sessionData-&gt;sessionType == &quot;unix-default&quot;) {
++                        // ignore this - does anyone use it?
++                    }
++
++                    returnMessage = ss.str();
++
++                    dbgln (&quot;session parameter command: &quot; + ss.str());
++
++                    this-&gt;stage++;
++                }
++            } else {
++                dbgln (&quot;either response is not 105 or sessionDataSet is&quot;
++                        &lt;&lt; &quot; false.&quot;);
++            }
++            break;
++
++        case FINISHED:
++            dbgln (&quot;FINISHED stage. Response is &quot; &lt;&lt; response
++                    &lt;&lt; &quot;. That should mean that session set up is complete.&quot;);
++            this-&gt;callbacks-&gt;readyForProxySignal();
++    }
++
++    dbgln (&quot;NXSession::parseSSH, about to return a message: &quot; + returnMessage);
++
++    if (!returnMessage.empty()) {
++        returnMessage.append(&quot;\n&quot;);
++        return returnMessage;
++    } else
++        return &quot;&quot;;
+ }
+ 
+ void NXSession::setSessionData (NXSessionData *sd)
+ {
+-	this-&gt;sessionData = sd;
++    this-&gt;sessionData = sd;
+ }
+ 
+ int NXSession::parseResponse(string message)
+ {
+-	string::size_type idx1, idx2;
+-	int response;
+-	dbgln (&quot;NXSession::parseResponse called for message:&quot; &lt;&lt; message);
++    string::size_type idx1, idx2;
+ 
+-	if ((idx1 = message.find (&quot;notQProcess error&quot;, 0)) != string::npos) {
+-		dbgln (&quot;Found notQProcess error&quot;);
+-		// This means a process crashed, we're going to return a number &gt;100000 to indicate this.
+-		if ( ((idx2 = message.find (&quot;crashed&quot;, 0)) != string::npos) &amp;&amp; idx2 &gt; idx1) {
+-			stringstream ss;
+-			ss &lt;&lt; message.substr((idx1+19), idx2-1-(idx1+19));
+-			ss &gt;&gt; response; // this is the pid that crashed
+-			response += 100000; // add 100000 and return this.
+-			return response;
+-		} else {
+-			dbgln (&quot;Uh oh, didn't find \&quot;crashed\&quot;&quot;);
+-		}
+-	}
++    int response;
+ 
+-	// Find out the server response number
+-	// This will only be present in strings which contain &quot;NX&gt;&quot;
+-	if (message.find(&quot;NX&gt;&quot;) != string::npos &amp;&amp; message.find(&quot;NX&gt;&quot;) == 0) {
+-		idx1 = message.find(&quot;NX&gt;&quot;) + 4;
+-		if ((idx2 = message.find(&quot; &quot;, idx1)) == string::npos) {
+-			if ((idx2 = message.find(&quot;\n&quot;, idx1)) == string::npos) {
+-				//dbgln (&quot;NXSession::parseResponse: warning: reading up to the end of message.&quot;);
+-				idx2 = message.size();
+-			}
+-		}
+-		if (idx2&gt;idx1) {
+-			stringstream ss;
+-			ss &lt;&lt; message.substr(idx1, idx2-idx1);
+-			ss &gt;&gt; response;
+-		} else {
+-			response = 0;
+-		}
+-	} else {
+-		response = 0;
+-	}
++    dbgln (&quot;NXSession::parseResponse called for message:&quot; &lt;&lt; message);
+ 
+-	dbgln (&quot;NXSession::parseResponse() returning &quot; &lt;&lt; response);
+-	return response;
++    if ((idx1 = message.find (&quot;notQProcess error&quot;, 0)) != string::npos) {
++
++        dbgln (&quot;Found notQProcess error&quot;);
++
++        // This means a process crashed, we're going to return a number &gt;100000
++        // to indicate this.
++        if ( ((idx2 = message.find (&quot;crashed&quot;, 0)) != string::npos) &amp;&amp; 
++                idx2 &gt; idx1) {
++
++            stringstream ss;
++            ss &lt;&lt; message.substr((idx1+19), idx2-1-(idx1+19));
++
++            // This is the pid that crashed
++            ss &gt;&gt; response;
++
++            // Add 100000 and return this
++            response += 100000;
++
++            return response;
++        } else {
++            dbgln (&quot;Uh oh, didn't find \&quot;crashed\&quot;&quot;);
++        }
++    }
++
++    // Find out the server response number
++    // This will only be present in strings which contain &quot;NX&gt;&quot;
++    if (message.find(&quot;NX&gt;&quot;) != string::npos &amp;&amp; message.find(&quot;NX&gt;&quot;) == 0) {
++        idx1 = message.find(&quot;NX&gt;&quot;) + 4;
++
++        if ((idx2 = message.find(&quot; &quot;, idx1)) == string::npos) {
++            if ((idx2 = message.find(&quot;\n&quot;, idx1)) == string::npos) {
++                idx2 = message.size();
++            }
++        }
++
++        if (idx2&gt;idx1) {
++            stringstream ss;
++            ss &lt;&lt; message.substr(idx1, idx2-idx1);
++            ss &gt;&gt; response;
++        } else {
++            response = 0;
++        }
++
++    } else {
++        response = 0;
++    }
++
++    dbgln (&quot;NXSession::parseResponse() returning &quot; &lt;&lt; response);
++    return response;
+ }
+ 
+ void NXSession::parseResumeSessions(list&lt;string&gt; rawdata)
+ {
+-	// Was: QStringList sessions, and got rawdata appended to it?
+-	list&lt;string&gt; sessions;
+-	list&lt;string&gt;::iterator iter, at;
++    // Was: QStringList sessions, and got rawdata appended to it?
++    list&lt;string&gt; sessions;
++    list&lt;string&gt;::iterator iter, at;
+ 
+-	dbgln (&quot;NXSession::parseResumeSessions called.&quot;);
++    dbgln (&quot;NXSession::parseResumeSessions called.&quot;);
+ 
+-	for (iter = rawdata.begin(); iter != rawdata.end(); iter++) {
+-		if (((*iter).find(&quot;-------&quot;) != string::npos) &amp;&amp; !(*iter).empty()) {
+-			at = iter;
+-		}
+-	}
++    for (iter = rawdata.begin(); iter != rawdata.end(); iter++) {
++        if (((*iter).find(&quot;-------&quot;) != string::npos) &amp;&amp; !(*iter).empty()) {
++            at = iter;
++        }
++    }
+ 
+-	for (iter = ++at; iter != rawdata.end(); iter++) {
+-		if ((!(*iter).find(&quot;NX&gt; 148&quot;) != string::npos) &amp;&amp; !(*iter).empty()) {
+-			sessions.push_back(*iter);
+-		}
+-	}
++    for (iter = ++at; iter != rawdata.end(); iter++) {
++        if ((!(*iter).find(&quot;NX&gt; 148&quot;) != string::npos) &amp;&amp; !(*iter).empty()) {
++            sessions.push_back(*iter);
++        }
++    }
+ 
+-	list &lt; vector&lt;string&gt; &gt; rawsessions;
+-	list &lt; vector&lt;string&gt; &gt;::iterator rsIter;
++    list &lt; vector&lt;string&gt; &gt; rawsessions;
++    list &lt; vector&lt;string&gt; &gt;::iterator rsIter;
+ 
+-	// Clean up each string in sessions[i], then push back
+-	// sessions[i] onto rawsessions., except that means
+-	// rawsessions is then just a list&lt;string&gt;...
+-	vector&lt;string&gt; session;
+-	vector&lt;string&gt;::iterator seshIter;
+-	for (iter = sessions.begin(); iter != sessions.end(); iter++) {
+-		session.clear();
+-		/* simplify one line of list&lt;string&gt; sessions */
+-		(*iter) = notQtUtilities::simplify (*iter); 
+-		/* split one line of list&lt;string&gt; sessions into a vector&lt;string&gt; */
+-		notQtUtilities::splitString (*iter, ' ', session); 
+-		/* Add that to rawsessions */
+-		rawsessions.push_back(session);
+-	}
++    // Clean up each string in sessions[i], then push back
++    // sessions[i] onto rawsessions., except that means
++    // rawsessions is then just a list&lt;string&gt;...
++    vector&lt;string&gt; session;
++    vector&lt;string&gt;::iterator seshIter;
+ 
+-	NXResumeData resData;
+-	
+-	for (rsIter = rawsessions.begin(); rsIter != rawsessions.end(); rsIter++) {
+-		stringstream ss1, ss2;
+-		int tmp;
+-		dbgln (&quot;*rsIter.size() == &quot; &lt;&lt; (*rsIter).size());
+-		ss1 &lt;&lt; (*rsIter)[0];
+-		ss1 &gt;&gt; tmp;
+-		resData.display = tmp;
+-		dbgln (&quot;resData.display = &quot; &lt;&lt; resData.display);
+-		resData.sessionType = (*rsIter)[1];
+-		dbgln (&quot;resData.sessionType = &quot; &lt;&lt; resData.sessionType);
+-		resData.sessionID = (*rsIter)[2];
+-		dbgln (&quot;resData.sessionID = &quot; &lt;&lt; resData.sessionID);
+-		resData.options = (*rsIter)[3];
+-		dbgln (&quot;resData.options = &quot; &lt;&lt; resData.options);
+-		ss2 &lt;&lt; (*rsIter)[4];
+-		ss2 &gt;&gt; tmp;
+-		resData.depth = tmp;
+-		dbgln (&quot;resData.depth = &quot; &lt;&lt; resData.depth);
+-		resData.screen = (*rsIter)[5];
+-		dbgln (&quot;resData.screen = &quot; &lt;&lt; resData.screen);
+-		resData.available = (*rsIter)[6];
+-		dbgln (&quot;resData.available = &quot; &lt;&lt; resData.available);
+-		resData.sessionName = (*rsIter)[7];
+-		dbgln (&quot;resData.sessionName = &quot; &lt;&lt; resData.sessionName);
+-		this-&gt;runningSessions.push_back(resData);
+-	}
++    for (iter = sessions.begin(); iter != sessions.end(); iter++) {
++        session.clear();
+ 
+-	if (this-&gt;runningSessions.size() != 0) {
+-		this-&gt;suspendedSessions = true;
+-		dbgln (&quot;NXSession::parseResumeSessions(): Calling sessionsSignal.&quot;);
+-		// runningSessions is a list of NXResumeData
+-		this-&gt;callbacks-&gt;sessionsSignal (this-&gt;runningSessions);
+-	} else {
+-		dbgln (&quot;NXSession::parseResumeSessions(): Calling this-&gt;callbacks-&gt;noSessionsSignal()&quot;);
+-		// In case we previously had one resumable session,
+-		// which the user terminated, then we listsessions and
+-		// got no resumable sessions, we need to make sure
+-		// startsession is called, not restoresession. hence
+-		// set sessionData-&gt;suspended to false.
+-		this-&gt;sessionData-&gt;suspended = false;
+-		this-&gt;callbacks-&gt;noSessionsSignal();
+-	}
+-	
+-	dbgln (&quot;Increment stage&quot;);
+-	this-&gt;stage++;
+-	dbgln (&quot;NXSession::parseResumeSessions() returning.&quot;);
++        // Simplify one line of list&lt;string&gt; sessions
++        (*iter) = notQtUtilities::simplify (*iter); 
++
++        // Split one line of list&lt;string&gt; sessions into a vector&lt;string&gt;
++        notQtUtilities::splitString (*iter, ' ', session); 
++
++        // Add that to rawsessions
++        rawsessions.push_back(session);
++    }
++
++    NXResumeData resData;
++
++    for (rsIter = rawsessions.begin(); rsIter != rawsessions.end(); rsIter++) {
++        stringstream ss1, ss2;
++        int tmp;
++
++        dbgln (&quot;*rsIter.size() == &quot; &lt;&lt; (*rsIter).size());
++        ss1 &lt;&lt; (*rsIter)[0];
++        ss1 &gt;&gt; tmp;
++
++        resData.display = tmp;
++
++        dbgln (&quot;resData.display = &quot; &lt;&lt; resData.display);
++        resData.sessionType = (*rsIter)[1];
++
++        dbgln (&quot;resData.sessionType = &quot; &lt;&lt; resData.sessionType);
++        resData.sessionID = (*rsIter)[2];
++
++        dbgln (&quot;resData.sessionID = &quot; &lt;&lt; resData.sessionID);
++        resData.options = (*rsIter)[3];
++
++        dbgln (&quot;resData.options = &quot; &lt;&lt; resData.options);
++        ss2 &lt;&lt; (*rsIter)[4];
++        ss2 &gt;&gt; tmp;
++
++        resData.depth = tmp;
++
++        dbgln (&quot;resData.depth = &quot; &lt;&lt; resData.depth);
++        resData.screen = (*rsIter)[5];
++
++        dbgln (&quot;resData.screen = &quot; &lt;&lt; resData.screen);
++        resData.available = (*rsIter)[6];
++
++        dbgln (&quot;resData.available = &quot; &lt;&lt; resData.available);
++        resData.sessionName = (*rsIter)[7];
++
++        dbgln (&quot;resData.sessionName = &quot; &lt;&lt; resData.sessionName);
++        this-&gt;runningSessions.push_back(resData);
++    }
++
++    if (this-&gt;runningSessions.size() != 0) {
++        this-&gt;suspendedSessions = true;
++
++        dbgln (&quot;NXSession::parseResumeSessions(): Calling sessionsSignal.&quot;);
++
++        // runningSessions is a list of NXResumeData
++        this-&gt;callbacks-&gt;sessionsSignal (this-&gt;runningSessions);
++    } else {
++        dbgln (&quot;NXSession::parseResumeSessions(): Calling&quot;
++                &lt;&lt; &quot; this-&gt;callbacks-&gt;noSessionsSignal()&quot;);
++
++        // In case we previously had one resumable session,
++        // which the user terminated, then we listsessions and
++        // got no resumable sessions, we need to make sure
++        // startsession is called, not restoresession. hence
++        // set sessionData-&gt;suspended to false.
++        this-&gt;sessionData-&gt;suspended = false;
++        this-&gt;callbacks-&gt;noSessionsSignal();
++    }
++
++    dbgln (&quot;Increment stage&quot;);
++    this-&gt;stage++;
++    dbgln (&quot;NXSession::parseResumeSessions() returning.&quot;);
+ }
+ 
+ void NXSession::wipeSessions()
+ {
+-	while (!this-&gt;runningSessions.empty()) {
+-		this-&gt;runningSessions.pop_front();
+-	}
++    while (!this-&gt;runningSessions.empty()) {
++        this-&gt;runningSessions.pop_front();
++    }
+ }
+ 
+ string NXSession::generateCookie()
+ {
+-	unsigned long long int int1, int2;
+-	stringstream cookie;
+-	
+-	devurand_fd = open(&quot;/dev/urandom&quot;, O_RDONLY);
++    unsigned long long int int1, int2;
++    stringstream cookie;
+ 
+-	fillRand((unsigned char*)&amp;int1, sizeof(int1));
+-	fillRand((unsigned char*)&amp;int2, sizeof(int2));
+-	cookie &lt;&lt; int1 &lt;&lt; int2;
+-	return cookie.str();
++    devurand_fd = open(&quot;/dev/urandom&quot;, O_RDONLY);
++
++    fillRand((unsigned char*)&amp;int1, sizeof(int1));
++    fillRand((unsigned char*)&amp;int2, sizeof(int2));
++    cookie &lt;&lt; int1 &lt;&lt; int2;
++    return cookie.str();
+ }
+ 
+-void NXSession::fillRand(unsigned char *buf, size_t nbytes) {
+-	ssize_t r;
+-	unsigned char *where = buf;
++void NXSession::fillRand(unsigned char *buf, size_t nbytes)
++{
++    ssize_t r;
++    unsigned char *where = buf;
+ 
+-	while (nbytes) {
+-		while ((r = read(devurand_fd, where, nbytes)) == -1)
+-		where  += r;
+-		nbytes -= r;
+-	}
++    while (nbytes) {
++        while ((r = read(devurand_fd, where, nbytes)) == -1)
++            where  += r;
++        nbytes -= r;
++    }
+ }
+ 
+ bool NXSession::chooseResumable (int n)
+ {
+-	dbgln (&quot;NXSession::chooseResumable called.&quot;);
+-	if (this-&gt;runningSessions.size() &lt;= static_cast&lt;unsigned int&gt;(n)) {
+-		// No nth session to resume.
+-		dbgln (&quot;No nth session to resume, return false.&quot;);
+-		return false;
+-	}
++    dbgln (&quot;NXSession::chooseResumable called.&quot;);
++    if (this-&gt;runningSessions.size() &lt;= static_cast&lt;unsigned int&gt;(n)) {
+ 
+-	this-&gt;sessionDataSet = false; // Set to false while we change
+-				      // contents of sessionData
++        // No nth session to resume.
++        dbgln (&quot;No nth session to resume, return false.&quot;);
++        return false;
++    }
+ 
+-	list&lt;NXResumeData&gt;::iterator it = this-&gt;runningSessions.begin();
+-	for (int i = 0; i&lt;n; i++) { it++; }
++    // Set to false while we change contents of sessionData
++    this-&gt;sessionDataSet = false;
+ 
+-	// If it's a shadow session, we don't want to replace &quot;shadow&quot; with X11-local
+-	if (this-&gt;sessionData-&gt;sessionType != &quot;shadow&quot;) {
+-		this-&gt;sessionData-&gt;sessionType = (*it).sessionType;
+-	}
+-	this-&gt;sessionData-&gt;display = (*it).display;
+-	this-&gt;sessionData-&gt;sessionName = (*it).sessionName;
+-	this-&gt;sessionData-&gt;id = (*it).sessionID;
+-	stringstream geom;	
+-	geom &lt;&lt; (*it).screen &lt;&lt; &quot;x&quot; &lt;&lt; (*it).display; // plus render, if necessary.
+-	// FIXME: This not yet quite complete.
+-	this-&gt;sessionData-&gt;geometry = geom.str(); // with depth in there too?
+-	this-&gt;sessionData-&gt;suspended=true;
++    list&lt;NXResumeData&gt;::iterator it = this-&gt;runningSessions.begin();
++    for (int i = 0; i&lt;n; i++) { it++; }
+ 
+-	this-&gt;sessionDataSet = true;
++    // If it's a shadow session, we don't want to replace &quot;shadow&quot; with
++    // X11-local
++    if (this-&gt;sessionData-&gt;sessionType != &quot;shadow&quot;) {
++        this-&gt;sessionData-&gt;sessionType = (*it).sessionType;
++    }
+ 
+-	dbgln (&quot;NXSession::chooseResumable returning true.&quot;);
+-	return true;
++    this-&gt;sessionData-&gt;display = (*it).display;
++    this-&gt;sessionData-&gt;sessionName = (*it).sessionName;
++    this-&gt;sessionData-&gt;id = (*it).sessionID;
++
++    stringstream geom;	
++
++    // Plus render, if necessary
++    geom &lt;&lt; (*it).screen &lt;&lt; &quot;x&quot; &lt;&lt; (*it).display;
++
++    // FIXME: This not yet quite complete.
++    // With depth in there too?
++    this-&gt;sessionData-&gt;geometry = geom.str();
++    this-&gt;sessionData-&gt;suspended=true;
++
++    this-&gt;sessionDataSet = true;
++
++    dbgln (&quot;NXSession::chooseResumable returning true.&quot;);
++    return true;
+ }
+ 
+ bool NXSession::terminateSession (int n)
+ {
+-	dbgln (&quot;NXSession::terminateSession called.&quot;);
+-	if (this-&gt;runningSessions.size() &lt;= static_cast&lt;unsigned int&gt;(n)) {
+-		// No nth session to resume.
+-		dbgln (&quot;No nth session to terminate, return false.&quot;);
+-		return false;
+-	}
++    dbgln (&quot;NXSession::terminateSession called.&quot;);
++    if (this-&gt;runningSessions.size() &lt;= static_cast&lt;unsigned int&gt;(n)) {
+ 
+-	this-&gt;sessionDataSet = false; // Set to false while we change
+-				      // contents of sessionData
++        // No nth session to terminate
++        dbgln (&quot;No nth session to terminate, return false.&quot;);
++        return false;
++    }
+ 
+-	list&lt;NXResumeData&gt;::iterator it = this-&gt;runningSessions.begin();
+-	for (int i = 0; i&lt;n; i++) { it++; }
++    // Set to false while we change the contents of sessionData
++    this-&gt;sessionDataSet = false;
+ 
+-	this-&gt;sessionData-&gt;terminate = true;
+-	this-&gt;sessionData-&gt;display = (*it).display;
+-	this-&gt;sessionData-&gt;sessionName = (*it).sessionName;
+-	this-&gt;sessionData-&gt;id = (*it).sessionID;
+-	this-&gt;sessionData-&gt;suspended=true;
++    list&lt;NXResumeData&gt;::iterator it = this-&gt;runningSessions.begin();
++    for (int i = 0; i&lt;n; i++) { it++; }
+ 
+-	this-&gt;sessionDataSet = true;
++    this-&gt;sessionData-&gt;terminate = true;
++    this-&gt;sessionData-&gt;display = (*it).display;
++    this-&gt;sessionData-&gt;sessionName = (*it).sessionName;
++    this-&gt;sessionData-&gt;id = (*it).sessionID;
++    this-&gt;sessionData-&gt;suspended=true;
+ 
+-	return true;
++    this-&gt;sessionDataSet = true;
++
++    return true;
+ }
+ 
+
+Modified: nxcl/lib/nxsession.h
+===================================================================
+--- nxcl/lib/nxsession.h	2008-01-07 09:44:37 UTC (rev 432)
++++ nxcl/lib/nxsession.h	2008-01-07 12:10:22 UTC (rev 433)
+@@ -1,4 +1,3 @@
+-/* -*-c++-*- */
+ /***************************************************************************
+                                  nxsession.h
+                              -------------------
+@@ -7,6 +6,8 @@
+     copyright            : (C) 2006 by George Wright
+     modifications        : (C) 2007 Embedded Software Foundry Ltd. (U.K.)
+                          :     Author: Sebastian James
++                         : (C) 2008 Defuturo Ltd
++                         :     Author: George Wright
+     email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
+  ***************************************************************************/
+ 
+@@ -31,124 +32,155 @@
+ 
+ namespace nxcl {
+ 
+-	/*!
+-	 * Virtual Callback class. These callbacks are called based on
+-	 * the output which we get from the nxssh process.
+-	 */
+-	class NXSessionCallbacks
+-	{
+-	public:
+-		NXSessionCallbacks() {}
+-		virtual ~NXSessionCallbacks() {}
+-		virtual void noSessionsSignal (void) {}
+-		virtual void loginFailedSignal (void) {}
+-		virtual void readyForProxySignal (void) {}
+-		/*!
+-		 * Emitted when the initial public key authentication
+-		 * is successful 
+-		 */
+-		virtual void authenticatedSignal (void) {}
+-		virtual void sessionsSignal (list&lt;NXResumeData&gt;) {}
+-	};
++    /*!
++     * Virtual Callback class. These callbacks are called based on
++     * the output which we get from the nxssh process.
++     */
++    class NXSessionCallbacks
++    {
++        public:
++            NXSessionCallbacks() {}
++            virtual ~NXSessionCallbacks() {}
++            virtual void noSessionsSignal (void) {}
++            virtual void loginFailedSignal (void) {}
++            virtual void readyForProxySignal (void) {}
++            /*!
++             * Emitted when the initial public key authentication
++             * is successful 
++             */
++            virtual void authenticatedSignal (void) {}
++            virtual void sessionsSignal (list&lt;NXResumeData&gt;) {}
++    };
+ 
+-	/*!
+-	 * This class is used to parse the output from the nxssh
+-	 * session to the server.
+-	 */
+-	class NXSession
+-	{
+-	public:
+-		NXSession();
+-		~NXSession();
+-		
+-		string parseSSH (string);
+-		int parseResponse (string);
+-		void parseResumeSessions (list&lt;string&gt;);
+-		void resetSession (void);
+-		void wipeSessions (void);
+-		bool chooseResumable (int n);
+-		bool terminateSession (int n);
+-		string generateCookie (void);
+-    void runSession (void) { sessionDataSet = true; }
++    /*!
++     * This class is used to parse the output from the nxssh
++     * session to the server.
++     */
++    class NXSession
++    {
++        public:
++            NXSession();
++            ~NXSession();
+ 
+-		/*!
+-		 * Accessors
+-		 */
+-		//@{
+-		void setUsername (string&amp; user) { nxUsername = user; }
+-		void setPassword (string&amp; pass) { nxPassword = pass; }
+-		void setResolution (int x, int y) {
+-			if (this-&gt;sessionDataSet) {
+-				this-&gt;sessionData-&gt;xRes = x;
+-				this-&gt;sessionData-&gt;yRes = y;
+-			}
+-		}
+-		void setDepth (int d) { if (this-&gt;sessionDataSet) {this-&gt;sessionData-&gt;depth = d;} }
+-		void setRender (bool isRender) { if (this-&gt;sessionDataSet) {this-&gt;sessionData-&gt;render = isRender;} }
+-		void setEncryption (bool enc) { if (this-&gt;sessionDataSet) {this-&gt;sessionData-&gt;encryption = enc;} }
++            string parseSSH (string);
++            int parseResponse (string);
++            void parseResumeSessions (list&lt;string&gt;);
++            void resetSession (void);
++            void wipeSessions (void);
++            bool chooseResumable (int n);
++            bool terminateSession (int n);
++            string generateCookie (void);
++            void runSession (void) { sessionDataSet = true; }
+ 
+-		void setContinue (bool allow) { doSSH = allow; }
+-		void setSessionData (NXSessionData*);
+-		bool getSessionDataSet (void) { return this-&gt;sessionDataSet; }
+-		void setCallbacks (NXSessionCallbacks * cb) { this-&gt;callbacks = cb; }
+-		//@}
+-		
+-	private:
+-		void reset (void);
+-		void fillRand(unsigned char *, size_t);
++            /*!
++             * Accessors
++             */
++            //@{
++            void setUsername (string&amp; user) { nxUsername = user; }
++            void setPassword (string&amp; pass) { nxPassword = pass; }
++            void setResolution (int x, int y) 
++            {
++                if (this-&gt;sessionDataSet) {
++                    this-&gt;sessionData-&gt;xRes = x;
++                    this-&gt;sessionData-&gt;yRes = y;
++                }
++            }
+ 
+-		/*!
+-		 * This is the answer to give to the ssh server if it
+-		 * asks whether we want to continue (say, if we're
+-		 * connecting for the first time and we don't
+-		 * necessarily trust its SSL key).
+-		 */
+-		bool doSSH;
+-		/*!
+-		 * Set to true if there are suspended sessions on the
+-		 * server which are owned by nxUsername.
+-		 */
+-		bool suspendedSessions;
+-		/*!
+-		 * Set to true of sessionData has been populated
+-		 */
+-		bool sessionDataSet;
+-		/*!
+-		 * Holds the stage of the process which we have
+-		 * reached as we go through the process of
+-		 * authenticating with the NX Server.
+-		 */
+-		int stage;
+-		/*!
+-		 * File descriptor for the random number device
+-		 */
+-		int devurand_fd;
+-		/*!
+-		 * Holds the username for this session
+-		 */
+-		string nxUsername;
+-		/*!
+-		 * Holds the password for this session
+-		 */
+-		string nxPassword;
+-		/*!
+-		 * A list of sessions which can be resumed, as strings.
+-		 */
+-		list&lt;string&gt; resumeSessions;
+-		/*!
+-		 * A list of running sessions, held as NXResumeData
+-		 * structures.
+-		 */
+-		list&lt;NXResumeData&gt; runningSessions;
+-		/*!
+-		 * Data for this session.
+-		 */
+-		NXSessionData *sessionData;
+-		/*!
+-		 * Pointer to a class containing callback methods.
+-		 */
+-		NXSessionCallbacks * callbacks;
+-	};
++            void setDepth (int d) 
++            {
++                if (this-&gt;sessionDataSet) {
++                    this-&gt;sessionData-&gt;depth = d;
++                }
++            }
+ 
++            void setRender (bool isRender)
++            {
++                if (this-&gt;sessionDataSet) {
++                    this-&gt;sessionData-&gt;render = isRender;
++                }
++            }
++
++            void setEncryption (bool enc)
++            {
++                if (this-&gt;sessionDataSet) {
++                    this-&gt;sessionData-&gt;encryption = enc;
++                }
++            }
++
++            void setContinue (bool allow)
++            {
++                doSSH = allow;
++            }
++
++            void setSessionData (NXSessionData*);
++
++            bool getSessionDataSet (void)
++            {
++                return this-&gt;sessionDataSet;
++            }
++
++            void setCallbacks (NXSessionCallbacks * cb) 
++            {
++                this-&gt;callbacks = cb;
++            }
++            //@}
++
++        private:
++            void reset (void);
++            void fillRand(unsigned char *, size_t);
++
++            /*!
++             * This is the answer to give to the ssh server if it
++             * asks whether we want to continue (say, if we're
++             * connecting for the first time and we don't
++             * necessarily trust its SSL key).
++             */
++            bool doSSH;
++            /*!
++             * Set to true if there are suspended sessions on the
++             * server which are owned by nxUsername.
++             */
++            bool suspendedSessions;
++            /*!
++             * Set to true of sessionData has been populated
++             */
++            bool sessionDataSet;
++            /*!
++             * Holds the stage of the process which we have
++             * reached as we go through the process of
++             * authenticating with the NX Server.
++             */
++            int stage;
++            /*!
++             * File descriptor for the random number device
++             */
++            int devurand_fd;
++            /*!
++             * Holds the username for this session
++             */
++            string nxUsername;
++            /*!
++             * Holds the password for this session
++             */
++            string nxPassword;
++            /*!
++             * A list of sessions which can be resumed, as strings.
++             */
++            list&lt;string&gt; resumeSessions;
++            /*!
++             * A list of running sessions, held as NXResumeData
++             * structures.
++             */
++            list&lt;NXResumeData&gt; runningSessions;
++            /*!
++             * Data for this session.
++             */
++            NXSessionData *sessionData;
++            /*!
++             * Pointer to a class containing callback methods.
++             */
++            NXSessionCallbacks * callbacks;
++    };
++
+ } // namespace
+ #endif
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000559.html">[Freenx-cvs] r432 - qtnx
+</A></li>
+	<LI>Next message: <A HREF="000560.html">[Freenx-cvs] r434 - qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#669">[ date ]</a>
+              <a href="thread.html#669">[ thread ]</a>
+              <a href="subject.html#669">[ subject ]</a>
+              <a href="author.html#669">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

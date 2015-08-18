@@ -1,0 +1,110 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fabianx modified gentoo-nomachine.diff
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%20gentoo-nomachine.diff&In-Reply-To=%3C42128642.mailBR111NRPT%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000023.html">
+   <LINK REL="Next"  HREF="000025.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fabianx modified gentoo-nomachine.diff</H1>
+    <B>fabianx</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%20gentoo-nomachine.diff&In-Reply-To=%3C42128642.mailBR111NRPT%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fabianx modified gentoo-nomachine.diff">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Wed Feb 16 00:31:14 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000023.html">[Freenx-cvs] CVS: freenx - fabianx modified INSTALL
+</A></li>
+        <LI>Next message: <A HREF="000025.html">[Freenx-cvs] CVS: freenx - fabianx modified nxsetup
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24">[ date ]</a>
+              <a href="thread.html#24">[ thread ]</a>
+              <a href="subject.html#24">[ subject ]</a>
+              <a href="author.html#24">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fabianx
+Date:      2005-02-15 23:31:14 GMT
+Modified:  .        gentoo-nomachine.diff
+Log:
+Fixed gentoo-nomachine.diff which was broken.
+
+Revision  Changes    Path
+1.12      +4 -4      freenx/gentoo-nomachine.diff
+
+
+rev 1.12, prev_rev 1.11
+Index: gentoo-nomachine.diff
+===================================================================
+RCS file: /cvsroot/freenx/freenx/gentoo-nomachine.diff,v
+retrieving revision 1.11
+retrieving revision 1.12
+diff -u -r1.11 -r1.12
+--- gentoo-nomachine.diff	14 Feb 2005 00:43:45 -0000	1.11
++++ gentoo-nomachine.diff	15 Feb 2005 23:31:13 -0000	1.12
+@@ -6,21 +6,21 @@
+  	
+ -	# copy the key to the authorized_keys2 file
+ -	rm -f $NX_KEY_DIR/$SSH_AUTHORIZED_KEYS
+--	echo -n &quot;no-port-forwarding,no-X11-forwarding,no-agent-forwarding,command=\&quot;nxserver\&quot; &quot; &gt;$NX_KEY_DIR/$SSH_AUTHORIZED_KEYS
++-	echo -n &quot;no-port-forwarding,no-X11-forwarding,no-agent-forwarding,command=\&quot;$PATH_BIN/nxserver\&quot; &quot; &gt;$NX_KEY_DIR/$SSH_AUTHORIZED_KEYS
+ -	cat ${NX_SERVER_KEY} &gt;&gt; $NX_KEY_DIR/$SSH_AUTHORIZED_KEYS
+ -
+  	# now tell the user what to do
+  
+  	echo &quot;Unique key generated; your users must install&quot;
+---- nxloadconf.old	2005-02-14 01:08:56.482546352 +0100
+-+++ nxloadconf	2005-02-14 01:09:40.109913984 +0100
++--- nxloadconfig.old	2005-02-14 01:08:56.482546352 +0100
+++++ nxloadconfig	2005-02-14 01:09:40.109913984 +0100
+ @@ -18,16 +18,16 @@
+  NX_LICENSE=&quot;OS (GPL)&quot;
+  
+  # Where can different nx components be found
+ -NX_DIR=/usr
+ +NX_DIR=/usr/NX
+- PATH_BIN=$NX_DIR/bin
++ PATH_BIN=$NX_DIR/bin # if you change that, be sure to also change the public keys
+  PATH_LIB=$NX_DIR/lib
+ -NX_ETC_DIR=/etc/nxserver
+ -NX_SESS_DIR=/var/lib/nxserver/db
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000023.html">[Freenx-cvs] CVS: freenx - fabianx modified INSTALL
+</A></li>
+	<LI>Next message: <A HREF="000025.html">[Freenx-cvs] CVS: freenx - fabianx modified nxsetup
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24">[ date ]</a>
+              <a href="thread.html#24">[ thread ]</a>
+              <a href="subject.html#24">[ subject ]</a>
+              <a href="author.html#24">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

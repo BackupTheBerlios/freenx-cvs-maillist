@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r534 - trunk/freenx-server
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r534%20-%20trunk/freenx-server&In-Reply-To=%3C200803162040.m2GKeFB1019035%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000656.html">
+   <LINK REL="Next"  HREF="000658.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r534 - trunk/freenx-server</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r534%20-%20trunk/freenx-server&In-Reply-To=%3C200803162040.m2GKeFB1019035%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r534 - trunk/freenx-server">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Sun Mar 16 21:40:15 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000656.html">[Freenx-cvs] r533 - in tags/freenx-server: . FreeNX-0.7.2	FreeNX-0.7.2/nxredir FreeNX-0.7.2/nxserver-helper
+</A></li>
+        <LI>Next message: <A HREF="000658.html">[Freenx-cvs] r535 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#657">[ date ]</a>
+              <a href="thread.html#657">[ thread ]</a>
+              <a href="subject.html#657">[ subject ]</a>
+              <a href="author.html#657">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-03-16 21:40:13 +0100 (Sun, 16 Mar 2008)
+New Revision: 534
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/node.conf.sample
+   trunk/freenx-server/nxloadconfig
+   trunk/freenx-server/nxserver
+Log:
+* Added logging of failed authentication attempts
+  to auth.log via syslog (3). This can be disabled by
+  setting ENABLE_LOG_FAILED_LOGINS=&quot;0&quot;.
+  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-03-14 21:47:47 UTC (rev 533)
++++ trunk/freenx-server/ChangeLog	2008-03-16 20:40:13 UTC (rev 534)
+@@ -1,3 +1,10 @@
++XX.06.2008 FreeNX 0.7.3
++	* Opened the 0.7.3 development.
++	* Added logging of failed authentication attempts
++	  to auth.log via syslog (3). This can be disabled by 
++	  setting ENABLE_LOG_FAILED_LOGINS=&quot;0&quot;.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++
+ 14.03.2008 FreeNX 0.7.2 &quot;Priscilla Edition&quot;
+ 	* Opened the 0.7.2 development.
+ 	* Fixed the display of local sessions to display only 
+
+Modified: trunk/freenx-server/node.conf.sample
+===================================================================
+--- trunk/freenx-server/node.conf.sample	2008-03-14 21:47:47 UTC (rev 533)
++++ trunk/freenx-server/node.conf.sample	2008-03-16 20:40:13 UTC (rev 534)
+@@ -106,6 +106,15 @@
+ #
+ #ENABLE_SLAVE_MODE=&quot;0&quot;
+ 
++# If ENABLE_LOG_FAILED_LOGINS=&quot;1&quot; then failed login attempts are logged to the system
++# auth.log.
++#
++# This is useful in combination with tools like fail2ban.
++#
++# The default is to log failed login attemps via syslog (3).
++#
++#ENABLE_LOG_FAILED_LOGINS=&quot;1&quot;
++
+ #########################################################################
+ # Restriction directives
+ #########################################################################
+
+Modified: trunk/freenx-server/nxloadconfig
+===================================================================
+--- trunk/freenx-server/nxloadconfig	2008-03-14 21:47:47 UTC (rev 533)
++++ trunk/freenx-server/nxloadconfig	2008-03-16 20:40:13 UTC (rev 534)
+@@ -100,6 +100,8 @@
+ 
+ ENABLE_SLAVE_MODE=&quot;0&quot;
+ 
++ENABLE_LOG_FAILED_LOGINS=&quot;1&quot;
++
+ # Restriction directives
+ 
+ DISPLAY_BASE=1000
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-03-14 21:47:47 UTC (rev 533)
++++ trunk/freenx-server/nxserver	2008-03-16 20:40:13 UTC (rev 534)
+@@ -787,6 +787,10 @@
+ 			else
+ 				echo_x &quot;NX&gt; 404 ERROR: wrong password or login&quot;
+ 				echo_x &quot;NX&gt; 999 Bye&quot;
++				if [ &quot;$ENABLE_LOG_FAILED_LOGINS&quot; = &quot;1&quot; ]
++				then
++					logger -t nxserver -i -p auth.info &quot;($(whoami)) Failed login for user=$USER from IP=$(echo $SSH_CLIENT | awk '{print $1}')&quot;
++				fi
+ 				exit 1
+ 			fi
+ 		;;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000656.html">[Freenx-cvs] r533 - in tags/freenx-server: . FreeNX-0.7.2	FreeNX-0.7.2/nxredir FreeNX-0.7.2/nxserver-helper
+</A></li>
+	<LI>Next message: <A HREF="000658.html">[Freenx-cvs] r535 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#657">[ date ]</a>
+              <a href="thread.html#657">[ thread ]</a>
+              <a href="subject.html#657">[ subject ]</a>
+              <a href="author.html#657">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

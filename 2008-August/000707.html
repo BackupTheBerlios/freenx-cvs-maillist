@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r573 - trunk/freenx-server
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r573%20-%20trunk/freenx-server&In-Reply-To=%3C200808181729.m7IHTbQ8016737%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000706.html">
+   <LINK REL="Next"  HREF="000708.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r573 - trunk/freenx-server</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r573%20-%20trunk/freenx-server&In-Reply-To=%3C200808181729.m7IHTbQ8016737%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r573 - trunk/freenx-server">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Mon Aug 18 19:29:37 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000706.html">[Freenx-cvs] r572 - trunk/freenx-server
+</A></li>
+        <LI>Next message: <A HREF="000708.html">[Freenx-cvs] r574 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#707">[ date ]</a>
+              <a href="thread.html#707">[ thread ]</a>
+              <a href="subject.html#707">[ subject ]</a>
+              <a href="author.html#707">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-08-18 19:29:37 +0200 (Mon, 18 Aug 2008)
+New Revision: 573
+
+Modified:
+   trunk/freenx-server/nxserver
+Log:
+Fixed saving of the agent cookie.
+
+
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-18 17:06:06 UTC (rev 572)
++++ trunk/freenx-server/nxserver	2008-08-18 17:29:37 UTC (rev 573)
+@@ -972,9 +972,10 @@
+ 				then
+ 					# check if we should save the cookie
+ 					$PATH_BIN/nxshadowacl &quot;$USER&quot;
+-					if [ $? -ne 0 ]
++					
++					if [ $? -eq 0 ]
+ 					then
+-						SHADOW_COOKIE=$(echo $CMD | cut -d: -f2)
++						SHADOW_COOKIE=$(echo $CMD | cut -d: -f2 | sed 's/ //g')
+ 						session_change &quot;$uniqueid&quot; &quot;shadow_cookie&quot; &quot;$SHADOW_COOKIE&quot;
+ 					fi
+ 				fi
+@@ -1423,7 +1424,7 @@
+ 		sessionRootlessMode=0
+ 		[ &quot;$(getparam rootless)&quot; = &quot;1&quot; ] &amp;&amp; sessionRootlessMode=1
+ 		CMDLINE=&quot;a=b&amp;$FULL_PARAMS&quot;
+-		session_add $uniqueid &quot;sessionName=$(getparam session)&amp;display=$(getparam display)&amp;status=Running&amp;startTime=$(date +%s)&amp;foreignAddress=$(getparam userip)&amp;sessionRootlessMode=$sessionRootlessMode&amp;type=$(getparam type)&amp;sessionId=$uniqueid&amp;creationTime=$(date +%s)&amp;userName=$USER&amp;serverPid=$SERVER_PID&amp;screeninfo=$(getparam screeninfo)&amp;geometry=$(getparam geometry)&amp;host=$SERVER_HOST&quot;
++		session_add $uniqueid &quot;sessionName=$(getparam session)&amp;display=$(getparam display)&amp;status=Running&amp;startTime=$(date +%s)&amp;foreignAddress=$(getparam userip)&amp;sessionRootlessMode=$sessionRootlessMode&amp;type=$(getparam type)&amp;sessionId=$uniqueid&amp;creationTime=$(date +%s)&amp;userName=$USER&amp;serverPid=$SERVER_PID&amp;screeninfo=$(getparam screeninfo)&amp;geometry=$(getparam geometry)&amp;host=$SERVER_HOST&amp;shadow_cookie=none&quot;
+ 	else
+ 		uniqueid=$(getparam restore)
+ 		[ -z &quot;$uniqueid&quot; ] &amp;&amp; uniqueid=$(getparam id) # 1.4.0-5 compatibility
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000706.html">[Freenx-cvs] r572 - trunk/freenx-server
+</A></li>
+	<LI>Next message: <A HREF="000708.html">[Freenx-cvs] r574 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#707">[ date ]</a>
+              <a href="thread.html#707">[ thread ]</a>
+              <a href="subject.html#707">[ subject ]</a>
+              <a href="author.html#707">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

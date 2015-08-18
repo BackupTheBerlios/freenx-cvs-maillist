@@ -1,0 +1,412 @@
+From gwright at mail.berlios.de  Thu Jul 10 10:01:25 2008
+From: gwright at mail.berlios.de (gwright at BerliOS)
+Date: Thu, 10 Jul 2008 10:01:25 +0200
+Subject: [Freenx-cvs] r545 - in trunk/freenx-client: nxcl nxcl/doc nxcl/lib
+	nxcl/nxcl qtnx
+Message-ID: <200807100801.m6A81POM031349@sheep.berlios.de>
+
+Author: gwright
+Date: 2008-07-10 10:01:24 +0200 (Thu, 10 Jul 2008)
+New Revision: 545
+
+Modified:
+   trunk/freenx-client/nxcl/configure.ac
+   trunk/freenx-client/nxcl/doc/Makefile.am
+   trunk/freenx-client/nxcl/lib/notQt.cpp
+   trunk/freenx-client/nxcl/lib/nxclientlib.cpp
+   trunk/freenx-client/nxcl/nxcl/nxcl.cpp
+   trunk/freenx-client/qtnx/qtnx.pro
+Log:
+Patches from Dirk Mueller <dmueller at suse.de> for:
+
+gcc 4.3 support
+automake 1.9 support
+docdir fixes
+install target for qtnx
+
+
+
+Modified: trunk/freenx-client/nxcl/configure.ac
+===================================================================
+--- trunk/freenx-client/nxcl/configure.ac	2008-05-22 18:43:26 UTC (rev 544)
++++ trunk/freenx-client/nxcl/configure.ac	2008-07-10 08:01:24 UTC (rev 545)
+@@ -5,7 +5,7 @@
+ AC_REVISION([$Revision: 1.3 $])
+ AC_PREFIX_DEFAULT(/usr/local)
+ 
+-AM_INIT_AUTOMAKE([1.10 foreign])
++AM_INIT_AUTOMAKE([1.9 foreign])
+ 
+ AM_CONFIG_HEADER(config.h)
+ AM_MAINTAINER_MODE
+
+Modified: trunk/freenx-client/nxcl/doc/Makefile.am
+===================================================================
+--- trunk/freenx-client/nxcl/doc/Makefile.am	2008-05-22 18:43:26 UTC (rev 544)
++++ trunk/freenx-client/nxcl/doc/Makefile.am	2008-07-10 08:01:24 UTC (rev 545)
+@@ -2,8 +2,6 @@
+ 
+ DOXYFILE = Doxyfile
+ 
+-docdir = $(prefix)/doc/$(PACKAGE)-$(VERSION)
+-
+ EXTRA_DIST = html
+ 
+ SEDCMD1 = s/$$title/GNU nxcl documentation version $(VERSION)/g
+
+Modified: trunk/freenx-client/nxcl/lib/notQt.cpp
+===================================================================
+--- trunk/freenx-client/nxcl/lib/notQt.cpp	2008-05-22 18:43:26 UTC (rev 544)
++++ trunk/freenx-client/nxcl/lib/notQt.cpp	2008-07-10 08:01:24 UTC (rev 545)
+@@ -29,6 +29,7 @@
+ #include <sys/socket.h>	
+ #include <signal.h>
+ }
++#include <stdlib.h>
+ 
+ #include "../config.h"
+ #include "notQt.h"
+
+Modified: trunk/freenx-client/nxcl/lib/nxclientlib.cpp
+===================================================================
+--- trunk/freenx-client/nxcl/lib/nxclientlib.cpp	2008-05-22 18:43:26 UTC (rev 544)
++++ trunk/freenx-client/nxcl/lib/nxclientlib.cpp	2008-07-10 08:01:24 UTC (rev 545)
+@@ -43,6 +43,8 @@
+     #include <sys/stat.h>
+     #include <unistd.h>
+ }
++#include <stdlib.h>
++#include <string.h>
+ 
+ /*
+  * On the location of nxproxy and nxssh binaries
+
+Modified: trunk/freenx-client/nxcl/nxcl/nxcl.cpp
+===================================================================
+--- trunk/freenx-client/nxcl/nxcl/nxcl.cpp	2008-05-22 18:43:26 UTC (rev 544)
++++ trunk/freenx-client/nxcl/nxcl/nxcl.cpp	2008-07-10 08:01:24 UTC (rev 545)
+@@ -30,6 +30,7 @@
+ #include <dbus/dbus.h>
+ #include <X11/Xlib.h>
+ }
++#include <stdlib.h>
+ 
+ using namespace nxcl;
+ using namespace std;
+
+Modified: trunk/freenx-client/qtnx/qtnx.pro
+===================================================================
+--- trunk/freenx-client/qtnx/qtnx.pro	2008-05-22 18:43:26 UTC (rev 544)
++++ trunk/freenx-client/qtnx/qtnx.pro	2008-07-10 08:01:24 UTC (rev 545)
+@@ -24,6 +24,8 @@
+ DEPENDPATH	+= $(QTDIR)/include
+ 
+ 
+-QT += ui xml
++QT += gui xml
+ 
+ TARGET		= qtnx
++target.path = $$[QT_INSTALL_BINS]
++INSTALLS += target
+
+
+
+From gwright at mail.berlios.de  Sat Jul 12 17:42:39 2008
+From: gwright at mail.berlios.de (gwright at BerliOS)
+Date: Sat, 12 Jul 2008 17:42:39 +0200
+Subject: [Freenx-cvs] r546 - in branches: . freenx-client
+Message-ID: <200807121542.m6CFgdlx007935@sheep.berlios.de>
+
+Author: gwright
+Date: 2008-07-12 17:42:38 +0200 (Sat, 12 Jul 2008)
+New Revision: 546
+
+Added:
+   branches/freenx-client/
+   branches/freenx-client/1.0-branch/
+Log:
+Branching freenx 1.0 to branches/freenx-client/1.0-branch. Trunk is now version 2.x
+
+
+Copied: branches/freenx-client/1.0-branch (from rev 545, trunk/freenx-client)
+
+
+
+From fabianx at mail.berlios.de  Thu Jul 31 20:12:34 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Thu, 31 Jul 2008 20:12:34 +0200
+Subject: [Freenx-cvs] r547 - in trunk/freenx-server: . nxredir
+Message-ID: <200807311812.m6VICYTY002328@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-07-31 20:12:33 +0200 (Thu, 31 Jul 2008)
+New Revision: 547
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/Makefile
+   trunk/freenx-server/nxredir/Makefile
+Log:
+* Fixed Makefile to stop on all errors.
+  (Idea by Hai Zaar <haizaar at gmail.com>, fabianx at bat.berlios.de)
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-07-12 15:42:38 UTC (rev 546)
++++ trunk/freenx-server/ChangeLog	2008-07-31 18:12:33 UTC (rev 547)
+@@ -23,6 +23,8 @@
+ 	* Added /usr/bin/xauth as default key and used /usr/X11R6/bin/xauth as
+ 	  fallback.
+ 	  (fabianx at bat.berlios.de)
++	* Fixed Makefile to stop on all errors.
++	  (Idea by Hai Zaar <haizaar at gmail.com>, fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/Makefile
+===================================================================
+--- trunk/freenx-server/Makefile	2008-07-12 15:42:38 UTC (rev 546)
++++ trunk/freenx-server/Makefile	2008-07-31 18:12:33 UTC (rev 547)
+@@ -6,23 +6,26 @@
+ PROGRAMS=nxacl.sample nxcheckload.sample nxcups-gethost nxdesktop_helper nxdialog nxkeygen nxloadconfig nxnode nxnode-login nxprint nxserver nxserver-helper/nxserver-helper nxsetup nxviewer_helper nxviewer-passwd/nxpasswd/nxpasswd
+ 
+ all:
+-	( cd nxviewer-passwd; xmkmf; make Makefiles; make depend; cd ..)
++	cd nxviewer-passwd && xmkmf && make Makefiles && make depend
+ 	for i in $(SUBDIRS) ; \
+ 	do\
+ 		echo "making" all "in $$i..."; \
+-	        $(MAKE) -C $$i  all;\
++	        $(MAKE) -C $$i all || exit 1;\
+ 	done
+ 
++nxenv_install:
++	install -m755 -d $(DESTDIR)/$$PATH_BIN/
++	install -m755 -d $(DESTDIR)/$$PATH_LIB/
++	install -m755 -d $(DESTDIR)/$$NX_ETC_DIR/
++	install -m755 -d $(DESTDIR)/$$CUPS_BACKEND/
++	for i in $(PROGRAMS) ;\
++	do\
++	        install -m755 $$i $(DESTDIR)/$$PATH_BIN/ || exit 1;\
++	done
++	install -m644 node.conf.sample $(DESTDIR)/$$NX_ETC_DIR/
++	$(MAKE) -C nxredir install
++
+ install:
+-	. nxloadconfig;\
+-	install -m755 -d $(DESTDIR)/$$PATH_BIN/ ;\
+-	install -m755 -d $(DESTDIR)/$$PATH_LIB/ ;\
+-	install -m755 -d $(DESTDIR)/$$NX_ETC_DIR/ ;\
+-	install -m755 -d $(DESTDIR)/$$CUPS_BACKEND/ ;\
+-	for i in $(PROGRAMS) ; \
+-	do\
+-	        install -m755 $$i $(DESTDIR)/$$PATH_BIN/ ;\
+-	done;\
+-	export PATH_BIN PATH_LIB CUPS_BACKEND NX_VERSION;\
+-	install -m644 node.conf.sample $(DESTDIR)/$$NX_ETC_DIR/ ; \
+-	make -C nxredir install
++	. nxloadconfig &&\
++	export PATH_BIN PATH_LIB CUPS_BACKEND NX_VERSION &&\
++	$(MAKE) nxenv_install
+
+Modified: trunk/freenx-server/nxredir/Makefile
+===================================================================
+--- trunk/freenx-server/nxredir/Makefile	2008-07-12 15:42:38 UTC (rev 546)
++++ trunk/freenx-server/nxredir/Makefile	2008-07-31 18:12:33 UTC (rev 547)
+@@ -11,20 +11,19 @@
+ 	rm -f $(LIBNAME)
+ 	rm -f *.o
+ 
++ifneq ($(NX_VERSION),)
+ install: all
+-	# install and possibly patch paths gotten by nxloadconfig
+-	if [ -n "$$NX_VERSION" ]; \
+-	then \
+-		install -m755 $(LIBNAME) $(DESTDIR)/$$PATH_LIB/ ;\
+-		install -m755 nxredir $(DESTDIR)/$$PATH_BIN/ ;\
+-		install -m755 nxsmb $(DESTDIR)/$$CUPS_BACKEND/ ;\
+-		perl -pi -e "s,PATH_LIB=.*,PATH_LIB=\"$$PATH_LIB\",g" $(DESTDIR)/$$PATH_BIN/nxredir ;\
+-		perl -pi -e "s,PATH_LIB=.*,PATH_LIB=\"$$PATH_LIB\",g" $(DESTDIR)/$$CUPS_BACKEND/nxsmb ;\
+-		perl -pi -e "s,CUPS_BACKEND=.*,CUPS_BACKEND=\"$$CUPS_BACKEND\",g" $(DESTDIR)/$$CUPS_BACKEND/nxsmb ;\
+-	else \
+-		install -m755 libnxredir.so.0 $(DESTDIR)/usr/lib ;\
+-		install -m755 nxredir $(DESTDIR)/usr/bin ;\
+-		install -m755 nxsmb $(DESTDIR)/usr/lib/cups/backend/ ;\
+-	fi
++	install -m755 $(LIBNAME) $(DESTDIR)/$$PATH_LIB/
++	install -m755 nxredir $(DESTDIR)/$$PATH_BIN/
++	install -m755 nxsmb $(DESTDIR)/$$CUPS_BACKEND/
++	perl -pi -e "s,PATH_LIB=.*,PATH_LIB=\"$$PATH_LIB\",g" $(DESTDIR)/$$PATH_BIN/nxredir
++	perl -pi -e "s,PATH_LIB=.*,PATH_LIB=\"$$PATH_LIB\",g" $(DESTDIR)/$$CUPS_BACKEND/nxsmb
++	perl -pi -e "s,CUPS_BACKEND=.*,CUPS_BACKEND=\"$$CUPS_BACKEND\",g" $(DESTDIR)/$$CUPS_BACKEND/nxsmb
++else
++install: all
++	install -m755 libnxredir.so.0 $(DESTDIR)/usr/lib
++	install -m755 nxredir $(DESTDIR)/usr/bin
++	install -m755 nxsmb $(DESTDIR)/usr/lib/cups/backend/
++endif
+ 
+ .PHONY: clean install
+
+
+
+From fabianx at mail.berlios.de  Thu Jul 31 20:22:31 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Thu, 31 Jul 2008 20:22:31 +0200
+Subject: [Freenx-cvs] r548 - trunk/freenx-server
+Message-ID: <200807311822.m6VIMVE4003395@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-07-31 20:22:30 +0200 (Thu, 31 Jul 2008)
+New Revision: 548
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/node.conf.sample
+   trunk/freenx-server/nxloadconfig
+Log:
+* Changed the default for ENABLE_PASSDB_AUTHENTICATION. If you had
+  added a user with different password via --adduser consider
+  re-activating this option in node.conf.
+  (fabianx at bat.berlios.de)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-07-31 18:12:33 UTC (rev 547)
++++ trunk/freenx-server/ChangeLog	2008-07-31 18:22:30 UTC (rev 548)
+@@ -25,6 +25,10 @@
+ 	  (fabianx at bat.berlios.de)
+ 	* Fixed Makefile to stop on all errors.
+ 	  (Idea by Hai Zaar <haizaar at gmail.com>, fabianx at bat.berlios.de)
++	* Changed the default for ENABLE_PASSDB_AUTHENTICATION. If you had
++	  added a user with different password via --adduser consider
++	  re-activating this option in node.conf.
++	  (fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/node.conf.sample
+===================================================================
+--- trunk/freenx-server/node.conf.sample	2008-07-31 18:12:33 UTC (rev 547)
++++ trunk/freenx-server/node.conf.sample	2008-07-31 18:22:30 UTC (rev 548)
+@@ -63,7 +63,7 @@
+ #ENABLE_USERMODE_AUTHENTICATION="0"
+ 
+ # This adds the passdb to the possible authentication methods
+-#ENABLE_PASSDB_AUTHENTICATION="1"
++#ENABLE_PASSDB_AUTHENTICATION="0"
+ 
+ # This adds SSH to the possible authentication methods. For it to work sshd
+ # must be set up at localhost accepting password authentication.
+
+Modified: trunk/freenx-server/nxloadconfig
+===================================================================
+--- trunk/freenx-server/nxloadconfig	2008-07-31 18:12:33 UTC (rev 547)
++++ trunk/freenx-server/nxloadconfig	2008-07-31 18:22:30 UTC (rev 548)
+@@ -90,7 +90,7 @@
+ # Authentication / Security directives
+ 
+ ENABLE_USERMODE_AUTHENTICATION="0"
+-ENABLE_PASSDB_AUTHENTICATION="1"
++ENABLE_PASSDB_AUTHENTICATION="0"
+ ENABLE_SSH_AUTHENTICATION="1"
+ ENABLE_SU_AUTHENTICATION="0"
+ ENABLE_USER_DB="0"
+
+
+
+From fabianx at mail.berlios.de  Thu Jul 31 20:52:01 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Thu, 31 Jul 2008 20:52:01 +0200
+Subject: [Freenx-cvs] r549 - trunk/freenx-server
+Message-ID: <200807311852.m6VIq1JT005933@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-07-31 20:52:01 +0200 (Thu, 31 Jul 2008)
+New Revision: 549
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxserver
+Log:
+* Added constraints for passdb based commands. They are only available
+  when ENABLE_PASSDB_AUTHENTICATION="1" else a friendly error message
+  is shown. This should help with users using old tutorials.
+  (fabianx at bat.berlios.de)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-07-31 18:22:30 UTC (rev 548)
++++ trunk/freenx-server/ChangeLog	2008-07-31 18:52:01 UTC (rev 549)
+@@ -29,6 +29,10 @@
+ 	  added a user with different password via --adduser consider
+ 	  re-activating this option in node.conf.
+ 	  (fabianx at bat.berlios.de)
++	* Added constraints for passdb based commands. They are only available
++	  when ENABLE_PASSDB_AUTHENTICATION="1" else a friendly error message
++	  is shown. This should help with users using old tutorials.
++	  (fabianx at bat.berlios.de)
+ 
+ 14.03.2008 FreeNX 0.7.2 "Priscilla Edition"
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-07-31 18:22:30 UTC (rev 548)
++++ trunk/freenx-server/nxserver	2008-07-31 18:52:01 UTC (rev 549)
+@@ -1595,7 +1595,7 @@
+ 
+ cmd_abort()
+ {
+-	echo "NX> 500" "$@" 1>&2
++	echo -e "NX> 500" "$@" 1>&2
+ 	echo "NX> 999 Bye" 1>&2
+ 	exit 1
+ }
+@@ -1628,6 +1628,16 @@
+ 	echo "Password changed."
+ }
+ 
++cmd_checkpassdb()
++{
++	if [ "$ENABLE_PASSDB_AUTHENTICATION" != "1" ]
++	then
++		cmd_abort "Error: The passdb function is not activated in node.conf.\n\nMost probably your FreeNX setup will work out of the box without this\nfunctionality and you've been misleaded by an old tutorial or old\ndocumentation to do this step.\n\nIf however you really need this functionality, just set\nENABLE_PASSDB_AUTHENTICATION=\"1\" in node.conf.\n"
++	fi
++
++	return 0
++}
++
+ cmd_adduser()
+ {
+ 	CMD_CHUSER=$2
+@@ -1880,15 +1890,19 @@
+ 	# User functions ...
+ 	# 
+ 	--passwd)
++		cmd_checkpassdb
+ 		cmd_passwd "$@"
+ 	;;
+ 	--adduser|--useradd)
++		cmd_checkpassdb
+ 		cmd_adduser "$@"
+ 	;;
+ 	--deluser|--userdel)
++		cmd_checkpassdb
+ 		cmd_deluser "$@"
+ 	;;
+ 	--listuser|--userlist)
++		cmd_checkpassdb
+ 		cmd_listuser
+ 	;;
+ 	--start)
+
+
+

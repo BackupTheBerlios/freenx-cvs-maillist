@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r400 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-October/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r400%20-%20freenx-server/trunk&In-Reply-To=%3C200710141807.l9EI73VI017793%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000528.html">
+   <LINK REL="Next"  HREF="000530.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r400 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r400%20-%20freenx-server/trunk&In-Reply-To=%3C200710141807.l9EI73VI017793%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r400 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Sun Oct 14 20:07:03 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000528.html">[Freenx-cvs] r399 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000530.html">[Freenx-cvs] r401 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#529">[ date ]</a>
+              <a href="thread.html#529">[ thread ]</a>
+              <a href="subject.html#529">[ subject ]</a>
+              <a href="author.html#529">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-10-14 20:07:02 +0200 (Sun, 14 Oct 2007)
+New Revision: 400
+
+Modified:
+   freenx-server/trunk/node.conf.sample
+Log:
+Changed the default md5sum tool. Was only changed in nxloadconfig.
+
+
+
+Modified: freenx-server/trunk/node.conf.sample
+===================================================================
+--- freenx-server/trunk/node.conf.sample	2007-10-14 18:05:36 UTC (rev 399)
++++ freenx-server/trunk/node.conf.sample	2007-10-14 18:07:02 UTC (rev 400)
+@@ -404,7 +404,7 @@
+ #COMMAND_CUPSD=/usr/sbin/cupsd
+ 
+ # The tool to generate md5sums with
+-#COMMAND_MD5SUM=md5sum
++#COMMAND_MD5SUM=&quot;openssl md5&quot;
+ 
+ # The key that contains the name of the complete path of the 'rdesktop' command.
+ #COMMAND_RDESKTOP=rdesktop
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000528.html">[Freenx-cvs] r399 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000530.html">[Freenx-cvs] r401 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#529">[ date ]</a>
+              <a href="thread.html#529">[ thread ]</a>
+              <a href="subject.html#529">[ subject ]</a>
+              <a href="author.html#529">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

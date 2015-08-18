@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r611 - trunk/freenx-server
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r611%20-%20trunk/freenx-server&In-Reply-To=%3C200808250251.m7P2pEM6016975%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000744.html">
+   <LINK REL="Next"  HREF="000746.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r611 - trunk/freenx-server</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r611%20-%20trunk/freenx-server&In-Reply-To=%3C200808250251.m7P2pEM6016975%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r611 - trunk/freenx-server">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Mon Aug 25 04:51:14 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000744.html">[Freenx-cvs] r610 - trunk/freenx-server
+</A></li>
+        <LI>Next message: <A HREF="000746.html">[Freenx-cvs] r612 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#745">[ date ]</a>
+              <a href="thread.html#745">[ thread ]</a>
+              <a href="subject.html#745">[ subject ]</a>
+              <a href="author.html#745">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-08-25 04:51:13 +0200 (Mon, 25 Aug 2008)
+New Revision: 611
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxserver
+Log:
+* Fixed broken round-robin load balance algorithm.
+(<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-25 02:41:44 UTC (rev 610)
++++ trunk/freenx-server/ChangeLog	2008-08-25 02:51:13 UTC (rev 611)
+@@ -3,6 +3,8 @@
+ 	* Fixed missing export of NX_ETC_DIR in Makefile,
+ 	  so node.conf.sample is installed correctly.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Fixed broken round-robin load balance algorithm.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
+ 18.08.2008 FreeNX 0.7.3 &quot;Priscilla One Year Edition&quot;
+ 	* Opened the 0.7.3 development.
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-25 02:41:44 UTC (rev 610)
++++ trunk/freenx-server/nxserver	2008-08-25 02:51:13 UTC (rev 611)
+@@ -1192,7 +1192,7 @@
+ 	# Lock held
+ 
+ 	SERVER_LB_NR=$(cat $NX_SESS_DIR/round-robin 2&gt;/dev/null)
+-	let SERVER_LB_NR=(SERVER_LB_NR+1) % SERVER_LB_NR_OF_HOSTS
++	let SERVER_LB_NR=(SERVER_LB_NR+1)%SERVER_LB_NR_OF_HOSTS
+ 	echo $SERVER_LB_NR &gt;$NX_SESS_DIR/round-robin
+ 
+ 	# Exit critical section
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000744.html">[Freenx-cvs] r610 - trunk/freenx-server
+</A></li>
+	<LI>Next message: <A HREF="000746.html">[Freenx-cvs] r612 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#745">[ date ]</a>
+              <a href="thread.html#745">[ thread ]</a>
+              <a href="subject.html#745">[ subject ]</a>
+              <a href="author.html#745">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

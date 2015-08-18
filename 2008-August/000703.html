@@ -1,0 +1,354 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r569 - in trunk/freenx-server: . nxserver-suid
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r569%20-%20in%20trunk/freenx-server%3A%20.%20nxserver-suid&In-Reply-To=%3C200808180216.m7I2GRPY029922%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000702.html">
+   <LINK REL="Next"  HREF="000704.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r569 - in trunk/freenx-server: . nxserver-suid</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r569%20-%20in%20trunk/freenx-server%3A%20.%20nxserver-suid&In-Reply-To=%3C200808180216.m7I2GRPY029922%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r569 - in trunk/freenx-server: . nxserver-suid">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Mon Aug 18 04:16:27 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000702.html">[Freenx-cvs] r568 - trunk/freenx-server
+</A></li>
+        <LI>Next message: <A HREF="000704.html">[Freenx-cvs] r570 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#703">[ date ]</a>
+              <a href="thread.html#703">[ thread ]</a>
+              <a href="subject.html#703">[ subject ]</a>
+              <a href="author.html#703">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-08-18 04:16:25 +0200 (Mon, 18 Aug 2008)
+New Revision: 569
+
+Added:
+   trunk/freenx-server/nxserver-suid/
+   trunk/freenx-server/nxserver-suid/Makefile
+   trunk/freenx-server/nxserver-suid/nxserver-suid.c
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/Makefile
+Log:
+* Added disabled nxserver-suid wrapper with help from Google. To
+  enable it uncomment the suid_install target in Makefile.
+  (Alistair Riddoch &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">alriddoch at google.com</A>&gt;, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-18 01:41:49 UTC (rev 568)
++++ trunk/freenx-server/ChangeLog	2008-08-18 02:16:25 UTC (rev 569)
+@@ -93,6 +93,9 @@
+ 		* Fixed creation of the logfile directory.
+ 		* Fixed nxnode usage of SSH_CLIENT using fallback mechanism.
+ 	  (Patch by <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">nbartos at bat.berlios.de</A>, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Added disabled nxserver-suid wrapper with help from Google. To 
++	  enable it uncomment the suid_install target in Makefile.
++	  ( Alistair Riddoch &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">alriddoch at google.com</A>&gt;, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
+ 14.03.2008 FreeNX 0.7.2 &quot;Priscilla Edition&quot;
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/Makefile
+===================================================================
+--- trunk/freenx-server/Makefile	2008-08-18 01:41:49 UTC (rev 568)
++++ trunk/freenx-server/Makefile	2008-08-18 02:16:25 UTC (rev 569)
+@@ -1,9 +1,9 @@
+-.PHONY: all install clean
++.PHONY: all install clean nxenv_install suid_install
+ 
+ SHELL = /bin/bash
+ 
+-SUBDIRS=nxredir nxviewer-passwd nxserver-helper nx-session-launcher
+-PROGRAMS=nxacl.sample nxcheckload.sample nxcups-gethost nxdesktop_helper nxdialog nxkeygen nxloadconfig nxnode nxnode-login nxprint nxserver nxserver-helper/nxserver-helper nxsetup nxviewer_helper nxviewer-passwd/nxpasswd/nxpasswd nx-session-launcher/nx-session-launcher nx-session-launcher/nx-session-launcher-suid nxserver-usermode
++SUBDIRS=nxredir nxviewer-passwd nxserver-helper nxserver-suid nx-session-launcher
++PROGRAMS=nxacl.sample nxcheckload.sample nxcups-gethost nxdesktop_helper nxdialog nxkeygen nxloadconfig nxnode nxnode-login nxprint nxserver nxserver-helper/nxserver-helper nxsetup nxviewer_helper nxviewer-passwd/nxpasswd/nxpasswd nx-session-launcher/nx-session-launcher nx-session-launcher/nx-session-launcher-suid nxserver-usermode nxserver-suid/nxserver-suid
+ 
+ all:
+ 	cd nxviewer-passwd &amp;&amp; xmkmf &amp;&amp; make Makefiles &amp;&amp; make depend
+@@ -15,6 +15,10 @@
+ 	        $(MAKE) -C $$i all || exit 1;\
+ 	done
+ 
++suid_install:
++	chown nx:root $(DESTDIR)/$$PATH_BIN/nxserver-suid
++	chmod 4755 $(DESTDIR)/$$PATH_BIN/nxserver-suid
++
+ nxenv_install:
+ 	install -m755 -d $(DESTDIR)/$$PATH_BIN/
+ 	install -m755 -d $(DESTDIR)/$$PATH_LIB/
+@@ -26,6 +30,9 @@
+ 	done
+ 	install -m644 node.conf.sample $(DESTDIR)/$$NX_ETC_DIR/
+ 	$(MAKE) -C nxredir install
++	# uncomment the following line to make
++	# nxserver-suid suid nx
++	#$(MAKE) suid_install
+ 
+ clean:
+ 	make -C nxviewer-passwd clean
+
+Added: trunk/freenx-server/nxserver-suid/Makefile
+===================================================================
+--- trunk/freenx-server/nxserver-suid/Makefile	2008-08-18 01:41:49 UTC (rev 568)
++++ trunk/freenx-server/nxserver-suid/Makefile	2008-08-18 02:16:25 UTC (rev 569)
+@@ -0,0 +1,12 @@
++.PHONY: all clean distclean
++
++ifneq ($(NX_VERSION),)
++CFLAGS+=-DNXSERVER_COMMAND=&quot;\&quot;$(PATH_BIN)/nxserver\&quot;&quot;
++CFLAGS+=-DNXNODE_COMMAND=&quot;\&quot;$(PATH_BIN)/nxnode\&quot;&quot;
++CFLAGS+=-DNXBIN_DIRECTORY=&quot;\&quot;$(PATH_BIN)\&quot;&quot;
++endif
++
++all: nxserver-suid
++
++clean distclean:
++	rm -f *.o nxserver-suid
+
+Added: trunk/freenx-server/nxserver-suid/nxserver-suid.c
+===================================================================
+--- trunk/freenx-server/nxserver-suid/nxserver-suid.c	2008-08-18 01:41:49 UTC (rev 568)
++++ trunk/freenx-server/nxserver-suid/nxserver-suid.c	2008-08-18 02:16:25 UTC (rev 569)
+@@ -0,0 +1,197 @@
++/*
++ * Copyright 2007 Google Inc.
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License
++ * as published by the Free Software Foundation; either version 2
++ * of the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
++ *
++ * Authors: <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">alriddoch at google.com</A> (Alistair Riddoch)
++ * 	    <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">freenx at fabian-franz.de</A> (Fabian Franz)
++ */
++
++#include &lt;sys/types.h&gt;
++#include &lt;sys/socket.h&gt;
++
++#include &lt;unistd.h&gt;
++#include &lt;stdlib.h&gt;
++#include &lt;stdio.h&gt;
++#include &lt;pwd.h&gt;
++#include &lt;syslog.h&gt;
++#include &lt;string.h&gt;
++#include &lt;errno.h&gt;
++#include &lt;libgen.h&gt;
++
++#include &lt;assert.h&gt;
++
++char * prgname = NULL;
++
++#define STRING_BUFLEN 512
++
++#ifndef NXNODE_COMMAND
++#define NXNODE_COMMAND &quot;/usr/NX/bin/nxnode&quot;
++#endif
++
++#ifndef NXSERVER_COMMAND
++#define NXSERVER_COMMAND &quot;/usr/NX/bin/nxserver&quot;
++#endif
++
++#ifndef NXBIN_DIRECTORY
++#define NXBIN_DIRECTORY &quot;/usr/NX/bin/&quot;
++#endif
++
++
++int launch_nxnode(uid_t user, int comm_fd)
++{
++    // This program is being run setuid, so we can now drop back to
++    // the ruid which should be the original user.
++
++    setuid(user);
++
++    if (seteuid(user) != 0) {
++        syslog(LOG_ERR, &quot;ERROR: Unable to drop back to calling userid: %m\n&quot;);
++        return 1;
++    }
++
++    // Disassociate from the terminal connected to the client that we were
++    // invoked from.
++    setsid();
++
++    // Close stdio, and reconnected it to a socket via which we can
++    // communicate with nxserver.
++    close(STDIN_FILENO);
++    close(STDOUT_FILENO);
++    close(STDERR_FILENO);
++
++    dup2(comm_fd, STDIN_FILENO);
++    dup2(comm_fd, STDOUT_FILENO);
++    dup2(comm_fd, STDERR_FILENO);
++
++    return execlp(NXNODE_COMMAND, NXNODE_COMMAND, &quot;--slave&quot;, NULL);
++}
++
++int launch_nxserver(const char * username, int comm_fd, int argc, char ** argv)
++{
++    size_t env_string_length;
++    char * env_string;
++    char ** new_env;
++    char ** new_argv;
++    int i;
++
++    // Really drop the user priviledges
++    setreuid(geteuid(), geteuid());
++   
++    // Setup a clean environment.
++    new_env = calloc(5+1, sizeof(char *));
++
++    i=0;
++	
++    env_string_length = snprintf(0, 0, &quot;%s=%s&quot;,
++                                 &quot;NX_TRUSTED_USER&quot;, username);
++    env_string = malloc(env_string_length + 1);
++    assert(env_string != NULL);
++    sprintf(env_string, &quot;%s=%s&quot;, &quot;NX_TRUSTED_USER&quot;, username);
++    new_env[i++] = env_string;
++
++    env_string_length = snprintf(0, 0, &quot;%s=%d&quot;,
++                                 &quot;NX_COMMFD&quot;, comm_fd);
++    env_string = malloc(env_string_length + 1);
++    assert(env_string != NULL);
++    sprintf(env_string, &quot;%s=%d&quot;, &quot;NX_COMMFD&quot;, comm_fd);
++    new_env[i++] = env_string;
++    
++    env_string_length = snprintf(0, 0, &quot;%s=%s&quot;,
++                                 &quot;USER&quot;, &quot;nx&quot;);
++    env_string = malloc(env_string_length + 1);
++    assert(env_string != NULL);
++    sprintf(env_string, &quot;%s=%s&quot;, &quot;USER&quot;, &quot;nx&quot;);
++    new_env[i++] = env_string;
++    
++    if (getenv(&quot;SSH_CLIENT&quot;) != NULL)
++    {
++    	env_string_length = snprintf(0, 0, &quot;%s=%s&quot;,
++    	                             &quot;SSH_CLIENT&quot;, getenv(&quot;SSH_CLIENT&quot;));
++    	env_string = malloc(env_string_length + 1);
++    	assert(env_string != NULL);
++    	sprintf(env_string, &quot;%s=%s&quot;, &quot;SSH_CLIENT&quot;, getenv(&quot;SSH_CLIENT&quot;));
++    	new_env[i++] = env_string;
++    }
++    
++    if (getenv(&quot;SSH_CLIENT2&quot;) != NULL)
++    {
++    	env_string_length = snprintf(0, 0, &quot;%s=%s&quot;,
++    	                             &quot;SSH_CLIENT2&quot;, getenv(&quot;SSH_CLIENT2&quot;));
++    	env_string = malloc(env_string_length + 1);
++    	assert(env_string != NULL);
++    	sprintf(env_string, &quot;%s=%s&quot;, &quot;SSH_CLIENT2&quot;, getenv(&quot;SSH_CLIENT2&quot;));
++    	new_env[i++] = env_string;
++    }
++
++    // Setup argv array
++    
++    new_argv = calloc(argc + 1, sizeof(char *));
++    new_argv[0] = NXSERVER_COMMAND;
++
++    for (i = 1; i &lt; argc; ++i) {
++        new_argv[i] = argv[i];
++    }
++
++    chdir(NXBIN_DIRECTORY);
++
++    return execve(NXSERVER_COMMAND, new_argv, new_env);
++}
++
++int main(int argc, char ** argv)
++{
++    prgname = basename(strdup(argv[0]));
++
++    openlog(prgname, LOG_PID, LOG_USER);
++
++    uid_t calling_uid = getuid();
++
++    if (geteuid() == calling_uid) {
++        syslog(LOG_WARNING, &quot;WARNING: Not running suid.\n&quot;);
++    }
++
++    struct passwd calling_user;
++    struct passwd * ret;
++    char user_string_buffer[STRING_BUFLEN];
++    errno = 0;
++
++    if (getpwuid_r(calling_uid, &amp;calling_user, &amp;user_string_buffer[0],
++                   STRING_BUFLEN, &amp;ret) != 0) {
++        syslog(LOG_ERR, &quot;ERROR: Unable to get passwd entry for calling user %d: %m\n&quot;, calling_uid);
++        return 1;
++    }
++
++    int sockets[2];
++
++    if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockets) != 0) {
++        syslog(LOG_ERR, &quot;FATAL: Socket error: %m&quot;);
++        return 1;
++    }
++
++    pid_t child = fork();
++
++    if (child &lt; 0) {
++        syslog(LOG_ERR, &quot;FATAL: Fork error: %m&quot;);
++        return 1;
++    }
++
++    if (child == 0) {
++        close(sockets[1]);
++        return launch_nxnode(calling_uid, sockets[0]);
++    }
++
++    close(sockets[0]);
++    return launch_nxserver(calling_user.pw_name, sockets[1], argc, argv);
++}
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000702.html">[Freenx-cvs] r568 - trunk/freenx-server
+</A></li>
+	<LI>Next message: <A HREF="000704.html">[Freenx-cvs] r570 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#703">[ date ]</a>
+              <a href="thread.html#703">[ thread ]</a>
+              <a href="subject.html#703">[ subject ]</a>
+              <a href="author.html#703">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

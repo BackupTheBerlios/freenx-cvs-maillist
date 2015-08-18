@@ -1,0 +1,101 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r293 - nx-utils/nxcups-wrapper
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r293%20-%20nx-utils/nxcups-wrapper&In-Reply-To=%3C200701241635.l0OGZ3Ps003561%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000422.html">
+   <LINK REL="Next"  HREF="000424.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r293 - nx-utils/nxcups-wrapper</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r293%20-%20nx-utils/nxcups-wrapper&In-Reply-To=%3C200701241635.l0OGZ3Ps003561%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r293 - nx-utils/nxcups-wrapper">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Wed Jan 24 17:35:03 CET 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000422.html">[Freenx-cvs] r292 - nx-utils/nxcups-wrapper
+</A></li>
+        <LI>Next message: <A HREF="000424.html">[Freenx-cvs] r294 - in nx-utils: . nxcupsd-wrapper
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#423">[ date ]</a>
+              <a href="thread.html#423">[ thread ]</a>
+              <a href="subject.html#423">[ subject ]</a>
+              <a href="author.html#423">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-01-24 17:35:03 +0100 (Wed, 24 Jan 2007)
+New Revision: 293
+
+Added:
+   nx-utils/nxcups-wrapper/nxcupsd-wrapper
+Removed:
+   nx-utils/nxcups-wrapper/nxcups-wrapper
+Log:
+Small rename.
+
+
+
+Deleted: nx-utils/nxcups-wrapper/nxcups-wrapper
+===================================================================
+--- nx-utils/nxcups-wrapper/nxcups-wrapper	2007-01-24 16:34:36 UTC (rev 292)
++++ nx-utils/nxcups-wrapper/nxcups-wrapper	2007-01-24 16:35:03 UTC (rev 293)
+@@ -1,19 +0,0 @@
+-#!/bin/sh
+-
+-
+-[ -f &quot;$NX_HOME/.nx/cups/cupsd.pid&quot; ] &amp;&amp; CPID=$(cat &quot;$NX_HOME/.nx/cups/cupsd.pid&quot;)
+-
+-[ -n &quot;$PID&quot; ] &amp;&amp; kill -0 $PID &amp;&amp; kill $PID &amp;&amp; sleep 2 &amp;&amp;  kill -9 $PID 2&gt;/dev/null
+-
+-echo &quot;PidFile $NX_HOME/.nx/cups/cupsd.pid&quot; &gt;&gt; $NX_HOME/.nx/cups/cupsd.conf
+-echo &quot;StateDir $NX_HOME/.nx/cups/&quot; &gt;&gt; $NX_HOME/.nx/cups/cupsd.conf
+-
+-mkdir -p $NX_HOME/.nx/cups/ppd/
+-
+-for i in $(lpstat -s | cut -d&quot; &quot; -f4)
+-do
+-	LD_LIBRARY_PATH=&quot;&quot; wget -q ${i/ipp/http}.ppd -O $NX_HOME/.nx/cups/ppd/$(basename $i)_nxdl.ppd
+-done
+-
+-/usr/sbin/cupsd &quot;$@&quot;
+-rm -f &quot;$NX_HOME/.nx/cups/cupsd.pid&quot;
+
+Copied: nx-utils/nxcups-wrapper/nxcupsd-wrapper (from rev 292, nx-utils/nxcups-wrapper/nxcups-wrapper)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000422.html">[Freenx-cvs] r292 - nx-utils/nxcups-wrapper
+</A></li>
+	<LI>Next message: <A HREF="000424.html">[Freenx-cvs] r294 - in nx-utils: . nxcupsd-wrapper
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#423">[ date ]</a>
+              <a href="thread.html#423">[ thread ]</a>
+              <a href="subject.html#423">[ subject ]</a>
+              <a href="author.html#423">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

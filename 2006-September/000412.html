@@ -1,0 +1,81 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r282 - nxclientlib/qtnx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-September/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r282%20-%20nxclientlib/qtnx&In-Reply-To=%3C200609230938.k8N9crJD028465%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r282 - nxclientlib/qtnx</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r282%20-%20nxclientlib/qtnx&In-Reply-To=%3C200609230938.k8N9crJD028465%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r282 - nxclientlib/qtnx">gwright at mail.berlios.de
+       </A><BR>
+    <I>Sat Sep 23 11:38:53 CEST 2006</I>
+    <P><UL>
+        
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#412">[ date ]</a>
+              <a href="thread.html#412">[ thread ]</a>
+              <a href="subject.html#412">[ subject ]</a>
+              <a href="author.html#412">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2006-09-23 11:38:53 +0200 (Sat, 23 Sep 2006)
+New Revision: 282
+
+Modified:
+   nxclientlib/qtnx/qtnxwindow.cpp
+Log:
+Fix a bug where QtNX segfaults when trying to resume a session.
+
+
+Modified: nxclientlib/qtnx/qtnxwindow.cpp
+===================================================================
+--- nxclientlib/qtnx/qtnxwindow.cpp	2006-08-24 21:09:04 UTC (rev 281)
++++ nxclientlib/qtnx/qtnxwindow.cpp	2006-09-23 09:38:53 UTC (rev 282)
+@@ -26,6 +26,8 @@
+ 
+ QtNXWindow::QtNXWindow() : QMainWindow()
+ {
++	sessionsDialog = 0;
++
+ 	logWindow = new QDialog(0);
+ 	ui_lw.setupUi(logWindow);
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#412">[ date ]</a>
+              <a href="thread.html#412">[ thread ]</a>
+              <a href="subject.html#412">[ subject ]</a>
+              <a href="author.html#412">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

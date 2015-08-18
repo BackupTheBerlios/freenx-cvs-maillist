@@ -1,0 +1,149 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r273 - in nxclientlib: . qtnx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r273%20-%20in%20nxclientlib%3A%20.%20qtnx&In-Reply-To=%3C200608231932.k7NJWnC5027831%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000402.html">
+   <LINK REL="Next"  HREF="000404.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r273 - in nxclientlib: . qtnx</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r273%20-%20in%20nxclientlib%3A%20.%20qtnx&In-Reply-To=%3C200608231932.k7NJWnC5027831%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r273 - in nxclientlib: . qtnx">gwright at mail.berlios.de
+       </A><BR>
+    <I>Wed Aug 23 21:32:49 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000402.html">[Freenx-cvs] r272 - in nxclientlib: . qtnx
+</A></li>
+        <LI>Next message: <A HREF="000404.html">[Freenx-cvs] r274 - nxclientlib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#403">[ date ]</a>
+              <a href="thread.html#403">[ thread ]</a>
+              <a href="subject.html#403">[ subject ]</a>
+              <a href="author.html#403">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2006-08-23 21:32:48 +0200 (Wed, 23 Aug 2006)
+New Revision: 273
+
+Modified:
+   nxclientlib/nxclientlib.cpp
+   nxclientlib/qtnx/qtnxwindow.cpp
+   nxclientlib/qtnx/qtnxwindow.h
+Log:
+SSH confirmation message for connecting to previously unconnected hosts
+
+
+
+Modified: nxclientlib/nxclientlib.cpp
+===================================================================
+--- nxclientlib/nxclientlib.cpp	2006-08-20 05:02:48 UTC (rev 272)
++++ nxclientlib/nxclientlib.cpp	2006-08-23 19:32:48 UTC (rev 273)
+@@ -42,7 +42,7 @@
+ 
+ NXClientLib::~NXClientLib()
+ {
+-	nxsshProcess.terminate();
++//	nxsshProcess.terminate();
+ }
+ 
+ void NXClientLib::invokeNXSSH(QString publicKey, QString serverHost, bool encryption, QByteArray key, int port)
+@@ -253,7 +253,7 @@
+ 	if (message.contains(&quot;NX&gt; 710 Session status: running&quot;)) {
+ 		invokeProxy();
+ 		session.wipeSessions();
+-		returnMessage = &quot;bye\n&quot;;
++//		returnMessage = &quot;bye\n&quot;;
+ 	}
+ 	
+ 	return returnMessage;
+
+Modified: nxclientlib/qtnx/qtnxwindow.cpp
+===================================================================
+--- nxclientlib/qtnx/qtnxwindow.cpp	2006-08-20 05:02:48 UTC (rev 272)
++++ nxclientlib/qtnx/qtnxwindow.cpp	2006-08-23 19:32:48 UTC (rev 273)
+@@ -21,6 +21,7 @@
+ #include &lt;QDesktopWidget&gt;
+ #include &lt;QDir&gt;
+ #include &lt;QFile&gt;
++#include &lt;QMessageBox&gt;
+ #include &lt;QX11Info&gt;
+ 
+ QtNXWindow::QtNXWindow() : QMainWindow()
+@@ -63,6 +64,16 @@
+ {
+ }
+ 
++void QtNXWindow::sshContinue(QString message)
++{
++	int reply = QMessageBox::question(this, tr(&quot;SSH Request&quot;), message, QMessageBox::Yes, QMessageBox::No, QMessageBox::NoButton);
++	if (reply == QMessageBox::Yes)
++		nxClient.allowSSHConnect(true);
++	else
++		nxClient.allowSSHConnect(false);
++
++}
++
+ void QtNXWindow::startConnect()
+ {
+ 	QDesktopWidget dw;
+@@ -117,6 +128,8 @@
+ 	nxClient.setDepth(info.depth());
+ 	connect(&amp;nxClient, SIGNAL(resumeSessions(QList&lt;NXResumeData&gt;)), this, SLOT(loadResumeDialog(QList&lt;NXResumeData&gt;)));
+ 	connect(&amp;nxClient, SIGNAL(noSessions()), this, SLOT(noSessions()));
++	connect(&amp;nxClient, SIGNAL(sshRequestConfirmation(QString)), this, SLOT(sshContinue(QString)));
++
+ 	//nxClient.setSession(&amp;session);
+ }
+ 
+
+Modified: nxclientlib/qtnx/qtnxwindow.h
+===================================================================
+--- nxclientlib/qtnx/qtnxwindow.h	2006-08-20 05:02:48 UTC (rev 272)
++++ nxclientlib/qtnx/qtnxwindow.h	2006-08-23 19:32:48 UTC (rev 273)
+@@ -45,6 +45,7 @@
+ 		void resumeNewPressed();
+ 		void resumeResumePressed(QString);
+ 		void noSessions();
++		void sshContinue(QString);
+ 	private:
+ 		Ui::LoginDialog ui_lg;
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000402.html">[Freenx-cvs] r272 - in nxclientlib: . qtnx
+</A></li>
+	<LI>Next message: <A HREF="000404.html">[Freenx-cvs] r274 - nxclientlib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#403">[ date ]</a>
+              <a href="thread.html#403">[ thread ]</a>
+              <a href="subject.html#403">[ subject ]</a>
+              <a href="author.html#403">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

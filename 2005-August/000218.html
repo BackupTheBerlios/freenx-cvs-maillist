@@ -1,0 +1,185 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fabianx modified 3 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%203%20files&In-Reply-To=%3C42EF8F32.mail326113WK3%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000217.html">
+   <LINK REL="Next"  HREF="000219.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fabianx modified 3 files</H1>
+    <B>fabianx</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%203%20files&In-Reply-To=%3C42EF8F32.mail326113WK3%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fabianx modified 3 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Tue Aug  2 17:20:18 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000217.html">[Freenx-cvs] CVS: freenx - fabianx modified 4 files
+</A></li>
+        <LI>Next message: <A HREF="000219.html">[Freenx-cvs] CVS: freenx - fabianx modified 4 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#218">[ date ]</a>
+              <a href="thread.html#218">[ thread ]</a>
+              <a href="subject.html#218">[ subject ]</a>
+              <a href="author.html#218">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fabianx
+Date:      2005-08-02 15:20:18 GMT
+Modified:  .        ChangeLog nxnode nxserver
+Log:
+* Set sleeps to 60 instead of 10 seconds, removed one wrong trap.
+  (Suggestion by &quot;Sunil&quot; &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">funtoos at yahoo.com</A>&gt;)
+* Removed session failure if session is tried to be resumed.
+  Session should still fail if nxagent died in the meanwhile.
+Annotation: This session code still sucks. Will be rewritten for 0.5.0.
+
+Revision  Changes    Path
+1.90      +2 -0      freenx/ChangeLog
+
+
+rev 1.90, prev_rev 1.89
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.89
+retrieving revision 1.90
+diff -u -r1.89 -r1.90
+--- ChangeLog	2 Aug 2005 14:51:43 -0000	1.89
++++ ChangeLog	2 Aug 2005 15:20:18 -0000	1.90
+@@ -10,6 +10,8 @@
+ 	* Removed grep from getent to not search through the whole database.
+ 	  (Suggestion by &quot;Matthew S. Harris&quot; &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">mharris at google.com</A>&gt;,
+ 	                 &quot;Ed Warnicke&quot;       &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">eaw at cisco.com</A>&gt;)
++	* Set sleeps to 60 instead of 10 seconds, removed one wrong trap.
++	  (Suggestion by &quot;Sunil&quot; &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">funtoos at yahoo.com</A>&gt;)
+ 
+ 28.07.2005 FreeNX 0.4.3 &quot;NoMachine 1.5.0 Edition&quot;
+ 	* Fixed reconnection problems with !M 1.5.0 client.
+
+
+
+1.77      +3 -3      freenx/nxnode
+
+
+rev 1.77, prev_rev 1.76
+Index: nxnode
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxnode,v
+retrieving revision 1.76
+retrieving revision 1.77
+diff -u -r1.76 -r1.77
+--- nxnode	31 Jul 2005 23:53:43 -0000	1.76
++++ nxnode	2 Aug 2005 15:20:18 -0000	1.77
+@@ -13,7 +13,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxnode,v 1.76 2005/07/31 23:53:43 fabianx Exp $
++# CVS: $Id: nxnode,v 1.77 2005/08/02 15:20:18 fabianx Exp $
+ #
+ # 21.06.2004: - Full reconnection support
+ 
+@@ -427,9 +427,9 @@
+ 		if stringinstring &quot;Info: tail -f running with pid&quot; &quot;$line&quot;
+ 		then
+ 			TAIL_PID=$(echo $line | cut -d&quot;'&quot; -f2)
+-			# now set a timeout of 10 seconds ...
++			# now set a timeout of 60 seconds ...
+ 			( 
+-                          sleep 10
++                          sleep 60
+ 			  if [ -d &quot;$HOME/.nx/C-$sess_id/&quot; ]
+ 			  then
+ 		          	echo &quot;NX&gt; 1004 Error: nxagent failed to start. Session timed out.&quot;
+
+
+
+1.73      +5 -4      freenx/nxserver
+
+
+rev 1.73, prev_rev 1.72
+Index: nxserver
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxserver,v
+retrieving revision 1.72
+retrieving revision 1.73
+diff -u -r1.72 -r1.73
+--- nxserver	2 Aug 2005 14:51:43 -0000	1.72
++++ nxserver	2 Aug 2005 15:20:18 -0000	1.73
+@@ -11,7 +11,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxserver,v 1.72 2005/08/02 14:51:43 fabianx Exp $
++# CVS: $Id: nxserver,v 1.73 2005/08/02 15:20:18 fabianx Exp $
+ #
+ 
+ # Read the config file
+@@ -684,7 +684,8 @@
+ {
+ 	server_add_usession
+ 
+-	trap server_nxnode_exit_func EXIT
++	# Trap did fire unnecessarily according to Sunil, so removed it again.
++	#trap server_nxnode_exit_func EXIT
+ 	
+ 	SERVER_CHANNEL=1
+ 	KILL_WAIT_PID=1
+@@ -871,7 +872,7 @@
+ 	fi
+ 
+ 	# now start the node
+-	(sleep 10; exit 1) &amp;
++	(sleep 60; exit 1) &amp;
+ 	SERVER_WAIT_PID=$!
+ 	server_nxnode_start_wait --&quot;$ACTION&quot;session $USER &quot;$FULL_PARAMS&quot; &amp;
+ 	SERVER_PID=$!
+@@ -881,7 +882,7 @@
+ 	if [ $? -eq 1 ]
+ 	then
+ 		# Something went wrong ...
+-		session_fail $uniqueid
++		[ &quot;$ACTION&quot; = &quot;start&quot; ] &amp;&amp; session_fail $uniqueid
+ 		# FIXME: Need correct error code.
+ 		echo_x &quot;NX&gt; 1004 Error: Session did not start.&quot;
+ 		echo_x &quot;NX&gt; 504 Session startup failed.&quot;
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000217.html">[Freenx-cvs] CVS: freenx - fabianx modified 4 files
+</A></li>
+	<LI>Next message: <A HREF="000219.html">[Freenx-cvs] CVS: freenx - fabianx modified 4 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#218">[ date ]</a>
+              <a href="thread.html#218">[ thread ]</a>
+              <a href="subject.html#218">[ subject ]</a>
+              <a href="author.html#218">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,175 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r566 - trunk/freenx-server
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r566%20-%20trunk/freenx-server&In-Reply-To=%3C200808172024.m7HKO8Al005146%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000699.html">
+   <LINK REL="Next"  HREF="000701.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r566 - trunk/freenx-server</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r566%20-%20trunk/freenx-server&In-Reply-To=%3C200808172024.m7HKO8Al005146%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r566 - trunk/freenx-server">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Sun Aug 17 22:24:08 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000699.html">[Freenx-cvs] r565 - trunk/freenx-server
+</A></li>
+        <LI>Next message: <A HREF="000701.html">[Freenx-cvs] r567 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#700">[ date ]</a>
+              <a href="thread.html#700">[ thread ]</a>
+              <a href="subject.html#700">[ subject ]</a>
+              <a href="author.html#700">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-08-17 22:24:08 +0200 (Sun, 17 Aug 2008)
+New Revision: 566
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxserver
+Log:
+* Finally checked for all service ports. (cups, media, samba)
+  and also checked it on the host where the load balancing actually
+  leads to.
+  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-05 23:32:01 UTC (rev 565)
++++ trunk/freenx-server/ChangeLog	2008-08-17 20:24:08 UTC (rev 566)
+@@ -71,7 +71,10 @@
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 	* Fixed start/stop exit codes.
+ 	  (Patch by Gentoo Portage, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+-	  
++	* Finally checked for all service ports. (cups, media, samba)
++	  and also checked it on the host where the load balancing actually
++	  leads to.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
+ 14.03.2008 FreeNX 0.7.2 &quot;Priscilla Edition&quot;
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-05 23:32:01 UTC (rev 565)
++++ trunk/freenx-server/nxserver	2008-08-17 20:24:08 UTC (rev 566)
+@@ -1295,14 +1295,16 @@
+ 	then
+ 		server_check_session_count || return 1
+ 		
++		# Possibly do loadbalancing
++		
++		SERVER_HOST=$(server_loadbalance)
++		
+ 		# start nxnode
+ 		SESS_DISPLAY=$DISPLAY_BASE
+ 		let SESS_DISPLAY_LIMIT=$DISPLAY_BASE+$DISPLAY_LIMIT
+ 	
+ 		# stupid but working algo ...
+ 			
+-		# TODO: need to check for _all_ offset and ports :-/
+-			
+ 		while true
+ 		do
+ 			while [ -e /tmp/.X$SESS_DISPLAY-lock -o -e &quot;/tmp/.nX$SESS_DISPLAY-lock&quot;  -o -e &quot;/tmp/.X11-unix/X$SESS_DISPLAY&quot; ]
+@@ -1310,17 +1312,44 @@
+ 				let SESS_DISPLAY=$SESS_DISPLAY+1
+ 			done
+ 
+-			# Check if there is already an agent running on that display
++			# Check if there is already an agent running on that display on that host
+ 			let AGENT_DISPLAY=$SESS_DISPLAY+6000
+-			if $COMMAND_NETCAT -z 127.0.0.1 $AGENT_DISPLAY 2&gt;/dev/null
++			if $COMMAND_NETCAT -z &quot;$SERVER_HOST&quot; $AGENT_DISPLAY 2&gt;/dev/null
+ 			then
+-				log 2 &quot;Warning: Stray nxagent without .X$SESS_DISPLAY-lock found on port $AGENT_DISPLAY.&quot;
++				log 2 &quot;Warning: Stray nxagent without .nX$SESS_DISPLAY-lock found on host:port $SERVER_HOST:$AGENT_DISPLAY.&quot;
+ 				let SESS_DISPLAY=$SESS_DISPLAY+1
+ 				continue
+ 			fi
++
++			# Now check for the other enabled services
+ 			
++			let SAMBA_DISPLAY=$SESS_DISPLAY+3000
++			if [ &quot;$(getparam 'samba')&quot; = 1 ] &amp;&amp; $COMMAND_NETCAT -z &quot;$SERVER_HOST&quot; $SAMBA_DISPLAY
++			then
++				log 2 &quot;Warning: Skipping $SERVER_HOST:$AGENT_DISPLAY as samba port is not free.&quot;
++				let SESS_DISPLAY=$SESS_DISPLAY+1
++				continue
++			fi
++			
++			let MEDIA_DISPLAY=$SESS_DISPLAY+7000
++			if [ &quot;$(getparam 'media')&quot; = 1 ] &amp;&amp; $COMMAND_NETCAT -z &quot;$SERVER_HOST&quot; $MEDIA_DISPLAY
++			then
++				log 2 &quot;Warning: Skipping $SERVER_HOST:$AGENT_DISPLAY as media port is not free.&quot;
++				let SESS_DISPLAY=$SESS_DISPLAY+1
++				continue
++			fi
+ 
++			
++			let CUPS_DISPLAY=$SESS_DISPLAY+9000
++			if [ &quot;$(getparam 'cups')&quot; = 1 ] &amp;&amp; $COMMAND_NETCAT -z &quot;$SERVER_HOST&quot; $CUPS_DISPLAY
++			then
++				log 2 &quot;Warning: Skipping $SERVER_HOST:$AGENT_DISPLAY as cups port is not free.&quot;
++				let SESS_DISPLAY=$SESS_DISPLAY+1
++				continue
++			fi
++
+ 			SESS_LOCKFILE=$(mktemp &quot;/tmp/.nX$SESS_DISPLAY-lock.XXXXXXXXX&quot;)
++			
+ 			# ln is an atomic operation
+ 			ln &quot;$SESS_LOCKFILE&quot; &quot;/tmp/.nX$SESS_DISPLAY-lock&quot; 2&gt;/dev/null &amp;&amp; break
+ 		done
+@@ -1336,10 +1365,6 @@
+ 	
+ 		uniqueid=$(echo $[$RANDOM*$RANDOM] | $COMMAND_MD5SUM | cut -d&quot; &quot; -f1 | tr &quot;[a-z]&quot; &quot;[A-Z]&quot;)
+ 
+-		# Possibly do loadbalancing
+-		
+-		SERVER_HOST=$(server_loadbalance)
+-		
+ 		FULL_PARAMS=&quot;$PARAMS&amp;user=$USER&amp;userip=$USERIP&amp;uniqueid=$uniqueid&amp;display=$SESS_DISPLAY&amp;host=$SERVER_HOST&quot;
+ 		log_secure &quot;6&quot; &quot;$FULL_PARAMS&quot;
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000699.html">[Freenx-cvs] r565 - trunk/freenx-server
+</A></li>
+	<LI>Next message: <A HREF="000701.html">[Freenx-cvs] r567 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#700">[ date ]</a>
+              <a href="thread.html#700">[ thread ]</a>
+              <a href="subject.html#700">[ subject ]</a>
+              <a href="author.html#700">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

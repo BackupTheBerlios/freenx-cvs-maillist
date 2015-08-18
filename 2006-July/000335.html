@@ -1,0 +1,109 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r205 - / freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-July/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r205%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200607011703.k61H3AQZ017116%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000336.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r205 - / freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r205%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200607011703.k61H3AQZ017116%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r205 - / freenx-server/trunk">fabianx at berlios.de
+       </A><BR>
+    <I>Sat Jul  1 19:03:10 CEST 2006</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000336.html">[Freenx-cvs] r206 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#335">[ date ]</a>
+              <a href="thread.html#335">[ thread ]</a>
+              <a href="subject.html#335">[ subject ]</a>
+              <a href="author.html#335">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2006-07-01 19:03:07 +0200 (Sat, 01 Jul 2006)
+New Revision: 205
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxserver
+Log:
+Really fixed all remaining stale session problems this time.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:273
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:275
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-03-31 11:13:51 UTC (rev 204)
++++ freenx-server/trunk/ChangeLog	2006-07-01 17:03:07 UTC (rev 205)
+@@ -28,6 +28,8 @@
+ 	* Implemented &quot;round-robin&quot; and &quot;load&quot; loadbalancing algorithms.
+ 	  Cleaned up node.conf keys.
+ 	* Fixed help for --restart.
++	* Fixed session_running function, which fixes all remaining stale
++	  session problems.
+ 
+ XX.XX.2006 FreeNX 0.4.5 &quot;aKademy Edition&quot;
+ 	* Made nxsetup more user-friendly and hopefully finally failsafe.
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2006-03-31 11:13:51 UTC (rev 204)
++++ freenx-server/trunk/nxserver	2006-07-01 17:03:07 UTC (rev 205)
+@@ -363,7 +363,7 @@
+ 
+ session_running()
+ {
+-	test -f &quot;$NX_SESS_DIR/running/sessionId'{'$1'}&quot;
++	test -f $NX_SESS_DIR/running/sessionId'{'$1'}'
+ }
+ 
+ # session_close &lt;session_id&gt; &lt;end-time&gt;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000336.html">[Freenx-cvs] r206 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#335">[ date ]</a>
+              <a href="thread.html#335">[ thread ]</a>
+              <a href="subject.html#335">[ subject ]</a>
+              <a href="author.html#335">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

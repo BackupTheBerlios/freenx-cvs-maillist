@@ -1,0 +1,407 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fabianx modified 4 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-April/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%204%20files&In-Reply-To=%3C4271660E.mailJAA11TFRR%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000129.html">
+   <LINK REL="Next"  HREF="000135.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fabianx modified 4 files</H1>
+    <B>fabianx</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%204%20files&In-Reply-To=%3C4271660E.mailJAA11TFRR%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fabianx modified 4 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Fri Apr 29 00:39:10 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000129.html">[Freenx-cvs] CVS: freenx - fux modified INSTALL
+</A></li>
+        <LI>Next message: <A HREF="000135.html">[Freenx-cvs] CVS: freenx - fabianx modified 4 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#130">[ date ]</a>
+              <a href="thread.html#130">[ thread ]</a>
+              <a href="subject.html#130">[ subject ]</a>
+              <a href="author.html#130">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fabianx
+Date:      2005-04-28 22:39:10 GMT
+Modified:  .        node.conf.sample nxloadconfig nxnode nxserver
+Log:
+Initial support for printing infrastructure.
+
+- Userspace CUPSD is almost correctly setup.
+- Printers are added correctly.
+- kdeprintrc is modified.
+- Offset 9000+Displaynr is choosen for userspace cupsd.
+
+New config file directives:
+
+	ENABLE_KDE_CUPS, KDE_PRINTRC
+
+Revision  Changes    Path
+1.23      +8 -1      freenx/node.conf.sample
+
+
+rev 1.23, prev_rev 1.22
+Index: node.conf.sample
+===================================================================
+RCS file: /cvsroot/freenx/freenx/node.conf.sample,v
+retrieving revision 1.22
+retrieving revision 1.23
+diff -u -r1.22 -r1.23
+--- node.conf.sample	25 Apr 2005 06:54:14 -0000	1.22
++++ node.conf.sample	28 Apr 2005 22:39:10 -0000	1.23
+@@ -37,7 +37,7 @@
+ #
+ #           <A HREF="https://mail.kde.org/mailman/listinfo/freenx-knx">https://mail.kde.org/mailman/listinfo/freenx-knx</A>
+ #
+-# CVS: $Id: node.conf.sample,v 1.22 2005/04/25 06:54:14 jonno Exp $
++# CVS: $Id: node.conf.sample,v 1.23 2005/04/28 22:39:10 fabianx Exp $
+ 
+ #########################################################################
+ # General FreeNX directives
+@@ -216,6 +216,11 @@
+ #ENABLE_ARTSD_PRELOAD=&quot;0&quot;
+ #ARTSD_BIN_PRELOAD=&quot;artsdsp&quot;
+ 
++# FreeNX with ENABLE_KDE_CUPS=&quot;1&quot; will automatically write 
++# $KDE_PRINTRC and put the current used port into it.
++
++#ENABLE_KDE_CUPS=&quot;0&quot;
++#KDE_PRINTRC=&quot;.kde/share/config/kdeprintrc&quot;
+ 
+ #########################################################################
+ # Path directives
+@@ -294,6 +299,8 @@
+ #COMMAND_SSH=ssh
+ #COMMAND_SSH_KEYGEN=ssh-keygen
+ 
++# The key that contains the name of the complete path of the 'cupsd' command.
++#COMMAND_CUPSD=/usr/sbin/cupsd
+ 
+ #########################################################################
+ # Misc directives
+
+
+
+1.28      +4 -1      freenx/nxloadconfig
+
+
+rev 1.28, prev_rev 1.27
+Index: nxloadconfig
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxloadconfig,v
+retrieving revision 1.27
+retrieving revision 1.28
+diff -u -r1.27 -r1.28
+--- nxloadconfig	25 Apr 2005 06:54:15 -0000	1.27
++++ nxloadconfig	28 Apr 2005 22:39:10 -0000	1.28
+@@ -5,7 +5,7 @@
+ #
+ # License: GPL, version 2
+ #
+-# CVS: $Id: nxloadconfig,v 1.27 2005/04/25 06:54:15 jonno Exp $
++# CVS: $Id: nxloadconfig,v 1.28 2005/04/28 22:39:10 fabianx Exp $
+ #
+ # ========================================================================
+ 
+@@ -132,6 +132,8 @@
+ ENABLE_ARTSD_PRELOAD=&quot;0&quot;
+ ARTSD_BIN_PRELOAD=&quot;artsdsp&quot;
+ 
++ENABLE_KDE_CUPS=&quot;0&quot;
++KDE_PRINTRC=&quot;.kde/share/config/kdeprintrc&quot;
+ 
+ # Path directives
+ 
+@@ -153,6 +155,7 @@
+ COMMAND_NETCAT=netcat
+ COMMAND_SSH=ssh
+ COMMAND_SSH_KEYGEN=ssh-keygen
++COMMAND_CUPSD=/usr/sbin/cupsd
+ 
+ 
+ # Misc directives
+
+
+
+1.52      +126 -5    freenx/nxnode
+
+
+rev 1.52, prev_rev 1.51
+Index: nxnode
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxnode,v
+retrieving revision 1.51
+retrieving revision 1.52
+diff -u -r1.51 -r1.52
+--- nxnode	23 Apr 2005 12:56:54 -0000	1.51
++++ nxnode	28 Apr 2005 22:39:10 -0000	1.52
+@@ -13,7 +13,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxnode,v 1.51 2005/04/23 12:56:54 jonno Exp $
++# CVS: $Id: nxnode,v 1.52 2005/04/28 22:39:10 fabianx Exp $
+ #
+ # 21.06.2004: - Full reconnection support
+ 
+@@ -294,6 +294,80 @@
+ 	[ -n &quot;$PROXY_PID&quot; ] &amp;&amp; kill $PROXY_PID 2&gt;/dev/null
+ }
+ 
++node_cupsd_stop()
++{
++	[ -e &quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd&quot; ] || return
++	NODE_CUPSD_PID=$(cat &quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd&quot;)
++	# Check for a running userspace cupsd, look if its still active 
++	# and kill it if so
++	( [ -n &quot;$NODE_CUPSD_PID&quot; ] &amp;&amp; kill -0 $NODE_CUPSD_PID &amp;&amp; kill $NODE_CUPSD_PID &amp;&amp; sleep 2 &amp;&amp; kill -0 $NODE_CUPSD_PID &amp;&amp; kill -9 $NODE_CUPSD_PID ) 2&gt;/dev/null
++	# delete pid file
++	rm -f &quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd&quot;
++	# remove all printers
++	echo &gt;&quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/printers.conf&quot;
++}
++
++node_cupsd_setup()
++{
++	let NODE_CUPSD_PORT=$display+9000 # offset 9000 for userspace cupsd's
++	export NODE_CUPSD_PORT
++	mkdir -p &quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/&quot;
++	[ -e &quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd&quot; ] &amp;&amp; return
++	touch &quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd&quot;
++	
++	mkdir -p $USER_FAKE_HOME/.nx/C-$sess_id/cups/spool/tmp $USER_FAKE_HOME/.nx/C-$sess_id/cups/spool/certs $USER_FAKE_HOME/.nx/C-$sess_id/cups/ppd
++	ln -sf spool/certs $USER_FAKE_HOME/.nx/C-$sess_id/cups/certs
++cat &lt;&lt;EOF &gt; $USER_FAKE_HOME/.nx/C-$sess_id/cups/cupsd.conf
++AccessLog /dev/null
++ErrorLog error_log
++PageLog page_log
++LogLevel info
++TempDir $USER_FAKE_HOME/.nx/C-$sess_id/cups/spool/tmp
++RequestRoot $USER_FAKE_HOME/.nx/C-$sess_id/cups/spool
++ServerRoot $USER_FAKE_HOME/.nx/C-$sess_id/cups/
++Port $NODE_CUPSD_PORT
++Browsing Off
++ServerName localhost
++
++&lt;Location /&gt;
++Order Deny,Allow
++Deny From All
++Allow from 127.0.0.1
++&lt;/Location&gt;
++EOF
++	touch $USER_FAKE_HOME/.nx/C-$sess_id/cups/printers.conf $USER_FAKE_HOME/.nx/C-$sess_id/cups/classes.conf
++
++	# start cupsd
++	$COMMAND_CUPSD -f -c &quot;$USER_FAKE_HOME/.nx/C-$sess_id/cups/cupsd.conf&quot; &amp;&gt;/dev/null &lt;/dev/null &amp;
++	CUPSD_PID=$!
++	sleep 3
++	echo $CUPSD_PID &gt;&quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd&quot;
++	# setup KDE
++	if [ &quot;$ENABLE_KDE_CUPS&quot; = &quot;1&quot; ]
++	then
++		if egrep -q &quot;^Port=&quot; &quot;$HOME/$KDE_PRINTRC&quot;
++		then
++			perl -pi -e &quot;s/^Port=.*/Port=$NODE_CUPSD_PORT/g&quot; &quot;$HOME/$KDE_PRINTRC&quot;
++		else
++			echo &quot;[CUPS]&quot; &gt;&gt; &quot;$HOME/$KDE_PRINTRC&quot;
++			echo &quot;Port=$NODE_CUPSD_PORT&quot; &gt;&gt; &quot;$HOME/$KDE_PRINTRC&quot;
++		fi
++	fi
++}
++
++node_cupsd_reload()
++{
++	[ -e &quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd&quot; ] || return
++	NODE_CUPSD_PID=$(cat &quot;$USER_FAKE_HOME/.nx/C-$sess_id/pids/cupsd&quot;)
++	[ -n &quot;$NODE_CUPSD_PID&quot; ] &amp;&amp; kill -0 $NODE_CUPSD_PID &amp;&amp; kill -HUP $NODE_CUPSD_PID
++}
++
++node_cupsd_get_port()
++{
++	node_cupsd_setup
++	echo $NODE_CUPSD_PORT
++}
++
+ node_umount_smb()
+ {
+ 	[ -e &quot;$USER_FAKE_HOME/.nx/C-$sess_id/scripts/mpoint&quot; ] || return
+@@ -303,6 +377,13 @@
+ 	done
+ }
+ 
++node_stop_services()
++{
++	node_umount_smb
++	node_cupsd_stop
++}
++
++
+ #
+ # Monitoring the nxagent: Its also kind of a &quot;state-machine&quot; 
+ #                         as it has to keep track of different 
+@@ -370,8 +451,8 @@
+ 			kill $TAIL_PID 2&gt;/dev/null
+ 			
+ 			echo &quot;NX&gt; 1005 Session status: suspended&quot;
+-			# umount shares 
+-			node_umount_smb
++			# umount shares &amp; stop printers
++			node_stop_services
+ 			break
+ 		fi
+ 
+@@ -405,8 +486,8 @@
+ 			sleep 2
+ 			kill -9 $PROXY_PID 2&gt;/dev/null
+ 
+-			# umount shares 
+-			node_umount_smb
++			# umount shares &amp; stop printers
++			node_stop_services
+ 
+ 			# kill the session
+ 			node_terminate_session &quot;$sess_id&quot;
+@@ -478,10 +559,12 @@
+ 			break
+ 		fi
+ 	done 
++	node_stop_services
+ 	# close all open file descriptors
+ 	exec 0&lt;&amp;-
+ 	exec 1&gt;&amp;-
+ 	exec 2&gt;&amp;-
++	exit 0
+ }
+ 
+ node_startsession()
+@@ -656,6 +739,41 @@
+ 	fi
+ }
+ 
++cmd_node_addprinter()
++{
++	sessionid=$(getparam_sessionid)
++	type=$(getparam type)
++	port=$(getparam port)
++	username=$(getparam username)
++	password=$(getparam password)
++	share=$(getparam share)
++	computername=$(getparam computername)
++	public=$(getparam public)
++	model=$(getparam model)
++	defaultPrinter=$(getparam defaultPrinter)
++	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | cut -d&quot;-&quot; -f3)
++	sess_id=&quot;$SERVER_NAME-$display-$sessionid&quot;
++	# this will also setup the userspace cupsd
++	IPP_PORT=$(node_cupsd_get_port)
++	export IPP_PORT
++	if [ &quot;$type&quot; = &quot;smb&quot; ]
++	then
++		DEVICE_URI=&quot;<A HREF="smb://$username:$password@localhost:$port/$share">smb://$username:$password@localhost:$port/$share</A>&quot;
++		NAME=&quot;$share&quot;
++		MODEL=&quot;$model.ppd&quot;
++	else
++		DEVICE_URI=&quot;<A HREF="ipp://localhost:$port/printers/$share">ipp://localhost:$port/printers/$share</A>&quot;
++		NAME=&quot;$share&quot;
++		MODEL=&quot;$model.ppd&quot;
++	fi
++	
++	PUBLIC=&quot;-u allow:$USER&quot;
++	[ &quot;$public&quot; == &quot;1&quot; ] &amp;&amp; PUBLIC=&quot;&quot;
++	lpadmin -p &quot;$NAME&quot; -E -v &quot;$DEVICE_URI&quot; -m &quot;$MODEL&quot; $PUBLIC
++	[ &quot;$defaultPrinter&quot; = &quot;1&quot; ] &amp;&amp; lpadmin -d &quot;$NAME&quot;
++}
++
++
+ case &quot;$1&quot; in 
+ 	--startsession)
+ 		node_startsession
+@@ -671,6 +789,9 @@
+ 	;;
+ 	--smbmount)
+ 		cmd_node_smbmount &gt;/dev/null 2&gt;/dev/null
++	;;
++	--addprinter)
++		cmd_node_addprinter &amp;&gt;/dev/null &lt;/dev/null &amp;
+ 	;;
+ 	--check)
+ 		echo &quot;NX&gt; 716 finished&quot;
+
+
+
+1.50      +3 -3      freenx/nxserver
+
+
+rev 1.50, prev_rev 1.49
+Index: nxserver
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxserver,v
+retrieving revision 1.49
+retrieving revision 1.50
+diff -u -r1.49 -r1.50
+--- nxserver	24 Apr 2005 15:51:54 -0000	1.49
++++ nxserver	28 Apr 2005 22:39:10 -0000	1.50
+@@ -11,7 +11,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxserver,v 1.49 2005/04/24 15:51:54 fabianx Exp $
++# CVS: $Id: nxserver,v 1.50 2005/04/28 22:39:10 fabianx Exp $
+ #
+ 
+ # Read the config file
+@@ -978,10 +978,10 @@
+ 			server_nxnode_start --smbmount &quot;$USER&quot; &quot;$PARAMS&quot; &gt;/dev/null 2&gt;&amp;1
+ 			echo_x &quot;NX&gt; 719 SMB filesystem: running&quot;
+ 		;;
+-		addprintercups*)
++		addprinter*)
+ 			server_get_params $CMD
+ 			PARAMS=$SERVER_PARAMS
+-			server_nxnode_start --addprintercups &quot;$USER&quot; &quot;$PARAMS&quot; &gt;/dev/null 2&gt;&amp;1
++			server_nxnode_start --addprinter &quot;$USER&quot; &quot;$PARAMS&quot; &gt;/dev/null 2&gt;&amp;1
+ 		;;
+ 		*)
+ 			# disabled for 1.4.0-5 snapshot client
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000129.html">[Freenx-cvs] CVS: freenx - fux modified INSTALL
+</A></li>
+	<LI>Next message: <A HREF="000135.html">[Freenx-cvs] CVS: freenx - fabianx modified 4 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#130">[ date ]</a>
+              <a href="thread.html#130">[ thread ]</a>
+              <a href="subject.html#130">[ subject ]</a>
+              <a href="author.html#130">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

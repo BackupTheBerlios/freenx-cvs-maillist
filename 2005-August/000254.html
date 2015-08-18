@@ -1,0 +1,93 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r127 - / freenx-server/branches/FreeNX-0.4
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r127%20-%20/%20freenx-server/branches/FreeNX-0.4&In-Reply-To=%3C200508181945.j7IJjVUc000999%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000253.html">
+   <LINK REL="Next"  HREF="000255.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r127 - / freenx-server/branches/FreeNX-0.4</H1>
+    <B>Thorsten Sandfuchs at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r127%20-%20/%20freenx-server/branches/FreeNX-0.4&In-Reply-To=%3C200508181945.j7IJjVUc000999%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r127 - / freenx-server/branches/FreeNX-0.4">fux at berlios.de
+       </A><BR>
+    <I>Thu Aug 18 21:45:31 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000253.html">[Freenx-cvs] r126 - / freenx-server/branches/FreeNX-0.4
+</A></li>
+        <LI>Next message: <A HREF="000255.html">[Freenx-cvs] r128 - / freenx-server/branches/FreeNX-0.4
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#254">[ date ]</a>
+              <a href="thread.html#254">[ thread ]</a>
+              <a href="subject.html#254">[ subject ]</a>
+              <a href="author.html#254">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fux
+Date: 2005-08-18 21:45:28 +0200 (Thu, 18 Aug 2005)
+New Revision: 127
+
+Modified:
+   /
+   freenx-server/branches/FreeNX-0.4/nxsetup
+Log:
+help gets displayed now
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1244
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1278
+
+Modified: freenx-server/branches/FreeNX-0.4/nxsetup
+===================================================================
+--- freenx-server/branches/FreeNX-0.4/nxsetup	2005-08-14 10:11:50 UTC (rev 126)
++++ freenx-server/branches/FreeNX-0.4/nxsetup	2005-08-18 19:45:28 UTC (rev 127)
+@@ -52,7 +52,7 @@
+ [ &quot;$UNINSTALL&quot; = &quot;yes&quot; -a &quot;$CLEAN&quot; = &quot;yes&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+ [ &quot;$SETUP_SSH2_KEY&quot; = &quot;yes&quot; -a &quot;$SETUP_NOMACHINE_KEY&quot; = &quot;no&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+ 
+-if [ &quot;$INSTALL&quot; = &quot;no&quot; -a &quot;$UNINSTALL&quot; = &quot;no&quot; -a &quot;$AUTOMATIC&quot; = &quot;no&quot; ]
++if [ &quot;$INSTALL&quot; = &quot;no&quot; -a &quot;$UNINSTALL&quot; = &quot;no&quot; -a &quot;$AUTOMATIC&quot; = &quot;no&quot; -a &quot;$HELP&quot; = &quot;no&quot; ]
+ then
+ 	echo &quot;------&gt; You did select no action.&quot;
+ 	echo &quot;        FreeNX guesses that you want to _install_ the&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000253.html">[Freenx-cvs] r126 - / freenx-server/branches/FreeNX-0.4
+</A></li>
+	<LI>Next message: <A HREF="000255.html">[Freenx-cvs] r128 - / freenx-server/branches/FreeNX-0.4
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#254">[ date ]</a>
+              <a href="thread.html#254">[ thread ]</a>
+              <a href="subject.html#254">[ subject ]</a>
+              <a href="author.html#254">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

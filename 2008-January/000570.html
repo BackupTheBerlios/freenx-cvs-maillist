@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r444 - nxcl/lib
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r444%20-%20nxcl/lib&In-Reply-To=%3C200801291115.m0TBFRm9029569%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000569.html">
+   <LINK REL="Next"  HREF="000571.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r444 - nxcl/lib</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r444%20-%20nxcl/lib&In-Reply-To=%3C200801291115.m0TBFRm9029569%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r444 - nxcl/lib">gwright at mail.berlios.de
+       </A><BR>
+    <I>Tue Jan 29 12:15:27 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000569.html">[Freenx-cvs] r443 - qtnx
+</A></li>
+        <LI>Next message: <A HREF="000571.html">[Freenx-cvs] r445 - nxcl/lib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#570">[ date ]</a>
+              <a href="thread.html#570">[ thread ]</a>
+              <a href="subject.html#570">[ subject ]</a>
+              <a href="author.html#570">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2008-01-29 12:15:27 +0100 (Tue, 29 Jan 2008)
+New Revision: 444
+
+Modified:
+   nxcl/lib/nxclientlib.cpp
+Log:
+Initial code fragments to start X11 on Windows
+
+
+Modified: nxcl/lib/nxclientlib.cpp
+===================================================================
+--- nxcl/lib/nxclientlib.cpp	2008-01-29 00:54:38 UTC (rev 443)
++++ nxcl/lib/nxclientlib.cpp	2008-01-29 11:15:27 UTC (rev 444)
+@@ -681,6 +681,54 @@
+     }
+ }
+ 
++#ifdef NXCL_CYGWIN
++int NXClientLib::startX11 (int xResolution, int yResolution, string name)
++{
++    // Invoke NXWin.exe on Windows machines
++
++    // See if XAUTHORITY path is set
++
++    stringstream xauthority = getenv(&quot;XAUTHORITY&quot;);
++
++    if (xauthority.empty()) {
++        // We hardcode XAUTHORITY to $HOME/.Xauthority
++        xauthority = getenv(&quot;HOME&quot;) &lt;&lt; &quot;/.Xauthority&quot;;
++    }
++
++    // Now we add a cookie to this auth file
++
++    char hostname[256];
++
++    gethostname(hostname, 256);
++
++    string cookie = NXSession::generateCookie();
++    stringstream domain = getenv(&quot;HOME&quot;) &lt;&lt; &quot;:0.0&quot;;
++
++    list&lt;string&gt; arguments;
++
++    // These arguments taken from the 2X GPL client
++    // We're going to assume that nxauth is in PATH
++    arguments.push_back(&quot;nxauth&quot;);
++    arguments.push_back(&quot;-i&quot;);
++    arguments.push_back(&quot;-f&quot;);
++    arguments.push_back(xauthority.str());
++    arguments.push_back(&quot;add&quot;);
++    arguments.push_back(domain.str());
++    arguments.push_back(&quot;MIT-MAGIC-COOKIE-1&quot;);
++    arguments.push_back(cookie);
++
++    notQProcess nxauthProcess;
++
++    nxauthProcess.start(&quot;nxauth&quot;, arguments);
++
++    if (this-&gt;nxauthProcess.waitForStarted() == false) {
++        this-&gt;externalCallbacks-&gt;write
++            (NXCL_PROCESS_ERROR, _(&quot;Error starting nxauth!&quot;));
++        this-&gt;isFinished = true;
++    }
++}
++#endif
++
+ bool NXClientLib::chooseResumable (int n)
+ {
+     return (this-&gt;session.chooseResumable(n));
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000569.html">[Freenx-cvs] r443 - qtnx
+</A></li>
+	<LI>Next message: <A HREF="000571.html">[Freenx-cvs] r445 - nxcl/lib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#570">[ date ]</a>
+              <a href="thread.html#570">[ thread ]</a>
+              <a href="subject.html#570">[ subject ]</a>
+              <a href="author.html#570">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,173 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r547 - in trunk/freenx-server: . nxredir
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-July/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r547%20-%20in%20trunk/freenx-server%3A%20.%20nxredir&In-Reply-To=%3C200807311812.m6VICYTY002328%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000680.html">
+   <LINK REL="Next"  HREF="000682.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r547 - in trunk/freenx-server: . nxredir</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r547%20-%20in%20trunk/freenx-server%3A%20.%20nxredir&In-Reply-To=%3C200807311812.m6VICYTY002328%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r547 - in trunk/freenx-server: . nxredir">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Thu Jul 31 20:12:34 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000680.html">[Freenx-cvs] r546 - in branches: . freenx-client
+</A></li>
+        <LI>Next message: <A HREF="000682.html">[Freenx-cvs] r548 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#681">[ date ]</a>
+              <a href="thread.html#681">[ thread ]</a>
+              <a href="subject.html#681">[ subject ]</a>
+              <a href="author.html#681">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-07-31 20:12:33 +0200 (Thu, 31 Jul 2008)
+New Revision: 547
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/Makefile
+   trunk/freenx-server/nxredir/Makefile
+Log:
+* Fixed Makefile to stop on all errors.
+  (Idea by Hai Zaar &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">haizaar at gmail.com</A>&gt;, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-07-12 15:42:38 UTC (rev 546)
++++ trunk/freenx-server/ChangeLog	2008-07-31 18:12:33 UTC (rev 547)
+@@ -23,6 +23,8 @@
+ 	* Added /usr/bin/xauth as default key and used /usr/X11R6/bin/xauth as
+ 	  fallback.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Fixed Makefile to stop on all errors.
++	  (Idea by Hai Zaar &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">haizaar at gmail.com</A>&gt;, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
+ 14.03.2008 FreeNX 0.7.2 &quot;Priscilla Edition&quot;
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/Makefile
+===================================================================
+--- trunk/freenx-server/Makefile	2008-07-12 15:42:38 UTC (rev 546)
++++ trunk/freenx-server/Makefile	2008-07-31 18:12:33 UTC (rev 547)
+@@ -6,23 +6,26 @@
+ PROGRAMS=nxacl.sample nxcheckload.sample nxcups-gethost nxdesktop_helper nxdialog nxkeygen nxloadconfig nxnode nxnode-login nxprint nxserver nxserver-helper/nxserver-helper nxsetup nxviewer_helper nxviewer-passwd/nxpasswd/nxpasswd
+ 
+ all:
+-	( cd nxviewer-passwd; xmkmf; make Makefiles; make depend; cd ..)
++	cd nxviewer-passwd &amp;&amp; xmkmf &amp;&amp; make Makefiles &amp;&amp; make depend
+ 	for i in $(SUBDIRS) ; \
+ 	do\
+ 		echo &quot;making&quot; all &quot;in $$i...&quot;; \
+-	        $(MAKE) -C $$i  all;\
++	        $(MAKE) -C $$i all || exit 1;\
+ 	done
+ 
++nxenv_install:
++	install -m755 -d $(DESTDIR)/$$PATH_BIN/
++	install -m755 -d $(DESTDIR)/$$PATH_LIB/
++	install -m755 -d $(DESTDIR)/$$NX_ETC_DIR/
++	install -m755 -d $(DESTDIR)/$$CUPS_BACKEND/
++	for i in $(PROGRAMS) ;\
++	do\
++	        install -m755 $$i $(DESTDIR)/$$PATH_BIN/ || exit 1;\
++	done
++	install -m644 node.conf.sample $(DESTDIR)/$$NX_ETC_DIR/
++	$(MAKE) -C nxredir install
++
+ install:
+-	. nxloadconfig;\
+-	install -m755 -d $(DESTDIR)/$$PATH_BIN/ ;\
+-	install -m755 -d $(DESTDIR)/$$PATH_LIB/ ;\
+-	install -m755 -d $(DESTDIR)/$$NX_ETC_DIR/ ;\
+-	install -m755 -d $(DESTDIR)/$$CUPS_BACKEND/ ;\
+-	for i in $(PROGRAMS) ; \
+-	do\
+-	        install -m755 $$i $(DESTDIR)/$$PATH_BIN/ ;\
+-	done;\
+-	export PATH_BIN PATH_LIB CUPS_BACKEND NX_VERSION;\
+-	install -m644 node.conf.sample $(DESTDIR)/$$NX_ETC_DIR/ ; \
+-	make -C nxredir install
++	. nxloadconfig &amp;&amp;\
++	export PATH_BIN PATH_LIB CUPS_BACKEND NX_VERSION &amp;&amp;\
++	$(MAKE) nxenv_install
+
+Modified: trunk/freenx-server/nxredir/Makefile
+===================================================================
+--- trunk/freenx-server/nxredir/Makefile	2008-07-12 15:42:38 UTC (rev 546)
++++ trunk/freenx-server/nxredir/Makefile	2008-07-31 18:12:33 UTC (rev 547)
+@@ -11,20 +11,19 @@
+ 	rm -f $(LIBNAME)
+ 	rm -f *.o
+ 
++ifneq ($(NX_VERSION),)
+ install: all
+-	# install and possibly patch paths gotten by nxloadconfig
+-	if [ -n &quot;$$NX_VERSION&quot; ]; \
+-	then \
+-		install -m755 $(LIBNAME) $(DESTDIR)/$$PATH_LIB/ ;\
+-		install -m755 nxredir $(DESTDIR)/$$PATH_BIN/ ;\
+-		install -m755 nxsmb $(DESTDIR)/$$CUPS_BACKEND/ ;\
+-		perl -pi -e &quot;s,PATH_LIB=.*,PATH_LIB=\&quot;$$PATH_LIB\&quot;,g&quot; $(DESTDIR)/$$PATH_BIN/nxredir ;\
+-		perl -pi -e &quot;s,PATH_LIB=.*,PATH_LIB=\&quot;$$PATH_LIB\&quot;,g&quot; $(DESTDIR)/$$CUPS_BACKEND/nxsmb ;\
+-		perl -pi -e &quot;s,CUPS_BACKEND=.*,CUPS_BACKEND=\&quot;$$CUPS_BACKEND\&quot;,g&quot; $(DESTDIR)/$$CUPS_BACKEND/nxsmb ;\
+-	else \
+-		install -m755 libnxredir.so.0 $(DESTDIR)/usr/lib ;\
+-		install -m755 nxredir $(DESTDIR)/usr/bin ;\
+-		install -m755 nxsmb $(DESTDIR)/usr/lib/cups/backend/ ;\
+-	fi
++	install -m755 $(LIBNAME) $(DESTDIR)/$$PATH_LIB/
++	install -m755 nxredir $(DESTDIR)/$$PATH_BIN/
++	install -m755 nxsmb $(DESTDIR)/$$CUPS_BACKEND/
++	perl -pi -e &quot;s,PATH_LIB=.*,PATH_LIB=\&quot;$$PATH_LIB\&quot;,g&quot; $(DESTDIR)/$$PATH_BIN/nxredir
++	perl -pi -e &quot;s,PATH_LIB=.*,PATH_LIB=\&quot;$$PATH_LIB\&quot;,g&quot; $(DESTDIR)/$$CUPS_BACKEND/nxsmb
++	perl -pi -e &quot;s,CUPS_BACKEND=.*,CUPS_BACKEND=\&quot;$$CUPS_BACKEND\&quot;,g&quot; $(DESTDIR)/$$CUPS_BACKEND/nxsmb
++else
++install: all
++	install -m755 libnxredir.so.0 $(DESTDIR)/usr/lib
++	install -m755 nxredir $(DESTDIR)/usr/bin
++	install -m755 nxsmb $(DESTDIR)/usr/lib/cups/backend/
++endif
+ 
+ .PHONY: clean install
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000680.html">[Freenx-cvs] r546 - in branches: . freenx-client
+</A></li>
+	<LI>Next message: <A HREF="000682.html">[Freenx-cvs] r548 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#681">[ date ]</a>
+              <a href="thread.html#681">[ thread ]</a>
+              <a href="subject.html#681">[ subject ]</a>
+              <a href="author.html#681">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

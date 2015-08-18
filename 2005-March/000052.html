@@ -1,0 +1,244 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - jonno modified 5 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20jonno%20modified%205%20files&In-Reply-To=%3C4231CCEE.mail66Y1OQHL1%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000051.html">
+   <LINK REL="Next"  HREF="000053.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - jonno modified 5 files</H1>
+    <B>jonno</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20jonno%20modified%205%20files&In-Reply-To=%3C4231CCEE.mail66Y1OQHL1%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - jonno modified 5 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Fri Mar 11 17:53:02 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000051.html">[Freenx-cvs] CVS: freenx - fabianx modified 4 files
+</A></li>
+        <LI>Next message: <A HREF="000053.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#52">[ date ]</a>
+              <a href="thread.html#52">[ thread ]</a>
+              <a href="subject.html#52">[ subject ]</a>
+              <a href="author.html#52">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      jonno
+Date:      2005-03-11 16:53:02 GMT
+Modified:  .        nxkeygen nxloadconfig nxnode nxserver nxsetup
+Log:
+Fixed a better solution of the nxloadconfig fix by fabian
+
+Revision  Changes    Path
+1.10      +2 -2      freenx/nxkeygen
+
+
+rev 1.10, prev_rev 1.9
+Index: nxkeygen
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxkeygen,v
+retrieving revision 1.9
+retrieving revision 1.10
+diff -u -r1.9 -r1.10
+--- nxkeygen	10 Mar 2005 23:55:27 -0000	1.9
++++ nxkeygen	11 Mar 2005 16:53:01 -0000	1.10
+@@ -11,12 +11,12 @@
+ # Copyright	(c) 2004 Gentoo Foundation
+ #		Released under v2 of the GNU GPL
+ #
+-# CVS: $Id: nxkeygen,v 1.9 2005/03/10 23:55:27 fabianx Exp $
++# CVS: $Id: nxkeygen,v 1.10 2005/03/11 16:53:01 jonno Exp $
+ #
+ # ========================================================================
+ 
+ # Read the config file
+-NX_LOADCONFIG=1 . $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig)
++. $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig) --
+ 
+ NX_KEY_DIR=&quot;$NX_HOME_DIR/.ssh&quot;
+ DATE=&quot;`date '+%Y%m%d-%H%M%S'`&quot;
+
+
+
+1.14      +1 -7      freenx/nxloadconfig
+
+
+rev 1.14, prev_rev 1.13
+Index: nxloadconfig
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxloadconfig,v
+retrieving revision 1.13
+retrieving revision 1.14
+diff -u -r1.13 -r1.14
+--- nxloadconfig	11 Mar 2005 03:47:09 -0000	1.13
++++ nxloadconfig	11 Mar 2005 16:53:01 -0000	1.14
+@@ -5,7 +5,7 @@
+ #
+ # License: GPL, version 2
+ #
+-# CVS: $Id: nxloadconfig,v 1.13 2005/03/11 03:47:09 fabianx Exp $
++# CVS: $Id: nxloadconfig,v 1.14 2005/03/11 16:53:01 jonno Exp $
+ #
+ # ========================================================================
+ 
+@@ -15,10 +15,6 @@
+ 
+ HELP=&quot;no&quot;
+ CHECK=&quot;no&quot;
+-
+-if [ -z &quot;$NX_LOADCONFIG&quot; ]
+-then
+-
+ USERCONF=&quot;no&quot;
+ 
+ while [ &quot;$1&quot; ]
+@@ -46,8 +42,6 @@
+ 	echo &quot;  --userconf [&lt;username&gt;]  Parse &lt;username&gt;.node.conf as well as node.conf.&quot;
+ 	echo &quot;                           Assume current user if no username is specified.&quot;
+ 	exit 0
+-fi
+-
+ fi
+ 
+ #########################################################################
+
+
+
+1.33      +2 -2      freenx/nxnode
+
+
+rev 1.33, prev_rev 1.32
+Index: nxnode
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxnode,v
+retrieving revision 1.32
+retrieving revision 1.33
+diff -u -r1.32 -r1.33
+--- nxnode	11 Mar 2005 02:29:15 -0000	1.32
++++ nxnode	11 Mar 2005 16:53:02 -0000	1.33
+@@ -13,12 +13,12 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxnode,v 1.32 2005/03/11 02:29:15 fabianx Exp $
++# CVS: $Id: nxnode,v 1.33 2005/03/11 16:53:02 jonno Exp $
+ #
+ # 21.06.2004: - Full reconnection support
+ 
+ # Read the config file
+-NX_LOADCONFIG=1 USERCONF=&quot;yes&quot; . $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig)
++. $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig) --userconf
+ 
+ echo &quot;NX&gt; 1000 NXNODE - Version $NX_VERSION $NX_LICENSE&quot;
+ 
+
+
+
+1.32      +3 -3      freenx/nxserver
+
+
+rev 1.32, prev_rev 1.31
+Index: nxserver
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxserver,v
+retrieving revision 1.31
+retrieving revision 1.32
+diff -u -r1.31 -r1.32
+--- nxserver	11 Mar 2005 03:47:09 -0000	1.31
++++ nxserver	11 Mar 2005 16:53:02 -0000	1.32
+@@ -11,11 +11,11 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxserver,v 1.31 2005/03/11 03:47:09 fabianx Exp $
++# CVS: $Id: nxserver,v 1.32 2005/03/11 16:53:02 jonno Exp $
+ #
+ 
+ # Read the config file
+-NX_LOADCONFIG=1 . $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig)
++. $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig) --
+ 
+ # following two functions are Copyright by Klaus Knopper
+ 
+@@ -545,7 +545,7 @@
+ 			if [ &quot;$LOGIN_SUCCESS&quot; = &quot;1&quot; ]
+ 			then
+ 				# Reread the config files (so that $USER.node.conf get sourced)
+-				NX_LOADCONFIG=1 USERCONF=&quot;yes&quot; . $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig)
++				. $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig) --userconf
+ 				echo_x &quot;NX&gt; 103 Welcome to: $SERVER_NAME user: $USER&quot;
+ 				break
+ 			else
+
+
+
+1.19      +2 -2      freenx/nxsetup
+
+
+rev 1.19, prev_rev 1.18
+Index: nxsetup
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxsetup,v
+retrieving revision 1.18
+retrieving revision 1.19
+diff -u -r1.18 -r1.19
+--- nxsetup	10 Mar 2005 23:55:28 -0000	1.18
++++ nxsetup	11 Mar 2005 16:53:02 -0000	1.19
+@@ -5,7 +5,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxsetup,v 1.18 2005/03/10 23:55:28 fabianx Exp $ 
++# CVS: $Id: nxsetup,v 1.19 2005/03/11 16:53:02 jonno Exp $ 
+ #
+ 
+ HELP=&quot;no&quot;
+@@ -66,7 +66,7 @@
+ fi
+ 
+ # Read the config file
+-NX_LOADCONFIG=1 . $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig)
++. $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig) --
+ 
+ # Tries to add a system user
+ useradd_nx()
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000051.html">[Freenx-cvs] CVS: freenx - fabianx modified 4 files
+</A></li>
+	<LI>Next message: <A HREF="000053.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#52">[ date ]</a>
+              <a href="thread.html#52">[ thread ]</a>
+              <a href="subject.html#52">[ subject ]</a>
+              <a href="author.html#52">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

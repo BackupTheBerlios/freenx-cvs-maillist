@@ -1,0 +1,312 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r243 - in nxclientlib: . test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r243%20-%20in%20nxclientlib%3A%20.%20test&In-Reply-To=%3C200608031517.k73FHpiN006328%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000375.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r243 - in nxclientlib: . test</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r243%20-%20in%20nxclientlib%3A%20.%20test&In-Reply-To=%3C200608031517.k73FHpiN006328%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r243 - in nxclientlib: . test">gwright at mail.berlios.de
+       </A><BR>
+    <I>Thu Aug  3 17:17:51 CEST 2006</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000375.html">[Freenx-cvs] r244 - in nxclientlib: . test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#374">[ date ]</a>
+              <a href="thread.html#374">[ thread ]</a>
+              <a href="subject.html#374">[ subject ]</a>
+              <a href="author.html#374">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2006-08-03 17:17:51 +0200 (Thu, 03 Aug 2006)
+New Revision: 243
+
+Modified:
+   nxclientlib/nxclientlib.cpp
+   nxclientlib/nxclientlib.h
+   nxclientlib/nxsession.cpp
+   nxclientlib/nxsession.h
+   nxclientlib/test/main.cpp
+Log:
+New cookie generating code using /dev/urandom
+
+
+Modified: nxclientlib/nxclientlib.cpp
+===================================================================
+--- nxclientlib/nxclientlib.cpp	2006-08-02 17:54:14 UTC (rev 242)
++++ nxclientlib/nxclientlib.cpp	2006-08-03 15:17:51 UTC (rev 243)
+@@ -25,6 +25,7 @@
+ NXClientLib::NXClientLib(QObject *parent) : QObject(parent)
+ {
+ 	connect(&amp;session, SIGNAL(authenticated()), this, SLOT(doneAuth()));
++	connect(&amp;session, SIGNAL(loginFailed()), this, SLOT(failedLogin()));
+ }
+ 
+ NXClientLib::~NXClientLib()
+@@ -51,7 +52,7 @@
+ 	
+ 	if (encryption == true) {
+ 		arguments &lt;&lt; &quot;-B&quot;;
+-		// session.sessionData.encryption = true;
++		session.sessionData.encryption = true;
+ 	}
+ 	
+ 	connect(&amp;nxsshProcess, SIGNAL(started()), this, SLOT(processStarted()));
+@@ -97,6 +98,12 @@
+ 	writeCallback(message);
+ }
+ 
++void NXClientLib::failedLogin()
++{
++	writeCallback(tr(&quot;Username or password incorrect&quot;));
++	nxsshProcess.terminate();
++}
++
+ void NXClientLib::processParseStdout()
+ {
+ 	QString message = nxsshProcess.readAllStandardOutput().data();
+
+Modified: nxclientlib/nxclientlib.h
+===================================================================
+--- nxclientlib/nxclientlib.h	2006-08-02 17:54:14 UTC (rev 242)
++++ nxclientlib/nxclientlib.h	2006-08-03 15:17:51 UTC (rev 243)
+@@ -49,8 +49,7 @@
+ 
+ 		void setCallback(NXCallback *cb) { callback = cb; };
+ 
+-		void setXRes(int x) { session.setXRes(x); };
+-		void setYRes(int y) { session.setYRes(y); };
++		void setResolution(int x, int y) { session.setResolution(x, y); };
+ 		void setDepth(int depth) { session.setDepth(depth); };
+ 		void setRender(bool render) { session.setRender(render); };
+ 		void allowSSHConnect(bool auth);
+@@ -64,6 +63,7 @@
+ 		void processParseStderr();
+ 
+ 		void doneAuth();
++		void failedLogin();
+ 	private:
+ 		QProcess nxsshProcess;
+ 		QTemporaryFile *keyFile;
+
+Modified: nxclientlib/nxsession.cpp
+===================================================================
+--- nxclientlib/nxsession.cpp	2006-08-02 17:54:14 UTC (rev 242)
++++ nxclientlib/nxsession.cpp	2006-08-03 15:17:51 UTC (rev 243)
+@@ -41,6 +41,7 @@
+ 
+ NXSession::NXSession()
+ {
++	devurand_fd = -1;
+ 	stage = 0;
+ 	sessionSet = false;
+ }
+@@ -102,6 +103,8 @@
+ 				case 103:
+ 					stage++;
+ 					break;
++				case 404:
++					emit loginFailed();
+ 				}
+ 			break;
+ 		case LIST_SESSIONS:
+@@ -137,7 +140,7 @@
+ 					&quot;\&quot; --type=\&quot;&quot; + sessionData.sessionType +
+ 					&quot;\&quot; --cache=\&quot;&quot; + sessionData.cache +
+ 					&quot;M\&quot; --images=\&quot;&quot; + sessionData.images +
+-					&quot;M\&quot; --cookie=\&quot;&quot; + sessionData.sessionCookie +
++					&quot;M\&quot; --cookie=\&quot;&quot; + generateCookie() +
+ 					&quot;\&quot; --link=\&quot;&quot; + sessionData.linkType +
+ 					&quot;\&quot; --kbtype=\&quot;&quot; + sessionData.kbtype +
+ 					&quot;\&quot; --nodelay=\&quot;1\&quot; --encryption=\&quot;&quot; + encryption +
+@@ -152,7 +155,7 @@
+ 					&quot;\&quot; --type=\&quot;&quot; + sessionData.sessionType +
+ 					&quot;\&quot; --cache=\&quot;&quot; + sessionData.cache +
+ 					&quot;M\&quot; --images=\&quot;&quot; + sessionData.images +
+-					&quot;M\&quot; --cookie=\&quot;&quot; + sessionData.sessionCookie +
++					&quot;M\&quot; --cookie=\&quot;&quot; + generateCookie() +
+ 					&quot;\&quot; --link=\&quot;&quot; + sessionData.linkType +
+ 					&quot;\&quot; --render=\&quot;&quot; + render +
+ 					&quot;\&quot; --encryption=\&quot;&quot; + encryption +
+@@ -241,43 +244,30 @@
+ 	stage++;
+ }
+ 
+-void NXSession::setUsername(QString user)
+-{
+-	nxUsername = user;
+-}
+ 
+-void NXSession::setPassword(QString pass)
++QString NXSession::generateCookie()
+ {
+-	nxPassword = pass;
+-}
++	unsigned long long int int1, int2;
++	QString cookie;
++	
++	devurand_fd = open(&quot;/dev/urandom&quot;, O_RDONLY);
+ 
+-void NXSession::reset()
+-{
+-	stage = 0;
+-}
++	fillRand((unsigned char*)&amp;int1, sizeof(int1));
++	fillRand((unsigned char*)&amp;int2, sizeof(int2));
++	cookie = QString(&quot;%1%2&quot;).arg(int1, 0, 16).arg(int2, 0, 16);
+ 
+-void NXSession::setXRes(int x)
+-{
+-	xRes.setNum(x);
++	return cookie;
+ }
+ 
+-void NXSession::setYRes(int y)
+-{
+-	yRes.setNum(y);
+-}
++void NXSession::fillRand(unsigned char *buf, size_t nbytes) {
++	ssize_t r;
++	unsigned char *where = buf;
+ 
+-void NXSession::setDepth(int d)
+-{
+-	depth.setNum(d);
++	while (nbytes) {
++		while ((r = read(devurand_fd, where, nbytes)) == -1)
++		where  += r;
++		nbytes -= r;
++	}
+ }
+ 
+-void NXSession::setRender(bool isRender)
+-{
+-	if (isRender)
+-		renderSet = &quot;render&quot;;
+-}
+ 
+-void NXSession::setContinue(bool allow)
+-{
+-		doSSH = allow;
+-}
+
+Modified: nxclientlib/nxsession.h
+===================================================================
+--- nxclientlib/nxsession.h	2006-08-02 17:54:14 UTC (rev 242)
++++ nxclientlib/nxsession.h	2006-08-03 15:17:51 UTC (rev 243)
+@@ -24,12 +24,14 @@
+ #include &lt;QString&gt;
+ #include &lt;QStringList&gt;
+ 
++#include &lt;fcntl.h&gt;
++#include &lt;unistd.h&gt;
++
+ struct NXSessionData {
+ 	QString sessionName;
+ 	QString sessionType;
+ 	int cache;
+ 	int images;
+-	QString sessionCookie;
+ 	QString linkType;
+ 	bool render;
+ 	bool encryption;
+@@ -71,29 +73,34 @@
+ 		
+ 		QString parseSSH(QString);
+ 		int parseResponse(QString);
+-		void setUsername(QString);
+-		void setPassword(QString);
++		void setUsername(QString user) { nxUsername = user; };
++		void setPassword(QString pass) { nxPassword = pass; };
+ 		void parseResumeSessions(QStringList);
+ 
+-		void setXRes(int);
+-		void setYRes(int);
+-		void setDepth(int);
+-		void setRender(bool);
+-		void setContinue(bool);
++		void setResolution(int x, int y) { xRes.setNum(x); yRes.setNum(y); };
++		void setDepth(int d) { depth.setNum(d); };
++		void setRender(bool isRender) { if (isRender) renderSet = &quot;render&quot;; };
++		void setContinue(bool allow) { doSSH = allow; };
+ 		void setSession(NXSessionData);
+-
++		QString generateCookie();
++		
+ 		NXSessionData sessionData;
+ 
+ 	signals:
+ 		// Emitted when the initial public key authentication is successful
+ 		void authenticated();
++		void loginFailed();
+ 	private:
+ 		bool doSSH;
+ 		bool suspendedSessions;
+ 		bool sessionSet;
+ 		void reset();
+-		
++		void fillRand(unsigned char *, size_t);
++
+ 		int stage;
++
++		int devurand_fd;
++
+ 		QString nxUsername;
+ 		QString nxPassword;
+ 
+
+Modified: nxclientlib/test/main.cpp
+===================================================================
+--- nxclientlib/test/main.cpp	2006-08-02 17:54:14 UTC (rev 242)
++++ nxclientlib/test/main.cpp	2006-08-03 15:17:51 UTC (rev 243)
+@@ -34,8 +34,7 @@
+ 	lib.invokeNXSSH(&quot;default&quot; ,argv[1], true);
+ 	lib.setUsername(argv[2]);
+ 	lib.setPassword(argv[3]);
+-	lib.setXRes(640);
+-	lib.setYRes(480);
++	lib.setResolution(640,480);
+ 	lib.setDepth(24);
+ 	lib.setRender(true);
+ 	return qApp-&gt;exec();
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000375.html">[Freenx-cvs] r244 - in nxclientlib: . test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#374">[ date ]</a>
+              <a href="thread.html#374">[ thread ]</a>
+              <a href="subject.html#374">[ subject ]</a>
+              <a href="author.html#374">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

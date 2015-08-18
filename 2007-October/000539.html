@@ -1,0 +1,119 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r411 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-October/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r411%20-%20freenx-server/trunk&In-Reply-To=%3C200710212134.l9LLYpY8017579%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000538.html">
+   <LINK REL="Next"  HREF="000540.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r411 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r411%20-%20freenx-server/trunk&In-Reply-To=%3C200710212134.l9LLYpY8017579%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r411 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Sun Oct 21 23:34:51 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000538.html">[Freenx-cvs] r410 - nxlaunch/src
+</A></li>
+        <LI>Next message: <A HREF="000540.html">[Freenx-cvs] r412 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#539">[ date ]</a>
+              <a href="thread.html#539">[ thread ]</a>
+              <a href="subject.html#539">[ subject ]</a>
+              <a href="author.html#539">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-10-21 23:34:51 +0200 (Sun, 21 Oct 2007)
+New Revision: 411
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxloadconfig
+   freenx-server/trunk/nxserver
+Log:
+* Fixed the display of local sessions to display only
+  when session type is VNC.
+  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-10-17 09:09:47 UTC (rev 410)
++++ freenx-server/trunk/ChangeLog	2007-10-21 21:34:51 UTC (rev 411)
+@@ -1,3 +1,9 @@
++xx.01.2008 FreeNX 0.7.2
++	* Opened the 0.7.2 development.
++	* Fixed the display of local sessions to display only 
++	  when session type is VNC.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++
+ 14.10.2007 FreeNX 0.7.1 &quot;Hip Hop Edition&quot;
+ 	* Fixed the issue that makes fonts look tiny and unreadable by default 
+ 	  with freenx and the commercial client. (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">diamond at google.com</A>)
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2007-10-17 09:09:47 UTC (rev 410)
++++ freenx-server/trunk/nxloadconfig	2007-10-21 21:34:51 UTC (rev 411)
+@@ -52,7 +52,7 @@
+ # DO NOT TOUCH unless you REALLY know what you are doing
+ #########################################################################
+ 
+-NX_VERSION=2.1.0-71
++NX_VERSION=2.1.0-72-SVN
+ NX_LICENSE=&quot;OS (GPL)&quot;
+ 
+ # Where can different nx components be found
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2007-10-17 09:09:47 UTC (rev 410)
++++ freenx-server/trunk/nxserver	2007-10-21 21:34:51 UTC (rev 411)
+@@ -267,7 +267,7 @@
+ 		egrep -q &quot;^userName=$1$&quot; $i &amp;&amp; let SESSION_COUNT_USER=$SESSION_COUNT_USER+1
+ 	done
+ 	
+-	if [ &quot;$ENABLE_DESKTOP_SHARING&quot; = &quot;1&quot; ]
++	if [ &quot;$4&quot; = &quot;vnc&quot; -a &quot;$ENABLE_DESKTOP_SHARING&quot; = &quot;1&quot; ]
+ 	then
+ 		export DESKTOP_SHARING_IDS=&quot;&quot;
+ 		for i in $(LC_ALL=C netstat -ln --protocol=unix | egrep 'X11-unix/X[0-9]$' | sed 's/.*X\(.*\)/\1/g')
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000538.html">[Freenx-cvs] r410 - nxlaunch/src
+</A></li>
+	<LI>Next message: <A HREF="000540.html">[Freenx-cvs] r412 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#539">[ date ]</a>
+              <a href="thread.html#539">[ thread ]</a>
+              <a href="subject.html#539">[ subject ]</a>
+              <a href="author.html#539">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

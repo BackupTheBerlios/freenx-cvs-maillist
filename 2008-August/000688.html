@@ -1,0 +1,114 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r554 - trunk/freenx-server
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r554%20-%20trunk/freenx-server&In-Reply-To=%3C200808051431.m75EVbTQ011608%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000687.html">
+   <LINK REL="Next"  HREF="000689.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r554 - trunk/freenx-server</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r554%20-%20trunk/freenx-server&In-Reply-To=%3C200808051431.m75EVbTQ011608%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r554 - trunk/freenx-server">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Tue Aug  5 16:31:37 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000687.html">[Freenx-cvs] r553 - trunk/freenx-server
+</A></li>
+        <LI>Next message: <A HREF="000689.html">[Freenx-cvs] r555 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#688">[ date ]</a>
+              <a href="thread.html#688">[ thread ]</a>
+              <a href="subject.html#688">[ subject ]</a>
+              <a href="author.html#688">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-08-05 16:31:36 +0200 (Tue, 05 Aug 2008)
+New Revision: 554
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxviewer_helper
+Log:
+* Use :0.0 if mirrorhost is 127.0.0.1 and add -localhost for
+  enhanced security. Also increase sleep timeout for slow machines.
+  (Based on Patch by Jeremy Wilkins, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-05 14:18:41 UTC (rev 553)
++++ trunk/freenx-server/ChangeLog	2008-08-05 14:31:36 UTC (rev 554)
+@@ -43,6 +43,9 @@
+ 	  (Bug by Phil Stricker &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">stril at gmx.de</A>&gt;, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 	* Added clean target to Makefile.
+ 	  (Based on patch by Ubuntu FreeNX-Team, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Use :0.0 if mirrorhost is 127.0.0.1 and add -localhost for 
++	  enhanced security. Also increase sleep timeout for slow machines.
++	  (Based on Patch by Jeremy Wilkins, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
+ 14.03.2008 FreeNX 0.7.2 &quot;Priscilla Edition&quot;
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxviewer_helper
+===================================================================
+--- trunk/freenx-server/nxviewer_helper	2008-08-05 14:18:41 UTC (rev 553)
++++ trunk/freenx-server/nxviewer_helper	2008-08-05 14:31:36 UTC (rev 554)
+@@ -21,11 +21,16 @@
+ then
+ 	(
+ 		unset XAUTHORITY
++
++		# We need to set just :0.0 in case of localhost connection.
++		[ &quot;$mirrorhost&quot; = &quot;127.0.0.1&quot; ] &amp;&amp; mirrorhost=&quot;&quot;
++		
+ 		# Note: No &quot;-accept popup&quot; as its the same user and with that password
+ 		#       he could do already more than -accept popup would allow.
+-		DISPLAY=&quot;$mirrorhost:$mirrordisplay.0&quot; $COMMAND_X11VNC -timeout 120 -once -rfbauth &quot;$NXSESSION_DIRECTORY/scripts/.passwd&quot; &gt;&quot;$NXSESSION_DIRECTORY/scripts/.vnc_port&quot; &amp;
++		
++		DISPLAY=&quot;$mirrorhost:$mirrordisplay.0&quot; $COMMAND_X11VNC -localhost -timeout 120 -once -rfbauth &quot;$NXSESSION_DIRECTORY/scripts/.passwd&quot; &gt;&quot;$NXSESSION_DIRECTORY/scripts/.vnc_port&quot; &amp;
+ 	)
+-	sleep 1
++	sleep 2
+ 	agent_port=$(cat &quot;$NXSESSION_DIRECTORY/scripts/.vnc_port&quot; | egrep &quot;^PORT=&quot; | cut -d'=' -f 2)
+ 	[ -z &quot;agent_port&quot; ] &amp;&amp; agent_port=&quot;0&quot;
+ 	# note the :: is not a mistake, but rather a hint for nxviewer to use this as a port and not
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000687.html">[Freenx-cvs] r553 - trunk/freenx-server
+</A></li>
+	<LI>Next message: <A HREF="000689.html">[Freenx-cvs] r555 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#688">[ date ]</a>
+              <a href="thread.html#688">[ thread ]</a>
+              <a href="subject.html#688">[ subject ]</a>
+              <a href="author.html#688">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

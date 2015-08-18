@@ -1,0 +1,200 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r120 - freenx-server/branches/FreeNX-0.4
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r120%20-%20freenx-server/branches/FreeNX-0.4&In-Reply-To=%3C200508100028.j7A0SPFE012458%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000246.html">
+   <LINK REL="Next"  HREF="000248.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r120 - freenx-server/branches/FreeNX-0.4</H1>
+    <B>Fabian Franz at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r120%20-%20freenx-server/branches/FreeNX-0.4&In-Reply-To=%3C200508100028.j7A0SPFE012458%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r120 - freenx-server/branches/FreeNX-0.4">fabianx at berlios.de
+       </A><BR>
+    <I>Wed Aug 10 02:28:25 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000246.html">[Freenx-cvs] r119 - freenx-server/branches/FreeNX-0.4
+</A></li>
+        <LI>Next message: <A HREF="000248.html">[Freenx-cvs] r121 - freenx-server/branches/FreeNX-0.4
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#247">[ date ]</a>
+              <a href="thread.html#247">[ thread ]</a>
+              <a href="subject.html#247">[ subject ]</a>
+              <a href="author.html#247">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2005-08-10 02:27:52 +0200 (Wed, 10 Aug 2005)
+New Revision: 120
+
+Modified:
+   freenx-server/branches/FreeNX-0.4/nxloadconfig
+   freenx-server/branches/FreeNX-0.4/nxsetup
+Log:
+Changed interactive mode to be less lines.
+Added:
+
+	- Enforcing of configuration check
+	- Test of the connection to the server
+		- Warning if version mismatches
+
+
+
+Modified: freenx-server/branches/FreeNX-0.4/nxloadconfig
+===================================================================
+--- freenx-server/branches/FreeNX-0.4/nxloadconfig	2005-08-09 23:42:34 UTC (rev 119)
++++ freenx-server/branches/FreeNX-0.4/nxloadconfig	2005-08-10 00:27:52 UTC (rev 120)
+@@ -493,6 +493,7 @@
+ 		echo &quot;  Errors occured during config check.&quot;
+ 		echo &quot;  Please correct the configuration file.&quot;
+ 		echo
++		exit 1
+ 	elif [ &quot;$WARNING&quot; = &quot;yes&quot; ]
+ 	then
+ 		echo
+
+Modified: freenx-server/branches/FreeNX-0.4/nxsetup
+===================================================================
+--- freenx-server/branches/FreeNX-0.4/nxsetup	2005-08-09 23:42:34 UTC (rev 119)
++++ freenx-server/branches/FreeNX-0.4/nxsetup	2005-08-10 00:27:52 UTC (rev 120)
+@@ -52,24 +52,21 @@
+ [ &quot;$UNINSTALL&quot; = &quot;yes&quot; -a &quot;$CLEAN&quot; = &quot;yes&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+ [ &quot;$SETUP_SSH2_KEY&quot; = &quot;yes&quot; -a &quot;$SETUP_NOMACHINE_KEY&quot; = &quot;no&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+ 
+-if [ &quot;$INSTALL&quot; = &quot;no&quot; -a &quot;$UNINSTALL&quot; = &quot;no&quot; ]
++if [ &quot;$INSTALL&quot; = &quot;no&quot; -a &quot;$UNINSTALL&quot; = &quot;no&quot; -a &quot;$AUTOMATIC&quot; = &quot;no&quot; ]
+ then
+-	if [ &quot;$AUTOMATIC&quot; = &quot;no&quot; -a &quot;$HELP&quot; = &quot;no&quot; ]
+-	then
+-		echo &quot;------&gt; You did select no action.&quot;
+-		echo &quot;        FreeNX guesses that you want to _install_ the&quot;
+-		echo &quot;        server.&quot;
+-		echo &quot;        Use --help to get help contents.&quot;
+-		echo &quot;&quot;
+-		echo -n &quot;Do you want to abort now? [y/N] &quot;
+-		read -n 1 CHOICE
+-		echo
+-		[ &quot;$CHOICE&quot; = &quot;y&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+-	else
+-		HELP=&quot;yes&quot;
+-	fi
++	echo &quot;------&gt; You did select no action.&quot;
++	echo &quot;        FreeNX guesses that you want to _install_ the&quot;
++	echo &quot;        server.&quot;
++	echo &quot;        Use --help to get help contents.&quot;
++	echo &quot;&quot;
++	echo -n &quot;Do you want to abort now? [y/N] &quot;
++	read -n 1 CHOICE
++	echo
++	[ &quot;$CHOICE&quot; = &quot;y&quot; ] || INSTALL=&quot;yes&quot;
+ fi
+ 
++[ &quot;$INSTALL&quot; = &quot;no&quot; -a &quot;$UNINSTALL&quot; = &quot;no&quot; ] &amp;&amp; HELP=&quot;yes&quot;
++
+ if [ &quot;$HELP&quot; = &quot;yes&quot; ]
+ then
+ 	echo &quot;nxsetup - Setup the FreeNX server.&quot;
+@@ -237,6 +234,21 @@
+ no-port-forwarding,no-X11-forwarding,no-agent-forwarding,command=&quot;$PATH_BIN/nxserver&quot; ssh-dss AAAAB3NzaC1kc3MAAACBAJe/0DNBePG9dYLWq7cJ0SqyRf1iiZN/IbzrmBvgPTZnBa5FT/0Lcj39sRYt1paAlhchwUmwwIiSZaON5JnJOZ6jKkjWIuJ9MdTGfdvtY1aLwDMpxUVoGwEaKWOyin02IPWYSkDQb6cceuG9NfPulS9iuytdx0zIzqvGqfvudtufAAAAFQCwosRXR2QA8OSgFWSO6+kGrRJKiwAAAIEAjgvVNAYWSrnFD+cghyJbyx60AAjKtxZ0r/Pn9k94Qt2rvQoMnGgt/zU0v/y4hzg+g3JNEmO1PdHh/wDPVOxlZ6Hb5F4IQnENaAZ9uTZiFGqhBO1c8Wwjiq/MFZy3jZaidarLJvVs8EeT4mZcWxwm7nIVD4lRU2wQ2lj4aTPcepMAAACANlgcCuA4wrC+3Cic9CFkqiwO/Rn1vk8dvGuEQqFJ6f6LVfPfRTfaQU7TGVLk2CzY4dasrwxJ1f6FsT8DHTNGnxELPKRuLstGrFY/PR7KeafeFZDf+fJ3mbX5nxrld3wi5titTnX+8s4IKv29HJguPvOK/SI7cjzA+SqNfD7qEo8= <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">root at nettuno</A>
+ EOF
+ 			chmod 600 $NX_HOME_DIR/.ssh/$SSH_AUTHORIZED_KEYS
++			cat &lt;&lt; EOF &gt;$NX_HOME_DIR/.ssh/client.id_dsa.key
++-----BEGIN DSA PRIVATE KEY-----
++MIIBuwIBAAKBgQCXv9AzQXjxvXWC1qu3CdEqskX9YomTfyG865gb4D02ZwWuRU/9
++C3I9/bEWLdaWgJYXIcFJsMCIkmWjjeSZyTmeoypI1iLifTHUxn3b7WNWi8AzKcVF
++aBsBGiljsop9NiD1mEpA0G+nHHrhvTXz7pUvYrsrXcdMyM6rxqn77nbbnwIVALCi
++xFdHZADw5KAVZI7r6QatEkqLAoGBAI4L1TQGFkq5xQ/nIIciW8setAAIyrcWdK/z
++5/ZPeELdq70KDJxoLf81NL/8uIc4PoNyTRJjtT3R4f8Az1TsZWeh2+ReCEJxDWgG
++fbk2YhRqoQTtXPFsI4qvzBWct42WonWqyyb1bPBHk+JmXFscJu5yFQ+JUVNsENpY
+++Gkz3HqTAoGANlgcCuA4wrC+3Cic9CFkqiwO/Rn1vk8dvGuEQqFJ6f6LVfPfRTfa
++QU7TGVLk2CzY4dasrwxJ1f6FsT8DHTNGnxELPKRuLstGrFY/PR7KeafeFZDf+fJ3
++mbX5nxrld3wi5titTnX+8s4IKv29HJguPvOK/SI7cjzA+SqNfD7qEo8CFDIm1xRf
++8xAPsSKs6yZ6j1FNklfu
++-----END DSA PRIVATE KEY-----
++EOF
++			chmod 600 $NX_HOME_DIR/.ssh/client.id_dsa.key
+ 		else
+ 			# generate a new key, backup the old and copy it to $SSH_AUTHORIZED_KEYS
+ 			$PATH_BIN/nxkeygen
+@@ -291,7 +303,43 @@
+ 
+ test_nx()
+ {
+-	:	
++	echo &quot;&quot;
++	echo &quot;----&gt; Testing your nxserver configuration ...&quot;
++	. $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig) --check
++	echo &quot;&lt;---- done&quot;
++	
++	echo &quot;----&gt; Testing your nxserver connection ...&quot;
++	
++	CONNECTION=&quot;&quot;
++	while read -t 3 line
++	do
++		case &quot;$line&quot; in
++			*&quot;HELLO NXSERVER - Version $NX_VERSION&quot;*)
++				CONNECTION=&quot;yes&quot;
++			;;
++			*&quot;HELLO NXSERVER - Version&quot;*)
++				echo &quot;Warning: Version Mismatch. Expected $NX_VERSION got: $line.&quot;
++				CONNECTION=&quot;yes&quot;
++			;;
++			*&quot;NX&gt; 999 Bye&quot;*)
++				break;
++			;;
++		esac
++		echo $line
++	done &lt; &lt;(echo &quot;quit&quot; | ssh -i $NX_HOME_DIR/.ssh/client.id_dsa.key -p &quot;$SSHD_PORT&quot; <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">nx at 127.0.0.1</A> -o &quot;RhostsAuthentication no&quot; -o &quot;PasswordAuthentication no&quot; -o &quot;RSAAuthentication no&quot; -o &quot;RhostsRSAAuthentication no&quot; -o &quot;PubkeyAuthentication yes&quot; -o &quot;PreferredAuthentications publickey&quot; nxserver)
++	if [ -z &quot;$CONNECTION&quot; ]
++	then
++		echo &quot;Fatal error: Could not connect to NX Server.&quot;
++		echo 
++		echo &quot;Please check your ssh setup:&quot;
++		echo &quot;&quot;
++		echo &quot;	- Make sure nx is one of the AllowUsers in sshd_config.&quot;
++		echo &quot;	- Make sure your sshd allows public key authentication.&quot;
++		echo &quot;	- Make sure your sshd is really running on port $SSHD_PORT.&quot;
++		echo &quot;	- Make sure your sshd_config AuthorizedKeysFile in sshd_config is set to $SSH_AUTHORIZED_KEYS.&quot;
++		exit 1
++	fi
++	echo &quot;&lt;--- done&quot;
+ }
+ 
+ uninstall_nx() 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000246.html">[Freenx-cvs] r119 - freenx-server/branches/FreeNX-0.4
+</A></li>
+	<LI>Next message: <A HREF="000248.html">[Freenx-cvs] r121 - freenx-server/branches/FreeNX-0.4
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#247">[ date ]</a>
+              <a href="thread.html#247">[ thread ]</a>
+              <a href="subject.html#247">[ subject ]</a>
+              <a href="author.html#247">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r408 - in nxcl: lib nxcl
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-October/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r408%20-%20in%20nxcl%3A%20lib%20nxcl&In-Reply-To=%3C200710162126.l9GLQFlL017423%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000535.html">
+   <LINK REL="Next"  HREF="000537.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r408 - in nxcl: lib nxcl</H1>
+    <B>sebjames at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r408%20-%20in%20nxcl%3A%20lib%20nxcl&In-Reply-To=%3C200710162126.l9GLQFlL017423%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r408 - in nxcl: lib nxcl">sebjames at mail.berlios.de
+       </A><BR>
+    <I>Tue Oct 16 23:26:15 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000535.html">[Freenx-cvs] r407 - nxlaunch
+</A></li>
+        <LI>Next message: <A HREF="000537.html">[Freenx-cvs] r409 - nxlaunch/lib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#536">[ date ]</a>
+              <a href="thread.html#536">[ thread ]</a>
+              <a href="subject.html#536">[ subject ]</a>
+              <a href="author.html#536">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: sebjames
+Date: 2007-10-16 23:26:15 +0200 (Tue, 16 Oct 2007)
+New Revision: 408
+
+Modified:
+   nxcl/lib/notQt.cpp
+   nxcl/nxcl/nxcl.cpp
+Log:
+Improved some dbus error handling in nxcl.cpp.
+Small fix in notQt.cpp to call the correct exit function.
+
+
+Modified: nxcl/lib/notQt.cpp
+===================================================================
+--- nxcl/lib/notQt.cpp	2007-10-16 21:23:16 UTC (rev 407)
++++ nxcl/lib/notQt.cpp	2007-10-16 21:26:15 UTC (rev 408)
+@@ -138,7 +138,7 @@
+ 		close (childErrToParent[WRITING_END]);
+ 		
+ 		// Child should exit now.
+-		exit(-1);
++		_exit(-1);
+ 
+ 	default:
+ 		// This is the PARENT process
+
+Modified: nxcl/nxcl/nxcl.cpp
+===================================================================
+--- nxcl/nxcl/nxcl.cpp	2007-10-16 21:23:16 UTC (rev 407)
++++ nxcl/nxcl/nxcl.cpp	2007-10-16 21:26:15 UTC (rev 408)
+@@ -229,7 +229,6 @@
+ {
+ 	DBusMessage * message;
+ 	DBusMessageIter args;
+-	DBusError error;
+ 	char * parameter = NULL;
+ 	bool settings_transferred = false;
+ 	stringstream ss;
+@@ -240,8 +239,12 @@
+ 	// loop listening for signals being emitted
+ 	while (settings_transferred == false) {
+ 
+-		if (dbus_error_is_set(&amp;error)) { 
+-			this-&gt;callbacks.error (&quot;receiveSettings(): Got a dbus error&quot;);
++		if (dbus_error_is_set(&amp;this-&gt;error)) {
++			stringstream errmsg;
++			errmsg &lt;&lt; &quot;receiveSettings(): Got a dbus error '&quot;
++			       &lt;&lt; this-&gt;error.name &lt;&lt; &quot;': &quot; &lt;&lt; this-&gt;error.message;
++			this-&gt;callbacks.error (errmsg.str());
++			dbus_error_free (&amp;this-&gt;error);
+ 		}
+ 
+ 		// non blocking read of the next available message
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000535.html">[Freenx-cvs] r407 - nxlaunch
+</A></li>
+	<LI>Next message: <A HREF="000537.html">[Freenx-cvs] r409 - nxlaunch/lib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#536">[ date ]</a>
+              <a href="thread.html#536">[ thread ]</a>
+              <a href="subject.html#536">[ subject ]</a>
+              <a href="author.html#536">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

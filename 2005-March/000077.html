@@ -1,0 +1,288 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fabianx modified 4 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%204%20files&In-Reply-To=%3C42345851.mailA45118IEK%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000076.html">
+   <LINK REL="Next"  HREF="000078.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fabianx modified 4 files</H1>
+    <B>fabianx</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%204%20files&In-Reply-To=%3C42345851.mailA45118IEK%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fabianx modified 4 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Sun Mar 13 16:12:17 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000076.html">[Freenx-cvs] CVS: freenx - fabianx modified node.conf.sample
+</A></li>
+        <LI>Next message: <A HREF="000078.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#77">[ date ]</a>
+              <a href="thread.html#77">[ thread ]</a>
+              <a href="subject.html#77">[ subject ]</a>
+              <a href="author.html#77">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fabianx
+Date:      2005-03-13 15:12:17 GMT
+Modified:  .        ChangeLog node.conf.sample nxloadconfig nxserver
+Log:
+Implemented SESSION_LIMIT and SESSION_USER_LIMIT config file directives.
+
+Note: There is no way to disable them. Just set it to SESSION_DISPLAY_LIMIT,
+      which is the maximum anyway.
+
+      Setting any of them to &quot;0&quot; will disable the start of new sessions
+      effectively.
+
+Revision  Changes    Path
+1.36      +1 -0      freenx/ChangeLog
+
+
+rev 1.36, prev_rev 1.35
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.35
+retrieving revision 1.36
+diff -u -r1.35 -r1.36
+--- ChangeLog	13 Mar 2005 12:57:59 -0000	1.35
++++ ChangeLog	13 Mar 2005 15:12:16 -0000	1.36
+@@ -16,6 +16,7 @@
+ 	* Implemented SSHD_CHECK_IP directive.
+ 	* Added the SESSION_HISTORY directive. Session history will by default be kept for 30 days.
+ 	* Implemented DEFAULT_X_WM for unix-application virtual desktop mode.
++	* Implemented SESSION_LIMIT and SESSION_USER_LIMIT.
+ 
+ 11.03.2005 FreeNX 0.3.1
+ 	* Fixed keyboard mapping problems.
+
+
+
+1.16      +3 -3      freenx/node.conf.sample
+
+
+rev 1.16, prev_rev 1.15
+Index: node.conf.sample
+===================================================================
+RCS file: /cvsroot/freenx/freenx/node.conf.sample,v
+retrieving revision 1.15
+retrieving revision 1.16
+diff -u -r1.15 -r1.16
+--- node.conf.sample	13 Mar 2005 13:31:10 -0000	1.15
++++ node.conf.sample	13 Mar 2005 15:12:16 -0000	1.16
+@@ -37,7 +37,7 @@
+ #
+ #           <A HREF="https://mail.kde.org/mailman/listinfo/freenx-knx">https://mail.kde.org/mailman/listinfo/freenx-knx</A>
+ #
+-# CVS: $Id: node.conf.sample,v 1.15 2005/03/13 13:31:10 fabianx Exp $
++# CVS: $Id: node.conf.sample,v 1.16 2005/03/13 15:12:16 fabianx Exp $
+ 
+ #########################################################################
+ # FreeNX specific node.conf directives
+@@ -201,11 +201,11 @@
+ #DISPLAY_BASE=1000
+ 
+ # The maximum number of contemporary sessions that can be run on FreeNX
+-#SESSION_LIMIT=20
++#SESSION_LIMIT=200
+ 
+ # The maximum number of contemporary sessions that a single user can run
+ # on FreeNX. Defaults to the value of SESSION_LIMIT.
+-#SESSION_USER_LIMIT=20
++#SESSION_USER_LIMIT=200
+ 
+ # The number of displays reserved for sessions, it has to be greater or equal
+ # to the maximum number of contemporary sessions that a server can run. 
+
+
+
+1.20      +2 -2      freenx/nxloadconfig
+
+
+rev 1.20, prev_rev 1.19
+Index: nxloadconfig
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxloadconfig,v
+retrieving revision 1.19
+retrieving revision 1.20
+diff -u -r1.19 -r1.20
+--- nxloadconfig	13 Mar 2005 12:57:59 -0000	1.19
++++ nxloadconfig	13 Mar 2005 15:12:16 -0000	1.20
+@@ -5,7 +5,7 @@
+ #
+ # License: GPL, version 2
+ #
+-# CVS: $Id: nxloadconfig,v 1.19 2005/03/13 12:57:59 fabianx Exp $
++# CVS: $Id: nxloadconfig,v 1.20 2005/03/13 15:12:16 fabianx Exp $
+ #
+ # ========================================================================
+ 
+@@ -121,7 +121,7 @@
+ SSHD_PORT=22
+ 
+ DISPLAY_BASE=1000
+-SESSION_LIMIT=20
++SESSION_LIMIT=200
+ DISPLAY_LIMIT=200
+ 
+ DEFAULT_X_WM=twm
+
+
+
+1.40      +51 -2     freenx/nxserver
+
+
+rev 1.40, prev_rev 1.39
+Index: nxserver
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxserver,v
+retrieving revision 1.39
+retrieving revision 1.40
+diff -u -r1.39 -r1.40
+--- nxserver	13 Mar 2005 12:04:49 -0000	1.39
++++ nxserver	13 Mar 2005 15:12:17 -0000	1.40
+@@ -11,7 +11,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxserver,v 1.39 2005/03/13 12:04:49 jonno Exp $
++# CVS: $Id: nxserver,v 1.40 2005/03/13 15:12:17 fabianx Exp $
+ #
+ 
+ # Read the config file
+@@ -190,10 +190,29 @@
+ 	done
+ }
+ 
++# Count all sessions of a user
++# and save it in SESSION_COUNT and SESSION_COUNT_USER
++
++session_count_user()
++{
++	SESSION_COUNT=0
++	SESSION_COUNT_USER=0
++
++	for i in $NX_SESS_DIR/running/*
++	do
++		[ -f $i ] || break
++		let SESSION_COUNT=$SESSION_COUNT+1
++		egrep -q &quot;^userName=$1$&quot; $i &amp;&amp; let SESSION_COUNT_USER=$SESSION_COUNT_USER+1
++	done
++}
++
+ # List all sessions of a user
+ 
+ session_list_user_suspended()
+ {
++	SESSION_COUNT=0
++	SESSION_COUNT_USER=0
++
+ 	TMPFILE=$(mktemp /tmp/nxserver_tmp.XXXXXXXXX)
+ 	echo &quot;NX&gt; 127 Sessions list of user '$1' for reconnect:&quot; &gt; $TMPFILE
+ 	echo &gt;&gt; $TMPFILE
+@@ -209,6 +228,7 @@
+ 	for i in $NX_SESS_DIR/running/*
+ 	do
+ 		[ -f $i ] || break
++		let SESSION_COUNT=$SESSION_COUNT+1
+ 		if egrep -q &quot;^userName=$1$&quot; $i &amp;&amp; egrep -q &quot;^status=$2$&quot; $i #&amp;&amp; grep -q &quot;screeninfo=$3&quot; $i
+ 		then
+ 			CMDLINE=$(session_get_cmdline $i)
+@@ -227,12 +247,18 @@
+ 			fi
+ 			echo -e &quot;$(getparam display)\t$(getparam type)\t$(getparam sessionId)\t$options\t$depth\t$geom\t$available\t$(getparam sessionName)&quot; &gt;&gt; $TMPFILE
+ 		fi
++		egrep -q &quot;^userName=$1$&quot; $i &amp;&amp; let SESSION_COUNT_USER=$SESSION_COUNT_USER+1
+ 	done
+ 	echo &quot;&quot; &gt;&gt; $TMPFILE
+ 	echo &quot;&quot; &gt;&gt; $TMPFILE
+ 	cat $TMPFILE
+ 	rm -f $TMPFILE
+-	echo &quot;NX&gt; 148 Server capacity: not reached for user: $1&quot;
++	if [ &quot;$SESSION_COUNT&quot; -ge &quot;$SESSION_LIMIT&quot; -o &quot;$SESSION_COUNT_USER&quot; -ge &quot;$SESSION_USER_LIMIT&quot; ]
++	then
++		echo &quot;NX&gt; 147 Server capacity: reached for user: $1&quot;
++	else
++		echo &quot;NX&gt; 148 Server capacity: not reached for user: $1&quot;
++	fi
+ }
+ 
+ session_list_user()
+@@ -683,6 +709,27 @@
+ 	[ -e &quot;/tmp/.nX$SESS_DISPLAY-lock&quot; ] &amp;&amp; rm -f /tmp/.nX$SESS_DISPLAY-lock
+ }
+ 
++server_check_session_count()
++{
++	session_count_user &quot;$USER&quot;
++	
++	if [ &quot;$SESSION_COUNT&quot; -ge &quot;$SESSION_LIMIT&quot; ]
++	then
++		echo_x &quot;NX&gt; 599 Reached the maximum number of concurrent sessions on this server.&quot;
++		echo_x &quot;NX&gt; 500 ERROR: Last operation failed.&quot;
++		return 1
++	fi
++	
++	if [ &quot;$SESSION_COUNT_USER&quot; -ge &quot;$SESSION_USER_LIMIT&quot; ]
++	then
++		echo_x &quot;NX&gt; 599 Server capacity: reached for user: $USER&quot;
++		echo_x &quot;NX&gt; 500 ERROR: Last operation failed.&quot;
++		return 1
++	fi
++
++	return 0
++}
++
+ server_startrestore_session()
+ {
+ 	ACTION=&quot;$1&quot;
+@@ -723,6 +770,8 @@
+ 	[ -z &quot;$USERIP&quot; ] &amp;&amp; USERIP=&quot;*&quot;
+ 	if [ &quot;$ACTION&quot; = &quot;start&quot; ]
+ 	then
++		server_check_session_count || return 1
++		
+ 		# start nxnode
+ 		SESS_DISPLAY=$DISPLAY_BASE
+ 		let SESS_DISPLAY_LIMIT=$DISPLAY_BASE+$DISPLAY_LIMIT
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000076.html">[Freenx-cvs] CVS: freenx - fabianx modified node.conf.sample
+</A></li>
+	<LI>Next message: <A HREF="000078.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#77">[ date ]</a>
+              <a href="thread.html#77">[ thread ]</a>
+              <a href="subject.html#77">[ subject ]</a>
+              <a href="author.html#77">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

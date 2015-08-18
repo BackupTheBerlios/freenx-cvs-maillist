@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r142 - / freenx-server/branches/FreeNX-0.4
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r142%20-%20/%20freenx-server/branches/FreeNX-0.4&In-Reply-To=%3C200508302012.j7UKCSL1024538%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000268.html">
+   <LINK REL="Next"  HREF="000270.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r142 - / freenx-server/branches/FreeNX-0.4</H1>
+    <B>Fabian Franz at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r142%20-%20/%20freenx-server/branches/FreeNX-0.4&In-Reply-To=%3C200508302012.j7UKCSL1024538%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r142 - / freenx-server/branches/FreeNX-0.4">fabianx at berlios.de
+       </A><BR>
+    <I>Tue Aug 30 22:12:28 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000268.html">[Freenx-cvs] r141 - / freenx-website freenx-website/intern freenx-website/intern/press
+</A></li>
+        <LI>Next message: <A HREF="000270.html">[Freenx-cvs] r143 - / freenx-website/intern/press
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#269">[ date ]</a>
+              <a href="thread.html#269">[ thread ]</a>
+              <a href="subject.html#269">[ subject ]</a>
+              <a href="author.html#269">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2005-08-30 22:12:25 +0200 (Tue, 30 Aug 2005)
+New Revision: 142
+
+Modified:
+   /
+   freenx-server/branches/FreeNX-0.4/INSTALL
+Log:
+ <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">r157 at Bluemoon</A>:  ffranz | 2005-08-30 22:11:54 +0200
+ Added nxclient / nxprint and 1.5.0 backend to installation instructions.
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:155
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:157
+
+Modified: freenx-server/branches/FreeNX-0.4/INSTALL
+===================================================================
+--- freenx-server/branches/FreeNX-0.4/INSTALL	2005-08-30 10:08:39 UTC (rev 141)
++++ freenx-server/branches/FreeNX-0.4/INSTALL	2005-08-30 20:12:25 UTC (rev 142)
+@@ -56,6 +56,8 @@
+ cp -a freenx*/nxkeygen ${NXPREFIX}/bin
+ cp -a freenx*/nxnode-login ${NXPREFIX}/bin
+ cp -a freenx*/nxloadconfig ${NXPREFIX}/bin
++cp -a freenx*/nxprint ${NXPREFIX}/bin
++cp -a freenx*/nxclient ${NXPREFIX}/bin
+ 
+ # config file
+ cp -a freenx*/node.conf.sample ${NXPREFIX}/etc/
+@@ -63,3 +65,5 @@
+ You should also install the nxclient from NoMachine or also copy the nxclient program from freenx. 
+ 
+ Then you need to run 'nxsetup --install' and follow the instructions given.
++
++If you use 1.5.0 as backend be sure to set ENABLE_1_5_0_BACKEND to 1 in node.conf or nxloadconfig.
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000268.html">[Freenx-cvs] r141 - / freenx-website freenx-website/intern freenx-website/intern/press
+</A></li>
+	<LI>Next message: <A HREF="000270.html">[Freenx-cvs] r143 - / freenx-website/intern/press
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#269">[ date ]</a>
+              <a href="thread.html#269">[ thread ]</a>
+              <a href="subject.html#269">[ subject ]</a>
+              <a href="author.html#269">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

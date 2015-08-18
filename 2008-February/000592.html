@@ -1,0 +1,905 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r466 - qtnx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r466%20-%20qtnx&In-Reply-To=%3C200802050137.m151bgI3012750%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000591.html">
+   <LINK REL="Next"  HREF="000593.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r466 - qtnx</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r466%20-%20qtnx&In-Reply-To=%3C200802050137.m151bgI3012750%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r466 - qtnx">gwright at mail.berlios.de
+       </A><BR>
+    <I>Tue Feb  5 02:37:42 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000591.html">[Freenx-cvs] r465 - qtnx
+</A></li>
+        <LI>Next message: <A HREF="000593.html">[Freenx-cvs] r467 - nxcl/lib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#592">[ date ]</a>
+              <a href="thread.html#592">[ thread ]</a>
+              <a href="subject.html#592">[ subject ]</a>
+              <a href="author.html#592">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2008-02-05 02:37:40 +0100 (Tue, 05 Feb 2008)
+New Revision: 466
+
+Modified:
+   qtnx/logindialog.ui
+   qtnx/logwindow.ui
+   qtnx/qtnxwindow.cpp
+   qtnx/settingsdialog.ui
+Log:
+Fix window titles
+
+
+Modified: qtnx/logindialog.ui
+===================================================================
+--- qtnx/logindialog.ui	2008-02-05 01:31:50 UTC (rev 465)
++++ qtnx/logindialog.ui	2008-02-05 01:37:40 UTC (rev 466)
+@@ -1,7 +1,4 @@
+ &lt;ui version=&quot;4.0&quot; &gt;
+- &lt;author&gt;&lt;/author&gt;
+- &lt;comment&gt;&lt;/comment&gt;
+- &lt;exportmacro&gt;&lt;/exportmacro&gt;
+  &lt;class&gt;LoginDialog&lt;/class&gt;
+  &lt;widget class=&quot;QWidget&quot; name=&quot;LoginDialog&quot; &gt;
+   &lt;property name=&quot;geometry&quot; &gt;
+@@ -13,15 +10,24 @@
+    &lt;/rect&gt;
+   &lt;/property&gt;
+   &lt;property name=&quot;windowTitle&quot; &gt;
+-   &lt;string&gt;Form&lt;/string&gt;
++   &lt;string&gt;QtNX&lt;/string&gt;
+   &lt;/property&gt;
+   &lt;layout class=&quot;QVBoxLayout&quot; &gt;
+-   &lt;property name=&quot;margin&quot; &gt;
+-    &lt;number&gt;9&lt;/number&gt;
+-   &lt;/property&gt;
+    &lt;property name=&quot;spacing&quot; &gt;
+     &lt;number&gt;6&lt;/number&gt;
+    &lt;/property&gt;
++   &lt;property name=&quot;leftMargin&quot; &gt;
++    &lt;number&gt;9&lt;/number&gt;
++   &lt;/property&gt;
++   &lt;property name=&quot;topMargin&quot; &gt;
++    &lt;number&gt;9&lt;/number&gt;
++   &lt;/property&gt;
++   &lt;property name=&quot;rightMargin&quot; &gt;
++    &lt;number&gt;9&lt;/number&gt;
++   &lt;/property&gt;
++   &lt;property name=&quot;bottomMargin&quot; &gt;
++    &lt;number&gt;9&lt;/number&gt;
++   &lt;/property&gt;
+    &lt;item&gt;
+     &lt;widget class=&quot;QLabel&quot; name=&quot;logo&quot; &gt;
+      &lt;property name=&quot;text&quot; &gt;
+@@ -34,20 +40,38 @@
+    &lt;/item&gt;
+    &lt;item&gt;
+     &lt;layout class=&quot;QHBoxLayout&quot; &gt;
+-     &lt;property name=&quot;margin&quot; &gt;
+-      &lt;number&gt;0&lt;/number&gt;
+-     &lt;/property&gt;
+      &lt;property name=&quot;spacing&quot; &gt;
+       &lt;number&gt;6&lt;/number&gt;
+      &lt;/property&gt;
++     &lt;property name=&quot;leftMargin&quot; &gt;
++      &lt;number&gt;0&lt;/number&gt;
++     &lt;/property&gt;
++     &lt;property name=&quot;topMargin&quot; &gt;
++      &lt;number&gt;0&lt;/number&gt;
++     &lt;/property&gt;
++     &lt;property name=&quot;rightMargin&quot; &gt;
++      &lt;number&gt;0&lt;/number&gt;
++     &lt;/property&gt;
++     &lt;property name=&quot;bottomMargin&quot; &gt;
++      &lt;number&gt;0&lt;/number&gt;
++     &lt;/property&gt;
+      &lt;item&gt;
+       &lt;layout class=&quot;QVBoxLayout&quot; &gt;
+-       &lt;property name=&quot;margin&quot; &gt;
+-        &lt;number&gt;0&lt;/number&gt;
+-       &lt;/property&gt;
+        &lt;property name=&quot;spacing&quot; &gt;
+         &lt;number&gt;6&lt;/number&gt;
+        &lt;/property&gt;
++       &lt;property name=&quot;leftMargin&quot; &gt;
++        &lt;number&gt;0&lt;/number&gt;
++       &lt;/property&gt;
++       &lt;property name=&quot;topMargin&quot; &gt;
++        &lt;number&gt;0&lt;/number&gt;
++       &lt;/property&gt;
++       &lt;property name=&quot;rightMargin&quot; &gt;
++        &lt;number&gt;0&lt;/number&gt;
++       &lt;/property&gt;
++       &lt;property name=&quot;bottomMargin&quot; &gt;
++        &lt;number&gt;0&lt;/number&gt;
++       &lt;/property&gt;
+        &lt;item&gt;
+         &lt;widget class=&quot;QLabel&quot; name=&quot;usernameLabel&quot; &gt;
+          &lt;property name=&quot;text&quot; &gt;
+@@ -73,12 +97,21 @@
+      &lt;/item&gt;
+      &lt;item&gt;
+       &lt;layout class=&quot;QVBoxLayout&quot; &gt;
+-       &lt;property name=&quot;margin&quot; &gt;
+-        &lt;number&gt;0&lt;/number&gt;
+-       &lt;/property&gt;
+        &lt;property name=&quot;spacing&quot; &gt;
+         &lt;number&gt;6&lt;/number&gt;
+        &lt;/property&gt;
++       &lt;property name=&quot;leftMargin&quot; &gt;
++        &lt;number&gt;0&lt;/number&gt;
++       &lt;/property&gt;
++       &lt;property name=&quot;topMargin&quot; &gt;
++        &lt;number&gt;0&lt;/number&gt;
++       &lt;/property&gt;
++       &lt;property name=&quot;rightMargin&quot; &gt;
++        &lt;number&gt;0&lt;/number&gt;
++       &lt;/property&gt;
++       &lt;property name=&quot;bottomMargin&quot; &gt;
++        &lt;number&gt;0&lt;/number&gt;
++       &lt;/property&gt;
+        &lt;item&gt;
+         &lt;widget class=&quot;QLineEdit&quot; name=&quot;username&quot; &gt;
+          &lt;property name=&quot;minimumSize&quot; &gt;
+@@ -105,9 +138,7 @@
+        &lt;item&gt;
+         &lt;widget class=&quot;QComboBox&quot; name=&quot;session&quot; &gt;
+          &lt;property name=&quot;sizePolicy&quot; &gt;
+-          &lt;sizepolicy&gt;
+-           &lt;hsizetype&gt;3&lt;/hsizetype&gt;
+-           &lt;vsizetype&gt;0&lt;/vsizetype&gt;
++          &lt;sizepolicy vsizetype=&quot;Fixed&quot; hsizetype=&quot;MinimumExpanding&quot; &gt;
+            &lt;horstretch&gt;0&lt;/horstretch&gt;
+            &lt;verstretch&gt;0&lt;/verstretch&gt;
+           &lt;/sizepolicy&gt;
+@@ -120,12 +151,21 @@
+    &lt;/item&gt;
+    &lt;item&gt;
+     &lt;layout class=&quot;QHBoxLayout&quot; &gt;
+-     &lt;property name=&quot;margin&quot; &gt;
+-      &lt;number&gt;0&lt;/number&gt;
+-     &lt;/property&gt;
+      &lt;property name=&quot;spacing&quot; &gt;
+       &lt;number&gt;6&lt;/number&gt;
+      &lt;/property&gt;
++     &lt;property name=&quot;leftMargin&quot; &gt;
++      &lt;number&gt;0&lt;/number&gt;
++     &lt;/property&gt;
++     &lt;property name=&quot;topMargin&quot; &gt;
++      &lt;number&gt;0&lt;/number&gt;
++     &lt;/property&gt;
++     &lt;property name=&quot;rightMargin&quot; &gt;
++      &lt;number&gt;0&lt;/number&gt;
++     &lt;/property&gt;
++     &lt;property name=&quot;bottomMargin&quot; &gt;
++      &lt;number&gt;0&lt;/number&gt;
++     &lt;/property&gt;
+      &lt;item&gt;
+       &lt;widget class=&quot;QPushButton&quot; name=&quot;configureButton&quot; &gt;
+        &lt;property name=&quot;text&quot; &gt;
+@@ -157,7 +197,6 @@
+    &lt;/item&gt;
+   &lt;/layout&gt;
+  &lt;/widget&gt;
+- &lt;pixmapfunction&gt;&lt;/pixmapfunction&gt;
+  &lt;resources/&gt;
+  &lt;connections/&gt;
+ &lt;/ui&gt;
+
+Modified: qtnx/logwindow.ui
+===================================================================
+--- qtnx/logwindow.ui	2008-02-05 01:31:50 UTC (rev 465)
++++ qtnx/logwindow.ui	2008-02-05 01:37:40 UTC (rev 466)
+@@ -1,7 +1,4 @@
+ &lt;ui version=&quot;4.0&quot; &gt;
+- &lt;author&gt;&lt;/author&gt;
+- &lt;comment&gt;&lt;/comment&gt;
+- &lt;exportmacro&gt;&lt;/exportmacro&gt;
+  &lt;class&gt;LogWindow&lt;/class&gt;
+  &lt;widget class=&quot;QDialog&quot; name=&quot;LogWindow&quot; &gt;
+   &lt;property name=&quot;geometry&quot; &gt;
+@@ -13,15 +10,24 @@
+    &lt;/rect&gt;
+   &lt;/property&gt;
+   &lt;property name=&quot;windowTitle&quot; &gt;
+-   &lt;string&gt;Dialog&lt;/string&gt;
++   &lt;string&gt;QtNX Logging Output&lt;/string&gt;
+   &lt;/property&gt;
+   &lt;layout class=&quot;QVBoxLayout&quot; &gt;
+-   &lt;property name=&quot;margin&quot; &gt;
+-    &lt;number&gt;9&lt;/number&gt;
+-   &lt;/property&gt;
+    &lt;property name=&quot;spacing&quot; &gt;
+     &lt;number&gt;6&lt;/number&gt;
+    &lt;/property&gt;
++   &lt;property name=&quot;leftMargin&quot; &gt;
++    &lt;number&gt;9&lt;/number&gt;
++   &lt;/property&gt;
++   &lt;property name=&quot;topMargin&quot; &gt;
++    &lt;number&gt;9&lt;/number&gt;
++   &lt;/property&gt;
++   &lt;property name=&quot;rightMargin&quot; &gt;
++    &lt;number&gt;9&lt;/number&gt;
++   &lt;/property&gt;
++   &lt;property name=&quot;bottomMargin&quot; &gt;
++    &lt;number&gt;9&lt;/number&gt;
++   &lt;/property&gt;
+    &lt;item&gt;
+     &lt;widget class=&quot;QTextEdit&quot; name=&quot;output&quot; &gt;
+      &lt;property name=&quot;font&quot; &gt;
+@@ -45,7 +51,6 @@
+    &lt;/item&gt;
+   &lt;/layout&gt;
+  &lt;/widget&gt;
+- &lt;pixmapfunction&gt;&lt;/pixmapfunction&gt;
+  &lt;resources/&gt;
+  &lt;connections/&gt;
+ &lt;/ui&gt;
+
+Modified: qtnx/qtnxwindow.cpp
+===================================================================
+--- qtnx/qtnxwindow.cpp	2008-02-05 01:31:50 UTC (rev 465)
++++ qtnx/qtnxwindow.cpp	2008-02-05 01:37:40 UTC (rev 466)
+@@ -37,6 +37,8 @@
+     sessionsDialog(NULL),
+     processProbe(new QTimer())
+ {
++    setWindowTitle(&quot;QtNX&quot;);
++
+     initialiseClient();
+ 
+     setupUI();
+
+Modified: qtnx/settingsdialog.ui
+===================================================================
+--- qtnx/settingsdialog.ui	2008-02-05 01:31:50 UTC (rev 465)
++++ qtnx/settingsdialog.ui	2008-02-05 01:37:40 UTC (rev 466)
+@@ -1,7 +1,4 @@
+ &lt;ui version=&quot;4.0&quot; &gt;
+- &lt;author&gt;&lt;/author&gt;
+- &lt;comment&gt;&lt;/comment&gt;
+- &lt;exportmacro&gt;&lt;/exportmacro&gt;
+  &lt;class&gt;SettingsDialog&lt;/class&gt;
+  &lt;widget class=&quot;QDialog&quot; name=&quot;SettingsDialog&quot; &gt;
+   &lt;property name=&quot;geometry&quot; &gt;
+@@ -13,18 +10,27 @@
+    &lt;/rect&gt;
+   &lt;/property&gt;
+   &lt;property name=&quot;windowTitle&quot; &gt;
+-   &lt;string&gt;Dialog&lt;/string&gt;
++   &lt;string&gt;QtNX Settings&lt;/string&gt;
+   &lt;/property&gt;
+   &lt;property name=&quot;modal&quot; &gt;
+    &lt;bool&gt;true&lt;/bool&gt;
+   &lt;/property&gt;
+   &lt;layout class=&quot;QVBoxLayout&quot; &gt;
+-   &lt;property name=&quot;margin&quot; &gt;
+-    &lt;number&gt;9&lt;/number&gt;
+-   &lt;/property&gt;
+    &lt;property name=&quot;spacing&quot; &gt;
+     &lt;number&gt;6&lt;/number&gt;
+    &lt;/property&gt;
++   &lt;property name=&quot;leftMargin&quot; &gt;
++    &lt;number&gt;9&lt;/number&gt;
++   &lt;/property&gt;
++   &lt;property name=&quot;topMargin&quot; &gt;
++    &lt;number&gt;9&lt;/number&gt;
++   &lt;/property&gt;
++   &lt;property name=&quot;rightMargin&quot; &gt;
++    &lt;number&gt;9&lt;/number&gt;
++   &lt;/property&gt;
++   &lt;property name=&quot;bottomMargin&quot; &gt;
++    &lt;number&gt;9&lt;/number&gt;
++   &lt;/property&gt;
+    &lt;item&gt;
+     &lt;widget class=&quot;QTabWidget&quot; name=&quot;layoutTabs&quot; &gt;
+      &lt;property name=&quot;currentIndex&quot; &gt;
+@@ -35,38 +41,63 @@
+        &lt;string&gt;Basic&lt;/string&gt;
+       &lt;/attribute&gt;
+       &lt;layout class=&quot;QVBoxLayout&quot; &gt;
+-       &lt;property name=&quot;margin&quot; &gt;
+-        &lt;number&gt;9&lt;/number&gt;
+-       &lt;/property&gt;
+        &lt;property name=&quot;spacing&quot; &gt;
+         &lt;number&gt;6&lt;/number&gt;
+        &lt;/property&gt;
++       &lt;property name=&quot;leftMargin&quot; &gt;
++        &lt;number&gt;9&lt;/number&gt;
++       &lt;/property&gt;
++       &lt;property name=&quot;topMargin&quot; &gt;
++        &lt;number&gt;9&lt;/number&gt;
++       &lt;/property&gt;
++       &lt;property name=&quot;rightMargin&quot; &gt;
++        &lt;number&gt;9&lt;/number&gt;
++       &lt;/property&gt;
++       &lt;property name=&quot;bottomMargin&quot; &gt;
++        &lt;number&gt;9&lt;/number&gt;
++       &lt;/property&gt;
+        &lt;item&gt;
+         &lt;widget class=&quot;QGroupBox&quot; name=&quot;generalGroup&quot; &gt;
+          &lt;property name=&quot;title&quot; &gt;
+           &lt;string&gt;General&lt;/string&gt;
+          &lt;/property&gt;
+          &lt;layout class=&quot;QVBoxLayout&quot; &gt;
+-          &lt;property name=&quot;margin&quot; &gt;
+-           &lt;number&gt;9&lt;/number&gt;
+-          &lt;/property&gt;
+           &lt;property name=&quot;spacing&quot; &gt;
+            &lt;number&gt;6&lt;/number&gt;
+           &lt;/property&gt;
++          &lt;property name=&quot;leftMargin&quot; &gt;
++           &lt;number&gt;9&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;topMargin&quot; &gt;
++           &lt;number&gt;9&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;rightMargin&quot; &gt;
++           &lt;number&gt;9&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;bottomMargin&quot; &gt;
++           &lt;number&gt;9&lt;/number&gt;
++          &lt;/property&gt;
+           &lt;item&gt;
+            &lt;layout class=&quot;QHBoxLayout&quot; &gt;
+-            &lt;property name=&quot;margin&quot; &gt;
+-             &lt;number&gt;0&lt;/number&gt;
+-            &lt;/property&gt;
+             &lt;property name=&quot;spacing&quot; &gt;
+              &lt;number&gt;6&lt;/number&gt;
+             &lt;/property&gt;
++            &lt;property name=&quot;leftMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;topMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;rightMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;bottomMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
+             &lt;item&gt;
+              &lt;widget class=&quot;QLabel&quot; name=&quot;sessionNameLabel&quot; &gt;
+               &lt;property name=&quot;sizePolicy&quot; &gt;
+-               &lt;sizepolicy&gt;
+-                &lt;hsizetype&gt;0&lt;/hsizetype&gt;
+-                &lt;vsizetype&gt;5&lt;/vsizetype&gt;
++               &lt;sizepolicy vsizetype=&quot;Preferred&quot; hsizetype=&quot;Fixed&quot; &gt;
+                 &lt;horstretch&gt;0&lt;/horstretch&gt;
+                 &lt;verstretch&gt;0&lt;/verstretch&gt;
+                &lt;/sizepolicy&gt;
+@@ -90,26 +121,42 @@
+           &lt;string&gt;Server&lt;/string&gt;
+          &lt;/property&gt;
+          &lt;layout class=&quot;QVBoxLayout&quot; &gt;
+-          &lt;property name=&quot;margin&quot; &gt;
+-           &lt;number&gt;9&lt;/number&gt;
+-          &lt;/property&gt;
+           &lt;property name=&quot;spacing&quot; &gt;
+            &lt;number&gt;6&lt;/number&gt;
+           &lt;/property&gt;
++          &lt;property name=&quot;leftMargin&quot; &gt;
++           &lt;number&gt;9&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;topMargin&quot; &gt;
++           &lt;number&gt;9&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;rightMargin&quot; &gt;
++           &lt;number&gt;9&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;bottomMargin&quot; &gt;
++           &lt;number&gt;9&lt;/number&gt;
++          &lt;/property&gt;
+           &lt;item&gt;
+            &lt;layout class=&quot;QHBoxLayout&quot; &gt;
+-            &lt;property name=&quot;margin&quot; &gt;
+-             &lt;number&gt;0&lt;/number&gt;
+-            &lt;/property&gt;
+             &lt;property name=&quot;spacing&quot; &gt;
+              &lt;number&gt;6&lt;/number&gt;
+             &lt;/property&gt;
++            &lt;property name=&quot;leftMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;topMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;rightMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;bottomMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
+             &lt;item&gt;
+              &lt;widget class=&quot;QLabel&quot; name=&quot;hostnameLabel&quot; &gt;
+               &lt;property name=&quot;sizePolicy&quot; &gt;
+-               &lt;sizepolicy&gt;
+-                &lt;hsizetype&gt;0&lt;/hsizetype&gt;
+-                &lt;vsizetype&gt;5&lt;/vsizetype&gt;
++               &lt;sizepolicy vsizetype=&quot;Preferred&quot; hsizetype=&quot;Fixed&quot; &gt;
+                 &lt;horstretch&gt;0&lt;/horstretch&gt;
+                 &lt;verstretch&gt;0&lt;/verstretch&gt;
+                &lt;/sizepolicy&gt;
+@@ -125,9 +172,7 @@
+             &lt;item&gt;
+              &lt;widget class=&quot;QLabel&quot; name=&quot;portLabel&quot; &gt;
+               &lt;property name=&quot;sizePolicy&quot; &gt;
+-               &lt;sizepolicy&gt;
+-                &lt;hsizetype&gt;0&lt;/hsizetype&gt;
+-                &lt;vsizetype&gt;5&lt;/vsizetype&gt;
++               &lt;sizepolicy vsizetype=&quot;Preferred&quot; hsizetype=&quot;Fixed&quot; &gt;
+                 &lt;horstretch&gt;0&lt;/horstretch&gt;
+                 &lt;verstretch&gt;0&lt;/verstretch&gt;
+                &lt;/sizepolicy&gt;
+@@ -139,12 +184,12 @@
+             &lt;/item&gt;
+             &lt;item&gt;
+              &lt;widget class=&quot;QSpinBox&quot; name=&quot;port&quot; &gt;
++              &lt;property name=&quot;minimum&quot; &gt;
++               &lt;number&gt;1&lt;/number&gt;
++              &lt;/property&gt;
+               &lt;property name=&quot;maximum&quot; &gt;
+                &lt;number&gt;65535&lt;/number&gt;
+               &lt;/property&gt;
+-              &lt;property name=&quot;minimum&quot; &gt;
+-               &lt;number&gt;1&lt;/number&gt;
+-              &lt;/property&gt;
+               &lt;property name=&quot;value&quot; &gt;
+                &lt;number&gt;22&lt;/number&gt;
+               &lt;/property&gt;
+@@ -154,12 +199,21 @@
+           &lt;/item&gt;
+           &lt;item&gt;
+            &lt;layout class=&quot;QHBoxLayout&quot; &gt;
+-            &lt;property name=&quot;margin&quot; &gt;
+-             &lt;number&gt;0&lt;/number&gt;
+-            &lt;/property&gt;
+             &lt;property name=&quot;spacing&quot; &gt;
+              &lt;number&gt;6&lt;/number&gt;
+             &lt;/property&gt;
++            &lt;property name=&quot;leftMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;topMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;rightMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;bottomMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
+             &lt;item&gt;
+              &lt;widget class=&quot;QCheckBox&quot; name=&quot;defaultKey&quot; &gt;
+               &lt;property name=&quot;text&quot; &gt;
+@@ -191,26 +245,42 @@
+           &lt;string&gt;Desktop&lt;/string&gt;
+          &lt;/property&gt;
+          &lt;layout class=&quot;QVBoxLayout&quot; &gt;
+-          &lt;property name=&quot;margin&quot; &gt;
+-           &lt;number&gt;9&lt;/number&gt;
+-          &lt;/property&gt;
+           &lt;property name=&quot;spacing&quot; &gt;
+            &lt;number&gt;6&lt;/number&gt;
+           &lt;/property&gt;
++          &lt;property name=&quot;leftMargin&quot; &gt;
++           &lt;number&gt;9&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;topMargin&quot; &gt;
++           &lt;number&gt;9&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;rightMargin&quot; &gt;
++           &lt;number&gt;9&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;bottomMargin&quot; &gt;
++           &lt;number&gt;9&lt;/number&gt;
++          &lt;/property&gt;
+           &lt;item&gt;
+            &lt;layout class=&quot;QHBoxLayout&quot; &gt;
+-            &lt;property name=&quot;margin&quot; &gt;
+-             &lt;number&gt;0&lt;/number&gt;
+-            &lt;/property&gt;
+             &lt;property name=&quot;spacing&quot; &gt;
+              &lt;number&gt;6&lt;/number&gt;
+             &lt;/property&gt;
++            &lt;property name=&quot;leftMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;topMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;rightMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;bottomMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
+             &lt;item&gt;
+              &lt;widget class=&quot;QLabel&quot; name=&quot;platformLabel&quot; &gt;
+               &lt;property name=&quot;sizePolicy&quot; &gt;
+-               &lt;sizepolicy&gt;
+-                &lt;hsizetype&gt;0&lt;/hsizetype&gt;
+-                &lt;vsizetype&gt;5&lt;/vsizetype&gt;
++               &lt;sizepolicy vsizetype=&quot;Preferred&quot; hsizetype=&quot;Fixed&quot; &gt;
+                 &lt;horstretch&gt;0&lt;/horstretch&gt;
+                 &lt;verstretch&gt;0&lt;/verstretch&gt;
+                &lt;/sizepolicy&gt;
+@@ -242,9 +312,7 @@
+             &lt;item&gt;
+              &lt;widget class=&quot;QLabel&quot; name=&quot;typeLabel&quot; &gt;
+               &lt;property name=&quot;sizePolicy&quot; &gt;
+-               &lt;sizepolicy&gt;
+-                &lt;hsizetype&gt;0&lt;/hsizetype&gt;
+-                &lt;vsizetype&gt;5&lt;/vsizetype&gt;
++               &lt;sizepolicy vsizetype=&quot;Preferred&quot; hsizetype=&quot;Fixed&quot; &gt;
+                 &lt;horstretch&gt;0&lt;/horstretch&gt;
+                 &lt;verstretch&gt;0&lt;/verstretch&gt;
+                &lt;/sizepolicy&gt;
+@@ -286,9 +354,7 @@
+             &lt;item&gt;
+              &lt;widget class=&quot;QLabel&quot; name=&quot;linkLabel&quot; &gt;
+               &lt;property name=&quot;sizePolicy&quot; &gt;
+-               &lt;sizepolicy&gt;
+-                &lt;hsizetype&gt;0&lt;/hsizetype&gt;
+-                &lt;vsizetype&gt;5&lt;/vsizetype&gt;
++               &lt;sizepolicy vsizetype=&quot;Preferred&quot; hsizetype=&quot;Fixed&quot; &gt;
+                 &lt;horstretch&gt;0&lt;/horstretch&gt;
+                 &lt;verstretch&gt;0&lt;/verstretch&gt;
+                &lt;/sizepolicy&gt;
+@@ -331,12 +397,21 @@
+           &lt;/item&gt;
+           &lt;item&gt;
+            &lt;layout class=&quot;QHBoxLayout&quot; &gt;
+-            &lt;property name=&quot;margin&quot; &gt;
+-             &lt;number&gt;0&lt;/number&gt;
+-            &lt;/property&gt;
+             &lt;property name=&quot;spacing&quot; &gt;
+              &lt;number&gt;6&lt;/number&gt;
+             &lt;/property&gt;
++            &lt;property name=&quot;leftMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;topMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;rightMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;bottomMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
+             &lt;item&gt;
+              &lt;spacer&gt;
+               &lt;property name=&quot;orientation&quot; &gt;
+@@ -371,26 +446,42 @@
+           &lt;string&gt;Geometry&lt;/string&gt;
+          &lt;/property&gt;
+          &lt;layout class=&quot;QVBoxLayout&quot; &gt;
+-          &lt;property name=&quot;margin&quot; &gt;
+-           &lt;number&gt;9&lt;/number&gt;
+-          &lt;/property&gt;
+           &lt;property name=&quot;spacing&quot; &gt;
+            &lt;number&gt;6&lt;/number&gt;
+           &lt;/property&gt;
++          &lt;property name=&quot;leftMargin&quot; &gt;
++           &lt;number&gt;9&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;topMargin&quot; &gt;
++           &lt;number&gt;9&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;rightMargin&quot; &gt;
++           &lt;number&gt;9&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;bottomMargin&quot; &gt;
++           &lt;number&gt;9&lt;/number&gt;
++          &lt;/property&gt;
+           &lt;item&gt;
+            &lt;layout class=&quot;QHBoxLayout&quot; &gt;
+-            &lt;property name=&quot;margin&quot; &gt;
+-             &lt;number&gt;0&lt;/number&gt;
+-            &lt;/property&gt;
+             &lt;property name=&quot;spacing&quot; &gt;
+              &lt;number&gt;6&lt;/number&gt;
+             &lt;/property&gt;
++            &lt;property name=&quot;leftMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;topMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;rightMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;bottomMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
+             &lt;item&gt;
+              &lt;widget class=&quot;QLabel&quot; name=&quot;resolutionLabel&quot; &gt;
+               &lt;property name=&quot;sizePolicy&quot; &gt;
+-               &lt;sizepolicy&gt;
+-                &lt;hsizetype&gt;0&lt;/hsizetype&gt;
+-                &lt;vsizetype&gt;5&lt;/vsizetype&gt;
++               &lt;sizepolicy vsizetype=&quot;Preferred&quot; hsizetype=&quot;Fixed&quot; &gt;
+                 &lt;horstretch&gt;0&lt;/horstretch&gt;
+                 &lt;verstretch&gt;0&lt;/verstretch&gt;
+                &lt;/sizepolicy&gt;
+@@ -432,9 +523,7 @@
+             &lt;item&gt;
+              &lt;widget class=&quot;QLabel&quot; name=&quot;compressionLabel&quot; &gt;
+               &lt;property name=&quot;sizePolicy&quot; &gt;
+-               &lt;sizepolicy&gt;
+-                &lt;hsizetype&gt;0&lt;/hsizetype&gt;
+-                &lt;vsizetype&gt;5&lt;/vsizetype&gt;
++               &lt;sizepolicy vsizetype=&quot;Preferred&quot; hsizetype=&quot;Fixed&quot; &gt;
+                 &lt;horstretch&gt;0&lt;/horstretch&gt;
+                 &lt;verstretch&gt;0&lt;/verstretch&gt;
+                &lt;/sizepolicy&gt;
+@@ -467,18 +556,25 @@
+           &lt;/item&gt;
+           &lt;item&gt;
+            &lt;layout class=&quot;QHBoxLayout&quot; &gt;
+-            &lt;property name=&quot;margin&quot; &gt;
+-             &lt;number&gt;0&lt;/number&gt;
+-            &lt;/property&gt;
+             &lt;property name=&quot;spacing&quot; &gt;
+              &lt;number&gt;6&lt;/number&gt;
+             &lt;/property&gt;
++            &lt;property name=&quot;leftMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;topMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;rightMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;bottomMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
+             &lt;item&gt;
+              &lt;widget class=&quot;QLabel&quot; name=&quot;qualityLabel&quot; &gt;
+               &lt;property name=&quot;sizePolicy&quot; &gt;
+-               &lt;sizepolicy&gt;
+-                &lt;hsizetype&gt;0&lt;/hsizetype&gt;
+-                &lt;vsizetype&gt;5&lt;/vsizetype&gt;
++               &lt;sizepolicy vsizetype=&quot;Preferred&quot; hsizetype=&quot;Fixed&quot; &gt;
+                 &lt;horstretch&gt;0&lt;/horstretch&gt;
+                 &lt;verstretch&gt;0&lt;/verstretch&gt;
+                &lt;/sizepolicy&gt;
+@@ -520,12 +616,21 @@
+           &lt;/item&gt;
+           &lt;item&gt;
+            &lt;layout class=&quot;QHBoxLayout&quot; &gt;
+-            &lt;property name=&quot;margin&quot; &gt;
+-             &lt;number&gt;0&lt;/number&gt;
+-            &lt;/property&gt;
+             &lt;property name=&quot;spacing&quot; &gt;
+              &lt;number&gt;6&lt;/number&gt;
+             &lt;/property&gt;
++            &lt;property name=&quot;leftMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;topMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;rightMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;bottomMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
+             &lt;item&gt;
+              &lt;widget class=&quot;QCheckBox&quot; name=&quot;render&quot; &gt;
+               &lt;property name=&quot;text&quot; &gt;
+@@ -539,9 +644,7 @@
+             &lt;item&gt;
+              &lt;widget class=&quot;QLabel&quot; name=&quot;widthLabel&quot; &gt;
+               &lt;property name=&quot;sizePolicy&quot; &gt;
+-               &lt;sizepolicy&gt;
+-                &lt;hsizetype&gt;0&lt;/hsizetype&gt;
+-                &lt;vsizetype&gt;5&lt;/vsizetype&gt;
++               &lt;sizepolicy vsizetype=&quot;Preferred&quot; hsizetype=&quot;Fixed&quot; &gt;
+                 &lt;horstretch&gt;0&lt;/horstretch&gt;
+                 &lt;verstretch&gt;0&lt;/verstretch&gt;
+                &lt;/sizepolicy&gt;
+@@ -567,9 +670,7 @@
+             &lt;item&gt;
+              &lt;widget class=&quot;QLabel&quot; name=&quot;heightLabel&quot; &gt;
+               &lt;property name=&quot;sizePolicy&quot; &gt;
+-               &lt;sizepolicy&gt;
+-                &lt;hsizetype&gt;0&lt;/hsizetype&gt;
+-                &lt;vsizetype&gt;5&lt;/vsizetype&gt;
++               &lt;sizepolicy vsizetype=&quot;Preferred&quot; hsizetype=&quot;Fixed&quot; &gt;
+                 &lt;horstretch&gt;0&lt;/horstretch&gt;
+                 &lt;verstretch&gt;0&lt;/verstretch&gt;
+                &lt;/sizepolicy&gt;
+@@ -604,24 +705,42 @@
+        &lt;string&gt;Advanced&lt;/string&gt;
+       &lt;/attribute&gt;
+       &lt;layout class=&quot;QVBoxLayout&quot; &gt;
+-       &lt;property name=&quot;margin&quot; &gt;
+-        &lt;number&gt;9&lt;/number&gt;
+-       &lt;/property&gt;
+        &lt;property name=&quot;spacing&quot; &gt;
+         &lt;number&gt;6&lt;/number&gt;
+        &lt;/property&gt;
++       &lt;property name=&quot;leftMargin&quot; &gt;
++        &lt;number&gt;9&lt;/number&gt;
++       &lt;/property&gt;
++       &lt;property name=&quot;topMargin&quot; &gt;
++        &lt;number&gt;9&lt;/number&gt;
++       &lt;/property&gt;
++       &lt;property name=&quot;rightMargin&quot; &gt;
++        &lt;number&gt;9&lt;/number&gt;
++       &lt;/property&gt;
++       &lt;property name=&quot;bottomMargin&quot; &gt;
++        &lt;number&gt;9&lt;/number&gt;
++       &lt;/property&gt;
+        &lt;item&gt;
+         &lt;widget class=&quot;QGroupBox&quot; name=&quot;networkGroup&quot; &gt;
+          &lt;property name=&quot;title&quot; &gt;
+           &lt;string&gt;Network&lt;/string&gt;
+          &lt;/property&gt;
+          &lt;layout class=&quot;QVBoxLayout&quot; &gt;
+-          &lt;property name=&quot;margin&quot; &gt;
+-           &lt;number&gt;9&lt;/number&gt;
+-          &lt;/property&gt;
+           &lt;property name=&quot;spacing&quot; &gt;
+            &lt;number&gt;6&lt;/number&gt;
+           &lt;/property&gt;
++          &lt;property name=&quot;leftMargin&quot; &gt;
++           &lt;number&gt;9&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;topMargin&quot; &gt;
++           &lt;number&gt;9&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;rightMargin&quot; &gt;
++           &lt;number&gt;9&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;bottomMargin&quot; &gt;
++           &lt;number&gt;9&lt;/number&gt;
++          &lt;/property&gt;
+           &lt;item&gt;
+            &lt;widget class=&quot;QCheckBox&quot; name=&quot;encryption&quot; &gt;
+             &lt;property name=&quot;text&quot; &gt;
+@@ -641,26 +760,42 @@
+           &lt;string&gt;Cache&lt;/string&gt;
+          &lt;/property&gt;
+          &lt;layout class=&quot;QVBoxLayout&quot; &gt;
+-          &lt;property name=&quot;margin&quot; &gt;
+-           &lt;number&gt;9&lt;/number&gt;
+-          &lt;/property&gt;
+           &lt;property name=&quot;spacing&quot; &gt;
+            &lt;number&gt;6&lt;/number&gt;
+           &lt;/property&gt;
++          &lt;property name=&quot;leftMargin&quot; &gt;
++           &lt;number&gt;9&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;topMargin&quot; &gt;
++           &lt;number&gt;9&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;rightMargin&quot; &gt;
++           &lt;number&gt;9&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;bottomMargin&quot; &gt;
++           &lt;number&gt;9&lt;/number&gt;
++          &lt;/property&gt;
+           &lt;item&gt;
+            &lt;layout class=&quot;QHBoxLayout&quot; &gt;
+-            &lt;property name=&quot;margin&quot; &gt;
+-             &lt;number&gt;0&lt;/number&gt;
+-            &lt;/property&gt;
+             &lt;property name=&quot;spacing&quot; &gt;
+              &lt;number&gt;6&lt;/number&gt;
+             &lt;/property&gt;
++            &lt;property name=&quot;leftMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;topMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;rightMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;bottomMargin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
+             &lt;item&gt;
+              &lt;widget class=&quot;QLabel&quot; name=&quot;memoryLabel&quot; &gt;
+               &lt;property name=&quot;sizePolicy&quot; &gt;
+-               &lt;sizepolicy&gt;
+-                &lt;hsizetype&gt;0&lt;/hsizetype&gt;
+-                &lt;vsizetype&gt;5&lt;/vsizetype&gt;
++               &lt;sizepolicy vsizetype=&quot;Preferred&quot; hsizetype=&quot;Fixed&quot; &gt;
+                 &lt;horstretch&gt;0&lt;/horstretch&gt;
+                 &lt;verstretch&gt;0&lt;/verstretch&gt;
+                &lt;/sizepolicy&gt;
+@@ -690,9 +825,7 @@
+             &lt;item&gt;
+              &lt;widget class=&quot;QLabel&quot; name=&quot;diskLabel&quot; &gt;
+               &lt;property name=&quot;sizePolicy&quot; &gt;
+-               &lt;sizepolicy&gt;
+-                &lt;hsizetype&gt;0&lt;/hsizetype&gt;
+-                &lt;vsizetype&gt;5&lt;/vsizetype&gt;
++               &lt;sizepolicy vsizetype=&quot;Preferred&quot; hsizetype=&quot;Fixed&quot; &gt;
+                 &lt;horstretch&gt;0&lt;/horstretch&gt;
+                 &lt;verstretch&gt;0&lt;/verstretch&gt;
+                &lt;/sizepolicy&gt;
+@@ -743,12 +876,21 @@
+    &lt;/item&gt;
+    &lt;item&gt;
+     &lt;layout class=&quot;QHBoxLayout&quot; &gt;
+-     &lt;property name=&quot;margin&quot; &gt;
+-      &lt;number&gt;0&lt;/number&gt;
+-     &lt;/property&gt;
+      &lt;property name=&quot;spacing&quot; &gt;
+       &lt;number&gt;6&lt;/number&gt;
+      &lt;/property&gt;
++     &lt;property name=&quot;leftMargin&quot; &gt;
++      &lt;number&gt;0&lt;/number&gt;
++     &lt;/property&gt;
++     &lt;property name=&quot;topMargin&quot; &gt;
++      &lt;number&gt;0&lt;/number&gt;
++     &lt;/property&gt;
++     &lt;property name=&quot;rightMargin&quot; &gt;
++      &lt;number&gt;0&lt;/number&gt;
++     &lt;/property&gt;
++     &lt;property name=&quot;bottomMargin&quot; &gt;
++      &lt;number&gt;0&lt;/number&gt;
++     &lt;/property&gt;
+      &lt;item&gt;
+       &lt;widget class=&quot;QPushButton&quot; name=&quot;cancelButton&quot; &gt;
+        &lt;property name=&quot;text&quot; &gt;
+@@ -787,7 +929,6 @@
+    &lt;/item&gt;
+   &lt;/layout&gt;
+  &lt;/widget&gt;
+- &lt;pixmapfunction&gt;&lt;/pixmapfunction&gt;
+  &lt;resources/&gt;
+  &lt;connections/&gt;
+ &lt;/ui&gt;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000591.html">[Freenx-cvs] r465 - qtnx
+</A></li>
+	<LI>Next message: <A HREF="000593.html">[Freenx-cvs] r467 - nxcl/lib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#592">[ date ]</a>
+              <a href="thread.html#592">[ thread ]</a>
+              <a href="subject.html#592">[ subject ]</a>
+              <a href="author.html#592">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

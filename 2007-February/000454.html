@@ -1,0 +1,90 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r320 - nx-utils/nxspeex
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r320%20-%20nx-utils/nxspeex&In-Reply-To=%3C200702061134.l16BY5ks000116%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000453.html">
+   <LINK REL="Next"  HREF="000455.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r320 - nx-utils/nxspeex</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r320%20-%20nx-utils/nxspeex&In-Reply-To=%3C200702061134.l16BY5ks000116%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r320 - nx-utils/nxspeex">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Tue Feb  6 12:34:05 CET 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000453.html">[Freenx-cvs] r319 - nx-utils/nxspeex
+</A></li>
+        <LI>Next message: <A HREF="000455.html">[Freenx-cvs] r321 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#454">[ date ]</a>
+              <a href="thread.html#454">[ thread ]</a>
+              <a href="subject.html#454">[ subject ]</a>
+              <a href="author.html#454">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-02-06 12:34:03 +0100 (Tue, 06 Feb 2007)
+New Revision: 320
+
+Modified:
+   nx-utils/nxspeex/README
+Log:
+Added some more issues with current version.
+
+
+
+Modified: nx-utils/nxspeex/README
+===================================================================
+--- nx-utils/nxspeex/README	2007-02-06 08:23:07 UTC (rev 319)
++++ nx-utils/nxspeex/README	2007-02-06 11:34:03 UTC (rev 320)
+@@ -39,6 +39,12 @@
+ 
+ Note:
+ 
++- No 8 bit files are supported until now.
++
++- ESD_MIXER and other ESD commands are just discarded.
++
++- Latency issues:
++
+ Its not yet perfect, as it depends on latency being quite low at the moment.
+ 
+ To remove this limitation, nxspeex should check via select if there is a heartbeat and just if it can't find one in a certain latency limit, do the real read and resync.
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000453.html">[Freenx-cvs] r319 - nx-utils/nxspeex
+</A></li>
+	<LI>Next message: <A HREF="000455.html">[Freenx-cvs] r321 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#454">[ date ]</a>
+              <a href="thread.html#454">[ thread ]</a>
+              <a href="subject.html#454">[ subject ]</a>
+              <a href="author.html#454">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

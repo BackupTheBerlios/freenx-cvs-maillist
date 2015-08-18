@@ -1,0 +1,215 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fabianx modified 4 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%204%20files&In-Reply-To=%3C420F82B4.mailHWD12TBWU%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000006.html">
+   <LINK REL="Next"  HREF="000008.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fabianx modified 4 files</H1>
+    <B>fabianx</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%204%20files&In-Reply-To=%3C420F82B4.mailHWD12TBWU%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fabianx modified 4 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Sun Feb 13 17:39:16 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000006.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+        <LI>Next message: <A HREF="000008.html">[Freenx-cvs] CVS: freenx - fabianx modified nxserver
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7">[ date ]</a>
+              <a href="thread.html#7">[ thread ]</a>
+              <a href="subject.html#7">[ subject ]</a>
+              <a href="author.html#7">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fabianx
+Date:      2005-02-13 16:39:16 GMT
+Modified:  .        ChangeLog gentoo-nomachine.diff nxkeygen nxsetup
+Log:
+Added blocking of port-forwarding, X11-forwarding, ... to nxkeygen and default NoMachine key in nxsetup.
+
+Revision  Changes    Path
+1.13      +1 -0      freenx/ChangeLog
+
+
+rev 1.13, prev_rev 1.12
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.12
+retrieving revision 1.13
+diff -u -r1.12 -r1.13
+--- ChangeLog	13 Feb 2005 15:29:18 -0000	1.12
++++ ChangeLog	13 Feb 2005 16:39:16 -0000	1.13
+@@ -19,6 +19,7 @@
+ 	  and added configuration directive to enable rootless mode.
+ 	* Added nxsetup --uninstall and added more feature to nxsetup.
+ 	  Note: You need to use nxsetup --install for installation now.
++	* Added Disabling of port-forwarding, X11-forwarding, ... to ssh-key.
+ 
+ 20.11.2004 FreeNX 0.2.7 &quot;Skolelinux Edition&quot;
+ 	* Fix nxserver to work again with KNX-Client. ('\r' is evil)
+
+
+
+1.10      +10 -8     freenx/gentoo-nomachine.diff
+
+
+rev 1.10, prev_rev 1.9
+Index: gentoo-nomachine.diff
+===================================================================
+RCS file: /cvsroot/freenx/freenx/gentoo-nomachine.diff,v
+retrieving revision 1.9
+retrieving revision 1.10
+diff -u -r1.9 -r1.10
+--- gentoo-nomachine.diff	12 Feb 2005 14:44:21 -0000	1.9
++++ gentoo-nomachine.diff	13 Feb 2005 16:39:16 -0000	1.10
+@@ -11,21 +11,23 @@
+  . $NX_CONFIG_FILE
+ --- nxkeygen.old	2005-02-01 01:02:19.000000000 +0100
+ +++ nxkeygen	2005-02-01 01:04:39.000000000 +0100
+-@@ -51,9 +51,6 @@
+- 		chmod 600 $x
++@@ -52,11 +52,6 @@
+  		chown nx:root $x
+  	done
+--	
++ 	
+ -	# copy the key to the authorized_keys2 file
+--	cp -af ${NX_SERVER_KEY} $NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE
+- 
++-	rm -f $NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE
++-	echo -n &quot;no-port-forwarding,no-X11-forwarding,no-agent-forwarding,command=\&quot;nxserver\&quot; &quot; &gt;$NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE
++-	cat ${NX_SERVER_KEY} &gt;&gt; $NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE
++-
+  	# now tell the user what to do
+  
++ 	echo &quot;Unique key generated; your users must install&quot;
+ --- node.conf.old	2005-02-01 01:02:27.000000000 +0100
+ +++ node.conf	2005-02-01 01:04:05.000000000 +0100
+-@@ -12,12 +12,12 @@
++@@ -39,12 +39,12 @@
+  # Path directives
+- # These tells freeNX where various files is to be found
++ # These tell FreeNX where various files are to be found
+  
+ -NX_DIR=/usr
+ +NX_DIR=/usr/NX
+@@ -40,7 +42,7 @@
+  
+  # Logfile directives
+  # Before turning logging on, please make sure that NX_LOGFILE is 
+-@@ -124,4 +124,4 @@
++@@ -185,4 +185,4 @@
+  NX_AUTHORIZED_KEYS_FILE=.ssh/authorized_keys2
+  
+  # adds LD_LIBRARY_PATH to the startup of nxagents
+
+
+
+1.6       +4 -2      freenx/nxkeygen
+
+
+rev 1.6, prev_rev 1.5
+Index: nxkeygen
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxkeygen,v
+retrieving revision 1.5
+retrieving revision 1.6
+diff -u -r1.5 -r1.6
+--- nxkeygen	12 Feb 2005 14:44:21 -0000	1.5
++++ nxkeygen	13 Feb 2005 16:39:16 -0000	1.6
+@@ -11,7 +11,7 @@
+ # Copyright	(c) 2004 Gentoo Foundation
+ #		Released under v2 of the GNU GPL
+ #
+-# CVS: $Id: nxkeygen,v 1.5 2005/02/12 14:44:21 fabianx Exp $
++# CVS: $Id: nxkeygen,v 1.6 2005/02/13 16:39:16 fabianx Exp $
+ #
+ # ========================================================================
+ 
+@@ -53,7 +53,9 @@
+ 	done
+ 	
+ 	# copy the key to the authorized_keys2 file
+-	cp -af ${NX_SERVER_KEY} $NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE
++	rm -f $NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE
++	echo -n &quot;no-port-forwarding,no-X11-forwarding,no-agent-forwarding,command=\&quot;nxserver\&quot; &quot; &gt;$NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE
++	cat ${NX_SERVER_KEY} &gt;&gt; $NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE
+ 
+ 	# now tell the user what to do
+ 
+
+
+
+1.10      +2 -2      freenx/nxsetup
+
+
+rev 1.10, prev_rev 1.9
+Index: nxsetup
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxsetup,v
+retrieving revision 1.9
+retrieving revision 1.10
+diff -u -r1.9 -r1.10
+--- nxsetup	13 Feb 2005 15:29:18 -0000	1.9
++++ nxsetup	13 Feb 2005 16:39:16 -0000	1.10
+@@ -5,7 +5,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxsetup,v 1.9 2005/02/13 15:29:18 fabianx Exp $ 
++# CVS: $Id: nxsetup,v 1.10 2005/02/13 16:39:16 fabianx Exp $ 
+ #
+ 
+ HELP=&quot;no&quot;
+@@ -124,7 +124,7 @@
+ 		if [ &quot;$SETUP_NOMACHINE_KEY&quot; = &quot;yes&quot; ]
+ 		then
+ 			cat &lt;&lt; EOF &gt;$NX_HOME_DIR/$NX_AUTHORIZED_KEYS_FILE
+-ssh-dss AAAAB3NzaC1kc3MAAACBAJe/0DNBePG9dYLWq7cJ0SqyRf1iiZN/IbzrmBvgPTZnBa5FT/0Lcj39sRYt1paAlhchwUmwwIiSZaON5JnJOZ6jKkjWIuJ9MdTGfdvtY1aLwDMpxUVoGwEaKWOyin02IPWYSkDQb6cceuG9NfPulS9iuytdx0zIzqvGqfvudtufAAAAFQCwosRXR2QA8OSgFWSO6+kGrRJKiwAAAIEAjgvVNAYWSrnFD+cghyJbyx60AAjKtxZ0r/Pn9k94Qt2rvQoMnGgt/zU0v/y4hzg+g3JNEmO1PdHh/wDPVOxlZ6Hb5F4IQnENaAZ9uTZiFGqhBO1c8Wwjiq/MFZy3jZaidarLJvVs8EeT4mZcWxwm7nIVD4lRU2wQ2lj4aTPcepMAAACANlgcCuA4wrC+3Cic9CFkqiwO/Rn1vk8dvGuEQqFJ6f6LVfPfRTfaQU7TGVLk2CzY4dasrwxJ1f6FsT8DHTNGnxELPKRuLstGrFY/PR7KeafeFZDf+fJ3mbX5nxrld3wi5titTnX+8s4IKv29HJguPvOK/SI7cjzA+SqNfD7qEo8= <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">root at nettuno</A>
++no-port-forwarding,no-X11-forwarding,no-agent-forwarding,command=&quot;nxserver&quot; ssh-dss AAAAB3NzaC1kc3MAAACBAJe/0DNBePG9dYLWq7cJ0SqyRf1iiZN/IbzrmBvgPTZnBa5FT/0Lcj39sRYt1paAlhchwUmwwIiSZaON5JnJOZ6jKkjWIuJ9MdTGfdvtY1aLwDMpxUVoGwEaKWOyin02IPWYSkDQb6cceuG9NfPulS9iuytdx0zIzqvGqfvudtufAAAAFQCwosRXR2QA8OSgFWSO6+kGrRJKiwAAAIEAjgvVNAYWSrnFD+cghyJbyx60AAjKtxZ0r/Pn9k94Qt2rvQoMnGgt/zU0v/y4hzg+g3JNEmO1PdHh/wDPVOxlZ6Hb5F4IQnENaAZ9uTZiFGqhBO1c8Wwjiq/MFZy3jZaidarLJvVs8EeT4mZcWxwm7nIVD4lRU2wQ2lj4aTPcepMAAACANlgcCuA4wrC+3Cic9CFkqiwO/Rn1vk8dvGuEQqFJ6f6LVfPfRTfaQU7TGVLk2CzY4dasrwxJ1f6FsT8DHTNGnxELPKRuLstGrFY/PR7KeafeFZDf+fJ3mbX5nxrld3wi5titTnX+8s4IKv29HJguPvOK/SI7cjzA+SqNfD7qEo8= <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">root at nettuno</A>
+ EOF
+ 		else
+ 			# generate a new key, backup the old and copy it to $NX_AUTHORIZED_KEYS_FILE
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000006.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+	<LI>Next message: <A HREF="000008.html">[Freenx-cvs] CVS: freenx - fabianx modified nxserver
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7">[ date ]</a>
+              <a href="thread.html#7">[ thread ]</a>
+              <a href="subject.html#7">[ subject ]</a>
+              <a href="author.html#7">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

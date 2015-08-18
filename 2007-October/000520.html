@@ -1,0 +1,112 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r391 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-October/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r391%20-%20freenx-server/trunk&In-Reply-To=%3C200710012014.l91KE9d0014921%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000521.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r391 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r391%20-%20freenx-server/trunk&In-Reply-To=%3C200710012014.l91KE9d0014921%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r391 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Mon Oct  1 22:14:09 CEST 2007</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000521.html">[Freenx-cvs] r392 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#520">[ date ]</a>
+              <a href="thread.html#520">[ thread ]</a>
+              <a href="subject.html#520">[ subject ]</a>
+              <a href="author.html#520">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-10-01 22:14:08 +0200 (Mon, 01 Oct 2007)
+New Revision: 391
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxloadconfig
+Log:
+* Fixed setting up KDE_PRINTRC altogether if ENABLE_KDE_CUPS is not 1,
+  and handles errors better when it is but kde-config is not available
+  or fails.
+  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">scop at bat.berlios.de</A>)
+
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-09-18 14:30:08 UTC (rev 390)
++++ freenx-server/trunk/ChangeLog	2007-10-01 20:14:08 UTC (rev 391)
+@@ -46,6 +46,10 @@
+ 	* Fixed diverse occurences of $sess_id in nxnode, when hostname
+ 	  contains whitespace.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Fixed setting up KDE_PRINTRC altogether if ENABLE_KDE_CUPS is not 1,
++	  and handles errors better when it is but kde-config is not available
++	  or fails.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">scop at bat.berlios.de</A>)
+ 
+ 07.07.2007 FreeNX 0.7.0 &quot;Jornade SPL Edition VI+1&quot;
+ 	* Fixed the printing support for CUPS 1.2.
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2007-09-18 14:30:08 UTC (rev 390)
++++ freenx-server/trunk/nxloadconfig	2007-10-01 20:14:08 UTC (rev 391)
+@@ -292,9 +292,12 @@
+ 	[ -z &quot;$(strings $PATH_BIN/nxagent | egrep 'NXAGENT - Version 2.[01].0')&quot; ] &amp;&amp; ENABLE_2_0_0_BACKEND=&quot;0&quot;
+ fi 
+ 
+-[ -z &quot;$KDE_PRINTRC&quot; -a -n &quot;$KDEHOME&quot; ] &amp;&amp; KDE_PRINTRC=&quot;$KDEHOME/share/config/kdeprintrc&quot;
+-[ -z &quot;$KDE_PRINTRC&quot; ] &amp;&amp; KDE_PRINTRC=$(kde-config --localprefix)&quot;/share/config/kdeprintrc&quot;
+-[ -z &quot;$KDE_PRINTRC&quot; -o ! -r &quot;$KDE_PRINTRC&quot; ] &amp;&amp; KDE_PRINTRC=&quot;$HOME/.kde/share/config/kdeprintrc&quot;
++if [ &quot;$ENABLE_KDE_CUPS&quot; = &quot;1&quot; ]
++then
++	[ -z &quot;$KDE_PRINTRC&quot; -a -n &quot;$KDEHOME&quot; ] &amp;&amp; KDE_PRINTRC=&quot;$KDEHOME/share/config/kdeprintrc&quot;
++	[ -z &quot;$KDE_PRINTRC&quot; ] &amp;&amp; which kde-config &gt;/dev/null 2&gt;&amp;1 &amp;&amp; KDE_PRINTRC=$(kde-config --localprefix 2&gt;/dev/null)&quot;/share/config/kdeprintrc&quot;
++	[ -z &quot;$KDE_PRINTRC&quot; -o ! -r &quot;$KDE_PRINTRC&quot; ] &amp;&amp; KDE_PRINTRC=&quot;$HOME/.kde/share/config/kdeprintrc&quot;
++fi
+ 
+ #########################################################################
+ # Support for --check
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000521.html">[Freenx-cvs] r392 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#520">[ date ]</a>
+              <a href="thread.html#520">[ thread ]</a>
+              <a href="subject.html#520">[ subject ]</a>
+              <a href="author.html#520">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

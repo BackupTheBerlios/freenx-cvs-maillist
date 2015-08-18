@@ -1,0 +1,278 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r350 - freenx-redesign/server/compatibility
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-July/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r350%20-%20freenx-redesign/server/compatibility&In-Reply-To=%3C200707061647.l66GlHnL025097%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000482.html">
+   <LINK REL="Next"  HREF="000484.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r350 - freenx-redesign/server/compatibility</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r350%20-%20freenx-redesign/server/compatibility&In-Reply-To=%3C200707061647.l66GlHnL025097%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r350 - freenx-redesign/server/compatibility">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Fri Jul  6 18:47:17 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000482.html">[Freenx-cvs] r349 - freenx-redesign/server/compatibility
+</A></li>
+        <LI>Next message: <A HREF="000484.html">[Freenx-cvs] r351 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#483">[ date ]</a>
+              <a href="thread.html#483">[ thread ]</a>
+              <a href="subject.html#483">[ subject ]</a>
+              <a href="author.html#483">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-07-06 18:47:15 +0200 (Fri, 06 Jul 2007)
+New Revision: 350
+
+Added:
+   freenx-redesign/server/compatibility/nxserver-login-hook
+   freenx-redesign/server/compatibility/nxserver-login-userhook
+Modified:
+   freenx-redesign/server/compatibility/nxserver-login
+   freenx-redesign/server/compatibility/nxserver-login-helper
+Log:
+Added hook scripts to do ssh | su + user check.
+
+
+
+Modified: freenx-redesign/server/compatibility/nxserver-login
+===================================================================
+--- freenx-redesign/server/compatibility/nxserver-login	2007-07-05 16:58:23 UTC (rev 349)
++++ freenx-redesign/server/compatibility/nxserver-login	2007-07-06 16:47:15 UTC (rev 350)
+@@ -10,7 +10,7 @@
+ # Used configuration keys:
+ #
+ # @param NXSERVER_LOGIN_AUTHENTICATION_METHOD Authentication method to use. (ssh|su)
+-# @param NXSERVER_LOGIN_HOOK_CHECK_VALID_USER Script to run to check if user is allowed. (executable script)
++# @param NXSERVER_LOGIN_HOOK_LOGIN_USER Script run to login the user. (executable script)
+ #
+ # Used internal subfunctions:
+ # 
+@@ -63,15 +63,14 @@
+ #
+ # @faq &quot;What about the USERMODE? Why was it removed?&quot; &quot;The usermode is now one of the default modes of FreeNX. nxserver-login really is only a small wrapper to remain compatible with old clients.&quot;
+ #
+-# @faq &quot;How can I restrict the users that are able to run an nxsession?&quot; &quot;You can set the configuration key NXSERVER_LOGIN_HOOK_CHECK_VALID_USER in nxserver-login.cfg to a custom script, which gets the username of the user to check as the first parameter. You can then use whatever method you want to check if the user is allowed to do so. An exit status of 0 means that the user is allowed to login. An exit status of 1 means that the user is not allowed to login. To give you just some ideas: file with names, part of group, LDAP, ... are all possible ways to check this.&quot;
++# @faq &quot;How can I restrict the users that are able to run an nxsession?&quot; &quot;You can set the configuration key NXSERVER_LOGIN_HOOK_LOGIN_USER in nxserver-login.cfg to a custom script. This script gets the following parameters: &lt;authentication method&gt; &lt;username&gt; &lt;executable&gt; &lt;parameters&gt;. You can then control if the user is allowed to do so, before doing the actual login. To give you just some ideas: file with names, part of group, LDAP, ... are all possible ways to check this. There is an example script in examples/ called nxserver-login-userhook, which you can use as a basis.&quot;
+ #
+ # SVN: $Id$
+ #
+ 
+ # Defaults for configuration keys
+-NXSERVER_LOGIN_HOOK_CHECK_VALID_USER=&quot;&quot;
++NXSERVER_LOGIN_HOOK_LOGIN_USER=&quot;&quot;
+ NXSERVER_LOGIN_AUTHENTICATION_METHOD=&quot;su&quot;
+-NXSERVER_LOGIN_SSH_PORT=&quot;22&quot;
+ 
+ #Read the nxserver-login.cfg file and load some helper functions
+ #. $(PATH=$(cd $(dirname $0) &amp;&amp; pwd):$PATH which nxloadconfig) -- --config=nxserver-login || { echo &quot;NX 503&gt; Internal server error. nxloadconfig could not be loaded.&quot;; exit 1; }
+@@ -104,6 +103,12 @@
+ 
+ # Re-check configuration keys
+ 
++if [ -n &quot;$NXSERVER_LOGIN_HOOK_LOGIN_USER&quot; -a ! -x &quot;$NXSERVER_LOGIN_HOOK_LOGIN_USER&quot; ]
++then
++	log $LOG_WARN $&quot;Warning: Configuration key NXSERVER_LOGIN_HOOK_LOGIN_USER=$NXSERVER_LOGIN_HOOK_LOGIN_USER is invalid. Reset to \&quot;\&quot;.&quot;
++	NXSERVER_LOGIN_HOOK_LOGIN_USER=&quot;&quot;
++fi
++
+ case &quot;$NXSERVER_LOGIN_AUTHENTICATION_METHOD&quot; in
+ 	ssh|su)
+ 	;;
+@@ -113,11 +118,6 @@
+ 	;;
+ esac
+ 
+-if [ -n &quot;$NXSERVER_LOGIN_HOOK_CHECK_VALID_USER&quot; -a ! -x &quot;$NXSERVER_LOGIN_HOOK_CHECK_VALID_USER&quot; ]
+-then
+-	log $LOG_WARN $&quot;Warning: Configuration key NXSERVER_LOGIN_HOOK_CHECK_VALID_USER=$NXSERVER_LOGIN_HOOK_CHECK_VALID_USER is invalid. Reset to \&quot;\&quot;.&quot;
+-	NXSERVER_LOGIN_HOOK_CHECK_VALID_USER=&quot;&quot;
+-fi
+ 
+ # helper functions
+ 
+@@ -174,21 +174,12 @@
+ 			echo_x &quot;&quot;
+ 			log $LOG_INFO $&quot;Info: Using authentication method $NXSERVER_LOGIN_AUTHENTICATION_METHOD for user $USER.&quot;
+ 
+-			AUTHENTICATION_FAILED=&quot;0&quot;
++			NODE_HOOK_LOGIN=&quot;$PATH_BIN/nxserver-login-hook&quot;
++			[ -n &quot;$NXSERVER_LOGIN_HOOK_LOGIN_USER&quot; ] &amp;&amp; NODE_HOOK_LOGIN=&quot;$NXSERVER_LOGIN_HOOK_LOGIN_USER&quot;
++			export NODE_HOOK_LOGIN
+ 
+-			# check if user is allowed to run a session
+-			if [ -n &quot;$NXSERVER_LOGIN_HOOK_CHECK_VALID_USER&quot; ]
+-			then
+-				log $LOG_INFO $&quot;Info: Running hook to check if user is allowed to run a nx session: $NXSERVER_LOGIN_HOOK_CHECK_VALID_USER.&quot;
+-				$NXSERVER_LOGIN_HOOK_CHECK_VALID_USER &quot;$USER&quot; || AUTHENTICATION_FAILED=&quot;1&quot;
+-				log $LOG_INFO $&quot;Info: Hook $NXSERVER_LOGIN_HOOK_CHECK_VALID_USER exited with status $AUTHENTICATION_FAILED.&quot;
+-			fi
+-
+-			if [ &quot;$AUTHENTICATION_FAILED&quot; = &quot;0&quot; ]
+-			then
+-				NODE_PASSWORD=&quot;$PASS&quot; $PATH_BIN/nxserver-login-helper -- $NXSERVER_LOGIN_AUTHENTICATION_METHOD &quot;$USER&quot; &quot;$PATH_BIN/nxserver-suid&quot; &quot;--proto=$PROTO&quot;
+-				AUTHENTICATION_FAILED=&quot;$?&quot;
+-			fi
++			NODE_PASSWORD=&quot;$PASS&quot; $PATH_BIN/nxserver-login-helper -- &quot;$NXSERVER_LOGIN_AUTHENTICATION_METHOD&quot; &quot;$USER&quot; &quot;$PATH_BIN/nxserver-suid&quot; &quot;--proto=$PROTO&quot;
++			AUTHENTICATION_FAILED=&quot;$?&quot;
+ 			
+ 			if [ &quot;$AUTHENTICATION_FAILED&quot; = &quot;1&quot; ]
+ 			then
+
+Modified: freenx-redesign/server/compatibility/nxserver-login-helper
+===================================================================
+--- freenx-redesign/server/compatibility/nxserver-login-helper	2007-07-05 16:58:23 UTC (rev 349)
++++ freenx-redesign/server/compatibility/nxserver-login-helper	2007-07-06 16:47:15 UTC (rev 350)
+@@ -64,8 +64,8 @@
+ set parameters [lindex $argv 3]
+ set command_ssh &quot;ssh&quot;
+ catch {set command_ssh $env(COMMAND_SSH)}
+-set command_user &quot;false&quot;
+-catch {set command_user $env(NODE_HOOK_LOGIN)}
++set command_login &quot;false&quot;
++catch {set command_login $env(NODE_HOOK_LOGIN)}
+ set command_netcat &quot;netcat&quot;
+ catch {set command_netcat $env(COMMAND_NETCAT)}
+ set host &quot;127.0.0.1&quot;
+@@ -80,7 +80,6 @@
+ 
+ 	set publickey &quot;&quot;
+ 	catch {set publickey $env(NODE_PUBLICKEY)}
+-	
+ 	set pid [spawn -noecho $command_ssh -2 -x -l &quot;$user&quot; &quot;$host&quot; -i &quot;$publickey&quot; -o &quot;RhostsAuthentication no&quot; -o &quot;PasswordAuthentication no&quot; -o &quot;RSAAuthentication no&quot; -o &quot;RhostsRSAAuthentication no&quot; -o &quot;PubkeyAuthentication yes&quot; -o &quot;PreferredAuthentications publickey&quot; -p &quot;$port&quot; &quot;$executable $parameters&quot; ]
+ 
+ 	expect {
+@@ -105,12 +104,8 @@
+ 
+ set stty_init &quot;raw icrnl -echo&quot;
+ 
+-if { &quot;$auth_method&quot;==&quot;ssh&quot; } { 
+-	set pid [spawn -noecho $command_ssh -2 -x -l &quot;$user&quot; &quot;$host&quot; -o &quot;NumberOfPasswordPrompts 1&quot; &quot;$executable $parameters&quot; ]
+-} elseif { &quot;$auth_method&quot;==&quot;su&quot; } {
+-	set pid [spawn -noecho su - &quot;$user&quot; -c &quot;$executable $parameters&quot; ]
+-} elseif { &quot;$auth_method&quot; == &quot;user&quot; } {
+-	set pid [spawn -noecho $command_user &quot;$user&quot; &quot;$executable $parameters&quot; ]
++if { &quot;$auth_method&quot;!=&quot;test-nx&quot; } {
++	set pid [ spawn -noecho $command_login &quot;$auth_method&quot; &quot;$user&quot; &quot;$executable&quot; &quot;$parameters&quot; ]
+ } else {
+ 	exit 1
+ }
+
+Added: freenx-redesign/server/compatibility/nxserver-login-hook
+===================================================================
+--- freenx-redesign/server/compatibility/nxserver-login-hook	2007-07-05 16:58:23 UTC (rev 349)
++++ freenx-redesign/server/compatibility/nxserver-login-hook	2007-07-06 16:47:15 UTC (rev 350)
+@@ -0,0 +1,33 @@
++#!/bin/bash
++#
++# nxserver-login-hook - Script to login the user and check if user is allowed to login.
++#
++# Copyright (c) 2007 by Fabian Franz &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">FreeNX at fabian-franz.de</A>&gt;
++#
++# License: GPL, version 2
++#
++# Syntax: nxserver-login-hook auth-method user executable parameters
++#
++
++# FIXME: Read general config
++
++SSH_PORT=&quot;22&quot;
++SSH_HOST=&quot;127.0.0.1&quot;
++COMMAND_SU=&quot;su&quot;
++COMMAND_SSH=&quot;ssh&quot;
++
++#if [ &quot;$2&quot; = &quot;ff&quot; ]
++#then
++#	exit 1
++#fi
++
++case &quot;$1&quot; in
++	ssh)
++		exec $COMMAND_SSH -2 -x -l &quot;$2&quot; &quot;$SSH_HOST&quot; -p &quot;$SSH_PORT&quot; -o &quot;NumberOfPasswordPrompts 1&quot; &quot;$3&quot; &quot;$4&quot;
++	;;
++	su)
++		exec $COMMAND_SU - &quot;$2&quot; -c &quot;$3 $4&quot;
++	;;
++esac
++
++exit 1
+
+
+Property changes on: freenx-redesign/server/compatibility/nxserver-login-hook
+___________________________________________________________________
+Name: svn:executable
+   + *
+
+Added: freenx-redesign/server/compatibility/nxserver-login-userhook
+===================================================================
+--- freenx-redesign/server/compatibility/nxserver-login-userhook	2007-07-05 16:58:23 UTC (rev 349)
++++ freenx-redesign/server/compatibility/nxserver-login-userhook	2007-07-06 16:47:15 UTC (rev 350)
+@@ -0,0 +1,22 @@
++#!/bin/bash
++#
++# nxserver-login-userhook - Example script to check if user is allowed to login and do the login.
++#
++# Copyright (c) 2007 by Fabian Franz &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">FreeNX at fabian-franz.de</A>&gt;
++#
++# License: GPL, version 2
++#
++# Syntax: nxserver-login-userhook auth-method user executable parameters
++#
++
++# FIXME: load config here
++PATH_BIN=$(cd $(dirname $0) &amp;&amp; pwd)
++
++if [ &quot;$2&quot; = &quot;ff&quot; ]
++then
++	exit 1
++fi
++
++exec $PATH_BIN/nxserver-login-hook &quot;$@&quot;
++
++exit 1
+
+
+Property changes on: freenx-redesign/server/compatibility/nxserver-login-userhook
+___________________________________________________________________
+Name: svn:executable
+   + *
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000482.html">[Freenx-cvs] r349 - freenx-redesign/server/compatibility
+</A></li>
+	<LI>Next message: <A HREF="000484.html">[Freenx-cvs] r351 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#483">[ date ]</a>
+              <a href="thread.html#483">[ thread ]</a>
+              <a href="subject.html#483">[ subject ]</a>
+              <a href="author.html#483">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fabianx modified nxnode
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%20nxnode&In-Reply-To=%3C423429A4.mail2Q51OHHWS%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000071.html">
+   <LINK REL="Next"  HREF="000073.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fabianx modified nxnode</H1>
+    <B>fabianx</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%20nxnode&In-Reply-To=%3C423429A4.mail2Q51OHHWS%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fabianx modified nxnode">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Sun Mar 13 12:53:08 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000071.html">[Freenx-cvs] CVS: freenx - fabianx modified 3 files
+</A></li>
+        <LI>Next message: <A HREF="000073.html">[Freenx-cvs] CVS: freenx - jonno modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#72">[ date ]</a>
+              <a href="thread.html#72">[ thread ]</a>
+              <a href="subject.html#72">[ subject ]</a>
+              <a href="author.html#72">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fabianx
+Date:      2005-03-13 11:53:08 GMT
+Modified:  .        nxnode
+Log:
+Implemented $COMMAND_XTERM.
+
+Note: If a unix-application &quot;xterm&quot; session is started, it is automatically replaced with $COMMAND_XTERM.
+
+Revision  Changes    Path
+1.43      +2 -1      freenx/nxnode
+
+
+rev 1.43, prev_rev 1.42
+Index: nxnode
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxnode,v
+retrieving revision 1.42
+retrieving revision 1.43
+diff -u -r1.42 -r1.43
+--- nxnode	13 Mar 2005 11:48:19 -0000	1.42
++++ nxnode	13 Mar 2005 11:53:08 -0000	1.43
+@@ -13,7 +13,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxnode,v 1.42 2005/03/13 11:48:19 fabianx Exp $
++# CVS: $Id: nxnode,v 1.43 2005/03/13 11:53:08 fabianx Exp $
+ #
+ # 21.06.2004: - Full reconnection support
+ 
+@@ -146,6 +146,7 @@
+ 			STARTX=$COMMAND_START_CDE
+ 		;;
+ 		unix-application)
++			[ &quot;$application&quot; = &quot;xterm&quot; ] &amp;&amp; application=&quot;$COMMAND_XTERM&quot;
+ 			STARTX=$application
+ 		;;
+ 		unix-default)
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000071.html">[Freenx-cvs] CVS: freenx - fabianx modified 3 files
+</A></li>
+	<LI>Next message: <A HREF="000073.html">[Freenx-cvs] CVS: freenx - jonno modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#72">[ date ]</a>
+              <a href="thread.html#72">[ thread ]</a>
+              <a href="subject.html#72">[ subject ]</a>
+              <a href="author.html#72">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

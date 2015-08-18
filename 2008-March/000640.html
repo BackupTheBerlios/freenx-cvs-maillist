@@ -1,0 +1,167 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r516 - trunk/freenx-server/nxredir
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r516%20-%20trunk/freenx-server/nxredir&In-Reply-To=%3C200803110158.m2B1wrJL014955%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000639.html">
+   <LINK REL="Next"  HREF="000641.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r516 - trunk/freenx-server/nxredir</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r516%20-%20trunk/freenx-server/nxredir&In-Reply-To=%3C200803110158.m2B1wrJL014955%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r516 - trunk/freenx-server/nxredir">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Tue Mar 11 02:58:53 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000639.html">[Freenx-cvs] r515 - trunk/freenx-server
+</A></li>
+        <LI>Next message: <A HREF="000641.html">[Freenx-cvs] r517 - in trunk/freenx-server: . nxserver-helper
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#640">[ date ]</a>
+              <a href="thread.html#640">[ thread ]</a>
+              <a href="subject.html#640">[ subject ]</a>
+              <a href="author.html#640">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-03-11 02:58:52 +0100 (Tue, 11 Mar 2008)
+New Revision: 516
+
+Modified:
+   trunk/freenx-server/nxredir/nxredir.c
+Log:
+Extended nxredir to only redirect 127.0.0.1:&lt;port&gt; and no other adresses.
+
+
+
+Modified: trunk/freenx-server/nxredir/nxredir.c
+===================================================================
+--- trunk/freenx-server/nxredir/nxredir.c	2008-03-11 01:03:54 UTC (rev 515)
++++ trunk/freenx-server/nxredir/nxredir.c	2008-03-11 01:58:52 UTC (rev 516)
+@@ -1,10 +1,28 @@
+ /*
+  * libnxredir - Redirect certain ports to other forwarded ports.
+  *
+- * Copyright (c) 2005 by Fabian Franz.
++ * Copyright (c) 2005-2008 by Fabian Franz &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">freenx at fabian-franz.de</A>&gt;.
+  *
+- * License: GPL
++ * License: GPL, version 2
+  *
++ * Based on TSOCKS - Wrapper library for transparent SOCKS
++ *
++ * Copyright (C) 2000 Shaun Clowes
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
++ *
+  */
+ 
+ char *progname = &quot;libnxredir&quot;;              /* Name used in err msgs    */
+@@ -45,20 +63,54 @@
+         realconnect = dlsym(RTLD_NEXT, &quot;connect&quot;);
+ }
+ 
++int is_local(struct in_addr *testip) {
++
++	if (testip-&gt;s_addr == htonl(0x7f000001))
++		return(1);
++
++        return(0);
++}
++
+ int connect(CONNECT_SIGNATURE) 
+ {
++	struct sockaddr_in *connaddr;
++        struct sockaddr_in peer_address;
++        int sock_type = -1;
++        socklen_t sock_type_len = sizeof(sock_type);
++	socklen_t namelen = sizeof(peer_address);
++
+ 	if (realconnect == NULL) {
+                 perror(&quot;Unresolved symbol: connect\n&quot;);
+                 return(-1);
+         }
+ 
++        connaddr = (struct sockaddr_in *) __addr;
++
++        /* Get the type of the socket */
++        getsockopt(__fd, SOL_SOCKET, SO_TYPE,
++                   (void *) &amp;sock_type, &amp;sock_type_len);
++
++        /* If this isn't an INET socket for a TCP stream we can't  */
++        /* handle it, just call the real connect now               */
++	if ((connaddr-&gt;sin_family != AF_INET) || (sock_type != SOCK_STREAM))
++                return(realconnect(__fd, __addr, __len));
++
++	/* If the socket is already connected, just call connect  */
++	/* and get its standard reply                             */
++	if (!getpeername(__fd, (struct sockaddr *) &amp;peer_address, &amp;namelen))
++		return(realconnect(__fd, __addr, __len));
++
++	/* If the address is not local call realconnect */
++	if (!is_local(&amp;(connaddr-&gt;sin_addr)))
++		return(realconnect(__fd, __addr, __len));
++
+ 	/* CUPS */
+-	if ((getenv(&quot;NXCUPS_PORT&quot;) != NULL) &amp;&amp; ((struct sockaddr_in*)__addr)-&gt;sin_port==htons(631))
+-		((struct sockaddr_in*)__addr)-&gt;sin_port=htons(atoi(getenv(&quot;NXCUPS_PORT&quot;)));
++	if ((getenv(&quot;NXCUPS_PORT&quot;) != NULL) &amp;&amp; connaddr-&gt;sin_port==htons(631))
++		connaddr-&gt;sin_port=htons(atoi(getenv(&quot;NXCUPS_PORT&quot;)));
+ 
+ 	/* SAMBA */
+-	if ((getenv(&quot;NXSAMBA_PORT&quot;) != NULL) &amp;&amp; (((struct sockaddr_in*)__addr)-&gt;sin_port==htons(139) || ((struct sockaddr_in*)__addr)-&gt;sin_port==htons(445)))
+-		((struct sockaddr_in*)__addr)-&gt;sin_port=htons(atoi(getenv(&quot;NXSAMBA_PORT&quot;)));
++	if ((getenv(&quot;NXSAMBA_PORT&quot;) != NULL) &amp;&amp; (connaddr-&gt;sin_port==htons(139) || connaddr-&gt;sin_port==htons(445)))
++		connaddr-&gt;sin_port=htons(atoi(getenv(&quot;NXSAMBA_PORT&quot;)));
+ 
+ 	return realconnect(__fd, __addr, __len);
+ }
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000639.html">[Freenx-cvs] r515 - trunk/freenx-server
+</A></li>
+	<LI>Next message: <A HREF="000641.html">[Freenx-cvs] r517 - in trunk/freenx-server: . nxserver-helper
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#640">[ date ]</a>
+              <a href="thread.html#640">[ thread ]</a>
+              <a href="subject.html#640">[ subject ]</a>
+              <a href="author.html#640">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,1048 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r247 - in nxclientlib: . qt-test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r247%20-%20in%20nxclientlib%3A%20.%20qt-test&In-Reply-To=%3C200608032140.k73Leci3022413%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000377.html">
+   <LINK REL="Next"  HREF="000379.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r247 - in nxclientlib: . qt-test</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r247%20-%20in%20nxclientlib%3A%20.%20qt-test&In-Reply-To=%3C200608032140.k73Leci3022413%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r247 - in nxclientlib: . qt-test">gwright at mail.berlios.de
+       </A><BR>
+    <I>Thu Aug  3 23:40:38 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000377.html">[Freenx-cvs] r246 - nxclientlib
+</A></li>
+        <LI>Next message: <A HREF="000379.html">[Freenx-cvs] r248 - nxclientlib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#378">[ date ]</a>
+              <a href="thread.html#378">[ thread ]</a>
+              <a href="subject.html#378">[ subject ]</a>
+              <a href="author.html#378">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2006-08-03 23:40:38 +0200 (Thu, 03 Aug 2006)
+New Revision: 247
+
+Added:
+   nxclientlib/qt-test/
+   nxclientlib/qt-test/main.cpp
+   nxclientlib/qt-test/mainwindow.ui
+   nxclientlib/qt-test/qt-test.pro
+   nxclientlib/qt-test/qtnxcallback.cpp
+   nxclientlib/qt-test/qtnxcallback.h
+   nxclientlib/qt-test/qtnxwindow.cpp
+   nxclientlib/qt-test/qtnxwindow.h
+Modified:
+   nxclientlib/nxcallback.h
+Log:
+New qt interface for testing the client library. Very crude.
+
+
+
+Modified: nxclientlib/nxcallback.h
+===================================================================
+--- nxclientlib/nxcallback.h	2006-08-03 19:26:43 UTC (rev 246)
++++ nxclientlib/nxcallback.h	2006-08-03 21:40:38 UTC (rev 247)
+@@ -14,6 +14,9 @@
+  *   (at your option) any later version.                                   *
+  *                                                                         *
+  ***************************************************************************/
++ 
++#ifndef _NXCALLBACK_H_
++#define _NXCALLBACK_H_
+ 
+ #include &lt;iostream&gt;
+ #include &lt;vector&gt;
+@@ -39,3 +42,5 @@
+ 
+ 		virtual void resumeSessions(std::vector&lt;NXResumeData&gt; *sessions) = 0;
+ };
++
++#endif
+
+Added: nxclientlib/qt-test/main.cpp
+===================================================================
+--- nxclientlib/qt-test/main.cpp	2006-08-03 19:26:43 UTC (rev 246)
++++ nxclientlib/qt-test/main.cpp	2006-08-03 21:40:38 UTC (rev 247)
+@@ -0,0 +1,28 @@
++/***************************************************************************
++                               main.cpp
++                             -------------------
++    begin                : Thursday August 3rd 2006
++    copyright            : (C) 2006 by George Wright
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++#include &quot;qtnxwindow.h&quot;
++
++int main(int argc, char *argv[])
++{
++	QApplication app(argc, argv);
++	
++	QtNXWindow *mw = new QtNXWindow();
++	mw-&gt;show();
++
++	return app.exec();
++}
+
+Added: nxclientlib/qt-test/mainwindow.ui
+===================================================================
+--- nxclientlib/qt-test/mainwindow.ui	2006-08-03 19:26:43 UTC (rev 246)
++++ nxclientlib/qt-test/mainwindow.ui	2006-08-03 21:40:38 UTC (rev 247)
+@@ -0,0 +1,635 @@
++&lt;ui version=&quot;4.0&quot; &gt;
++ &lt;author&gt;&lt;/author&gt;
++ &lt;comment&gt;&lt;/comment&gt;
++ &lt;exportmacro&gt;&lt;/exportmacro&gt;
++ &lt;class&gt;MainWindow&lt;/class&gt;
++ &lt;widget class=&quot;QMainWindow&quot; name=&quot;MainWindow&quot; &gt;
++  &lt;property name=&quot;geometry&quot; &gt;
++   &lt;rect&gt;
++    &lt;x&gt;0&lt;/x&gt;
++    &lt;y&gt;0&lt;/y&gt;
++    &lt;width&gt;411&lt;/width&gt;
++    &lt;height&gt;697&lt;/height&gt;
++   &lt;/rect&gt;
++  &lt;/property&gt;
++  &lt;property name=&quot;windowTitle&quot; &gt;
++   &lt;string&gt;MainWindow&lt;/string&gt;
++  &lt;/property&gt;
++  &lt;widget class=&quot;QWidget&quot; name=&quot;centralwidget&quot; &gt;
++   &lt;layout class=&quot;QHBoxLayout&quot; &gt;
++    &lt;property name=&quot;margin&quot; &gt;
++     &lt;number&gt;9&lt;/number&gt;
++    &lt;/property&gt;
++    &lt;property name=&quot;spacing&quot; &gt;
++     &lt;number&gt;6&lt;/number&gt;
++    &lt;/property&gt;
++    &lt;item&gt;
++     &lt;layout class=&quot;QVBoxLayout&quot; &gt;
++      &lt;property name=&quot;margin&quot; &gt;
++       &lt;number&gt;0&lt;/number&gt;
++      &lt;/property&gt;
++      &lt;property name=&quot;spacing&quot; &gt;
++       &lt;number&gt;6&lt;/number&gt;
++      &lt;/property&gt;
++      &lt;item&gt;
++       &lt;widget class=&quot;QLabel&quot; name=&quot;label_18&quot; &gt;
++        &lt;property name=&quot;text&quot; &gt;
++         &lt;string&gt;&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;/head&gt;&lt;body style=&quot; white-space: pre-wrap; font-family:Sans Serif; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;&quot;&gt;&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:13pt; font-weight:600;&quot;&gt;NX Client&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;&lt;/string&gt;
++        &lt;/property&gt;
++        &lt;property name=&quot;alignment&quot; &gt;
++         &lt;set&gt;Qt::AlignCenter&lt;/set&gt;
++        &lt;/property&gt;
++       &lt;/widget&gt;
++      &lt;/item&gt;
++      &lt;item&gt;
++       &lt;layout class=&quot;QVBoxLayout&quot; &gt;
++        &lt;property name=&quot;margin&quot; &gt;
++         &lt;number&gt;0&lt;/number&gt;
++        &lt;/property&gt;
++        &lt;property name=&quot;spacing&quot; &gt;
++         &lt;number&gt;6&lt;/number&gt;
++        &lt;/property&gt;
++        &lt;item&gt;
++         &lt;layout class=&quot;QHBoxLayout&quot; &gt;
++          &lt;property name=&quot;margin&quot; &gt;
++           &lt;number&gt;0&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;spacing&quot; &gt;
++           &lt;number&gt;6&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QLabel&quot; name=&quot;label_15&quot; &gt;
++            &lt;property name=&quot;text&quot; &gt;
++             &lt;string&gt;Server hostname:&lt;/string&gt;
++            &lt;/property&gt;
++           &lt;/widget&gt;
++          &lt;/item&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QLineEdit&quot; name=&quot;server&quot; /&gt;
++          &lt;/item&gt;
++         &lt;/layout&gt;
++        &lt;/item&gt;
++        &lt;item&gt;
++         &lt;layout class=&quot;QHBoxLayout&quot; &gt;
++          &lt;property name=&quot;margin&quot; &gt;
++           &lt;number&gt;0&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;spacing&quot; &gt;
++           &lt;number&gt;6&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QLabel&quot; name=&quot;label_16&quot; &gt;
++            &lt;property name=&quot;text&quot; &gt;
++             &lt;string&gt;Username:&lt;/string&gt;
++            &lt;/property&gt;
++           &lt;/widget&gt;
++          &lt;/item&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QLineEdit&quot; name=&quot;username&quot; /&gt;
++          &lt;/item&gt;
++         &lt;/layout&gt;
++        &lt;/item&gt;
++        &lt;item&gt;
++         &lt;layout class=&quot;QHBoxLayout&quot; &gt;
++          &lt;property name=&quot;margin&quot; &gt;
++           &lt;number&gt;0&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;spacing&quot; &gt;
++           &lt;number&gt;6&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QLabel&quot; name=&quot;label_17&quot; &gt;
++            &lt;property name=&quot;text&quot; &gt;
++             &lt;string&gt;Password:&lt;/string&gt;
++            &lt;/property&gt;
++           &lt;/widget&gt;
++          &lt;/item&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QLineEdit&quot; name=&quot;password&quot; &gt;
++            &lt;property name=&quot;inputMask&quot; &gt;
++             &lt;string/&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;text&quot; &gt;
++             &lt;string/&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;echoMode&quot; &gt;
++             &lt;enum&gt;QLineEdit::Password&lt;/enum&gt;
++            &lt;/property&gt;
++           &lt;/widget&gt;
++          &lt;/item&gt;
++         &lt;/layout&gt;
++        &lt;/item&gt;
++        &lt;item&gt;
++         &lt;layout class=&quot;QHBoxLayout&quot; &gt;
++          &lt;property name=&quot;margin&quot; &gt;
++           &lt;number&gt;0&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;spacing&quot; &gt;
++           &lt;number&gt;6&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QLabel&quot; name=&quot;label_2&quot; &gt;
++            &lt;property name=&quot;text&quot; &gt;
++             &lt;string&gt;Session Name:&lt;/string&gt;
++            &lt;/property&gt;
++           &lt;/widget&gt;
++          &lt;/item&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QLineEdit&quot; name=&quot;session_name&quot; /&gt;
++          &lt;/item&gt;
++         &lt;/layout&gt;
++        &lt;/item&gt;
++        &lt;item&gt;
++         &lt;layout class=&quot;QHBoxLayout&quot; &gt;
++          &lt;property name=&quot;margin&quot; &gt;
++           &lt;number&gt;0&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;spacing&quot; &gt;
++           &lt;number&gt;6&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QLabel&quot; name=&quot;label_3&quot; &gt;
++            &lt;property name=&quot;text&quot; &gt;
++             &lt;string&gt;Session Type:&lt;/string&gt;
++            &lt;/property&gt;
++           &lt;/widget&gt;
++          &lt;/item&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QComboBox&quot; name=&quot;session_type&quot; &gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;unix-kde&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;unix-gnome&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;unix-application&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;windows&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;vnc&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++           &lt;/widget&gt;
++          &lt;/item&gt;
++         &lt;/layout&gt;
++        &lt;/item&gt;
++        &lt;item&gt;
++         &lt;layout class=&quot;QHBoxLayout&quot; &gt;
++          &lt;property name=&quot;margin&quot; &gt;
++           &lt;number&gt;0&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;spacing&quot; &gt;
++           &lt;number&gt;6&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QLabel&quot; name=&quot;label_4&quot; &gt;
++            &lt;property name=&quot;text&quot; &gt;
++             &lt;string&gt;Memory cache size:&lt;/string&gt;
++            &lt;/property&gt;
++           &lt;/widget&gt;
++          &lt;/item&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QComboBox&quot; name=&quot;cache&quot; &gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;0&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;1&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;2&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;4&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;8&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;16&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;32&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++           &lt;/widget&gt;
++          &lt;/item&gt;
++         &lt;/layout&gt;
++        &lt;/item&gt;
++        &lt;item&gt;
++         &lt;layout class=&quot;QHBoxLayout&quot; &gt;
++          &lt;property name=&quot;margin&quot; &gt;
++           &lt;number&gt;0&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;spacing&quot; &gt;
++           &lt;number&gt;6&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QLabel&quot; name=&quot;label_5&quot; &gt;
++            &lt;property name=&quot;text&quot; &gt;
++             &lt;string&gt;Disk cache size:&lt;/string&gt;
++            &lt;/property&gt;
++           &lt;/widget&gt;
++          &lt;/item&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QComboBox&quot; name=&quot;images&quot; &gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;0&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;1&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;2&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;4&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;8&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;16&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;32&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++           &lt;/widget&gt;
++          &lt;/item&gt;
++         &lt;/layout&gt;
++        &lt;/item&gt;
++        &lt;item&gt;
++         &lt;layout class=&quot;QHBoxLayout&quot; &gt;
++          &lt;property name=&quot;margin&quot; &gt;
++           &lt;number&gt;0&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;spacing&quot; &gt;
++           &lt;number&gt;6&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QLabel&quot; name=&quot;label_6&quot; &gt;
++            &lt;property name=&quot;text&quot; &gt;
++             &lt;string&gt;Link type:&lt;/string&gt;
++            &lt;/property&gt;
++           &lt;/widget&gt;
++          &lt;/item&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QComboBox&quot; name=&quot;link_type&quot; &gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;modem&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;isdn&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;adsl&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;wan&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;lan&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++           &lt;/widget&gt;
++          &lt;/item&gt;
++         &lt;/layout&gt;
++        &lt;/item&gt;
++        &lt;item&gt;
++         &lt;layout class=&quot;QHBoxLayout&quot; &gt;
++          &lt;property name=&quot;margin&quot; &gt;
++           &lt;number&gt;0&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;spacing&quot; &gt;
++           &lt;number&gt;6&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QLabel&quot; name=&quot;label_7&quot; &gt;
++            &lt;property name=&quot;text&quot; &gt;
++             &lt;string&gt;Resolution:&lt;/string&gt;
++            &lt;/property&gt;
++           &lt;/widget&gt;
++          &lt;/item&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QComboBox&quot; name=&quot;resolution&quot; &gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;640x480&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;800x600&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;1024x768&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;1600x1200&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++           &lt;/widget&gt;
++          &lt;/item&gt;
++         &lt;/layout&gt;
++        &lt;/item&gt;
++        &lt;item&gt;
++         &lt;layout class=&quot;QHBoxLayout&quot; &gt;
++          &lt;property name=&quot;margin&quot; &gt;
++           &lt;number&gt;0&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;spacing&quot; &gt;
++           &lt;number&gt;6&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QLabel&quot; name=&quot;label_8&quot; &gt;
++            &lt;property name=&quot;text&quot; &gt;
++             &lt;string&gt;RENDER Extension:&lt;/string&gt;
++            &lt;/property&gt;
++           &lt;/widget&gt;
++          &lt;/item&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QCheckBox&quot; name=&quot;render&quot; &gt;
++            &lt;property name=&quot;text&quot; &gt;
++             &lt;string&gt;Use RENDER&lt;/string&gt;
++            &lt;/property&gt;
++           &lt;/widget&gt;
++          &lt;/item&gt;
++         &lt;/layout&gt;
++        &lt;/item&gt;
++        &lt;item&gt;
++         &lt;layout class=&quot;QHBoxLayout&quot; &gt;
++          &lt;property name=&quot;margin&quot; &gt;
++           &lt;number&gt;0&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;spacing&quot; &gt;
++           &lt;number&gt;6&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QLabel&quot; name=&quot;label_9&quot; &gt;
++            &lt;property name=&quot;text&quot; &gt;
++             &lt;string&gt;Use SSH Tunnelling:&lt;/string&gt;
++            &lt;/property&gt;
++           &lt;/widget&gt;
++          &lt;/item&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QCheckBox&quot; name=&quot;encryption&quot; &gt;
++            &lt;property name=&quot;text&quot; &gt;
++             &lt;string&gt;Use SSL&lt;/string&gt;
++            &lt;/property&gt;
++           &lt;/widget&gt;
++          &lt;/item&gt;
++         &lt;/layout&gt;
++        &lt;/item&gt;
++        &lt;item&gt;
++         &lt;layout class=&quot;QHBoxLayout&quot; &gt;
++          &lt;property name=&quot;margin&quot; &gt;
++           &lt;number&gt;0&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;spacing&quot; &gt;
++           &lt;number&gt;6&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QLabel&quot; name=&quot;label_10&quot; &gt;
++            &lt;property name=&quot;text&quot; &gt;
++             &lt;string&gt;Image compression:&lt;/string&gt;
++            &lt;/property&gt;
++           &lt;/widget&gt;
++          &lt;/item&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QComboBox&quot; name=&quot;image_compression&quot; &gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;JPEG&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;RAW&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++            &lt;item&gt;
++             &lt;property name=&quot;text&quot; &gt;
++              &lt;string&gt;PNG&lt;/string&gt;
++             &lt;/property&gt;
++            &lt;/item&gt;
++           &lt;/widget&gt;
++          &lt;/item&gt;
++         &lt;/layout&gt;
++        &lt;/item&gt;
++        &lt;item&gt;
++         &lt;layout class=&quot;QHBoxLayout&quot; &gt;
++          &lt;property name=&quot;margin&quot; &gt;
++           &lt;number&gt;0&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;spacing&quot; &gt;
++           &lt;number&gt;6&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QLabel&quot; name=&quot;label_11&quot; &gt;
++            &lt;property name=&quot;text&quot; &gt;
++             &lt;string&gt;JPEG Quality:&lt;/string&gt;
++            &lt;/property&gt;
++           &lt;/widget&gt;
++          &lt;/item&gt;
++          &lt;item&gt;
++           &lt;layout class=&quot;QHBoxLayout&quot; &gt;
++            &lt;property name=&quot;margin&quot; &gt;
++             &lt;number&gt;0&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;property name=&quot;spacing&quot; &gt;
++             &lt;number&gt;6&lt;/number&gt;
++            &lt;/property&gt;
++            &lt;item&gt;
++             &lt;widget class=&quot;QSlider&quot; name=&quot;jpeg_quality&quot; &gt;
++              &lt;property name=&quot;maximum&quot; &gt;
++               &lt;number&gt;100&lt;/number&gt;
++              &lt;/property&gt;
++              &lt;property name=&quot;sliderPosition&quot; &gt;
++               &lt;number&gt;75&lt;/number&gt;
++              &lt;/property&gt;
++              &lt;property name=&quot;orientation&quot; &gt;
++               &lt;enum&gt;Qt::Horizontal&lt;/enum&gt;
++              &lt;/property&gt;
++             &lt;/widget&gt;
++            &lt;/item&gt;
++            &lt;item&gt;
++             &lt;widget class=&quot;QLabel&quot; name=&quot;label&quot; &gt;
++              &lt;property name=&quot;text&quot; &gt;
++               &lt;string&gt;75&lt;/string&gt;
++              &lt;/property&gt;
++             &lt;/widget&gt;
++            &lt;/item&gt;
++           &lt;/layout&gt;
++          &lt;/item&gt;
++         &lt;/layout&gt;
++        &lt;/item&gt;
++        &lt;item&gt;
++         &lt;layout class=&quot;QHBoxLayout&quot; &gt;
++          &lt;property name=&quot;margin&quot; &gt;
++           &lt;number&gt;0&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;spacing&quot; &gt;
++           &lt;number&gt;6&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QLabel&quot; name=&quot;label_12&quot; &gt;
++            &lt;property name=&quot;text&quot; &gt;
++             &lt;string&gt;RDP Username:&lt;/string&gt;
++            &lt;/property&gt;
++           &lt;/widget&gt;
++          &lt;/item&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QLineEdit&quot; name=&quot;rdp_username&quot; /&gt;
++          &lt;/item&gt;
++         &lt;/layout&gt;
++        &lt;/item&gt;
++        &lt;item&gt;
++         &lt;layout class=&quot;QHBoxLayout&quot; &gt;
++          &lt;property name=&quot;margin&quot; &gt;
++           &lt;number&gt;0&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;spacing&quot; &gt;
++           &lt;number&gt;6&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QLabel&quot; name=&quot;label_13&quot; &gt;
++            &lt;property name=&quot;text&quot; &gt;
++             &lt;string&gt;RDP Password:&lt;/string&gt;
++            &lt;/property&gt;
++           &lt;/widget&gt;
++          &lt;/item&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QLineEdit&quot; name=&quot;rdp_password&quot; &gt;
++            &lt;property name=&quot;echoMode&quot; &gt;
++             &lt;enum&gt;QLineEdit::Password&lt;/enum&gt;
++            &lt;/property&gt;
++           &lt;/widget&gt;
++          &lt;/item&gt;
++         &lt;/layout&gt;
++        &lt;/item&gt;
++        &lt;item&gt;
++         &lt;layout class=&quot;QHBoxLayout&quot; &gt;
++          &lt;property name=&quot;margin&quot; &gt;
++           &lt;number&gt;0&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;property name=&quot;spacing&quot; &gt;
++           &lt;number&gt;6&lt;/number&gt;
++          &lt;/property&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QLabel&quot; name=&quot;label_14&quot; &gt;
++            &lt;property name=&quot;text&quot; &gt;
++             &lt;string&gt;RDP Server:&lt;/string&gt;
++            &lt;/property&gt;
++           &lt;/widget&gt;
++          &lt;/item&gt;
++          &lt;item&gt;
++           &lt;widget class=&quot;QLineEdit&quot; name=&quot;rdp_server&quot; /&gt;
++          &lt;/item&gt;
++         &lt;/layout&gt;
++        &lt;/item&gt;
++       &lt;/layout&gt;
++      &lt;/item&gt;
++      &lt;item&gt;
++       &lt;spacer&gt;
++        &lt;property name=&quot;orientation&quot; &gt;
++         &lt;enum&gt;Qt::Vertical&lt;/enum&gt;
++        &lt;/property&gt;
++        &lt;property name=&quot;sizeHint&quot; &gt;
++         &lt;size&gt;
++          &lt;width&gt;20&lt;/width&gt;
++          &lt;height&gt;40&lt;/height&gt;
++         &lt;/size&gt;
++        &lt;/property&gt;
++       &lt;/spacer&gt;
++      &lt;/item&gt;
++      &lt;item&gt;
++       &lt;widget class=&quot;QPushButton&quot; name=&quot;connectButton&quot; &gt;
++        &lt;property name=&quot;text&quot; &gt;
++         &lt;string&gt;&amp;Connect&lt;/string&gt;
++        &lt;/property&gt;
++       &lt;/widget&gt;
++      &lt;/item&gt;
++     &lt;/layout&gt;
++    &lt;/item&gt;
++   &lt;/layout&gt;
++  &lt;/widget&gt;
++  &lt;widget class=&quot;QMenuBar&quot; name=&quot;menubar&quot; &gt;
++   &lt;property name=&quot;geometry&quot; &gt;
++    &lt;rect&gt;
++     &lt;x&gt;0&lt;/x&gt;
++     &lt;y&gt;0&lt;/y&gt;
++     &lt;width&gt;411&lt;/width&gt;
++     &lt;height&gt;31&lt;/height&gt;
++    &lt;/rect&gt;
++   &lt;/property&gt;
++   &lt;widget class=&quot;QMenu&quot; name=&quot;menu_File&quot; &gt;
++    &lt;property name=&quot;title&quot; &gt;
++     &lt;string&gt;&amp;File&lt;/string&gt;
++    &lt;/property&gt;
++    &lt;addaction name=&quot;action_Quit&quot; /&gt;
++   &lt;/widget&gt;
++   &lt;addaction name=&quot;menu_File&quot; /&gt;
++  &lt;/widget&gt;
++  &lt;widget class=&quot;QStatusBar&quot; name=&quot;statusbar&quot; /&gt;
++  &lt;action name=&quot;action_Quit&quot; &gt;
++   &lt;property name=&quot;text&quot; &gt;
++    &lt;string&gt;&amp;Quit&lt;/string&gt;
++   &lt;/property&gt;
++  &lt;/action&gt;
++ &lt;/widget&gt;
++ &lt;pixmapfunction&gt;&lt;/pixmapfunction&gt;
++ &lt;resources/&gt;
++ &lt;connections/&gt;
++&lt;/ui&gt;
+
+Added: nxclientlib/qt-test/qt-test.pro
+===================================================================
+--- nxclientlib/qt-test/qt-test.pro	2006-08-03 19:26:43 UTC (rev 246)
++++ nxclientlib/qt-test/qt-test.pro	2006-08-03 21:40:38 UTC (rev 247)
+@@ -0,0 +1,19 @@
++TEMPLATE	= app
++
++FORMS = mainwindow.ui
++
++SOURCES = main.cpp qtnxwindow.cpp qtnxcallback.cpp
++
++HEADERS = qtnxwindow.h qtnxcallback.h
++
++INCLUDEPATH	+= $(QTDIR)/include . ..
++
++DEPENDPATH	+= $(QTDIR)/include
++
++LIBPATH += ..
++
++QT += ui
++
++LIBS	= -lnxclientlib
++
++TARGET		= qtnx
+\ No newline at end of file
+
+Added: nxclientlib/qt-test/qtnxcallback.cpp
+===================================================================
+--- nxclientlib/qt-test/qtnxcallback.cpp	2006-08-03 19:26:43 UTC (rev 246)
++++ nxclientlib/qt-test/qtnxcallback.cpp	2006-08-03 21:40:38 UTC (rev 247)
+@@ -0,0 +1,39 @@
++/***************************************************************************
++                               qtnxcallback.cpp
++                             -------------------
++    begin                : Thursday August 3rd 2006
++    copyright            : (C) 2006 by George Wright
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++#include &quot;qtnxcallback.h&quot;
++
++void QtNXCallback::write(std::string *msg)
++{
++	emit message(*msg);
++}
++
++void QtNXCallback::sshRequestAuthenticity(std::string *msg)
++{
++	emit sshAuth(*msg);
++}
++
++void QtNXCallback::authenticationFailed()
++{
++	emit authFailed();
++}
++
++void QtNXCallback::resumeSessions(std::vector&lt;NXResumeData&gt; *sessions)
++{
++	emit resume();
++	m_sessions = sessions;
++}
+
+Added: nxclientlib/qt-test/qtnxcallback.h
+===================================================================
+--- nxclientlib/qt-test/qtnxcallback.h	2006-08-03 19:26:43 UTC (rev 246)
++++ nxclientlib/qt-test/qtnxcallback.h	2006-08-03 21:40:38 UTC (rev 247)
+@@ -0,0 +1,48 @@
++/***************************************************************************
++                               qtnxcallback.h
++                             -------------------
++    begin                : Thursday August 3rd 2006
++    copyright            : (C) 2006 by George Wright
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++ 
++#ifndef _QTNXCALLBACK_H_
++#define _QTNXCALLBACK_H_
++
++#include &lt;QObject&gt;
++#include &quot;nxcallback.h&quot;
++
++class QtNXCallback : public QObject, public NXCallback
++{
++	Q_OBJECT
++	public:
++		virtual void write(std::string *msg);
++		virtual void sshRequestAuthenticity(std::string *msg);
++
++		virtual void authenticationFailed();
++
++		// Stdout/stderr from the nxssh process
++		virtual void stdout(std::string *msg) {};
++		virtual void stderr(std::string *msg) {};
++		// Stdin sent to the nxssh process
++		virtual void stdin(std::string *msg) {};
++		virtual void resumeSessions(std::vector&lt;NXResumeData&gt; *sessions);
++	signals:
++		void authFailed();
++		void message(std::string);
++		void sshAuth(std::string);
++		void resume();
++	private:
++		std::vector&lt;NXResumeData&gt; *m_sessions;
++};
++
++#endif
+
+Added: nxclientlib/qt-test/qtnxwindow.cpp
+===================================================================
+--- nxclientlib/qt-test/qtnxwindow.cpp	2006-08-03 19:26:43 UTC (rev 246)
++++ nxclientlib/qt-test/qtnxwindow.cpp	2006-08-03 21:40:38 UTC (rev 247)
+@@ -0,0 +1,91 @@
++/***************************************************************************
++                               qtnxwindow.cpp
++                             -------------------
++    begin                : Thursday August 3rd 2006
++    copyright            : (C) 2006 by George Wright
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++#include &quot;qtnxwindow.h&quot;
++
++#include &lt;QDesktopWidget&gt;
++#include &lt;QX11Info&gt;
++
++QtNXWindow::QtNXWindow() : QMainWindow()
++{
++	ui_mw.setupUi(this);
++	m_cb = new QtNXCallback();
++
++	m_lib.setCallback(m_cb);
++	
++	connect(ui_mw.connectButton, SIGNAL(pressed()), this, SLOT(connectPressed()));
++}
++
++QtNXWindow::~QtNXWindow()
++{
++}
++
++void QtNXWindow::connectPressed()
++{
++	QDesktopWidget dw;
++	QX11Info info;
++	
++	session.sessionName = ui_mw.session_name-&gt;text();
++	session.sessionType = ui_mw.session_type-&gt;currentText();
++	session.cache = ui_mw.cache-&gt;currentText().toInt();
++	session.images = ui_mw.images-&gt;currentText().toInt();
++	session.linkType = ui_mw.link_type-&gt;currentText();
++	
++	if (ui_mw.render-&gt;checkState() == 0)
++		session.render = false;
++	if (ui_mw.render-&gt;checkState() == 2)
++		session.render = true;
++	
++	session.backingstore = &quot;when_requested&quot;;
++
++	if (ui_mw.image_compression-&gt;currentText() == &quot;JPEG&quot;)
++		session.imageCompressionMethod = -1;
++	if (ui_mw.image_compression-&gt;currentText() == &quot;RAW&quot;)
++		session.imageCompressionMethod = 0;
++	if (ui_mw.image_compression-&gt;currentText() == &quot;PNG&quot;)
++		session.imageCompressionMethod = 2;
++		
++	session.imageCompressionLevel = ui_mw.jpeg_quality-&gt;value();
++
++	if (ui_mw.resolution-&gt;currentText() == &quot;640x480&quot;)
++		session.geometry = &quot;640x480+0+0&quot;;
++	if (ui_mw.resolution-&gt;currentText() == &quot;800x600&quot;)
++		session.geometry = &quot;800x600+0+0&quot;;
++	if (ui_mw.resolution-&gt;currentText() == &quot;1024x768&quot;)
++		session.geometry = &quot;1024x768+0+0&quot;;
++	if (ui_mw.resolution-&gt;currentText() == &quot;1600x1200&quot;)
++		session.geometry = &quot;1600x1200+0+0&quot;;
++
++	session.keyboard = &quot;defkeymap&quot;;
++	session.kbtype = &quot;pc102/defkeymap&quot;;
++	
++	session.media = false;
++	session.agentServer = ui_mw.rdp_server-&gt;text();
++	session.agentUser = ui_mw.rdp_username-&gt;text();
++	session.agentPass = ui_mw.rdp_password-&gt;text();
++
++	session.screenInfo = QString::number(dw.screenGeometry(this).width()) + &quot;x&quot; + QString::number(dw.screenGeometry(this).height()) + &quot;x&quot; + QString::number(info.depth()) + &quot;render&quot;;
++	session.suspended = false;
++
++	m_lib.invokeNXSSH(&quot;default&quot; , ui_mw.server-&gt;text().toAscii().data(), true);
++	m_lib.setUsername(ui_mw.username-&gt;text().toAscii().data());
++	m_lib.setPassword(ui_mw.password-&gt;text().toAscii().data());
++	m_lib.setResolution(dw.screenGeometry(this).width(), dw.screenGeometry(this).height());
++	m_lib.setDepth(info.depth());
++	m_lib.setRender(true);
++	m_lib.setSession(session);
++}
+
+Added: nxclientlib/qt-test/qtnxwindow.h
+===================================================================
+--- nxclientlib/qt-test/qtnxwindow.h	2006-08-03 19:26:43 UTC (rev 246)
++++ nxclientlib/qt-test/qtnxwindow.h	2006-08-03 21:40:38 UTC (rev 247)
+@@ -0,0 +1,43 @@
++/***************************************************************************
++                               qtnxwindow.h
++                             -------------------
++    begin                : Thursday August 3rd 2006
++    copyright            : (C) 2006 by George Wright
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">gwright at kde.org</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++#ifndef _QTNXWINDOW_H_
++#define _QTNXWINDOW_H_
++
++#include &lt;QMainWindow&gt;
++
++#include &quot;ui_mainwindow.h&quot;
++
++#include &quot;nxclientlib.h&quot;
++#include &quot;qtnxcallback.h&quot;
++
++class QtNXWindow : public QMainWindow
++{
++	Q_OBJECT
++	public:
++		QtNXWindow();
++		~QtNXWindow();
++	public slots:
++		void connectPressed();
++	private:
++		Ui::MainWindow ui_mw;
++		NXClientLib m_lib;
++		NXSessionData session;
++		QtNXCallback *m_cb;
++};
++
++#endif
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000377.html">[Freenx-cvs] r246 - nxclientlib
+</A></li>
+	<LI>Next message: <A HREF="000379.html">[Freenx-cvs] r248 - nxclientlib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#378">[ date ]</a>
+              <a href="thread.html#378">[ thread ]</a>
+              <a href="subject.html#378">[ subject ]</a>
+              <a href="author.html#378">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

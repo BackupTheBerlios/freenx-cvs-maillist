@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r607 - trunk/freenx-utils/nxpublickey
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r607%20-%20trunk/freenx-utils/nxpublickey&In-Reply-To=%3C200808250123.m7P1N9uH004398%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000740.html">
+   <LINK REL="Next"  HREF="000742.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r607 - trunk/freenx-utils/nxpublickey</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r607%20-%20trunk/freenx-utils/nxpublickey&In-Reply-To=%3C200808250123.m7P1N9uH004398%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r607 - trunk/freenx-utils/nxpublickey">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Mon Aug 25 03:23:09 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000740.html">[Freenx-cvs] r606 - trunk/freenx-utils/nxpublickey
+</A></li>
+        <LI>Next message: <A HREF="000742.html">[Freenx-cvs] r608 - trunk/freenx-website
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#741">[ date ]</a>
+              <a href="thread.html#741">[ thread ]</a>
+              <a href="subject.html#741">[ subject ]</a>
+              <a href="author.html#741">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-08-25 03:23:08 +0200 (Mon, 25 Aug 2008)
+New Revision: 607
+
+Modified:
+   trunk/freenx-utils/nxpublickey/nxssh-4US.c
+   trunk/freenx-utils/nxpublickey/nxssh-wrapper
+Log:
+Only export SSH_ASKPASS if its not set already.
+
+
+
+Modified: trunk/freenx-utils/nxpublickey/nxssh-4US.c
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-4US.c	2008-08-25 00:55:30 UTC (rev 606)
++++ trunk/freenx-utils/nxpublickey/nxssh-4US.c	2008-08-25 01:23:08 UTC (rev 607)
+@@ -237,8 +237,8 @@
+ 		else
+ 		{
+ #ifndef _WIN32
+-			// Need to putenv SSH_ASKPASS
+-			putenv(&quot;SSH_ASKPASS=/usr/bin/ssh-askpass&quot;);
++			// Need to setenv SSH_ASKPASS if not already set
++			setenv(&quot;SSH_ASKPASS&quot;,&quot;/usr/bin/ssh-askpass&quot;, 0);
+ #endif
+ 			execl(command, argv[0], &quot;-l&quot;, username, hostname, &quot;-x&quot;, &quot;-2&quot;, &quot;-B&quot;, &quot;sh&quot;, &quot;-c&quot;, remote_command, NULL);
+ 			perror(&quot;Error: Could not execute original renamed nxssh (default: mxssh)&quot;);
+
+Modified: trunk/freenx-utils/nxpublickey/nxssh-wrapper
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-wrapper	2008-08-25 00:55:30 UTC (rev 606)
++++ trunk/freenx-utils/nxpublickey/nxssh-wrapper	2008-08-25 01:23:08 UTC (rev 607)
+@@ -149,7 +149,7 @@
+ 	then 
+ 		$(dirname $0)/$NXSSH_ORIG -nxstdinpass &quot;$USER2@$CONN&quot; -x -2 -B -o &quot;NumberOfPasswordPrompts 1&quot; sh -c &quot;'$REMOTE_COMMAND'&quot; 
+ 	else
+-		export SSH_ASKPASS=/usr/bin/ssh-askpass
++		[ -z &quot;$SSH_ASKPASS&quot; ] &amp;&amp; export SSH_ASKPASS=/usr/bin/ssh-askpass
+ 
+ 		$(dirname $0)/$NXSSH_ORIG &quot;$USER2@$CONN&quot; -x -2 -B sh -c &quot;'$REMOTE_COMMAND'&quot;
+ 	fi
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000740.html">[Freenx-cvs] r606 - trunk/freenx-utils/nxpublickey
+</A></li>
+	<LI>Next message: <A HREF="000742.html">[Freenx-cvs] r608 - trunk/freenx-website
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#741">[ date ]</a>
+              <a href="thread.html#741">[ thread ]</a>
+              <a href="subject.html#741">[ subject ]</a>
+              <a href="author.html#741">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

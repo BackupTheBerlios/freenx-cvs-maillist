@@ -1,0 +1,146 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - jonno modified nxsetup
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20jonno%20modified%20nxsetup&In-Reply-To=%3C42104FD0.mail8R1GP5EK%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000018.html">
+   <LINK REL="Next"  HREF="000020.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - jonno modified nxsetup</H1>
+    <B>jonno</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20jonno%20modified%20nxsetup&In-Reply-To=%3C42104FD0.mail8R1GP5EK%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - jonno modified nxsetup">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Mon Feb 14 08:14:24 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000018.html">[Freenx-cvs] CVS: freenx - fabianx modified nxnode
+</A></li>
+        <LI>Next message: <A HREF="000020.html">[Freenx-cvs] CVS: freenx - jonno modified 3 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19">[ date ]</a>
+              <a href="thread.html#19">[ thread ]</a>
+              <a href="subject.html#19">[ subject ]</a>
+              <a href="author.html#19">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      jonno
+Date:      2005-02-14 07:14:24 GMT
+Modified:  .        nxsetup
+Log:
+Adding --uid &lt;number&gt; to nxsetup
+
+Revision  Changes    Path
+1.14      +11 -4     freenx/nxsetup
+
+
+rev 1.14, prev_rev 1.13
+Index: nxsetup
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxsetup,v
+retrieving revision 1.13
+retrieving revision 1.14
+diff -u -r1.13 -r1.14
+--- nxsetup	14 Feb 2005 01:52:08 -0000	1.13
++++ nxsetup	14 Feb 2005 07:14:23 -0000	1.14
+@@ -5,12 +5,13 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxsetup,v 1.13 2005/02/14 01:52:08 fabianx Exp $ 
++# CVS: $Id: nxsetup,v 1.14 2005/02/14 07:14:23 jonno Exp $ 
+ #
+ 
+ HELP=&quot;no&quot;
+ INSTALL=&quot;no&quot;
+ SETUP_NOMACHINE_KEY=&quot;no&quot;
++SETUP_UID=&quot;&quot;
+ CLEAN=&quot;no&quot;
+ UNINSTALL=&quot;no&quot;
+ PURGE=&quot;no&quot;
+@@ -21,6 +22,7 @@
+ 		--help) HELP=&quot;yes&quot;; shift ;;
+ 		--install) INSTALL=&quot;yes&quot;; shift ;;
+ 		--setup-nomachine-key) SETUP_NOMACHINE_KEY=&quot;yes&quot;; shift ;;
++		--uid) SETUP_UID=$2; shift 2 ;;
+ 		--clean) CLEAN=&quot;yes&quot;; shift ;;
+ 		--uninstall) UNINSTALL=&quot;yes&quot;; shift ;;
+ 		--purge) PURGE=&quot;yes&quot;; shift ;;
+@@ -33,14 +35,14 @@
+ [ &quot;$INSTALL&quot; = &quot;yes&quot; -a &quot;$UNINSTALL&quot; = &quot;yes&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+ [ &quot;$INSTALL&quot; = &quot;no&quot; -a &quot;$UNINSTALL&quot; = &quot;no&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+ [ &quot;$INSTALL&quot; = &quot;yes&quot; -a &quot;$CLEAN&quot; = &quot;no&quot; -a &quot;$PURGE&quot; = &quot;yes&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+-[ &quot;$UNINSTALL&quot; = &quot;yes&quot; -a &quot;$SETUP_NOMACHINE_KEY&quot; = &quot;yes&quot; ] &amp;&amp; HELP=&quot;yes&quot;
++[ &quot;$UNINSTALL&quot; = &quot;yes&quot; ] &amp;&amp; [ &quot;$SETUP_NOMACHINE_KEY&quot; = &quot;yes&quot; -o -n &quot;$SETUP_UID&quot; -o &quot;$CLEAN&quot; = &quot;yes&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+ [ &quot;$UNINSTALL&quot; = &quot;yes&quot; -a &quot;$CLEAN&quot; = &quot;yes&quot; ] &amp;&amp; HELP=&quot;yes&quot;
+ 
+ if [ &quot;$HELP&quot; = &quot;yes&quot; ]
+ then
+ 	echo &quot;nxsetup - Setup the FreeNX server.&quot;
+ 	echo &quot;Syntax: nxsetup --help&quot;
+-	echo &quot;        nxsetup --install [--setup-nomachine-key] [--clean [--purge]]&quot;
++	echo &quot;        nxsetup --install [--setup-nomachine-key] [--uid &lt;nummber&gt;] [--clean [--purge]]&quot;
+ 	echo &quot;        nxsetup --uninstall [--purge]&quot;
+ 	echo
+ 	echo &quot;  --help                 Displays this help message&quot;
+@@ -49,6 +51,7 @@
+ 	echo &quot;                         client. This is not as secure, but it simplifies the &quot;
+ 	echo &quot;                         configuration of clients.&quot;
+ 	echo &quot;                         Use this option at your own risk.&quot;
++	echo &quot;  --uid &lt;number&gt;         The nx user will be given the uid &lt;number&gt;.&quot;
+ 	echo &quot;  --clean                Performs an uninstall prior to the installation&quot;
+ 	echo &quot;  --uninstall            Remove log and session files, as well as the nx user&quot;
+ 	echo &quot;  --purge                Uninstall will remove extra configuration files and ssh&quot;
+@@ -68,8 +71,12 @@
+ # Tries to add a system user
+ useradd_nx()
+ {
++	# Are uid specified
++	if [ -n &quot;$SETUP_UID&quot; ]
++	then
++		useradd -u $SETUP_UID -d $NX_HOME_DIR -s $PATH_BIN/nxserver nx
+ 	# Is it a debian?
+-	if [ -f /etc/debian_version ]
++	elif [ -f /etc/debian_version ]
+ 	then
+ 		adduser --system --home $NX_HOME_DIR --shell $PATH_BIN/nxserver nx
+ 	# or is it a SuSE?
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000018.html">[Freenx-cvs] CVS: freenx - fabianx modified nxnode
+</A></li>
+	<LI>Next message: <A HREF="000020.html">[Freenx-cvs] CVS: freenx - jonno modified 3 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19">[ date ]</a>
+              <a href="thread.html#19">[ thread ]</a>
+              <a href="subject.html#19">[ subject ]</a>
+              <a href="author.html#19">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

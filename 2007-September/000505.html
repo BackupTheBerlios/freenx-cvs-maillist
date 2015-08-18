@@ -1,0 +1,717 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r375 - in nxcl: lib nxcl test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-September/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r375%20-%20in%20nxcl%3A%20lib%20nxcl%20test&In-Reply-To=%3C200709111459.l8BExDrg026061%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000667.html">
+   <LINK REL="Next"  HREF="000506.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r375 - in nxcl: lib nxcl test</H1>
+    <B>sebjames at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r375%20-%20in%20nxcl%3A%20lib%20nxcl%20test&In-Reply-To=%3C200709111459.l8BExDrg026061%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r375 - in nxcl: lib nxcl test">sebjames at mail.berlios.de
+       </A><BR>
+    <I>Tue Sep 11 16:59:13 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000667.html">[Freenx-cvs] r374 - in nxcl: nxcl test
+</A></li>
+        <LI>Next message: <A HREF="000506.html">[Freenx-cvs] r376 - nxcl
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#505">[ date ]</a>
+              <a href="thread.html#505">[ thread ]</a>
+              <a href="subject.html#505">[ subject ]</a>
+              <a href="author.html#505">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: sebjames
+Date: 2007-09-11 16:59:12 +0200 (Tue, 11 Sep 2007)
+New Revision: 375
+
+Modified:
+   nxcl/lib/notQt.cpp
+   nxcl/lib/notQt.h
+   nxcl/lib/nxclientlib.cpp
+   nxcl/lib/nxclientlib.h
+   nxcl/nxcl/main.cpp
+   nxcl/nxcl/nxcl.cpp
+   nxcl/nxcl/nxcl.h
+   nxcl/test/libtest.cpp
+   nxcl/test/notQttest.cpp
+   nxcl/test/nxcmd.cpp
+Log:
+1) Unified copyright notices to all look the same.
+2) Added a remove method to the notQTemporaryFile class - how temporary is a file that can't be removed?
+3) Took the hardcoded certificate out of NXClientLib. I placed a hardcoded certificate into nxcmd.cpp instead - the certificate has to be passed in to nxcl somehow. In nxlaunch, I'll put the default certificate in a file and use that.
+
+
+
+Modified: nxcl/lib/notQt.cpp
+===================================================================
+--- nxcl/lib/notQt.cpp	2007-09-11 13:14:39 UTC (rev 374)
++++ nxcl/lib/notQt.cpp	2007-09-11 14:59:12 UTC (rev 375)
+@@ -1,13 +1,22 @@
+-/*!
+- * A set of QT like functionality, especially related to the starting
+- * of processes.
+- *
+- * Author: Sebastian James &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>&gt;
+- * This code is copyright (C) Embedded Software Foundry Ltd. 2007
+- *
+- * It is released under the terms of the GNU GPL version 2.
+- */
++/***************************************************************************
++        notQt.cpp: A set of Qt like functionality, especially related
++                       to the starting of processes.
++                             -------------------
++    begin                : June 2007
++    copyright            : (C) 2007 Embedded Software Foundry Ltd. (U.K.)
++                         :     Author: Sebastian James
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>
++ ***************************************************************************/
+ 
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
+ #include &lt;iostream&gt;
+ #include &lt;sstream&gt;
+ extern &quot;C&quot; {
+@@ -317,6 +326,7 @@
+ // Destructor
+ notQTemporaryFile::~notQTemporaryFile ()
+ {
++	this-&gt;close();
+ }
+ 
+ void
+@@ -331,13 +341,15 @@
+ void
+ notQTemporaryFile::write (string input)
+ {
+-	f &lt;&lt; input;
++	this-&gt;f &lt;&lt; input;
+ }
+ 
+ void
+ notQTemporaryFile::close (void)
+ {
+-	this-&gt;f.close();
++	if (this-&gt;f.is_open()) {
++		this-&gt;f.close();
++	}
+ }
+ 
+ // getter for fileName
+@@ -347,6 +359,12 @@
+ 	return this-&gt;theFileName;
+ }
+ 
++void
++notQTemporaryFile::remove (void)
++{
++	this-&gt;close();
++	unlink (this-&gt;theFileName.c_str());
++}
+ //@}
+ 
+ 
+
+Modified: nxcl/lib/notQt.h
+===================================================================
+--- nxcl/lib/notQt.h	2007-09-11 13:14:39 UTC (rev 374)
++++ nxcl/lib/notQt.h	2007-09-11 14:59:12 UTC (rev 375)
+@@ -1,13 +1,28 @@
+ /* -*-c++-*- */
+-/*
+- * Simple re-implementations of some QT-like functionality.  In
+- * particular, there's a QProcess-like (though much simplified) class,
+- * a QTemporaryFile like class and a couple of the methods that you
+- * get with QString.
+- *
+- * (C) 2007 Sebastian James, Embedded Software Foundry Ltd (U.K.).
+- *
+- * Released under the terms of the GNU General Public Licence Version 2. 
++/***************************************************************************
++           notQt.h: A set of Qt like functionality, especially related
++                       to the starting of processes.
++                             -------------------
++    begin                : June 2007
++    copyright            : (C) 2007 Embedded Software Foundry Ltd. (U.K.)
++                         :     Author: Sebastian James
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++/*!
++ * \file notQt.h Simple re-implementations of some Qt-like
++ * functionality.  In particular, there's a QProcess-like (though much
++ * simplified) class, a QTemporaryFile like class and a couple of the
++ * methods that you get with QString.
+  */
+ 
+ #ifndef _NOTQT_H_
+@@ -67,7 +82,7 @@
+ 	};
+ 
+ 	/*!
+-	 * notQProcess is a simple replacement for the QT class QProcess.
++	 * notQProcess is a simple replacement for the Qt class QProcess.
+ 	 */
+ 	class notQProcess
+ 	{
+@@ -170,7 +185,7 @@
+ 	};
+ 
+ 	/*!
+-	 * A simple replacement for the QT Class QTemporaryFile.
++	 * A simple replacement for the Qt Class QTemporaryFile.
+ 	 */
+ 	class notQTemporaryFile
+ 	{
+@@ -195,6 +210,10 @@
+ 		 * A getter for the file name of the temporary file
+ 		 */
+ 		string fileName (void);
++		/*!
++		 * Remove the temporary file
++		 */
++		void remove (void);
+ 
+ 	private:
+ 		/*!
+@@ -216,7 +235,7 @@
+ 		notQtUtilities();
+ 		~notQtUtilities();
+ 
+-		/*! The same (more or less) as QT QString::simplified */
++		/*! The same (more or less) as Qt QString::simplified */
+ 		static string simplify (string&amp; input);
+ 		/*!
+ 		 * Split a string 'line' based on token, placing the portions in the vector rtn
+
+Modified: nxcl/lib/nxclientlib.cpp
+===================================================================
+--- nxcl/lib/nxclientlib.cpp	2007-09-11 13:14:39 UTC (rev 374)
++++ nxcl/lib/nxclientlib.cpp	2007-09-11 14:59:12 UTC (rev 375)
+@@ -38,9 +38,6 @@
+ using namespace std;
+ using namespace nxcl;
+ 
+-// Default NoMachine certificate for FALLBACK
+-string cert(&quot;-----BEGIN DSA PRIVATE KEY-----\nMIIBuwIBAAKBgQCXv9AzQXjxvXWC1qu3CdEqskX9YomTfyG865gb4D02ZwWuRU/9\nC3I9/bEWLdaWgJYXIcFJsMCIkmWjjeSZyTmeoypI1iLifTHUxn3b7WNWi8AzKcVF\naBsBGiljsop9NiD1mEpA0G+nHHrhvTXz7pUvYrsrXcdMyM6rxqn77nbbnwIVALCi\nxFdHZADw5KAVZI7r6QatEkqLAoGBAI4L1TQGFkq5xQ/nIIciW8setAAIyrcWdK/z\n5/ZPeELdq70KDJxoLf81NL/8uIc4PoNyTRJjtT3R4f8Az1TsZWeh2+ReCEJxDWgG\nfbk2YhRqoQTtXPFsI4qvzBWct42WonWqyyb1bPBHk+JmXFscJu5yFQ+JUVNsENpY\n+Gkz3HqTAoGANlgcCuA4wrC+3Cic9CFkqiwO/Rn1vk8dvGuEQqFJ6f6LVfPfRTfa\nQU7TGVLk2CzY4dasrwxJ1f6FsT8DHTNGnxELPKRuLstGrFY/PR7KeafeFZDf+fJ3\nmbX5nxrld3wi5titTnX+8s4IKv29HJguPvOK/SI7cjzA+SqNfD7qEo8CFDIm1xRf\n8xAPsSKs6yZ6j1FNklfu\n-----END DSA PRIVATE KEY-----&quot;);
+-
+ /*!
+  * Implementation of the NXClientLibCallbacks class
+  */
+@@ -167,7 +164,7 @@
+ 	nxsshProcess.terminate();
+ }
+ 
+-void NXClientLib::invokeNXSSH(string publicKey, string serverHost, bool encryption, string key, int port)
++void NXClientLib::invokeNXSSH (string publicKey, string serverHost, bool encryption, string key, int port)
+ {
+ 	list&lt;string&gt; arguments;
+ 	stringstream argtmp;
+@@ -180,48 +177,38 @@
+ 
+ 	// Start to build the arguments for the nxssh command.
+ 	// notQProcess requires that argv[0] contains the program name
++	// FIXME: Here, I place the PACKAGE_BIN_DIR path in front of
++	// nxssh, but nxssh may be installed in a different prefix...
+ 	arguments.push_back (PACKAGE_BIN_DIR&quot;/nxssh&quot;);
+ 	
+-	if (publicKey == &quot;default&quot;) {
+-		usingHardcodedKey = true;
+-	}
+-
+ 	argtmp &lt;&lt; &quot;-nx&quot;;
+ 	arguments.push_back (argtmp.str());
+ 
+ 	argtmp.str(&quot;&quot;);
+ 	argtmp &lt;&lt; &quot;-p&quot; &lt;&lt; port;
+-	arguments.push_back(argtmp.str());
++	arguments.push_back (argtmp.str());
+ 
+-	if (publicKey == &quot;default&quot; || publicKey == &quot;supplied&quot;) {
+-		if (publicKey == &quot;default&quot;) {
+-			this-&gt;externalCallbacks-&gt;stderrSignal (_(&quot;WARNING: Using hardcoded NoMachine public key for &quot;
+-					&quot;outer/first stage SSH encryption.&quot;));
+-		}
++	if (publicKey == &quot;supplied&quot;) {
+ 		
+-		keyFile = new notQTemporaryFile;
+-		keyFile-&gt;open();
++		this-&gt;keyFile = new notQTemporaryFile;
++		this-&gt;keyFile-&gt;open();
+ 		
+ 		argtmp.str(&quot;&quot;);
+-		argtmp &lt;&lt; &quot;-i&quot; &lt;&lt; keyFile-&gt;fileName();
++		argtmp &lt;&lt; &quot;-i&quot; &lt;&lt; this-&gt;keyFile-&gt;fileName();
+ 		arguments.push_back (argtmp.str());
+ 
+-		if (publicKey == &quot;default&quot;) {
+-			keyFile-&gt;write(cert);
+-		} else {
+-			keyFile-&gt;write(key);
+-		}
+-			
+-		keyFile-&gt;close();
++		this-&gt;keyFile-&gt;write (key);			
++		this-&gt;keyFile-&gt;close();
++
+ 	} else {
+ 		argtmp.str(&quot;&quot;);
+ 		argtmp &lt;&lt; &quot;-i&quot; &lt;&lt; publicKey;
+-		arguments.push_back(argtmp.str());
++		arguments.push_back (argtmp.str());
+ 	}
+ 	
+ 	argtmp.str(&quot;&quot;);
+ 	argtmp &lt;&lt; &quot;nx@&quot; &lt;&lt; serverHost;
+-	arguments.push_back(argtmp.str());
++	arguments.push_back (argtmp.str());
+ 
+ 	// These options copied from the way Nomachine's client
+ 	// specifies the nxssh command - they make good sense.
+@@ -440,9 +427,11 @@
+ 
+ void NXClientLib::doneAuth()
+ {
+-	// FIXME: Don't think this is correctly removing the keyfile data.
+-	if (usingHardcodedKey)
+-		delete keyFile;
++	if (this-&gt;keyFile != NULL) {
++		this-&gt;keyFile-&gt;remove();
++		delete this-&gt;keyFile;
++	}
++	return;
+ }
+ 
+ void NXClientLib::allowSSHConnect (bool auth)
+
+Modified: nxcl/lib/nxclientlib.h
+===================================================================
+--- nxcl/lib/nxclientlib.h	2007-09-11 13:14:39 UTC (rev 374)
++++ nxcl/lib/nxclientlib.h	2007-09-11 14:59:12 UTC (rev 375)
+@@ -3,7 +3,7 @@
+                                 nxclientlib.h
+                              -------------------
+     begin                : Sat 22nd July 2006
+-    remove QT dependency : Started June 2007
++    remove Qt dependency : Started June 2007
+     modifications        : June-July 2007
+     copyright            : (C) 2006 by George Wright
+     modifications        : (C) 2007 Embedded Software Foundry Ltd. (U.K.)
+@@ -149,29 +149,35 @@
+ 		/*!
+ 		 * Set up data and then call this-&gt;nxsshProcess.start().
+ 		 * 
+-		 * \arg publicKey is the path to the ssh public key
+-		 * file to authenticate with.  Pass &quot;default&quot; to use
+-		 * the default NoMachine key.
++		 * \param publicKey is the path to the ssh public key
++		 * file to authenticate with.  Pass &quot;supplied&quot; to use
++		 * a new key, which you should then supply as the
++		 * parameter key.
+ 		 *
+-		 * \arg serverHost is the hostname of the NX server to
++		 * \param serverHost is the hostname of the NX server to
+ 		 * connect to
+ 		 *
+-		 * \arg encryption is whether to use an encrypted NX
++		 * \param encryption is whether to use an encrypted NX
+ 		 * session
++		 *
++		 * \param key ssh key to use for authentication of the
++		 * nx user if publicKey is &quot;supplied&quot;.
++		 *
++		 * \param port TCP port to use for the ssh connection.
+ 		 */
+-		void invokeNXSSH (string publicKey = &quot;default&quot;, string serverHost = &quot;&quot;,
++		void invokeNXSSH (string publicKey = &quot;supplied&quot;, string serverHost = &quot;&quot;,
+ 				  bool encryption = true, string key = &quot;&quot;, int port = 22);
+ 
+ 		/*!
+ 		 * Overloaded to give callback data on write.
+ 		 * 
+-		 * Writes \arg data to this-&gt;nxsshProcess stdin and also
++		 * Writes data to this-&gt;nxsshProcess stdin and also
+ 		 * out to the user via stdoutCallback
+ 		 */
+ 		void write (string data);
+ 
+ 		/*!
+-		 * Passes \arg auth to this-&gt;session.setContinue()
++		 * Passes auth to this-&gt;session.setContinue()
+ 		 */
+ 		void allowSSHConnect (bool auth);
+ 
+@@ -265,11 +271,6 @@
+ 
+ 	private:
+ 		/*!
+-		 * true if we're using the hardcoded SSL key (the
+-		 * default NoMachine one). To be removed.
+-		 */
+-		bool usingHardcodedKey;
+-		/*!
+ 		 * Set true when the program is ready to end, e.g if
+ 		 * authentication failed, nxssh failed to start amoung
+ 		 * other reasons.
+
+Modified: nxcl/nxcl/main.cpp
+===================================================================
+--- nxcl/nxcl/main.cpp	2007-09-11 13:14:39 UTC (rev 374)
++++ nxcl/nxcl/main.cpp	2007-09-11 14:59:12 UTC (rev 375)
+@@ -1,23 +1,33 @@
+-/*
+- * nxcld: The NXCL dbus daemon.
++/***************************************************************************
++                        nxcl: The NXCL dbus daemon.
++                             -------------------
++    begin                : June 2007
++    copyright            : (C) 2007 Embedded Software Foundry Ltd. (U.K.)
++                         :     Author: Sebastian James
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++/*!
++ * This program should be launched by a client - that might be
++ * nxlaunch (already written) or (not yet written) qtnxc, fltknxc,
++ * tknxc, emacsnxc.... etc etc you get the picture.
+  *
+- * This program should be launched by a client - that might be gnxc,
+- * qtnxc, fltknxc, tknxc, emacsnxc.... etc etc you get the picture.
+- *
+- * This graphical launcher program is the place where the user can
++ * The graphical launcher program is the place where the user can
+  * select the connection type, and enter his username and password. It
+- * launches nxcld via a dbus call (or some other way?), then transmits
+- * the settings to nxcld via dbus. nxcld then negotiates the NX
+- * connection - launching nxssh and nxproxy. nxcld will send back a
+- * list of sessions to the launching NX client (if there are
+- * multiple available sessions) and a signal to say if the connection
+- * has been launched or if an error occurred.
+- *
+- * (C) 2007 Embedded Software Foundry Ltd. (U.K.)
+- * Author: Sebastian James
+- * Email:  <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>
+- *
+- * Released under the terms of the GNU GPL version 2.
++ * launches nxcl, then transmits the settings to nxcl via dbus. nxcl
++ * then negotiates the NX connection - launching nxssh and
++ * nxproxy. nxcl will send back a list of sessions to the launching
++ * NX client (if there are multiple available sessions) and a signal
++ * to say if the connection has been launched or if an error occurred.
+  */
+ 
+ #include &quot;../config.h&quot;
+
+Modified: nxcl/nxcl/nxcl.cpp
+===================================================================
+--- nxcl/nxcl/nxcl.cpp	2007-09-11 13:14:39 UTC (rev 374)
++++ nxcl/nxcl/nxcl.cpp	2007-09-11 14:59:12 UTC (rev 375)
+@@ -1,19 +1,23 @@
+-/*
+- * nxcl: The NXCL dbus daemon.
+- *
+- * See main.cpp for general notes.
+- *
+- * This file contains the implementation of the Nxcl class used by
+- * the nxcl program.
+- *
+- * (C) 2007 Embedded Software Foundry Ltd. (U.K.)
+- * Author: Sebastian James
+- * Email:  <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>
+- *
+- * Released under the terms of the GNU GPL version 2.
+- */
++/***************************************************************************
++                        nxcl: The NXCL dbus daemon.
++                             -------------------
++    begin                : June 2007
++    copyright            : (C) 2007 Embedded Software Foundry Ltd. (U.K.)
++                         :     Author: Sebastian James
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>
++ ***************************************************************************/
+ 
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
+ #include &quot;../config.h&quot;
++#include &quot;nxclientlib_i18n.h&quot;
+ #include &quot;nxclientlib.h&quot;
+ #include &lt;fstream&gt;
+ 
+@@ -444,17 +448,13 @@
+ 
+ 	/* If we have session info, start up the connection */
+ 	if (this-&gt;sessionData.key.size() == 0) { // Shouldn't need this-&gt;sessionData.encryption here.
+-		this-&gt;nxclientlib.invokeNXSSH(&quot;default&quot;,
+-					      this-&gt;nxserver,
+-					      this-&gt;sessionData.encryption, 
+-					      &quot;&quot;, this-&gt;nxport);
++		this-&gt;callbacks.write (_(&quot;No key supplied! Please fix your client to send a key via dbus!&quot;));
+ 	} else {
+ 		this-&gt;nxclientlib.invokeNXSSH(&quot;supplied&quot;,
+ 					      this-&gt;nxserver,
+ 					      this-&gt;sessionData.encryption,
+ 					      this-&gt;sessionData.key, this-&gt;nxport);
+-	} // Is there another case here, other than &quot;default&quot; or &quot;supplied&quot;?
+-
++	}
+ }
+ 
+ void
+@@ -498,7 +498,7 @@
+ 						   this-&gt;dbusSendInterface.c_str(),
+ 						   &quot;AvailableSession&quot;);
+ 
+-		// We have to create a const char* pointer or each
++		// We have to create a const char* pointer for each
+ 		// string variable in the NXResumeSessions struct.
+ 		const char* sessionType = (*it).sessionType.c_str();
+ 		const char* sessionID = (*it).sessionID.c_str();
+
+Modified: nxcl/nxcl/nxcl.h
+===================================================================
+--- nxcl/nxcl/nxcl.h	2007-09-11 13:14:39 UTC (rev 374)
++++ nxcl/nxcl/nxcl.h	2007-09-11 14:59:12 UTC (rev 375)
+@@ -1,17 +1,27 @@
+ /* -*-c++-*- */
+-/*
+- * nxcl: The NXCL dbus daemon.
++/***************************************************************************
++                        nxcl: The NXCL dbus daemon.
++                             -------------------
++    begin                : June 2007
++    copyright            : (C) 2007 Embedded Software Foundry Ltd. (U.K.)
++                         :     Author: Sebastian James
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++/*!
++ * \file nxcl.h This file contains the definition of the Nxcl class
++ * used by the nxcl program.
+  *
+  * See main.cpp for general notes.
+- *
+- * This file contains the definition of the Nxcl class used by the
+- * nxcl program.
+- *
+- * (C) 2007 Embedded Software Foundry Ltd. (U.K.)
+- * Author: Sebastian James
+- * Email:  <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>
+- *
+- * Released under the terms of the GNU GPL version 2.
+  */
+ 
+ #ifndef _NXCL_H_
+
+Modified: nxcl/test/libtest.cpp
+===================================================================
+--- nxcl/test/libtest.cpp	2007-09-11 13:14:39 UTC (rev 374)
++++ nxcl/test/libtest.cpp	2007-09-11 14:59:12 UTC (rev 375)
+@@ -1,3 +1,27 @@
++/***************************************************************************
++         libtest: A VERY simple command line test for the NXCL library
++                             -------------------
++    begin                : June 2007
++    copyright            : (C) 2007 Embedded Software Foundry Ltd. (U.K.)
++                         :     Author: Sebastian James
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++/*
++ * NB NB! This probably doesn't work. It shouldn't be hard to fix
++ * though. It will be broken because I changed the signal handler
++ * scheme. Seb.
++ */
++
+ #include &quot;nxclientlib.h&quot;
+ #include &lt;fstream&gt;
+ 
+
+Modified: nxcl/test/notQttest.cpp
+===================================================================
+--- nxcl/test/notQttest.cpp	2007-09-11 13:14:39 UTC (rev 374)
++++ nxcl/test/notQttest.cpp	2007-09-11 14:59:12 UTC (rev 375)
+@@ -1,14 +1,20 @@
+-/*
+- * notQttest.cpp - A test of some of the features in ../lib/notQt.cpp
+- *
++/***************************************************************************
++   notQttest.cpp - A test of some of the features in ../lib/notQt.cpp
++                             -------------------
++    begin                : June 2007
++    copyright            : (C) 2007 Embedded Software Foundry Ltd. (U.K.)
++                         :     Author: Sebastian James
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>
++ ***************************************************************************/
+ 
+- *
+- * (C) 2007 Embedded Software Foundry Ltd. (U.K.)
+- * Author: Sebastian James
+- * Email:  <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>
+- *
+- * Released under the terms of the GNU GPL version 2.
+- */
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
+ 
+ #include &lt;iostream&gt;
+ #include &lt;string&gt;
+
+Modified: nxcl/test/nxcmd.cpp
+===================================================================
+--- nxcl/test/nxcmd.cpp	2007-09-11 13:14:39 UTC (rev 374)
++++ nxcl/test/nxcmd.cpp	2007-09-11 14:59:12 UTC (rev 375)
+@@ -1,6 +1,22 @@
+-/*
+- * nxcmd: A simple command line test for the NXCL dbus daemon.
+- *
++/***************************************************************************
++         nxcmd: A simple command line test for the NXCL dbus daemon.
++                             -------------------
++    begin                : June 2007
++    copyright            : (C) 2007 Embedded Software Foundry Ltd. (U.K.)
++                         :     Author: Sebastian James
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++/*!
+  * See ../nxcl/main.cpp for general notes on the nxcl program.
+  *
+  * This program will fork a process and run nxcl, then it will send
+@@ -10,12 +26,6 @@
+  * This is a very hacked together program, part C, part C++, but it
+  * serves its purpose of demonstrating the techniques you'll need to
+  * write a simple client to nxcl.
+- *
+- * (C) 2007 Embedded Software Foundry Ltd. (U.K.)
+- * Author: Sebastian James
+- * Email:  <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">seb at esfnet.co.uk</A>
+- *
+- * Released under the terms of the GNU GPL version 2.
+  */
+ 
+ #include &lt;iostream&gt;
+@@ -40,6 +50,12 @@
+ 
+ using namespace std;
+ 
++// Default NoMachine certificate for FALLBACK. Don't do it this way in
++// your code. Instead, ship a default key in a file and reference
++// that.
++string cert(&quot;-----BEGIN DSA PRIVATE KEY-----\nMIIBuwIBAAKBgQCXv9AzQXjxvXWC1qu3CdEqskX9YomTfyG865gb4D02ZwWuRU/9\nC3I9/bEWLdaWgJYXIcFJsMCIkmWjjeSZyTmeoypI1iLifTHUxn3b7WNWi8AzKcVF\naBsBGiljsop9NiD1mEpA0G+nHHrhvTXz7pUvYrsrXcdMyM6rxqn77nbbnwIVALCi\nxFdHZADw5KAVZI7r6QatEkqLAoGBAI4L1TQGFkq5xQ/nIIciW8setAAIyrcWdK/z\n5/ZPeELdq70KDJxoLf81NL/8uIc4PoNyTRJjtT3R4f8Az1TsZWeh2+ReCEJxDWgG\nfbk2YhRqoQTtXPFsI4qvzBWct42WonWqyyb1bPBHk+JmXFscJu5yFQ+JUVNsENpY\n+Gkz3HqTAoGANlgcCuA4wrC+3Cic9CFkqiwO/Rn1vk8dvGuEQqFJ6f6LVfPfRTfa\nQU7TGVLk2CzY4dasrwxJ1f6FsT8DHTNGnxELPKRuLstGrFY/PR7KeafeFZDf+fJ3\nmbX5nxrld3wi5titTnX+8s4IKv29HJguPvOK/SI7cjzA+SqNfD7qEo8CFDIm1xRf\n8xAPsSKs6yZ6j1FNklfu\n-----END DSA PRIVATE KEY-----&quot;);
++
++
+ // Used in receiveSession as the return value
+ #define REPLY_REQUIRED  1
+ #define NEW_CONNECTION  2
+@@ -214,6 +230,7 @@
+ 	cfg.agentPass = &quot;&quot;;
+ 	cfg.cups = 0;
+ 	cfg.encryption = true;
++	cfg.key = cert;
+ 	cfg.fullscreen = false; // If true, ignore cfg.geometry. 	
+ 	
+ 	cout &lt;&lt; &quot;NXCMD&gt; Sending settings\n&quot;;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000667.html">[Freenx-cvs] r374 - in nxcl: nxcl test
+</A></li>
+	<LI>Next message: <A HREF="000506.html">[Freenx-cvs] r376 - nxcl
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#505">[ date ]</a>
+              <a href="thread.html#505">[ thread ]</a>
+              <a href="subject.html#505">[ subject ]</a>
+              <a href="author.html#505">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

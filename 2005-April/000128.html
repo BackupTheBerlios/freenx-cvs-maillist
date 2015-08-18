@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - jonno modified 2 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-April/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20jonno%20modified%202%20files&In-Reply-To=%3C426C941B.mailB81115DAV%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000127.html">
+   <LINK REL="Next"  HREF="000129.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - jonno modified 2 files</H1>
+    <B>jonno</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20jonno%20modified%202%20files&In-Reply-To=%3C426C941B.mailB81115DAV%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - jonno modified 2 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Mon Apr 25 08:54:19 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000127.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+        <LI>Next message: <A HREF="000129.html">[Freenx-cvs] CVS: freenx - fux modified INSTALL
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#128">[ date ]</a>
+              <a href="thread.html#128">[ thread ]</a>
+              <a href="subject.html#128">[ subject ]</a>
+              <a href="author.html#128">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      jonno
+Date:      2005-04-25 06:54:16 GMT
+Modified:  .        node.conf.sample nxloadconfig
+Log:
+Small fix to node.conf.sample
+
+Revision  Changes    Path
+1.22      +2 -2      freenx/node.conf.sample
+
+
+rev 1.22, prev_rev 1.21
+Index: node.conf.sample
+===================================================================
+RCS file: /cvsroot/freenx/freenx/node.conf.sample,v
+retrieving revision 1.21
+retrieving revision 1.22
+diff -u -r1.21 -r1.22
+--- node.conf.sample	24 Apr 2005 18:01:14 -0000	1.21
++++ node.conf.sample	25 Apr 2005 06:54:14 -0000	1.22
+@@ -37,7 +37,7 @@
+ #
+ #           <A HREF="https://mail.kde.org/mailman/listinfo/freenx-knx">https://mail.kde.org/mailman/listinfo/freenx-knx</A>
+ #
+-# CVS: $Id: node.conf.sample,v 1.21 2005/04/24 18:01:14 jonno Exp $
++# CVS: $Id: node.conf.sample,v 1.22 2005/04/25 06:54:14 jonno Exp $
+ 
+ #########################################################################
+ # General FreeNX directives
+@@ -88,7 +88,7 @@
+ 
+ 
+ #########################################################################
+-# Limitations
++# Restriction directives
+ #########################################################################
+ 
+ # The base display number from which sessions are started.
+
+
+
+1.27      +3 -3      freenx/nxloadconfig
+
+
+rev 1.27, prev_rev 1.26
+Index: nxloadconfig
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxloadconfig,v
+retrieving revision 1.26
+retrieving revision 1.27
+diff -u -r1.26 -r1.27
+--- nxloadconfig	24 Apr 2005 18:01:14 -0000	1.26
++++ nxloadconfig	25 Apr 2005 06:54:15 -0000	1.27
+@@ -5,7 +5,7 @@
+ #
+ # License: GPL, version 2
+ #
+-# CVS: $Id: nxloadconfig,v 1.26 2005/04/24 18:01:14 jonno Exp $
++# CVS: $Id: nxloadconfig,v 1.27 2005/04/25 06:54:15 jonno Exp $
+ #
+ # ========================================================================
+ 
+@@ -91,7 +91,7 @@
+ SSHD_CHECK_IP=&quot;0&quot;
+ 
+ 
+-# Limitations
++# Restriction directives
+ 
+ DISPLAY_BASE=1000
+ SESSION_LIMIT=200
+@@ -260,7 +260,7 @@
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SSHD_CHECK_IP=$SSHD_CHECK_IP\&quot;&quot;
+ 	
+ 	
+-	# Limitations
++	# Restriction directives
+ 	
+ 	[ -z $(echo &quot;$DISPLAY_BASE&quot; | egrep &quot;^[1-9][0-9]{0,4}$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;DISPLAY_BASE=$DISPLAY_BASE\&quot;&quot;
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000127.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+	<LI>Next message: <A HREF="000129.html">[Freenx-cvs] CVS: freenx - fux modified INSTALL
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#128">[ date ]</a>
+              <a href="thread.html#128">[ thread ]</a>
+              <a href="subject.html#128">[ subject ]</a>
+              <a href="author.html#128">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

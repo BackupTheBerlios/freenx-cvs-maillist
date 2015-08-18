@@ -1,0 +1,251 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r383 - nxlaunch/src
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-September/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r383%20-%20nxlaunch/src&In-Reply-To=%3C200709171510.l8HFA6AI030975%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000511.html">
+   <LINK REL="Next"  HREF="000513.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r383 - nxlaunch/src</H1>
+    <B>sebjames at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r383%20-%20nxlaunch/src&In-Reply-To=%3C200709171510.l8HFA6AI030975%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r383 - nxlaunch/src">sebjames at mail.berlios.de
+       </A><BR>
+    <I>Mon Sep 17 17:10:06 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000511.html">[Freenx-cvs] r382 - nxlaunch/src
+</A></li>
+        <LI>Next message: <A HREF="000513.html">[Freenx-cvs] r384 - in nxcl: lib nxcl
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#512">[ date ]</a>
+              <a href="thread.html#512">[ thread ]</a>
+              <a href="subject.html#512">[ subject ]</a>
+              <a href="author.html#512">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: sebjames
+Date: 2007-09-17 17:10:05 +0200 (Mon, 17 Sep 2007)
+New Revision: 383
+
+Modified:
+   nxlaunch/src/nxconfig.glade
+   nxlaunch/src/nxlaunch.c
+   nxlaunch/src/nxlaunch.h
+Log:
+Fixed the edit connection feature and implemented the delete connection feature.
+
+
+Modified: nxlaunch/src/nxconfig.glade
+===================================================================
+--- nxlaunch/src/nxconfig.glade	2007-09-17 14:13:40 UTC (rev 382)
++++ nxlaunch/src/nxconfig.glade	2007-09-17 15:10:05 UTC (rev 383)
+@@ -1957,4 +1957,91 @@
+   &lt;/child&gt;
+ &lt;/widget&gt;
+ 
++&lt;widget class=&quot;GtkDialog&quot; id=&quot;confirm_delete&quot;&gt;
++  &lt;property name=&quot;title&quot; translatable=&quot;yes&quot;&gt;Confirm delete&lt;/property&gt;
++  &lt;property name=&quot;type&quot;&gt;GTK_WINDOW_TOPLEVEL&lt;/property&gt;
++  &lt;property name=&quot;window_position&quot;&gt;GTK_WIN_POS_CENTER_ON_PARENT&lt;/property&gt;
++  &lt;property name=&quot;modal&quot;&gt;False&lt;/property&gt;
++  &lt;property name=&quot;resizable&quot;&gt;True&lt;/property&gt;
++  &lt;property name=&quot;destroy_with_parent&quot;&gt;False&lt;/property&gt;
++  &lt;property name=&quot;icon&quot;&gt;nx-icon.png&lt;/property&gt;
++  &lt;property name=&quot;decorated&quot;&gt;True&lt;/property&gt;
++  &lt;property name=&quot;skip_taskbar_hint&quot;&gt;False&lt;/property&gt;
++  &lt;property name=&quot;skip_pager_hint&quot;&gt;False&lt;/property&gt;
++  &lt;property name=&quot;type_hint&quot;&gt;GDK_WINDOW_TYPE_HINT_DIALOG&lt;/property&gt;
++  &lt;property name=&quot;gravity&quot;&gt;GDK_GRAVITY_NORTH_WEST&lt;/property&gt;
++  &lt;property name=&quot;has_separator&quot;&gt;True&lt;/property&gt;
++
++  &lt;child internal-child=&quot;vbox&quot;&gt;
++    &lt;widget class=&quot;GtkVBox&quot; id=&quot;dialog-vbox8&quot;&gt;
++      &lt;property name=&quot;visible&quot;&gt;True&lt;/property&gt;
++      &lt;property name=&quot;homogeneous&quot;&gt;False&lt;/property&gt;
++      &lt;property name=&quot;spacing&quot;&gt;0&lt;/property&gt;
++
++      &lt;child internal-child=&quot;action_area&quot;&gt;
++	&lt;widget class=&quot;GtkHButtonBox&quot; id=&quot;dialog-action_area8&quot;&gt;
++	  &lt;property name=&quot;visible&quot;&gt;True&lt;/property&gt;
++	  &lt;property name=&quot;layout_style&quot;&gt;GTK_BUTTONBOX_END&lt;/property&gt;
++
++	  &lt;child&gt;
++	    &lt;widget class=&quot;GtkButton&quot; id=&quot;cancelbutton1&quot;&gt;
++	      &lt;property name=&quot;visible&quot;&gt;True&lt;/property&gt;
++	      &lt;property name=&quot;can_default&quot;&gt;True&lt;/property&gt;
++	      &lt;property name=&quot;can_focus&quot;&gt;True&lt;/property&gt;
++	      &lt;property name=&quot;label&quot;&gt;gtk-cancel&lt;/property&gt;
++	      &lt;property name=&quot;use_stock&quot;&gt;True&lt;/property&gt;
++	      &lt;property name=&quot;relief&quot;&gt;GTK_RELIEF_NORMAL&lt;/property&gt;
++	      &lt;property name=&quot;focus_on_click&quot;&gt;True&lt;/property&gt;
++	      &lt;property name=&quot;response_id&quot;&gt;-6&lt;/property&gt;
++	      &lt;signal name=&quot;clicked&quot; handler=&quot;gtk_widget_hide&quot; object=&quot;confirm_delete&quot; last_modification_time=&quot;Mon, 17 Sep 2007 14:58:26 GMT&quot;/&gt;
++	    &lt;/widget&gt;
++	  &lt;/child&gt;
++
++	  &lt;child&gt;
++	    &lt;widget class=&quot;GtkButton&quot; id=&quot;okbutton1&quot;&gt;
++	      &lt;property name=&quot;visible&quot;&gt;True&lt;/property&gt;
++	      &lt;property name=&quot;can_default&quot;&gt;True&lt;/property&gt;
++	      &lt;property name=&quot;can_focus&quot;&gt;True&lt;/property&gt;
++	      &lt;property name=&quot;label&quot;&gt;gtk-ok&lt;/property&gt;
++	      &lt;property name=&quot;use_stock&quot;&gt;True&lt;/property&gt;
++	      &lt;property name=&quot;relief&quot;&gt;GTK_RELIEF_NORMAL&lt;/property&gt;
++	      &lt;property name=&quot;focus_on_click&quot;&gt;True&lt;/property&gt;
++	      &lt;property name=&quot;response_id&quot;&gt;-5&lt;/property&gt;
++	      &lt;signal name=&quot;clicked&quot; handler=&quot;on_button_confirm_delete_clicked&quot; last_modification_time=&quot;Mon, 17 Sep 2007 14:58:41 GMT&quot;/&gt;
++	      &lt;signal name=&quot;clicked&quot; handler=&quot;gtk_widget_hide&quot; object=&quot;confirm_delete&quot; last_modification_time=&quot;Mon, 17 Sep 2007 14:58:52 GMT&quot;/&gt;
++	    &lt;/widget&gt;
++	  &lt;/child&gt;
++	&lt;/widget&gt;
++	&lt;packing&gt;
++	  &lt;property name=&quot;padding&quot;&gt;0&lt;/property&gt;
++	  &lt;property name=&quot;expand&quot;&gt;False&lt;/property&gt;
++	  &lt;property name=&quot;fill&quot;&gt;True&lt;/property&gt;
++	  &lt;property name=&quot;pack_type&quot;&gt;GTK_PACK_END&lt;/property&gt;
++	&lt;/packing&gt;
++      &lt;/child&gt;
++
++      &lt;child&gt;
++	&lt;widget class=&quot;GtkLabel&quot; id=&quot;label_confirm_delete&quot;&gt;
++	  &lt;property name=&quot;visible&quot;&gt;True&lt;/property&gt;
++	  &lt;property name=&quot;label&quot; translatable=&quot;yes&quot;&gt;Please confirm that you want to delete that connection.&lt;/property&gt;
++	  &lt;property name=&quot;use_underline&quot;&gt;False&lt;/property&gt;
++	  &lt;property name=&quot;use_markup&quot;&gt;False&lt;/property&gt;
++	  &lt;property name=&quot;justify&quot;&gt;GTK_JUSTIFY_LEFT&lt;/property&gt;
++	  &lt;property name=&quot;wrap&quot;&gt;True&lt;/property&gt;
++	  &lt;property name=&quot;selectable&quot;&gt;False&lt;/property&gt;
++	  &lt;property name=&quot;xalign&quot;&gt;0.5&lt;/property&gt;
++	  &lt;property name=&quot;yalign&quot;&gt;0.5&lt;/property&gt;
++	  &lt;property name=&quot;xpad&quot;&gt;8&lt;/property&gt;
++	  &lt;property name=&quot;ypad&quot;&gt;13&lt;/property&gt;
++	&lt;/widget&gt;
++	&lt;packing&gt;
++	  &lt;property name=&quot;padding&quot;&gt;0&lt;/property&gt;
++	  &lt;property name=&quot;expand&quot;&gt;False&lt;/property&gt;
++	  &lt;property name=&quot;fill&quot;&gt;False&lt;/property&gt;
++	&lt;/packing&gt;
++      &lt;/child&gt;
++    &lt;/widget&gt;
++  &lt;/child&gt;
++&lt;/widget&gt;
++
+ &lt;/glade-interface&gt;
+
+Modified: nxlaunch/src/nxlaunch.c
+===================================================================
+--- nxlaunch/src/nxlaunch.c	2007-09-17 14:13:40 UTC (rev 382)
++++ nxlaunch/src/nxlaunch.c	2007-09-17 15:10:05 UTC (rev 383)
+@@ -204,7 +204,7 @@
+ 
+ 	// Read in nx_conn for the highlighted entry
+ 	nx_conn = g_malloc0 (sizeof (struct nx_connection));
+-	getActiveConnection (nx_conn);
++	getActiveConnection (nx_conn);	
+ 	setup_nx_popup (nx_conn);
+ 	nx_connection_free (nx_conn);
+ 
+@@ -213,10 +213,42 @@
+ 
+ void on_button_nxlaunch_delete_clicked (GtkButton * button)
+ {
+-	printerr (&quot;%s\n&quot;, __FUNCTION__);
++	GtkWidget * widget;
++	widget = glade_xml_get_widget (xml_glob, &quot;confirm_delete&quot;);
++	gtk_widget_show_all (widget);
+ 	return;
+ }
+ 
++void on_button_confirm_delete_clicked (GtkButton * button)
++{
++	GtkTreeView * list_tree;
++	GtkTreeSelection * selected;
++	GtkTreeIter iter;
++	GtkTreeModel * tree_model;
++	gchar * name;
++
++	/* Get iter for current row and update connection list. */
++	list_tree = GTK_TREE_VIEW (glade_xml_get_widget (xml_nxlaunch_glob, &quot;treeview_nxconnection&quot;));
++	selected = gtk_tree_view_get_selection (list_tree);
++	tree_model = GTK_TREE_MODEL (conn_store);
++	if (gtk_tree_selection_get_selected (selected, &amp;tree_model, &amp;iter)) {
++		/* Get connection name */
++		gtk_tree_model_get (tree_model, &amp;iter, CONN_CONNECTIONNAME, &amp;name, -1);
++
++		/* delete the row */
++		if (FALSE == gtk_list_store_remove (conn_store, &amp;iter)) {
++			printerr (&quot;NXLAUNCH&gt; Failed to remove that row..\n&quot;);
++		}
++	}
++
++	/* Unlink the connection file */
++	delete_nx_connection (name);
++
++	if (name) { g_free (name); }
++
++	return;
++}
++
+ void on_conn_new_ok_clicked (GtkButton * button)
+ {
+ 	GtkTreeView * list_tree;
+@@ -279,6 +311,9 @@
+ 				    -1);
+ 	}
+ 
++	/* Re-write the connection to the xml file */
++	write_nx_connection (nx_conn);
++
+ 	nx_connection_free (nx_conn);
+ 	return;
+ }
+
+Modified: nxlaunch/src/nxlaunch.h
+===================================================================
+--- nxlaunch/src/nxlaunch.h	2007-09-17 14:13:40 UTC (rev 382)
++++ nxlaunch/src/nxlaunch.h	2007-09-17 15:10:05 UTC (rev 383)
+@@ -163,6 +163,7 @@
+ void on_button_nxlaunch_new_clicked (GtkButton * button);
+ void on_button_nxlaunch_edit_clicked (GtkButton * button);
+ void on_button_nxlaunch_delete_clicked (GtkButton * button);
++void on_button_confirm_delete_clicked (GtkButton * button);
+ /*!
+  * Called when the OK button is clicked in the config window. On this
+  * callback we need to read the data from the window into an nx_conn
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000511.html">[Freenx-cvs] r382 - nxlaunch/src
+</A></li>
+	<LI>Next message: <A HREF="000513.html">[Freenx-cvs] r384 - in nxcl: lib nxcl
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#512">[ date ]</a>
+              <a href="thread.html#512">[ thread ]</a>
+              <a href="subject.html#512">[ subject ]</a>
+              <a href="author.html#512">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

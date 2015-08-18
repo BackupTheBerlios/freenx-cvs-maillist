@@ -1,0 +1,305 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r82 - nx-utils/nxsocks/nxsocksd
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-July/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r82%20-%20nx-utils/nxsocks/nxsocksd&In-Reply-To=%3C200507311749.j6VHnA59009034%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000205.html">
+   <LINK REL="Next"  HREF="000207.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r82 - nx-utils/nxsocks/nxsocksd</H1>
+    <B>Fabian Franz at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r82%20-%20nx-utils/nxsocks/nxsocksd&In-Reply-To=%3C200507311749.j6VHnA59009034%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r82 - nx-utils/nxsocks/nxsocksd">fabianx at berlios.de
+       </A><BR>
+    <I>Sun Jul 31 19:49:10 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000205.html">[Freenx-cvs] r81 - nx-utils/nxsocks/nxsocksd
+</A></li>
+        <LI>Next message: <A HREF="000207.html">[Freenx-cvs] r83 - nx-utils/nxsocks/nxsocksd
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#206">[ date ]</a>
+              <a href="thread.html#206">[ thread ]</a>
+              <a href="subject.html#206">[ subject ]</a>
+              <a href="author.html#206">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2005-07-31 19:49:06 +0200 (Sun, 31 Jul 2005)
+New Revision: 82
+
+Added:
+   nx-utils/nxsocks/nxsocksd/nxsocksd.1.in
+Removed:
+   nx-utils/nxsocks/nxsocksd/usocksd.1.in
+Log:
+NX'fied the package.
+
+
+Copied: nx-utils/nxsocks/nxsocksd/nxsocksd.1.in (from rev 77, nx-utils/nxsocks/nxsocksd/usocksd.1.in)
+
+Deleted: nx-utils/nxsocks/nxsocksd/usocksd.1.in
+===================================================================
+--- nx-utils/nxsocks/nxsocksd/usocksd.1.in	2005-07-31 17:47:46 UTC (rev 81)
++++ nx-utils/nxsocks/nxsocksd/usocksd.1.in	2005-07-31 17:49:06 UTC (rev 82)
+@@ -1,224 +0,0 @@
+-.\&quot; -*- nroff -*-
+-.\&quot; $Id: usocksd.1.in,v 1.3 1999/05/13 22:28:11 olaf Exp $
+-.\&quot;
+-.\&quot; Configuration options
+-.ds D @DEBUG@
+-.ds N @NORELAX@
+-.ds F @DO_SPAWN@
+-.\&quot;
+-.TH USOCKSD 1 &quot;HaDiNet Software&quot;
+-.SH NAME
+-usocksd \- user specific SOCKS5 daemon
+-.SH SYNOPSIS
+-.B usocksd
+-[
+-.BI \-p &quot; port&quot;
+-]
+-.if !'\*N'1' [
+-.BI \-a &quot; accepthost&quot;
+-.if !'\*N'1' ] [
+-.BI \-u &quot; udphost&quot;
+-.if !'\*N'1' ]
+-[
+-.BI \-i &quot; identuser&quot;
+-]
+-.if !'\*N'1' [
+-.BI \-U &quot; authuser&quot;
+-.if !'\*N'1' ]
+-.if '\*D'1' \{\
+-[
+-.BI \-d &quot; debuglevel&quot;
+-]\}
+-.SH DESCRIPTION
+-.B usocksd
+-is a lightweight SOCKS5 daemon. It is intended to be run by the user
+-who wants to use the SOCKS service and facilitates the use of an
+-.B ssh
+-TCP port redirection to run the SOCKS protocol over.
+-.B usocksd
+-is useful in situations where the user has access to a host with less
+-restricted connectivity than his own machine, or where the user\'s
+-own machine is on an insecure network and all connections should be
+-encrypted.
+-.B usocksd
+-implements all documented commands, the address types
+-.I IPv4 Address
+-and
+-.I Domain Name
+-(for domain names that resolve to IPv4 addresses) and the
+-authentication methods
+-.I No Authentication
+-and
+-.IR &quot;Username/Password&quot; .
+-.SH OPTIONS
+-.TP
+-.BI \-p &quot; port&quot;
+-Port to listen on for connections. On a multi-user system, each user
+-has to specify his own port instead of relying on the standard port.
+-Default is 1080, nonetheless.
+-.TP
+-.BI \-a &quot; accepthost&quot;
+-Specify that connections are only accepted from this host.
+-.ie '\*N'1' This option must be present.
+-.el Default: no restriction.
+-It is possible to specify more than one allowed host, they have to be
+-separated with a comma (and nothing else). Hosts are given either as
+-IP address or as resolvable name.
+-.TP
+-.BI \-u &quot; udphost&quot;
+-Specify that UDP packets to be relayed come from this host instead of
+-the default (the connecting host). Why this violation of RFC 1928 is
+-necessary is explained below under &quot;Usage&quot;.
+-.if '\*N'1' This option must be present.
+-It is possible to specify more than one host.
+-.TP
+-.BI \-i &quot; identuser&quot;
+-Specify that for each incoming connection an
+-.B identd
+-query will be made and the connection rejected if it does not resolve
+-to the given user name. Note that
+-.B identd
+-is not a reliable authentication service.
+-.TP
+-.BI \-U &quot; authuser&quot;
+-Specify that
+-.I Username/Password
+-authentication be used with the given user name. The password is read
+-from standard input.
+-.ie '\*N'1' This option must be present.
+-.el Without this option, no authentication is requested from clients.
+-.if '\*D'1' \{\
+-.TP
+-.BI \-d &quot; debuglevel&quot;
+-Specify the amount of tracing output. See the source for the meaning
+-of the numbers.\}
+-.SH USAGE
+-The intended usage for running SOCKS5 over an
+-.B ssh
+-connection is as follows:
+-.PP
+-.nf
+-\fCssh -L1080:relayhost:12345 relayhost\\
+-.br
+- &quot;usocksd -p12345 -arelayhost -umyhost -Ufred&quot;\fP
+-.fi
+-.PP
+-where
+-.I relayhost
+-is the host where
+-.B usocksd
+-runs and
+-.I myhost
+-is the client's host. Note the coincidence of the host name and port
+-number arguments. After this connection is established,
+-.I myhost
+-can be used as its own SOCKS5 server. The SOCKS connections, and
+-therefore all TCP data, will be encrypted. UDP data is not sent over
+-the encrypted SOCKS connection and is not encrypted; it goes directly
+-from
+-.I myhost
+-to
+-.IR relayhost ,
+-while the corresponding SOCKS connection seems to come from
+-.I relayhost
+-itself. This is the reason why a regular SOCKS5 server can not be used
+-for UDP in this situation (and the original incentive for writing
+-.BR usocksd ).
+-The SOCKS clients will use password authentication as user
+-.IR fred.
+-The password to use is read from standard input.
+-Neither user name nor password need to coincide with the real user
+-name and password on any of the machines involved.
+-.PP
+-.B usocksd
+-terminates when it encounters EOF on standard input. All other input
+-on stdin is ignored. If the password should be read from a file
+-instead of standard input, the proper way of invocation is
+-.PP
+-.nf
+-\fCcat ~/.socks-password - |\\
+- ssh -L1080:relayhost:12345 relayhost\\
+-.br
+- &quot;usocksd -p12345 -arelayhost -umyhost -Ufred&quot;\fP
+-.fi
+-.PP
+-.B usocksd
+-does not spawn any child processes,
+-.if '\*F'1' \{\
+-except for the extended
+-.B ping
+-and
+-.B traceroute
+-commands, \}
+-it does not detach from the
+-controlling terminal and does produce output on the standard output
+-and error channels.
+-.SH DIAGNOSTICS
+-Messages about new connections, operating parameters and statistics
+-are printed on standard output. Messages about connection failures are
+-printed on standard error.
+-.if '\*D'1' \{\
+-Depending on the
+-.B \-d
+-argument, more tracing is printed on standard output. \}
+-.SH SEE ALSO
+-.BR ssh (1),
+-.BR &quot;RFC 1928:&quot; &quot; SOCKS Protocol Version 5&quot;
+-.SH BUGS
+-Most of the permission and sanity checks described in RFC 1928 are not
+-implemented. This may be considered a feature.
+-.PP
+-Nonblocking I/O is used where applicable. On some systems, where
+-nonblocking I/O does not work, new connections in progress will
+-temporarily suspend data transfer on existing connections. The same
+-applies to diagnostic output if the standard output and standard error
+-channels run on a socket or pipe which can block.
+-.PP
+-.B usocksd
+-does not fully support multi-homed servers. Support for multi-homed
+-clients may depend on the client's SOCKS library.
+-.PP
+-UDP relaying does not work in the following case:
+-Multiple or no addresses are given with the
+-.BI \-u
+-argument, and the client does not send any packets (it only receives),
+-and the client binds its socket to address 0.
+-.PP
+-When multiple addresses are given with the
+-.BI \-u
+-argument, UDP relaying between those hosts does or does not work,
+-depending on the exact sequence of packets. It is
+-assumed that all allowed clients connect to each other directly.
+-.PP
+-There should be a more elegant method of killing an
+-.B usocksd
+-started via
+-.B ssh
+-than the EOF handling.
+-.SH NOTES
+-The
+-.B ping
+-and
+-.B traceroute
+-utilities do not work with SOCKS because they use the ICMP protocol.
+-The reference implementation SOCKS
+-daemon by NEC includes undocumented commands for these applications.
+-.ie '\*F'1' \{\
+-.B usocksd
+-supports these by calling the
+-.B ping
+-or
+-.B traceroute
+-programs on the host where it runs. \}
+-.el \{\
+-These are not supported by this configuration of
+-.BR usocksd . \}
+-.SH VERSION
+<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">- at VERSION</A>@ as of @<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">DATE at .</A>
+-.SH AUTHOR
+-Olaf Titz &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">olaf at bigred.inka.de</A>&gt;.
+-.SH COPYING
+-This program is free software; you can redistribute it and/or
+-modify it under the terms of the GNU General Public License
+-as published by the Free Software Foundation; either version
+-2 of the License, or (at your option) any later version.
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000205.html">[Freenx-cvs] r81 - nx-utils/nxsocks/nxsocksd
+</A></li>
+	<LI>Next message: <A HREF="000207.html">[Freenx-cvs] r83 - nx-utils/nxsocks/nxsocksd
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#206">[ date ]</a>
+              <a href="thread.html#206">[ thread ]</a>
+              <a href="subject.html#206">[ subject ]</a>
+              <a href="author.html#206">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

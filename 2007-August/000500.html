@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r368 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r368%20-%20freenx-server/trunk&In-Reply-To=%3C200708120358.l7C3wOEn032497%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000499.html">
+   <LINK REL="Next"  HREF="000501.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r368 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r368%20-%20freenx-server/trunk&In-Reply-To=%3C200708120358.l7C3wOEn032497%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r368 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Sun Aug 12 05:58:24 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000499.html">[Freenx-cvs] r367 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000501.html">[Freenx-cvs] r369 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#500">[ date ]</a>
+              <a href="thread.html#500">[ thread ]</a>
+              <a href="subject.html#500">[ subject ]</a>
+              <a href="author.html#500">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-08-12 05:58:23 +0200 (Sun, 12 Aug 2007)
+New Revision: 368
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxnode
+Log:
+* Removed bad -noautokill option from the nxclient dialog spawning.
+  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">wayneb at bat.berlios.de</A>)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-08-11 21:54:52 UTC (rev 367)
++++ freenx-server/trunk/ChangeLog	2007-08-12 03:58:23 UTC (rev 368)
+@@ -23,6 +23,8 @@
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>, Bastian Kames &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">kames at ibg-monforts.de</A>&gt;)
+ 	* Fixed nxclient -printer to not use commercial client, because its too 
+ 	  slow in case of huge databases like foomatic. (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Removed bad -noautokill option from the nxclient dialog spawning.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">wayneb at bat.berlios.de</A>)
+ 
+ 07.07.2007 FreeNX 0.7.0 &quot;Jornade SPL Edition VI+1&quot;
+ 	* Fixed the printing support for CUPS 1.2.
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2007-08-11 21:54:52 UTC (rev 367)
++++ freenx-server/trunk/nxnode	2007-08-12 03:58:23 UTC (rev 368)
+@@ -1263,10 +1263,10 @@
+ 	error=$(PASSWD=&quot;$password&quot; &quot;$COMMAND_SMBMOUNT&quot; &quot;//$computername/$share&quot; &quot;$HOME/$dir&quot; -o username=&quot;$username,ip=127.0.0.1,port=$port&quot; 2&gt;&amp;1)
+ 	if [ $? -eq 0 ]
+ 	then
+-		$PATH_BIN/nxclient -dialog ok -caption &quot;NXServer Message&quot; -message &quot;Info: Share: '//$computername/$share' mounted on: '$HOME/$dir'&quot; -noautokill -display :$display &amp;
++		$PATH_BIN/nxclient -dialog ok -caption &quot;NXServer Message&quot; -message &quot;Info: Share: '//$computername/$share' mounted on: '$HOME/$dir'&quot; -display :$display &amp;
+ 		echo &quot;$HOME/$dir&quot; &gt;&gt; &quot;$USER_FAKE_HOME/.nx/C-$SERVER_NAME-$display-$sessionid/scripts/mpoint&quot;
+ 	else
+-		$PATH_BIN/nxclient -dialog ok -caption &quot;NXServer Message&quot; -message &quot;Info: Share: '//$computername/$share' failed to mount: $error&quot; -noautokill -display :$display &amp;
++		$PATH_BIN/nxclient -dialog ok -caption &quot;NXServer Message&quot; -message &quot;Info: Share: '//$computername/$share' failed to mount: $error&quot; -display :$display &amp;
+ 	fi
+ }
+ 
+@@ -1302,7 +1302,7 @@
+ 
+ 	if [ &quot;$ENABLE_CUPS_SEAMLESS&quot; != &quot;1&quot; ]
+ 	then
+-		MODEL=$($PATH_BIN/nxclient -printer &quot;$NAME&quot; -noautokill -display :$display)
++		MODEL=$($PATH_BIN/nxclient -printer &quot;$NAME&quot; -display :$display)
+ 		[ -z &quot;$MODEL&quot; -o &quot;$MODEL&quot; = &quot;cancel: aborted&quot; ] &amp;&amp; return
+ 	else
+ 		sleep $CUPS_SEAMLESS_DELAY
+@@ -1319,8 +1319,8 @@
+ 		then
+ 			curl --digest -o &quot;$USER_FAKE_HOME/.nx/config/ppd/$printer.ppd&quot; &quot;<A HREF="http://$username:$password@127.0.0.1:$port/ppd/${printer">http://$username:$password@127.0.0.1:$port/ppd/${printer</A>}_nxdl.ppd&quot; &gt;&gt;$USER_FAKE_HOME/.nx/C-$sess_id/cups/curl.log 2&gt;&amp;1
+ 		RC=$?
+-		[ $RC -eq 0 -a &quot;$ENABLE_CUPS_SEAMLESS&quot; != &quot;1&quot; ] &amp;&amp; $PATH_BIN/nxclient --message &quot;Download successful.&quot; -noautokill -display :$display
+-		[ $RC -ne 0 -a &quot;$ENABLE_CUPS_SEAMLESS&quot; != &quot;1&quot; ] &amp;&amp; $PATH_BIN/nxclient --message &quot;Download failed. Log is: $USER_FAKE_HOME/.nx/C-$sess_id/cups/curl.log&quot; -noautokill -display :$display
++		[ $RC -eq 0 -a &quot;$ENABLE_CUPS_SEAMLESS&quot; != &quot;1&quot; ] &amp;&amp; $PATH_BIN/nxclient --message &quot;Download successful.&quot; -display :$display
++		[ $RC -ne 0 -a &quot;$ENABLE_CUPS_SEAMLESS&quot; != &quot;1&quot; ] &amp;&amp; $PATH_BIN/nxclient --message &quot;Download failed. Log is: $USER_FAKE_HOME/.nx/C-$sess_id/cups/curl.log&quot; -display :$display
+ 		fi
+ 		MODEL=&quot;$USER_FAKE_HOME/.nx/config/ppd/$printer.ppd&quot;
+ 	fi
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000499.html">[Freenx-cvs] r367 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000501.html">[Freenx-cvs] r369 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#500">[ date ]</a>
+              <a href="thread.html#500">[ thread ]</a>
+              <a href="subject.html#500">[ subject ]</a>
+              <a href="author.html#500">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

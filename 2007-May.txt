@@ -1,0 +1,53 @@
+From fabianx at mail.berlios.de  Tue May 29 17:27:07 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 29 May 2007 17:27:07 +0200
+Subject: [Freenx-cvs] r334 - freenx-server/trunk
+Message-ID: <200705291527.l4TFR7Kp021627@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-05-29 17:27:07 +0200 (Tue, 29 May 2007)
+New Revision: 334
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxserver
+Log:
+Fixed loadbalancing. It was using the undocumented variable SERVER_LOADBALANCING.
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-04-20 17:59:07 UTC (rev 333)
++++ freenx-server/trunk/ChangeLog	2007-05-29 15:27:07 UTC (rev 334)
+@@ -36,6 +36,7 @@
+ 	* Fixed respecting of enconding settings in case of rootless mode.
+ 	* Fixed smb mounting in case nxclient sends the wrong port. 
+ 	  (Patch by Jan Lockenvitz <jan.lockenvitz.ext at siemens.com>)
++	* Fixed loadbalancing - was still using an undocumented variable.
+ 
+ 23.01.2007 FreeNX 0.6.0 "Juliana birthday edition"
+ 	* Opened the 0.6.0 branch.
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2007-04-20 17:59:07 UTC (rev 333)
++++ freenx-server/trunk/nxserver	2007-05-29 15:27:07 UTC (rev 334)
+@@ -1046,12 +1046,12 @@
+ server_loadbalance()
+ {
+ 	SERVER_HOST="127.0.0.1"
+-	if [ -n "$SERVER_LOADBALANCING" ]
++	if [ -n "$LOAD_BALANCE_SERVERS" ]
+ 	then
+ 		SERVER_HOST=""
+ 		if [ -n "$PREFERRED_HOST" -a "$ENABLE_LOAD_BALANCE_PREFERENCE" = "1" ]
+ 		then
+-			stringinstring " $PREFERRED_HOST " " $SERVER_LOADBALANCING " && SERVER_HOST="$PREFERRED_HOST"
++			stringinstring " $PREFERRED_HOST " " $LOAD_BALANCE_SERVERS " && SERVER_HOST="$PREFERRED_HOST"
+ 		fi
+ 		
+ 		# Fallback if still empty
+
+
+

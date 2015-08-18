@@ -1,0 +1,271 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r557 - in trunk/freenx-server: . nx-session-launcher
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r557%20-%20in%20trunk/freenx-server%3A%20.%20nx-session-launcher&In-Reply-To=%3C200808051754.m75HsXeL023589%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000690.html">
+   <LINK REL="Next"  HREF="000692.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r557 - in trunk/freenx-server: . nx-session-launcher</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r557%20-%20in%20trunk/freenx-server%3A%20.%20nx-session-launcher&In-Reply-To=%3C200808051754.m75HsXeL023589%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r557 - in trunk/freenx-server: . nx-session-launcher">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Tue Aug  5 19:54:33 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000690.html">[Freenx-cvs] r556 - trunk/freenx-server
+</A></li>
+        <LI>Next message: <A HREF="000692.html">[Freenx-cvs] r558 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#691">[ date ]</a>
+              <a href="thread.html#691">[ thread ]</a>
+              <a href="subject.html#691">[ subject ]</a>
+              <a href="author.html#691">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-08-05 19:54:32 +0200 (Tue, 05 Aug 2008)
+New Revision: 557
+
+Added:
+   trunk/freenx-server/nx-session-launcher/
+   trunk/freenx-server/nx-session-launcher/ConsoleKit-NX.conf
+   trunk/freenx-server/nx-session-launcher/Makefile
+   trunk/freenx-server/nx-session-launcher/nx-session-launcher
+   trunk/freenx-server/nx-session-launcher/nx-session-launcher-suid.c
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/Makefile
+Log:
+* Added nx-session-launcher from Ubuntu FreeNX-Team to use FreeNX with
+  ConsoleKit.
+  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">marceloshima at gmail.com</A>, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-05 14:48:37 UTC (rev 556)
++++ trunk/freenx-server/ChangeLog	2008-08-05 17:54:32 UTC (rev 557)
+@@ -51,6 +51,9 @@
+ 	   <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 	* Merge Xresources on startup of session.
+ 	  (Jeremy Wilkins &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">wjeremy at shaw.ca</A>&gt;)
++	* Added nx-session-launcher from Ubuntu FreeNX-Team to use FreeNX with
++	  ConsoleKit.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">marceloshima at gmail.com</A>, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
+ 14.03.2008 FreeNX 0.7.2 &quot;Priscilla Edition&quot;
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/Makefile
+===================================================================
+--- trunk/freenx-server/Makefile	2008-08-05 14:48:37 UTC (rev 556)
++++ trunk/freenx-server/Makefile	2008-08-05 17:54:32 UTC (rev 557)
+@@ -1,12 +1,14 @@
+-.PHONY: all install
++.PHONY: all install clean
+ 
+ SHELL = /bin/bash
+ 
+-SUBDIRS=nxredir nxviewer-passwd nxserver-helper
+-PROGRAMS=nxacl.sample nxcheckload.sample nxcups-gethost nxdesktop_helper nxdialog nxkeygen nxloadconfig nxnode nxnode-login nxprint nxserver nxserver-helper/nxserver-helper nxsetup nxviewer_helper nxviewer-passwd/nxpasswd/nxpasswd
++SUBDIRS=nxredir nxviewer-passwd nxserver-helper nx-session-launcher
++PROGRAMS=nxacl.sample nxcheckload.sample nxcups-gethost nxdesktop_helper nxdialog nxkeygen nxloadconfig nxnode nxnode-login nxprint nxserver nxserver-helper/nxserver-helper nxsetup nxviewer_helper nxviewer-passwd/nxpasswd/nxpasswd nx-session-launcher/nx-session-launcher nx-session-launcher/nx-session-launcher-suid
+ 
+ all:
+ 	cd nxviewer-passwd &amp;&amp; xmkmf &amp;&amp; make Makefiles &amp;&amp; make depend
++	. nxloadconfig &amp;&amp;\
++	export PATH_BIN PATH_LIB CUPS_BACKEND NX_VERSION &amp;&amp;\
+ 	for i in $(SUBDIRS) ; \
+ 	do\
+ 		echo &quot;making&quot; all &quot;in $$i...&quot;; \
+
+Added: trunk/freenx-server/nx-session-launcher/ConsoleKit-NX.conf
+===================================================================
+--- trunk/freenx-server/nx-session-launcher/ConsoleKit-NX.conf	2008-08-05 14:48:37 UTC (rev 556)
++++ trunk/freenx-server/nx-session-launcher/ConsoleKit-NX.conf	2008-08-05 17:54:32 UTC (rev 557)
+@@ -0,0 +1,26 @@
++&lt;!DOCTYPE busconfig PUBLIC
++ &quot;-//freedesktop//DTD D-BUS Bus Configuration 1.0//EN&quot;
++ &quot;<A HREF="http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd</A>&quot;&gt;
++&lt;busconfig&gt;
++
++  &lt;!-- Allow nx user to manage sessions --&gt;
++  &lt;policy user=&quot;nx&quot;&gt;
++    &lt;allow own=&quot;org.freedesktop.ConsoleKit&quot;/&gt;
++
++    &lt;allow send_interface=&quot;org.freedesktop.ConsoleKit.Manager&quot;/&gt;
++    &lt;allow send_interface=&quot;org.freedesktop.ConsoleKit.Seat&quot;/&gt;
++    &lt;allow send_interface=&quot;org.freedesktop.ConsoleKit.Session&quot;/&gt;
++
++    &lt;deny send_interface=&quot;org.freedesktop.ConsoleKit.Manager&quot;
++           send_member=&quot;SetX11ParkingPlace&quot;/&gt;
++    &lt;allow send_interface=&quot;org.freedesktop.ConsoleKit.Manager&quot;
++           send_member=&quot;OpenConsoleWithParameters&quot;/&gt;
++    &lt;allow send_interface=&quot;org.freedesktop.ConsoleKit.Session&quot;
++           send_member=&quot;Lock&quot;/&gt;
++    &lt;allow send_interface=&quot;org.freedesktop.ConsoleKit.Session&quot;
++           send_member=&quot;Unlock&quot;/&gt;
++    &lt;allow send_destination=&quot;org.freedesktop.ConsoleKit&quot;
++           send_interface=&quot;org.freedesktop.DBus.Properties&quot; /&gt;
++  &lt;/policy&gt;
++
++&lt;/busconfig&gt;
+
+Added: trunk/freenx-server/nx-session-launcher/Makefile
+===================================================================
+--- trunk/freenx-server/nx-session-launcher/Makefile	2008-08-05 14:48:37 UTC (rev 556)
++++ trunk/freenx-server/nx-session-launcher/Makefile	2008-08-05 17:54:32 UTC (rev 557)
+@@ -0,0 +1,17 @@
++.PHONY: all install
++
++CC=gcc
++CFLAGS=-g -O2 -Wall -fPIC
++
++SOURCES = nx-session-launcher-suid.c
++PROGRAMS = nx-session-launcher-suid
++
++ifneq ($(NX_VERSION),)
++CFLAGS+=-DNXSERVER_COMMAND=&quot;\&quot;$(PATH_BIN)/nx-session-launcher\&quot;&quot;
++endif
++
++all: $(PROGRAMS)
++
++clean:
++	rm -f $(PROGRAMS)
++
+
+Added: trunk/freenx-server/nx-session-launcher/nx-session-launcher
+===================================================================
+--- trunk/freenx-server/nx-session-launcher/nx-session-launcher	2008-08-05 14:48:37 UTC (rev 556)
++++ trunk/freenx-server/nx-session-launcher/nx-session-launcher	2008-08-05 17:54:32 UTC (rev 557)
+@@ -0,0 +1,31 @@
++#!/usr/bin/env python
++
++import os
++import gobject
++import dbus
++import sys
++
++bus = dbus.SystemBus ()
++
++manager_obj = bus.get_object ('org.freedesktop.ConsoleKit', '/org/freedesktop/ConsoleKit/Manager')
++manager = dbus.Interface (manager_obj, 'org.freedesktop.ConsoleKit.Manager')
++
++params = dbus.Array ([], signature = &quot;(sv)&quot;)
++params.append ((&quot;unix-user&quot;, dbus.Int32 (os.getuid(), variant_level=1)))
++params.append ((&quot;session-type&quot;, dbus.String (&quot;nx&quot;, variant_level=1)))
++params.append ((&quot;x11-display&quot;, dbus.String (os.environ['DISPLAY'], variant_level=1)))
++params.append ((&quot;is-local&quot;, dbus.Boolean (True, variant_level=1)))
++
++cookie = manager.OpenSessionWithParameters (params)
++os.environ['XDG_SESSION_COOKIE'] = cookie
++
++current_session = manager.GetSessionForCookie (cookie)
++session_obj = bus.get_object ('org.freedesktop.ConsoleKit', current_session)
++session = dbus.Interface (session_obj, 'org.freedesktop.ConsoleKit.Session')
++
++properties = dbus.Interface (session_obj, 'org.freedesktop.DBus.Properties')
++properties.Set (&quot;org.freedesktop.DBus.Properties&quot;, &quot;active&quot;, dbus.Boolean (True, variant_level=1))
++
++os.setreuid(os.getuid(), os.getuid())
++os.spawnvp(os.P_WAIT, sys.argv[1], [])
++
+
+Added: trunk/freenx-server/nx-session-launcher/nx-session-launcher-suid.c
+===================================================================
+--- trunk/freenx-server/nx-session-launcher/nx-session-launcher-suid.c	2008-08-05 14:48:37 UTC (rev 556)
++++ trunk/freenx-server/nx-session-launcher/nx-session-launcher-suid.c	2008-08-05 17:54:32 UTC (rev 557)
+@@ -0,0 +1,54 @@
++/*
++ * Copyright 2007 Google Inc.
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License
++ * as published by the Free Software Foundation; either version 2
++ * of the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
++ *
++ * Authors: <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">alriddoch at google.com</A> (Alistair Riddoch)
++ * 	    <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">freenx at fabian-franz.de</A> (Fabian Franz)
++ */
++
++#include &lt;unistd.h&gt;
++#include &lt;stdlib.h&gt;
++#include &lt;stdio.h&gt;
++
++#ifndef NXSERVER_COMMAND
++#define NXSERVER_COMMAND &quot;/usr/bin/nx-session-launcher&quot;
++#endif
++
++#define CK_LAUNCH_SESSION_COMMAND &quot;/usr/bin/ck-launch-session&quot;
++
++int main(int argc, char ** argv)
++{
++    char ** new_argv;
++    new_argv = calloc(argc + 1, sizeof(char *));
++    int i;
++
++    for (i = 1; i &lt; argc; ++i) {
++        new_argv[i] = argv[i];
++    }
++
++    uid_t calling_uid = getuid();
++
++    if (geteuid() == calling_uid) {
++        printf(&quot;Not running suid. Executing ck-launch-session.\n&quot;);
++
++        new_argv[0] = CK_LAUNCH_SESSION_COMMAND;
++
++    }else{
++        new_argv[0] = NXSERVER_COMMAND;
++    }
++
++    return execv(new_argv[0], new_argv);
++}
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000690.html">[Freenx-cvs] r556 - trunk/freenx-server
+</A></li>
+	<LI>Next message: <A HREF="000692.html">[Freenx-cvs] r558 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#691">[ date ]</a>
+              <a href="thread.html#691">[ thread ]</a>
+              <a href="subject.html#691">[ subject ]</a>
+              <a href="author.html#691">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

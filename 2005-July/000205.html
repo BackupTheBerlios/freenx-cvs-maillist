@@ -1,0 +1,98 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r81 - nx-utils/nxsocks/nxsocksd
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-July/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r81%20-%20nx-utils/nxsocks/nxsocksd&In-Reply-To=%3C200507311747.j6VHlsRq008893%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000204.html">
+   <LINK REL="Next"  HREF="000206.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r81 - nx-utils/nxsocks/nxsocksd</H1>
+    <B>Fabian Franz at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r81%20-%20nx-utils/nxsocks/nxsocksd&In-Reply-To=%3C200507311747.j6VHlsRq008893%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r81 - nx-utils/nxsocks/nxsocksd">fabianx at berlios.de
+       </A><BR>
+    <I>Sun Jul 31 19:47:54 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000204.html">[Freenx-cvs] r80 - nx-utils/nxsocks/nxsocksd
+</A></li>
+        <LI>Next message: <A HREF="000206.html">[Freenx-cvs] r82 - nx-utils/nxsocks/nxsocksd
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#205">[ date ]</a>
+              <a href="thread.html#205">[ thread ]</a>
+              <a href="subject.html#205">[ subject ]</a>
+              <a href="author.html#205">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2005-07-31 19:47:46 +0200 (Sun, 31 Jul 2005)
+New Revision: 81
+
+Modified:
+   nx-utils/nxsocks/nxsocksd/socks.c
+Log:
+Made the hack just in case nxsocksd is used as user.
+
+
+Modified: nx-utils/nxsocks/nxsocksd/socks.c
+===================================================================
+--- nx-utils/nxsocks/nxsocksd/socks.c	2005-07-31 17:46:36 UTC (rev 80)
++++ nx-utils/nxsocks/nxsocksd/socks.c	2005-07-31 17:47:46 UTC (rev 81)
+@@ -522,12 +522,16 @@
+ 	    ++s_protfail;
+ 	    flagerr(7);
+ 	}
++	
++	if (strncmp(sp-&gt;uname, &quot;nxsocksd&quot;, 8)==0)
++	{
++	    /* FF HACK - Just allow CONNECT method, 127.0.0.1:CUPS/NXFISH now.*/
+ 
+-	/* FF HACK - Just allow CONNECT method, 127.0.0.1:CUPS/NXFISH for now */
+-	if (rq_cmd(sp) != 1 || (strcmp(inet_ntoa(rq_addr(sp)),&quot;127.0.0.1&quot;)!=0) || (ntohs(rq_port(sp)) != 631 &amp;&amp; ntohs(rq_port(sp)) != 6201))
+-	{
+-	    ++s_fconn;
+-	    flagerr(2);
++	    if (rq_cmd(sp) != 1 || (strcmp(inet_ntoa(rq_addr(sp)),&quot;127.0.0.1&quot;)!=0) || (ntohs(rq_port(sp)) != 631 &amp;&amp; ntohs(rq_port(sp)) != 6201))
++	    {
++		++s_fconn;
++		flagerr(2);
++            }
+ 	}
+ 
+ 	switch(rq_cmd(sp)) {
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000204.html">[Freenx-cvs] r80 - nx-utils/nxsocks/nxsocksd
+</A></li>
+	<LI>Next message: <A HREF="000206.html">[Freenx-cvs] r82 - nx-utils/nxsocks/nxsocksd
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#205">[ date ]</a>
+              <a href="thread.html#205">[ thread ]</a>
+              <a href="subject.html#205">[ subject ]</a>
+              <a href="author.html#205">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

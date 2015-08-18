@@ -1,0 +1,379 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - jonno modified 3 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20jonno%20modified%203%20files&In-Reply-To=%3C4232DCE5.mailCGB1MX3X5%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000063.html">
+   <LINK REL="Next"  HREF="000065.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - jonno modified 3 files</H1>
+    <B>jonno</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20jonno%20modified%203%20files&In-Reply-To=%3C4232DCE5.mailCGB1MX3X5%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - jonno modified 3 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Sat Mar 12 13:13:25 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000063.html">[Freenx-cvs] CVS: freenx - jonno modified nxnode
+</A></li>
+        <LI>Next message: <A HREF="000065.html">[Freenx-cvs] CVS: freenx - fabianx modified nxnode
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#64">[ date ]</a>
+              <a href="thread.html#64">[ thread ]</a>
+              <a href="subject.html#64">[ subject ]</a>
+              <a href="author.html#64">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      jonno
+Date:      2005-03-12 12:13:25 GMT
+Modified:  .        nxloadconfig nxnode nxserver
+Log:
+Fixed broken nxloadconfig --check as well as improved the checks considerably
+
+Revision  Changes    Path
+1.16      +81 -31    freenx/nxloadconfig
+
+
+rev 1.16, prev_rev 1.15
+Index: nxloadconfig
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxloadconfig,v
+retrieving revision 1.15
+retrieving revision 1.16
+diff -u -r1.15 -r1.16
+--- nxloadconfig	12 Mar 2005 02:49:28 -0000	1.15
++++ nxloadconfig	12 Mar 2005 12:13:25 -0000	1.16
+@@ -5,7 +5,7 @@
+ #
+ # License: GPL, version 2
+ #
+-# CVS: $Id: nxloadconfig,v 1.15 2005/03/12 02:49:28 fabianx Exp $
++# CVS: $Id: nxloadconfig,v 1.16 2005/03/12 12:13:25 jonno Exp $
+ #
+ # ========================================================================
+ 
+@@ -193,13 +193,30 @@
+ 	ERROR=&quot;no&quot;
+ 	WARNING=&quot;no&quot;
+ 	
++	[ ! -d &quot;$PATH_BIN&quot; ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;PATH_BIN=$PATH_BIN\&quot;&quot;
++	[ ! -d &quot;$PATH_LIB&quot; ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;PATH_LIB=$PATH_LIB\&quot;&quot;
++	[ ! -d &quot;$NX_ETC_DIR&quot; ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;NX_ETC_DIR=$NX_ETC_DIR\&quot;&quot;
++	[ ! -d &quot;$NX_SESS_DIR&quot; ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;NX_SESS_DIR=$NX_SESS_DIR\&quot;&quot;
++	[ ! -d &quot;$NX_HOME_DIR&quot; ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;NX_HOME_DIR=$NX_HOME_DIR\&quot;&quot;
++	
++	[ -z $(echo &quot;$NX_NOMACHINE_WAY&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;NX_NOMACHINE_WAY=$NX_NOMACHINE_WAY\&quot;&quot;
++
++	[ -z &quot;$SSH_AUTHORIZED_KEYS&quot; ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SSH_AUTHORIZED_KEYS=$SSH_AUTHORIZED_KEYS\&quot;&quot; 
++	
+ 	[ -z $(echo &quot;$NX_LOGGING&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;NX_LOGGING=$NX_LOGGING\&quot;&quot;
+ 	[ &quot;$NX_LOGGING&quot; = &quot;1&quot; -a ! -e &quot;$NX_LOGFILE&quot; ] &amp;&amp; \
+ 		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;NX_LOGFILE=$NX_LOGFILE\&quot;&quot; \
+ 					  &amp;&amp; echo &quot;         No loggfile will be kept.&quot;
+ 		# How do I check if another user might write to a file? ( -w checks only current user)
+-	[ -z $(echo &quot;$SESSION_HISTORY&quot; | egrep &quot;^-?[0-9]*$&quot;) ] &amp;&amp; \
++	[ -z $(echo &quot;$SESSION_HISTORY&quot; | egrep &quot;^-?[0-9]+$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SESSION_HISTORY=$SESSION_HISTORY\&quot;&quot;
+ 	
+ 	[ -z $(echo &quot;$ENABLE_PASSDB_AUTHENTICATION&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+@@ -226,22 +243,26 @@
+ 	
+ 	[ -z $(echo &quot;$ENABLE_SERVER_FORWARD&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_SERVER_FORWARD=$ENABLE_SERVER_FORWARD\&quot;&quot;
+-	[ &quot;$ENABLE_SERVER_FORWARD&quot; = &quot;1&quot; -a -n &quot;$SERVER_FORWARD_HOST&quot; ] &amp;&amp; \
++	[ &quot;$ENABLE_SERVER_FORWARD&quot; = &quot;1&quot; -a -z &quot;$SERVER_FORWARD_HOST&quot; ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SERVER_FORWARD_HOST=$SERVER_FORWARD_HOST\&quot;&quot; 
+ 		# Any ideas on how I can check for a VALID host is velcome!
+ 		# In my private scripts I use 'resolveip -q' and check if output conforms to [0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}, 
+ 		# but resolveip is part of mysql, and I don't think I should add that dependancy...
+-	[ &quot;$ENABLE_SERVER_FORWARD&quot; = &quot;1&quot; -a -z $(echo &quot;$SERVER_FORWARD_PORT&quot; | egrep &quot;^[0-9]*$&quot;) ] &amp;&amp; \
++	[ &quot;$ENABLE_SERVER_FORWARD&quot; = &quot;1&quot; -a -z $(echo &quot;$SERVER_FORWARD_PORT&quot; | egrep &quot;^[1-9][0-9]{0,4}$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SERVER_FORWARD_PORT=$SERVER_FORWARD_PORT\&quot;&quot;
+ 	[ &quot;$ENABLE_SERVER_FORWARD&quot; = &quot;1&quot; -a ! -e &quot;$SERVER_FORWARD_KEY&quot; ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SERVER_FORWARD_KEY=$SERVER_FORWARD_KEY\&quot;&quot;
+ 	
+-	[ -z $(echo &quot;$ENABLE_NOMACHINE_FORWARD&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_NOMACHINE_FORWARD=$ENABLE_NOMACHINE_FORWARD\&quot;&quot;
+-	[ &quot;$ENABLE_NOMACHINE_FORWARD&quot; = &quot;1&quot; ] &amp;&amp; ! which &quot;$NOMACHINE_SERVER&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++	[ -z $(echo &quot;$ENABLE_NOMACHINE_FORWARD_USER&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_NOMACHINE_FORWARD_USER=$ENABLE_NOMACHINE_FORWARD_USER\&quot;&quot;
++	[ -z $(echo &quot;$ENABLE_NOMACHINE_FORWARD_PORT&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_NOMACHINE_FORWARD_PORT=$ENABLE_NOMACHINE_FORWARD_PORT\&quot;&quot;
++	[ &quot;$ENABLE_NOMACHINE_FORWARD_USER&quot; = &quot;1&quot; -o &quot;$ENABLE_NOMACHINE_FORWARD_PORT&quot; = &quot;1&quot; ] &amp;&amp; ! which &quot;$NOMACHINE_SERVER&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;NOMACHINE_SERVER=$NOMACHINE_SERVER\&quot;&quot;
+-	[ &quot;$ENABLE_NOMACHINE_FORWARD&quot; = &quot;1&quot; -a ! -d &quot;$NOMACHINE_NX_HOME_DIR&quot; ] &amp;&amp; \
++	[ &quot;$ENABLE_NOMACHINE_FORWARD_USER&quot; = &quot;1&quot; -a ! -d &quot;$NOMACHINE_NX_HOME_DIR&quot; ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;NOMACHINE_NX_HOME_DIR=$NOMACHINE_NX_HOME_DIR\&quot;&quot;
++	[ &quot;$ENABLE_NOMACHINE_FORWARD_PORT&quot; = &quot;1&quot; -a -z $(echo &quot;$NOMACHINE_FORWARD_PORT&quot; | egrep &quot;^[1-9][0-9]{0,4}$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;NOMACHINE_FORWARD_PORT=$NOMACHINE_FORWARD_PORT\&quot;&quot;
+ 	
+ 	[ -z $(echo &quot;$ENABLE_ROOTLESS_MODE&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_ROOTLESS_MODE=$ENABLE_ROOTLESS_MODE\&quot;&quot;
+@@ -252,6 +273,21 @@
+ 		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;ESD_BIN_PRELOAD=$ESD_BIN_PRELOAD\&quot;&quot; \
+ 					  &amp;&amp; echo &quot;         No esd preload will be performed.&quot;
+ 	
++	[ -z $(echo &quot;$ENABLE_ARTSD_PRELOAD&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_ARTSD_PRELOAD=$ENABLE_ARTSD_PRELOAD\&quot;&quot;
++	[ &quot;$ARTSD_BIN_PRELOAD&quot; = &quot;1&quot; ] &amp;&amp; ! which &quot;$ARTSD_BIN_PRELOAD&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;ARTSD_BIN_PRELOAD=$ARTSD_BIN_PRELOAD\&quot;&quot; \
++					  &amp;&amp; echo &quot;         No arts preload will be performed.&quot;
++	
++	! which &quot;$COMMAND_NETCAT&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_NETCAT=$COMMAND_NETCAT\&quot;&quot;
++	
++	[ -z $(echo &quot;$ENABLE_USESSION&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_USESSION=$ENABLE_USESSION\&quot;&quot;
++	[ &quot;$ENABLE_USESSION&quot; = &quot;1&quot; ] &amp;&amp; ! which &quot;$COMMAND_SESSREG&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;COMMAND_SESSREG=$COMMAND_SESSREG\&quot;&quot; \
++					  &amp;&amp; echo &quot;         Logged in users will not be registered with sessreg.&quot;
++	
+ 	[ ! -d &quot;$USER_FAKE_HOME&quot; ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;USER_FAKE_HOME=$USER_FAKE_HOME\&quot;&quot;
+ 	
+@@ -260,22 +296,23 @@
+ 	
+ 	[ -z $(echo &quot;$SSHD_CHECK_IP&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SSHD_CHECK_IP=$SSHD_CHECK_IP\&quot;&quot;
+-	[ -z $(echo &quot;$SSHD_PORT&quot; | egrep &quot;^[0-9]*$&quot;) ] &amp;&amp; \
++	[ -z $(echo &quot;$SSHD_PORT&quot; | egrep &quot;^[1-9][0-9]{0,4}$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SSHD_PORT=$SSHD_PORT\&quot;&quot;
+ 	
+-	[ -z $(echo &quot;$DISPLAY_BASE&quot; | egrep &quot;^[0-9]*$&quot;) ] &amp;&amp; \
++	[ -z $(echo &quot;$DISPLAY_BASE&quot; | egrep &quot;^[1-9][0-9]{0,4}$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;DISPLAY_BASE=$DISPLAY_BASE\&quot;&quot;
+-		[ -z $(echo &quot;$SESSION_LIMIT&quot; | egrep &quot;^[0-9]*$&quot;) ] &amp;&amp;  \
+-			ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SESSION_LIMIT=$SESSION_LIMIT\&quot;&quot;
+-	[ -z $(echo &quot;$SESSION_USER_LIMIT&quot; | egrep &quot;^[0-9]*$&quot;) -o $SESSION_USER_LIMIT -gt $SESSION_LIMIT ] &amp;&amp; \
++	[ -z $(echo &quot;$SESSION_LIMIT&quot; | egrep &quot;^[1-9][0-9]{0,4}$&quot;) ] &amp;&amp;  \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SESSION_LIMIT=$SESSION_LIMIT\&quot;&quot;
++	[ -z $(echo &quot;$SESSION_USER_LIMIT&quot; | egrep &quot;^[1-9][0-9]{0,4}$&quot;) -o $SESSION_USER_LIMIT -gt $SESSION_LIMIT ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SESSION_USER_LIMIT=$SESSION_USER_LIMIT\&quot;&quot;
+-	[ -z $(echo &quot;$DISPLAY_LIMIT&quot; | egrep &quot;^[0-9]*$&quot;) -o $DISPLAY_LIMIT -lt $SESSION_LIMIT ] &amp;&amp; \
++	[ -z $(echo &quot;$DISPLAY_LIMIT&quot; | egrep &quot;^[1-9][0-9]{0,4}$&quot;) -o $DISPLAY_LIMIT -lt $SESSION_LIMIT ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;DISPLAY_LIMIT=$DISPLAY_LIMIT\&quot;&quot;
+ 	
+ 	! which &quot;$DEFAULT_X_WM&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;DEFAULT_X_WM=$DEFAULT_X_WM\&quot;&quot;
+ 	! which &quot;$DEFAULT_X_SESSION&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;DEFAULT_X_SESSION=$DEFAULT_X_SESSION\&quot;&quot;
++		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;DEFAULT_X_SESSION=$DEFAULT_X_SESSION\&quot;&quot; \
++					  &amp;&amp; echo &quot;         Users might not be able to request a default X session.&quot;
+ 	! which &quot;$COMMAND_START_KDE&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;COMMAND_START_KDE=$COMMAND_START_KDE\&quot;&quot; \
+ 					  &amp;&amp; echo &quot;         Users will not be able to request a KDE session.&quot;
+@@ -303,24 +340,18 @@
+ 	! which &quot;$COMMAND_SMBUMOUNT&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_SMBUMOUNT=$COMMAND_SMBUMOUNT\&quot;&quot;
+ 	
+-	OLD_IFS=$IFS
+-	IFS=&quot;,&quot;
+-	if [ &quot;$ENABLE_PERSISTENT_SESSION&quot; != &quot;all&quot; ]
+-	then
+-		for USERNAME in $ENABLE_PERSISTENT_SESSION; do
+-			[ -z $(getent passwd | egrep &quot;^$USERNAME:&quot;) ] &amp;&amp; \
+-				ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_PERSISTENT_SESSION=$ENABLE_PERSISTENT_SESSION\&quot;&quot; &amp;&amp; break ;
+-		done
+-	fi
+-	for USERNAME in $DISABLE_PERSISTENT_SESSION; do
+-		[ -z $(getent passwd | egrep &quot;^$USERNAME:&quot;) ] &amp;&amp; \
+-			ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;DISABLE_PERSISTENT_SESSION=$DISABLE_PERSISTENT_SESSION\&quot;&quot; &amp;&amp; break ;
+-	done
+-	IFS=$OLD_IFS
++	#AGENT_EXTRA_OPTIONS_RFB=&quot;&quot;
++	#AGENT_EXTRA_OPTIONS_RDP=&quot;&quot;
++	#AGENT_EXTRA_OPTIONS_X=&quot;&quot;
++	#PROXY_EXTRA_OPTIONS=&quot;&quot;
++		#Can these be checked???
+ 	
+ 	#AGENT_FONT_SERVER=&quot;&quot;
+ 		#Any ideas on how I can check for a VALID host is velcome!
+ 	
++	[ -z $(echo &quot;$PROXY_TCP_NODELAY&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;PROXY_TCP_NODELAY=$PROXY_TCP_NODELAY\&quot;&quot;
++	
+ 	[ -z $(echo &quot;$CUPS_SUPPORT&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;CUPS_SUPPORT=$CUPS_SUPPORT\&quot;&quot;
+ 	# CUPS_BACKEND=&quot;&quot;
+@@ -336,8 +367,27 @@
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;PROXY_LIBRARY_PATH=$PROXY_LIBRARY_PATH\&quot;&quot;
+ 	[ ! -d &quot;$APPLICATION_LIBRARY_PATH&quot; ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;APPLICATION_LIBRARY_PATH=$APPLICATION_LIBRARY_PATH\&quot;&quot;
+-	#APPLICATION_LIBRARY_PRELOAD=&quot;&quot;
+-		# As this isn't used yet I don't know how to realy check for it. Fix this when adding support!
++	
++	OLD_IFS=$IFS
++	IFS=&quot;,&quot;
++	if [ &quot;$ENABLE_PERSISTENT_SESSION&quot; != &quot;all&quot; ]
++	then
++		for USERNAME in $ENABLE_PERSISTENT_SESSION; do
++			[ -z $(getent passwd | egrep &quot;^$USERNAME:&quot;) ] &amp;&amp; \
++				ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_PERSISTENT_SESSION=$ENABLE_PERSISTENT_SESSION\&quot;&quot; &amp;&amp; break ;
++		done
++	fi
++	for USERNAME in $DISABLE_PERSISTENT_SESSION; do
++		[ -z $(getent passwd | egrep &quot;^$USERNAME:&quot;) ] &amp;&amp; \
++			ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;DISABLE_PERSISTENT_SESSION=$DISABLE_PERSISTENT_SESSION\&quot;&quot; &amp;&amp; break ;
++	done
++	
++	IFS=&quot;:&quot;
++	for LIBRARY in $APPLICATION_LIBRARY_PRELOAD; do
++		[ ! -e $LIBRARY ] &amp;&amp; \
++			ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;APPLICATION_LIBRARY_PRELOAD=$APPLICATION_LIBRARY_PRELOAD\&quot;&quot; &amp;&amp; break ;
++	done
++	IFS=$OLD_IFS
+ 	
+ 	if [ &quot;$ERROR&quot; = &quot;yes&quot; ]
+ 	then
+
+
+
+1.37      +6 -6      freenx/nxnode
+
+
+rev 1.37, prev_rev 1.36
+Index: nxnode
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxnode,v
+retrieving revision 1.36
+retrieving revision 1.37
+diff -u -r1.36 -r1.37
+--- nxnode	12 Mar 2005 08:03:45 -0000	1.36
++++ nxnode	12 Mar 2005 12:13:25 -0000	1.37
+@@ -13,7 +13,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxnode,v 1.36 2005/03/12 08:03:45 jonno Exp $
++# CVS: $Id: nxnode,v 1.37 2005/03/12 12:13:25 jonno Exp $
+ #
+ # 21.06.2004: - Full reconnection support
+ 
+@@ -137,9 +137,9 @@
+ 			STARTX=$application
+ 		;;
+ 		unix-default)
+-			if [ -f &quot;$HOME/.Xclients&quot; ]; then
++			if [ -x &quot;$HOME/.Xclients&quot; ]; then
+ 				STARTX=&quot;$HOME/.Xclients&quot;
+-			elif [ -f &quot;$DEFAULT_X_SESSION&quot; ]; then
++			elif which &quot;$DEFAULT_X_SESSION&quot; &gt;/dev/null 2&gt;&amp;1 ; then
+ 				STARTX=&quot;$DEFAULT_X_SESSION&quot;
+ 			fi
+ 		;;
+@@ -153,7 +153,7 @@
+ 		export ESPEAKER=&quot;127.0.0.1:$ESPEAKER&quot;
+ 		
+ 		# Check for config file directive
+-		if [ &quot;$ENABLE_ESD_PRELOAD&quot; = &quot;1&quot; ]
++		if [ &quot;$ENABLE_ESD_PRELOAD&quot; = &quot;1&quot; -a -x $ESD_BIN_PRELOAD ]
+ 		then
+ 			STARTX=&quot;$ESD_BIN_PRELOAD $STARTX&quot;
+ 			
+@@ -166,7 +166,7 @@
+ 	then
+ 		# Overwrite users mcoprc
+ 		echo -n &quot;GlobalComm=Arts::X11GlobalComm&quot; &gt; $USER_FAKE_HOME/.mcoprc
+-		if [ &quot;$ENABLE_ARTSD_PRELOAD&quot; = &quot;1&quot; ]
++		if [ &quot;$ENABLE_ARTSD_PRELOAD&quot; = &quot;1&quot; -a -x $ARTSD_BIN_PRELOAD ]
+ 		then
+ 			STARTX=&quot;$ARTSD_BIN_PRELOAD $STARTX&quot;
+ 			echo &quot;Info: NXNODE - Using $ARTSD_BIN_PRELOAD wrapper script.&quot; &gt;&gt; $USER_FAKE_HOME/.nx/C-$sess_id/session
+@@ -539,7 +539,7 @@
+ 	node_start_applications &amp;
+ fi
+ 
+-[ -n &quot;$NODE_AUTOSTART&quot; ] &amp;&amp; &quot;$NODE_AUTOSTART&quot; &quot;$1&quot;
++which &quot;$NODE_AUTOSTART&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; &quot;$NODE_AUTOSTART&quot; &quot;$1&quot;
+ 	
+ cat &lt;&lt; EOF
+ NX&gt; 700 Session id: $sess_id
+
+
+
+1.36      +4 -5      freenx/nxserver
+
+
+rev 1.36, prev_rev 1.35
+Index: nxserver
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxserver,v
+retrieving revision 1.35
+retrieving revision 1.36
+diff -u -r1.35 -r1.36
+--- nxserver	12 Mar 2005 04:17:03 -0000	1.35
++++ nxserver	12 Mar 2005 12:13:25 -0000	1.36
+@@ -11,7 +11,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxserver,v 1.35 2005/03/12 04:17:03 fabianx Exp $
++# CVS: $Id: nxserver,v 1.36 2005/03/12 12:13:25 jonno Exp $
+ #
+ 
+ # Read the config file
+@@ -350,14 +350,13 @@
+ 
+ log()
+ {
+-	[ &quot;$NX_LOGGING&quot; = &quot;1&quot; ] &amp;&amp; echo &quot;$@&quot; &gt;&gt; &quot;$NX_LOGFILE&quot;
++	[ &quot;$NX_LOGGING&quot; = &quot;1&quot; -a -w &quot;$NX_LOGFILE&quot; ] &amp;&amp; echo &quot;$@&quot; &gt;&gt; &quot;$NX_LOGFILE&quot;
+ }
+ 
+ log_tee()
+ {
+-
+-  [ &quot;$NX_LOGGING&quot; = &quot;1&quot; ] &amp;&amp; exec tee -a &quot;$NX_LOGFILE&quot;
+-  [ &quot;$NX_LOGGING&quot; = &quot;1&quot; ] || exec cat -
++	[ &quot;$NX_LOGGING&quot; = &quot;1&quot; -a -w &quot;$NX_LOGFILE&quot; ] &amp;&amp; exec tee -a &quot;$NX_LOGFILE&quot;
++	[ &quot;$NX_LOGGING&quot; = &quot;1&quot; -a -w &quot;$NX_LOGFILE&quot; ] || exec cat -
+ }
+ 
+ echo_x()
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000063.html">[Freenx-cvs] CVS: freenx - jonno modified nxnode
+</A></li>
+	<LI>Next message: <A HREF="000065.html">[Freenx-cvs] CVS: freenx - fabianx modified nxnode
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#64">[ date ]</a>
+              <a href="thread.html#64">[ thread ]</a>
+              <a href="subject.html#64">[ subject ]</a>
+              <a href="author.html#64">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,32 @@
+From gwright at mail.berlios.de  Sat Sep 23 11:38:53 2006
+From: gwright at mail.berlios.de (gwright at BerliOS)
+Date: Sat, 23 Sep 2006 11:38:53 +0200
+Subject: [Freenx-cvs] r282 - nxclientlib/qtnx
+Message-ID: <200609230938.k8N9crJD028465@sheep.berlios.de>
+
+Author: gwright
+Date: 2006-09-23 11:38:53 +0200 (Sat, 23 Sep 2006)
+New Revision: 282
+
+Modified:
+   nxclientlib/qtnx/qtnxwindow.cpp
+Log:
+Fix a bug where QtNX segfaults when trying to resume a session.
+
+
+Modified: nxclientlib/qtnx/qtnxwindow.cpp
+===================================================================
+--- nxclientlib/qtnx/qtnxwindow.cpp	2006-08-24 21:09:04 UTC (rev 281)
++++ nxclientlib/qtnx/qtnxwindow.cpp	2006-09-23 09:38:53 UTC (rev 282)
+@@ -26,6 +26,8 @@
+ 
+ QtNXWindow::QtNXWindow() : QMainWindow()
+ {
++	sessionsDialog = 0;
++
+ 	logWindow = new QDialog(0);
+ 	ui_lw.setupUi(logWindow);
+ 
+
+
+

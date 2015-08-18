@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r599 - trunk/freenx-utils/nxpublickey
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r599%20-%20trunk/freenx-utils/nxpublickey&In-Reply-To=%3C200808241625.m7OGPm0u010749%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000732.html">
+   <LINK REL="Next"  HREF="000734.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r599 - trunk/freenx-utils/nxpublickey</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r599%20-%20trunk/freenx-utils/nxpublickey&In-Reply-To=%3C200808241625.m7OGPm0u010749%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r599 - trunk/freenx-utils/nxpublickey">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Sun Aug 24 18:25:48 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000732.html">[Freenx-cvs] r598 - trunk/freenx-utils/nxpublickey
+</A></li>
+        <LI>Next message: <A HREF="000734.html">[Freenx-cvs] r600 - trunk/freenx-utils/nxpublickey
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#733">[ date ]</a>
+              <a href="thread.html#733">[ thread ]</a>
+              <a href="subject.html#733">[ subject ]</a>
+              <a href="author.html#733">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-08-24 18:25:48 +0200 (Sun, 24 Aug 2008)
+New Revision: 599
+
+Modified:
+   trunk/freenx-utils/nxpublickey/nxssh-wrapper
+Log:
+- Search for binary in path.
+
+- Be able to set binary as user@&lt;U|S&gt;:path-to-binary.
+
+
+
+Modified: trunk/freenx-utils/nxpublickey/nxssh-wrapper
+===================================================================
+--- trunk/freenx-utils/nxpublickey/nxssh-wrapper	2008-08-24 15:11:22 UTC (rev 598)
++++ trunk/freenx-utils/nxpublickey/nxssh-wrapper	2008-08-24 16:25:48 UTC (rev 599)
+@@ -8,7 +8,7 @@
+ #
+ #	hostname: [@]hostname, if the @ is set it is wrapped.
+ #
+-#	username: [@]user[@U|@S]
++#	username: [@]user[@&lt;U|S&gt;[:path-to-binary]]
+ #
+ #		The first @ denotes if password should not be read / used from nxclient. (@ set = use plain ssh)
+ #
+@@ -22,8 +22,9 @@
+ 
+ # VARIABLES:
+ 
+-NXSERVER_SUID=&quot;/usr/NX/bin/nxserver-suid&quot;
+-NXSERVER_USERMODE=&quot;~/NX4U/bin/nxserver-usermode&quot;
++NXSERVER_SUID=&quot;nxserver-suid&quot;
++NXSERVER_USERMODE=&quot;nxserver-usermode&quot;
++NXSERVER_PATH=&quot;~/bin:~/NX4U/:/usr/NX/bin:/opt/NX/bin:/opt/NX4U/bin/:/usr/lib/nx/bin&quot;
+ 
+ # Enable to always wrap
+ #NXWRAP=1
+@@ -124,13 +125,23 @@
+ 	case &quot;$USER2&quot; in 
+ 		*&quot;@&quot;*)
+ 			MODE=$(echo $USER2 | cut -d'@' -f2)
++			USER2=$(echo $USER2 | cut -d'@' -f1)
++
++			# Parse for : part
++			BINARY=$(echo $MODE | cut -d':' -f2)
++			MODE=$(echo $MODE | cut -d':' -f1)
++			
+ 			[ &quot;$MODE&quot; = &quot;U&quot; ] &amp;&amp; NXSERVER_SUID=/bin/false
+ 			[ &quot;$MODE&quot; = &quot;S&quot; ] &amp;&amp; NXSERVER_USERMODE=/bin/falsedoesnotexist
+-			USER2=$(echo $USER2 | cut -d'@' -f1)
++			
++			# Did we get a hint that another binary should be used?
++
++			[ -n &quot;$BINARY&quot; -a &quot;$MODE&quot; = &quot;U&quot; ] &amp;&amp; NXSERVER_USERMODE=&quot;$BINARY $NXSERVER_USERMODE&quot;
++			[ -n &quot;$BINARY&quot; -a &quot;$MODE&quot; = &quot;S&quot; ] &amp;&amp; NXSERVER_SUID=&quot;$BINARY $NXSERVER_SUID&quot;
+ 		;;
+ 	esac
+ 	
+-	export REMOTE_COMMAND='if [ -x '&quot;$NXSERVER_SUID&quot;' -a -u '&quot;$NXSERVER_SUID&quot;' ]; then unset SSH_CLIENT SSH_CLIENT2; export SSH_CLIENT=&quot;127.0.0.1 56404 127.0.0.1 22&quot;; '$NXSERVER_SUID'; elif [ -x '&quot;$NXSERVER_USERMODE&quot;' ]; then '&quot;$NXSERVER_USERMODE&quot;'; else echo &quot;NX&gt; 596 Service not available.&quot;; echo &quot;NX&gt; 999 Bye&quot;; fi'
++	export REMOTE_COMMAND='export PATH='&quot;$NXSERVER_PATH&quot;':&quot;$PATH&quot;; for i in $(which -a '&quot;$NXSERVER_SUID&quot;'); do if [ -x &quot;$i&quot; -a -u &quot;$i&quot; ]; then unset SSH_CLIENT SSH_CLIENT2; export SSH_CLIENT=&quot;127.0.0.1 56404 127.0.0.1 22&quot;; exec &quot;$i&quot;; fi; done; for i in $(which -a '&quot;$NXSERVER_USERMODE&quot;'); do if [ -x &quot;$i&quot; -a ! -L &quot;$i&quot; ]; then exec &quot;$i&quot;; fi; done; echo &quot;NX&gt; 596 Service not available.&quot;; echo &quot;NX&gt; 999 Bye&quot;'
+ 
+ 	if [ &quot;$PWMODE&quot; = &quot;1&quot; ]
+ 	then 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000732.html">[Freenx-cvs] r598 - trunk/freenx-utils/nxpublickey
+</A></li>
+	<LI>Next message: <A HREF="000734.html">[Freenx-cvs] r600 - trunk/freenx-utils/nxpublickey
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#733">[ date ]</a>
+              <a href="thread.html#733">[ thread ]</a>
+              <a href="subject.html#733">[ subject ]</a>
+              <a href="author.html#733">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

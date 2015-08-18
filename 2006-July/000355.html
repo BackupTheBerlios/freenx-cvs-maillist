@@ -1,0 +1,179 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r226 - / freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-July/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r226%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200607042338.k64NcNaw008327%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000354.html">
+   <LINK REL="Next"  HREF="000356.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r226 - / freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r226%20-%20/%20freenx-server/trunk&In-Reply-To=%3C200607042338.k64NcNaw008327%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r226 - / freenx-server/trunk">fabianx at berlios.de
+       </A><BR>
+    <I>Wed Jul  5 01:38:23 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000354.html">[Freenx-cvs] r225 - / freenx-server/trunk freenx-server/trunk/nxserver-helper
+</A></li>
+        <LI>Next message: <A HREF="000356.html">[Freenx-cvs] r227 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#355">[ date ]</a>
+              <a href="thread.html#355">[ thread ]</a>
+              <a href="subject.html#355">[ subject ]</a>
+              <a href="author.html#355">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2006-07-05 01:38:10 +0200 (Wed, 05 Jul 2006)
+New Revision: 226
+
+Modified:
+   /
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/node.conf.sample
+   freenx-server/trunk/nxloadconfig
+   freenx-server/trunk/nxsetup
+Log:
+Code cleanup:
+
+* Removed deprecated ENABLE_NOMACHINE_FORWARD_USER.
+* Fixed nxsetup to be able to setup the forwarding.
+
+
+
+
+Property changes on: 
+___________________________________________________________________
+Name: svk:merge
+   - 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:235
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+   + 0e379f48-0dfb-0310-837f-faf58c73f1fd:/freenx/local/freenx:1286
+db78c40e-8a17-0410-9696-a91623a98005:/local/freenx:240
+dfed1786-65ff-0310-a727-a632acf074e8:/local/freenx:287
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2006-07-04 22:23:53 UTC (rev 225)
++++ freenx-server/trunk/ChangeLog	2006-07-04 23:38:10 UTC (rev 226)
+@@ -1,6 +1,7 @@
+ xx.xx.2006 FreeNX 0.6.0
+ 	* Opened the 0.6.0 branch.
+ 	* Added nxnode slave mode.
++	* General code cleanup.
+ 
+ 01.07.2006 FreeNX 0.5.0 &quot;UKUUG 2006 Edition&quot;
+ 	* Opened the 0.5.0 branch.
+
+Modified: freenx-server/trunk/node.conf.sample
+===================================================================
+--- freenx-server/trunk/node.conf.sample	2006-07-04 22:23:53 UTC (rev 225)
++++ freenx-server/trunk/node.conf.sample	2006-07-04 23:38:10 UTC (rev 226)
+@@ -174,32 +174,22 @@
+ #SERVER_FORWARD_KEY=&quot;/usr/NX/share/client.id_dsa.key&quot;
+ 
+ 
+-# FreeNX with ENABLE_NOMACHINE_FORWARD_USER=&quot;1&quot; will automatically forward all
++# FreeNX with ENABLE_NOMACHINE_FORWARD_PORT=&quot;1&quot; will automatically forward all
+ # connections to the commercial NoMachine nxserver installed on the same
+-# machine. This feature is introduced to enable the usage of FreeNX and
+-# NoMachine NX side by side on the same machine without conflicts.
++# machine, which go in by port NOMACHINE_FORWARD_PORT. This feature is introduced
++# to enable the usage of FreeNX and NoMachine NX side by side on the same machine
++# without conflicts.
+ #
+-# To make a connection to the FreeNX server, just use 'freenx.&lt;user&gt;' as 
+-# username (where &lt;username&gt; is the existing Unix username. (You do not 
+-# need to create a user named 'freenx.&lt;user&gt;'!)
+-#
+-# To make a connection to the NoMachine nxserver, use the unmodified
+-# '&lt;user&gt;' username.
+-
+-#ENABLE_NOMACHINE_FORWARD_USER=&quot;0&quot;
+-#NOMACHINE_SERVER=&quot;/usr/NX/bin/nxserver&quot;
+-#NOMACHINE_NX_HOME_DIR=&quot;/usr/NX/home/nx&quot;
+-
+-
+-# To just forward connections to the NoMachine server, which connect to a
+-# certain port enable the following two directives.
+-# 
+ # Note: You need to let SSHD listen to several ports to make use of this
+ #       directive.
+ 
+ #ENABLE_NOMACHINE_FORWARD_PORT=&quot;0&quot;
+ #NOMACHINE_FORWARD_PORT=&quot;22&quot;
+ 
++#NOMACHINE_SERVER=&quot;/usr/NX/bin/nxserver&quot;
++#NOMACHINE_NX_HOME_DIR=&quot;/usr/NX/home/nx&quot;
++
++
+ # LOAD BALANCING
+ # ==============
+ #
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2006-07-04 22:23:53 UTC (rev 225)
++++ freenx-server/trunk/nxloadconfig	2006-07-04 23:38:10 UTC (rev 226)
+@@ -126,10 +126,8 @@
+ SERVER_FORWARD_PORT=22
+ SERVER_FORWARD_KEY=&quot;/usr/NX/share/client.id_dsa.key&quot;
+ 
+-ENABLE_NOMACHINE_FORWARD_USER=&quot;0&quot;
+ NOMACHINE_SERVER=&quot;/usr/NX/bin/nxserver&quot;
+ NOMACHINE_NX_HOME_DIR=&quot;/usr/NX/home/nx&quot;
+-
+ ENABLE_NOMACHINE_FORWARD_PORT=&quot;0&quot;
+ NOMACHINE_FORWARD_PORT=&quot;22&quot;
+ 
+
+Modified: freenx-server/trunk/nxsetup
+===================================================================
+--- freenx-server/trunk/nxsetup	2006-07-04 22:23:53 UTC (rev 225)
++++ freenx-server/trunk/nxsetup	2006-07-04 23:38:10 UTC (rev 226)
+@@ -239,7 +239,7 @@
+ 		echo &quot;done&quot;
+ 	fi
+ 	
+-	if [ &quot;$ENABLE_NOMACHINE_FORWARD&quot; = &quot;1&quot; -a -x &quot;$NOMACHINE_SERVER&quot; ]
++	if [ &quot;$ENABLE_NOMACHINE_FORWARD_PORT&quot; = &quot;1&quot; -a -x &quot;$NOMACHINE_SERVER&quot; ]
+ 	then
+ 		echo -n &quot;Setting up NoMachine forwarding ...&quot;
+ 		usermod -s &quot;$PATH_BIN/nxserver&quot; -d &quot;$NOMACHINE_NX_HOME_DIR&quot; nx
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000354.html">[Freenx-cvs] r225 - / freenx-server/trunk freenx-server/trunk/nxserver-helper
+</A></li>
+	<LI>Next message: <A HREF="000356.html">[Freenx-cvs] r227 - / freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#355">[ date ]</a>
+              <a href="thread.html#355">[ thread ]</a>
+              <a href="subject.html#355">[ subject ]</a>
+              <a href="author.html#355">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

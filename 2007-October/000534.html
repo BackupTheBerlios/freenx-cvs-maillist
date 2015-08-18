@@ -1,0 +1,171 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r406 - freenx-website
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-October/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r406%20-%20freenx-website&In-Reply-To=%3C200710142334.l9ENYkXX022432%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000665.html">
+   <LINK REL="Next"  HREF="000535.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r406 - freenx-website</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r406%20-%20freenx-website&In-Reply-To=%3C200710142334.l9ENYkXX022432%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r406 - freenx-website">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Mon Oct 15 01:34:46 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000665.html">[Freenx-cvs] r405 - in freenx-server/tags: . FreeNX-0.7.1	FreeNX-0.7.1/nxserver-helper
+</A></li>
+        <LI>Next message: <A HREF="000535.html">[Freenx-cvs] r407 - nxlaunch
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#534">[ date ]</a>
+              <a href="thread.html#534">[ thread ]</a>
+              <a href="subject.html#534">[ subject ]</a>
+              <a href="author.html#534">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-10-15 01:34:45 +0200 (Mon, 15 Oct 2007)
+New Revision: 406
+
+Modified:
+   freenx-website/home.inc
+Log:
+Release of FreeNX 0.7.1.
+
+
+
+Modified: freenx-website/home.inc
+===================================================================
+--- freenx-website/home.inc	2007-10-14 22:25:14 UTC (rev 405)
++++ freenx-website/home.inc	2007-10-14 23:34:45 UTC (rev 406)
+@@ -12,6 +12,93 @@
+ 	&lt;/h2&gt;
+ 	&lt;h3&gt;
+ 		&lt;a
++	href=&quot;<A HREF="http://mail.kde.org/pipermail/freenx-knx/2007-October/005959.html">http://mail.kde.org/pipermail/freenx-knx/2007-October/005959.html</A>&quot;&gt;FreeNX
++	0.7.1 Released&lt;/a&gt; 
++        - Sunday, 14/10/07 - 
++	[&lt;a title=&quot;Download&quot;
++	href=&quot;<A HREF="http://prdownload.berlios.de/freenx/freenx-0.7.1.tar.gz">http://prdownload.berlios.de/freenx/freenx-0.7.1.tar.gz</A>&quot;&gt;Download&lt;/a&gt;]
++	&lt;/h3&gt;
++	&lt;pre&gt;
++14.10.2007 FreeNX 0.7.1 &quot;Hip Hop Edition&quot;
++        * Fixed the issue that makes fonts look tiny and unreadable by default
++          with freenx and the commercial client. (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">diamond at google.com</A>)
++        * Added invalidating of NSCD cache after group and user add.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">diamond at google.com</A>)
++        * Added better wording with less misunderstanding to dialog of
++          nxclient for Suspend/Terminate/Close case. (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">diamond at google.com</A>)
++        * Added 'dialog_interface=dialog' option since many installations may
++          not have Xdialog and since xmessage is very limiting. This new option
++          will work on any machine that has dialog and xterm.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">puterguy at bat.berlios.de</A>)
++        * Fixed the APPLICATION_LIBRARY_PRELOAD to be just a warning and fixed
++          the default path. (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Added drivers.cache.all that is reloaded just every 60 minutes.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">puterguy at bat.berlios.de</A>)
++        * Fixed missing services stop that lead to redundant mounts and still
++          running cupsd processes.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">puterguy at bat.berlios.de</A>)
++        * Added support for mount.cifs additionally to the deprecated
++          smbmount. (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">puterguy at bat.berlios.de</A>)
++        * Added &quot;host&quot; output to --list to see which user is connected to
++          which server in case of loadbalancing.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>, Bastian Kames &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">kames at ibg-monforts.de</A>&gt;)
++        * Fixed nxclient -printer to not use commercial client, because its too
++          slow in case of huge databases like foomatic. (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Removed bad -noautokill option from the nxclient dialog spawning.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">wayneb at bat.berlios.de</A>)
++        * Added basic support for mirrored sessions.
++          * The functionality can be used by connecting to VNC session
++            and choosing to &quot;resume&quot; such a session.
++          * New configuration key: ENABLE_MIRROR_VIA_VNC=1
++          * New configuration key: ENABLE_DESKTOP_SHARING=1
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Fixed some portability issues.
++          * Fixed nxloadconfig in case that COMMAND_X is not only one word,
++            like &quot;openssl md5&quot;.
++          * Added usage of &quot;openssl md5&quot; instead of &quot;md5sum&quot; by default.
++          * Changed perl to COMMAND_PERL.
++          * Removed rev and replaced the code with efficient awk code.
++          * Added an outcommented way to also use &quot;POSIX find&quot; for history
++            cleaning.
++          (Peter O'Gorman &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">peter at pogma.com</A>&gt;)
++        * Fix ownership of $SSH_AUTHORIZED_KEYS in nxkeygen, just in case
++          it is run without nxsetup.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>, thx to sambiase on #nx)
++        * Fixed diverse occurences of $sess_id in nxnode, when hostname
++          contains whitespace.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Fixed setting up KDE_PRINTRC altogether if ENABLE_KDE_CUPS is not 1,
++          and handles errors better when it is but kde-config is not available
++          or fails.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">scop at bat.berlios.de</A>)
++        * Changed unix:$display -&gt; :$display to enable FreeNX usage with newer
++          xlib in C (used for example by Novell).
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Enabled 3.0.0 backend with same usage pattern as 2.[0|1].0 backend.
++          (Shawn Starr &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">spstarr at kde.org</A>&gt;)
++        * Bumped version number to 2.1.0-71 to let things like File-sharing
++          port and auxiliary channels work.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Added parsing of aux parameter. This should remove all keyboard
++          related problems with nxdesktop with 2.[01].0 backend.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Renamed nxclient to nxdialog and setup the necessary environment
++          variable for nxagent to find it.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>, Thanks to NoMachine for giving this hint)
++        * Added experimental support for usage of external rdesktop and
++          vncviewer programs.
++          This is for example needed for 3.0.0 backend.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Changed the default load balancing algorithm to &quot;random&quot;
++          as the nxcheckload script might not be available.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++        * Added ENABLE_CLIPBOARD=&quot;none|client|server|both&quot; option
++          to node.conf to disable, restrict or enable the clipboard
++          synchronization.
++          (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)		
++	&lt;/pre&gt;
++	&lt;h3&gt;
++		&lt;a
+ 	href=&quot;<A HREF="http://mail.kde.org/pipermail/freenx-knx/2007-July/005473.html">http://mail.kde.org/pipermail/freenx-knx/2007-July/005473.html</A>&quot;&gt;FreeNX
+ 	0.7.0 Released&lt;/a&gt; 
+         - Saturday, 07/07/07 - 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000665.html">[Freenx-cvs] r405 - in freenx-server/tags: . FreeNX-0.7.1	FreeNX-0.7.1/nxserver-helper
+</A></li>
+	<LI>Next message: <A HREF="000535.html">[Freenx-cvs] r407 - nxlaunch
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#534">[ date ]</a>
+              <a href="thread.html#534">[ thread ]</a>
+              <a href="subject.html#534">[ subject ]</a>
+              <a href="author.html#534">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

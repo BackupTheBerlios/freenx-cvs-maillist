@@ -1,0 +1,650 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r263 - in nxclientlib: . qtnx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r263%20-%20in%20nxclientlib%3A%20.%20qtnx&In-Reply-To=%3C200608160502.k7G52Ujc004211%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000392.html">
+   <LINK REL="Next"  HREF="000394.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r263 - in nxclientlib: . qtnx</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r263%20-%20in%20nxclientlib%3A%20.%20qtnx&In-Reply-To=%3C200608160502.k7G52Ujc004211%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r263 - in nxclientlib: . qtnx">gwright at mail.berlios.de
+       </A><BR>
+    <I>Wed Aug 16 07:02:30 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000392.html">[Freenx-cvs] r262 - in nxclientlib: . qtnx
+</A></li>
+        <LI>Next message: <A HREF="000394.html">[Freenx-cvs] r264 - nxclientlib/qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#393">[ date ]</a>
+              <a href="thread.html#393">[ thread ]</a>
+              <a href="subject.html#393">[ subject ]</a>
+              <a href="author.html#393">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2006-08-16 07:02:15 +0200 (Wed, 16 Aug 2006)
+New Revision: 263
+
+Modified:
+   nxclientlib/nxparsexml.cpp
+   nxclientlib/nxparsexml.h
+   nxclientlib/nxwritexml.cpp
+   nxclientlib/nxwritexml.h
+   nxclientlib/qtnx/qtnxsettings.cpp
+   nxclientlib/qtnx/qtnxsettings.h
+   nxclientlib/qtnx/qtnxwindow.cpp
+Log:
+Fix broken XML code. Updated qtnx configuration stuff.
+
+
+Modified: nxclientlib/nxparsexml.cpp
+===================================================================
+--- nxclientlib/nxparsexml.cpp	2006-08-16 02:41:16 UTC (rev 262)
++++ nxclientlib/nxparsexml.cpp	2006-08-16 05:02:15 UTC (rev 263)
+@@ -30,109 +30,107 @@
+ 
+ bool NXParseXML::startElement(const QString &amp;namespaceURI, const QString &amp;localName, const QString &amp;qName, const QXmlAttributes &amp;attributes)
+ {
+-	QString key = attributes.value(&quot;key&quot;);
+-	QString value = attributes.value(&quot;value&quot;);
+-	if (key == &quot;Connection Name&quot;){
+-		sessionData-&gt;sessionName = value;
++	if (attributes.value(&quot;key&quot;) == &quot;Connection Name&quot;) {
++		sessionData-&gt;sessionName = attributes.value(&quot;value&quot;);
+ 	}
+ 	
+-	if (key == &quot;Server Hostname&quot;) {
+-		sessionData-&gt;serverHost = value;
++	if (attributes.value(&quot;key&quot;) == &quot;Server Hostname&quot;) {
++		sessionData-&gt;serverHost = attributes.value(&quot;value&quot;);
+ 	}
+ 
+-	if (key == &quot;Server Port&quot;) {
+-		sessionData-&gt;serverPort = value.toInt();
++	if (attributes.value(&quot;key&quot;) == &quot;Server Port&quot;) {
++		sessionData-&gt;serverPort = attributes.value(&quot;value&quot;).toInt();
+ 	}
+ 
+-	if (key == &quot;Session Type&quot;) {
+-		sessionData-&gt;sessionType = value;
++	if (attributes.value(&quot;key&quot;) == &quot;Session Type&quot;) {
++		sessionData-&gt;sessionType = attributes.value(&quot;value&quot;);
+ 	}
+ 
+-	if (key == &quot;Custom Session Command&quot;) {
+-		sessionData-&gt;customCommand = value;
++	if (attributes.value(&quot;key&quot;) == &quot;Custom Session Command&quot;) {
++		sessionData-&gt;customCommand = attributes.value(&quot;value&quot;);
+ 	}
+ 
+-	if (key == &quot;Disk Cache&quot;) {
+-		sessionData-&gt;cache = value.toInt();
++	if (attributes.value(&quot;key&quot;) == &quot;Disk Cache&quot;) {
++		sessionData-&gt;cache = attributes.value(&quot;value&quot;).toInt();
+ 	}
+ 
+-	if (key == &quot;Image Cache&quot;) {
+-		sessionData-&gt;images = value.toInt();
++	if (attributes.value(&quot;key&quot;) == &quot;Image Cache&quot;) {
++		sessionData-&gt;images = attributes.value(&quot;value&quot;).toInt();
+ 	}
+ 
+-	if (key == &quot;Link Type&quot;) {
+-		sessionData-&gt;linkType = value;
++	if (attributes.value(&quot;key&quot;) == &quot;Link Type&quot;) {
++		sessionData-&gt;linkType = attributes.value(&quot;value&quot;);
+ 	}
+ 
+-	if (key == &quot;Use Render Extension&quot;) {
+-		if (value == &quot;True&quot;)
++	if (attributes.value(&quot;key&quot;) == &quot;Use Render Extension&quot;) {
++		if (attributes.value(&quot;value&quot;) == &quot;True&quot;)
+ 			sessionData-&gt;render = true;
+ 		else
+ 			sessionData-&gt;render = false;
+ 	}
+ 
+-	if (key == &quot;Image Compression Method&quot;) {
+-		if (value == &quot;JPEG&quot;)
++	if (attributes.value(&quot;key&quot;) == &quot;Image Compression Method&quot;) {
++		if (attributes.value(&quot;value&quot;) == &quot;JPEG&quot;)
+ 			sessionData-&gt;imageCompressionMethod = -1;
+-		else if (value == &quot;PNG&quot;)
++		else if (attributes.value(&quot;value&quot;) == &quot;PNG&quot;)
+ 			sessionData-&gt;imageCompressionMethod = 2;
+-		else if (value == &quot;Raw X11&quot;)
++		else if (attributes.value(&quot;value&quot;) == &quot;Raw X11&quot;)
+ 			sessionData-&gt;imageCompressionMethod = 0;
+ 	}
+ 
+-	if (key == &quot;JPEG Compression Level&quot;) {
+-		sessionData-&gt;imageCompressionLevel = value.toInt();
++	if (attributes.value(&quot;key&quot;) == &quot;JPEG Compression Level&quot;) {
++		sessionData-&gt;imageCompressionLevel = attributes.value(&quot;value&quot;).toInt();
+ 	}
+ 
+-	if (key == &quot;Desktop Geometry&quot;) {
+-		sessionData-&gt;geometry = value;
++	if (attributes.value(&quot;key&quot;) == &quot;Desktop Geometry&quot;) {
++		sessionData-&gt;geometry = attributes.value(&quot;value&quot;);
+ 	}
+ 
+-	if (key == &quot;Keyboard Layout&quot;) {
+-		sessionData-&gt;keyboard = value;
++	if (attributes.value(&quot;key&quot;) == &quot;Keyboard Layout&quot;) {
++		sessionData-&gt;keyboard = attributes.value(&quot;value&quot;);
+ 	}
+ 
+-	if (key == &quot;Keyboard Type&quot;) {
+-		sessionData-&gt;kbtype = value;
++	if (attributes.value(&quot;key&quot;) == &quot;Keyboard Type&quot;) {
++		sessionData-&gt;kbtype = attributes.value(&quot;value&quot;);
+ 	}
+ 
+-	if (key == &quot;Media&quot;) {
+-		if (value == &quot;True&quot;)
++	if (attributes.value(&quot;key&quot;) == &quot;Media&quot;) {
++		if (attributes.value(&quot;value&quot;) == &quot;True&quot;)
+ 			sessionData-&gt;media = true;
+ 		else
+ 			sessionData-&gt;media = false;
+ 	}
+ 
+-	if (key == &quot;Agent Server&quot;) {
+-		sessionData-&gt;agentServer = value;
++	if (attributes.value(&quot;key&quot;) == &quot;Agent Server&quot;) {
++		sessionData-&gt;agentServer = attributes.value(&quot;value&quot;);
+ 	}
+ 
+-	if (key == &quot;Agent User&quot;) {
+-		sessionData-&gt;agentUser = value;
++	if (attributes.value(&quot;key&quot;) == &quot;Agent User&quot;) {
++		sessionData-&gt;agentUser = attributes.value(&quot;value&quot;);
+ 	}
+ 
+-	if (key == &quot;CUPS Port&quot;) {
+-		sessionData-&gt;cups = value.toInt();
++	if (attributes.value(&quot;key&quot;) == &quot;CUPS Port&quot;) {
++		sessionData-&gt;cups = attributes.value(&quot;value&quot;).toInt();
+ 	}
+ 
+-	if (key == &quot;Authentication Key&quot;) {
+-		sessionData-&gt;key = value;
++	if (attributes.value(&quot;key&quot;) == &quot;Authentication Key&quot;) {
++		sessionData-&gt;key = attributes.value(&quot;value&quot;);
+ 	}
+ 
+-	if (key == &quot;Use SSL Tunnelling&quot;) {
+-		if (value == &quot;True&quot;)
++	if (attributes.value(&quot;key&quot;) == &quot;Use SSL Tunnelling&quot;) {
++		if (attributes.value(&quot;value&quot;) == &quot;True&quot;)
+ 			sessionData-&gt;encryption = true;
+ 		else
+ 			sessionData-&gt;encryption = false;
+ 	}
+ 
+-	if (key == &quot;Enable Fullscreen Desktop&quot;) {
+-		if (value == &quot;True&quot;)
++	if (attributes.value(&quot;key&quot;) == &quot;Enable Fullscreen Desktop&quot;) {
++		if (attributes.value(&quot;value&quot;) == &quot;True&quot;)
+ 			sessionData-&gt;fullscreen = true;
+ 		else
+ 			sessionData-&gt;fullscreen = false;
+ 	}
+-
++	
+ 	return true;
+ }
+ 
+@@ -140,11 +138,3 @@
+ {
+ 	return true;
+ }
+-
+-bool NXParseXML::characters(const QString &amp;str)
+-{
+-}
+-
+-bool NXParseXML::fatalError(const QXmlParseException &amp;exception)
+-{
+-}
+
+Modified: nxclientlib/nxparsexml.h
+===================================================================
+--- nxclientlib/nxparsexml.h	2006-08-16 02:41:16 UTC (rev 262)
++++ nxclientlib/nxparsexml.h	2006-08-16 05:02:15 UTC (rev 263)
+@@ -23,18 +23,15 @@
+ #include &quot;nxdata.h&quot;
+ #include &quot;nxsession.h&quot;
+ 
+-class NXParseXML : public QXmlDefaultHandler
++class NXParseXML : public QObject, public QXmlDefaultHandler
+ {
++	Q_OBJECT
+ 	public:
+ 		NXParseXML();
+ 		~NXParseXML();
+ 		bool startElement(const QString &amp;namespaceURI, const QString &amp;localName, const QString &amp;qName, const QXmlAttributes &amp;attributes);
+ 		bool endElement(const QString &amp;namespaceURI, const QString &amp;localName, const QString &amp;qName);
+-		bool characters(const QString &amp;str);
+-		bool fatalError(const QXmlParseException &amp;exception);
+-
+-		void setSessionData(NXConfigData *data) { sessionData = data; };
+-		NXConfigData data();
++		void setData(NXConfigData *data) { sessionData = data; };
+ 	private:
+ 		NXConfigData *sessionData;
+ 		int group;
+
+Modified: nxclientlib/nxwritexml.cpp
+===================================================================
+--- nxclientlib/nxwritexml.cpp	2006-08-16 02:41:16 UTC (rev 262)
++++ nxclientlib/nxwritexml.cpp	2006-08-16 05:02:15 UTC (rev 263)
+@@ -25,60 +25,62 @@
+ {
+ }
+ 
+-void NXWriteXML::write(QFile file)
++void NXWriteXML::write(QString fileName)
+ {
++	QFile file(fileName);
+ 	file.open(QFile::WriteOnly);
+ 	
+ 	QTextStream xml(&amp;file);
+ 	xml.setCodec(&quot;UTF-8&quot;);
+ 
+ 	xml &lt;&lt; &quot;&lt;!DOCTYPE NXClientLibSettings&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;NXClientLibSettings&gt;\n&quot;;
++
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Connection Name\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.sessionName) &lt;&lt; &quot;\&quot;&gt;&lt;/option&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Server Hostname\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.serverHost) &lt;&lt; &quot;\&quot;&gt;&lt;/option&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Server Port\&quot; value=\&quot;&quot; &lt;&lt; escape(QString::number(sessionData.serverPort)) &lt;&lt; &quot;\&quot;&gt;&lt;/option&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Session Type\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.sessionType) &lt;&lt; &quot;\&quot;&gt;&lt;/option&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Custom Session Command\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.customCommand) &lt;&lt; &quot;\&quot;&gt;&lt;/option&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Disk Cache\&quot; value=\&quot;&quot; &lt;&lt; escape(QString::number(sessionData.cache)) &lt;&lt; &quot;\&quot;&gt;&lt;/option&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Image Cache\&quot; value=\&quot;&quot; &lt;&lt; escape(QString::number(sessionData.images)) &lt;&lt; &quot;\&quot;&gt;&lt;/option&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Link Type\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.linkType) &lt;&lt; &quot;\&quot;&gt;&lt;/option&gt;\n&quot;;
+ 	
+-	xml &lt;&lt; &quot;&lt;option key=\&quot;Connection Name\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.sessionName) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
+-	xml &lt;&lt; &quot;&lt;option key=\&quot;Server Hostname\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.serverHost) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
+-	xml &lt;&lt; &quot;&lt;option key=\&quot;Server Port\&quot; value=\&quot;&quot; &lt;&lt; escape(QString::number(sessionData.serverPort)) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
+-	xml &lt;&lt; &quot;&lt;option key=\&quot;Session Type\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.sessionType) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
+-	xml &lt;&lt; &quot;&lt;option key=\&quot;Custom Session Command\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.customCommand) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
+-	xml &lt;&lt; &quot;&lt;option key=\&quot;Disk Cache\&quot; value=\&quot;&quot; &lt;&lt; escape(QString::number(sessionData.cache)) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
+-	xml &lt;&lt; &quot;&lt;option key=\&quot;Image Cache\&quot; value=\&quot;&quot; &lt;&lt; escape(QString::number(sessionData.images)) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
+-	xml &lt;&lt; &quot;&lt;option key=\&quot;Link Type\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.linkType) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
+-	
+ 	if (sessionData.render == true)
+-		xml &lt;&lt; &quot;&lt;option key=\&quot;Use Render Extension\&quot; value=\&quot;True\&quot; /&gt;\n&quot;;
++		xml &lt;&lt; &quot;&lt;option key=\&quot;Use Render Extension\&quot; value=\&quot;True\&quot;&gt;&lt;/option&gt;\n&quot;;
+ 	else
+-		xml &lt;&lt; &quot;&lt;option key=\&quot;Use Render Extension\&quot; value=\&quot;False\&quot; /&gt;\n&quot;;
++		xml &lt;&lt; &quot;&lt;option key=\&quot;Use Render Extension\&quot; value=\&quot;False\&quot;&gt;&lt;/option&gt;\n&quot;;
+ 	
+ 	if (sessionData.imageCompressionMethod == -1)
+-		xml &lt;&lt; &quot;&lt;option key=\&quot;Image Compression Method\&quot; value=\&quot;JPEG\&quot; /&gt;\n&quot;;
++		xml &lt;&lt; &quot;&lt;option key=\&quot;Image Compression Method\&quot; value=\&quot;JPEG\&quot;&gt;&lt;/option&gt;\n&quot;;
+ 	else if (sessionData.imageCompressionMethod == 2)
+-		xml &lt;&lt; &quot;&lt;option key=\&quot;Image Compression Method\&quot; value=\&quot;PNG\&quot; /&gt;\n&quot;;
++		xml &lt;&lt; &quot;&lt;option key=\&quot;Image Compression Method\&quot; value=\&quot;PNG\&quot;&gt;&lt;/option&gt;\n&quot;;
+ 	else if (sessionData.imageCompressionMethod == 0)
+-		xml &lt;&lt; &quot;&lt;option key=\&quot;Image Compression Method\&quot; value=\&quot;Raw X11\&quot; /&gt;\n&quot;;
++		xml &lt;&lt; &quot;&lt;option key=\&quot;Image Compression Method\&quot; value=\&quot;Raw X11\&quot;&gt;&lt;/option&gt;\n&quot;;
+ 	
+-	xml &lt;&lt; &quot;&lt;option key=\&quot;JPEG Compression Level\&quot; value=\&quot;&quot; &lt;&lt; escape(QString::number(sessionData.imageCompressionLevel)) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
+-	xml &lt;&lt; &quot;&lt;option key=\&quot;Desktop Geometry\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.geometry) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
+-	xml &lt;&lt; &quot;&lt;option key=\&quot;Keyboard Layout\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.keyboard) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
+-	xml &lt;&lt; &quot;&lt;option key=\&quot;Keyboard Type\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.kbtype) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;option key=\&quot;JPEG Compression Level\&quot; value=\&quot;&quot; &lt;&lt; escape(QString::number(sessionData.imageCompressionLevel)) &lt;&lt; &quot;\&quot;&gt;&lt;/option&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Desktop Geometry\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.geometry) &lt;&lt; &quot;\&quot;&gt;&lt;/option&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Keyboard Layout\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.keyboard) &lt;&lt; &quot;\&quot;&gt;&lt;/option&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Keyboard Type\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.kbtype) &lt;&lt; &quot;\&quot;&gt;&lt;/option&gt;\n&quot;;
+ 
+ 	if (sessionData.media == true)
+-		xml &lt;&lt; &quot;&lt;option key=\&quot;Media\&quot; value=\&quot;True\&quot; /&gt;\n&quot;;
++		xml &lt;&lt; &quot;&lt;option key=\&quot;Media\&quot; value=\&quot;True\&quot;&gt;&lt;/option&gt;\n&quot;;
+ 	else
+-		xml &lt;&lt; &quot;&lt;option key=\&quot;Media\&quot; value=\&quot;False\&quot; /&gt;\n&quot;;
++		xml &lt;&lt; &quot;&lt;option key=\&quot;Media\&quot; value=\&quot;False\&quot;&gt;&lt;/option&gt;\n&quot;;
+ 
+-	xml &lt;&lt; &quot;&lt;option key=\&quot;Agent Server\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.agentServer) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
+-	xml &lt;&lt; &quot;&lt;option key=\&quot;Agent User\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.agentUser) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
+-	xml &lt;&lt; &quot;&lt;option key=\&quot;CUPS Port\&quot; value=\&quot;&quot; &lt;&lt; escape(QString::number(sessionData.cups)) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
+-	xml &lt;&lt; &quot;&lt;option key=\&quot;Authentication Key\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.key) &lt;&lt; &quot;\&quot; /&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Agent Server\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.agentServer) &lt;&lt; &quot;\&quot;&gt;&lt;/option&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Agent User\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.agentUser) &lt;&lt; &quot;\&quot;&gt;&lt;/option&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;option key=\&quot;CUPS Port\&quot; value=\&quot;&quot; &lt;&lt; escape(QString::number(sessionData.cups)) &lt;&lt; &quot;\&quot;&gt;&lt;/option&gt;\n&quot;;
++	xml &lt;&lt; &quot;&lt;option key=\&quot;Authentication Key\&quot; value=\&quot;&quot; &lt;&lt; escape(sessionData.key) &lt;&lt; &quot;\&quot;&gt;&lt;/option&gt;\n&quot;;
+ 
+ 	if (sessionData.encryption == true)
+-		xml &lt;&lt; &quot;&lt;option key=\&quot;Use SSL Tunnelling\&quot; value=\&quot;True\&quot; /&gt;\n&quot;;
++		xml &lt;&lt; &quot;&lt;option key=\&quot;Use SSL Tunnelling\&quot; value=\&quot;True\&quot;&gt;&lt;/option&gt;\n&quot;;
+ 	else
+-		xml &lt;&lt; &quot;&lt;option key=\&quot;Use SSL Tunnelling\&quot; value=\&quot;False\&quot; /&gt;\n&quot;;
++		xml &lt;&lt; &quot;&lt;option key=\&quot;Use SSL Tunnelling\&quot; value=\&quot;False\&quot;&gt;&lt;/option&gt;\n&quot;;
+ 
+ 	if (sessionData.fullscreen == true)
+-		xml &lt;&lt; &quot;&lt;option key=\&quot;Enable Fullscreen Desktop\&quot; value=\&quot;True\&quot; /&gt;\n&quot;;
++		xml &lt;&lt; &quot;&lt;option key=\&quot;Enable Fullscreen Desktop\&quot; value=\&quot;True\&quot;&gt;&lt;/option&gt;\n&quot;;
+ 	else
+-		xml &lt;&lt; &quot;&lt;option key=\&quot;Enable Fullscreen Desktop\&quot; value=\&quot;False\&quot; /&gt;\n&quot;;
++		xml &lt;&lt; &quot;&lt;option key=\&quot;Enable Fullscreen Desktop\&quot; value=\&quot;False\&quot;&gt;&lt;/option&gt;\n&quot;;
+ 
+ 	xml &lt;&lt; &quot;&lt;/NXClientLibSettings&gt;\n&quot;;
+ 
+
+Modified: nxclientlib/nxwritexml.h
+===================================================================
+--- nxclientlib/nxwritexml.h	2006-08-16 02:41:16 UTC (rev 262)
++++ nxclientlib/nxwritexml.h	2006-08-16 05:02:15 UTC (rev 263)
+@@ -29,7 +29,7 @@
+ 	public:
+ 		NXWriteXML();
+ 		~NXWriteXML();
+-		void write(QFile);
++		void write(QString);
+ 		void setSessionData(NXConfigData data) { sessionData = data; };
+ 		QString escape(QString);
+ 	private:
+
+Modified: nxclientlib/qtnx/qtnxsettings.cpp
+===================================================================
+--- nxclientlib/qtnx/qtnxsettings.cpp	2006-08-16 02:41:16 UTC (rev 262)
++++ nxclientlib/qtnx/qtnxsettings.cpp	2006-08-16 05:02:15 UTC (rev 263)
+@@ -22,19 +22,24 @@
+ 
+ #include &quot;nxdata.h&quot;
+ #include &quot;nxparsexml.h&quot;
++#include &quot;nxwritexml.h&quot;
+ 
+ QtNXSettings::QtNXSettings(QString sessionName) : QDialog()
+ {
+ 	if (!sessionName.isEmpty())
+-		fileName = QDir::homePath() + &quot;.qtnx/&quot; + sessionName + &quot;.nxml&quot;;
++		fileName = QDir::homePath() + &quot;/.qtnx/&quot; + sessionName + &quot;.nxml&quot;;
+ 	else
+ 		fileName = &quot;&quot;;
+ 		
+-	parseFile();
+-	
+ 	ui_sd.setupUi(this);
+ 	ui_sd.sessionName-&gt;setText(sessionName);
++	
++	parseFile();
+ 
++	connect(ui_sd.resolution, SIGNAL(currentIndexChanged(QString)), this, SLOT(resolutionChanged(QString)));
++	connect(ui_sd.imageCompressionType, SIGNAL(currentIndexChanged(QString)), this, SLOT(compressionChanged(QString)));
++	connect(ui_sd.defaultKey, SIGNAL(stateChanged(int)), this, SLOT(keyChanged(int)));
++	connect(ui_sd.applyButton, SIGNAL(pressed()), this, SLOT(applyPressed()));
+ }
+ 
+ QtNXSettings::~QtNXSettings()
+@@ -45,8 +50,8 @@
+ {
+ 	if (!fileName.isEmpty()) {
+ 		NXParseXML handler;
+-		handler.setSessionData(&amp;config);
+-	
++		handler.setData(&amp;config);
++		
+ 		QFile file(fileName);
+ 		QXmlInputSource inputSource(&amp;file);
+ 
+@@ -54,17 +59,17 @@
+ 		reader.setContentHandler(&amp;handler);
+ 		reader.setErrorHandler(&amp;handler);
+ 		reader.parse(inputSource);
+-
++		
+ 		ui_sd.hostname-&gt;setText(config.serverHost);
+ 		ui_sd.port-&gt;setValue(config.serverPort);
+-
++		
+ 		if (config.key.isEmpty())
+ 			ui_sd.defaultKey-&gt;setChecked(true);
+ 		else {
+ 			ui_sd.defaultKey-&gt;setChecked(false);
+ 			ui_sd.setAuthKeyButton-&gt;setEnabled(true);
+ 		}
+-
++		
+ 		if (config.sessionType == &quot;unix-kde&quot;) {
+ 			ui_sd.platform-&gt;setCurrentIndex(ui_sd.platform-&gt;findText(tr(&quot;UNIX&quot;)));
+ 			ui_sd.type-&gt;setCurrentIndex(ui_sd.type-&gt;findText(tr(&quot;KDE&quot;)));
+@@ -81,15 +86,15 @@
+ 		}
+ 
+ 		if (config.linkType == &quot;modem&quot;)
+-			ui_sd.link-&gt;setCurrentIndex(ui_sd.link-&gt;findText(&quot;Modem&quot;));
++			ui_sd.link-&gt;setCurrentIndex(ui_sd.link-&gt;findText(tr(&quot;Modem&quot;)));
+ 		else if (config.linkType == &quot;isdn&quot;)
+-			ui_sd.link-&gt;setCurrentIndex(ui_sd.link-&gt;findText(&quot;ISDN&quot;));
++			ui_sd.link-&gt;setCurrentIndex(ui_sd.link-&gt;findText(tr(&quot;ISDN&quot;)));
+ 		else if (config.linkType == &quot;adsl&quot;)
+-			ui_sd.link-&gt;setCurrentIndex(ui_sd.link-&gt;findText(&quot;ADSL&quot;));
++			ui_sd.link-&gt;setCurrentIndex(ui_sd.link-&gt;findText(tr(&quot;ADSL&quot;)));
+ 		else if (config.linkType == &quot;wan&quot;)
+-			ui_sd.link-&gt;setCurrentIndex(ui_sd.link-&gt;findText(&quot;WAN&quot;));
++			ui_sd.link-&gt;setCurrentIndex(ui_sd.link-&gt;findText(tr(&quot;WAN&quot;)));
+ 		else if (config.linkType == &quot;lan&quot;)
+-			ui_sd.link-&gt;setCurrentIndex(ui_sd.link-&gt;findText(&quot;LAN&quot;));
++			ui_sd.link-&gt;setCurrentIndex(ui_sd.link-&gt;findText(tr(&quot;LAN&quot;)));
+ 
+ 		if (config.imageCompressionMethod == -1) {
+ 			ui_sd.imageCompressionType-&gt;setCurrentIndex(ui_sd.imageCompressionType-&gt;findText(tr(&quot;JPEG&quot;)));
+@@ -100,11 +105,11 @@
+ 			ui_sd.imageCompressionType-&gt;setCurrentIndex(ui_sd.imageCompressionType-&gt;findText(tr(&quot;Raw X11&quot;)));
+ 
+ 		if (config.geometry == &quot;640x480+0+0&quot;)
+-			ui_sd.resolution-&gt;setCurrentIndex(ui_sd.resolution-&gt;findText(tr(&quot;640x480&quot;)));
++			ui_sd.resolution-&gt;setCurrentIndex(ui_sd.resolution-&gt;findText(&quot;640x480&quot;));
+ 		else if (config.geometry == &quot;800x600+0+0&quot;)
+-			ui_sd.resolution-&gt;setCurrentIndex(ui_sd.resolution-&gt;findText(tr(&quot;640x480&quot;)));
++			ui_sd.resolution-&gt;setCurrentIndex(ui_sd.resolution-&gt;findText(&quot;640x480&quot;));
+ 		else if (config.geometry == &quot;1024x768+0+0&quot;)
+-			ui_sd.resolution-&gt;setCurrentIndex(ui_sd.resolution-&gt;findText(tr(&quot;640x480&quot;)));
++			ui_sd.resolution-&gt;setCurrentIndex(ui_sd.resolution-&gt;findText(&quot;640x480&quot;));
+ 		else {
+ 			if (config.fullscreen) {
+ 				ui_sd.resolution-&gt;setCurrentIndex(ui_sd.resolution-&gt;findText(tr(&quot;Fullscreen&quot;)));
+@@ -120,6 +125,114 @@
+ 			}
+ 		}
+ 
++		ui_sd.encryption-&gt;setChecked(config.encryption);
++		ui_sd.memoryCache-&gt;setValue(config.cache);
++		ui_sd.diskCache-&gt;setValue(config.images);
++
+ 		ui_sd.render-&gt;setChecked(config.render);
+ 	}
+ }
++
++void QtNXSettings::resolutionChanged(QString text)
++{
++	if (text == tr(&quot;Custom&quot;)) {
++		ui_sd.width-&gt;setEnabled(true);
++		ui_sd.height-&gt;setEnabled(true);
++	} else {
++		ui_sd.width-&gt;setEnabled(false);
++		ui_sd.height-&gt;setEnabled(false);
++	}
++}
++
++void QtNXSettings::compressionChanged(QString text)
++{
++	if (text == tr(&quot;JPEG&quot;)) {
++		ui_sd.imageQualityLevel-&gt;setEnabled(true);
++	} else {
++		ui_sd.imageQualityLevel-&gt;setEnabled(false);
++	}
++}
++
++void QtNXSettings::platformChanged(QString text)
++{
++}
++
++void QtNXSettings::typeChanged(QString text)
++{
++}
++
++void QtNXSettings::keyChanged(int state)
++{
++	if (state == Qt::Checked)
++		ui_sd.setAuthKeyButton-&gt;setEnabled(false);
++	else
++		ui_sd.setAuthKeyButton-&gt;setEnabled(true);
++}
++
++void QtNXSettings::applyPressed()
++{
++	QDir configDir(QDir::homePath() + &quot;/.qtnx/&quot;);
++	configDir.mkpath(QDir::homePath() + &quot;/.qtnx/&quot;);
++
++	config.sessionName = ui_sd.sessionName-&gt;text();
++	config.serverHost = ui_sd.hostname-&gt;text();
++	config.serverPort = ui_sd.port-&gt;value();
++
++	// TODO: Add keyboard selection support
++	config.keyboard = &quot;defkeymap&quot;;
++	config.kbtype = &quot;pc102/defkeymap&quot;;
++
++	if (ui_sd.platform-&gt;currentText() == tr(&quot;UNIX&quot;)) {
++		if (ui_sd.type-&gt;currentText() == tr(&quot;KDE&quot;))
++			config.sessionType = &quot;unix-kde&quot;;
++		else if (ui_sd.type-&gt;currentText() == tr(&quot;GNOME&quot;))
++			config.sessionType = &quot;unix-gnome&quot;;
++		else if (ui_sd.type-&gt;currentText() == tr(&quot;CDE&quot;))
++			config.sessionType = &quot;unix-cde&quot;;
++		else if (ui_sd.type-&gt;currentText() == tr(&quot;Custom&quot;))
++			config.sessionType = &quot;unix-application&quot;;
++	}
++	
++	if (ui_sd.link-&gt;currentText() == tr(&quot;Modem&quot;))
++		config.linkType = &quot;modem&quot;;
++	else if (ui_sd.link-&gt;currentText() == tr(&quot;ISDN&quot;))
++		config.linkType = &quot;isdn&quot;;
++	else if (ui_sd.link-&gt;currentText() == tr(&quot;ADSL&quot;))
++		config.linkType = &quot;adsl&quot;;
++	else if (ui_sd.link-&gt;currentText() == tr(&quot;WAN&quot;))
++		config.linkType = &quot;wan&quot;;
++	else if (ui_sd.link-&gt;currentText() == tr(&quot;LAN&quot;))
++		config.linkType = &quot;lan&quot;;
++		
++	if (ui_sd.imageCompressionType-&gt;currentText() == tr(&quot;JPEG&quot;)) {
++		config.imageCompressionMethod = -1;
++		config.imageCompressionLevel = ui_sd.imageQualityLevel-&gt;value();
++	} else if (ui_sd.imageCompressionType-&gt;currentText() == tr(&quot;PNG&quot;))
++		config.imageCompressionMethod = 2;
++	else if (ui_sd.imageCompressionType-&gt;currentText() == tr(&quot;Raw X11&quot;))
++		config.imageCompressionMethod = 0;
++
++	if (ui_sd.resolution-&gt;currentText() == tr(&quot;Fullscreen&quot;))
++		config.fullscreen = true;
++	else if (ui_sd.resolution-&gt;currentText() == tr(&quot;Custom&quot;)) {
++		config.geometry = QString::number(ui_sd.width-&gt;value()) + &quot;x&quot; + QString::number(ui_sd.height-&gt;value()) + &quot;+0+0&quot;;
++	} else
++		config.geometry = ui_sd.resolution-&gt;currentText() + &quot;+0+0&quot;;
++
++	if (ui_sd.encryption-&gt;checkState() == Qt::Checked)
++		config.encryption = true;
++	else
++		config.encryption = false;
++		
++	config.cache = ui_sd.memoryCache-&gt;value();
++	config.images = ui_sd.diskCache-&gt;value();
++
++	if (ui_sd.render-&gt;checkState() == Qt::Checked)
++		config.render = true;
++	else
++		config.render = false;
++
++	NXWriteXML writeData;
++	writeData.setSessionData(config);
++	writeData.write(QDir::homePath() + &quot;/.qtnx/&quot; + ui_sd.sessionName-&gt;text() + &quot;.nxml&quot;);
++}
+
+Modified: nxclientlib/qtnx/qtnxsettings.h
+===================================================================
+--- nxclientlib/qtnx/qtnxsettings.h	2006-08-16 02:41:16 UTC (rev 262)
++++ nxclientlib/qtnx/qtnxsettings.h	2006-08-16 05:02:15 UTC (rev 263)
+@@ -31,6 +31,14 @@
+ 		QtNXSettings(QString);
+ 		~QtNXSettings();
+ 		void parseFile();
++	public slots:
++		void resolutionChanged(QString);
++		void compressionChanged(QString);
++		void platformChanged(QString);
++		void typeChanged(QString);
++		void keyChanged(int);
++		void applyPressed();
++		void setData(NXConfigData data) { config = data; };
+ 	private:
+ 		Ui::SettingsDialog ui_sd;
+ 		NXConfigData config;
+
+Modified: nxclientlib/qtnx/qtnxwindow.cpp
+===================================================================
+--- nxclientlib/qtnx/qtnxwindow.cpp	2006-08-16 02:41:16 UTC (rev 262)
++++ nxclientlib/qtnx/qtnxwindow.cpp	2006-08-16 05:02:15 UTC (rev 263)
+@@ -45,10 +45,9 @@
+ 
+ 	connectionMenu-&gt;addAction(tr(&quot;Connect...&quot;), this, SLOT(startConnect()));
+ 
+-	QDir dir(QDir::homePath()+&quot;.qtnx&quot;,&quot;*.nxml&quot;);
++	QDir dir(QDir::homePath()+&quot;/.qtnx&quot;,&quot;*.nxml&quot;);
+ 	for (unsigned int i=0;i&lt;dir.count();i++) {
+ 		QString conn=dir[i];
+-		if (conn.compare(&quot;nxclient.conf&quot;)==0) continue;
+ 		ui_lg.session-&gt;addItem(conn.left(conn.length()-5));
+ 	}
+ 	ui_lg.session-&gt;addItem(tr(&quot;Create new session&quot;));
+@@ -68,8 +67,7 @@
+ // 	QX11Info info;
+ 
+ 	NXParseXML handler;
+-	handler.setSessionData(&amp;config);
+-	
++
+ 	QFile file(QDir::homePath() + &quot;.qtnx/&quot; + ui_lg.session-&gt;currentText() + &quot;.nxml&quot;);
+ 	QXmlInputSource inputSource(&amp;file);
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000392.html">[Freenx-cvs] r262 - in nxclientlib: . qtnx
+</A></li>
+	<LI>Next message: <A HREF="000394.html">[Freenx-cvs] r264 - nxclientlib/qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#393">[ date ]</a>
+              <a href="thread.html#393">[ thread ]</a>
+              <a href="subject.html#393">[ subject ]</a>
+              <a href="author.html#393">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

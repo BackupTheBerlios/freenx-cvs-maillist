@@ -1,0 +1,198 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r57 - thinnx/trunk/thinnx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r57%20-%20thinnx/trunk/thinnx&In-Reply-To=%3C200503182204.j2IM4lxZ023918%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000107.html">
+   <LINK REL="Next"  HREF="000109.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r57 - thinnx/trunk/thinnx</H1>
+    <B>Gustavo Noronha Silva at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r57%20-%20thinnx/trunk/thinnx&In-Reply-To=%3C200503182204.j2IM4lxZ023918%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r57 - thinnx/trunk/thinnx">kov at sheep.berlios.de
+       </A><BR>
+    <I>Fri Mar 18 23:04:47 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000107.html">[Freenx-cvs] r56 - thinnx/trunk/thinnx
+</A></li>
+        <LI>Next message: <A HREF="000109.html">[Freenx-cvs] r58 - thinnx/trunk/thinnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#108">[ date ]</a>
+              <a href="thread.html#108">[ thread ]</a>
+              <a href="subject.html#108">[ subject ]</a>
+              <a href="author.html#108">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: kov
+Date: 2005-03-18 23:04:46 +0100 (Fri, 18 Mar 2005)
+New Revision: 57
+
+Modified:
+   thinnx/trunk/thinnx/thinnx.c
+Log:
+supports restoring session automatically if there's only 1 session
+to be restored (it will otherwise probably break =D)
+
+
+Modified: thinnx/trunk/thinnx/thinnx.c
+===================================================================
+--- thinnx/trunk/thinnx/thinnx.c	2005-03-18 19:21:16 UTC (rev 56)
++++ thinnx/trunk/thinnx/thinnx.c	2005-03-18 22:04:46 UTC (rev 57)
+@@ -153,6 +153,15 @@
+ }
+ 
+ void
++drop_lines (gint fd, gint max)
++{
++  gint count;
++
++  for (count = 0; count &lt; max; count++)
++    drop_line (fd);
++}
++
++void
+ protocol_error (gchar *msg)
+ {
+   flush_buffer (buffer);
+@@ -319,7 +328,7 @@
+ }
+ 
+ gchar*
+-get_info_after_colon (gchar *buffer)
++get_info_after_char (gchar *buffer, gchar c)
+ {
+   gchar *split_str;
+   gchar *retval;
+@@ -327,7 +336,7 @@
+   printf (&quot;%s&quot;, buffer);
+ 
+   split_str = buffer+(strlen(buffer) - 1);
+-  while (*(split_str-1) != ':')
++  while (*(split_str-1) != c)
+     *split_str--;
+ 
+   retval = g_strdup (split_str);
+@@ -336,6 +345,18 @@
+   return retval;
+ }
+ 
++gchar*
++get_info_after_colon (gchar *buffer)
++{
++  return get_info_after_char (buffer, ':');
++}
++
++gchar*
++get_restore_id (gchar *line)
++{
++  return get_info_after_char (line, '\t');
++}
++
+ /* Handle session start information */  
+ gchar *
+ get_session_info (gint out, gchar *code)
+@@ -388,6 +409,8 @@
+   
+   gchar **nxssh_argv = (gchar**) g_malloc (sizeof(gchar*) * 9);
+ 
++  gchar *restore_id = NULL;
++
+   pid_t pid;
+ 
+   int parent_pipe[2];	/* For talking to the parent */
+@@ -762,22 +785,51 @@
+       buffer = read_code (out);
+       if (!strcmp (buffer, &quot;NX&gt; 105&quot;))
+ 	{
+-	  gchar *cmdline;
++	  gchar *m;
+ 
+ 	  flush_buffer (buffer);
+ 	  drop_chars (out, 1);
+ 
+-	  cmdline = g_strdup_printf (&quot;startsession --session=\&quot;%s\&quot; --type=\&quot;%s\&quot; --cache=\&quot;8M\&quot; --images=\&quot;32M\&quot; --cookie=\&quot;%s\&quot; --link=\&quot;%s\&quot; --kbtype=\&quot;%s\&quot; --nodelay=\&quot;1\&quot; --backingstore=\&quot;never\&quot; --geometry=\&quot;%s\&quot; --media=\&quot;0\&quot; --agent_server=\&quot;\&quot; --agent_user=\&quot;\&quot; --agent_password=\&quot;\&quot; --screeninfo=\&quot;%s\&quot; --encryption=\&quot;%d\&quot;&quot;, session, type, cookie, link, kbdtype, geometry, screeninfo, use_ssl);
+-	  write_line (in, cmdline);
+-	  g_free (cmdline);
++	  m = g_strdup_printf (&quot;list %s&quot;, user);
++	  write_line (in, m);
++	  g_free (m);
+ 
+-	  drop_line (out);
+-	  drop_line (out);
+-	  drop_line (out);
++	  drop_lines (out, 5);
++
++	  while (1)
++	    {
++	      buffer = read_code (out);
++	      if (!strcmp (buffer, &quot;NX&gt; 105&quot;))
++		{
++		  flush_buffer (buffer);
++		  drop_chars (out, 1);
++		  break;
++		}
++
++	      flush_buffer (buffer);
++	      buffer = read_line (out);
++	      restore_id = get_restore_id (buffer);
++	    }
+ 	}
+       else
+ 	protocol_error (&quot;session startup, buddy, I don't want problems!&quot;);
++      
+ 
++      {
++	gchar *cmdline;
++	
++	if (!restore_id)
++	  cmdline = g_strdup_printf (&quot;startsession --session=\&quot;%s\&quot; --type=\&quot;%s\&quot; --cache=\&quot;8M\&quot; --images=\&quot;32M\&quot; --cookie=\&quot;%s\&quot; --link=\&quot;%s\&quot; --kbtype=\&quot;%s\&quot; --nodelay=\&quot;1\&quot; --backingstore=\&quot;never\&quot; --geometry=\&quot;%s\&quot; --media=\&quot;0\&quot; --agent_server=\&quot;\&quot; --agent_user=\&quot;\&quot; --agent_password=\&quot;\&quot; --screeninfo=\&quot;%s\&quot; --encryption=\&quot;%d\&quot;&quot;, session, type, cookie, link, kbdtype, geometry, screeninfo, use_ssl);
++	else
++	  cmdline = g_strdup_printf (&quot;restoresession --session=\&quot;%s\&quot; --type=\&quot;%s\&quot; --cache=\&quot;8M\&quot; --images=\&quot;32M\&quot; --cookie=\&quot;%s\&quot; --link=\&quot;%s\&quot; --kbtype=\&quot;%s\&quot; --nodelay=\&quot;1\&quot; --backingstore=\&quot;never\&quot; --geometry=\&quot;%s\&quot; --media=\&quot;0\&quot; --agent_server=\&quot;\&quot; --agent_user=\&quot;\&quot; --agent_password=\&quot;\&quot; --screeninfo=\&quot;%s\&quot; --encryption=\&quot;%d\&quot; --id=\&quot;%s\&quot;&quot;, session, type, cookie, link, kbdtype, geometry, screeninfo, use_ssl, restore_id);
++	
++	write_line (in, cmdline);
++	g_free (cmdline);
++	cmdline = NULL;
++	
++	drop_lines (out, 3);
++      }
++
+       session_id = get_session_info (out, &quot;NX&gt; 700&quot;);
+       session_display = get_session_info (out, &quot;NX&gt; 705&quot;);
+       drop_line (out); /* 703 (session type) */
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000107.html">[Freenx-cvs] r56 - thinnx/trunk/thinnx
+</A></li>
+	<LI>Next message: <A HREF="000109.html">[Freenx-cvs] r58 - thinnx/trunk/thinnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#108">[ date ]</a>
+              <a href="thread.html#108">[ thread ]</a>
+              <a href="subject.html#108">[ subject ]</a>
+              <a href="author.html#108">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,146 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r577 - trunk/freenx-server
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r577%20-%20trunk/freenx-server&In-Reply-To=%3C200808181904.m7IJ4iPK027329%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000710.html">
+   <LINK REL="Next"  HREF="000712.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r577 - trunk/freenx-server</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r577%20-%20trunk/freenx-server&In-Reply-To=%3C200808181904.m7IJ4iPK027329%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r577 - trunk/freenx-server">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Mon Aug 18 21:04:44 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000710.html">[Freenx-cvs] r576 - trunk/freenx-server
+</A></li>
+        <LI>Next message: <A HREF="000712.html">[Freenx-cvs] r578 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#711">[ date ]</a>
+              <a href="thread.html#711">[ thread ]</a>
+              <a href="subject.html#711">[ subject ]</a>
+              <a href="author.html#711">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-08-18 21:04:43 +0200 (Mon, 18 Aug 2008)
+New Revision: 577
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxserver
+Log:
++       * Added shadow support to --listsession command.
++         (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-18 18:34:55 UTC (rev 576)
++++ trunk/freenx-server/ChangeLog	2008-08-18 19:04:43 UTC (rev 577)
+@@ -112,6 +112,8 @@
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 	* The same user is always allowed to shadow its own sessions.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Added shadow support to --listsession command.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
+ 14.03.2008 FreeNX 0.7.2 &quot;Priscilla Edition&quot;
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-18 18:34:55 UTC (rev 576)
++++ trunk/freenx-server/nxserver	2008-08-18 19:04:43 UTC (rev 577)
+@@ -288,6 +288,20 @@
+ 		if egrep -q &quot;^userName=$1$&quot; $i &amp;&amp; egrep -q &quot;^status=$2$&quot; $i #&amp;&amp; grep -q &quot;screeninfo=$3&quot; $i
+ 		then
+ 			CMDLINE=$(session_get_cmdline $i)
++			
++			if [ &quot;$4&quot; = &quot;shadow&quot; ]
++			then
++				if [ &quot;$(getparam userName)&quot; != &quot;$USER&quot; ]
++				then 
++					[ -z &quot;$(getparam shadowcookie)&quot; ] &amp;&amp; continue
++					
++					if [ -x &quot;$PATH_BIN/nxshadowacl&quot; ]
++					then
++						$PATH_BIN/nxshadowacl &quot;$(getparam userName)&quot; &quot;$USER&quot; || continue
++					fi
++				fi
++			fi
++	
+ 			depth=$(getparam screeninfo | cut -d &quot;x&quot; -f3 | cut -d &quot;+&quot; -f1 )
+ 			[ &quot;$depth&quot; = &quot;32&quot; ] &amp;&amp; depth=24
+ 			geom=$(getparam screeninfo | cut -d &quot;x&quot; -f1,2) 
+@@ -315,7 +329,12 @@
+ 			# We automatically offer VNC shadowed sessions for &quot;remote&quot; support
+ 			if [ &quot;$4&quot; = &quot;vnc&quot; -a &quot;$ENABLE_MIRROR_VIA_VNC&quot; = &quot;1&quot; ] &amp;&amp; stringinstring &quot;unix-&quot; &quot;$(getparam type)&quot;
+ 			then
++				available=$(getparam status)
+ 				printf &quot;%-7s %-16s %32s %8s %5s %-14s %-11s %s\n&quot; &quot;$(getparam display)&quot; &quot;vnc-shadowed&quot; &quot;$(getparam sessionId)&quot; &quot;$options&quot; &quot;$depth&quot; &quot;$geom&quot; &quot;$available&quot; &quot;$(getparam sessionName) (Mirrored)&quot; &gt;&gt; $TMPFILE
++			elif [ &quot;$4&quot; = &quot;shadow&quot; ]
++			then
++				available=$(getparam status)
++				printf &quot;%-7s %-16s %32s %8s %5s %-14s %-11s %s\n&quot; &quot;$(getparam display)&quot; &quot;$(getparam type)&quot; &quot;$(getparam sessionId)&quot; &quot;$options&quot; &quot;$depth&quot; &quot;$geom&quot; &quot;$available&quot; &quot;$(getparam sessionName) (Shadowed)&quot; &gt;&gt; $TMPFILE
+ 			else
+ 				# only unix-* sessions can be resumed, but other session types can still be terminated
+ 				stringinstring &quot;unix-&quot; &quot;$4&quot; || available=&quot;N/A&quot;
+@@ -1545,7 +1564,8 @@
+ 			server_get_params $CMD
+ 			PARAMS=$SERVER_PARAMS
+ 			CMDLINE=$PARAMS
+-			
++
++		
+ 			status=$(getparam status)
+ 
+ 			if [ &quot;$status&quot; = &quot;Suspended&quot; -a -n &quot;$(getparam screeninfo)&quot; ]
+@@ -1561,6 +1581,9 @@
+ 				status=$(echo $status | sed 's/,/$|^status=/g; s/suspended/Suspended/g; s/running/Running/g')
+ 				[ &quot;$ENABLE_SHOW_RUNNING_SESSIONS&quot; = &quot;0&quot; ] &amp;&amp; status=&quot;Suspended&quot;
+ 				session_list_user_suspended &quot;$USER&quot; &quot;$status&quot; &quot;$(getparam geometry)&quot; &quot;$(getparam type)&quot;
++			elif [ &quot;$(getparam type)&quot; = &quot;shadow&quot; ]
++			then
++				session_list_user_suspended &quot;.*&quot; &quot;Running&quot; &quot;&quot; &quot;shadow&quot;
+ 			else
+ 				session_list_user &quot;$USER&quot; | log_tee
+ 			fi
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000710.html">[Freenx-cvs] r576 - trunk/freenx-server
+</A></li>
+	<LI>Next message: <A HREF="000712.html">[Freenx-cvs] r578 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#711">[ date ]</a>
+              <a href="thread.html#711">[ thread ]</a>
+              <a href="subject.html#711">[ subject ]</a>
+              <a href="author.html#711">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

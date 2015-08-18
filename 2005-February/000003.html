@@ -1,0 +1,110 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fabianx modified nxnode-login
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%20nxnode-login&In-Reply-To=%3C420F5231.mailAZA11DK0U%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000002.html">
+   <LINK REL="Next"  HREF="000004.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fabianx modified nxnode-login</H1>
+    <B>fabianx</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%20nxnode-login&In-Reply-To=%3C420F5231.mailAZA11DK0U%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fabianx modified nxnode-login">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Sun Feb 13 14:12:17 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000002.html">[Freenx-cvs] CVS: freenx - fabianx modified nxnode
+</A></li>
+        <LI>Next message: <A HREF="000004.html">[Freenx-cvs] CVS: freenx - pipitas modified ChangeLog
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3">[ date ]</a>
+              <a href="thread.html#3">[ thread ]</a>
+              <a href="subject.html#3">[ subject ]</a>
+              <a href="author.html#3">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fabianx
+Date:      2005-02-13 13:12:17 GMT
+Modified:  .        nxnode-login
+Log:
+Hopefully fixed &quot;Password&quot; in plaintext in logfile.
+
+Revision  Changes    Path
+1.8       +2 -3      freenx/nxnode-login
+
+
+rev 1.8, prev_rev 1.7
+Index: nxnode-login
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxnode-login,v
+retrieving revision 1.7
+retrieving revision 1.8
+diff -u -r1.7 -r1.8
+--- nxnode-login	12 Feb 2005 19:17:18 -0000	1.7
++++ nxnode-login	13 Feb 2005 13:12:17 -0000	1.8
+@@ -3,7 +3,7 @@
+ # Copyright (c) 2004 by Fabian Franz.
+ # License: GPL, version 2
+ #
+-# CVS: $Id: nxnode-login,v 1.7 2005/02/12 19:17:18 fabianx Exp $
++# CVS: $Id: nxnode-login,v 1.8 2005/02/13 13:12:17 fabianx Exp $
+ #
+ 
+ # Syntax: nxnode-login {ssh|su} user ssh-port executable command tosend
+@@ -24,7 +24,6 @@
+ 	set pid [spawn -noecho ssh -2 -l &quot;$user&quot; &quot;127.0.0.1&quot; -o &quot;NumberOfPasswordPrompts 1&quot; -p &quot;$port&quot; &quot;$executable $command&quot; ]
+ } elseif { &quot;$auth_method&quot;==&quot;su&quot; } {
+ 	set pid [spawn -noecho su - &quot;$user&quot; -c &quot;$executable $command&quot; ]
+- 	sleep 0.3
+ } else {
+ 	exit 1
+ }
+@@ -32,7 +31,7 @@
+ while {1} {
+ 	expect {
+ 		&quot;Are you sure you want to continue connecting (yes/no)?&quot; { send &quot;yes\r&quot; }
+-		&quot;assword:&quot;  { send &quot;$password\r&quot; }
++		&quot;assword:&quot;  { sleep 0.3; send &quot;$password\r&quot; }
+ 		&quot;Permission denied*&quot; { exit 1 }
+ 		&quot;su: Authentication failure&quot; { exit 1 }
+ 		&quot;NX&gt; 1000 NXNODE - Version&quot; { 
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000002.html">[Freenx-cvs] CVS: freenx - fabianx modified nxnode
+</A></li>
+	<LI>Next message: <A HREF="000004.html">[Freenx-cvs] CVS: freenx - pipitas modified ChangeLog
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3">[ date ]</a>
+              <a href="thread.html#3">[ thread ]</a>
+              <a href="subject.html#3">[ subject ]</a>
+              <a href="author.html#3">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

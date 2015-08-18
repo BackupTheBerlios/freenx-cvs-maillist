@@ -1,0 +1,223 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r362 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r362%20-%20freenx-server/trunk&In-Reply-To=%3C200708111708.l7BH88oL016168%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000493.html">
+   <LINK REL="Next"  HREF="000495.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r362 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r362%20-%20freenx-server/trunk&In-Reply-To=%3C200708111708.l7BH88oL016168%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r362 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Sat Aug 11 19:08:08 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000493.html">[Freenx-cvs] r361 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000495.html">[Freenx-cvs] r363 - freenx-website
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#494">[ date ]</a>
+              <a href="thread.html#494">[ thread ]</a>
+              <a href="subject.html#494">[ subject ]</a>
+              <a href="author.html#494">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-08-11 19:08:07 +0200 (Sat, 11 Aug 2007)
+New Revision: 362
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/node.conf.sample
+   freenx-server/trunk/nxloadconfig
+   freenx-server/trunk/nxnode
+Log:
+* Added support for mount.cifs additionally to the deprecated
+  smbmount. (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">puterguy at bat.berlios.de</A>)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-08-09 15:58:11 UTC (rev 361)
++++ freenx-server/trunk/ChangeLog	2007-08-11 17:08:07 UTC (rev 362)
+@@ -10,12 +10,14 @@
+ 	  will work on any machine that has dialog and xterm.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">puterguy at bat.berlios.de</A>)
+ 	* Fixed the APPLICATION_LIBRARY_PRELOAD to be just a warning and fixed 
+-	  the default path.
++	  the default path. (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 	* Added drivers.cache.all that is reloaded just every 60 minutes.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">puterguy at bat.berlios.de</A>)
+ 	* Fixed missing services stop that lead to redundant mounts and still
+ 	  running cupsd processes.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">puterguy at bat.berlios.de</A>)
++	* Added support for mount.cifs additionally to the deprecated
++	  smbmount. (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>, <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">puterguy at bat.berlios.de</A>)
+ 
+ 07.07.2007 FreeNX 0.7.0 &quot;Jornade SPL Edition VI+1&quot;
+ 	* Fixed the printing support for CUPS 1.2.
+
+Modified: freenx-server/trunk/node.conf.sample
+===================================================================
+--- freenx-server/trunk/node.conf.sample	2007-08-09 15:58:11 UTC (rev 361)
++++ freenx-server/trunk/node.conf.sample	2007-08-11 17:08:07 UTC (rev 362)
+@@ -294,6 +294,18 @@
+ #CUPS_DEFAULT_SOCK=&quot;/var/run/cups/cups.sock&quot;
+ #CUPS_ETC=&quot;/etc/cups&quot;
+ 
++# SAMBA_MOUNT_SHARE_PROTOCOL is a key to configure the supported 
++# protocols for mounting shares.
++#
++# This key can be set to the following values:
++#
++# both, either SMB and CIFS protocol are supported, this is the default value.
++# smbfs, only SMB protocol is supported.
++# cifs, only CIFS protocol is supported.
++# none, no network file-sharing protocol is supported.
++
++#SAMBA_MOUNT_SHARE_PROTOCOL=&quot;both&quot;
++
+ #########################################################################
+ # Path directives
+ #########################################################################
+@@ -357,6 +369,14 @@
+ # 'smbumount'.
+ #COMMAND_SMBUMOUNT=smbumount
+ 
++# The key that contains the name of the complete path of command name
++# 'mount.cifs'.
++#COMMAND_SMBMOUNT_CIFS=/sbin/mount.cifs
++
++# The key that contains the name of the complete path of command name
++# 'umount.cifs'.
++#COMMAND_SMBUMOUNT_CIFS=/sbin/umount.cifs
++
+ # The key that contains the name of the complete path of the 'netcat' command.
+ #COMMAND_NETCAT=netcat
+ 
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2007-08-09 15:58:11 UTC (rev 361)
++++ freenx-server/trunk/nxloadconfig	2007-08-11 17:08:07 UTC (rev 362)
+@@ -157,6 +157,8 @@
+ CUPS_DEFAULT_SOCK=&quot;/var/run/cups/cups.sock&quot;
+ CUPS_ETC=&quot;/etc/cups/&quot;
+ 
++SAMBA_MOUNT_SHARE_PROTOCOL=&quot;both&quot;
++
+ # Path directives
+ 
+ USER_FAKE_HOME=&quot;&quot; #Calculated
+@@ -173,6 +175,8 @@
+ COMMAND_XAUTH=/usr/X11R6/bin/xauth
+ COMMAND_SMBMOUNT=smbmount
+ COMMAND_SMBUMOUNT=smbumount
++COMMAND_SMBMOUNT_CIFS=/sbin/mount.cifs
++COMMAND_SMBUMOUNT_CIFS=/sbin/umount.cifs
+ COMMAND_NETCAT=netcat
+ COMMAND_SSH=ssh
+ COMMAND_SSH_KEYGEN=ssh-keygen
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2007-08-09 15:58:11 UTC (rev 361)
++++ freenx-server/trunk/nxnode	2007-08-11 17:08:07 UTC (rev 362)
+@@ -1011,6 +1011,48 @@
+ 	# Rootless fix from 2x nxserver 1.5.0
+ 	realtype=$type
+ 	[ &quot;$type&quot; = &quot;unix-application&quot; -o &quot;$type&quot; = &quot;unix-default&quot; ] &amp;&amp; realtype=&quot;unix-desktop&quot;
++
++	# NX 2.1.0 file-sharing port options
++	client=$(getparam client)
++
++	smbport=&quot;&quot;
++
++	if [ &quot;$samba&quot; = &quot;1&quot; ]
++	then
++		# We know from protocol traces that client=linux,winnt,macosx are valid values.
++		# I hope with smbclientproto=smb on default and smbclientproto=cifs on all valid
++		# values we get support for all those systems.
++
++		smbproto=&quot;$SAMBA_MOUNT_SHARE_PROTOCOL&quot;
++
++		if [ &quot;$smbproto&quot; = &quot;both&quot; ]
++		then
++			smbproto=&quot;smbfs&quot;
++
++			[ &quot;$client&quot; = &quot;linux&quot; ] &amp;&amp; smbproto=&quot;cifs&quot;
++			[ &quot;$client&quot; = &quot;winnt&quot; ] &amp;&amp; smbproto=&quot;cifs&quot;
++			[ &quot;$client&quot; = &quot;macosx&quot; ] &amp;&amp; smbproto=&quot;cifs&quot;
++
++			# FIXME: This is a rather wild guess
++			[ &quot;$client&quot; = &quot;win9x&quot; ] &amp;&amp; smbproto=&quot;smbfs&quot;
++		fi
++
++		if [ &quot;$smbproto&quot; = &quot;cifs&quot; ]
++		then
++			smbport=445
++			COMMAND_SMBMOUNT=$COMMAND_SMBMOUNT_CIFS
++			COMMAND_SMBUMOUNT=$COMMAND_SMBUMOUNT_CIFS
++		elif [ &quot;$smbproto&quot; = &quot;none&quot; ] # none
++		then
++			# we set this to true so that the 
++			# SMB mount does not give an error message.
++
++			COMMAND_SMBMOUNT=/bin/true
++			COMMAND_SMBUMOUNT=/bin/true
++		else # smbfs
++			smbport=139
++		fi
++	fi
+ 	
+ 	# FreeNX specific variables
+ 	clientproto=$(getparam clientproto)
+@@ -1148,6 +1190,9 @@
+ NX&gt; 707 SSL tunneling: $ssl_tunnel
+ EOF
+ 
++# File-sharing port options
++[ &quot;$samba&quot; = &quot;1&quot; -a -n &quot;$smbport&quot; ] &amp;&amp; echo &quot;NX&gt; 709 File-sharing port: $smbport&quot;
++
+ # collection ...
+ 
+ # NX&gt; 1004 Error:
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000493.html">[Freenx-cvs] r361 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000495.html">[Freenx-cvs] r363 - freenx-website
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#494">[ date ]</a>
+              <a href="thread.html#494">[ thread ]</a>
+              <a href="subject.html#494">[ subject ]</a>
+              <a href="author.html#494">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

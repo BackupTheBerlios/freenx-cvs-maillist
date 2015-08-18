@@ -1,0 +1,295 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r264 - nxclientlib/qtnx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r264%20-%20nxclientlib/qtnx&In-Reply-To=%3C200608161956.k7GJuEcC030493%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000393.html">
+   <LINK REL="Next"  HREF="000395.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r264 - nxclientlib/qtnx</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r264%20-%20nxclientlib/qtnx&In-Reply-To=%3C200608161956.k7GJuEcC030493%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r264 - nxclientlib/qtnx">gwright at mail.berlios.de
+       </A><BR>
+    <I>Wed Aug 16 21:56:14 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000393.html">[Freenx-cvs] r263 - in nxclientlib: . qtnx
+</A></li>
+        <LI>Next message: <A HREF="000395.html">[Freenx-cvs] r265 - nxclientlib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#394">[ date ]</a>
+              <a href="thread.html#394">[ thread ]</a>
+              <a href="subject.html#394">[ subject ]</a>
+              <a href="author.html#394">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2006-08-16 21:56:14 +0200 (Wed, 16 Aug 2006)
+New Revision: 264
+
+Modified:
+   nxclientlib/qtnx/qtnxsettings.cpp
+   nxclientlib/qtnx/qtnxsettings.h
+   nxclientlib/qtnx/qtnxwindow.cpp
+   nxclientlib/qtnx/settingsdialog.ui
+Log:
+Connection now works, various config fixes
+
+
+Modified: nxclientlib/qtnx/qtnxsettings.cpp
+===================================================================
+--- nxclientlib/qtnx/qtnxsettings.cpp	2006-08-16 05:02:15 UTC (rev 263)
++++ nxclientlib/qtnx/qtnxsettings.cpp	2006-08-16 19:56:14 UTC (rev 264)
+@@ -40,6 +40,8 @@
+ 	connect(ui_sd.imageCompressionType, SIGNAL(currentIndexChanged(QString)), this, SLOT(compressionChanged(QString)));
+ 	connect(ui_sd.defaultKey, SIGNAL(stateChanged(int)), this, SLOT(keyChanged(int)));
+ 	connect(ui_sd.applyButton, SIGNAL(pressed()), this, SLOT(applyPressed()));
++	connect(ui_sd.okButton, SIGNAL(pressed()), this, SLOT(okPressed()));
++	connect(ui_sd.cancelButton, SIGNAL(pressed()), this, SLOT(cancelPressed()));
+ }
+ 
+ QtNXSettings::~QtNXSettings()
+@@ -99,6 +101,7 @@
+ 		if (config.imageCompressionMethod == -1) {
+ 			ui_sd.imageCompressionType-&gt;setCurrentIndex(ui_sd.imageCompressionType-&gt;findText(tr(&quot;JPEG&quot;)));
+ 			ui_sd.imageQualityLevel-&gt;setValue(config.imageCompressionLevel);
++			ui_sd.imageQualityLevel-&gt;setEnabled(true);
+ 		} else if (config.imageCompressionMethod == 2)
+ 			ui_sd.imageCompressionType-&gt;setCurrentIndex(ui_sd.imageCompressionType-&gt;findText(tr(&quot;PNG&quot;)));
+ 		else if (config.imageCompressionMethod == 0)
+@@ -169,6 +172,18 @@
+ 		ui_sd.setAuthKeyButton-&gt;setEnabled(true);
+ }
+ 
++void QtNXSettings::cancelPressed()
++{
++	close();
++}
++
++void QtNXSettings::okPressed()
++{
++	applyPressed();
++	emit closing();
++	close();
++}
++
+ void QtNXSettings::applyPressed()
+ {
+ 	QDir configDir(QDir::homePath() + &quot;/.qtnx/&quot;);
+
+Modified: nxclientlib/qtnx/qtnxsettings.h
+===================================================================
+--- nxclientlib/qtnx/qtnxsettings.h	2006-08-16 05:02:15 UTC (rev 263)
++++ nxclientlib/qtnx/qtnxsettings.h	2006-08-16 19:56:14 UTC (rev 264)
+@@ -38,7 +38,11 @@
+ 		void typeChanged(QString);
+ 		void keyChanged(int);
+ 		void applyPressed();
++		void cancelPressed();
++		void okPressed();
+ 		void setData(NXConfigData data) { config = data; };
++	signals:
++		void closing();
+ 	private:
+ 		Ui::SettingsDialog ui_sd;
+ 		NXConfigData config;
+
+Modified: nxclientlib/qtnx/qtnxwindow.cpp
+===================================================================
+--- nxclientlib/qtnx/qtnxwindow.cpp	2006-08-16 05:02:15 UTC (rev 263)
++++ nxclientlib/qtnx/qtnxwindow.cpp	2006-08-16 19:56:14 UTC (rev 264)
+@@ -18,8 +18,10 @@
+ #include &quot;qtnxwindow.h&quot;
+ 
+ #include &lt;QApplication&gt;
++#include &lt;QDesktopWidget&gt;
+ #include &lt;QDir&gt;
+ #include &lt;QFile&gt;
++#include &lt;QX11Info&gt;
+ 
+ QtNXWindow::QtNXWindow() : QMainWindow()
+ {
+@@ -63,12 +65,13 @@
+ 
+ void QtNXWindow::startConnect()
+ {
+-// 	QDesktopWidget dw;
+-// 	QX11Info info;
++	QDesktopWidget dw;
++	QX11Info info;
+ 
+ 	NXParseXML handler;
++	handler.setData(&amp;config);
+ 
+-	QFile file(QDir::homePath() + &quot;.qtnx/&quot; + ui_lg.session-&gt;currentText() + &quot;.nxml&quot;);
++	QFile file(QDir::homePath() + &quot;/.qtnx/&quot; + ui_lg.session-&gt;currentText() + &quot;.nxml&quot;);
+ 	QXmlInputSource inputSource(&amp;file);
+ 
+ 	QXmlSimpleReader reader;
+@@ -76,62 +79,41 @@
+ 	reader.setErrorHandler(&amp;handler);
+ 	reader.parse(inputSource);
+ 
+-/*	session-&gt;sessionName = ui_mw.session_name-&gt;text();
+-	session-&gt;sessionType = ui_mw.session_type-&gt;currentText();
+-	session-&gt;cache = ui_mw.cache-&gt;currentText().toInt();
+-	session-&gt;images = ui_mw.images-&gt;currentText().toInt();
+-	session-&gt;linkType = ui_mw.link_type-&gt;currentText();
+-	
+-	if (ui_mw.render-&gt;checkState() == 0)
+-		session-&gt;render = false;
+-	if (ui_mw.render-&gt;checkState() == 2)
+-		session-&gt;render = true;
+-	
+-	session-&gt;backingstore = &quot;when_requested&quot;;
++	session.sessionName = config.sessionName;
++	session.sessionType = config.sessionType;
++	session.cache = config.cache;
++	session.images = config.images;
++	session.linkType = config.linkType;
++	session.render = config.render;
++	session.backingstore = &quot;when_requested&quot;;
++	session.imageCompressionMethod = config.imageCompressionMethod;
++	session.imageCompressionLevel = config.imageCompressionLevel;
++	session.geometry = config.geometry;
++	session.keyboard = &quot;defkeymap&quot;;
++	session.kbtype = &quot;pc102/defkeymap&quot;;
++	session.media = config.media;
++	session.agentServer = config.agentServer;
++	session.agentUser = config.agentUser;
++	session.agentPass = config.agentPass;
++	session.cups = config.cups;
++	if (!config.key.isEmpty())
++		session.key = config.key;
++	else
++		session.key = &quot;default&quot;;
+ 
+-	if (ui_mw.image_compression-&gt;currentText() == &quot;JPEG&quot;)
+-		session-&gt;imageCompressionMethod = -1;
+-	if (ui_mw.image_compression-&gt;currentText() == &quot;RAW&quot;)
+-		session-&gt;imageCompressionMethod = 0;
+-	if (ui_mw.image_compression-&gt;currentText() == &quot;PNG&quot;)
+-		session-&gt;imageCompressionMethod = 2;
+-		
+-	session-&gt;imageCompressionLevel = ui_mw.jpeg_quality-&gt;value();
++	if (config.sessionType == &quot;unix-application&quot;)
++		session.customCommand = config.customCommand;
+ 
+-	if (ui_mw.resolution-&gt;currentText() == &quot;640x480&quot;)
+-		session-&gt;geometry = &quot;640x480+0+0&quot;;
+-	if (ui_mw.resolution-&gt;currentText() == &quot;800x600&quot;)
+-		session-&gt;geometry = &quot;800x600+0+0&quot;;
+-	if (ui_mw.resolution-&gt;currentText() == &quot;1024x768&quot;)
+-		session-&gt;geometry = &quot;1024x768+0+0&quot;;
+-	if (ui_mw.resolution-&gt;currentText() == &quot;1600x1200&quot;)
+-		session-&gt;geometry = &quot;1600x1200+0+0&quot;;
+-
+-	session-&gt;keyboard = &quot;defkeymap&quot;;
+-	session-&gt;kbtype = &quot;pc102/defkeymap&quot;;
+-	
+-	session-&gt;media = false;
+-	session-&gt;agentServer = ui_mw.rdp_server-&gt;text();
+-	session-&gt;agentUser = ui_mw.rdp_username-&gt;text();
+-	session-&gt;agentPass = ui_mw.rdp_password-&gt;text();
+-	if (QApplication::desktop()-&gt;paintEngine()-&gt;hasFeature(QPaintEngine::Antialiasing))
+-		m_lib.setRender(true);
++	if (config.encryption == false)
++		nxClient.invokeNXSSH(session.key , config.serverHost, false);
+ 	else
+-		m_lib.setRender(false);
++		nxClient.invokeNXSSH(session.key , config.serverHost, true);
+ 		
+-	// session-&gt;screenInfo = QString::number(dw.screenGeometry(this).width()) + &quot;x&quot; + QString::number(dw.screenGeometry(this).height()) + &quot;x&quot; + QString::number(info.depth()) + &quot;render&quot;;
+-	session-&gt;suspended = false;
+-
+-	if (ui_mw.encryption-&gt;checkState() == 0)
+-		m_lib.invokeNXSSH(&quot;default&quot; , ui_mw.server-&gt;text(), false);
+-	if (ui_mw.encryption-&gt;checkState() == 2)
+-		m_lib.invokeNXSSH(&quot;default&quot; , ui_mw.server-&gt;text(), true);
+-		
+-	m_lib.setUsername(ui_mw.username-&gt;text());
+-	m_lib.setPassword(ui_mw.password-&gt;text());
+-	m_lib.setResolution(dw.screenGeometry(this).width(), dw.screenGeometry(this).height());
+-	m_lib.setDepth(info.depth());
+-	m_lib.setSession(session);*/
++	nxClient.setUsername(ui_lg.username-&gt;text());
++	nxClient.setPassword(ui_lg.password-&gt;text());
++	nxClient.setResolution(dw.screenGeometry(this).width(), dw.screenGeometry(this).height());
++	nxClient.setDepth(info.depth());
++	nxClient.setSession(&amp;session);
+ }
+ 
+ void QtNXWindow::configure()
+
+Modified: nxclientlib/qtnx/settingsdialog.ui
+===================================================================
+--- nxclientlib/qtnx/settingsdialog.ui	2006-08-16 05:02:15 UTC (rev 263)
++++ nxclientlib/qtnx/settingsdialog.ui	2006-08-16 19:56:14 UTC (rev 264)
+@@ -3,7 +3,7 @@
+  &lt;comment&gt;&lt;/comment&gt;
+  &lt;exportmacro&gt;&lt;/exportmacro&gt;
+  &lt;class&gt;SettingsDialog&lt;/class&gt;
+- &lt;widget class=&quot;QWidget&quot; name=&quot;SettingsDialog&quot; &gt;
++ &lt;widget class=&quot;QDialog&quot; name=&quot;SettingsDialog&quot; &gt;
+   &lt;property name=&quot;geometry&quot; &gt;
+    &lt;rect&gt;
+     &lt;x&gt;0&lt;/x&gt;
+@@ -13,8 +13,11 @@
+    &lt;/rect&gt;
+   &lt;/property&gt;
+   &lt;property name=&quot;windowTitle&quot; &gt;
+-   &lt;string&gt;Form&lt;/string&gt;
++   &lt;string&gt;Dialog&lt;/string&gt;
+   &lt;/property&gt;
++  &lt;property name=&quot;modal&quot; &gt;
++   &lt;bool&gt;true&lt;/bool&gt;
++  &lt;/property&gt;
+   &lt;layout class=&quot;QVBoxLayout&quot; &gt;
+    &lt;property name=&quot;margin&quot; &gt;
+     &lt;number&gt;9&lt;/number&gt;
+@@ -363,7 +366,7 @@
+         &lt;/widget&gt;
+        &lt;/item&gt;
+        &lt;item&gt;
+-        &lt;widget class=&quot;QGroupBox&quot; name=&quot;groupBox_3&quot; &gt;
++        &lt;widget class=&quot;QGroupBox&quot; name=&quot;groupBox&quot; &gt;
+          &lt;property name=&quot;title&quot; &gt;
+           &lt;string&gt;Geometry&lt;/string&gt;
+          &lt;/property&gt;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000393.html">[Freenx-cvs] r263 - in nxclientlib: . qtnx
+</A></li>
+	<LI>Next message: <A HREF="000395.html">[Freenx-cvs] r265 - nxclientlib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#394">[ date ]</a>
+              <a href="thread.html#394">[ thread ]</a>
+              <a href="subject.html#394">[ subject ]</a>
+              <a href="author.html#394">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

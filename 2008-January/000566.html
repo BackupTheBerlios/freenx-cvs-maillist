@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r440 - nxcl
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r440%20-%20nxcl&In-Reply-To=%3C200801290028.m0T0Sb5M024963%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000565.html">
+   <LINK REL="Next"  HREF="000567.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r440 - nxcl</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r440%20-%20nxcl&In-Reply-To=%3C200801290028.m0T0Sb5M024963%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r440 - nxcl">gwright at mail.berlios.de
+       </A><BR>
+    <I>Tue Jan 29 01:28:37 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000565.html">[Freenx-cvs] r439 - in nxcl: . nxcl test
+</A></li>
+        <LI>Next message: <A HREF="000567.html">[Freenx-cvs] r441 - nxcl
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#566">[ date ]</a>
+              <a href="thread.html#566">[ thread ]</a>
+              <a href="subject.html#566">[ subject ]</a>
+              <a href="author.html#566">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2008-01-29 01:28:37 +0100 (Tue, 29 Jan 2008)
+New Revision: 440
+
+Modified:
+   nxcl/Makefile.am
+   nxcl/configure.ac
+Log:
+Add --with(out)-doxygen
+
+
+Modified: nxcl/Makefile.am
+===================================================================
+--- nxcl/Makefile.am	2008-01-29 00:12:34 UTC (rev 439)
++++ nxcl/Makefile.am	2008-01-29 00:28:37 UTC (rev 440)
+@@ -1,15 +1,18 @@
+ 
+ AUTOMAKE_OPTIONS = check-news dist-bzip2
+ 
+-ALWAYS_SUBDIRS = lib test doc
++ALWAYS_SUBDIRS = lib test
+ 
+-
+ SUBDIRS = $(ALWAYS_SUBDIRS)
+ 
+ if WITH_NXCMD
+-  SUBDIRS +=  nxcl
++  SUBDIRS += nxcl
+ endif
+ 
++if WITH_DOXYGEN
++  SUBDIRS += doc
++endif
++
+ CLEANFILES = *~
+ 
+ MAINTAINERCLEANFILES = aclocal.m4 nxcl-*.tar.gz nxcl-*.tar.bz2 nxcl-*.diff
+
+Modified: nxcl/configure.ac
+===================================================================
+--- nxcl/configure.ac	2008-01-29 00:12:34 UTC (rev 439)
++++ nxcl/configure.ac	2008-01-29 00:28:37 UTC (rev 440)
+@@ -18,8 +18,6 @@
+ AC_PROG_INSTALL
+ AC_PROG_LIBTOOL
+ 
+-AC_CHECK_PROG(DOXYGEN, doxygen, doxygen, /bin/echo)
+-
+ dnl check for boost library
+ dnl I would prefer to include boost code and compile in place and statically link.
+ dnl AC_CHECK_LIB(boost_signals, LIB_BOOST_SIGNALS=&quot;-lboost_signals&quot;)
+@@ -46,6 +44,17 @@
+ 
+ AM_CONDITIONAL(WITH_NXCMD, test &quot;$with_nxcmd&quot; = yes)
+ 
++AC_ARG_WITH(doxygen,
++            AC_HELP_STRING([--with-doxygen], [build doxygen API documentation]),
++        [with_doxygen=${withval}],
++        [with_doxygen=yes])
++
++if test &quot;$with_doxygen&quot; = yes; then
++  AC_CHECK_PROG(DOXYGEN, doxygen, doxygen, /bin/echo)
++fi
++
++AM_CONDITIONAL(WITH_DOXYGEN, test &quot;$with_doxygen&quot; = yes)
++
+ dnl Checks for library functions.
+ AC_HEADER_STDC
+ AC_HEADER_TIME
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000565.html">[Freenx-cvs] r439 - in nxcl: . nxcl test
+</A></li>
+	<LI>Next message: <A HREF="000567.html">[Freenx-cvs] r441 - nxcl
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#566">[ date ]</a>
+              <a href="thread.html#566">[ thread ]</a>
+              <a href="subject.html#566">[ subject ]</a>
+              <a href="author.html#566">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

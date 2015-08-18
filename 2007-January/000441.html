@@ -1,0 +1,574 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r308 - nx-utils/nxfish
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r308%20-%20nx-utils/nxfish&In-Reply-To=%3C200701300536.l0U5as7O029540%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000440.html">
+   <LINK REL="Next"  HREF="000442.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r308 - nx-utils/nxfish</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r308%20-%20nx-utils/nxfish&In-Reply-To=%3C200701300536.l0U5as7O029540%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r308 - nx-utils/nxfish">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Tue Jan 30 06:36:54 CET 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000440.html">[Freenx-cvs] r307 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000442.html">[Freenx-cvs] r309 - nx-utils/nxcupsd-wrapper
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#441">[ date ]</a>
+              <a href="thread.html#441">[ thread ]</a>
+              <a href="subject.html#441">[ subject ]</a>
+              <a href="author.html#441">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-01-30 06:36:53 +0100 (Tue, 30 Jan 2007)
+New Revision: 308
+
+Added:
+   nx-utils/nxfish/README.win32
+   nx-utils/nxfish/nx-fishsrv-win32.pl
+Log:
+Added initial win32 version of nx-fishsrv.pl.
+
+Maybe it will be later synced with unix version ...
+
+
+
+Added: nx-utils/nxfish/README.win32
+===================================================================
+--- nx-utils/nxfish/README.win32	2007-01-29 18:50:50 UTC (rev 307)
++++ nx-utils/nxfish/README.win32	2007-01-30 05:36:53 UTC (rev 308)
+@@ -0,0 +1,15 @@
++There is now also a windows version available.
++
++You need to install perl and create a start bat like:
++
+<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">+ at start</A> perl C:\\PATH\\TO\\nx-fishsrv-win32.pl &quot;C:\\Folder\\Shared\\&quot; &quot;&quot; &quot;&lt;port&gt;&quot;
++
++You also need to install file to C:\\Programme\\GnuWin32\\bin\file.exe.
++
++Or tweak the path in nx-fishsrv-win32.pl.
++
++Enjoy!
++
++cu
++
++Fabian
+
+Added: nx-utils/nxfish/nx-fishsrv-win32.pl
+===================================================================
+--- nx-utils/nxfish/nx-fishsrv-win32.pl	2007-01-29 18:50:50 UTC (rev 307)
++++ nx-utils/nxfish/nx-fishsrv-win32.pl	2007-01-30 05:36:53 UTC (rev 308)
+@@ -0,0 +1,472 @@
++#!/usr/bin/perl
++
++# nx-fishrv.pl - Originally based on KDE sources.
++#
++#   A simple fileserver to allow remote browsing via <A HREF="nxfish://.">nxfish://.</A>
++# 
++# License: GPL - v2
++#
++# Made &quot;secure&quot; for use by NX by Fabian Franz &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">freenx at fabian-franz.de</A>&gt;.
++# 
++# Version: 0.0.3-nx-3
++#
++# SVN: $$ 
++
++=pod
++=cut
++
++use Fcntl;
++$|++;
++use strict;
++use POSIX qw(getcwd dup2 strftime);
++use IO::Socket ();
++
++my $substpath=$ARGV[0];
++my $cookie=$ARGV[1];
++my $port=$ARGV[2];
++my $authenticated=0;
++
++my $client_ich=undef;
++my $client_och=undef;
++
++if ($substpath eq '' or $substpath eq '.')
++{
++	$substpath='./';
++}
++
++if ($cookie eq '')
++{
++	$authenticated=1;
++}
++
++$| = 1;
++
++if ($port ne '')
++{
++	Server();
++}
++else
++{
++	Run(*STDIN, *STDOUT);
++}
++
++sub Server()
++{
++  my $verbose=1;
++  my $debug=0;
++  $verbose = 1 if $debug &amp;&amp; !$verbose;
++
++  my $ah = IO::Socket::INET-&gt;new('LocalAddr' =&gt; &quot;0.0.0.0&quot;,
++				 'LocalPort' =&gt; $port,
++				 'Reuse' =&gt; 1,
++				 'Listen' =&gt; 10)
++    || die &quot;Failed to bind to local socket: $!&quot;;
++
++  print &quot;Entering main loop.\n&quot; if $verbose;
++  $SIG{'CHLD'} = 'IGNORE';
++  my $num = 0;
++  while (1) {
++    my $ch = $ah-&gt;accept();
++    if (!$ch) {
++      print STDERR &quot;Failed to accept: $!\n&quot;;
++      next;
++    }
++    printf(&quot;Accepting client from %s, port %s.\n&quot;,
++	   $ch-&gt;peerhost(), $ch-&gt;peerport()) if $verbose;
++    ++$num;
++    my $pid = eval { fork () };
++    if ($@) {
++      # fork not supported, we handle a single connection
++      Run($ch, $ch);
++    } elsif (!defined($pid)) {
++      print STDERR &quot;Failed to fork: $!\n&quot;;
++    } elsif ($pid == 0) {
++      # This is the child
++      $ah-&gt;close();
++      Run($ch, $ch);
++      exit 0;
++    } else {
++      print &quot;Parent: Forked child, closing socket.\n&quot; if $verbose;
++      $ch-&gt;close();
++    }
++  }
++}
++
++sub Run()
++{
++$SIG{'CHLD'} = 'IGNORE';
++$client_ich = shift;
++$client_och = shift;
++
++myprint(&quot;FISH:\n&quot;);
++
++MAIN: while (readline($client_ich)) {
++    chomp;
++    chomp;
++
++    write_file(&quot;debug.log&quot;, &quot;$_\n&quot;); # debug
++    
++    /^#PASS\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        my $usercookie    = $1;
++	
++	if ($usercookie eq $cookie or $authenticated eq 1)
++	{
++		$authenticated=1;
++		#myprint(&quot;### 200\n&quot;);
++	}
++	else
++	{
++		myprint(&quot;### 500 Wrong password supplied.\n&quot;);
++	}
++        next; # or should we bail out here?
++    };
++    
++    if ($authenticated eq 0)
++    {
++    	myprint(&quot;### 500 Not authenticated please use #PASS command.\n&quot;);
++	next;
++    }
++
++    /\#FISH/ &amp;&amp; do {
++	myprint(&quot;### 200\n&quot;);
++	next;
++    };
++
++    next if !length($_) || substr( $_, 0, 1 ) ne '#';
++    s/^#//;
++    /^VER / &amp;&amp; do {
++        myprint(&quot;VER 0.0.3 copy lscount lslinks lsmime stat\n### 200\n&quot;);
++        next;
++    };
++    /^PWD$/ &amp;&amp; do {
++        myprint(&quot;/&quot;, &quot;\n### 200\n&quot;);
++        next;
++    };
++    /^SYMLINK\s+((?:\\.|[^\\])*?)\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        my $ofn = unquote($1);
++        my $fn  = unquote($2);
++	#myprint( symlink( $ofn, $fn ) ? &quot;### 200\n&quot; : &quot;### 500 $!\n&quot; );
++	myprint( &quot;### 500 Symlink not supported on Windows systems.\n&quot; );
++        next;
++    };
++    /^COPY\s+((?:\\.|[^\\])*?)\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        my $ofn    = unquote($1);
++        my $fn     = unquote($2);
++        my ($size) = ( stat($ofn) )[7];
++        my $read   = 1;
++        if ( -l $ofn ) {
++            my $dest = readlink($ofn);
++            unlink($fn);
++            symlink( $dest, $fn ) || ( $read = 0 );
++        }
++        else {
++            sysopen( FH, $ofn, O_RDONLY ) || do { myprint(&quot;### 500 $!\n&quot;); next; };
++            sysopen( OFH, $fn, O_WRONLY | O_CREAT | O_TRUNC )
++              || do { close(FH); myprint(&quot;### 500 $!\n&quot;); next; };
++            local $/ = undef;
++            my $buffer = '';
++            while ( $size &gt; 16384
++                &amp;&amp; ( $read = sysread( FH, $buffer, 16384 ) ) &gt; 0 )
++            {
++                $size -= $read;
++                if ( syswrite( OFH, $buffer, $read ) != $read ) {
++                    close(FH);
++                    close(OFH);
++                    myprint(&quot;### 500 $!\n&quot;);
++                    next MAIN;
++                }
++            }
++            while ( $size &gt; 0 &amp;&amp; ( $read = sysread( FH, $buffer, $size ) ) &gt; 0 )
++            {
++                $size -= $read;
++                if ( syswrite( OFH, $buffer, $read ) != $read ) {
++                    close(FH);
++                    close(OFH);
++                    myprint(&quot;### 500 $!\n&quot;);
++                    next MAIN;
++                }
++            }
++            close(FH);
++            close(OFH);
++        }
++        if ( $read &gt; 0 ) {
++            myprint(&quot;### 200\n&quot;);
++        }
++        else {
++            myprint(&quot;### 500 $!\n&quot;);
++        }
++        next;
++    };
++    /^LINK\s+((?:\\.|[^\\])*?)\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        my $ofn = unquote($1);
++        my $fn  = unquote($2);
++        myprint( link( $ofn, $fn ) ? &quot;### 200\n&quot; : &quot;### 500 $!\n&quot; );
++        next;
++    };
++    /^RENAME\s+((?:\\.|[^\\])*?)\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        my $ofn = unquote($1);
++        my $fn  = unquote($2);
++        myprint( rename( $ofn, $fn ) ? &quot;### 200\n&quot; : &quot;### 500 $!\n&quot; );
++        next;
++    };
++    /^CHGRP\s+(\d+)\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        my $fn = unquote($2);
++        myprint( chown( -1, int($1), $fn ) ? &quot;### 200\n&quot; : &quot;### 500 $!\n&quot; );
++        next;
++    };
++    /^CHOWN\s+(\d+)\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        my $fn = unquote($2);
++        myprint( chown( int($1), -1, $fn ) ? &quot;### 200\n&quot; : &quot;### 500 $!\n&quot; );
++        next;
++    };
++    /^CHMOD\s+([0-7]+)\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        my $fn = unquote($2);
++        myprint( chmod( oct($1), $fn ) ? &quot;### 200\n&quot; : &quot;### 500 $!\n&quot; );
++        next;
++    };
++    /^DELE\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        my $fn = unquote($1);
++        myprint( unlink($fn) ? &quot;### 200\n&quot; : &quot;### 500 $!\n&quot; );
++        next;
++    };
++    /^RMD\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        my $dn = unquote($1);
++        myprint( rmdir($dn) ? &quot;### 200\n&quot; : &quot;### 500 $!\n&quot; );
++        next;
++    };
++    /^MKD\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        my $dn = unquote($1);
++        if ( mkdir( $dn, 0777 ) ) {
++            myprint(&quot;### 200\n&quot;);
++        }
++        else {
++            my $err = $!;
++            myprint( chdir($dn) ? &quot;### 501 $err\n&quot; : &quot;### 500 $err\n&quot; );
++        }
++        next;
++    };
++    #/^CWD\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++    #    my $dn = unquote($1);
++    #    myprint( chdir($dn) ? &quot;### 200\n&quot; : &quot;### 500 $!\n&quot; );
++    #    next;
++    #};
++    /^LIST\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        list( $1, 1 );
++        next;
++    };
++    /^STAT\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        list( $1, 0 );
++        next;
++    };
++    /^WRITE\s+(\d+)\s+(\d+)\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        write_loop( $2, $3, O_WRONLY | O_CREAT, $1 );
++        next;
++    };
++    /^APPEND\s+(\d+)\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        write_loop( $1, $2, O_WRONLY | O_APPEND );
++        next;
++    };
++    /^STOR\s+(\d+)\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        write_loop( $1, $2, O_WRONLY | O_CREAT | O_TRUNC );
++        next;
++    };
++    /^RETR\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        read_loop($1);
++        next;
++    };
++    /^READ\s+(\d+)\s+(\d+)\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        read_loop( $3, $2, $1 );
++        next;
++    };
++}
++exit(0);
++}
++
++sub write_file
++{
++	my $f = shift;
++	my $data = shift;
++        open F, &quot;&gt;&gt; $f&quot; or die &quot;Can't open $f : $!&quot;;
++        syswrite(F, $data, length($data));
++        close F;
++}
++
++
++sub list {
++    my $dn = unquote( $_[0] );
++    my @entries;
++    if ( !-e $dn ) {
++        myprint(&quot;### 404 File does not exist\n&quot;);
++        return;
++    }
++    elsif ( $_[1] &amp;&amp; -d _ ) {
++        opendir( DIR, $dn ) || do { myprint(&quot;### 500 $!\n&quot;); return; };
++        @entries = readdir(DIR);
++        closedir(DIR);
++    }
++    else {
++        ( $dn, @entries ) = $dn =~ m{(.*)/(.*)};
++        $dn = '/' if ( !length($dn) );
++    }
++    myprint(scalar(@entries), &quot;\n### 100\n&quot;);
++    my $cwd = getcwd();
++    chdir($dn) || do { myprint(&quot;### 500 $!\n&quot;); return; };
++    foreach (@entries) {
++        my $link = readlink;
++        my ( $mode, $uid, $gid, $size, $mtime ) = (lstat)[ 2, 4, 5, 7, 9 ];
++        myprint(filetype( $mode, $link, $uid, $gid ));
++        myprint(&quot;S$size\n&quot;);
++        myprint(strftime( &quot;D%Y %m %d %H %M %S\n&quot;, localtime($mtime) ));
++        myprint(&quot;:$_\n&quot;);
++        myprint(&quot;L$link\n&quot;) if (defined $link &amp;&amp; ($_[0] ne &quot;/&quot;));
++        myprint(mimetype($_));
++        myprint(&quot;\n&quot;);
++    }
++    chdir($cwd);
++    myprint(&quot;### 200\n&quot;);
++}
++
++sub read_loop {
++    my $fn = unquote( $_[0] );
++    my ($size) = ( $_[1] ? int( $_[1] ) : ( stat($fn) )[7] );
++    my $error = '';
++    myprint(&quot;### 501 Is directory\n&quot;) and return if -d $fn;
++    sysopen( FH, $fn, O_RDONLY ) || ( $error = $! );
++    if ( $_[2] ) {
++        sysseek( FH, int( $_[2] ), 0 ) || do { close(FH); $error ||= $!; };
++    }
++    myprint(&quot;### 500 $error\n&quot;) and return if $error;
++    if ( @_ &lt; 2 ) {
++        myprint(&quot;$size\n&quot;);
++    }
++    myprint(&quot;### 100\n&quot;);
++    my $buffer = '';
++    my $read   = 1;
++    while ( $size &gt; 16384 &amp;&amp; ( $read = sysread( FH, $buffer, 16384 ) ) &gt; 0 ) {
++        $size -= $read;
++        myprint($buffer);
++    }
++    while ( $size &gt; 0 &amp;&amp; ( $read = sysread( FH, $buffer, $size ) ) &gt; 0 ) {
++        $size -= $read;
++        myprint($buffer);
++    }
++    while ( $size &gt; 0 ) {
++        myprint(' ');
++        $size--;
++    }
++    $error ||= $! if $read &lt;= 0;
++    close(FH);
++    if ( !$error ) {
++        myprint(&quot;### 200\n&quot;);
++    }
++    else {
++        myprint(&quot;### 500 $error\n&quot;);
++    }
++}
++
++sub write_loop {
++    my $size  = int( $_[0] );
++    my $fn    = unquote( $_[1] );
++    my $error = '';
++    sysopen( FH, $fn, $_[2] ) || do { myprint(&quot;### 400 $!\n&quot;); return; };
++    eval { flock( FH, 2 ); };
++    if ( $_[3] ) {
++        sysseek( FH, int( $_[3] ), 0 )
++          || do { close(FH); myprint(&quot;### 400 $!\n&quot;); return; };
++    }
++    readline($client_ich);
++    myprint(&quot;### 100\n&quot;);
++    my $buffer = '';
++    my $read   = 1;
++    while ( $size &gt; 16384 &amp;&amp; ( $read = read( $client_ich, $buffer, 16384 ) ) &gt; 0 ) {
++        $size -= $read;
++        $error ||= $! if ( syswrite( FH, $buffer, $read ) != $read );
++    }
++    while ( $size &gt; 0 &amp;&amp; ( $read = read( $client_ich, $buffer, $size ) ) &gt; 0 ) {
++        $size -= $read;
++        $error ||= $! if ( syswrite( FH, $buffer, $read ) != $read );
++    }
++    close(FH);
++    if ( !$error ) {
++        myprint(&quot;### 200\n&quot;);
++    }
++    else {
++        myprint(&quot;### 500 $error\n&quot;);
++    }
++}
++
++# FIXME: Make it secure
++
++sub unquote { $_ = shift; s/\\(.)/$1/g; s/\.\./\//g; s/^/$substpath/g; return $_; }
++#sub unquote { $_ = shift; s/\\(.)/$1/g; return $_; }
++
++sub myprint {
++	my $foo = shift;
++	syswrite($client_och, $foo, length($foo));
++}
++
++
++sub filetype {
++    my ( $mode, $link, $uid, $gid ) = @_;
++    my $result = 'P';
++    while (1) {
++        -f _           &amp;&amp; do { $result .= '-'; last; };
++        -d _           &amp;&amp; do { $result .= 'd'; last; };
++        defined($link) &amp;&amp; do { $result .= 'l'; last; };
++        -c _           &amp;&amp; do { $result .= 'c'; last; };
++        -b _           &amp;&amp; do { $result .= 'b'; last; };
++        -S _           &amp;&amp; do { $result .= 's'; last; };
++        -p _           &amp;&amp; do { $result .= 'p'; last; };
++        $result .= '?';
++        last;
++    }
++    $result .= ( $mode &amp; 0400 ? 'r' : '-' );
++    $result .= ( $mode &amp; 0200 ? 'w' : '-' );
++    $result .=
++      ( $mode &amp; 0100
++        ? ( $mode &amp; 04000 ? 's' : 'x' )
++        : ( $mode &amp; 04000 ? 'S' : '-' ) );
++    $result .= ( $mode &amp; 0040 ? 'r' : '-' );
++    $result .= ( $mode &amp; 0020 ? 'w' : '-' );
++    $result .=
++      ( $mode &amp; 0010
++        ? ( $mode &amp; 02000 ? 's' : 'x' )
++        : ( $mode &amp; 02000 ? 'S' : '-' ) );
++    $result .= ( $mode &amp; 0004 ? 'r' : '-' );
++    $result .= ( $mode &amp; 0002 ? 'w' : '-' );
++    $result .=
++      ( $mode &amp; 0001
++        ? ( $mode &amp; 01000 ? 't' : 'x' )
++        : ( $mode &amp; 01000 ? 'T' : '-' ) );
++    $result .= ' ';
++    $result .= '1000'; #( getpwuid($uid) || $uid );
++    $result .= '.';
++    $result .= '1000'; #( getgrgid($gid) || $gid );
++    $result .= &quot;\n&quot;;
++    return $result;
++}
++
++sub mimetype {
++    my $fn = shift;
++    return &quot;Minode/directory\n&quot; if -d $fn;
++    pipe( IN, OUT );
++    my $pid = fork();
++    return '' if ( !defined $pid );
++    if ($pid) {
++        close(OUT);
++        my $type = &lt;IN&gt;;
++        close(IN);
++        chomp $type;
++        chomp $type;
++        $type =~ s/[,; ].*//;
++        return '' if ( $type !~ m/\// );
++        return &quot;M$type\n&quot;;
++    }
++    close(IN);
++#    sysopen( NULL, '/dev/null', O_RDWR );
++#    dup2( fileno(NULL), fileno(STDIN) );
++#    dup2( fileno(OUT),  fileno(STDOUT) );
++#    dup2( fileno(NULL), fileno(STDERR) );
++    exec( 'C:\Programme\GnuWin32\bin\file.exe', '-i', '-b', $fn );
++    exit(0);
++}
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000440.html">[Freenx-cvs] r307 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000442.html">[Freenx-cvs] r309 - nx-utils/nxcupsd-wrapper
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#441">[ date ]</a>
+              <a href="thread.html#441">[ thread ]</a>
+              <a href="subject.html#441">[ subject ]</a>
+              <a href="author.html#441">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

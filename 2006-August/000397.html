@@ -1,0 +1,157 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r267 - nxclientlib/qtnx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r267%20-%20nxclientlib/qtnx&In-Reply-To=%3C200608162038.k7GKc43d001972%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000396.html">
+   <LINK REL="Next"  HREF="000398.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r267 - nxclientlib/qtnx</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r267%20-%20nxclientlib/qtnx&In-Reply-To=%3C200608162038.k7GKc43d001972%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r267 - nxclientlib/qtnx">gwright at mail.berlios.de
+       </A><BR>
+    <I>Wed Aug 16 22:38:04 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000396.html">[Freenx-cvs] r266 - nxclientlib/qtnx
+</A></li>
+        <LI>Next message: <A HREF="000398.html">[Freenx-cvs] r268 - in nxclientlib: . qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#397">[ date ]</a>
+              <a href="thread.html#397">[ thread ]</a>
+              <a href="subject.html#397">[ subject ]</a>
+              <a href="author.html#397">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2006-08-16 22:38:03 +0200 (Wed, 16 Aug 2006)
+New Revision: 267
+
+Modified:
+   nxclientlib/qtnx/qtnxsettings.cpp
+   nxclientlib/qtnx/qtnxsettings.h
+   nxclientlib/qtnx/qtnxwindow.cpp
+   nxclientlib/qtnx/qtnxwindow.h
+Log:
+Update combobox when sessions are added
+
+
+Modified: nxclientlib/qtnx/qtnxsettings.cpp
+===================================================================
+--- nxclientlib/qtnx/qtnxsettings.cpp	2006-08-16 20:21:00 UTC (rev 266)
++++ nxclientlib/qtnx/qtnxsettings.cpp	2006-08-16 20:38:03 UTC (rev 267)
+@@ -26,6 +26,8 @@
+ 
+ QtNXSettings::QtNXSettings(QString sessionName) : QDialog()
+ {
++	filedesc = sessionName;
++	
+ 	if (!sessionName.isEmpty())
+ 		fileName = QDir::homePath() + &quot;/.qtnx/&quot; + sessionName + &quot;.nxml&quot;;
+ 	else
+@@ -186,6 +188,12 @@
+ 
+ void QtNXSettings::applyPressed()
+ {
++	// File has been renamed, remove old one
++	if (filedesc != ui_sd.sessionName-&gt;text()) {
++		QFile temp(QDir::homePath() + &quot;/.qtnx/&quot; + filedesc + &quot;.nxml&quot;);
++		temp.remove();
++	}
++	
+ 	QDir configDir(QDir::homePath() + &quot;/.qtnx/&quot;);
+ 	configDir.mkpath(QDir::homePath() + &quot;/.qtnx/&quot;);
+ 
+
+Modified: nxclientlib/qtnx/qtnxsettings.h
+===================================================================
+--- nxclientlib/qtnx/qtnxsettings.h	2006-08-16 20:21:00 UTC (rev 266)
++++ nxclientlib/qtnx/qtnxsettings.h	2006-08-16 20:38:03 UTC (rev 267)
+@@ -47,6 +47,7 @@
+ 		Ui::SettingsDialog ui_sd;
+ 		NXConfigData config;
+ 		QString fileName;
++		QString filedesc;
+ 
+ };
+ 
+
+Modified: nxclientlib/qtnx/qtnxwindow.cpp
+===================================================================
+--- nxclientlib/qtnx/qtnxwindow.cpp	2006-08-16 20:21:00 UTC (rev 266)
++++ nxclientlib/qtnx/qtnxwindow.cpp	2006-08-16 20:38:03 UTC (rev 267)
+@@ -124,6 +124,22 @@
+ 		settingsDialog = new QtNXSettings(&quot;&quot;);
+ 	else
+ 		settingsDialog = new QtNXSettings(ui_lg.session-&gt;currentText());
+-		
++
++	connect(settingsDialog, SIGNAL(closing()), this, SLOT(configureClosed()));
++
+ 	settingsDialog-&gt;show();
+ }
++
++void QtNXWindow::configureClosed()
++{
++	while (ui_lg.session-&gt;count() != 0) {
++		ui_lg.session-&gt;removeItem(0);
++	}
++
++	QDir dir(QDir::homePath()+&quot;/.qtnx&quot;,&quot;*.nxml&quot;);
++	for (unsigned int i=0;i&lt;dir.count();i++) {
++		QString conn=dir[i];
++		ui_lg.session-&gt;addItem(conn.left(conn.length()-5));
++	}
++	ui_lg.session-&gt;addItem(tr(&quot;Create new session&quot;));
++}
+\ No newline at end of file
+
+Modified: nxclientlib/qtnx/qtnxwindow.h
+===================================================================
+--- nxclientlib/qtnx/qtnxwindow.h	2006-08-16 20:21:00 UTC (rev 266)
++++ nxclientlib/qtnx/qtnxwindow.h	2006-08-16 20:38:03 UTC (rev 267)
+@@ -39,6 +39,7 @@
+ 	public slots:
+ 		void startConnect();
+ 		void configure();
++		void configureClosed();
+ 	private:
+ 		Ui::LoginDialog ui_lg;
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000396.html">[Freenx-cvs] r266 - nxclientlib/qtnx
+</A></li>
+	<LI>Next message: <A HREF="000398.html">[Freenx-cvs] r268 - in nxclientlib: . qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#397">[ date ]</a>
+              <a href="thread.html#397">[ thread ]</a>
+              <a href="subject.html#397">[ subject ]</a>
+              <a href="author.html#397">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

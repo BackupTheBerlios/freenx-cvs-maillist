@@ -1,0 +1,392 @@
+From fabianx at mail.berlios.de  Tue Nov 11 16:01:50 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 11 Nov 2008 16:01:50 +0100
+Subject: [Freenx-cvs] r614 - in tags: . freenx-client
+Message-ID: <200811111501.mABF1ooe031121@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-11-11 16:01:49 +0100 (Tue, 11 Nov 2008)
+New Revision: 614
+
+Added:
+   tags/freenx-client_freenx-client-0.9/
+Removed:
+   tags/freenx-client/freenx-client-0.9/
+Log:
+Repository reorganization for git migration.
+
+
+
+Copied: tags/freenx-client_freenx-client-0.9 (from rev 613, tags/freenx-client/freenx-client-0.9)
+
+
+
+From fabianx at mail.berlios.de  Tue Nov 11 16:02:07 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 11 Nov 2008 16:02:07 +0100
+Subject: [Freenx-cvs] r615 - in tags: . freenx-server
+Message-ID: <200811111502.mABF27ig031190@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-11-11 16:02:06 +0100 (Tue, 11 Nov 2008)
+New Revision: 615
+
+Added:
+   tags/freenx-server_FreeNX-0.4.4/
+Removed:
+   tags/freenx-server/FreeNX-0.4.4/
+Log:
+Repository reorganization for git migration.
+
+Copied: tags/freenx-server_FreeNX-0.4.4 (from rev 614, tags/freenx-server/FreeNX-0.4.4)
+
+
+
+From fabianx at mail.berlios.de  Tue Nov 11 16:02:09 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 11 Nov 2008 16:02:09 +0100
+Subject: [Freenx-cvs] r616 - in tags: . freenx-server
+Message-ID: <200811111502.mABF29Aj031223@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-11-11 16:02:09 +0100 (Tue, 11 Nov 2008)
+New Revision: 616
+
+Added:
+   tags/freenx-server_FreeNX-0_4_4-RC1/
+Removed:
+   tags/freenx-server/FreeNX-0_4_4-RC1/
+Log:
+Repository reorganization for git migration.
+
+Copied: tags/freenx-server_FreeNX-0_4_4-RC1 (from rev 615, tags/freenx-server/FreeNX-0_4_4-RC1)
+
+
+
+From fabianx at mail.berlios.de  Tue Nov 11 16:02:10 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 11 Nov 2008 16:02:10 +0100
+Subject: [Freenx-cvs] r617 - in tags: . freenx-server
+Message-ID: <200811111502.mABF2AWB031261@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-11-11 16:02:10 +0100 (Tue, 11 Nov 2008)
+New Revision: 617
+
+Added:
+   tags/freenx-server_FreeNX-0.4.5/
+Removed:
+   tags/freenx-server/FreeNX-0.4.5/
+Log:
+Repository reorganization for git migration.
+
+Copied: tags/freenx-server_FreeNX-0.4.5 (from rev 616, tags/freenx-server/FreeNX-0.4.5)
+
+
+
+From fabianx at mail.berlios.de  Tue Nov 11 16:02:12 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 11 Nov 2008 16:02:12 +0100
+Subject: [Freenx-cvs] r618 - in tags: . freenx-server
+Message-ID: <200811111502.mABF2CBC031294@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-11-11 16:02:12 +0100 (Tue, 11 Nov 2008)
+New Revision: 618
+
+Added:
+   tags/freenx-server_FreeNX-0.5.0/
+Removed:
+   tags/freenx-server/FreeNX-0.5.0/
+Log:
+Repository reorganization for git migration.
+
+Copied: tags/freenx-server_FreeNX-0.5.0 (from rev 617, tags/freenx-server/FreeNX-0.5.0)
+
+
+
+From fabianx at mail.berlios.de  Tue Nov 11 16:02:14 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 11 Nov 2008 16:02:14 +0100
+Subject: [Freenx-cvs] r619 - in tags: . freenx-server
+Message-ID: <200811111502.mABF2Enr031327@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-11-11 16:02:14 +0100 (Tue, 11 Nov 2008)
+New Revision: 619
+
+Added:
+   tags/freenx-server_FreeNX-0_5_0-LWE/
+Removed:
+   tags/freenx-server/FreeNX-0_5_0-LWE/
+Log:
+Repository reorganization for git migration.
+
+Copied: tags/freenx-server_FreeNX-0_5_0-LWE (from rev 618, tags/freenx-server/FreeNX-0_5_0-LWE)
+
+
+
+From fabianx at mail.berlios.de  Tue Nov 11 16:02:16 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 11 Nov 2008 16:02:16 +0100
+Subject: [Freenx-cvs] r620 - in tags: . freenx-server
+Message-ID: <200811111502.mABF2Gaf031360@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-11-11 16:02:16 +0100 (Tue, 11 Nov 2008)
+New Revision: 620
+
+Added:
+   tags/freenx-server_FreeNX-0.6.0/
+Removed:
+   tags/freenx-server/FreeNX-0.6.0/
+Log:
+Repository reorganization for git migration.
+
+Copied: tags/freenx-server_FreeNX-0.6.0 (from rev 619, tags/freenx-server/FreeNX-0.6.0)
+
+
+
+From fabianx at mail.berlios.de  Tue Nov 11 16:02:19 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 11 Nov 2008 16:02:19 +0100
+Subject: [Freenx-cvs] r621 - in tags: . freenx-server
+Message-ID: <200811111502.mABF2Jak031394@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-11-11 16:02:18 +0100 (Tue, 11 Nov 2008)
+New Revision: 621
+
+Added:
+   tags/freenx-server_FreeNX-0.6.0.99/
+Removed:
+   tags/freenx-server/FreeNX-0.6.0.99/
+Log:
+Repository reorganization for git migration.
+
+Copied: tags/freenx-server_FreeNX-0.6.0.99 (from rev 620, tags/freenx-server/FreeNX-0.6.0.99)
+
+
+
+From fabianx at mail.berlios.de  Tue Nov 11 16:02:22 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 11 Nov 2008 16:02:22 +0100
+Subject: [Freenx-cvs] r623 - in tags: . freenx-server
+Message-ID: <200811111502.mABF2Msa031460@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-11-11 16:02:22 +0100 (Tue, 11 Nov 2008)
+New Revision: 623
+
+Added:
+   tags/freenx-server_FreeNX-0.7.1/
+Removed:
+   tags/freenx-server/FreeNX-0.7.1/
+Log:
+Repository reorganization for git migration.
+
+Copied: tags/freenx-server_FreeNX-0.7.1 (from rev 622, tags/freenx-server/FreeNX-0.7.1)
+
+
+
+From fabianx at mail.berlios.de  Tue Nov 11 16:02:24 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 11 Nov 2008 16:02:24 +0100
+Subject: [Freenx-cvs] r624 - in tags: . freenx-server
+Message-ID: <200811111502.mABF2OF9031495@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-11-11 16:02:24 +0100 (Tue, 11 Nov 2008)
+New Revision: 624
+
+Added:
+   tags/freenx-server_FreeNX-0.7.2/
+Removed:
+   tags/freenx-server/FreeNX-0.7.2/
+Log:
+Repository reorganization for git migration.
+
+Copied: tags/freenx-server_FreeNX-0.7.2 (from rev 623, tags/freenx-server/FreeNX-0.7.2)
+
+
+
+From fabianx at mail.berlios.de  Tue Nov 11 16:02:21 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 11 Nov 2008 16:02:21 +0100
+Subject: [Freenx-cvs] r622 - in tags: . freenx-server
+Message-ID: <200811111502.mABF2KbE031427@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-11-11 16:02:20 +0100 (Tue, 11 Nov 2008)
+New Revision: 622
+
+Added:
+   tags/freenx-server_FreeNX-0.7.0/
+Removed:
+   tags/freenx-server/FreeNX-0.7.0/
+Log:
+Repository reorganization for git migration.
+
+Copied: tags/freenx-server_FreeNX-0.7.0 (from rev 621, tags/freenx-server/FreeNX-0.7.0)
+
+
+
+From fabianx at mail.berlios.de  Tue Nov 11 16:02:27 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 11 Nov 2008 16:02:27 +0100
+Subject: [Freenx-cvs] r626 - in tags: . freenx-utils
+Message-ID: <200811111502.mABF2RPY031563@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-11-11 16:02:27 +0100 (Tue, 11 Nov 2008)
+New Revision: 626
+
+Added:
+   tags/freenx-utils_FreeNX-0_5_0-LWE/
+Removed:
+   tags/freenx-utils/FreeNX-0_5_0-LWE/
+Log:
+Repository reorganization for git migration.
+
+Copied: tags/freenx-utils_FreeNX-0_5_0-LWE (from rev 625, tags/freenx-utils/FreeNX-0_5_0-LWE)
+
+
+
+From fabianx at mail.berlios.de  Tue Nov 11 16:02:25 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 11 Nov 2008 16:02:25 +0100
+Subject: [Freenx-cvs] r625 - in tags: . freenx-server
+Message-ID: <200811111502.mABF2P4r031530@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-11-11 16:02:25 +0100 (Tue, 11 Nov 2008)
+New Revision: 625
+
+Added:
+   tags/freenx-server_FreeNX-0.7.3/
+Removed:
+   tags/freenx-server/FreeNX-0.7.3/
+Log:
+Repository reorganization for git migration.
+
+Copied: tags/freenx-server_FreeNX-0.7.3 (from rev 624, tags/freenx-server/FreeNX-0.7.3)
+
+
+
+From fabianx at mail.berlios.de  Tue Nov 11 16:05:48 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 11 Nov 2008 16:05:48 +0100
+Subject: [Freenx-cvs] r627 - in branches: . freenx-client
+Message-ID: <200811111505.mABF5mOd031915@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-11-11 16:05:47 +0100 (Tue, 11 Nov 2008)
+New Revision: 627
+
+Added:
+   branches/freenx-client_1.0-branch/
+Removed:
+   branches/freenx-client/1.0-branch/
+Log:
+Repository reorganization for git migration.
+
+Copied: branches/freenx-client_1.0-branch (from rev 626, branches/freenx-client/1.0-branch)
+
+
+
+From fabianx at mail.berlios.de  Tue Nov 11 16:05:49 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 11 Nov 2008 16:05:49 +0100
+Subject: [Freenx-cvs] r628 - in branches: . freenx-server
+Message-ID: <200811111505.mABF5noF031948@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-11-11 16:05:49 +0100 (Tue, 11 Nov 2008)
+New Revision: 628
+
+Added:
+   branches/freenx-server_0_5_0-based-on-0.4.1/
+Removed:
+   branches/freenx-server/0_5_0-based-on-0.4.1/
+Log:
+Repository reorganization for git migration.
+
+Copied: branches/freenx-server_0_5_0-based-on-0.4.1 (from rev 627, branches/freenx-server/0_5_0-based-on-0.4.1)
+
+
+
+From fabianx at mail.berlios.de  Tue Nov 11 16:05:56 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 11 Nov 2008 16:05:56 +0100
+Subject: [Freenx-cvs] r630 - in branches: . freenx-server
+Message-ID: <200811111505.mABF5u2A032014@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-11-11 16:05:56 +0100 (Tue, 11 Nov 2008)
+New Revision: 630
+
+Added:
+   branches/freenx-server_FreeNX-0.5/
+Removed:
+   branches/freenx-server/FreeNX-0.5/
+Log:
+Repository reorganization for git migration.
+
+Copied: branches/freenx-server_FreeNX-0.5 (from rev 629, branches/freenx-server/FreeNX-0.5)
+
+
+
+From fabianx at mail.berlios.de  Tue Nov 11 16:05:54 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 11 Nov 2008 16:05:54 +0100
+Subject: [Freenx-cvs] r629 - in branches: . freenx-server
+Message-ID: <200811111505.mABF5sLY031981@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-11-11 16:05:54 +0100 (Tue, 11 Nov 2008)
+New Revision: 629
+
+Added:
+   branches/freenx-server_FreeNX-0.4/
+Removed:
+   branches/freenx-server/FreeNX-0.4/
+Log:
+Repository reorganization for git migration.
+
+Copied: branches/freenx-server_FreeNX-0.4 (from rev 628, branches/freenx-server/FreeNX-0.4)
+
+
+
+From fabianx at mail.berlios.de  Tue Nov 11 17:11:48 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Tue, 11 Nov 2008 17:11:48 +0100
+Subject: [Freenx-cvs] r631 - trunk/freenx-website
+Message-ID: <200811111611.mABGBm3F012021@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-11-11 17:11:47 +0100 (Tue, 11 Nov 2008)
+New Revision: 631
+
+Modified:
+   trunk/freenx-website/home.inc
+Log:
+Added NX Client too.
+
+
+
+Modified: trunk/freenx-website/home.inc
+===================================================================
+--- trunk/freenx-website/home.inc	2008-11-11 15:05:56 UTC (rev 630)
++++ trunk/freenx-website/home.inc	2008-11-11 16:11:47 UTC (rev 631)
+@@ -3,7 +3,7 @@
+ 		Next Generation Remote Display
+ 	</h2>
+ 	<p>
+-		NX is an exciting new technology for remote display. It provides <em>near local speed</em> application responsiveness over high latency, low bandwidth links. The core libraries for NX are provided by <a href="http://www.nomachine.com/">NoMachine</a> under the GPL. FreeNX is a GPL implementation of the NX Server.
++		NX is an exciting new technology for remote display. It provides <em>near local speed</em> application responsiveness over high latency, low bandwidth links. The core libraries for NX are provided by <a href="http://www.nomachine.com/">NoMachine</a> under the GPL. FreeNX is a GPL implementation of the NX Server and NX Client Components.
+ 	</p>
+ </div>
+ <div class="box">
+
+
+

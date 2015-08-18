@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r495 - in freenx-server/trunk: . nxredir
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r495%20-%20in%20freenx-server/trunk%3A%20.%20nxredir&In-Reply-To=%3C200803051357.m25DvCYd032178%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000620.html">
+   <LINK REL="Next"  HREF="000622.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r495 - in freenx-server/trunk: . nxredir</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r495%20-%20in%20freenx-server/trunk%3A%20.%20nxredir&In-Reply-To=%3C200803051357.m25DvCYd032178%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r495 - in freenx-server/trunk: . nxredir">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Wed Mar  5 14:57:12 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000620.html">[Freenx-cvs] r494 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000622.html">[Freenx-cvs] r496 - qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#621">[ date ]</a>
+              <a href="thread.html#621">[ thread ]</a>
+              <a href="subject.html#621">[ subject ]</a>
+              <a href="author.html#621">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-03-05 14:57:12 +0100 (Wed, 05 Mar 2008)
+New Revision: 495
+
+Modified:
+   freenx-server/trunk/nxnode
+   freenx-server/trunk/nxredir/nxsmb
+Log:
+Changed protocol to be compatible with !M and look at lot nicer and especially be still compliant to URI struct.
+
+
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2008-03-05 13:33:10 UTC (rev 494)
++++ freenx-server/trunk/nxnode	2008-03-05 13:57:12 UTC (rev 495)
+@@ -1362,7 +1362,14 @@
+ 			smbport=$(cat &quot;$USER_FAKE_HOME/.nx/C-$sess_id/scripts/smbport&quot; 2&gt;/dev/null)
+ 			[ -z &quot;$smbport&quot; ] &amp;&amp; smbport=139 # should not happen
+ 
+-			DEVICE_URI=&quot;<A HREF="nxsmb://$username:$password@127.0.0.1:$port-$smbport/$share">nxsmb://$username:$password@127.0.0.1:$port-$smbport/$share</A>&quot;
++			if [ &quot;$smbport&quot; = &quot;445&quot; ]
++			then
++				smbproto=&quot;cifs&quot;
++			else
++				smbproto=&quot;smb&quot;
++			fi
++
++			DEVICE_URI=&quot;<A HREF="nxsmb://$username:$password@127.0.0.1:$port/$smbproto/$share">nxsmb://$username:$password@127.0.0.1:$port/$smbproto/$share</A>&quot;
+ 		else
+ 			DEVICE_URI=&quot;<A HREF="smb://$username:$password@127.0.0.1:$port/$share">smb://$username:$password@127.0.0.1:$port/$share</A>&quot;
+ 		fi
+
+Modified: freenx-server/trunk/nxredir/nxsmb
+===================================================================
+--- freenx-server/trunk/nxredir/nxsmb	2008-03-05 13:33:10 UTC (rev 494)
++++ freenx-server/trunk/nxredir/nxsmb	2008-03-05 13:57:12 UTC (rev 495)
+@@ -12,10 +12,11 @@
+ NXREDIR_LIBRARY=&quot;/usr/lib/libnxredir.so.0&quot;
+ COMMAND_SMB=&quot;/usr/lib/cups/backend/smb&quot;
+ 
+-PORT=$(echo $DEVICE_URI | cut -d/ -f3 | cut -d@ -f2 | cut -d: -f2 | cut -d- -f1)
+-REAL_PORT=$(echo $DEVICE_URI | cut -d/ -f3 | cut -d@ -f2 | cut -d: -f2 | cut -d- -f2)
++PORT=$(echo $DEVICE_URI | cut -d/ -f3 | cut -d@ -f2 | cut -d: -f2)
++PROTOCOL=$(echo $DEVICE_URI | cut -d/ -f4)
++PRINTER=$(echo $DEVICE_URI | cut -d/ -f5)
+ 
+-if [ -z &quot;$PORT&quot; -o &quot;$PORT&quot; = &quot;$REALPORT&quot; ] # old style setup
++if [ -z &quot;$PRINTER&quot; ] # old style setup
+ then
+ 	echo &quot;Warning: Not using nxredir library. The DEVICE_URI is not in the right format.&quot;
+ 	exec &quot;$COMMAND_SMB&quot; &quot;$@&quot;
+@@ -24,13 +25,20 @@
+ if [ ! -x &quot;$NXREDIR_LIBRARY&quot; ]
+ then
+ 	# repair DEVICE_URI
+-	DEVICE_URI=$(echo $DEVICE_URI | sed &quot;s|:$PORT-$REAL_PORT/|:$PORT/|g&quot;)
++	DEVICE_URI=$(echo $DEVICE_URI | sed &quot;s|/$PROTOCOL/|/$PRINTER|g&quot;)
+ 	echo &quot;Error: Not using nxredir library. $NXREDIR_LIBRARY could not be found or is not executable.&quot;
+ 	exec &quot;$COMMAND_SMB&quot; &quot;$@&quot;
+ fi
+ 
+-DEVICE_URI=$(echo $DEVICE_URI | sed &quot;s|:$PORT-$REAL_PORT/|:$REAL_PORT/|g&quot;)
++if [ &quot;$PROTOCOL&quot; = &quot;cifs&quot; -o &quot;$PROTOCOL&quot; = &quot;CIFS&quot; ]
++then
++	REAL_PORT=&quot;445&quot;
++else
++	REAL_PORT=&quot;139&quot;
++fi
+ 
++DEVICE_URI=$(echo $DEVICE_URI | sed &quot;s|:$PORT/$PROTOCOL/|:$REAL_PORT/|g&quot;)
++
+ export NXSAMBA_PORT=&quot;$PORT&quot;
+ export LD_PRELOAD=&quot;$NXREDIR_LIBRARY${LD_PRELOAD:+:$LD_PRELOAD}&quot;
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000620.html">[Freenx-cvs] r494 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000622.html">[Freenx-cvs] r496 - qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#621">[ date ]</a>
+              <a href="thread.html#621">[ thread ]</a>
+              <a href="subject.html#621">[ subject ]</a>
+              <a href="author.html#621">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

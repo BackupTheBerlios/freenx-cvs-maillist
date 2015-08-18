@@ -1,0 +1,2147 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r66 - / nx-utils nx-utils/nxfish
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-July/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r66%20-%20/%20nx-utils%20nx-utils/nxfish&In-Reply-To=%3C200507031608.j63G8D6X010241%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000156.html">
+   <LINK REL="Next"  HREF="000158.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r66 - / nx-utils nx-utils/nxfish</H1>
+    <B>Fabian Franz at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r66%20-%20/%20nx-utils%20nx-utils/nxfish&In-Reply-To=%3C200507031608.j63G8D6X010241%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r66 - / nx-utils nx-utils/nxfish">fabianx at berlios.de
+       </A><BR>
+    <I>Sun Jul  3 18:08:13 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000156.html">[Freenx-cvs] r65 - freenx-server
+</A></li>
+        <LI>Next message: <A HREF="000158.html">[Freenx-cvs] r67 - in nx-utils: . nxredir
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#157">[ date ]</a>
+              <a href="thread.html#157">[ thread ]</a>
+              <a href="subject.html#157">[ subject ]</a>
+              <a href="author.html#157">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2005-07-03 18:08:12 +0200 (Sun, 03 Jul 2005)
+New Revision: 66
+
+Added:
+   nx-utils/
+   nx-utils/nxfish/
+   nx-utils/nxfish/Makefile.am
+   nx-utils/nxfish/fish.cpp
+   nx-utils/nxfish/nx-fishsrv.pl
+   nx-utils/nxfish/nxfish.protocol
+Log:
+Initial import into SVN.
+
+
+Added: nx-utils/nxfish/Makefile.am
+===================================================================
+--- nx-utils/nxfish/Makefile.am	2005-07-03 15:44:33 UTC (rev 65)
++++ nx-utils/nxfish/Makefile.am	2005-07-03 16:08:12 UTC (rev 66)
+@@ -0,0 +1,33 @@
++kde_module_LTLIBRARIES = kio_nxfish.la
++
++INCLUDES = $(all_includes)
++AM_LDFLAGS = $(all_libraries) $(KDE_RPATH)
++
++kio_nxfish_la_SOURCES = fish.cpp
++kio_nxfish_la_LIBADD = $(LIB_KSYCOCA) #$(LIBUTIL) 
++kio_nxfish_la_LDFLAGS = $(all_libraries) -module $(KDE_PLUGIN)
++noinst_HEADERS = fishcode.h fish.h
++
++EXTRA_DIST = AUTHORS COPYING ChangeLog INSTALL README TODO FAQ fish.pl
++
++DISTCLEANFILES = fishcode.h
++
++kdelnk_DATA = nxfish.protocol
++kdelnkdir = $(kde_servicesdir)
++
++METASOURCES = AUTO
++
++fish.lo: fishcode.h
++
++fishcode.h: fish.pl
++	SUM=`$(MD5SUM) $(srcdir)/fish.pl | cut -d ' ' $(MD5SUM_CUT)`; \
++	echo '#define CHECKSUM &quot;'$$SUM'&quot;' &gt; $@; \
++	echo 'static const char *fishCode(' &gt;&gt; $@; \
++	sed -e 's/\\/\\\\/g;s/&quot;/\\&quot;/g;s/^[ 	]*/&quot;/;/^&quot;# /d;s/[ 	]*$$/\\n&quot;/;/^&quot;\\n&quot;$$/d;s/{CHECKSUM}/'$$SUM'/;' $(srcdir)/fish.pl &gt;&gt; $@; \
++	echo ');' &gt;&gt; $@;
++
++messages:
++	$(XGETTEXT) *.cpp -o $(podir)/kio_fish.pot
++
++
++
+
+Added: nx-utils/nxfish/fish.cpp
+===================================================================
+--- nx-utils/nxfish/fish.cpp	2005-07-03 15:44:33 UTC (rev 65)
++++ nx-utils/nxfish/fish.cpp	2005-07-03 16:08:12 UTC (rev 66)
+@@ -0,0 +1,1618 @@
++/***************************************************************************
++                          fish.cpp  -  a FISH kioslave
++                             -------------------
++    begin                : Thu Oct  4 17:09:14 CEST 2001
++    copyright            : (C) 2001-2003 by J&#246;rg Walter
++    email                : <A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">jwalt-kde at garni.ch</A>
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation, version 2 of the License                *
++ *                                                                         *
++ ***************************************************************************/
++
++/*
++  This code contains fragments and ideas from the ftp kioslave
++  done by David Faure &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">faure at kde.org</A>&gt;.
++
++  Structure is a bit complicated, since I made the mistake to use
++  KProcess... now there is a lightweight homebrew async IO system
++  inside, but if signals/slots become available for ioslaves, switching
++  back to KProcess should be easy.
++*/
++
++#include &quot;config.h&quot;
++
++#include &lt;qcstring.h&gt;
++#include &lt;qfile.h&gt;
++#include &lt;qsocket.h&gt;
++#include &lt;qdatetime.h&gt;
++#include &lt;qbitarray.h&gt;
++#include &lt;qregexp.h&gt;
++
++#include &lt;stdlib.h&gt;
++#ifdef HAVE_PTY_H
++#include &lt;pty.h&gt;
++#endif
++#ifdef HAVE_TERMIOS_H
++#include &lt;termios.h&gt;
++#endif
++#include &lt;math.h&gt;
++#include &lt;unistd.h&gt;
++#include &lt;signal.h&gt;
++#include &lt;sys/wait.h&gt;
++#include &lt;sys/socket.h&gt;
++#include &lt;netinet/in.h&gt;
++#include &lt;netdb.h&gt;
++#include &lt;sys/types.h&gt;
++#ifdef HAVE_STROPTS
++#include &lt;stropts.h&gt;
++#endif
++#ifdef HAVE_SYS_IOCTL_H
++#include &lt;sys/ioctl.h&gt;
++#endif
++#ifdef HAVE_LIBUTIL_H
++#include &lt;libutil.h&gt;
++#endif
++#ifdef HAVE_UTIL_H
++#include &lt;util.h&gt;
++#endif
++
++#include &lt;kdebug.h&gt;
++#include &lt;kmessagebox.h&gt;
++#include &lt;kinstance.h&gt;
++#include &lt;kglobal.h&gt;
++#include &lt;kstandarddirs.h&gt;
++#include &lt;klocale.h&gt;
++#include &lt;kremoteencoding.h&gt;
++#include &lt;kurl.h&gt;
++#include &lt;ksock.h&gt;
++#include &lt;stdarg.h&gt;
++#include &lt;time.h&gt;
++#include &lt;sys/stat.h&gt;
++#include &lt;kmimetype.h&gt;
++#include &lt;kmimemagic.h&gt;
++#include &lt;fcntl.h&gt;
++#include &lt;sys/socket.h&gt;
++#include &lt;errno.h&gt;
++#include &lt;sys/resource.h&gt;
++
++#include &quot;fish.h&quot;
++#include &quot;fishcode.h&quot;
++
++#ifndef NDEBUG 
++#define myDebug(x) kdDebug(7127) &lt;&lt; __LINE__ &lt;&lt; &quot;: &quot; x
++#define connected() do{myDebug( &lt;&lt; &quot;_______ emitting connected()&quot; &lt;&lt; endl); connected();}while(0)
++#define dataReq() do{myDebug( &lt;&lt; &quot;_______ emitting dataReq()&quot; &lt;&lt; endl); dataReq();}while(0)
++#define needSubURLData() do{myDebug( &lt;&lt; &quot;_______ emitting needSubURLData()&quot; &lt;&lt; endl); needSubURLData();}while(0)
++#define slaveStatus(x,y) do{myDebug( &lt;&lt; &quot;_______ emitting slaveStatus(&quot; &lt;&lt; x &lt;&lt; &quot;, &quot; &lt;&lt; y &lt;&lt; &quot;)&quot; &lt;&lt; endl); slaveStatus(x,y);}while(0)
++#define statEntry(x) do{myDebug( &lt;&lt; &quot;_______ emitting statEntry(&quot;&lt;&lt;x.size()&lt;&lt;&quot;)&quot; &lt;&lt; endl); statEntry(x);}while(0)
++#define listEntries(x) do{myDebug( &lt;&lt; &quot;_______ emitting listEntries(...)&quot; &lt;&lt; endl); listEntries(x);}while(0)
++#define canResume(x) do{myDebug( &lt;&lt; &quot;_______ emitting canResume(&quot;&lt;&lt;(int)x&lt;&lt;&quot;)&quot; &lt;&lt; endl); canResume(x);}while(0)
++#define totalSize(x) do{myDebug( &lt;&lt; &quot;_______ emitting totalSize(&quot;&lt;&lt;(int)x&lt;&lt;&quot;)&quot; &lt;&lt; endl); totalSize(x);}while(0)
++#define processedSize(x) do{myDebug( &lt;&lt; &quot;_______ emitting processedSize(&quot;&lt;&lt;x&lt;&lt;&quot;)&quot; &lt;&lt; endl); processedSize(x);}while(0)
++#define speed(x) do{myDebug( &lt;&lt; &quot;_______ emitting speed(&quot;&lt;&lt;(int)x&lt;&lt;&quot;)&quot; &lt;&lt; endl); speed(x);}while(0)
++#define redirection(x) do{myDebug( &lt;&lt; &quot;_______ emitting redirection(&quot;&lt;&lt;x&lt;&lt;&quot;)&quot; &lt;&lt; endl); redirection(x);}while(0)
++#define errorPage() do{myDebug( &lt;&lt; &quot;_______ emitting errorPage()&quot; &lt;&lt; endl); errorPage();}while(0)
++#define sendmimeType(x) do{myDebug( &lt;&lt; &quot;_______ emitting mimeType(&quot;&lt;&lt;x&lt;&lt;&quot;)&quot; &lt;&lt; endl); mimeType(x);}while(0)
++#define warning(x) do{myDebug( &lt;&lt; &quot;_______ emitting warning(&quot;&lt;&lt;x&lt;&lt;&quot;)&quot; &lt;&lt; endl); warning(x);}while(0)
++#define infoMessage(x) do{myDebug( &lt;&lt; &quot;_______ emitting infoMessage(&quot;&lt;&lt;x&lt;&lt;&quot;)&quot; &lt;&lt; endl); infoMessage(x);}while(0)
++#else
++#define myDebug(x)
++#define sendmimeType(x) mimeType(x)
++#endif
++
++static char *sshPath = NULL;
++static char *suPath = NULL;
++// disabled: currently not needed. Didn't work reliably.
++// static int isOpenSSH = 0;
++
++#define E(x) ((const char*)remoteEncoding()-&gt;encode(x).data())
++
++using namespace KIO;
++extern &quot;C&quot; {
++
++static void ripper(int)
++{
++    while (waitpid(-1,0,WNOHANG) &gt; 0) {
++      // do nothing, go on
++    }
++}
++
++int KDE_EXPORT kdemain( int argc, char **argv )
++{
++    KLocale::setMainCatalogue(&quot;kio_fish&quot;);
++    KInstance instance(&quot;fish&quot;);
++
++    myDebug( &lt;&lt; &quot;*** Starting fish &quot; &lt;&lt; endl);
++    if (argc != 4) {
++        myDebug( &lt;&lt; &quot;Usage: fish  protocol domain-socket1 domain-socket2&quot; &lt;&lt; endl);
++        exit(-1);
++    }
++
++    struct sigaction act;
++    memset(&amp;act,0,sizeof(act));
++    act.sa_handler = ripper;
++    act.sa_flags = 0
++#ifdef SA_NOCLDSTOP
++    | SA_NOCLDSTOP
++#endif
++#ifdef SA_RESTART
++    | SA_RESTART
++#endif
++    ;
++    sigaction(SIGCHLD,&amp;act,NULL);
++
++    fishProtocol slave(argv[2], argv[3]);
++    slave.dispatchLoop();
++
++    myDebug( &lt;&lt; &quot;*** fish Done&quot; &lt;&lt; endl);
++    return 0;
++}
++
++}
++
++const struct fishProtocol::fish_info fishProtocol::fishInfo[] = {
++    { (&quot;FISH&quot;), 0,
++      (&quot;echo; /bin/sh -c start_fish_server &gt; /dev/null 2&gt;/dev/null; perl .fishsrv.pl &quot; CHECKSUM &quot; 2&gt;/dev/null; perl -e '$|=1; print \&quot;### 100 transfer fish server\\n\&quot;; while(&lt;STDIN&gt;) { last if /^__END__/; $code.=$_; } exit(eval($code));' 2&gt;/dev/null;&quot;),
++      1 },
++    { (&quot;VER 0.0.3 copy append lscount lslinks lsmime exec stat&quot;), 0,
++      (&quot;echo 'VER 0.0.3 copy append lscount lslinks lsmime exec stat'&quot;),
++      1 },
++    { (&quot;PWD&quot;), 0,
++      (&quot;pwd&quot;),
++      1 },
++    { (&quot;LIST&quot;), 1,
++      (&quot;echo `ls -Lla %1 2&gt; /dev/null | grep '^[-dsplcb]' | wc -l`; ls -Lla %1 2&gt;/dev/null | grep '^[-dspl]' | ( while read -r p x u g s m d y n; do file -b -i $n 2&gt;/dev/null | sed -e '\\,^[^/]*$,d;s/^/M/;s,/.*[ \t],/,'; FILE=%1; if [ -e %1\&quot;/$n\&quot; ]; then FILE=%1\&quot;/$n\&quot;; fi; if [ -L \&quot;$FILE\&quot; ]; then echo \&quot;:$n\&quot;; ls -lad \&quot;$FILE\&quot; | sed -e 's/.* -&gt; /L/'; else echo \&quot;:$n\&quot; | sed -e 's/ -&gt; /\\\nL/'; fi; echo \&quot;P$p $u.$g\nS$s\nd$m $d $y\n\&quot;; done; );&quot;
++                &quot;ls -Lla %1 2&gt;/dev/null | grep '^[cb]' | ( while read -r p x u g a i m d y n; do echo \&quot;P$p $u.$g\nE$a$i\nd$m $d $y\n:$n\n\&quot;; done; )&quot;),
++      0 },
++    { (&quot;STAT&quot;), 1,
++      (&quot;echo `ls -dLla %1 2&gt; /dev/null | grep '^[-dsplcb]' | wc -l`; ls -dLla %1 2&gt;/dev/null | grep '^[-dspl]' | ( while read -r p x u g s m d y n; do file -b -i $n 2&gt;/dev/null | sed -e '\\,^[^/]*$,d;s/^/M/;s,/.*[ \t],/,'; FILE=%1; if [ -e %1\&quot;/$n\&quot; ]; then FILE=%1\&quot;/$n\&quot;; fi; if [ -L \&quot;$FILE\&quot; ]; then echo \&quot;:$n\&quot;; ls -lad \&quot;$FILE\&quot; | sed -e 's/.* -&gt; /L/'; else echo \&quot;:$n\&quot; | sed -e 's/ -&gt; /\\\nL/'; fi; echo \&quot;P$p $u.$g\nS$s\nd$m $d $y\n\&quot;; done; );&quot;
++                &quot;ls -dLla %1 2&gt;/dev/null | grep '^[cb]' | ( while read -r p x u g a i m d y n; do echo \&quot;P$p $u.$g\nE$a$i\nd$m $d $y\n:$n\n\&quot;; done; )&quot;),
++      0 },
++    { (&quot;RETR&quot;), 1,
++      (&quot;ls -l %1 2&gt;&amp;1 | ( read -r a b c d x e; echo $x ) 2&gt;&amp;1; echo '### 001'; cat %1&quot;),
++      1 },
++    { (&quot;STOR&quot;), 2,
++      (&quot;&gt; %2; echo '### 001'; ( [ \&quot;`expr %1 / 4096`\&quot; -gt 0 ] &amp;&amp; dd bs=4096 count=`expr %1 / 4096` 2&gt;/dev/null;&quot;
++              &quot;[ \&quot;`expr %1 % 4096`\&quot; -gt 0 ] &amp;&amp; dd bs=`expr %1 % 4096` count=1 2&gt;/dev/null; ) | ( cat &gt; %2 || echo Error $?; cat &gt; /dev/null )&quot;),
++      0 },
++    { (&quot;CWD&quot;), 1,
++      (&quot;cd %1&quot;),
++      0 },
++    { (&quot;CHMOD&quot;), 2,
++      (&quot;chmod %1 %2&quot;),
++      0 },
++    { (&quot;DELE&quot;), 1,
++      (&quot;rm -f %1&quot;),
++      0 },
++    { (&quot;MKD&quot;), 1,
++      (&quot;mkdir %1&quot;),
++      0 },
++    { (&quot;RMD&quot;), 1,
++      (&quot;rmdir %1&quot;),
++      0 },
++    { (&quot;RENAME&quot;), 2,
++      (&quot;mv -f %1 %2&quot;),
++      0 },
++    { (&quot;LINK&quot;), 2,
++      (&quot;ln -f %1 %2&quot;),
++      0 },
++    { (&quot;SYMLINK&quot;), 2,
++      (&quot;ln -sf %1 %2&quot;),
++      0 },
++    { (&quot;CHOWN&quot;), 2,
++      (&quot;chown %1 %2&quot;),
++      0 },
++    { (&quot;CHGRP&quot;), 2,
++      (&quot;chgrp %1 %2&quot;),
++      0 },
++    { (&quot;READ&quot;), 3,
++      (&quot;echo '### 100';cat %3 /dev/zero | ( [ \&quot;`expr %1 / 4096`\&quot; -gt 0 ] &amp;&amp; dd bs=4096 count=`expr %1 / 4096` &gt;/dev/null;&quot;
++              &quot;[ \&quot;`expr %1 % 4096`\&quot; -gt 0 ] &amp;&amp; dd bs=`expr %1 % 4096` count=1 &gt;/dev/null;&quot;
++              &quot;dd bs=%2 count=1; ) 2&gt;/dev/null;&quot;),
++      0 },
++    // Yes, this is &quot;ibs=1&quot;, since dd &quot;count&quot; is input blocks.
++    // On network connections, read() may not fill the buffer
++    // completely (no more data immediately available), but dd
++    // does ignore that fact by design. Sorry, writes are slow.
++    // OTOH, WRITE is not used by the current ioslave methods,
++    // we use APPEND.
++    { (&quot;WRITE&quot;), 3,
++      (&quot;&gt;&gt; %3; echo '### 001'; ( [ %2 -gt 0 ] &amp;&amp; dd ibs=1 obs=%2 count=%2 2&gt;/dev/null ) | &quot;
++              &quot;( dd ibs=32768 obs=%1 seek=1 of=%3 2&gt;/dev/null || echo Error $?; cat &gt;/dev/null; )&quot;),
++      0 },
++    { (&quot;COPY&quot;), 2,
++      (&quot;if [ -L %1 ]; then if cp -pdf %1 %2 2&gt;/dev/null; then :; else LINK=\&quot;`readlink %1`\&quot;; ln -sf $LINK %2; fi; else cp -pf %1 %2; fi&quot;),
++      0 },
++    { (&quot;APPEND&quot;), 2,
++      (&quot;&gt;&gt; %2; echo '### 001'; ( [ %1 -gt 0 ] &amp;&amp; dd ibs=1 obs=%1 count=%1 2&gt; /dev/null; ) | ( cat &gt;&gt; %2 || echo Error $?; cat &gt;/dev/null; )&quot;),
++      0 },
++    { (&quot;EXEC&quot;), 2,
++      (&quot;UMASK=`umask`; umask 077; touch %2; umask $UMASK; eval %1 &lt; /dev/null &gt; %2 2&gt;&amp;1; echo \&quot;###RESULT: $?\&quot; &gt;&gt; %2&quot;),
++      0 }
++};
++
++fishProtocol::fishProtocol(const QCString &amp;pool_socket, const QCString &amp;app_socket)
++  : SlaveBase(&quot;fish&quot;, pool_socket, app_socket), mimeBuffer(1024),
++    mimeTypeSent(false)
++{
++    myDebug( &lt;&lt; &quot;fishProtocol::fishProtocol()&quot; &lt;&lt; endl);
++    if (sshPath == NULL) {
++        // disabled: currently not needed. Didn't work reliably.
++        // isOpenSSH = !system(&quot;ssh -V 2&gt;&amp;1 | grep OpenSSH &gt; /dev/null&quot;);
++        sshPath = strdup(QFile::encodeName(KStandardDirs::findExe(&quot;nxfish&quot;)));
++    }
++    if (suPath == NULL) {
++        suPath = strdup(QFile::encodeName(KStandardDirs::findExe(&quot;su&quot;)));
++    }
++    childPid = 0;
++    connectionPort = 0;
++    isLoggedIn = false;
++    writeReady = true;
++    isRunning = false;
++    firstLogin = true;
++    errorCount = 0;
++    rawRead = 0;
++    rawWrite = -1;
++    recvLen = -1;
++    sendLen = -1;
++    setMultipleAuthCaching( true );
++    connectionAuth.keepPassword = true;
++    connectionAuth.url.setProtocol(&quot;fish&quot;);
++    epoch.setTime_t(0, Qt::UTC);
++    outBufPos = -1;
++    outBuf = NULL;
++    outBufLen = 0;
++    typeAtom.m_uds = UDS_FILE_TYPE;
++    typeAtom.m_long = 0;
++    mimeAtom.m_uds = UDS_MIME_TYPE;
++    mimeAtom.m_long = 0;
++    mimeAtom.m_str = QString::null;
++    
++    hasAppend = false;
++    
++    isStat = false; // FIXME: just a workaround for konq deficiencies
++    redirectUser = &quot;&quot;; // FIXME: just a workaround for konq deficiencies
++    redirectPass = &quot;&quot;; // FIXME: just a workaround for konq deficiencies
++    fishCodeLen = strlen(fishCode);
++}
++/* ---------------------------------------------------------------------------------- */
++
++
++fishProtocol::~fishProtocol()
++{
++    myDebug( &lt;&lt; &quot;fishProtocol::~fishProtocol()&quot; &lt;&lt; endl);
++    shutdownConnection(true);
++}
++
++/* --------------------------------------------------------------------------- */
++
++/**
++Connects to a server and logs us in via SSH. Then starts FISH protocol.
++*/
++void fishProtocol::openConnection() {
++    if (childPid) return;
++
++    /*if (connectionHost.isEmpty())
++    {
++       error( KIO::ERR_UNKNOWN_HOST, QString::null );
++       return;
++    }*/
++
++    infoMessage(i18n(&quot;Connecting...&quot;));
++
++    myDebug( &lt;&lt; &quot;connecting to: &quot; &lt;&lt; connectionUser &lt;&lt; &quot;@&quot; &lt;&lt; connectionHost &lt;&lt; &quot;:&quot; &lt;&lt; connectionPort &lt;&lt; endl);
++    sendCommand(FISH_FISH);
++    sendCommand(FISH_VER);
++    if (connectionStart()) {
++        error(ERR_COULD_NOT_CONNECT,connectionHost);
++        shutdownConnection();
++        return;
++    };
++    myDebug( &lt;&lt; &quot;subprocess is running&quot; &lt;&lt; endl);
++}
++
++static int open_pty_pair(int fd[2])
++{
++#if defined(HAVE_TERMIOS_H) &amp;&amp; defined(HAVE_GRANTPT) &amp;&amp; !defined(HAVE_OPENPTY)
++/** with kind regards to The GNU C Library
++Reference Manual for Version 2.2.x of the GNU C Library */
++    int master, slave;
++    char *name;
++    struct ::termios ti;
++    memset(&amp;ti,0,sizeof(ti));
++
++    ti.c_cflag = CLOCAL|CREAD|CS8;
++    ti.c_cc[VMIN] = 1;
++
++#ifdef HAVE_GETPT
++    master = getpt();
++#else
++    master = open(&quot;/dev/ptmx&quot;, O_RDWR);
++#endif
++    if (master &lt; 0) return 0;
++
++    if (grantpt(master) &lt; 0 || unlockpt(master) &lt; 0) goto close_master;
++
++    name = ptsname(master);
++    if (name == NULL) goto close_master;
++
++    slave = open(name, O_RDWR);
++    if (slave == -1) goto close_master;
++
++#if (defined(HAVE_ISASTREAM) || defined(isastream)) &amp;&amp; defined(I_PUSH)
++    if (isastream(slave) &amp;&amp;
++        (ioctl(slave, I_PUSH, &quot;ptem&quot;) &lt; 0 ||
++         ioctl(slave, I_PUSH, &quot;ldterm&quot;) &lt; 0))
++            goto close_slave;
++#endif
++
++    tcsetattr(slave, TCSANOW, &amp;ti);
++    fd[0] = master;
++    fd[1] = slave;
++    return 0;
++
++#if (defined(HAVE_ISASTREAM) || defined(isastream)) &amp;&amp; defined(I_PUSH)
++close_slave:
++#endif
++    close(slave);
++
++close_master:
++    close(master);
++    return -1;
++#else
++#ifdef HAVE_OPENPTY
++    struct ::termios ti;
++    memset(&amp;ti,0,sizeof(ti));
++
++    ti.c_cflag = CLOCAL|CREAD|CS8;
++    ti.c_cc[VMIN] = 1;
++
++    return openpty(fd,fd+1,NULL,&amp;ti,NULL);
++#else
++#ifdef __GNUC__
++#warning &quot;No tty support available. Password dialog won't work.&quot;
++#endif
++    return socketpair(PF_UNIX,SOCK_STREAM,0,fd);
++#endif
++#endif
++}
++/**
++creates the subprocess
++*/
++bool fishProtocol::connectionStart() {
++    int fd[2];
++    int rc, flags;
++    thisFn = QString::null;
++
++    rc = open_pty_pair(fd);
++    if (rc == -1) {
++        myDebug( &lt;&lt; &quot;socketpair failed, error: &quot; &lt;&lt; strerror(errno) &lt;&lt; endl);
++        return true;
++    }
++
++    if (!requestNetwork()) return true;
++    myDebug( &lt;&lt; &quot;Exec: &quot; &lt;&lt; (local ? suPath : sshPath) &lt;&lt; &quot; Port: &quot; &lt;&lt; connectionPort &lt;&lt; &quot; User: &quot; &lt;&lt; connectionUser &lt;&lt; endl);
++    childPid = fork();
++    if (childPid == -1) {
++        myDebug( &lt;&lt; &quot;fork failed, error: &quot; &lt;&lt; strerror(errno) &lt;&lt; endl);
++        close(fd[0]);
++        close(fd[1]);
++        childPid = 0;
++        dropNetwork();
++        return true;
++    }
++    if (childPid == 0) {
++        // taken from konsole, see TEPty.C for details
++        // note: if we're running on socket pairs,
++        // this will fail, but thats what we expect
++
++        for (int sig = 1; sig &lt; NSIG; sig++) signal(sig,SIG_DFL);
++
++        struct rlimit rlp;
++        getrlimit(RLIMIT_NOFILE, &amp;rlp);
++        for (int i = 0; i &lt; (int)rlp.rlim_cur; i++)
++            if (i != fd[1]) close(i);
++
++        dup2(fd[1],0);
++        dup2(fd[1],1);
++        dup2(fd[1],2);
++        if (fd[1] &gt; 2) close(fd[1]);
++
++        setsid();
++
++#if defined(TIOCSCTTY)
++        ioctl(0, TIOCSCTTY, 0);
++#endif
++
++        int pgrp = getpid();
++#if defined( _AIX) || defined( __hpux)
++        tcsetpgrp(0, pgrp);
++#else
++        ioctl(0, TIOCSPGRP, (char *)&amp;pgrp);
++#endif
++
++        const char *dev = ttyname(0);
++        setpgid(0,0);
++        if (dev) close(open(dev, O_WRONLY, 0));
++        setpgid(0,0);
++
++        if (local) {
++            execl(suPath, &quot;su&quot;, &quot;-&quot;, connectionUser.latin1(), &quot;-c&quot;, &quot;cd ~;echo FISH:;exec /bin/sh -c \&quot;if env true 2&gt;/dev/null; then env PS1= PS2= TZ=UTC LANG=C LC_ALL=C LOCALE=C /bin/sh; else PS1= PS2= TZ=UTC LANG=C LC_ALL=C LOCALE=C /bin/sh; fi\&quot;&quot;, (void *)0);
++        } else {
++            #define common_args &quot;-l&quot;, connectionUser.latin1(), &quot;-x&quot;, &quot;-e&quot;, &quot;none&quot;, \
++                &quot;-q&quot;, connectionHost.latin1(), \
++                &quot;echo FISH:;exec /bin/sh -c \&quot;if env true 2&gt;/dev/null; then env PS1= PS2= TZ=UTC LANG=C LC_ALL=C LOCALE=C /bin/sh; else PS1= PS2= TZ=UTC LANG=C LC_ALL=C LOCALE=C /bin/sh; fi\&quot;&quot;, (void *)0
++            // disabled: leave compression up to the client.
++            // (isOpenSSH?&quot;-C&quot;:&quot;+C&quot;),
++
++            if (connectionPort)
++                execl(sshPath, &quot;ssh&quot;, &quot;-p&quot;, QString::number(connectionPort).latin1(), common_args);
++            else
++                execl(sshPath, &quot;ssh&quot;, common_args);
++            #undef common_args
++        }
++        myDebug( &lt;&lt; &quot;could not exec! &quot; &lt;&lt; strerror(errno) &lt;&lt; endl);
++        ::exit(-1);
++    }
++    close(fd[1]);
++    rc = fcntl(fd[0],F_GETFL,&amp;flags);
++    rc = fcntl(fd[0],F_SETFL,flags|O_NONBLOCK);
++    childFd = fd[0];
++
++    fd_set rfds, wfds;
++    FD_ZERO(&amp;rfds);
++    FD_ZERO(&amp;wfds);
++    char buf[32768];
++    int offset = 0;
++    while (!isLoggedIn) {
++        FD_SET(childFd,&amp;rfds);
++        FD_ZERO(&amp;wfds);
++        if (outBufPos &gt;= 0) FD_SET(childFd,&amp;wfds);
++        rc = select(childFd+1, &amp;rfds, &amp;wfds, NULL, NULL);
++        if (rc &lt; 0) {
++            if (errno == EINTR)
++                continue;
++            myDebug( &lt;&lt; &quot;select failed, rc: &quot; &lt;&lt; rc &lt;&lt; &quot;, error: &quot; &lt;&lt; strerror(errno) &lt;&lt; endl);
++            return true;
++        }
++        if (FD_ISSET(childFd,&amp;wfds) &amp;&amp; outBufPos &gt;= 0) {
++            if (outBuf &gt; 0) rc = write(childFd,outBuf+outBufPos,outBufLen-outBufPos);
++            else rc = 0;
++            if (rc &gt;= 0) outBufPos += rc;
++            else {
++                if (errno == EINTR)
++                    continue;
++                myDebug( &lt;&lt; &quot;write failed, rc: &quot; &lt;&lt; rc &lt;&lt; &quot;, error: &quot; &lt;&lt; strerror(errno) &lt;&lt; endl);
++                outBufPos = -1;
++                //return true;
++            }
++            if (outBufPos &gt;= outBufLen) {
++                outBufPos = -1;
++                outBuf = NULL;
++                outBufLen = 0;
++            }
++        }
++        if (FD_ISSET(childFd,&amp;rfds)) {
++            rc = read(childFd,buf+offset,32768-offset);
++            if (rc &gt; 0) {
++                int noff = establishConnection(buf,rc+offset);
++                if (noff &lt; 0) return false;
++                if (noff &gt; 0) memmove(buf,buf+offset+rc-noff,noff);
++                offset = noff;
++            } else {
++                if (errno == EINTR)
++                    continue;
++                myDebug( &lt;&lt; &quot;read failed, rc: &quot; &lt;&lt; rc &lt;&lt; &quot;, error: &quot; &lt;&lt; strerror(errno) &lt;&lt; endl);
++                return true;
++            }
++        }
++    }
++    return false;
++}
++
++/**
++writes one chunk of data to stdin of child process
++*/
++void fishProtocol::writeChild(const char *buf, int len) {
++    if (outBufPos &gt;= 0 &amp;&amp; outBuf) {
++        QString debug;
++        debug.setLatin1(outBuf,outBufLen);
++        if (len &gt; 0) myDebug( &lt;&lt; &quot;write request while old one is pending, throwing away input (&quot; &lt;&lt; outBufLen &lt;&lt; &quot;,&quot; &lt;&lt; outBufPos &lt;&lt; &quot;,&quot; &lt;&lt; debug.left(10) &lt;&lt; &quot;...)&quot; &lt;&lt; endl);
++        return;
++    }
++    outBuf = buf;
++    outBufPos = 0;
++    outBufLen = len;
++}
++
++/**
++manages initial communication setup including password queries
++*/
++int fishProtocol::establishConnection(char *buffer, int len) {
++    QString buf;
++    buf.setLatin1(buffer,len);
++    int pos;
++    // Strip trailing whitespace
++    while (buf.length() &amp;&amp; (buf[buf.length()-1] == ' '))
++       buf.truncate(buf.length()-1);
++
++    myDebug( &lt;&lt; &quot;establishing: got &quot; &lt;&lt; buf &lt;&lt; endl);
++    while (childPid &amp;&amp; ((pos = buf.find('\n')) &gt;= 0 ||
++            buf.endsWith(&quot;:&quot;) || buf.endsWith(&quot;?&quot;))) {
++        pos++;
++        QString str = buf.left(pos);
++        buf = buf.mid(pos);
++        if (str == &quot;\n&quot;)
++            continue;
++        if (str == &quot;FISH:\n&quot;) {
++            thisFn = QString::null;
++            infoMessage(i18n(&quot;Initiating protocol...&quot;));
++            if (!connectionAuth.password.isEmpty()) {
++                connectionAuth.password = connectionAuth.password.left(connectionAuth.password.length()-1);
++                cacheAuthentication(connectionAuth);
++            }
++            isLoggedIn = true;
++            return 0;
++        } else if (!str.isEmpty()) {
++            thisFn += str;
++        } else if (buf.endsWith(&quot;:&quot;)) {
++            if (!redirectUser.isEmpty() &amp;&amp; connectionUser != redirectUser) {
++                KURL dest = url;
++                dest.setUser(redirectUser);
++                dest.setPass(redirectPass);
++                redirection(dest);
++                commandList.clear();
++                commandCodes.clear();
++                finished();
++                redirectUser = &quot;&quot;;
++                redirectPass = &quot;&quot;;
++                return -1;
++            } else if (!connectionPassword.isEmpty()) {
++                myDebug( &lt;&lt; &quot;sending cpass&quot; &lt;&lt; endl);
++                connectionAuth.password = connectionPassword+&quot;\n&quot;;
++                connectionPassword = QString::null;
++                // su does not like receiving a password directly after sending
++                // the password prompt so we wait a while.
++                if (local)
++                    sleep(1);
++                writeChild(connectionAuth.password.latin1(),connectionAuth.password.length());
++            } else {
++                myDebug( &lt;&lt; &quot;sending mpass&quot; &lt;&lt; endl);
++                connectionAuth.prompt = thisFn+buf;
++                if (local)
++                    connectionAuth.caption = i18n(&quot;Local Login&quot;);
++                else
++                    connectionAuth.caption = i18n(&quot;SSH Authorization&quot;);
++                if ((!firstLogin || !checkCachedAuthentication(connectionAuth)) &amp;&amp; !openPassDlg(connectionAuth)) {
++                    error(ERR_USER_CANCELED,connectionHost);
++                    shutdownConnection();
++                    return -1;
++                }
++                firstLogin = false;
++                connectionAuth.password += &quot;\n&quot;;
++                if (connectionAuth.username != connectionUser) {
++                    KURL dest = url;
++                    dest.setUser(connectionAuth.username);
++                    dest.setPass(connectionAuth.password);
++                    redirection(dest);
++                    if (isStat) { // FIXME: just a workaround for konq deficiencies
++                        redirectUser = connectionAuth.username;
++                        redirectPass = connectionAuth.password;
++                    }
++                    commandList.clear();
++                    commandCodes.clear();
++                    finished();
++                    return -1;
++                }
++                myDebug( &lt;&lt; &quot;sending pass&quot; &lt;&lt; endl);
++                if (local)
++                    sleep(1);
++                writeChild(connectionAuth.password.latin1(),connectionAuth.password.length());
++            }
++            thisFn = QString::null;
++            return 0;
++        } else if (buf.endsWith(&quot;?&quot;)) {
++            int rc = messageBox(QuestionYesNo,thisFn+buf);
++            if (rc == KMessageBox::Yes) {
++                writeChild(&quot;yes\n&quot;,4);
++            } else {
++                writeChild(&quot;no\n&quot;,3);
++            }
++            thisFn = QString::null;
++            return 0;
++        } else {
++            myDebug( &lt;&lt; &quot;unmatched case in initial handling! shouldn't happen!&quot; &lt;&lt; endl);
++          }
++    }
++    return buf.length();
++}
++/**
++sets connection information for subsequent commands
++*/
++void fishProtocol::setHost(const QString &amp; host, int port, const QString &amp; u, const QString &amp; pass){
++    QString user(u);
++
++    //local = (host == &quot;localhost&quot; &amp;&amp; port == 0);
++
++    local = 0;
++
++    if (port &lt;= 0) port = 0;
++    if (user.isEmpty()) user = getenv(&quot;LOGNAME&quot;);
++
++    if (host == connectionHost &amp;&amp; port == connectionPort &amp;&amp; user == connectionUser)
++        return;
++    myDebug( &lt;&lt; &quot;setHost &quot; &lt;&lt; u &lt;&lt; &quot;@&quot; &lt;&lt; host &lt;&lt; endl);
++
++    if (childPid) shutdownConnection();
++
++    connectionHost = host;
++    connectionAuth.url.setHost(host);
++
++    connectionUser = user;
++    connectionAuth.username = user;
++    connectionAuth.url.setUser(user);
++
++    connectionPort = port;
++    connectionPassword = pass;
++    firstLogin = true;
++}
++
++/**
++Forced close of the connection
++
++This function gets called from the application side of the universe,
++it shouldn't send any response.
++ */
++void fishProtocol::closeConnection(){
++    myDebug( &lt;&lt; &quot;closeConnection()&quot; &lt;&lt; endl);
++    shutdownConnection(true);
++}
++
++/**
++Closes the connection
++ */
++void fishProtocol::shutdownConnection(bool forced){
++    if (childPid) {
++        kill(childPid,SIGTERM); // We may not have permission...
++        childPid = 0;
++        close(childFd); // ...in which case this should do the trick
++        childFd = -1;
++        if (!forced)
++        {
++           dropNetwork();
++           infoMessage(i18n(&quot;Disconnected.&quot;));
++        }
++    }
++    outBufPos = -1;
++    outBuf = NULL;
++    outBufLen = 0;
++    qlist.clear();
++    commandList.clear();
++    commandCodes.clear();
++    isLoggedIn = false;
++    writeReady = true;
++    isRunning = false;
++    rawRead = 0;
++    rawWrite = -1;
++    recvLen = -1;
++    sendLen = -1;
++}
++/**
++builds each FISH request and sets the error counter
++*/
++bool fishProtocol::sendCommand(fish_command_type cmd, ...) {
++    const fish_info &amp;info = fishInfo[cmd];
++    myDebug( &lt;&lt; &quot;queueing: cmd=&quot;&lt;&lt; cmd &lt;&lt; &quot;['&quot; &lt;&lt; info.command &lt;&lt; &quot;'](&quot; &lt;&lt; info.params &lt;&lt;&quot;), alt=['&quot; &lt;&lt; info.alt &lt;&lt; &quot;'], lines=&quot; &lt;&lt; info.lines &lt;&lt; endl);
++
++    va_list list;
++    va_start(list, cmd);
++    QString realCmd = info.command;
++    QString realAlt = info.alt;
++    static QRegExp rx(&quot;[][\\\\\n $`#!()*?{}~&amp;&lt;&gt;;'\&quot;%^@|\t]&quot;);
++    for (int i = 0; i &lt; info.params; i++) {
++        QString arg(va_arg(list, const char *));
++        int pos = -2;
++        while ((pos = rx.search(arg,pos+2)) &gt;= 0) {
++            arg.replace(pos,0,QString(&quot;\\&quot;));
++        }
++        //myDebug( &lt;&lt; &quot;arg &quot; &lt;&lt; i &lt;&lt; &quot;: &quot; &lt;&lt; arg &lt;&lt; endl);
++        realCmd.append(&quot; &quot;).append(arg);
++        realAlt.replace(QRegExp(&quot;%&quot;+QString::number(i+1)),arg);
++    }
++    QString s(&quot;#&quot;);
++    s.append(realCmd).append(&quot;\n &quot;).append(realAlt).append(&quot; 2&gt;&amp;1;echo '### 000'\n&quot;);
++    if (realCmd == &quot;FISH&quot;)
++        s.prepend(&quot; &quot;);
++    commandList.append(s);
++    commandCodes.append(cmd);
++    return true;
++}
++
++/**
++checks response string for result code, converting 000 and 001 appropriately
++*/
++int fishProtocol::handleResponse(const QString &amp;str){
++    myDebug( &lt;&lt; &quot;handling: &quot; &lt;&lt; str &lt;&lt; endl);
++    if (str.startsWith(&quot;### &quot;)) {
++        bool isOk = false;
++        int result = str.mid(4,3).toInt(&amp;isOk);
++        if (!isOk) result = 500;
++        if (result == 0) result = (errorCount != 0?500:200);
++        if (result == 1) result = (errorCount != 0?500:100);
++        myDebug( &lt;&lt; &quot;result: &quot; &lt;&lt; result &lt;&lt; &quot;, errorCount: &quot; &lt;&lt; errorCount &lt;&lt; endl);
++        return result;
++    } else {
++        errorCount++;
++        return 0;
++    }
++}
++
++int fishProtocol::makeTimeFromLs(const QString &amp;monthStr, const QString &amp;dayStr, const QString &amp;timeyearStr)
++{
++    QDateTime dt;
++    dt.setTime_t(time(0));
++    dt.setTime(QTime());
++    int year = dt.date().year();
++    int month = dt.date().month();
++    int currentMonth = month;
++    int day = dayStr.toInt();
++
++    static const char * const monthNames[12] = {
++          &quot;Jan&quot;, &quot;Feb&quot;, &quot;Mar&quot;, &quot;Apr&quot;, &quot;May&quot;, &quot;Jun&quot;,
++        &quot;Jul&quot;, &quot;Aug&quot;, &quot;Sep&quot;, &quot;Oct&quot;, &quot;Nov&quot;, &quot;Dec&quot;
++    };
++
++    for (int i=0; i &lt; 12; i++) if (monthStr.startsWith(monthNames[i])) {
++        month = i+1;
++        break;
++    }
++
++    int pos = timeyearStr.find(':');
++    if (timeyearStr.length() == 4 &amp;&amp; pos == -1) {
++        year = timeyearStr.toInt();
++    } else if (pos == -1) {
++        return 0;
++    } else {
++        if (month &gt; currentMonth + 1) year--;
++        dt.time().setHMS(timeyearStr.left(pos).toInt(),timeyearStr.mid(pos+1).toInt(),0);
++    }
++    dt.date().setYMD(year,month,day);
++
++    return epoch.secsTo(dt);
++}
++
++/**
++parses response from server and acts accordingly
++*/
++void fishProtocol::manageConnection(const QString &amp;l) {
++    QString line(l);
++    int rc = handleResponse(line);
++    UDSAtom atom;
++    QDateTime dt;
++    int pos, pos2, pos3;
++    bool isOk = false;
++    if (!rc) {
++        switch (fishCommand) {
++        case FISH_VER:
++            if (line.startsWith(&quot;VER 0.0.3&quot;)) {
++                line.append(&quot; &quot;);
++                hasAppend = line.contains(&quot; append &quot;);
++            } else {
++                error(ERR_UNSUPPORTED_PROTOCOL,line);
++                shutdownConnection();
++            }
++            break;
++        case FISH_PWD:
++            url.setPath(line);
++            redirection(url);
++            break;
++        case FISH_LIST:
++            myDebug( &lt;&lt; &quot;listReason: &quot; &lt;&lt; listReason &lt;&lt; endl);
++            /* Fall through */
++        case FISH_STAT:
++            if (line.length() &gt; 0) {
++                switch (line[0].cell()) {
++                case '0':
++                case '1':
++                case '2':
++                case '3':
++                case '4':
++                case '5':
++                case '6':
++                case '7':
++                case '8':
++                case '9':
++                    pos = line.toInt(&amp;isOk);
++                    if (pos &gt; 0 &amp;&amp; isOk) errorCount--;
++                    if ((fishCommand == FISH_LIST) &amp;&amp; (listReason == LIST))
++                        totalSize(pos);
++                    break;
++
++                case 'P':
++                    errorCount--;
++                    if (line[1] == 'd') {
++                        mimeAtom.m_str = &quot;inode/directory&quot;;
++                        typeAtom.m_long = S_IFDIR;
++                    } else {
++                        if (line[1] == '-') {
++                            typeAtom.m_long = S_IFREG;
++                        } else if (line[1] == 'l') {
++                            typeAtom.m_long = S_IFLNK;
++                        } else if (line[1] == 'c') {
++                            typeAtom.m_long = S_IFCHR;
++                        } else if (line[1] == 'b') {
++                            typeAtom.m_long = S_IFBLK;
++                        } else if (line[1] == 's') {
++                            typeAtom.m_long = S_IFSOCK;
++                        } else if (line[1] == 'p') {
++                            typeAtom.m_long = S_IFIFO;
++                        } else {
++                            myDebug( &lt;&lt; &quot;unknown file type: &quot; &lt;&lt; line[1].cell() &lt;&lt; endl);
++                            errorCount++;
++                            break;
++                        }
++                    }
++                    //myDebug( &lt;&lt; &quot;file type: &quot; &lt;&lt; atom.m_long &lt;&lt; endl);
++                    //udsEntry.append(atom);
++
++                    atom.m_uds = UDS_ACCESS;
++                    atom.m_long = 0;
++                    if (line[2] == 'r') atom.m_long |= S_IRUSR;
++                    if (line[3] == 'w') atom.m_long |= S_IWUSR;
++                    if (line[4] == 'x' || line[4] == 's') atom.m_long |= S_IXUSR;
++                    if (line[4] == 'S' || line[4] == 's') atom.m_long |= S_ISUID;
++                    if (line[5] == 'r') atom.m_long |= S_IRGRP;
++                    if (line[6] == 'w') atom.m_long |= S_IWGRP;
++                    if (line[7] == 'x' || line[7] == 's') atom.m_long |= S_IXGRP;
++                    if (line[7] == 'S' || line[7] == 's') atom.m_long |= S_ISGID;
++                    if (line[8] == 'r') atom.m_long |= S_IROTH;
++                    if (line[9] == 'w') atom.m_long |= S_IWOTH;
++                    if (line[10] == 'x' || line[10] == 't') atom.m_long |= S_IXOTH;
++                    if (line[10] == 'T' || line[10] == 't') atom.m_long |= S_ISVTX;
++                    udsEntry.append(atom);
++
++                    atom.m_uds = UDS_USER;
++                    atom.m_long = 0;
++                    pos = line.find('.',12);
++                    if (pos &lt; 0) {
++                        errorCount++;
++                        break;
++                    }
++                    atom.m_str = line.mid(12,pos-12);
++                    udsEntry.append(atom);
++
++                    atom.m_uds = UDS_GROUP;
++                    atom.m_long = 0;
++                    atom.m_str = line.mid(pos+1);
++                    udsEntry.append(atom);
++                    break;
++
++                case 'd':
++                    atom.m_uds = UDS_MODIFICATION_TIME;
++                    pos = line.find(' ');
++                    pos2 = line.find(' ',pos+1);
++                    if (pos &lt; 0 || pos2 &lt; 0) break;
++                    errorCount--;
++                    atom.m_long = makeTimeFromLs(line.mid(1,pos-1), line.mid(pos+1,pos2-pos), line.mid(pos2+1));
++                    udsEntry.append(atom);
++                    break;
++
++                case 'D':
++                    atom.m_uds = UDS_MODIFICATION_TIME;
++                    pos = line.find(' ');
++                    pos2 = line.find(' ',pos+1);
++                    pos3 = line.find(' ',pos2+1);
++                    if (pos &lt; 0 || pos2 &lt; 0 || pos3 &lt; 0) break;
++                    dt.setDate(QDate(line.mid(1,pos-1).toInt(),line.mid(pos+1,pos2-pos-1).toInt(),line.mid(pos2+1,pos3-pos2-1).toInt()));
++                    pos = pos3;
++                    pos2 = line.find(' ',pos+1);
++                    pos3 = line.find(' ',pos2+1);
++                    if (pos &lt; 0 || pos2 &lt; 0 || pos3 &lt; 0) break;
++                    dt.setTime(QTime(line.mid(pos+1,pos2-pos-1).toInt(),line.mid(pos2+1,pos3-pos2-1).toInt(),line.mid(pos3+1).toInt()));
++                    errorCount--;
++                    atom.m_long = epoch.secsTo(dt);
++                    udsEntry.append(atom);
++                    break;
++
++                case 'S':
++                    atom.m_uds = UDS_SIZE;
++                    atom.m_long = line.mid(1).toLongLong(&amp;isOk);
++                    if (!isOk) break;
++                    errorCount--;
++                    udsEntry.append(atom);
++                    break;
++
++                case 'E':
++                    errorCount--;
++                    break;
++
++                case ':':
++                    atom.m_uds = UDS_NAME;
++                    atom.m_long = 0;
++                    pos = line.findRev('/');
++                    atom.m_str = thisFn = line.mid(pos &lt; 0?1:pos+1);
++                    if (fishCommand == FISH_LIST)
++                        udsEntry.append(atom);
++                    // By default, the mimetype comes from the extension
++                    // We'll use the file(1) result only as fallback [like the rest of KDE does]
++                    {
++                      KMimeType::Ptr mime = KMimeType::findByURL( KURL(&quot;<A HREF="fish://host/">fish://host/</A>&quot; + thisFn) );
++                      if ( mime-&gt;name() != KMimeType::defaultMimeType() )
++                          mimeAtom.m_str = mime-&gt;name();
++                    }
++                    errorCount--;
++                    break;
++
++                case 'M':
++                    // This is getting ugly. file(1) makes some uneducated
++                    // guesses, so we must try to ignore them (#51274)
++                    if (mimeAtom.m_str.isEmpty() &amp;&amp; line.right(8) != &quot;/unknown&quot; &amp;&amp;
++                            (thisFn.find('.') &lt; 0 || (line.left(8) != &quot;Mtext/x-&quot;
++                                                  &amp;&amp; line != &quot;Mtext/plain&quot;))) {
++                        mimeAtom.m_str = line.mid(1);
++                        if ( mimeAtom.m_str == &quot;inode/directory&quot; ) // a symlink to a dir is a dir
++                          typeAtom.m_long = S_IFDIR;
++                    }
++                    errorCount--;
++                    break;
++
++                case 'L':
++                    atom.m_uds = UDS_LINK_DEST;
++                    atom.m_long = 0;
++                    atom.m_str = line.mid(1);
++                    udsEntry.append(atom);
++                    if (!typeAtom.m_long) typeAtom.m_long = S_IFLNK;
++                    errorCount--;
++                    break;
++                }
++            } else {
++                if (!mimeAtom.m_str.isNull())
++                    udsEntry.append(mimeAtom);
++                mimeAtom.m_str = QString::null;
++
++                udsEntry.append(typeAtom);
++                typeAtom.m_long = 0;
++
++                if (fishCommand == FISH_STAT)
++                    udsStatEntry = udsEntry;
++                else if (listReason == LIST) {
++                    listEntry(udsEntry, false); //1
++                } else if (listReason == CHECK) checkExist = true; //0
++                errorCount--;
++                udsEntry.clear();
++            }
++            break;
++
++        case FISH_RETR:
++            if (line.length() == 0) {
++                error(ERR_IS_DIRECTORY,url.prettyURL());
++                recvLen = 0;
++                break;
++            }
++            recvLen = line.toInt(&amp;isOk);
++            if (!isOk) {
++                error(ERR_COULD_NOT_READ,url.prettyURL());
++                shutdownConnection();
++                break;
++            }
++            break;
++        default : break;
++        }
++
++    } else if (rc == 100) {
++        switch (fishCommand) {
++        case FISH_FISH:
++            writeChild(fishCode, fishCodeLen);
++            break;
++        case FISH_READ:
++            recvLen = 1024;
++            /* fall through */
++        case FISH_RETR:
++            myDebug( &lt;&lt; &quot;reading &quot; &lt;&lt; recvLen &lt;&lt; endl);
++            if (recvLen == -1) {
++                error(ERR_COULD_NOT_READ,url.prettyURL());
++                shutdownConnection();
++            } else {
++                rawRead = recvLen;
++                t_start = t_last = time(NULL);
++                dataRead = 0;
++                mimeTypeSent = false;
++                if (recvLen == 0)
++                {
++                    mimeType(&quot;application/x-zerosize&quot;);
++                    mimeTypeSent = true;
++                }
++            }
++            break;
++        case FISH_STOR:
++        case FISH_WRITE:
++        case FISH_APPEND:
++            rawWrite = sendLen;
++            //myDebug( &lt;&lt; &quot;sending &quot; &lt;&lt; sendLen &lt;&lt; endl);
++            writeChild(NULL,0);
++            break;
++        default : break;
++        }
++    } else if (rc/100 != 2) {
++        switch (fishCommand) {
++        case FISH_STOR:
++        case FISH_WRITE:
++        case FISH_APPEND:
++            error(ERR_COULD_NOT_WRITE,url.prettyURL());
++            shutdownConnection();
++            break;
++        case FISH_RETR:
++            error(ERR_COULD_NOT_READ,url.prettyURL());
++            shutdownConnection();
++            break;
++        case FISH_READ:
++            if ( rc == 501 )
++            {
++               mimeType(&quot;inode/directory&quot;);
++               mimeTypeSent = true;
++               recvLen = 0;
++               finished();
++            }
++            else
++            {
++               error(ERR_COULD_NOT_READ,url.prettyURL());
++               shutdownConnection();
++            }
++            break;
++        case FISH_FISH:
++        case FISH_VER:
++            error(ERR_SLAVE_DEFINED,line);
++            shutdownConnection();
++            break;
++        case FISH_PWD:
++        case FISH_CWD:
++            error(ERR_CANNOT_ENTER_DIRECTORY,url.prettyURL());
++            break;
++        case FISH_LIST:
++            myDebug( &lt;&lt; &quot;list error. reason: &quot; &lt;&lt; listReason &lt;&lt; endl);
++            if (listReason == LIST) error(ERR_CANNOT_ENTER_DIRECTORY,url.prettyURL());
++            else if (listReason == CHECK) {
++                checkExist = false;
++                finished();
++            }
++            break;
++        case FISH_STAT:
++            error(ERR_DOES_NOT_EXIST,url.prettyURL());
++            udsStatEntry.clear();
++            break;
++        case FISH_CHMOD:
++            error(ERR_CANNOT_CHMOD,url.prettyURL());
++            break;
++        case FISH_CHOWN:
++        case FISH_CHGRP:
++            error(ERR_ACCESS_DENIED,url.prettyURL());
++            break;
++        case FISH_MKD:
++            if ( rc == 501 )
++                error(ERR_DIR_ALREADY_EXIST,url.prettyURL());
++            else
++                error(ERR_COULD_NOT_MKDIR,url.prettyURL());
++            break;
++        case FISH_RMD:
++            error(ERR_COULD_NOT_RMDIR,url.prettyURL());
++            break;
++        case FISH_DELE:
++            error(ERR_CANNOT_DELETE,url.prettyURL());
++            break;
++        case FISH_RENAME:
++            error(ERR_CANNOT_RENAME,url.prettyURL());
++            break;
++        case FISH_COPY:
++        case FISH_LINK:
++        case FISH_SYMLINK:
++            error(ERR_COULD_NOT_WRITE,url.prettyURL());
++            break;
++        default : break;
++        }
++    } else {
++        if (fishCommand == FISH_STOR) fishCommand = (hasAppend?FISH_APPEND:FISH_WRITE);
++        if (fishCommand == FISH_FISH) {
++            connected();
++        } else if (fishCommand == FISH_LIST) {
++            if (listReason == LIST) {
++                listEntry(UDSEntry(),true);
++            } else if (listReason == CHECK) {
++                if (!checkOverwrite &amp;&amp; checkExist)
++                {
++                    error(ERR_FILE_ALREADY_EXIST,url.prettyURL());
++                    return; // Don't call finished!
++                }
++            }
++        } else if (fishCommand == FISH_STAT) {
++            UDSAtom atom;
++
++            atom.m_uds = KIO::UDS_NAME;
++            atom.m_str = url.fileName();
++            udsStatEntry.append( atom );
++            statEntry(udsStatEntry);
++        } else if (fishCommand == FISH_APPEND) {
++            dataReq();
++            if (readData(rawData) &gt; 0) sendCommand(FISH_APPEND,E(QString::number(rawData.size())),E(url.path()));
++            else if (!checkExist &amp;&amp; putPerm &gt; -1) sendCommand(FISH_CHMOD,E(QString::number(putPerm,8)),E(url.path()));
++            sendLen = rawData.size();
++        } else if (fishCommand == FISH_WRITE) {
++            dataReq();
++            if (readData(rawData) &gt; 0) sendCommand(FISH_WRITE,E(QString::number(putPos)),E(QString::number(rawData.size())),E(url.path()));
++            else if (!checkExist &amp;&amp; putPerm &gt; -1) sendCommand(FISH_CHMOD,E(QString::number(putPerm,8)),E(url.path()));
++            putPos += rawData.size();
++            sendLen = rawData.size();
++        } else if (fishCommand == FISH_RETR) {
++            data(QByteArray());
++        }
++        finished();
++    }
++}
++
++void fishProtocol::writeStdin(const QString &amp;line)
++{
++    qlist.append(line);
++
++    if (writeReady) {
++        writeReady = false;
++        //myDebug( &lt;&lt; &quot;Writing: &quot; &lt;&lt; qlist.first().mid(0,qlist.first().find('\n')) &lt;&lt; endl);
++        myDebug( &lt;&lt; &quot;Writing: &quot; &lt;&lt; qlist.first() &lt;&lt; endl);
++        myDebug( &lt;&lt; &quot;---------&quot; &lt;&lt; endl);
++        writeChild((const char *)qlist.first().latin1(), qlist.first().length());
++    }
++}
++
++void fishProtocol::sent()
++{
++    if (rawWrite &gt; 0) {
++        myDebug( &lt;&lt; &quot;writing raw: &quot; &lt;&lt; rawData.size() &lt;&lt; &quot;/&quot; &lt;&lt; rawWrite &lt;&lt; endl);
++        writeChild(rawData.data(),((unsigned int)rawWrite &gt; rawData.size()?rawData.size():rawWrite));
++        rawWrite -= rawData.size();
++        if (rawWrite &gt; 0) {
++            dataReq();
++            if (readData(rawData) &lt;= 0) {
++                shutdownConnection();
++            }
++        }
++        return;
++    } else if (rawWrite == 0) {
++        // workaround: some dd's insist in reading multiples of
++        // 8 bytes, swallowing up to seven bytes. Sending
++        // newlines is safe even when a sane dd is used
++        writeChild(&quot;\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n&quot;,15);
++        rawWrite = -1;
++        return;
++    }
++    if (qlist.count() &gt; 0) qlist.remove(qlist.begin());
++    if (qlist.count() == 0) {
++        writeReady = true;
++    } else {
++        //myDebug( &lt;&lt; &quot;Writing: &quot; &lt;&lt; qlist.first().mid(0,qlist.first().find('\n')) &lt;&lt; endl);
++        myDebug( &lt;&lt; &quot;Writing: &quot; &lt;&lt; qlist.first() &lt;&lt; endl);
++        myDebug( &lt;&lt; &quot;---------&quot; &lt;&lt; endl);
++        writeChild((const char *)qlist.first().latin1(),qlist.first().length());
++    }
++}
++
++int fishProtocol::received(const char *buffer, int buflen)
++{
++    int pos = 0;
++    do {
++        if (buflen &lt;= 0) break;
++
++        if (rawRead &gt; 0) {
++            myDebug( &lt;&lt; &quot;processedSize &quot; &lt;&lt; dataRead &lt;&lt; &quot;, len &quot; &lt;&lt; buflen &lt;&lt; &quot;/&quot; &lt;&lt; rawRead &lt;&lt; endl);
++            int dataSize = (rawRead &gt; buflen?buflen:rawRead);
++            if (!mimeTypeSent)
++            {
++                int mimeSize = QMIN(dataSize, (int)mimeBuffer.size()-dataRead);
++                memcpy(mimeBuffer.data()+dataRead,buffer,mimeSize);
++                dataRead += mimeSize;
++                rawRead -= mimeSize;
++                buffer += mimeSize;
++                buflen -= mimeSize;
++                if (rawRead == 0) // End of data
++                    mimeBuffer.resize(dataRead);
++                if (dataRead &lt; (int)mimeBuffer.size())
++                {
++                    myDebug( &lt;&lt; &quot;wait for more&quot; &lt;&lt; endl);
++                    break;
++                }
++                sendmimeType(KMimeMagic::self()-&gt;findBufferFileType(mimeBuffer,url.path())-&gt;mimeType());
++                mimeTypeSent = true;
++                if (fishCommand != FISH_READ) {
++                    totalSize(dataRead + rawRead);
++                    data(mimeBuffer);
++                    processedSize(dataRead);
++                }
++                mimeBuffer.resize(1024);
++                pos = 0;
++                continue; // Process rest of buffer/buflen
++            }
++
++            QByteArray bdata;
++            bdata.duplicate(buffer,dataSize);
++            data(bdata);
++            
++            dataRead += dataSize;
++            rawRead -= dataSize;
++            time_t t = time(NULL);
++            if (t-t_last &gt;= 1) {
++                processedSize(dataRead);
++                //speed(dataRead/(t-t_start));
++                t_last = t;
++            }
++            if (rawRead &lt;= 0) {
++                buffer += dataSize;
++                buflen -= dataSize;
++            } else {
++                return 0;
++            }
++        }
++
++        if (buflen &lt;= 0) break;
++
++        pos = 0;
++        // Find newline
++        while((pos &lt; buflen) &amp;&amp; (buffer[pos] != '\n'))
++            ++pos;
++        
++        if (pos &lt; buflen)
++        {
++           QString s = remoteEncoding()-&gt;decode(QCString(buffer,pos+1));
++        
++           buffer += pos+1;
++           buflen -= pos+1;
++
++           manageConnection(s);
++           
++           pos = 0;
++           // Find next newline
++           while((pos &lt; buflen) &amp;&amp; (buffer[pos] != '\n'))
++               ++pos;
++        }
++    } while (childPid &amp;&amp; buflen &amp;&amp; (rawRead &gt; 0 || pos &lt; buflen));
++    return buflen;
++}
++/** get a file */
++void fishProtocol::get(const KURL&amp; u){
++    myDebug( &lt;&lt; &quot;@@@@@@@@@ get &quot; &lt;&lt; u &lt;&lt; endl);
++    setHost(u.host(),u.port(),u.user(),u.pass());
++    url = u;
++    openConnection();
++    if (!isLoggedIn) return;
++    url.cleanPath();
++    if (!url.hasPath()) {
++        sendCommand(FISH_PWD);
++    } else {
++        recvLen = -1;
++        sendCommand(FISH_RETR,E(url.path()));
++    }
++    run();
++}
++
++/** put a file */
++void fishProtocol::put(const KURL&amp; u, int permissions, bool overwrite, bool /*resume*/){
++    myDebug( &lt;&lt; &quot;@@@@@@@@@ put &quot; &lt;&lt; u &lt;&lt; &quot; &quot; &lt;&lt; permissions &lt;&lt; &quot; &quot; &lt;&lt; overwrite &lt;&lt; &quot; &quot; /* &lt;&lt; resume */ &lt;&lt; endl);
++    setHost(u.host(),u.port(),u.user(),u.pass());
++    url = u;
++    openConnection();
++    if (!isLoggedIn) return;
++    url.cleanPath();
++    if (!url.hasPath()) {
++        sendCommand(FISH_PWD);
++    } else {
++        putPerm = permissions;
++        checkOverwrite = overwrite;
++        checkExist = false;
++        putPos = 0;
++        listReason = CHECK;
++        sendCommand(FISH_LIST,E(url.path()));
++        sendCommand(FISH_STOR,&quot;0&quot;,E(url.path()));
++    }
++    run();
++}
++/** executes next command in sequence or calls finished() if all is done */
++void fishProtocol::finished() {
++    if (commandList.count() &gt; 0) {
++        fishCommand = (fish_command_type)commandCodes.first();
++        errorCount = -fishInfo[fishCommand].lines;
++        rawRead = 0;
++        rawWrite = -1;
++        udsEntry.clear();
++        udsStatEntry.clear();
++        writeStdin(commandList.first());
++        //if (fishCommand != FISH_APPEND &amp;&amp; fishCommand != FISH_WRITE) infoMessage(&quot;Sending &quot;+(commandList.first().mid(1,commandList.first().find(&quot;\n&quot;)-1))+&quot;...&quot;);
++        commandList.remove(commandList.begin());
++        commandCodes.remove(commandCodes.begin());
++    } else {
++        myDebug( &lt;&lt; &quot;_______ emitting finished()&quot; &lt;&lt; endl);
++        SlaveBase::finished();
++        isRunning = false;
++    }
++}
++/** aborts command sequence and calls error() */
++void fishProtocol::error(int type, const QString &amp;detail) {
++    commandList.clear();
++    commandCodes.clear();
++    myDebug( &lt;&lt; &quot;ERROR: &quot; &lt;&lt; type &lt;&lt; &quot; - &quot; &lt;&lt; detail &lt;&lt; endl);
++    SlaveBase::error(type,detail);
++    isRunning = false;
++}
++/** executes a chain of commands */
++void fishProtocol::run() {
++    if (!isRunning) {
++        int rc;
++        isRunning = true;
++        finished();
++        fd_set rfds, wfds;
++        FD_ZERO(&amp;rfds);
++        char buf[32768];
++        int offset = 0;
++        while (isRunning) {
++            FD_SET(childFd,&amp;rfds);
++            FD_ZERO(&amp;wfds);
++            if (outBufPos &gt;= 0) FD_SET(childFd,&amp;wfds);
++            rc = select(childFd+1, &amp;rfds, &amp;wfds, NULL, NULL);
++            if (rc &lt; 0) {
++                if (errno == EINTR)
++                    continue;
++                myDebug( &lt;&lt; &quot;select failed, rc: &quot; &lt;&lt; rc &lt;&lt; &quot;, error: &quot; &lt;&lt; strerror(errno) &lt;&lt; endl);
++                error(ERR_CONNECTION_BROKEN,connectionHost);
++                shutdownConnection();
++                return;
++            }
++            if (FD_ISSET(childFd,&amp;wfds) &amp;&amp; outBufPos &gt;= 0) {
++                QString debug;
++                debug.setLatin1(outBuf+outBufPos,outBufLen-outBufPos);
++                myDebug( &lt;&lt; &quot;now writing &quot; &lt;&lt; (outBufLen-outBufPos) &lt;&lt; &quot; &quot; &lt;&lt; debug.left(40) &lt;&lt; &quot;...&quot; &lt;&lt; endl);
++                if (outBufLen-outBufPos &gt; 0) rc = write(childFd,outBuf+outBufPos,outBufLen-outBufPos);
++                else rc = 0;
++                if (rc &gt;= 0) outBufPos += rc;
++                else {
++                    if (errno == EINTR)
++                        continue;
++                    myDebug( &lt;&lt; &quot;write failed, rc: &quot; &lt;&lt; rc &lt;&lt; &quot;, error: &quot; &lt;&lt; strerror(errno) &lt;&lt; endl);
++                    error(ERR_CONNECTION_BROKEN,connectionHost);
++                    shutdownConnection();
++                    return;
++                }
++                if (outBufPos &gt;= outBufLen) {
++                    outBufPos = -1;
++                    outBuf = NULL;
++                    sent();
++                }
++            }
++            if (FD_ISSET(childFd,&amp;rfds)) {
++                rc = read(childFd,buf+offset,32768-offset);
++                //myDebug( &lt;&lt; &quot;read &quot; &lt;&lt; rc &lt;&lt; &quot; bytes&quot; &lt;&lt; endl);
++                if (rc &gt; 0) {
++                    int noff = received(buf,rc+offset);
++                    if (noff &gt; 0) memmove(buf,buf+offset+rc-noff,noff);
++                    //myDebug( &lt;&lt; &quot;left &quot; &lt;&lt; noff &lt;&lt; &quot; bytes: &quot; &lt;&lt; QString::fromLatin1(buf,offset) &lt;&lt; endl);
++                    offset = noff;
++                } else {
++                    if (errno == EINTR)
++                        continue;
++                    myDebug( &lt;&lt; &quot;read failed, rc: &quot; &lt;&lt; rc &lt;&lt; &quot;, error: &quot; &lt;&lt; strerror(errno) &lt;&lt; endl);
++                    error(ERR_CONNECTION_BROKEN,connectionHost);
++                    shutdownConnection();
++                    return;
++                }
++            }
++            if (wasKilled())
++                return;
++        }
++    }
++}
++/** stat a file */
++void fishProtocol::stat(const KURL&amp; u){
++    myDebug( &lt;&lt; &quot;@@@@@@@@@ stat &quot; &lt;&lt; u &lt;&lt; endl);
++    setHost(u.host(),u.port(),u.user(),u.pass());
++    url = u;
++    isStat = true; // FIXME: just a workaround for konq deficiencies
++    openConnection();
++    isStat = false; // FIXME: just a workaround for konq deficiencies
++    if (!isLoggedIn) return;
++    url.cleanPath();
++    if (!url.hasPath()) {
++        sendCommand(FISH_PWD);
++    } else {
++        sendCommand(FISH_STAT,E(url.path(-1)));
++    }
++    run();
++}
++/** find mimetype for a file */
++void fishProtocol::mimetype(const KURL&amp; u){
++    myDebug( &lt;&lt; &quot;@@@@@@@@@ mimetype &quot; &lt;&lt; u &lt;&lt; endl);
++    setHost(u.host(),u.port(),u.user(),u.pass());
++    url = u;
++    openConnection();
++    if (!isLoggedIn) return;
++    url.cleanPath();
++    if (!url.hasPath()) {
++        sendCommand(FISH_PWD);
++    } else {
++        recvLen = 1024;
++        sendCommand(FISH_READ,&quot;0&quot;,&quot;1024&quot;,E(url.path()));
++    }
++    run();
++}
++/** list a directory */
++void fishProtocol::listDir(const KURL&amp; u){
++    myDebug( &lt;&lt; &quot;@@@@@@@@@ listDir &quot; &lt;&lt; u &lt;&lt; endl);
++    setHost(u.host(),u.port(),u.user(),u.pass());
++    url = u;
++    openConnection();
++    if (!isLoggedIn) return;
++    url.cleanPath();
++    if (!url.hasPath()) {
++        sendCommand(FISH_PWD);
++    } else {
++        listReason = LIST;
++        sendCommand(FISH_LIST,E(url.path()));
++    }
++    run();
++}
++/** create a directory */
++void fishProtocol::mkdir(const KURL&amp; u, int permissions) {
++    myDebug( &lt;&lt; &quot;@@@@@@@@@ mkdir &quot; &lt;&lt; u &lt;&lt; &quot; &quot; &lt;&lt; permissions &lt;&lt; endl);
++    setHost(u.host(),u.port(),u.user(),u.pass());
++    url = u;
++    openConnection();
++    if (!isLoggedIn) return;
++    url.cleanPath();
++    if (!url.hasPath()) {
++        sendCommand(FISH_PWD);
++    } else {
++        sendCommand(FISH_MKD,E(url.path()));
++        if (permissions &gt; -1) sendCommand(FISH_CHMOD,E(QString::number(permissions,8)),E(url.path()));
++    }
++    run();
++}
++/** rename a file */
++void fishProtocol::rename(const KURL&amp; s, const KURL&amp; d, bool overwrite) {
++    myDebug( &lt;&lt; &quot;@@@@@@@@@ rename &quot; &lt;&lt; s &lt;&lt; &quot; &quot; &lt;&lt; d &lt;&lt; &quot; &quot; &lt;&lt; overwrite &lt;&lt; endl);
++    if (s.host() != d.host() || s.port() != d.port() || s.user() != d.user()) {
++        error(ERR_UNSUPPORTED_ACTION,s.prettyURL());
++        return;
++    }
++    setHost(s.host(),s.port(),s.user(),s.pass());
++    url = d;
++    openConnection();
++    if (!isLoggedIn) return;
++    KURL src = s;
++    url.cleanPath();
++    src.cleanPath();
++    if (!url.hasPath()) {
++        sendCommand(FISH_PWD);
++    } else {
++        if (!overwrite) {
++            listReason = CHECK;
++            checkOverwrite = false;
++            sendCommand(FISH_LIST,E(url.path()));
++        }
++        sendCommand(FISH_RENAME,E(src.path()),E(url.path()));
++    }
++    run();
++}
++/** create a symlink */
++void fishProtocol::symlink(const QString&amp; target, const KURL&amp; u, bool overwrite) {
++    myDebug( &lt;&lt; &quot;@@@@@@@@@ symlink &quot; &lt;&lt; target &lt;&lt; &quot; &quot; &lt;&lt; u &lt;&lt; &quot; &quot; &lt;&lt; overwrite &lt;&lt; endl);
++    setHost(u.host(),u.port(),u.user(),u.pass());
++    url = u;
++    openConnection();
++    if (!isLoggedIn) return;
++    url.cleanPath();
++    if (!url.hasPath()) {
++        sendCommand(FISH_PWD);
++    } else {
++        if (!overwrite) {
++            listReason = CHECK;
++            checkOverwrite = false;
++            sendCommand(FISH_LIST,E(url.path()));
++        }
++        sendCommand(FISH_SYMLINK,E(target),E(url.path()));
++    }
++    run();
++}
++/** change file permissions */
++void fishProtocol::chmod(const KURL&amp; u, int permissions){
++    myDebug( &lt;&lt; &quot;@@@@@@@@@ chmod &quot; &lt;&lt; u &lt;&lt; &quot; &quot; &lt;&lt; permissions &lt;&lt; endl);
++    setHost(u.host(),u.port(),u.user(),u.pass());
++    url = u;
++    openConnection();
++    if (!isLoggedIn) return;
++    url.cleanPath();
++    if (!url.hasPath()) {
++        sendCommand(FISH_PWD);
++    } else {
++        if (permissions &gt; -1) sendCommand(FISH_CHMOD,E(QString::number(permissions,8)),E(url.path()));
++    }
++    run();
++}
++/** copies a file */
++void fishProtocol::copy(const KURL &amp;s, const KURL &amp;d, int permissions, bool overwrite) {
++    myDebug( &lt;&lt; &quot;@@@@@@@@@ copy &quot; &lt;&lt; s &lt;&lt; &quot; &quot; &lt;&lt; d &lt;&lt; &quot; &quot; &lt;&lt; permissions &lt;&lt; &quot; &quot; &lt;&lt; overwrite &lt;&lt; endl);
++    if (s.host() != d.host() || s.port() != d.port() || s.user() != d.user()) {
++        error(ERR_UNSUPPORTED_ACTION,s.prettyURL());
++        return;
++    }
++    //myDebug( &lt;&lt; s &lt;&lt; endl &lt;&lt; d &lt;&lt; endl);
++    setHost(s.host(),s.port(),s.user(),s.pass());
++    url = d;
++    openConnection();
++    if (!isLoggedIn) return;
++    KURL src = s;
++    url.cleanPath();
++    src.cleanPath();
++    if (!src.hasPath()) {
++        sendCommand(FISH_PWD);
++    } else {
++        if (!overwrite) {
++            listReason = CHECK;
++            checkOverwrite = false;
++            sendCommand(FISH_LIST,E(url.path()));
++        }
++        sendCommand(FISH_COPY,E(src.path()),E(url.path()));
++        if (permissions &gt; -1) sendCommand(FISH_CHMOD,E(QString::number(permissions,8)),E(url.path()));
++    }
++    run();
++}
++/** removes a file or directory */
++void fishProtocol::del(const KURL &amp;u, bool isFile){
++    myDebug( &lt;&lt; &quot;@@@@@@@@@ del &quot; &lt;&lt; u &lt;&lt; &quot; &quot; &lt;&lt; isFile &lt;&lt; endl);
++    setHost(u.host(),u.port(),u.user(),u.pass());
++    url = u;
++    openConnection();
++    if (!isLoggedIn) return;
++    url.cleanPath();
++    if (!url.hasPath()) {
++        sendCommand(FISH_PWD);
++    } else {
++        sendCommand((isFile?FISH_DELE:FISH_RMD),E(url.path()));
++    }
++    run();
++}
++/** special like background execute */
++void fishProtocol::special( const QByteArray &amp;data ){
++    int tmp;
++
++    QDataStream stream(data, IO_ReadOnly);
++
++    stream &gt;&gt; tmp;
++    switch (tmp) {
++        case FISH_EXEC_CMD: // SSH EXEC
++        {
++            KURL u;
++            QString command;
++            QString tempfile;
++            stream &gt;&gt; u;
++            stream &gt;&gt; command;
++            myDebug( &lt;&lt; &quot;@@@@@@@@@ exec &quot; &lt;&lt; u &lt;&lt; &quot; &quot; &lt;&lt; command &lt;&lt; endl);
++            setHost(u.host(),u.port(),u.user(),u.pass());
++            url = u;
++            openConnection();
++            if (!isLoggedIn) return;
++            sendCommand(FISH_EXEC,E(command),E(url.path()));
++            run();
++            break;
++        }
++        default:
++            // Some command we don't understand.
++            error(ERR_UNSUPPORTED_ACTION,QString().setNum(tmp));
++            break;
++    }
++}
++/** report status */
++void fishProtocol::slave_status() {
++    myDebug( &lt;&lt; &quot;@@@@@@@@@ slave_status&quot; &lt;&lt; endl);
++    if (childPid &gt; 0)
++        slaveStatus(connectionHost,isLoggedIn);
++    else
++        slaveStatus(QString::null,false);
++}
+
+Added: nx-utils/nxfish/nx-fishsrv.pl
+===================================================================
+--- nx-utils/nxfish/nx-fishsrv.pl	2005-07-03 15:44:33 UTC (rev 65)
++++ nx-utils/nxfish/nx-fishsrv.pl	2005-07-03 16:08:12 UTC (rev 66)
+@@ -0,0 +1,342 @@
++#!/usr/bin/perl
++
++=pod
++=cut
++
++use Fcntl;
++$|++;
++
++my $substpath=$ARGV[0];
++
++use strict;
++use POSIX qw(getcwd dup2 strftime);
++$SIG{'CHLD'} = 'IGNORE';
++$| = 1;
++MAIN: while (&lt;STDIN&gt;) {
++    chomp;
++    chomp;
++    /\#FISH/ &amp;&amp; do {
++	print &quot;### 200\n&quot;;
++	next;
++    };
++
++    next if !length($_) || substr( $_, 0, 1 ) ne '#';
++    s/^#//;
++    /^VER / &amp;&amp; do {
++        print &quot;VER 0.0.3 copy lscount lslinks lsmime stat\n### 200\n&quot;;
++        next;
++    };
++    /^PWD$/ &amp;&amp; do {
++        print &quot;/&quot;, &quot;\n### 200\n&quot;;
++        next;
++    };
++    /^SYMLINK\s+((?:\\.|[^\\])*?)\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        my $ofn = unquote($1);
++        my $fn  = unquote($2);
++        print( symlink( $ofn, $fn ) ? &quot;### 200\n&quot; : &quot;### 500 $!\n&quot; );
++        next;
++    };
++    /^COPY\s+((?:\\.|[^\\])*?)\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        my $ofn    = unquote($1);
++        my $fn     = unquote($2);
++        my ($size) = ( stat($ofn) )[7];
++        my $read   = 1;
++        if ( -l $ofn ) {
++            my $dest = readlink($ofn);
++            unlink($fn);
++            symlink( $dest, $fn ) || ( $read = 0 );
++        }
++        else {
++            sysopen( FH, $ofn, O_RDONLY ) || do { print &quot;### 500 $!\n&quot;; next; };
++            sysopen( OFH, $fn, O_WRONLY | O_CREAT | O_TRUNC )
++              || do { close(FH); print &quot;### 500 $!\n&quot;; next; };
++            local $/ = undef;
++            my $buffer = '';
++            while ( $size &gt; 16384
++                &amp;&amp; ( $read = sysread( FH, $buffer, 16384 ) ) &gt; 0 )
++            {
++                $size -= $read;
++                if ( syswrite( OFH, $buffer, $read ) != $read ) {
++                    close(FH);
++                    close(OFH);
++                    print &quot;### 500 $!\n&quot;;
++                    next MAIN;
++                }
++            }
++            while ( $size &gt; 0 &amp;&amp; ( $read = sysread( FH, $buffer, $size ) ) &gt; 0 )
++            {
++                $size -= $read;
++                if ( syswrite( OFH, $buffer, $read ) != $read ) {
++                    close(FH);
++                    close(OFH);
++                    print &quot;### 500 $!\n&quot;;
++                    next MAIN;
++                }
++            }
++            close(FH);
++            close(OFH);
++        }
++        if ( $read &gt; 0 ) {
++            print &quot;### 200\n&quot;;
++        }
++        else {
++            print &quot;### 500 $!\n&quot;;
++        }
++        next;
++    };
++    /^LINK\s+((?:\\.|[^\\])*?)\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        my $ofn = unquote($1);
++        my $fn  = unquote($2);
++        print( link( $ofn, $fn ) ? &quot;### 200\n&quot; : &quot;### 500 $!\n&quot; );
++        next;
++    };
++    /^RENAME\s+((?:\\.|[^\\])*?)\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        my $ofn = unquote($1);
++        my $fn  = unquote($2);
++        print( rename( $ofn, $fn ) ? &quot;### 200\n&quot; : &quot;### 500 $!\n&quot; );
++        next;
++    };
++    /^CHGRP\s+(\d+)\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        my $fn = unquote($2);
++        print( chown( -1, int($1), $fn ) ? &quot;### 200\n&quot; : &quot;### 500 $!\n&quot; );
++        next;
++    };
++    /^CHOWN\s+(\d+)\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        my $fn = unquote($2);
++        print( chown( int($1), -1, $fn ) ? &quot;### 200\n&quot; : &quot;### 500 $!\n&quot; );
++        next;
++    };
++    /^CHMOD\s+([0-7]+)\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        my $fn = unquote($2);
++        print( chmod( oct($1), $fn ) ? &quot;### 200\n&quot; : &quot;### 500 $!\n&quot; );
++        next;
++    };
++    /^DELE\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        my $fn = unquote($1);
++        print( unlink($fn) ? &quot;### 200\n&quot; : &quot;### 500 $!\n&quot; );
++        next;
++    };
++    /^RMD\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        my $dn = unquote($1);
++        print( rmdir($dn) ? &quot;### 200\n&quot; : &quot;### 500 $!\n&quot; );
++        next;
++    };
++    /^MKD\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        my $dn = unquote($1);
++        if ( mkdir( $dn, 0777 ) ) {
++            print &quot;### 200\n&quot;;
++        }
++        else {
++            my $err = $!;
++            print( chdir($dn) ? &quot;### 501 $err\n&quot; : &quot;### 500 $err\n&quot; );
++        }
++        next;
++    };
++    #/^CWD\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++    #    my $dn = unquote($1);
++    #    print( chdir($dn) ? &quot;### 200\n&quot; : &quot;### 500 $!\n&quot; );
++    #    next;
++    #};
++    /^LIST\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        list( $1, 1 );
++        next;
++    };
++    /^STAT\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        list( $1, 0 );
++        next;
++    };
++    /^WRITE\s+(\d+)\s+(\d+)\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        write_loop( $2, $3, O_WRONLY | O_CREAT, $1 );
++        next;
++    };
++    /^APPEND\s+(\d+)\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        write_loop( $1, $2, O_WRONLY | O_APPEND );
++        next;
++    };
++    /^STOR\s+(\d+)\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        write_loop( $1, $2, O_WRONLY | O_CREAT | O_TRUNC );
++        next;
++    };
++    /^RETR\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        read_loop($1);
++        next;
++    };
++    /^READ\s+(\d+)\s+(\d+)\s+((?:\\.|[^\\])*?)\s*$/ &amp;&amp; do {
++        read_loop( $3, $2, $1 );
++        next;
++    };
++}
++exit(0);
++
++sub list {
++    my $dn = unquote( $_[0] );
++    my @entries;
++    if ( !-e $dn ) {
++        print &quot;### 404 File does not exist\n&quot;;
++        return;
++    }
++    elsif ( $_[1] &amp;&amp; -d _ ) {
++        opendir( DIR, $dn ) || do { print &quot;### 500 $!\n&quot;; return; };
++        @entries = readdir(DIR);
++        closedir(DIR);
++    }
++    else {
++        ( $dn, @entries ) = $dn =~ m{(.*)/(.*)};
++        $dn = '/' if ( !length($dn) );
++    }
++    print scalar(@entries), &quot;\n### 100\n&quot;;
++    my $cwd = getcwd();
++    chdir($dn) || do { print &quot;### 500 $!\n&quot;; return; };
++    foreach (@entries) {
++        my $link = readlink;
++        my ( $mode, $uid, $gid, $size, $mtime ) = (lstat)[ 2, 4, 5, 7, 9 ];
++        print filetype( $mode, $link, $uid, $gid );
++        print &quot;S$size\n&quot;;
++        print strftime( &quot;D%Y %m %d %H %M %S\n&quot;, localtime($mtime) );
++        print &quot;:$_\n&quot;;
++        print &quot;L$link\n&quot; if (defined $link &amp;&amp; ($_[0] ne &quot;/&quot;));
++        print mimetype($_);
++        print &quot;\n&quot;;
++    }
++    chdir($cwd);
++    print &quot;### 200\n&quot;;
++}
++
++sub read_loop {
++    my $fn = unquote( $_[0] );
++    my ($size) = ( $_[1] ? int( $_[1] ) : ( stat($fn) )[7] );
++    my $error = '';
++    print &quot;### 501 Is directory\n&quot; and return if -d $fn;
++    sysopen( FH, $fn, O_RDONLY ) || ( $error = $! );
++    if ( $_[2] ) {
++        sysseek( FH, int( $_[2] ), 0 ) || do { close(FH); $error ||= $!; };
++    }
++    print &quot;### 500 $error\n&quot; and return if $error;
++    if ( @_ &lt; 2 ) {
++        print &quot;$size\n&quot;;
++    }
++    print &quot;### 100\n&quot;;
++    my $buffer = '';
++    my $read   = 1;
++    while ( $size &gt; 16384 &amp;&amp; ( $read = sysread( FH, $buffer, 16384 ) ) &gt; 0 ) {
++        $size -= $read;
++        print $buffer;
++    }
++    while ( $size &gt; 0 &amp;&amp; ( $read = sysread( FH, $buffer, $size ) ) &gt; 0 ) {
++        $size -= $read;
++        print $buffer;
++    }
++    while ( $size &gt; 0 ) {
++        print ' ';
++        $size--;
++    }
++    $error ||= $! if $read &lt;= 0;
++    close(FH);
++    if ( !$error ) {
++        print &quot;### 200\n&quot;;
++    }
++    else {
++        print &quot;### 500 $error\n&quot;;
++    }
++}
++
++sub write_loop {
++    my $size  = int( $_[0] );
++    my $fn    = unquote( $_[1] );
++    my $error = '';
++    sysopen( FH, $fn, $_[2] ) || do { print &quot;### 400 $!\n&quot;; return; };
++    eval { flock( FH, 2 ); };
++    if ( $_[3] ) {
++        sysseek( FH, int( $_[3] ), 0 )
++          || do { close(FH); print &quot;### 400 $!\n&quot;; return; };
++    }
++    &lt;STDIN&gt;;
++    print &quot;### 100\n&quot;;
++    my $buffer = '';
++    my $read   = 1;
++    while ( $size &gt; 16384 &amp;&amp; ( $read = read( STDIN, $buffer, 16384 ) ) &gt; 0 ) {
++        $size -= $read;
++        $error ||= $! if ( syswrite( FH, $buffer, $read ) != $read );
++    }
++    while ( $size &gt; 0 &amp;&amp; ( $read = read( STDIN, $buffer, $size ) ) &gt; 0 ) {
++        $size -= $read;
++        $error ||= $! if ( syswrite( FH, $buffer, $read ) != $read );
++    }
++    close(FH);
++    if ( !$error ) {
++        print &quot;### 200\n&quot;;
++    }
++    else {
++        print &quot;### 500 $error\n&quot;;
++    }
++}
++
++# FIXME: Make it secure
++
++sub unquote { $_ = shift; s/\\(.)/$1/g; s/^/$substpath/g; s/\.\./\//g; return $_; }
++#sub unquote { $_ = shift; s/\\(.)/$1/g; return $_; }
++
++sub filetype {
++    my ( $mode, $link, $uid, $gid ) = @_;
++    my $result = 'P';
++    while (1) {
++        -f _           &amp;&amp; do { $result .= '-'; last; };
++        -d _           &amp;&amp; do { $result .= 'd'; last; };
++        defined($link) &amp;&amp; do { $result .= 'l'; last; };
++        -c _           &amp;&amp; do { $result .= 'c'; last; };
++        -b _           &amp;&amp; do { $result .= 'b'; last; };
++        -S _           &amp;&amp; do { $result .= 's'; last; };
++        -p _           &amp;&amp; do { $result .= 'p'; last; };
++        $result .= '?';
++        last;
++    }
++    $result .= ( $mode &amp; 0400 ? 'r' : '-' );
++    $result .= ( $mode &amp; 0200 ? 'w' : '-' );
++    $result .=
++      ( $mode &amp; 0100
++        ? ( $mode &amp; 04000 ? 's' : 'x' )
++        : ( $mode &amp; 04000 ? 'S' : '-' ) );
++    $result .= ( $mode &amp; 0040 ? 'r' : '-' );
++    $result .= ( $mode &amp; 0020 ? 'w' : '-' );
++    $result .=
++      ( $mode &amp; 0010
++        ? ( $mode &amp; 02000 ? 's' : 'x' )
++        : ( $mode &amp; 02000 ? 'S' : '-' ) );
++    $result .= ( $mode &amp; 0004 ? 'r' : '-' );
++    $result .= ( $mode &amp; 0002 ? 'w' : '-' );
++    $result .=
++      ( $mode &amp; 0001
++        ? ( $mode &amp; 01000 ? 't' : 'x' )
++        : ( $mode &amp; 01000 ? 'T' : '-' ) );
++    $result .= ' ';
++    $result .= ( getpwuid($uid) || $uid );
++    $result .= '.';
++    $result .= ( getgrgid($gid) || $gid );
++    $result .= &quot;\n&quot;;
++    return $result;
++}
++
++sub mimetype {
++    my $fn = shift;
++    return &quot;Minode/directory\n&quot; if -d $fn;
++    pipe( IN, OUT );
++    my $pid = fork();
++    return '' if ( !defined $pid );
++    if ($pid) {
++        close(OUT);
++        my $type = &lt;IN&gt;;
++        close(IN);
++        chomp $type;
++        chomp $type;
++        $type =~ s/[,; ].*//;
++        return '' if ( $type !~ m/\// );
++        return &quot;M$type\n&quot;;
++    }
++    close(IN);
++    sysopen( NULL, '/dev/null', O_RDWR );
++    dup2( fileno(NULL), fileno(STDIN) );
++    dup2( fileno(OUT),  fileno(STDOUT) );
++    dup2( fileno(NULL), fileno(STDERR) );
++    exec( '/usr/bin/file', '-i', '-b', '-L', $fn );
++    exit(0);
++}
+
+Added: nx-utils/nxfish/nxfish.protocol
+===================================================================
+--- nx-utils/nxfish/nxfish.protocol	2005-07-03 15:44:33 UTC (rev 65)
++++ nx-utils/nxfish/nxfish.protocol	2005-07-03 16:08:12 UTC (rev 66)
+@@ -0,0 +1,54 @@
++[Protocol]
++exec=kio_nxfish
++protocol=nxfish
++input=none
++output=filesystem
++listing=Name,Type,Size,Date,Access,Owner,Group,Link,
++reading=true
++writing=true
++makedir=true
++deleting=true
++linking=true
++moving=true
++Icon=remote
++Description=A kioslave for the FISH protocol
++Description[bn]=&#224;&#166;&#171;&#224;&#166;&#191;&#224;&#166;&#182; (FISH) &#224;&#166;&#170;&#224;&#167;&#141;&#224;&#166;&#176;&#224;&#167;&#139;&#224;&#166;&#159;&#224;&#167;&#139;&#224;&#166;&#149;&#224;&#166;&#178;-&#224;&#166;&#143;&#224;&#166;&#176; &#224;&#166;&#156;&#224;&#166;&#168;&#224;&#167;&#141;&#224;&#166;&#175; &#224;&#166;&#143;&#224;&#166;&#149;&#224;&#166;&#159;&#224;&#166;&#191; kioslave
++Description[bs]=kioslave za FISH protokol
++Description[ca]=Un kioslave pel protocol FISH
++Description[cs]=Pomocn&#195;&#189; protokol FISH
++Description[da]=En kioslave for FISH-protokollen
++Description[de]=Ein-/Ausgabemodul f&#195;&#188;r das FISH-Protokoll
++Description[el]=&#206;&#136;&#206;&#189;&#206;&#177;&#207;&#130; kioslave &#206;&#179;&#206;&#185;&#206;&#177; &#207;&#132;&#206;&#191; &#207;&#128;&#207;&#129;&#207;&#137;&#207;&#132;&#207;&#140;&#206;&#186;&#206;&#191;&#206;&#187;&#206;&#187;&#206;&#191; FISH
++Description[es]=Un kioslave para el protocolo FISH
++Description[et]=Protokolli FISH IO-moodul
++Description[eu]=FISH protokolorako kioslavea
++Description[fi]=Liit&#195;&#164;nt&#195;&#164; FISH-yhteysk&#195;&#164;yt&#195;&#164;nt&#195;&#182;
++Description[fr]=Un kioslave pour le protocole FISH
++Description[fy]=In kioslave foar it FISH protokol
++Description[hi]=&#224;&#164;&#171;&#224;&#164;&#191;&#224;&#164;&#182; &#224;&#164;&#170;&#224;&#165;&#141;&#224;&#164;&#176;&#224;&#165;&#139;&#224;&#164;&#159;&#224;&#165;&#139;&#224;&#164;&#149;&#224;&#165;&#137;&#224;&#164;&#178; &#224;&#164;&#185;&#224;&#165;&#135;&#224;&#164;&#164;&#224;&#165;&#129; &#224;&#164;&#149;&#224;&#165;&#135;-&#224;&#164;&#134;&#224;&#164;&#136;-&#224;&#164;&#147;-&#224;&#164;&#184;&#224;&#165;&#141;&#224;&#164;&#178;&#224;&#165;&#135;&#224;&#164;&#181;
++Description[hu]=KDE-protokoll a FISH protokollhoz
++Description[is]=kioslave fyrir FISH samskiptaregluna
++Description[it]=Un kioslave per il protocollo FISH
++Description[ja]=FISH &#227;&#131;&#151;&#227;&#131;&#173;&#227;&#131;&#136;&#227;&#130;&#179;&#227;&#131;&#171;&#227;&#129;&#174;&#227;&#129;&#159;&#227;&#130;&#129;&#227;&#129;&#174; kioslave
++Description[lt]=Kiovergas FISH protokolui
++Description[nb]=En IU-slave for FISH-protokollen
++Description[nds]=En In-/Utgaavdeenst f&#195;&#182;r dat FISH-Protokull
++Description[nl]=Een kioslave voor het protocol FISH
++Description[nn]=Ein IU-slave for FISH-protokollen
++Description[pa]=FISH &#224;&#168;&#170;&#224;&#169;&#141;&#224;&#168;&#176;&#224;&#169;&#139;&#224;&#168;&#159;&#224;&#169;&#139;&#224;&#168;&#149;&#224;&#168;&#190;&#224;&#168;&#178; &#224;&#168;&#178;&#224;&#168;&#136; kioslave
++Description[pl]=Wtyczka protoko&#197;&#130;u FISH
++Description[pt]=Um 'kioslave' para protocolo FISH
++Description[pt_BR]=Uma implementa&#195;&#167;&#195;&#163;o para o protocolo FISH
++Description[ro]=Un dispozitiv de I/E pentru protocolul FISH
++Description[ru]=&#208;&#156;&#208;&#190;&#208;&#180;&#209;&#131;&#208;&#187;&#209;&#140; &#209;&#132;&#208;&#176;&#208;&#185;&#208;&#187;&#208;&#190;&#208;&#178;&#208;&#190;&#208;&#185; &#209;&#129;&#208;&#184;&#209;&#129;&#209;&#130;&#208;&#181;&#208;&#188;&#209;&#139; &#208;&#180;&#208;&#187;&#209;&#143; &#208;&#191;&#209;&#128;&#208;&#190;&#209;&#130;&#208;&#190;&#208;&#186;&#208;&#190;&#208;&#187;&#208;&#176; FISH
++Description[se]=SO-&#197;&#161;l&#195;&#161;va FISH-protokolla v&#195;&#161;r&#195;&#161;s
++Description[sk]=IO klient pre protokol FISH
++Description[sl]=kioslave za protokol FISH
++Description[sr]=Kioslave &#208;&#183;&#208;&#176; &#208;&#191;&#209;&#128;&#208;&#190;&#209;&#130;&#208;&#190;&#208;&#186;&#208;&#190;&#208;&#187; FISH
++Description[<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">sr at Latn</A>]=Kioslave za protokol FISH
++Description[sv]=En I/O-slav f&#195;&#182;r protokollet FISH
++Description[ta]=FISH &#224;&#174;&#168;&#224;&#175;&#134;&#224;&#174;&#177;&#224;&#174;&#191;&#224;&#174;&#174;&#224;&#175;&#129;&#224;&#174;&#177;&#224;&#175;&#136;&#224;&#174;&#149;&#224;&#175;&#141;&#224;&#174;&#149;&#224;&#174;&#190;&#224;&#174;&#169; &#224;&#174;&#146;&#224;&#174;&#176;&#224;&#175;&#129; &#224;&#174;&#149;&#224;&#175;&#141;&#224;&#174;&#175;&#224;&#175;&#139;&#224;&#174;&#184;&#224;&#175;&#141;&#224;&#174;&#178;&#224;&#175;&#135;&#224;&#174;&#181;&#224;&#175;&#141;
++Description[tg]=&#208;&#156;&#208;&#190;&#208;&#180;&#209;&#131;&#208;&#187;&#208;&#184; &#209;&#132;&#208;&#176;&#208;&#185;&#208;&#187;&#208;&#184;&#208;&#184; &#209;&#129;&#208;&#184;&#209;&#129;&#209;&#130;&#208;&#181;&#208;&#188;&#208;&#176; &#208;&#177;&#208;&#176;&#209;&#128;&#208;&#190;&#208;&#184; &#208;&#191;&#209;&#128;&#208;&#190;&#209;&#130;&#208;&#190;&#208;&#186;&#208;&#190;&#208;&#187;&#208;&#184; FISH
++Description[tr]=FISH protokol&#195;&#188; i&#195;&#167;in kioslave
++Description[uk]=&#208;&#159;&#209;&#150;&#208;&#180;&#208;&#187;&#208;&#181;&#208;&#179;&#208;&#187;&#208;&#184;&#208;&#185; B/&#208;&#146; &#208;&#180;&#208;&#187;&#209;&#143; &#208;&#191;&#209;&#128;&#208;&#190;&#209;&#130;&#208;&#190;&#208;&#186;&#208;&#190;&#208;&#187;&#209;&#131; FISH
++DocPath=kioslave/fish.html
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000156.html">[Freenx-cvs] r65 - freenx-server
+</A></li>
+	<LI>Next message: <A HREF="000158.html">[Freenx-cvs] r67 - in nx-utils: . nxredir
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#157">[ date ]</a>
+              <a href="thread.html#157">[ thread ]</a>
+              <a href="subject.html#157">[ subject ]</a>
+              <a href="author.html#157">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

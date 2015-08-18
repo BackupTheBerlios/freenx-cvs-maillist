@@ -1,0 +1,127 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r571 - trunk/freenx-server
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r571%20-%20trunk/freenx-server&In-Reply-To=%3C200808181629.m7IGTIOX021298%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000704.html">
+   <LINK REL="Next"  HREF="000706.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r571 - trunk/freenx-server</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r571%20-%20trunk/freenx-server&In-Reply-To=%3C200808181629.m7IGTIOX021298%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r571 - trunk/freenx-server">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Mon Aug 18 18:29:18 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000704.html">[Freenx-cvs] r570 - trunk/freenx-server
+</A></li>
+        <LI>Next message: <A HREF="000706.html">[Freenx-cvs] r572 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#705">[ date ]</a>
+              <a href="thread.html#705">[ thread ]</a>
+              <a href="subject.html#705">[ subject ]</a>
+              <a href="author.html#705">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2008-08-18 18:29:17 +0200 (Mon, 18 Aug 2008)
+New Revision: 571
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/nxnode
+   trunk/freenx-server/nxserver
+Log:
+* Changed type for external agents to windows-helper or vnc-helper
+  so that those sessions can be mirrored / shadowed as well.
+  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-18 02:26:05 UTC (rev 570)
++++ trunk/freenx-server/ChangeLog	2008-08-18 16:29:17 UTC (rev 571)
+@@ -102,6 +102,9 @@
+ 	  and more reliable. If you encounter any problems with it,
+ 	  disable it in node.conf.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
++	* Changed type for external agents to windows-helper or vnc-helper
++	  so that those sessions can be mirrored / shadowed as well.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">fabianx at bat.berlios.de</A>)
+ 
+ 14.03.2008 FreeNX 0.7.2 &quot;Priscilla Edition&quot;
+ 	* Opened the 0.7.2 development.
+
+Modified: trunk/freenx-server/nxnode
+===================================================================
+--- trunk/freenx-server/nxnode	2008-08-18 02:26:05 UTC (rev 570)
++++ trunk/freenx-server/nxnode	2008-08-18 16:29:17 UTC (rev 571)
+@@ -214,7 +214,7 @@
+ 		unix-cde)
+ 			NODE_STARTX=$COMMAND_START_CDE
+ 		;;
+-		unix-application)
++		unix-application|windows-helper|vnc-helper)
+ 			[ &quot;$application&quot; = &quot;xterm&quot; ] &amp;&amp; application=$COMMAND_XTERM
+ 			NODE_STARTX=$application
+ 		;;
+
+Modified: trunk/freenx-server/nxserver
+===================================================================
+--- trunk/freenx-server/nxserver	2008-08-18 02:26:05 UTC (rev 570)
++++ trunk/freenx-server/nxserver	2008-08-18 16:29:17 UTC (rev 571)
+@@ -1259,7 +1259,7 @@
+ 
+ 		if [ &quot;$ENABLE_EXTERNAL_NXDESKTOP&quot; = &quot;1&quot; -a &quot;$(getparam type)&quot; = &quot;windows&quot; ]
+ 		then
+-			type=&quot;unix-application&quot;
++			type=&quot;windows-helper&quot;
+ 			application=&quot;$PATH_BIN/nxdesktop_helper&quot;
+ 			PARAMS=&quot;$PARAMS&amp;type=$type&amp;application=$application&amp;freenx_export_agents=1&quot;
+ 			CMDLINE=$PARAMS
+@@ -1267,7 +1267,7 @@
+ 		 
+ 		if [ &quot;$ENABLE_EXTERNAL_NXVIEWER&quot; = &quot;1&quot; -a &quot;$(getparam type)&quot; = &quot;vnc&quot; ]
+ 		then
+-			type=&quot;unix-application&quot;
++			type=&quot;vnc-helper&quot;
+ 			application=&quot;$PATH_BIN/nxviewer_helper&quot;
+ 			PARAMS=&quot;$PARAMS&amp;type=$type&amp;application=$application&amp;freenx_export_agents=1&quot;
+ 			CMDLINE=$PARAMS
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000704.html">[Freenx-cvs] r570 - trunk/freenx-server
+</A></li>
+	<LI>Next message: <A HREF="000706.html">[Freenx-cvs] r572 - trunk/freenx-server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#705">[ date ]</a>
+              <a href="thread.html#705">[ thread ]</a>
+              <a href="subject.html#705">[ subject ]</a>
+              <a href="author.html#705">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

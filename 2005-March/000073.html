@@ -1,0 +1,161 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - jonno modified 2 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20jonno%20modified%202%20files&In-Reply-To=%3C42342C62.mail8K911HRB2%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000072.html">
+   <LINK REL="Next"  HREF="000074.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - jonno modified 2 files</H1>
+    <B>jonno</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20jonno%20modified%202%20files&In-Reply-To=%3C42342C62.mail8K911HRB2%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - jonno modified 2 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Sun Mar 13 13:04:50 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000072.html">[Freenx-cvs] CVS: freenx - fabianx modified nxnode
+</A></li>
+        <LI>Next message: <A HREF="000074.html">[Freenx-cvs] CVS: freenx - fabianx modified 4 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#73">[ date ]</a>
+              <a href="thread.html#73">[ thread ]</a>
+              <a href="subject.html#73">[ subject ]</a>
+              <a href="author.html#73">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      jonno
+Date:      2005-03-13 12:04:50 GMT
+Modified:  .        ChangeLog nxserver
+Log:
+Added the SESSION_HISTORY directive. Code by Fabian, I only provided a smal fix.
+
+Revision  Changes    Path
+1.34      +1 -0      freenx/ChangeLog
+
+
+rev 1.34, prev_rev 1.33
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.33
+retrieving revision 1.34
+diff -u -r1.33 -r1.34
+--- ChangeLog	13 Mar 2005 11:48:19 -0000	1.33
++++ ChangeLog	13 Mar 2005 12:04:49 -0000	1.34
+@@ -14,6 +14,7 @@
+ 		- SET_LD_LIBRARY_PATH replaces NX_NOMACHINE_WAY and is 
+ 		  enabled by default, as it is now safe to do so
+ 	* Implemented SSHD_CHECK_IP directive.
++	* Added the SESSION_HISTORY directive. Session history will by default be kept for 30 days.
+ 
+ 11.03.2005 FreeNX 0.3.1
+ 	* Fixed keyboard mapping problems.
+
+
+
+1.39      +17 -3     freenx/nxserver
+
+
+rev 1.39, prev_rev 1.38
+Index: nxserver
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxserver,v
+retrieving revision 1.38
+retrieving revision 1.39
+diff -u -r1.38 -r1.39
+--- nxserver	13 Mar 2005 11:48:19 -0000	1.38
++++ nxserver	13 Mar 2005 12:04:49 -0000	1.39
+@@ -11,7 +11,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxserver,v 1.38 2005/03/13 11:48:19 fabianx Exp $
++# CVS: $Id: nxserver,v 1.39 2005/03/13 12:04:49 jonno Exp $
+ #
+ 
+ # Read the config file
+@@ -277,6 +277,15 @@
+ 	done
+ }
+ 
++# remove all sessions older than $SESSION_HISTORY seconds in failed/closed.
++
++session_cleanup()
++{
++	[ &quot;$SESSION_HISTORY&quot; -gt &quot;-1&quot; ] || return
++	let SESSION_HISTORY_MINUTES=$SESSION_HISTORY/60
++	find $NX_SESS_DIR/closed/ $NX_SESS_DIR/failed/ -type f -mmin +&quot;$SESSION_HISTORY_MINUTES&quot; -exec rm -f '{}' ';'
++}
++
+ session_list_all()
+ {
+ 	echo &quot;NX&gt; 127 Sessions list:&quot;
+@@ -321,14 +330,16 @@
+ {
+ 	perl -pi -e &quot;s/startTime=\(.*\)/startTime=\1\nendTime=$(date +%s)/&quot; $NX_SESS_DIR/running/sessionId'{'$1'}'
+ 	session_status $1 &quot;Finished&quot;
+-	mv -f $NX_SESS_DIR/running/sessionId'{'$1'}' $NX_SESS_DIR/closed/sessionId'{'$1'}'
++	[ &quot;$SESSION_HISTORY&quot; = &quot;0&quot; ] &amp;&amp; rm -f $NX_SESS_DIR/running/sessionId'{'$1'}'
++	[ &quot;$SESSION_HISTORY&quot; = &quot;0&quot; ] || mv -f $NX_SESS_DIR/running/sessionId'{'$1'}' $NX_SESS_DIR/closed/sessionId'{'$1'}'
+ }
+ 
+ session_fail()
+ {
+ 	perl -pi -e &quot;s/startTime=\(.*\)/startTime=\1\nendTime=$(date +%s)/&quot; $NX_SESS_DIR/running/sessionId'{'$1'}'
+ 	session_status $1 &quot;Failed&quot;
+-	mv -f $NX_SESS_DIR/running/sessionId'{'$1'}' $NX_SESS_DIR/failed/sessionId'{'$1'}'
++	[ &quot;$SESSION_HISTORY&quot; = &quot;0&quot; ] &amp;&amp; rm -f $NX_SESS_DIR/running/sessionId'{'$1'}'
++	[ &quot;$SESSION_HISTORY&quot; = &quot;0&quot; ] || mv -f $NX_SESS_DIR/running/sessionId'{'$1'}' $NX_SESS_DIR/failed/sessionId'{'$1'}'
+ }
+ 
+ session_suspend()
+@@ -561,6 +572,9 @@
+ 		;;
+ 	esac
+ done
++
++# remove old session infos from history
++session_cleanup
+ 
+ #
+ # call it with: server_get_params $CMD # no &quot;&quot;!
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000072.html">[Freenx-cvs] CVS: freenx - fabianx modified nxnode
+</A></li>
+	<LI>Next message: <A HREF="000074.html">[Freenx-cvs] CVS: freenx - fabianx modified 4 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#73">[ date ]</a>
+              <a href="thread.html#73">[ thread ]</a>
+              <a href="subject.html#73">[ subject ]</a>
+              <a href="author.html#73">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

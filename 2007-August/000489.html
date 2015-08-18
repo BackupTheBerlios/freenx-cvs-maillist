@@ -1,0 +1,247 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r357 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r357%20-%20freenx-server/trunk&In-Reply-To=%3C200708061306.l76D6sir013666%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000488.html">
+   <LINK REL="Next"  HREF="000490.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r357 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r357%20-%20freenx-server/trunk&In-Reply-To=%3C200708061306.l76D6sir013666%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r357 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Mon Aug  6 15:06:54 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000488.html">[Freenx-cvs] r356 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000490.html">[Freenx-cvs] r358 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#489">[ date ]</a>
+              <a href="thread.html#489">[ thread ]</a>
+              <a href="subject.html#489">[ subject ]</a>
+              <a href="author.html#489">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-08-06 15:06:54 +0200 (Mon, 06 Aug 2007)
+New Revision: 357
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxclient
+Log:
+- Added 'dialog_interface=dialog' option since many installations may not have Xdialog and since
+xmessage is very limiting. (This new option will work on any machine that has dialog and xterm).
+
+Implementing this requires:
+        - Requoting (and saving) the inputs line
+	  ($@)
+	- Launching an xterm to display the
+	  dialog (and logic so only done once when
+	  subdialogs exist)
+	- Using a tempfile to capture temporarily
+	  the result of each dialog
+	- Defining the &quot;dialog&quot; interface
+	  functions analogous to the &quot;Xdialog&quot; interface functions
+          (with a few subtle syntax differences)
+
+JJK (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">puterguy at bat.berlios.de</A>)
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-08-03 18:49:01 UTC (rev 356)
++++ freenx-server/trunk/ChangeLog	2007-08-06 13:06:54 UTC (rev 357)
+@@ -4,7 +4,11 @@
+ 	* Added invalidating of NSCD cache after group and user add.
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">diamond at google.com</A>)
+ 	* Added better wording with less misunderstanding to dialog of 
+-	  nxclient for Suspend/Terminate/Close case.
++	  nxclient for Suspend/Terminate/Close case. (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">diamond at google.com</A>)
++	* Added 'dialog_interface=dialog' option since many installations may 
++	  not have Xdialog and since xmessage is very limiting. This new option 
++	  will work on any machine that has dialog and xterm.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">puterguy at bat.berlios.de</A>)
+ 
+ 07.07.2007 FreeNX 0.7.0 &quot;Jornade SPL Edition VI+1&quot;
+ 	* Fixed the printing support for CUPS 1.2.
+
+Modified: freenx-server/trunk/nxclient
+===================================================================
+--- freenx-server/trunk/nxclient	2007-08-03 18:49:01 UTC (rev 356)
++++ freenx-server/trunk/nxclient	2007-08-06 13:06:54 UTC (rev 357)
+@@ -19,6 +19,21 @@
+ [ -x &quot;$NXCLIENT&quot; -a &quot;$(file -bi $NXCLIENT)&quot; != 'application/x-shellscript' ] \
+ 	&amp;&amp; exec ${NXCLIENT} &quot;$@&quot;
+ 
++#JJK: borrowed from Aron Griffis
++
++function requote 
++{
++	declare arg
++
++	for arg
++	do
++		arg=$(printf '%q' &quot;$arg&quot;)
++		printf '%s ' &quot;${arg:-''}&quot;
++	done
++}
++
++INPUTS=$(requote &quot;$@&quot;)	#JJK: Save input parameter line...
++
+ TEMP=`getopt -a -o d: --long local,noautokill,dialog:,caption:,message:,display:,printer:,parent: -n $(basename $0) -- &quot;$@&quot;`
+ 
+ if [ $? != 0 ] ; then echo &quot;Terminating...&quot; &gt;&amp;2 ; exit 1 ; fi
+@@ -55,10 +70,34 @@
+ # if --printer is set, the dialog type is overridden
+ [ -n &quot;$DIALOG_PRINTER&quot; ] &amp;&amp; DIALOG_TYPE=&quot;printer&quot;
+ 
++# FIXME: This should be COMMAND_XDIALOG, ...
+ if [ -x /usr/bin/Xdialog ] 
+ then
+ 	dialog_interface=&quot;xdialog&quot;
+ 	DIALOG=/usr/bin/Xdialog # just in case that we have no good path
++elif [ -x /usr/bin/dialog ]
++then
++	#JJK: Added 'dialog_interface=dialog' option because Xdialog not standard
++	#JJK: on some distros such as Fedora and xmessage won't handle long
++	#JJK: lists of ppd files while the combination of 'dialog' and 'xterm'
++	#JJK: should be present on most setups.
++
++	dialog_interface=&quot;dialog&quot;
++	DIALOG=/usr/bin/dialog
++	if [ -z &quot;$NXCLIENT_FIRST_TIME&quot; ]
++	then
++		# Run only once in case of subdialogs. Capture result in tempfile
++		TMPFILE=$(mktemp /tmp/nxclient.XXXXX)
++		export NXCLIENT_FIRST_TIME=1
++
++		xterm -geometry 120x24+100+100 +sb -title &quot;NXclient&quot; -e \
++		       /bin/bash -c &quot;$DIALOG --infobox 'Please wait...' 3 25; $0 $INPUTS | tee $TMPFILE&quot; || exit 1
++
++		#Need to recover the last line output and remove non-printing chars
++		tail -1 $TMPFILE | egrep -v &quot;^[&quot;
++		rm -f $TMPFILE
++		exit 0
++	fi
+ else
+ 	dialog_interface=&quot;xmessage&quot;
+ 	xmessage=$(which xmessage 2&gt;/dev/null)
+@@ -257,7 +296,70 @@
+ 	$DIALOG --stdout --title &quot;$DIALOG_CAPTION&quot; --radiolist &quot;$DIALOG_MESSAGE&quot; 0 0 6 &quot;${XDIALOG_LIST[@]}&quot;
+ }
+ 
++#JJK: dialog interface
++# These are analogous to the Xdialog functions with a few subtle
++# syntax differences
++#
+ 
++dialog_ok()
++{
++	$DIALOG --title &quot;$DIALOG_CAPTION&quot; --msgbox &quot;$DIALOG_MESSAGE&quot; 0 0
++	return 0 # Give cancel on close ...
++}
++
++dialog_yesno()
++{
++	$DIALOG --title &quot;$DIALOG_CAPTION&quot; --yesno &quot;$DIALOG_MESSAGE&quot; 0 0
++	RC=$?
++	[ $RC -eq 0 ] &amp;&amp; return 2
++	[ $RC -eq 1 ] &amp;&amp; return 0
++}
++
++dialog_yesnosuspend()
++{
++	$DIALOG --title &quot;$DIALOG_CAPTION&quot;  --yes-label &quot;Suspend&quot; --no-label &quot;Terminate&quot; --yesno &quot;$DIALOG_MESSAGE\n\nPress 'Esc' to cancel.&quot; 8 60
++	RC=$?
++	[ $RC -eq 0 ] &amp;&amp; return 3
++	[ $RC -eq 1 ] &amp;&amp; return 2
++}
++
++dialog_panic()
++{
++	$DIALOG --title &quot;$DIALOG_CAPTION&quot; --defaultno --yes-label &quot;Terminate&quot; --no-label &quot;Cancel&quot; --yesno &quot;$DIALOG_MESSAGE&quot; 0 0
++	RC=$?
++	[ $RC -eq 0 ] &amp;&amp; return 2
++	[ $RC -eq 1 ] &amp;&amp; return 0
++}
++
++dialog_quit()
++{
++	$DIALOG --ok-label &quot;Quit&quot; --title &quot;$DIALOG_CAPTION&quot; --msgbox &quot;$DIALOG_MESSAGE&quot; 0 0
++	return 0 # Give cancel on close ...
++}
++
++dialog_printer_ask()
++{
++	$DIALOG --cr-wrap --title &quot;$DIALOG_CAPTION&quot; --yes-label &quot;Ok&quot; --no-label &quot;Configure&quot; --yesno &quot;$DIALOG_MESSAGE\n\nPress 'Esc' to cancel.&quot; 10 70
++	RC=$?
++	echo $RC
++	[ $RC -eq 255 ] &amp;&amp; return 2
++	return $RC
++}
++
++dialog_printer_configure_vendor()
++{
++	IFS='|' VENDOR_LIST=( $(utility_printer getvendlist | sed 's/|/||/g') )
++	$DIALOG --stdout --title &quot;$DIALOG_CAPTION&quot; --menu &quot;$DIALOG_MESSAGE&quot; 0 40 15 &quot;${VENDOR_LIST[@]}&quot;
++}
++
++# dialog_printer_configure_driver vendor old_driver
++dialog_printer_configure_driver()
++{
++	IFS='|' XDIALOG_LIST=( $(utility_printer getextdrvlist &quot;$1&quot; | tr '\n' '|') )
++	$DIALOG --stdout --title &quot;$DIALOG_CAPTION&quot; --menu &quot;$DIALOG_MESSAGE&quot; 0 110 15 &quot;${XDIALOG_LIST[@]}&quot;
++}
++
++
+ #
+ # helper functions
+ #
+@@ -299,7 +401,7 @@
+ 	# echo the choosen &lt;ppdfile&gt; to stdout
+ 	[ -n &quot;$DRIVER&quot; ] &amp;&amp; echo &quot;$DRIVER&quot;
+ 	[ -z &quot;$DRIVER&quot; ] &amp;&amp; echo &quot;cancel: aborted&quot; &amp;&amp; exit 2
+-			
++
+ 	exit 0
+ }
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000488.html">[Freenx-cvs] r356 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000490.html">[Freenx-cvs] r358 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#489">[ date ]</a>
+              <a href="thread.html#489">[ thread ]</a>
+              <a href="subject.html#489">[ subject ]</a>
+              <a href="author.html#489">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

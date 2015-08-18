@@ -1,0 +1,182 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r470 - qtnx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r470%20-%20qtnx&In-Reply-To=%3C200802050227.m152RxTG026995%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000595.html">
+   <LINK REL="Next"  HREF="000597.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r470 - qtnx</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r470%20-%20qtnx&In-Reply-To=%3C200802050227.m152RxTG026995%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r470 - qtnx">gwright at mail.berlios.de
+       </A><BR>
+    <I>Tue Feb  5 03:27:59 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000595.html">[Freenx-cvs] r469 - qtnx
+</A></li>
+        <LI>Next message: <A HREF="000597.html">[Freenx-cvs] r471 - qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#596">[ date ]</a>
+              <a href="thread.html#596">[ thread ]</a>
+              <a href="subject.html#596">[ subject ]</a>
+              <a href="author.html#596">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2008-02-05 03:27:58 +0100 (Tue, 05 Feb 2008)
+New Revision: 470
+
+Modified:
+   qtnx/logindialog.ui
+   qtnx/qtnxwindow.cpp
+   qtnx/qtnxwindow.h
+   qtnx/settingsdialog.ui
+Log:
+Make the automatic closing user configurable
+
+
+Modified: qtnx/logindialog.ui
+===================================================================
+--- qtnx/logindialog.ui	2008-02-05 01:53:10 UTC (rev 469)
++++ qtnx/logindialog.ui	2008-02-05 02:27:58 UTC (rev 470)
+@@ -191,6 +191,9 @@
+        &lt;property name=&quot;text&quot; &gt;
+         &lt;string&gt;&amp;Connect&lt;/string&gt;
+        &lt;/property&gt;
++       &lt;property name=&quot;default&quot; &gt;
++        &lt;bool&gt;true&lt;/bool&gt;
++       &lt;/property&gt;
+       &lt;/widget&gt;
+      &lt;/item&gt;
+     &lt;/layout&gt;
+
+Modified: qtnx/qtnxwindow.cpp
+===================================================================
+--- qtnx/qtnxwindow.cpp	2008-02-05 01:53:10 UTC (rev 469)
++++ qtnx/qtnxwindow.cpp	2008-02-05 02:27:58 UTC (rev 470)
+@@ -74,7 +74,7 @@
+ 
+     connect(&amp;callback, SIGNAL(atCapacity()), this, SLOT(handleAtCapacity()));
+ 
+-    connect(&amp;callback, SIGNAL(connectedSuccessfully()), this, SLOT(close()));
++    connect(&amp;callback, SIGNAL(connectedSuccessfully()), this, SLOT(quit()));
+ }
+ 
+ QtNXWindow::~QtNXWindow()
+@@ -82,6 +82,11 @@
+     delete m_NXClient;
+ }
+ 
++void QtNXWindow::quit()
++{
++    if (closeWindowAction-&gt;isChecked())
++        qApp-&gt;quit();
++}
+ void QtNXWindow::initialiseClient()
+ {
+     m_NXClient-&gt;setExternalCallbacks(&amp;callback);
+@@ -147,6 +152,17 @@
+     connectionMenu-&gt;addAction(tr(&quot;Connect...&quot;),
+             this,
+             SLOT(startConnect()));
++
++    connectionMenu-&gt;addSeparator();
++
++    closeWindowAction = connectionMenu-&gt;addAction(
++            tr(&quot;Close QtNX when NX starts&quot;),
++            this,
++            SLOT(closeNXStarts()),
++            QKeySequence(tr(&quot;CTRL+O&quot;)));
++
++    closeWindowAction-&gt;setCheckable(true);
++    closeWindowAction-&gt;setChecked(true);
+ }
+ 
+ void QtNXWindow::showLogWindow()
+
+Modified: qtnx/qtnxwindow.h
+===================================================================
+--- qtnx/qtnxwindow.h	2008-02-05 01:53:10 UTC (rev 469)
++++ qtnx/qtnxwindow.h	2008-02-05 02:27:58 UTC (rev 470)
+@@ -120,6 +120,7 @@
+         void sshContinue(QString);
+         void failedLogin();
+         void showLogWindow();
++        void quit();
+     private:
+ 
+         // Decided to split up the code
+@@ -143,6 +144,7 @@
+         QtNXSettings *settingsDialog;
+         QtNXSessions *sessionsDialog;
+ 
++        QAction *closeWindowAction;
+         QDialog *logWindow;
+         QMenu *fileMenu;
+         QMenu *connectionMenu;
+
+Modified: qtnx/settingsdialog.ui
+===================================================================
+--- qtnx/settingsdialog.ui	2008-02-05 01:53:10 UTC (rev 469)
++++ qtnx/settingsdialog.ui	2008-02-05 02:27:58 UTC (rev 470)
+@@ -916,6 +916,12 @@
+        &lt;property name=&quot;text&quot; &gt;
+         &lt;string&gt;&amp;OK&lt;/string&gt;
+        &lt;/property&gt;
++       &lt;property name=&quot;autoDefault&quot; &gt;
++        &lt;bool&gt;false&lt;/bool&gt;
++       &lt;/property&gt;
++       &lt;property name=&quot;default&quot; &gt;
++        &lt;bool&gt;true&lt;/bool&gt;
++       &lt;/property&gt;
+       &lt;/widget&gt;
+      &lt;/item&gt;
+      &lt;item&gt;
+@@ -923,6 +929,9 @@
+        &lt;property name=&quot;text&quot; &gt;
+         &lt;string&gt;&amp;Apply&lt;/string&gt;
+        &lt;/property&gt;
++       &lt;property name=&quot;autoDefault&quot; &gt;
++        &lt;bool&gt;false&lt;/bool&gt;
++       &lt;/property&gt;
+       &lt;/widget&gt;
+      &lt;/item&gt;
+     &lt;/layout&gt;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000595.html">[Freenx-cvs] r469 - qtnx
+</A></li>
+	<LI>Next message: <A HREF="000597.html">[Freenx-cvs] r471 - qtnx
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#596">[ date ]</a>
+              <a href="thread.html#596">[ thread ]</a>
+              <a href="subject.html#596">[ subject ]</a>
+              <a href="author.html#596">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

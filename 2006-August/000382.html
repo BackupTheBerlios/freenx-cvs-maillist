@@ -1,0 +1,185 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r251 - nxclientlib
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2006-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r251%20-%20nxclientlib&In-Reply-To=%3C200608040217.k742HFnE020866%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000381.html">
+   <LINK REL="Next"  HREF="000383.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r251 - nxclientlib</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r251%20-%20nxclientlib&In-Reply-To=%3C200608040217.k742HFnE020866%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r251 - nxclientlib">gwright at mail.berlios.de
+       </A><BR>
+    <I>Fri Aug  4 04:17:15 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000381.html">[Freenx-cvs] r250 - nxclientlib
+</A></li>
+        <LI>Next message: <A HREF="000383.html">[Freenx-cvs] r252 - in nxclientlib: . qt-test test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#382">[ date ]</a>
+              <a href="thread.html#382">[ thread ]</a>
+              <a href="subject.html#382">[ subject ]</a>
+              <a href="author.html#382">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2006-08-04 04:17:12 +0200 (Fri, 04 Aug 2006)
+New Revision: 251
+
+Modified:
+   nxclientlib/nxsession.cpp
+   nxclientlib/nxsession.h
+Log:
+Make external stuff Qt-independent
+
+
+Modified: nxclientlib/nxsession.cpp
+===================================================================
+--- nxclientlib/nxsession.cpp	2006-08-03 23:58:17 UTC (rev 250)
++++ nxclientlib/nxsession.cpp	2006-08-04 02:17:12 UTC (rev 251)
+@@ -132,7 +132,7 @@
+ 					
+ 				if (sessionData.suspended) {
+ 					// These are the session parameters that NoMachine's client sends for resume
+-					returnMessage = &quot;restoresession --id=\&quot;&quot; + sessionData.id +
++					returnMessage = &quot;restoresession --id=\&quot;&quot; + QString(sessionData.id) +
+ 					&quot;\&quot; --session=\&quot;&quot; + sessionData.sessionName +
+ 					&quot;\&quot; --type=\&quot;&quot; + sessionData.sessionType +
+ 					&quot;\&quot; --cache=\&quot;&quot; + QString::number(sessionData.cache) +
+@@ -149,7 +149,7 @@
+ 					&quot;\&quot; --agent_password=\&quot;&quot; + sessionData.agentPass + &quot;\&quot;&quot;;
+ 					stage++;
+ 				} else {
+-					returnMessage = &quot;startsession --session=\&quot;&quot; + sessionData.sessionName +
++					returnMessage = &quot;startsession --session=\&quot;&quot; + QString(sessionData.sessionName) +
+ 					&quot;\&quot; --type=\&quot;&quot; + sessionData.sessionType +
+ 					&quot;\&quot; --cache=\&quot;&quot; + QString::number(sessionData.cache) +
+ 					&quot;M\&quot; --images=\&quot;&quot; + QString::number(sessionData.images) +
+@@ -160,7 +160,7 @@
+ 					&quot;\&quot; --backingstore=\&quot;&quot; + sessionData.backingstore +
+ 					&quot;\&quot; --imagecompressionmethod=\&quot;&quot; + QString::number(sessionData.imageCompressionMethod) +
+ 					&quot;\&quot; --geometry=\&quot;&quot; + sessionData.geometry +
+-					&quot;\&quot; --screeninfo=\&quot;&quot; + sessionData.screenInfo + 
++					&quot;\&quot; --screeninfo=\&quot;&quot; + xRes + &quot;x&quot; + yRes + &quot;x&quot; + depth + &quot;+&quot; + renderSet +
+ 					&quot;\&quot; --keyboard=\&quot;&quot; + sessionData.keyboard +
+ 					&quot;\&quot; --kbtype=\&quot;&quot; + sessionData.kbtype +
+ 					&quot;\&quot; --media=\&quot;&quot; + QString::number(media) +
+@@ -229,13 +229,13 @@
+ 
+ 	for (i = 0; i &lt; rawsessions.size(); ++i) {
+ 		resData.display = rawsessions.at(i).at(0).toInt();
+-		resData.sessionType = rawsessions.at(i).at(1);
+-		resData.sessionID = rawsessions.at(i).at(2);
+-		resData.options = rawsessions.at(i).at(3);
++		resData.sessionType = rawsessions.at(i).at(1).toAscii().data();
++		resData.sessionID = rawsessions.at(i).at(2).toAscii().data();
++		resData.options = rawsessions.at(i).at(3).toAscii().data();
+ 		resData.depth = rawsessions.at(i).at(4).toInt();
+-		resData.screen = rawsessions.at(i).at(5);
+-		resData.available = rawsessions.at(i).at(6);
+-		resData.sessionName = rawsessions.at(i).at(7);
++		resData.screen = rawsessions.at(i).at(5).toAscii().data();
++		resData.available = rawsessions.at(i).at(6).toAscii().data();
++		resData.sessionName = rawsessions.at(i).at(7).toAscii().data();
+ 		runningSessions.push_back(resData);
+ 	}
+ 
+
+Modified: nxclientlib/nxsession.h
+===================================================================
+--- nxclientlib/nxsession.h	2006-08-03 23:58:17 UTC (rev 250)
++++ nxclientlib/nxsession.h	2006-08-04 02:17:12 UTC (rev 251)
+@@ -28,37 +28,37 @@
+ #include &lt;unistd.h&gt;
+ 
+ struct NXSessionData {
+-	QString sessionName;
+-	QString sessionType;
++	const char *sessionName;
++	const char *sessionType;
+ 	int cache;
+ 	int images;
+-	QString linkType;
++	const char *linkType;
+ 	bool render;
+-	QString backingstore;
++	const char *backingstore;
+ 	int imageCompressionMethod;
+ 	int imageCompressionLevel;
+-	QString geometry;
+-	QString keyboard;
+-	QString kbtype;
++	const char *geometry;
++	const char *keyboard;
++	const char *kbtype;
+ 	bool media;
+-	QString agentServer;
+-	QString agentUser;
+-	QString agentPass;
+-	QString screenInfo;
++	const char *agentServer;
++	const char *agentUser;
++	const char *agentPass;
++	const char *screenInfo;
+ 	int cups;
+-	QString id;
++	const char *id;
+ 	bool suspended;
+ };
+ 
+ struct NXResumeData {
+ 	int display;
+-	QString sessionType;
+-	QString sessionID;
+-	QString options;
++	const char *sessionType;
++	const char *sessionID;
++	const char *options;
+ 	int depth;
+-	QString screen;
+-	QString available;
+-	QString sessionName;
++	const char *screen;
++	const char *available;
++	const char *sessionName;
+ };
+ 
+ // This class is used to parse the output from the nxssh session to the server
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000381.html">[Freenx-cvs] r250 - nxclientlib
+</A></li>
+	<LI>Next message: <A HREF="000383.html">[Freenx-cvs] r252 - in nxclientlib: . qt-test test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#382">[ date ]</a>
+              <a href="thread.html#382">[ thread ]</a>
+              <a href="subject.html#382">[ subject ]</a>
+              <a href="author.html#382">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

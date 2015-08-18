@@ -1,0 +1,1056 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - jonno modified 2 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-April/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20jonno%20modified%202%20files&In-Reply-To=%3C426BDEEA.mail4UK1FRYLG%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000125.html">
+   <LINK REL="Next"  HREF="000127.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - jonno modified 2 files</H1>
+    <B>jonno</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20jonno%20modified%202%20files&In-Reply-To=%3C426BDEEA.mail4UK1FRYLG%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - jonno modified 2 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Sun Apr 24 20:01:14 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000125.html">[Freenx-cvs] CVS: freenx - fabianx modified ChangeLog
+</A></li>
+        <LI>Next message: <A HREF="000127.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#126">[ date ]</a>
+              <a href="thread.html#126">[ thread ]</a>
+              <a href="subject.html#126">[ subject ]</a>
+              <a href="author.html#126">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      jonno
+Date:      2005-04-24 18:01:14 GMT
+Modified:  .        node.conf.sample nxloadconfig
+Log:
+FR #848: node.conf.sample cleanup and rearange.
+
+Revision  Changes    Path
+1.21      +164 -164  freenx/node.conf.sample
+
+
+rev 1.21, prev_rev 1.20
+Index: node.conf.sample
+===================================================================
+RCS file: /cvsroot/freenx/freenx/node.conf.sample,v
+retrieving revision 1.20
+retrieving revision 1.21
+diff -u -r1.20 -r1.21
+--- node.conf.sample	24 Apr 2005 15:51:54 -0000	1.20
++++ node.conf.sample	24 Apr 2005 18:01:14 -0000	1.21
+@@ -37,37 +37,23 @@
+ #
+ #           <A HREF="https://mail.kde.org/mailman/listinfo/freenx-knx">https://mail.kde.org/mailman/listinfo/freenx-knx</A>
+ #
+-# CVS: $Id: node.conf.sample,v 1.20 2005/04/24 15:51:54 fabianx Exp $
++# CVS: $Id: node.conf.sample,v 1.21 2005/04/24 18:01:14 jonno Exp $
+ 
+ #########################################################################
+-# FreeNX specific node.conf directives
++# General FreeNX directives
+ #########################################################################
+ 
+-# This directives controls the verbosity of the server-wide log.
+-# 0: No Logging, 
+-# 1: Errors
+-# 2: Warnings
+-# 3: Important information
+-# 4: Server - Client communication
+-# 5: Information
+-# 6: Debugging information
+-#NX_LOG_LEVEL=0
++# The host name which is used by NX server. It's should be used if it's
++# different than the default hostname (as returned by `hostname`)
++#SERVER_NAME=&quot;$(hostname)&quot;
+ 
+-# Before turning logging on, please make sure that NX_LOGFILE is 
+-# writeable for the &quot;nx&quot; user
+-#NX_LOGFILE=/var/log/nxserver.log
++# The port number where local 'sshd' is listening.
++#SSHD_PORT=22
+ 
+-# This directive controls if the temporary session directory 
+-# ($HOME/.nx/C-&lt;hostname&gt;-&lt;display&gt;-&lt;session_id&gt;) should be kept after a 
+-# session has ended. A successfully terminated session will be saved as 
+-# T-C-&lt;hostname&gt;-&lt;display&gt;-&lt;session_id&gt; while a failed session will be saved 
+-# as F-C-&lt;hostname&gt;-&lt;display&gt;-&lt;session_id&gt;.
+-#SESSION_LOG_CLEAN=0
+ 
+-# Amount of seconds nxserver is to keep session history. The default of 2592000
+-# is equivalent to 30 days. If this is 0 no session history will be kept,
+-# and a negative value denotes infinity.
+-#SESSION_HISTORY=2592000
++#########################################################################
++# Authentication / Security directives
++#########################################################################
+ 
+ # Authentication directives
+ # This adds the passdb to the possible authentication methods
+@@ -78,35 +64,97 @@
+ #ENABLE_SSH_AUTHENTICATION=&quot;1&quot;
+ 
+ # This adds SU to the possible authentication methods. For it to work the 
+-# &quot;nx&quot; user must be in the wheel (RedHat, Fedora) or the users group (SUSE) 
+-# and the user logging in must have a valid shell that accepts the -c 
++# &quot;nx&quot; user must be in the wheel (RedHat, Fedora) or the users group (SUSE)
++# and the user logging in must have a valid shell that accepts the -c
+ # parameter.
+ #ENABLE_SU_AUTHENTICATION=&quot;0&quot;
+ 
+-# Require all users to be in the passdb, regardless of authentication 
+-# method
++# Require all users to be in the passdb, regardless of authentication method
+ #ENABLE_USER_DB=&quot;0&quot;
+ 
+-# When set to 1 this will automatically resume started sessions
+-#ENABLE_AUTORECONNECT=&quot;0&quot;
+ 
+-# When set to 1 this will automatically resume started sessions
+-# but only if an older client version is used
+-#ENABLE_AUTORECONNECT_BEFORE_140=&quot;1&quot;
++# If enabled forces the user to use encryption. This will bail out
++# if the user does not have encryption enabled.
++#ENABLE_FORCE_ENCRYPTION=&quot;0&quot;
+ 
+-# When set to 1 exports NXUSERIP / NXSESSIONID in nxnode
+-#EXPORT_USERIP=&quot;0&quot;
+-#EXPORT_SESSIONID=&quot;0&quot;
++# Refuse the NX client connection if SSHD does not export the
++# SSH_CONNECTION and SSH_CLIENT variables in the environment
++# passed to the NX server.
++# 1: Will check the remote IP and will not accept the
++#    connection if it can't be determined.
++# 0: Will accept the connection even if the remote IP
++#    is not provided.
++#SSHD_CHECK_IP=&quot;0&quot;
+ 
+-# This can be set to any executable, which is started after session startup
+-# like: $NODE_AUTOSTART {start|restore}
+-#NODE_AUTOSTART=&quot;&quot;
++
++#########################################################################
++# Limitations
++#########################################################################
++
++# The base display number from which sessions are started.
++#DISPLAY_BASE=1000
++
++# The maximum number of contemporary sessions that can be run on FreeNX
++#SESSION_LIMIT=200
++
++# The maximum number of contemporary sessions that a single user can run
++# on FreeNX. Defaults to the value of SESSION_LIMIT.
++#SESSION_USER_LIMIT=200
++
++# The number of displays reserved for sessions, it has to be greater or equal
++# to the maximum number of contemporary sessions that a server can run.
++#DISPLAY_LIMIT=200
++
++
++# User for which sessions should be persistent. Either the keyword &quot;all&quot; or a
++# comma-separated list of usernames or groups in the @groupname syntax.
++#ENABLE_PERSISTENT_SESSION=&quot;all&quot;
++
++# Users and groups for whom persistent sessions should be disabled.
++# Especially useful if ENABLE_PERSISTENT_SESSION=&quot;all&quot;
++#DISABLE_PERSISTENT_SESSION=&quot;&quot;
++
++
++#########################################################################
++# Logging directives
++#########################################################################
++
++# This directives controls the verbosity of the server-wide log.
++# 0: No Logging
++# 1: Errors
++# 2: Warnings
++# 3: Important information
++# 4: Server - Client communication
++# 5: Information
++# 6: Debugging information
++#NX_LOG_LEVEL=0
++
++# Before turning logging on, please make sure that NX_LOGFILE is
++# writeable for the &quot;nx&quot; user
++#NX_LOGFILE=/var/log/nxserver.log
++
++# This directive controls if the temporary session directory
++# ($HOME/.nx/C-&lt;hostname&gt;-&lt;display&gt;-&lt;session_id&gt;) should be kept after a
++# session has ended. A successfully terminated session will be saved as
++# T-C-&lt;hostname&gt;-&lt;display&gt;-&lt;session_id&gt; while a failed session will be saved
++# as F-C-&lt;hostname&gt;-&lt;display&gt;-&lt;session_id&gt;.
++#SESSION_LOG_CLEAN=0
++
++# Amount of seconds nxserver is to keep session history. The default of 2592000
++# is equivalent to 30 days. If this is 0 no session history will be kept
++# and a negative value denotes infinity.
++#SESSION_HISTORY=2592000
++
++
++#########################################################################
++# Forwarding directives
++#########################################################################
+ 
+ # FreeNX with ENABLE_SERVER_FORWARD=&quot;1&quot; will automatically forward all
+-# connections to the host specified in SERVER_FORWARD_HOST with the 
++# connections to the host specified in SERVER_FORWARD_HOST with the
+ # secret key SERVER_FORWARD_KEY.
+ #
+-# This allows to have a &quot;chain&quot; of NX Servers. Note that you will need to 
++# This allows to have a &quot;chain&quot; of NX Servers. Note that you will need to
+ # use &quot;SSL encryption&quot; for all connections.
+ 
+ #ENABLE_SERVER_FORWARD=&quot;0&quot;
+@@ -114,6 +162,7 @@
+ #SERVER_FORWARD_PORT=22
+ #SERVER_FORWARD_KEY=&quot;/usr/NX/share/client.id_dsa.key&quot;
+ 
++
+ # FreeNX with ENABLE_NOMACHINE_FORWARD_USER=&quot;1&quot; will automatically forward all
+ # connections to the commercial NoMachine nxserver installed on the same
+ # machine. This feature is introduced to enable the usage of FreeNX and
+@@ -130,131 +179,76 @@
+ #NOMACHINE_SERVER=&quot;/usr/NX/bin/nxserver&quot;
+ #NOMACHINE_NX_HOME_DIR=&quot;/usr/NX/home/nx&quot;
+ 
+-# To just forward connections to the NoMachine server, which connect to a 
++
++# To just forward connections to the NoMachine server, which connect to a
+ # certain port enable the following two directives.
+ # 
+-# Note: You need to let SSHD listen to several ports to make use of this 
++# Note: You need to let SSHD listen to several ports to make use of this
+ #       directive.
+ 
+ #ENABLE_NOMACHINE_FORWARD_PORT=&quot;0&quot;
+ #NOMACHINE_FORWARD_PORT=&quot;22&quot;
+ 
+-# When set to 1 will start nxagent in rootless mode.
+-#ENABLE_ROOTLESS_MODE=&quot;0&quot;
+ 
+-# FreeNX with ENABLE_ESD_PRELOAD=&quot;1&quot; will automatically try to setup 
++#########################################################################
++# Services directives
++#########################################################################
++
++# FreeNX with ENABLE_ESD_PRELOAD=&quot;1&quot; will automatically try to setup
+ # the sound with the help of the esd media helper.
+ #
+ # Currently ESD will be used just by the Windows NX Client.
+ #
+-# Be sure that $ESD_BIN_PRELOAD is in your path, does exist and work 
++# Be sure that $ESD_BIN_PRELOAD is in your path, does exist and work
+ # before enabling this directive.
+ 
+ #ENABLE_ESD_PRELOAD=&quot;0&quot;
+ #ESD_BIN_PRELOAD=&quot;esddsp&quot;
+ 
+-# FreeNX with ENABLE_ARTSD_PRELOAD=&quot;1&quot; will automatically try to setup 
++# FreeNX with ENABLE_ARTSD_PRELOAD=&quot;1&quot; will automatically try to setup
+ # the sound with the help of the artsd media helper.
+ #
+ # Currently ARTSD will be used just by the Linux NX Client.
+ #
+-# Be sure that $ARTSD_BIN_PRELOAD is in your path, does exist and work 
++# Be sure that $ARTSD_BIN_PRELOAD is in your path, does exist and work
+ # before enabling this directive.
+ 
+ #ENABLE_ARTSD_PRELOAD=&quot;0&quot;
+ #ARTSD_BIN_PRELOAD=&quot;artsdsp&quot;
+ 
+-# The key that contains the name of the complete path of the 'netcat' command. 
+-#COMMAND_NETCAT=netcat
+-
+-# The key that contains the name of the complete path of the 'ssh' and 
+-# 'ssh-keygen' command. 
+-#COMMAND_SSH=ssh
+-#COMMAND_SSH_KEYGEN=ssh-keygen
+-
+-# If enabled writes entries via the COMMAND_SESSREG program 
+-# into utmp/wtmp/lastlog database.
+-#
+-# Note: You have to make sure that you add the nx user to the 
+-#       utmp or tty group or how its called on your system
+-#       before this directive works.
+ 
+-#ENABLE_USESSION=&quot;0&quot;
+-#COMMAND_SESSREG=&quot;sessreg&quot;
++#########################################################################
++# Path directives
++#########################################################################
+ 
+ # USER_FAKE_HOME is the base directory for the .nx directory. Use this
+ # parameter instead of the users home directory if $HOME is on a NFS share.
+-# Note that this directory must be unique for every user! To accomplish this 
++# Note that this directory must be unique for every user! To accomplish this
+ # it is recommended to include $USER in the path.
+ #USER_FAKE_HOME=$HOME
+ 
+ # Add the nx libraries to LD_LIBRARY_PATH before starting nx agents.
+-# WARNING: This will NOT (and should not) affect applications. ONLY Disable this
+-#          if the nx libraries are in a standard system path (such as /usr/lib)!
++# WARNING: This will NOT (and should not) affect applications. ONLY Disable
++# this if the nx libraries are in a standard system path (such as /usr/lib)!
+ #SET_LD_LIBRARY_PATH=&quot;1&quot;
+ 
+-# If enabled forces the user to use encryption. This will bail out 
+-# if the user does not have encryption enabled.
+-#ENABLE_FORCE_ENCRYPTION=&quot;0&quot;
+-
+-#########################################################################
+-# NoMachine node.conf compatible (almost) directives
+-# All might not be implemented as of now, but will be in the near future.
+-#########################################################################
+-
+-# The host name which is used by NX server. It's should be used if it's 
+-# different than the default hostname (as returned by `hostname`)
+-#SERVER_NAME=&quot;$(hostname)&quot;
+-
+-# Refuse the NX client connection if SSHD does not export the
+-# SSH_CONNECTION and SSH_CLIENT variables in the environment
+-# passed to the NX server.
+-#
+-# 1: Will check the remote IP and will not accept the
+-# connection if it can't be determined.
+-#
+-# 0: Will accept the connection even if the remote IP
+-# is not provided.
+-#SSHD_CHECK_IP=&quot;0&quot;
+-
+-# The port number where local 'sshd' is listening. 
+-#SSHD_PORT=22
+-
+-
+-# The base display number from which sessions are started. 
+-#DISPLAY_BASE=1000
+-
+-# The maximum number of contemporary sessions that can be run on FreeNX
+-#SESSION_LIMIT=200
+-
+-# The maximum number of contemporary sessions that a single user can run
+-# on FreeNX. Defaults to the value of SESSION_LIMIT.
+-#SESSION_USER_LIMIT=200
+-
+-# The number of displays reserved for sessions, it has to be greater or equal
+-# to the maximum number of contemporary sessions that a server can run. 
+-#DISPLAY_LIMIT=200
+ 
+-
+-# The command binary for the default window manager. It is run when a 
+-# unix 'custom' session is requested by the NX Client and an application 
+-# to run is specified. By default it is set to &quot;twm&quot;. If you don't have 
++# The command binary for the default window manager. It is run when a
++# 'unix-custom' session is requested by the NX Client and an application
++# to run is specified. By default it is set to &quot;twm&quot;. If you don't have
+ # twm in the default path or if you want to use another window manager,
+-# you have to set it to the absolute file name of the command binary you 
++# you have to set it to the absolute file name of the command binary you
+ # want to use.
+-
+ # FreeNX: To enable this feature set ENABLE_DEFAULT_X_WM=&quot;1&quot;
+-#         
+ #         If ENABLE_DEFAULT_X_WM_KILL is set the WM is terminated
+-#         after the started application finishes. Else FreeNX will 
+-#         wait for the window manager to complete. 
+-
++#         after the started application finishes. Else FreeNX will
++#         wait for the window manager to complete.
+ #ENABLE_DEFAULT_X_WM=&quot;0&quot;
+ #ENABLE_DEFAULT_X_WM_KILL=&quot;0&quot;
+ #DEFAULT_X_WM=twm
+ 
+ # When a 'unix-default' session is requested by the client the user's X startup
+-# script will be run if pressent and executable, otherwise the default X 
++# script will be run if pressent and executable, otherwise the default X
+ # session will be run.
+ # Depending on distribution USER_X_STARTUP_SCRIPT might be .Xclients, .xinitrc
+ # and .Xsession
+@@ -263,66 +257,73 @@
+ #USER_X_STARTUP_SCRIPT=.Xclients
+ #DEFAULT_X_SESSION=/etc/X11/xdm/Xsession
+ 
+-# The key that contains the name of the script that starts a KDE session. 
+-# It's run when a unix 'kde' session is requested by the client.
++# The key that contains the name of the script that starts a KDE session.
++# It's run when a 'unix-kde' session is requested by the client.
+ #COMMAND_START_KDE=startkde
+ 
+-# The key that contains the name of the script that starts a gnome session. 
+-# It's run when a unix 'gnome' session is requested by the client.
++# The key that contains the name of the script that starts a gnome session.
++# It's run when a 'unix-gnome' session is requested by the client.
+ #COMMAND_START_GNOME=gnome-session
+ 
+-# The key that contains the name of the script that starts a CDE session. 
+-# It's run when a unix 'cde' session is requested by the client.
++# The key that contains the name of the script that starts a CDE session.
++# It's run when a 'unix-cde' session is requested by the client.
+ #COMMAND_START_CDE=cdwm
+ 
+-# The key that contains the name of the complete path of command name 
+-# 'xterm'. It is run when a unix &quot;xterm&quot; session is requested by the 
++# The key that contains the name of the complete path of command name
++# 'xterm'. It is run when a unix &quot;xterm&quot; session is requested by the
+ # client.
+ #COMMAND_XTERM=xterm
+ 
+-# The key that contains the name of the complete path of command name 
++# The key that contains the name of the complete path of command name
+ # 'xauth'.
+ #COMMAND_XAUTH=/usr/X11R6/bin/xauth
+ 
+-# The key that contains the name of the complete path of command name 
+-# 'xset'. 
+-# FreeNX: This key is not used in the FreeNX project.
+-
+-#COMMAND_XSET=/usr/X11R6/bin/xset
++# The key that contains the name of the complete path of command name
++# 'smbmount'.
++#COMMAND_SMBMOUNT=smbmount
+ 
+-# The key that contains the name of the complete path of command name 
+-# 'xmodmap'. 
+-# FreeNX: This key is not used in the FreeNX project.
++# The key that contains the name of the complete path of command name
++# 'smbumount'.
++#COMMAND_SMBUMOUNT=smbumount
+ 
+-#COMMAND_XMODMAP=/usr/X11R6/bin/xmodmap
++# The key that contains the name of the complete path of the 'netcat' command.
++#COMMAND_NETCAT=netcat
+ 
+-# The key that contains the name of the complete path of command name 
+-# 'xkbcomp'. 
+-# FreeNX: This key is not used in the FreeNX project.
++# The key that contains the name of the complete path of the 'ssh' and
++# 'ssh-keygen' command.
++#COMMAND_SSH=ssh
++#COMMAND_SSH_KEYGEN=ssh-keygen
+ 
+-#COMMAND_XKBCOMP=/usr/X11R6/bin/xkbcomp
+ 
+-# The keymap file for xkbcomp
+-# FreeNX: This key is not used in the FreeNX project.
++#########################################################################
++# Misc directives
++#########################################################################
+ 
+-#XKBCOMP_KEYMAP_FILE=/etc/X11/xkb/keymap/xfree86
++# When set to 1 this will automatically resume started sessions
++#ENABLE_AUTORECONNECT=&quot;0&quot;
+ 
+-# The key that contains the name of the complete path of command name 
+-# 'smbmount'.
+-#COMMAND_SMBMOUNT=smbmount
++# When set to 1 this will automatically resume started sessions
++# but only if an older client version is used
++#ENABLE_AUTORECONNECT_BEFORE_140=&quot;1&quot;
+ 
+-# The key that contains the name of the complete path of command name
+-# 'smbumount'.
+-#COMMAND_SMBUMOUNT=smbumount
++# When set to 1 exports NXUSERIP / NXSESSIONID in nxnode
++#EXPORT_USERIP=&quot;0&quot;
++#EXPORT_SESSIONID=&quot;0&quot;
+ 
++# This can be set to any executable, which is started after session startup
++# like: $NODE_AUTOSTART {start|restore}
++#NODE_AUTOSTART=&quot;&quot;
+ 
+-# User for which sessions should be persistent. Either the keyword &quot;all&quot; or a
+-# comma-separated list of usernames or groups in the @groupname syntax.
+-#ENABLE_PERSISTENT_SESSION=&quot;all&quot;
++# When set to 1 will start nxagent in rootless mode.
++#ENABLE_ROOTLESS_MODE=&quot;0&quot;
+ 
+-# Users and groups for whom persistent sessions should be disabled. 
+-# Especially useful if ENABLE_PERSISTENT_SESSION=&quot;all&quot;
+-#DISABLE_PERSISTENT_SESSION=&quot;&quot;
++# If enabled writes entries via the COMMAND_SESSREG program
++# into utmp/wtmp/lastlog database.
++# Note: You have to make sure that you add the nx user to the
++#       utmp or tty group or how its called on your system
++#       before this directive works.
++#ENABLE_USESSION=&quot;0&quot;
++#COMMAND_SESSREG=&quot;sessreg&quot;
+ 
+ # Extra options sent to the different nx agents. See !M documentation
+ # for examples of useful parameters.
+@@ -335,14 +336,13 @@
+ # in /etc/X11/XF86Config
+ #AGENT_FONT_SERVER=&quot;&quot;
+ 
+-# disable or enable use of 'tcp nodelay' on proxy. Old versions of Linux 
+-# kernels have problems using this option on sockets that will cause a loss 
+-# of TCP connections. This option is not set by default to allow clients to 
+-# specify whether to enable or disable TCP nodelay. Setting this option to 
+-# the value of &quot;0&quot; NX proxy avoids using 'tcp nodelay' but it will cause a 
++# Disable or enable use of 'tcp nodelay' on proxy. Old versions of Linux
++# kernels have problems using this option on sockets that will cause a loss
++# of TCP connections. This option is not set by default to allow clients to
++# specify whether to enable or disable TCP nodelay. Setting this option to
++# the value of &quot;0&quot; NX proxy avoids using 'tcp nodelay' but it will cause a
+ # loss of interaction in sessions.
+ #PROXY_TCP_NODELAY=&quot;0&quot;
+ 
+ # Extra options to nxproxy. See !M documentation for useful parameters.
+-#PROXY_EXTRA_OPTIONS=&quot;&quot;
+-
++#PROXY_EXTRA_OPTIONS=&quot;&quot;
+\ No newline at end of file
+
+
+
+1.26      +180 -165  freenx/nxloadconfig
+
+
+rev 1.26, prev_rev 1.25
+Index: nxloadconfig
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxloadconfig,v
+retrieving revision 1.25
+retrieving revision 1.26
+diff -u -r1.25 -r1.26
+--- nxloadconfig	24 Apr 2005 15:51:54 -0000	1.25
++++ nxloadconfig	24 Apr 2005 18:01:14 -0000	1.26
+@@ -1,17 +1,17 @@
+ #!/bin/bash
+ #
+ # Copyright (c) 2005 by Fabian Franz &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">freenx at fabian-franz.de</A>&gt;
+-#           (c) 2005 by Jon Severinsson &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">jon at severinsson.net</A>&gt;
++#           (c) 2005 by Jon Severinsson &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">jonno at users.berlios.de</A>&gt;
+ #
+ # License: GPL, version 2
+ #
+-# CVS: $Id: nxloadconfig,v 1.25 2005/04/24 15:51:54 fabianx Exp $
++# CVS: $Id: nxloadconfig,v 1.26 2005/04/24 18:01:14 jonno Exp $
+ #
+ # ========================================================================
+ 
+ #########################################################################
+ # Commandline support for --help, --check and --userconf
+-#######################################################################
++#########################################################################
+ 
+ HELP=&quot;no&quot;
+ CHECK=&quot;no&quot;
+@@ -60,30 +60,57 @@
+ NX_SESS_DIR=/var/lib/nxserver/db
+ NX_HOME_DIR=/var/lib/nxserver/home
+ 
++# Advanced users ONLY
++AGENT_LIBRARY_PATH=&quot;&quot; #Calculated
++PROXY_LIBRARY_PATH=&quot;&quot; #Calculated
++APPLICATION_LIBRARY_PATH=&quot;&quot; #Calculated
++APPLICATION_LIBRARY_PRELOAD=&quot;&quot; #Calculated
++
+ # the name of the authorized keys file for ssh
+ SSH_AUTHORIZED_KEYS=&quot;authorized_keys2&quot;
+ 
+ #########################################################################
+ # Default Values
+-# DO NOT EVER TOUCH THIS, edit $NX_ETC_DIR/node.conf instead
++# A user should NEVER touch this, edit $NX_ETC_DIR/node.conf instead
+ #########################################################################
+ 
+-NX_LOG_LEVEL=0
+-NX_LOGFILE=/var/log/nxserver.log
+-SESSION_LOG_CLEAN=1
+-SESSION_HISTORY=2592000
++# General FreeNX directives
++
++SERVER_NAME=&quot;$(hostname)&quot;
++SSHD_PORT=22
++
++
++# Authentication / Security directives
+ 
+ ENABLE_PASSDB_AUTHENTICATION=&quot;1&quot;
+ ENABLE_SSH_AUTHENTICATION=&quot;1&quot;
+ ENABLE_SU_AUTHENTICATION=&quot;0&quot;
+ ENABLE_USER_DB=&quot;0&quot;
+ 
+-ENABLE_AUTORECONNECT=&quot;0&quot;
+-ENABLE_AUTORECONNECT_BEFORE_140=&quot;1&quot;
++ENABLE_FORCE_ENCRYPTION=&quot;0&quot;
++SSHD_CHECK_IP=&quot;0&quot;
++
++
++# Limitations
++
++DISPLAY_BASE=1000
++SESSION_LIMIT=200
++SESSION_USER_LIMIT=&quot;&quot; #Calculated
++DISPLAY_LIMIT=200
++
++ENABLE_PERSISTENT_SESSION=&quot;all&quot;
++DISABLE_PERSISTENT_SESSION=&quot;&quot;
++
++
++# Logging directives
++
++NX_LOG_LEVEL=0
++NX_LOGFILE=/var/log/nxserver.log
++SESSION_LOG_CLEAN=1
++SESSION_HISTORY=2592000
+ 
+-EXPORT_USERIP=&quot;0&quot;
+-EXPORT_SESSIONID=&quot;0&quot;
+-NODE_AUTOSTART=&quot;&quot;
++
++# Forwarding directives
+ 
+ ENABLE_SERVER_FORWARD=&quot;0&quot;
+ SERVER_FORWARD_HOST=&quot;&quot;
+@@ -97,40 +124,22 @@
+ ENABLE_NOMACHINE_FORWARD_PORT=&quot;0&quot;
+ NOMACHINE_FORWARD_PORT=&quot;22&quot;
+ 
+-ENABLE_ROOTLESS_MODE=&quot;0&quot;
++
++# Services directives
+ 
+ ENABLE_ESD_PRELOAD=&quot;0&quot;
+ ESD_BIN_PRELOAD=&quot;esddsp&quot;
+-
+ ENABLE_ARTSD_PRELOAD=&quot;0&quot;
+ ARTSD_BIN_PRELOAD=&quot;artsdsp&quot;
+ 
+-COMMAND_NETCAT=netcat
+-COMMAND_SSH=ssh
+-COMMAND_SSH_KEYGEN=ssh-keygen
+ 
+-ENABLE_USESSION=&quot;0&quot;
+-COMMAND_SESSREG=&quot;sessreg&quot;
++# Path directives
+ 
++USER_FAKE_HOME=&quot;&quot; #Calculated
+ SET_LD_LIBRARY_PATH=&quot;1&quot;
+ 
+-ENABLE_FORCE_ENCRYPTION=&quot;0&quot;
+-
+-# FreeNX + NoMachine mixed section
+-
+-# see below for DEFAULT_X_WM directive
+ ENABLE_DEFAULT_X_WM=&quot;0&quot;
+ ENABLE_DEFAULT_X_WM_KILL=&quot;0&quot;
+-
+-# NoMachine node.conf compatible vars
+-
+-SSHD_CHECK_IP=&quot;0&quot;
+-SSHD_PORT=22
+-
+-DISPLAY_BASE=1000
+-SESSION_LIMIT=200
+-DISPLAY_LIMIT=200
+-
+ DEFAULT_X_WM=twm
+ USER_X_STARTUP_SCRIPT=.Xclients
+ DEFAULT_X_SESSION=/etc/X11/xdm/Xsession
+@@ -139,40 +148,30 @@
+ COMMAND_START_CDE=cdwm
+ COMMAND_XTERM=xterm
+ COMMAND_XAUTH=/usr/X11R6/bin/xauth
+-COMMAND_XSET=/usr/X11R6/bin/xset
+-COMMAND_XMODMAP=/usr/X11R6/bin/xmodmap
+-COMMAND_XKBCOMP=/usr/X11R6/bin/xkbcomp
+-XKBCOMP_KEYMAP_FILE=/etc/X11/xkb/keymap/xfree86
+ COMMAND_SMBMOUNT=smbmount
+ COMMAND_SMBUMOUNT=smbumount
++COMMAND_NETCAT=netcat
++COMMAND_SSH=ssh
++COMMAND_SSH_KEYGEN=ssh-keygen
+ 
+-ENABLE_PERSISTENT_SESSION=&quot;all&quot;
+-DISABLE_PERSISTENT_SESSION=&quot;&quot; 
+ 
++# Misc directives
++
++ENABLE_AUTORECONNECT=&quot;0&quot;
++ENABLE_AUTORECONNECT_BEFORE_140=&quot;1&quot;
++EXPORT_USERIP=&quot;0&quot;
++EXPORT_SESSIONID=&quot;0&quot;
++NODE_AUTOSTART=&quot;&quot;
++ENABLE_ROOTLESS_MODE=&quot;0&quot;
++ENABLE_USESSION=&quot;0&quot;
++COMMAND_SESSREG=&quot;sessreg&quot;
+ AGENT_EXTRA_OPTIONS_RFB=&quot;&quot;
+ AGENT_EXTRA_OPTIONS_RDP=&quot;&quot;
+ AGENT_EXTRA_OPTIONS_X=&quot;&quot;
+ AGENT_FONT_SERVER=&quot;&quot;
+-
+ PROXY_TCP_NODELAY=&quot;0&quot;
+ PROXY_EXTRA_OPTIONS=&quot;&quot;
+ 
+-CUPS_SUPPORT=&quot;0&quot;
+-CUPS_BACKEND=&quot;&quot;
+-CUPS_BIN=&quot;&quot;
+-CUPS_SBIN=&quot;&quot;
+-
+-#########################################################################
+-# Values that will be calculated
+-#########################################################################
+-
+-SERVER_NAME=&quot;&quot;
+-SESSION_USER_LIMIT=&quot;&quot;
+-AGENT_LIBRARY_PATH=&quot;&quot;
+-PROXY_LIBRARY_PATH=&quot;&quot;
+-APPLICATION_LIBRARY_PATH=&quot;&quot;
+-APPLICATION_LIBRARY_PRELOAD=&quot;&quot;
+-USER_FAKE_HOME=&quot;&quot;
+ 
+ #########################################################################
+ # node.conf file evaluation
+@@ -181,18 +180,19 @@
+ [ -e $NX_ETC_DIR/node.conf ] &amp;&amp; . $NX_ETC_DIR/node.conf
+ [ &quot;$USERCONF&quot; = &quot;yes&quot; -a -e $NX_ETC_DIR/$USER.node.conf ] &amp;&amp; . $NX_ETC_DIR/$USER.node.conf
+ 
++
+ #########################################################################
+ # Calculated values
+ #########################################################################
+ 
+-[ -z &quot;$SERVER_NAME&quot; ] &amp;&amp; SERVER_NAME=$(hostname)
+ [ -z &quot;$SESSION_USER_LIMIT&quot; ] &amp;&amp; SESSION_USER_LIMIT=$SESSION_LIMIT
++[ -z &quot;$USER_FAKE_HOME&quot; ] &amp;&amp; USER_FAKE_HOME=$HOME
+ 
+ [ -z &quot;$AGENT_LIBRARY_PATH&quot; ] &amp;&amp; AGENT_LIBRARY_PATH=$PATH_LIB
+ [ -z &quot;$PROXY_LIBRARY_PATH&quot; ] &amp;&amp; PROXY_LIBRARY_PATH=$PATH_LIB
+ [ -z &quot;$APPLICATION_LIBRARY_PATH&quot; ] &amp;&amp; APPLICATION_LIBRARY_PATH=$PATH_LIB
+ [ -z &quot;$APPLICATION_LIBRARY_PRELOAD&quot; ] &amp;&amp; APPLICATION_LIBRARY_PRELOAD=&quot;$APPLICATION_LIBRARY_PATH/libX11.so.6.2:$APPLICATION_LIBRARY_PATH/libXext.so.6.4:$APPLICATION_LIBRARY_PATH/libXcomp.so.1:$APPLICATION_LIBRARY_PATH/libXcompext.so.1:$APPLICATION_LIBRARY_PATH/libXrender.so.1.2&quot;
+-[ -z &quot;$USER_FAKE_HOME&quot; ] &amp;&amp; USER_FAKE_HOME=$HOME
++
+ 
+ #########################################################################
+ # Support for --check
+@@ -203,6 +203,8 @@
+ 	ERROR=&quot;no&quot;
+ 	WARNING=&quot;no&quot;
+ 	
++	# Internal Stuff
++	
+ 	[ ! -d &quot;$PATH_BIN&quot; ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;PATH_BIN=$PATH_BIN\&quot;&quot;
+ 	[ ! -d &quot;$PATH_LIB&quot; ] &amp;&amp; \
+@@ -213,9 +215,83 @@
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;NX_SESS_DIR=$NX_SESS_DIR\&quot;&quot;
+ 	[ ! -d &quot;$NX_HOME_DIR&quot; ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;NX_HOME_DIR=$NX_HOME_DIR\&quot;&quot;
++
++	[ ! -d &quot;$AGENT_LIBRARY_PATH&quot; ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;AGENT_LIBRARY_PATH=$AGENT_LIBRARY_PATH\&quot;&quot;
++	[ ! -d &quot;$PROXY_LIBRARY_PATH&quot; ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;PROXY_LIBRARY_PATH=$PROXY_LIBRARY_PATH\&quot;&quot;
++	[ ! -d &quot;$APPLICATION_LIBRARY_PATH&quot; ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;APPLICATION_LIBRARY_PATH=$APPLICATION_LIBRARY_PATH\&quot;&quot;
++	
++	OLD_IFS=$IFS
++	IFS=&quot;:&quot;
++	for LIBRARY in $APPLICATION_LIBRARY_PRELOAD; do
++		[ ! -e $LIBRARY ] &amp;&amp; \
++			ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;APPLICATION_LIBRARY_PRELOAD=$APPLICATION_LIBRARY_PRELOAD\&quot;&quot; &amp;&amp; break ;
++	done
++	IFS=$OLD_IFS
+ 	
+ 	[ -z &quot;$SSH_AUTHORIZED_KEYS&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SSH_AUTHORIZED_KEYS=$SSH_AUTHORIZED_KEYS\&quot;&quot; 
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SSH_AUTHORIZED_KEYS=$SSH_AUTHORIZED_KEYS\&quot;&quot;
++	
++	
++	# General FreeNX directives
++	
++	[ -z &quot;$SERVER_NAME&quot; ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SERVER_NAME=$SERVER_NAME\&quot;&quot;
++	[ -z $(echo &quot;$SSHD_PORT&quot; | egrep &quot;^[1-9][0-9]{0,4}$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SSHD_PORT=$SSHD_PORT\&quot;&quot;
++	
++	
++	# Authentication / Security directives
++	
++	[ -z $(echo &quot;$ENABLE_PASSDB_AUTHENTICATION&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_PASSDB_AUTHENTICATION=$ENABLE_PASSDB_AUTHENTICATION\&quot;&quot;
++	[ -z $(echo &quot;$ENABLE_SSH_AUTHENTICATION&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_SSH_AUTHENTICATION=$ENABLE_SSH_AUTHENTICATION:\&quot;&quot;
++	[ -z $(echo &quot;$ENABLE_SU_AUTHENTICATION&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_SU_AUTHENTICATION=$NENABLE_SU_AUTHENTICATION\&quot;&quot;
++	[ -z $(echo &quot;$ENABLE_USER_DB&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_USER_DB=$ENABLE_USER_DB\&quot;&quot;
++	
++	[ -z $(echo &quot;$ENABLE_FORCE_ENCRYPTION&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_FORCE_ENCRYPTION=$ENABLE_FORCE_ENCRYPTION\&quot;&quot;
++	[ -z $(echo &quot;$SSHD_CHECK_IP&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SSHD_CHECK_IP=$SSHD_CHECK_IP\&quot;&quot;
++	
++	
++	# Limitations
++	
++	[ -z $(echo &quot;$DISPLAY_BASE&quot; | egrep &quot;^[1-9][0-9]{0,4}$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;DISPLAY_BASE=$DISPLAY_BASE\&quot;&quot;
++	[ -z $(echo &quot;$SESSION_LIMIT&quot; | egrep &quot;^[1-9][0-9]{0,4}$&quot;) ] &amp;&amp;  \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SESSION_LIMIT=$SESSION_LIMIT\&quot;&quot;
++	[ -z $(echo &quot;$SESSION_USER_LIMIT&quot; | egrep &quot;^[1-9][0-9]{0,4}$&quot;) -o $SESSION_USER_LIMIT -gt $SESSION_LIMIT ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SESSION_USER_LIMIT=$SESSION_USER_LIMIT\&quot;&quot;
++	[ -z $(echo &quot;$DISPLAY_LIMIT&quot; | egrep &quot;^[1-9][0-9]{0,4}$&quot;) -o $DISPLAY_LIMIT -lt $SESSION_LIMIT ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;DISPLAY_LIMIT=$DISPLAY_LIMIT\&quot;&quot;
++	
++	OLD_IFS=$IFS
++	IFS=&quot;,&quot;
++	if [ &quot;$ENABLE_PERSISTENT_SESSION&quot; != &quot;all&quot; ]
++	then
++		for USERNAME in $ENABLE_PERSISTENT_SESSION; do
++			[ &quot;${USERNAME:0:1}&quot; != &quot;@&quot; ] &amp;&amp; [ -z $(getent passwd | egrep &quot;^$USERNAME:&quot;) ] &amp;&amp; \
++				ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_PERSISTENT_SESSION=$ENABLE_PERSISTENT_SESSION\&quot;&quot; &amp;&amp; break ;
++			[ &quot;${USERNAME:0:1}&quot; = &quot;@&quot; ] &amp;&amp; [ -z $(getent group | egrep &quot;^${USERNAME:1}:&quot;) ] &amp;&amp; \
++				ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_PERSISTENT_SESSION=$ENABLE_PERSISTENT_SESSION\&quot;&quot; &amp;&amp; break ;
++		done
++	fi
++	for USERNAME in $DISABLE_PERSISTENT_SESSION; do
++		[ &quot;${USERNAME:0:1}&quot; != &quot;@&quot; ] &amp;&amp; [ -z $(getent passwd | egrep &quot;^$USERNAME:&quot;) ] &amp;&amp; \
++			ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;DISABLE_PERSISTENT_SESSION=$DISABLE_PERSISTENT_SESSION\&quot;&quot; &amp;&amp; break ;
++		[ &quot;${USERNAME:0:1}&quot; = &quot;@&quot; ] &amp;&amp; [ -z $(getent group | egrep &quot;^${USERNAME:1}:&quot;) ] &amp;&amp; \
++			ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;DISABLE_PERSISTENT_SESSION=$DISABLE_PERSISTENT_SESSION\&quot;&quot; &amp;&amp; break ;
++	done
++	IFS=$OLD_IFS
++	
++	
++	# Logging directives
+ 	
+ 	[ -z $(echo &quot;$NX_LOG_LEVEL&quot; | egrep &quot;^[0-6]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;NX_LOG_LEVEL=$NX_LOG_LEVEL\&quot;&quot;
+@@ -228,27 +304,8 @@
+ 	[ -z $(echo &quot;$SESSION_HISTORY&quot; | egrep &quot;^-?[0-9]+$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SESSION_HISTORY=$SESSION_HISTORY\&quot;&quot;
+ 	
+-	[ -z $(echo &quot;$ENABLE_PASSDB_AUTHENTICATION&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_PASSDB_AUTHENTICATION=$ENABLE_PASSDB_AUTHENTICATION\&quot;&quot;
+-	[ -z $(echo &quot;$ENABLE_SSH_AUTHENTICATION&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_SSH_AUTHENTICATION=$ENABLE_SSH_AUTHENTICATION:\&quot;&quot;
+-	[ -z $(echo &quot;$ENABLE_SU_AUTHENTICATION&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_SU_AUTHENTICATION=$NENABLE_SU_AUTHENTICATION\&quot;&quot;
+-	[ -z $(echo &quot;$ENABLE_USER_DB&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_USER_DB=$ENABLE_USER_DB\&quot;&quot;
+-	
+-	[ -z $(echo &quot;$ENABLE_AUTORECONNECT&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_AUTORECONNECT=$ENABLE_AUTORECONNECT\&quot;&quot;
+-	[ -z $(echo &quot;$ENABLE_AUTORECONNECT_BEFORE_140&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_AUTORECONNECT_BEFORE_140=$ENABLE_AUTORECONNECT_BEFORE_140\&quot;&quot;
+ 	
+-	[ -z $(echo &quot;$EXPORT_USERIP&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;EXPORT_USERIP=$EXPORT_USERIP\&quot;&quot;
+-	[ -z $(echo &quot;$EXPORT_SESSIONID&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;EXPORT_SESSIONID=$EXPORT_SESSIONID\&quot;&quot;
+-	[ -n &quot;$NODE_AUTOSTART&quot; ] &amp;&amp; ! which &quot;$NODE_AUTOSTART&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;NODE_AUTOSTART=$NODE_AUTOSTART\&quot;&quot; \
+-					  &amp;&amp; echo &quot;         No autostart will be performed.&quot;
++	# Forwarding directives
+ 	
+ 	[ -z $(echo &quot;$ENABLE_SERVER_FORWARD&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_SERVER_FORWARD=$ENABLE_SERVER_FORWARD\&quot;&quot;
+@@ -273,8 +330,8 @@
+ 	[ &quot;$ENABLE_NOMACHINE_FORWARD_PORT&quot; = &quot;1&quot; -a -z $(echo &quot;$NOMACHINE_FORWARD_PORT&quot; | egrep &quot;^[1-9][0-9]{0,4}$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;NOMACHINE_FORWARD_PORT=$NOMACHINE_FORWARD_PORT\&quot;&quot;
+ 	
+-	[ -z $(echo &quot;$ENABLE_ROOTLESS_MODE&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_ROOTLESS_MODE=$ENABLE_ROOTLESS_MODE\&quot;&quot;
++	
++	# Services directives
+ 	
+ 	[ -z $(echo &quot;$ENABLE_ESD_PRELOAD&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_ESD_PRELOAD=$ENABLE_ESD_PRELOAD\&quot;&quot;
+@@ -288,43 +345,22 @@
+ 		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;ARTSD_BIN_PRELOAD=$ARTSD_BIN_PRELOAD\&quot;&quot; \
+ 					  &amp;&amp; echo &quot;         No arts preload will be performed.&quot;
+ 	
+-	! which &quot;$COMMAND_NETCAT&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_NETCAT=$COMMAND_NETCAT\&quot;&quot;
+-
+-	! which &quot;$COMMAND_SSH&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_SSH=$COMMAND_SSH\&quot;&quot;
+-
+-	! which &quot;$COMMAND_SSH_KEYGEN&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_SSH_KEYGEN=$COMMAND_SSH_KEYGEN\&quot;&quot;
+ 	
+-	[ -z $(echo &quot;$ENABLE_USESSION&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_USESSION=$ENABLE_USESSION\&quot;&quot;
+-	[ &quot;$ENABLE_USESSION&quot; = &quot;1&quot; ] &amp;&amp; ! which &quot;$COMMAND_SESSREG&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;COMMAND_SESSREG=$COMMAND_SESSREG\&quot;&quot; \
+-					  &amp;&amp; echo &quot;         Logged in users will not be registered with sessreg.&quot;
++	# Path directives
+ 	
+ 	[ ! -d &quot;$USER_FAKE_HOME&quot; ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;USER_FAKE_HOME=$USER_FAKE_HOME\&quot;&quot;
++	[ -z $(echo &quot;$SET_LD_LIBRARY_PATH&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SET_LD_LIBRARY_PATH=$SET_LD_LIBRARY_PATH\&quot;&quot;
+ 	
+-	[ -z &quot;$SERVER_NAME&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SERVER_NAME=$SERVER_NAME\&quot;&quot; 
+-	
+-	[ -z $(echo &quot;$SSHD_CHECK_IP&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SSHD_CHECK_IP=$SSHD_CHECK_IP\&quot;&quot;
+-	[ -z $(echo &quot;$SSHD_PORT&quot; | egrep &quot;^[1-9][0-9]{0,4}$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SSHD_PORT=$SSHD_PORT\&quot;&quot;
+-	
+-	[ -z $(echo &quot;$DISPLAY_BASE&quot; | egrep &quot;^[1-9][0-9]{0,4}$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;DISPLAY_BASE=$DISPLAY_BASE\&quot;&quot;
+-	[ -z $(echo &quot;$SESSION_LIMIT&quot; | egrep &quot;^[1-9][0-9]{0,4}$&quot;) ] &amp;&amp;  \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SESSION_LIMIT=$SESSION_LIMIT\&quot;&quot;
+-	[ -z $(echo &quot;$SESSION_USER_LIMIT&quot; | egrep &quot;^[1-9][0-9]{0,4}$&quot;) -o $SESSION_USER_LIMIT -gt $SESSION_LIMIT ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SESSION_USER_LIMIT=$SESSION_USER_LIMIT\&quot;&quot;
+-	[ -z $(echo &quot;$DISPLAY_LIMIT&quot; | egrep &quot;^[1-9][0-9]{0,4}$&quot;) -o $DISPLAY_LIMIT -lt $SESSION_LIMIT ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;DISPLAY_LIMIT=$DISPLAY_LIMIT\&quot;&quot;
+-	
+-	! which &quot;$DEFAULT_X_WM&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++	[ -z $(echo &quot;$ENABLE_DEFAULT_X_WM&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_DEFAULT_X_WM=$ENABLE_DEFAULT_X_WM\&quot;&quot;
++	[ &quot;$ENABLE_DEFAULT_X_WM&quot; = &quot;1&quot; -a  -z $(echo &quot;$ENABLE_DEFAULT_X_WM_KILL&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_DEFAULT_X_WM_KILL=$ENABLE_DEFAULT_X_WM_KILL\&quot;&quot;
++	[ &quot;$ENABLE_DEFAULT_X_WM&quot; = &quot;1&quot; ] &amp;&amp; ! which &quot;$DEFAULT_X_WM&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;DEFAULT_X_WM=$DEFAULT_X_WM\&quot;&quot;
++	[ -z &quot;$USER_X_STARTUP_SCRIPT&quot; ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;USER_X_STARTUP_SCRIPT=$USER_X_STARTUP_SCRIPT\&quot;&quot;
+ 	! which &quot;$DEFAULT_X_SESSION&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;DEFAULT_X_SESSION=$DEFAULT_X_SESSION\&quot;&quot; \
+ 					  &amp;&amp; echo &quot;         Users might not be able to request a default X session.&quot;
+@@ -342,18 +378,40 @@
+ 					  &amp;&amp; echo &quot;         Users will not be able to request an xterm session.&quot;
+ 	! which &quot;$COMMAND_XAUTH&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_XAUTH=$COMMAND_XAUTH\&quot;&quot;
+-	! which &quot;$COMMAND_XSET&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_XSET=$COMMAND_XSET\&quot;&quot;
+-	! which &quot;$COMMAND_XMODMAP&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_XMODMAP=$COMMAND_XMODMAP\&quot;&quot;
+-	! which &quot;$COMMAND_XKBCOMP&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_XKBCOMP=$COMMAND_XKBCOMP\&quot;&quot;
+-	[ ! -e &quot;$XKBCOMP_KEYMAP_FILE&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;XKBCOMP_KEYMAP_FILE=$XKBCOMP_KEYMAP_FILE\&quot;&quot;
+ 	! which &quot;$COMMAND_SMBMOUNT&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_SMBMOUNT=$COMMAND_SMBMOUNT\&quot;&quot;
+ 	! which &quot;$COMMAND_SMBUMOUNT&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_SMBUMOUNT=$COMMAND_SMBUMOUNT\&quot;&quot;
++	! which &quot;$COMMAND_NETCAT&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_NETCAT=$COMMAND_NETCAT\&quot;&quot;
++	! which &quot;$COMMAND_SSH&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_SSH=$COMMAND_SSH\&quot;&quot;
++	! which &quot;$COMMAND_SSH_KEYGEN&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;COMMAND_SSH_KEYGEN=$COMMAND_SSH_KEYGEN\&quot;&quot;
++
++	# Misc directives
++	
++	[ -z $(echo &quot;$ENABLE_AUTORECONNECT&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_AUTORECONNECT=$ENABLE_AUTORECONNECT\&quot;&quot;
++	[ -z $(echo &quot;$ENABLE_AUTORECONNECT_BEFORE_140&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_AUTORECONNECT_BEFORE_140=$ENABLE_AUTORECONNECT_BEFORE_140\&quot;&quot;
++	
++	[ -z $(echo &quot;$EXPORT_USERIP&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;EXPORT_USERIP=$EXPORT_USERIP\&quot;&quot;
++	[ -z $(echo &quot;$EXPORT_SESSIONID&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;EXPORT_SESSIONID=$EXPORT_SESSIONID\&quot;&quot;
++	[ -n &quot;$NODE_AUTOSTART&quot; ] &amp;&amp; ! which &quot;$NODE_AUTOSTART&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;NODE_AUTOSTART=$NODE_AUTOSTART\&quot;&quot; \
++					  &amp;&amp; echo &quot;         No autostart will be performed.&quot;
++
++	[ -z $(echo &quot;$ENABLE_ROOTLESS_MODE&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_ROOTLESS_MODE=$ENABLE_ROOTLESS_MODE\&quot;&quot;
++
++	[ -z $(echo &quot;$ENABLE_USESSION&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
++		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_USESSION=$ENABLE_USESSION\&quot;&quot;
++	[ &quot;$ENABLE_USESSION&quot; = &quot;1&quot; ] &amp;&amp; ! which &quot;$COMMAND_SESSREG&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
++		WARNING=&quot;yes&quot; &amp;&amp; echo &quot;Warning: Invalid value \&quot;COMMAND_SESSREG=$COMMAND_SESSREG\&quot;&quot; \
++					  &amp;&amp; echo &quot;         Logged in users will not be registered with sessreg.&quot;
+ 	
+ 	#AGENT_EXTRA_OPTIONS_RFB=&quot;&quot;
+ 	#AGENT_EXTRA_OPTIONS_RDP=&quot;&quot;
+@@ -367,49 +425,6 @@
+ 	[ -z $(echo &quot;$PROXY_TCP_NODELAY&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+ 		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;PROXY_TCP_NODELAY=$PROXY_TCP_NODELAY\&quot;&quot;
+ 	
+-	[ -z $(echo &quot;$CUPS_SUPPORT&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;CUPS_SUPPORT=$CUPS_SUPPORT\&quot;&quot;
+-	# CUPS_BACKEND=&quot;&quot;
+-		# As this isn't used yet I don't know how to realy check for it. Fix this when adding support!
+-	[ &quot;$CUPS_SUPPORT&quot; = &quot;1&quot; -a ! -d &quot;$CUPS_BIN&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;CUPS_BIN=$CUPS_BIN\&quot;&quot;
+-	[ &quot;$CUPS_SUPPORT&quot; = &quot;1&quot; -a ! -d &quot;$CUPS_SBIN&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;CUPS_SBIN=$CUPS_SBIN\&quot;&quot;
+-	
+-	[ -z $(echo &quot;$SET_LD_LIBRARY_PATH&quot; | egrep &quot;^[0|1]$&quot;) ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;SET_LD_LIBRARY_PATH=$SET_LD_LIBRARY_PATH\&quot;&quot;
+-		
+-	[ ! -d &quot;$AGENT_LIBRARY_PATH&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;AGENT_LIBRARY_PATH=$AGENT_LIBRARY_PATH\&quot;&quot;
+-	[ ! -d &quot;$PROXY_LIBRARY_PATH&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;PROXY_LIBRARY_PATH=$PROXY_LIBRARY_PATH\&quot;&quot;
+-	[ ! -d &quot;$APPLICATION_LIBRARY_PATH&quot; ] &amp;&amp; \
+-		ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;APPLICATION_LIBRARY_PATH=$APPLICATION_LIBRARY_PATH\&quot;&quot;
+-	
+-	OLD_IFS=$IFS
+-	IFS=&quot;,&quot;
+-	if [ &quot;$ENABLE_PERSISTENT_SESSION&quot; != &quot;all&quot; ]
+-	then
+-		for USERNAME in $ENABLE_PERSISTENT_SESSION; do
+-			[ &quot;${USERNAME:0:1}&quot; != &quot;@&quot; ] &amp;&amp; [ -z $(getent passwd | egrep &quot;^$USERNAME:&quot;) ] &amp;&amp; \
+-				ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_PERSISTENT_SESSION=$ENABLE_PERSISTENT_SESSION\&quot;&quot; &amp;&amp; break ;
+-			[ &quot;${USERNAME:0:1}&quot; = &quot;@&quot; ] &amp;&amp; [ -z $(getent group | egrep &quot;^${USERNAME:1}:&quot;) ] &amp;&amp; \
+-				ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;ENABLE_PERSISTENT_SESSION=$ENABLE_PERSISTENT_SESSION\&quot;&quot; &amp;&amp; break ;
+-		done
+-	fi
+-	for USERNAME in $DISABLE_PERSISTENT_SESSION; do
+-		[ &quot;${USERNAME:0:1}&quot; != &quot;@&quot; ] &amp;&amp; [ -z $(getent passwd | egrep &quot;^$USERNAME:&quot;) ] &amp;&amp; \
+-			ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;DISABLE_PERSISTENT_SESSION=$DISABLE_PERSISTENT_SESSION\&quot;&quot; &amp;&amp; break ;
+-		[ &quot;${USERNAME:0:1}&quot; = &quot;@&quot; ] &amp;&amp; [ -z $(getent group | egrep &quot;^${USERNAME:1}:&quot;) ] &amp;&amp; \
+-			ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;DISABLE_PERSISTENT_SESSION=$DISABLE_PERSISTENT_SESSION\&quot;&quot; &amp;&amp; break ;
+-	done
+-	
+-	IFS=&quot;:&quot;
+-	for LIBRARY in $APPLICATION_LIBRARY_PRELOAD; do
+-		[ ! -e $LIBRARY ] &amp;&amp; \
+-			ERROR=&quot;yes&quot; &amp;&amp; echo &quot;Error: Invalid value \&quot;APPLICATION_LIBRARY_PRELOAD=$APPLICATION_LIBRARY_PRELOAD\&quot;&quot; &amp;&amp; break ;
+-	done
+-	IFS=$OLD_IFS
+ 	
+ 	if [ &quot;$ERROR&quot; = &quot;yes&quot; ]
+ 	then
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000125.html">[Freenx-cvs] CVS: freenx - fabianx modified ChangeLog
+</A></li>
+	<LI>Next message: <A HREF="000127.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#126">[ date ]</a>
+              <a href="thread.html#126">[ thread ]</a>
+              <a href="subject.html#126">[ subject ]</a>
+              <a href="author.html#126">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

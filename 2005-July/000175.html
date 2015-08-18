@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fux modified 2 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-July/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fux%20modified%202%20files&In-Reply-To=%3C42CBFFCA.mailN61KCK76%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000176.html">
+   <LINK REL="Next"  HREF="000177.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fux modified 2 files</H1>
+    <B>fux</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fux%20modified%202%20files&In-Reply-To=%3C42CBFFCA.mailN61KCK76%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fux modified 2 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Wed Jul  6 17:59:06 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000176.html">[Freenx-cvs] CVS: freenx - fux modified 2 files
+</A></li>
+        <LI>Next message: <A HREF="000177.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#175">[ date ]</a>
+              <a href="thread.html#175">[ thread ]</a>
+              <a href="subject.html#175">[ subject ]</a>
+              <a href="author.html#175">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fux
+Date:      2005-07-06 15:59:06 GMT
+Modified:  .        ChangeLog nxserver
+Log:
+Added detection of SSH2_CLIENT variable
+
+Revision  Changes    Path
+1.69      +1 -0      freenx/ChangeLog
+
+
+rev 1.69, prev_rev 1.68
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.68
+retrieving revision 1.69
+diff -u -r1.68 -r1.69
+--- ChangeLog	6 Jul 2005 10:33:56 -0000	1.68
++++ ChangeLog	6 Jul 2005 15:59:05 -0000	1.69
+@@ -17,6 +17,7 @@
+ 	* Added nxserver --cleanup, which terminates all running sessions.
+ 	  Useful after a power outage.
+ 	* Fixed nxclient invocation with non-standard installation path
++	* Added detection of SSH2_CLIENT variable (commercial ssh)
+ 
+ 24.06.2005 FreeNX 0.4.1 &quot;LinuxTag Edition&quot;
+ 	* Fixed a small security problem giving access to session database.
+
+
+
+1.62      +6 -5      freenx/nxserver
+
+
+rev 1.62, prev_rev 1.61
+Index: nxserver
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxserver,v
+retrieving revision 1.61
+retrieving revision 1.62
+diff -u -r1.61 -r1.62
+--- nxserver	4 Jul 2005 01:52:17 -0000	1.61
++++ nxserver	6 Jul 2005 15:59:05 -0000	1.62
+@@ -11,7 +11,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxserver,v 1.61 2005/07/04 01:52:17 fabianx Exp $
++# CVS: $Id: nxserver,v 1.62 2005/07/06 15:59:05 fux Exp $
+ #
+ 
+ # Read the config file
+@@ -433,7 +433,7 @@
+ fi
+ 
+ # forward the connection to commercial NoMachine server?
+-if [ &quot;$ENABLE_NOMACHINE_FORWARD_PORT&quot; = &quot;1&quot; -a &quot;$NOMACHINE_FORWARD_PORT&quot; = &quot;$(echo $SSH_CLIENT | cut -d' ' -f3)&quot; -a -n &quot;$NOMACHINE_SERVER&quot; ]
++if [ &quot;$ENABLE_NOMACHINE_FORWARD_PORT&quot; = &quot;1&quot; -a &quot;$NOMACHINE_FORWARD_PORT&quot; = &quot;$(echo $SSH_CLIENT $SSH2_CLIENT| cut -d' ' -f3)&quot; -a -n &quot;$NOMACHINE_SERVER&quot; ]
+ then
+ 	log 3 &quot;Info: Detected SSH destination port $NOMACHINE_FORWARD_PORT. Forwarding connection to commercial NoMachine server.&quot;
+ 	exec $NOMACHINE_SERVER
+@@ -726,7 +726,7 @@
+ 	
+ 	# If we can't get the userip and SSHD_CHECK_IP is set to 1
+ 	# we bail out.
+-	if [ -z &quot;$SSH_CLIENT&quot; ]
++	if [ -z &quot;$SSH_CLIENT&quot; -a -z &quot;$SSH2_CLIENT&quot; ]
+ 	then 
+ 		if [ &quot;$SSHD_CHECK_IP&quot; = &quot;1&quot; ]
+ 		then
+@@ -734,7 +734,7 @@
+ 			return 1
+ 		else
+ 			log 2 &quot;Warning: Failed to determine the client IP.&quot;
+-			log 2 &quot;Warning: The SSH_CLIENT variable was not provided by SSHD.&quot;
++			log 2 &quot;Warning: The SSH_CLIENT or SSH2_CLIENT variable was not provided by SSHD.&quot;
+ 			log 2 &quot;Warning: Please set SSHD_CHECK_IP=1 if you want to refuse the connection.&quot;
+ 		fi
+ 	fi
+@@ -759,7 +759,8 @@
+ 		fi
+ 	fi
+ 
+-	USERIP=$(echo $SSH_CLIENT | cut -d&quot; &quot; -f1 | sed 's/::<A HREF="ffff://g">ffff://g</A>')
++	# as only $SSH_CLIENT or $SSH2_CLIENT will be set, this should work
++	USERIP=$(echo $SSH_CLIENT $SSH2_CLIENT | cut -d&quot; &quot; -f1 | sed 's/::<A HREF="ffff://g">ffff://g</A>')
+ 	[ -z &quot;$USERIP&quot; ] &amp;&amp; USERIP=&quot;*&quot;
+ 	if [ &quot;$ACTION&quot; = &quot;start&quot; ]
+ 	then
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000176.html">[Freenx-cvs] CVS: freenx - fux modified 2 files
+</A></li>
+	<LI>Next message: <A HREF="000177.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#175">[ date ]</a>
+              <a href="thread.html#175">[ thread ]</a>
+              <a href="subject.html#175">[ subject ]</a>
+              <a href="author.html#175">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

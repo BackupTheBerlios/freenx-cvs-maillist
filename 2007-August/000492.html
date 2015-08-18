@@ -1,0 +1,152 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r360 - freenx-server/trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-August/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r360%20-%20freenx-server/trunk&In-Reply-To=%3C200708081453.l78Erh6U012492%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000491.html">
+   <LINK REL="Next"  HREF="000493.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r360 - freenx-server/trunk</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r360%20-%20freenx-server/trunk&In-Reply-To=%3C200708081453.l78Erh6U012492%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r360 - freenx-server/trunk">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Wed Aug  8 16:53:43 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000491.html">[Freenx-cvs] r359 - freenx-server/trunk
+</A></li>
+        <LI>Next message: <A HREF="000493.html">[Freenx-cvs] r361 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#492">[ date ]</a>
+              <a href="thread.html#492">[ thread ]</a>
+              <a href="subject.html#492">[ subject ]</a>
+              <a href="author.html#492">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-08-08 16:53:43 +0200 (Wed, 08 Aug 2007)
+New Revision: 360
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxclient
+   freenx-server/trunk/nxprint
+Log:
+* Added drivers.cache.all that is reloaded just every 60 minutes.
+ (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">puterguy at bat.berlios.de</A>)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-08-08 13:52:20 UTC (rev 359)
++++ freenx-server/trunk/ChangeLog	2007-08-08 14:53:43 UTC (rev 360)
+@@ -11,6 +11,8 @@
+ 	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">puterguy at bat.berlios.de</A>)
+ 	* Fixed the APPLICATION_LIBRARY_PRELOAD to be just a warning and fixed 
+ 	  the default path.
++	* Added drivers.cache.all that is reloaded just every 60 minutes.
++	  (<A HREF="https://lists.berlios.de/mailman/listinfo/freenx-cvs">puterguy at bat.berlios.de</A>)
+ 
+ 07.07.2007 FreeNX 0.7.0 &quot;Jornade SPL Edition VI+1&quot;
+ 	* Fixed the printing support for CUPS 1.2.
+
+Modified: freenx-server/trunk/nxclient
+===================================================================
+--- freenx-server/trunk/nxclient	2007-08-08 13:52:20 UTC (rev 359)
++++ freenx-server/trunk/nxclient	2007-08-08 14:53:43 UTC (rev 360)
+@@ -138,7 +138,7 @@
+ 	UTILITY_NXPRINT=&quot;nxprint&quot;
+ 	[ -n &quot;$PATH_BIN&quot; ] &amp;&amp; UTILITY_NXPRINT=&quot;$PATH_BIN/nxprint&quot;
+ 	# Export configuration vars for nxprint
+-	export ENABLE_FOOMATIC COMMAND_FOOMATIC
++	export ENABLE_FOOMATIC COMMAND_FOOMATIC UTILITY_DRIVERS_CACHE
+ 	case &quot;$1&quot; in 
+ 		get)
+ 			grep &quot;driver|$2|&quot; &quot;$UTILITY_DRIVERS_CACHE&quot; 2&gt;/dev/null
+
+Modified: freenx-server/trunk/nxprint
+===================================================================
+--- freenx-server/trunk/nxprint	2007-08-08 13:52:20 UTC (rev 359)
++++ freenx-server/trunk/nxprint	2007-08-08 14:53:43 UTC (rev 360)
+@@ -44,21 +44,30 @@
+ 	echo &quot;driver|Raw|Raw Queue|raw&quot;
+ 	echo &quot;driver|Download (CUPS)|Download from CUPS server (cached)|download_cached&quot;
+ 	echo &quot;driver|Download (CUPS)|Download from CUPS server (redownload)|download_new&quot;
+-	{ 
+-        cd /usr/share/ppd/
+-        awk -F '&quot;' '/\*Manufacturer:/ { a[FILENAME]=$2 }
+-                    /\*NickName:/ { b[FILENAME]=$2 } 
+-                    END { 
+-                       for (i in a) 
+-                          print &quot;driver|&quot; (a[i]==&quot;ESP&quot;?substr(b[i],0,index(b[i],&quot; &quot;)-1):a[i]) &quot;|&quot;b[i]&quot;|&quot;i&quot;|en&quot;
+-                    }' $(find -name &quot;*.ppd&quot;)
++	#JJK: Added the following to avoid multiple calls to NXPRINT which are
++	#JJK: *SLOW* when using 1500+ foomatic drivers
++	#JJK: Note cache is reloaded after 60 minutes (or if empty)
+ 
+-	if [ &quot;$ENABLE_FOOMATIC&quot; = &quot;1&quot; ]
++	if [ -z &quot;$(find $UTILITY_DRIVERS_CACHE.all -mmin -60 2&gt; /dev/null)&quot; ]
+ 	then
+-		[ -z &quot;$COMMAND_FOOMATIC&quot; ] &amp;&amp; COMMAND_FOOMATIC=&quot;foomatic-ppdfile&quot; 
+-		$COMMAND_FOOMATIC list | awk -F'&quot;' '{ A=&quot;&quot;; if ($4 == &quot;HP&quot;) { B=substr($6,index($6,&quot; &quot;)+1); A=&quot; &quot;substr(B,0,index(B,&quot; &quot;)); } printf(&quot;driver|%s%s|%s|%s|%s\n&quot;,$4,A,$6,$2,substr($3,2)) } '
+-	fi
+-	} | sort
++		{ 
++		cd /usr/share/ppd/
++		awk -F '&quot;' '/\*Manufacturer:/ { a[FILENAME]=$2 }
++			    /\*NickName:/ { b[FILENAME]=$2 } 
++			    END { 
++			       for (i in a) 
++				  print &quot;driver|&quot; (a[i]==&quot;ESP&quot;?substr(b[i],0,index(b[i],&quot; &quot;)-1):a[i]) &quot;|&quot;b[i]&quot;|&quot;i&quot;|en&quot;
++			    }' $(find -name &quot;*.ppd&quot;)
++
++		if [ &quot;$ENABLE_FOOMATIC&quot; = &quot;1&quot; ]
++		then
++			[ -z &quot;$COMMAND_FOOMATIC&quot; ] &amp;&amp; COMMAND_FOOMATIC=&quot;foomatic-ppdfile&quot; 
++			$COMMAND_FOOMATIC list | awk -F'&quot;' '{ A=&quot;&quot;; if ($4 == &quot;HP&quot;) { B=substr($6,index($6,&quot; &quot;)+1); A=&quot; &quot;substr(B,0,index(B,&quot; &quot;)); } printf(&quot;driver|%s%s|%s|%s|%s\n&quot;,$4,A,$6,$2,substr($3,2)) } '
++		fi
++		} | sort &gt; &quot;$UTILITY_DRIVERS_CACHE&quot;.all
++       fi
++
++       cat &quot;$UTILITY_DRIVERS_CACHE&quot;.all
+ fi
+ 
+ if [ &quot;$PRINTERS&quot; = &quot;yes&quot; ]
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000491.html">[Freenx-cvs] r359 - freenx-server/trunk
+</A></li>
+	<LI>Next message: <A HREF="000493.html">[Freenx-cvs] r361 - freenx-server/trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#492">[ date ]</a>
+              <a href="thread.html#492">[ thread ]</a>
+              <a href="subject.html#492">[ subject ]</a>
+              <a href="author.html#492">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

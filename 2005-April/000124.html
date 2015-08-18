@@ -1,0 +1,216 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fabianx modified 4 files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-April/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%204%20files&In-Reply-To=%3C426BC09A.mailKG211LJY4%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000123.html">
+   <LINK REL="Next"  HREF="000125.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fabianx modified 4 files</H1>
+    <B>fabianx</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%204%20files&In-Reply-To=%3C426BC09A.mailKG211LJY4%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fabianx modified 4 files">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Sun Apr 24 17:51:54 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000123.html">[Freenx-cvs] CVS: freenx - fabianx modified nxserver
+</A></li>
+        <LI>Next message: <A HREF="000125.html">[Freenx-cvs] CVS: freenx - fabianx modified ChangeLog
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#124">[ date ]</a>
+              <a href="thread.html#124">[ thread ]</a>
+              <a href="subject.html#124">[ subject ]</a>
+              <a href="author.html#124">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fabianx
+Date:      2005-04-24 15:51:54 GMT
+Modified:  .        ChangeLog node.conf.sample nxloadconfig nxserver
+Log:
+Added enforcing of encryption on the server.
+
+New configfile directive: ENABLE_FORCE_ENCRYPTION.
+
+Revision  Changes    Path
+1.45      +2 -0      freenx/ChangeLog
+
+
+rev 1.45, prev_rev 1.44
+Index: ChangeLog
+===================================================================
+RCS file: /cvsroot/freenx/freenx/ChangeLog,v
+retrieving revision 1.44
+retrieving revision 1.45
+diff -u -r1.44 -r1.45
+--- ChangeLog	31 Mar 2005 08:17:56 -0000	1.44
++++ ChangeLog	24 Apr 2005 15:51:54 -0000	1.45
+@@ -21,6 +21,8 @@
+ 	* Added NX_LOG_LEVEL instead of NX_LOGGING, allowing less verbose logfile.
+ 	* Added SESSION_LOG_CLEAN for configurable removal of the temporary session directory.
+ 	* Added &quot;--ssh2&quot; cmdline switch for commercial ssh2-server support in nxsetup
++	* Added ENABLE_FORCE_ENCRYPTION to enforce the usage of encryption on 
++	  the server.
+ 
+ XX.03.2005 FreeNX 0.3.1-CVS
+ 	* Fixed keyboard mapping problems.
+
+
+
+1.20      +5 -1      freenx/node.conf.sample
+
+
+rev 1.20, prev_rev 1.19
+Index: node.conf.sample
+===================================================================
+RCS file: /cvsroot/freenx/freenx/node.conf.sample,v
+retrieving revision 1.19
+retrieving revision 1.20
+diff -u -r1.19 -r1.20
+--- node.conf.sample	23 Apr 2005 12:56:54 -0000	1.19
++++ node.conf.sample	24 Apr 2005 15:51:54 -0000	1.20
+@@ -37,7 +37,7 @@
+ #
+ #           <A HREF="https://mail.kde.org/mailman/listinfo/freenx-knx">https://mail.kde.org/mailman/listinfo/freenx-knx</A>
+ #
+-# CVS: $Id: node.conf.sample,v 1.19 2005/04/23 12:56:54 jonno Exp $
++# CVS: $Id: node.conf.sample,v 1.20 2005/04/24 15:51:54 fabianx Exp $
+ 
+ #########################################################################
+ # FreeNX specific node.conf directives
+@@ -192,6 +192,10 @@
+ # WARNING: This will NOT (and should not) affect applications. ONLY Disable this
+ #          if the nx libraries are in a standard system path (such as /usr/lib)!
+ #SET_LD_LIBRARY_PATH=&quot;1&quot;
++
++# If enabled forces the user to use encryption. This will bail out 
++# if the user does not have encryption enabled.
++#ENABLE_FORCE_ENCRYPTION=&quot;0&quot;
+ 
+ #########################################################################
+ # NoMachine node.conf compatible (almost) directives
+
+
+
+1.25      +5 -1      freenx/nxloadconfig
+
+
+rev 1.25, prev_rev 1.24
+Index: nxloadconfig
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxloadconfig,v
+retrieving revision 1.24
+retrieving revision 1.25
+diff -u -r1.24 -r1.25
+--- nxloadconfig	23 Apr 2005 12:56:54 -0000	1.24
++++ nxloadconfig	24 Apr 2005 15:51:54 -0000	1.25
+@@ -5,7 +5,7 @@
+ #
+ # License: GPL, version 2
+ #
+-# CVS: $Id: nxloadconfig,v 1.24 2005/04/23 12:56:54 jonno Exp $
++# CVS: $Id: nxloadconfig,v 1.25 2005/04/24 15:51:54 fabianx Exp $
+ #
+ # ========================================================================
+ 
+@@ -113,6 +113,10 @@
+ COMMAND_SESSREG=&quot;sessreg&quot;
+ 
+ SET_LD_LIBRARY_PATH=&quot;1&quot;
++
++ENABLE_FORCE_ENCRYPTION=&quot;0&quot;
++
++# FreeNX + NoMachine mixed section
+ 
+ # see below for DEFAULT_X_WM directive
+ ENABLE_DEFAULT_X_WM=&quot;0&quot;
+
+
+
+1.49      +9 -3      freenx/nxserver
+
+
+rev 1.49, prev_rev 1.48
+Index: nxserver
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxserver,v
+retrieving revision 1.48
+retrieving revision 1.49
+diff -u -r1.48 -r1.49
+--- nxserver	24 Apr 2005 15:12:13 -0000	1.48
++++ nxserver	24 Apr 2005 15:51:54 -0000	1.49
+@@ -11,7 +11,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxserver,v 1.48 2005/04/24 15:12:13 fabianx Exp $
++# CVS: $Id: nxserver,v 1.49 2005/04/24 15:51:54 fabianx Exp $
+ #
+ 
+ # Read the config file
+@@ -771,6 +771,14 @@
+ 			log 2 &quot;Warning: Please set SSHD_CHECK_IP=1 if you want to refuse the connection.&quot;
+ 		fi
+ 	fi
++	
++	export ENCRYPTION=$(getparam encryption)
++	
++	if [ &quot;$ENABLE_FORCE_ENCRYPTION&quot; = &quot;1&quot; -a &quot;$ENCRYPTION&quot; != &quot;1&quot; ]
++	then
++			echo_x &quot;NX&gt; 504 Unencrypted sessions are not allowed.&quot;
++			return 1
++	fi
+ 
+ 	# check if there is a suspended session, which we could resume
+ 	if [ &quot;$ENABLE_AUTORECONNECT&quot; = &quot;1&quot; -a &quot;$ACTION&quot; = &quot;start&quot; ]
+@@ -826,11 +834,9 @@
+ 		# now update the session listing
+ 		CMDLINE=&quot;a=b&amp;$FULL_PARAMS&quot;
+ 		session_add $uniqueid &quot;sessionName=$(getparam session)&amp;display=$(getparam display)&amp;status=Running&amp;startTime=$(date +%s)&amp;foreignAddress=$(getparam userip)&amp;type=$(getparam type)&amp;sessionId=$uniqueid&amp;creationTime=$(date +%s)&amp;userName=$USER&amp;serverPid=$SERVER_PID&amp;screeninfo=$(getparam screeninfo)&amp;geometry=$(getparam geometry)&quot;
+-		export ENCRYPTION=$(getparam encryption)
+ 	else
+ 		uniqueid=$(getparam restore)
+ 		[ -z &quot;$uniqueid&quot; ] &amp;&amp; uniqueid=$(getparam id) # 1.4.0-5 compatibility
+-		export ENCRYPTION=$(getparam encryption)
+ 		session_change &quot;$uniqueid&quot; &quot;foreignAddress&quot; &quot;$USERIP&quot;
+ 
+ 		CMDLINE=$(session_get &quot;$uniqueid&quot;)
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000123.html">[Freenx-cvs] CVS: freenx - fabianx modified nxserver
+</A></li>
+	<LI>Next message: <A HREF="000125.html">[Freenx-cvs] CVS: freenx - fabianx modified ChangeLog
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#124">[ date ]</a>
+              <a href="thread.html#124">[ thread ]</a>
+              <a href="subject.html#124">[ subject ]</a>
+              <a href="author.html#124">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

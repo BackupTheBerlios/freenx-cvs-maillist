@@ -1,0 +1,104 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] CVS: freenx - fabianx modified nxsetup
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2005-February/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%20nxsetup&In-Reply-To=%3C42128D20.mailHIV1M1YAL%40lists.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000024.html">
+   <LINK REL="Next"  HREF="000026.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] CVS: freenx - fabianx modified nxsetup</H1>
+    <B>fabianx</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20CVS%3A%20freenx%20-%20fabianx%20modified%20nxsetup&In-Reply-To=%3C42128D20.mailHIV1M1YAL%40lists.berlios.de%3E"
+       TITLE="[Freenx-cvs] CVS: freenx - fabianx modified nxsetup">freenx-cvs at berlios.de
+       </A><BR>
+    <I>Wed Feb 16 01:00:32 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000024.html">[Freenx-cvs] CVS: freenx - fabianx modified gentoo-nomachine.diff
+</A></li>
+        <LI>Next message: <A HREF="000026.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#25">[ date ]</a>
+              <a href="thread.html#25">[ thread ]</a>
+              <a href="subject.html#25">[ subject ]</a>
+              <a href="author.html#25">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>User:      fabianx
+Date:      2005-02-16 00:00:31 GMT
+Modified:  .        nxsetup
+Log:
+Create base directory of home directory before running useradd. Else this will fail in case of /usr/NX/home/nx. (like in gentoo-nomachine case)
+
+Revision  Changes    Path
+1.16      +5 -1      freenx/nxsetup
+
+
+rev 1.16, prev_rev 1.15
+Index: nxsetup
+===================================================================
+RCS file: /cvsroot/freenx/freenx/nxsetup,v
+retrieving revision 1.15
+retrieving revision 1.16
+diff -u -r1.15 -r1.16
+--- nxsetup	14 Feb 2005 08:23:16 -0000	1.15
++++ nxsetup	16 Feb 2005 00:00:31 -0000	1.16
+@@ -5,7 +5,7 @@
+ #
+ # License: GNU GPL, version 2
+ #
+-# CVS: $Id: nxsetup,v 1.15 2005/02/14 08:23:16 jonno Exp $ 
++# CVS: $Id: nxsetup,v 1.16 2005/02/16 00:00:31 fabianx Exp $ 
+ #
+ 
+ HELP=&quot;no&quot;
+@@ -71,6 +71,10 @@
+ # Tries to add a system user
+ useradd_nx()
+ {
++	# In any case create the basedir of the HOME directory before, 
++	# because useradd will fail to make more than one directory
++	mkdir -p $(dirname &quot;$NX_HOME_DIR&quot;)
++	
+ 	# Are uid specified
+ 	if [ -n &quot;$SETUP_UID&quot; ]
+ 	then
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000024.html">[Freenx-cvs] CVS: freenx - fabianx modified gentoo-nomachine.diff
+</A></li>
+	<LI>Next message: <A HREF="000026.html">[Freenx-cvs] CVS: freenx - fabianx modified 2 files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#25">[ date ]</a>
+              <a href="thread.html#25">[ thread ]</a>
+              <a href="subject.html#25">[ subject ]</a>
+              <a href="author.html#25">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

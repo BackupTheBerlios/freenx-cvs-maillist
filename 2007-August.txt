@@ -1,0 +1,2314 @@
+From fabianx at mail.berlios.de  Fri Aug  3 20:42:44 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Fri, 3 Aug 2007 20:42:44 +0200
+Subject: [Freenx-cvs] r354 - freenx-server/trunk
+Message-ID: <200708031842.l73Igi1b000615@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-08-03 20:42:43 +0200 (Fri, 03 Aug 2007)
+New Revision: 354
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxnode
+Log:
+- Opened 0.7.1.
+
+* Fixed the issue that makes fonts look tiny and unreadable by default
+  with freenx and the commercial client. (diamond at google.com)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-07-07 05:59:50 UTC (rev 353)
++++ freenx-server/trunk/ChangeLog	2007-08-03 18:42:43 UTC (rev 354)
+@@ -1,3 +1,7 @@
++xx.10.2007 FreeNX 0.7.1
++	* Fixed the issue that makes fonts look tiny and unreadable by default 
++	  with freenx and the commercial client. (diamond at google.com)
++
+ 07.07.2007 FreeNX 0.7.0 "Jornade SPL Edition VI+1"
+ 	* Fixed the printing support for CUPS 1.2.
+ 	  Older versions of CUPS are no longer supported.
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2007-07-07 05:59:50 UTC (rev 353)
++++ freenx-server/trunk/nxnode	2007-08-03 18:42:43 UTC (rev 354)
+@@ -304,6 +304,8 @@
+ 		NODE_WM_PID=$!
+ 	fi
+ 
++	echo "Xft.dpi: 96" | DISPLAY=unix:$display xrdb -merge >>"$USER_FAKE_HOME/.nx/C-$sess_id/session" 2>&1
++
+ 	#
+ 	# Startup the application
+ 	#
+
+
+
+From fabianx at mail.berlios.de  Fri Aug  3 20:46:06 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Fri, 3 Aug 2007 20:46:06 +0200
+Subject: [Freenx-cvs] r355 - freenx-server/trunk
+Message-ID: <200708031846.l73Ik68V000874@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-08-03 20:46:06 +0200 (Fri, 03 Aug 2007)
+New Revision: 355
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxsetup
+Log:
+08_neg_cache_fix.dpatch - If nscd is being used, it can take a few
+seconds to pick up the new user/group after addition. This patch
+causes nscd --invalidate to be called after each user/group
+addition/removal to prevent subsequent commands from failing. In
+particular, addgroup followed by adduser would often fail, with
+adduser complaining that the 'nx' group did not exist as nscd hadn't
+picked up the addition yet. - Stephen Shirley (diamond at google.com)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-08-03 18:42:43 UTC (rev 354)
++++ freenx-server/trunk/ChangeLog	2007-08-03 18:46:06 UTC (rev 355)
+@@ -1,6 +1,8 @@
+ xx.10.2007 FreeNX 0.7.1
+ 	* Fixed the issue that makes fonts look tiny and unreadable by default 
+ 	  with freenx and the commercial client. (diamond at google.com)
++	* Added invalidating of NSCD cache after group and user add.
++	  (diamond at google.com)
+ 
+ 07.07.2007 FreeNX 0.7.0 "Jornade SPL Edition VI+1"
+ 	* Fixed the printing support for CUPS 1.2.
+
+Modified: freenx-server/trunk/nxsetup
+===================================================================
+--- freenx-server/trunk/nxsetup	2007-08-03 18:42:43 UTC (rev 354)
++++ freenx-server/trunk/nxsetup	2007-08-03 18:46:06 UTC (rev 355)
+@@ -164,7 +164,10 @@
+ 
+ 		# adduser needs a valid group to add the user to
+ 		! nx_group_exists && addgroup --system --quiet $GROUPADD_OPTIONS nx
++		[ -f /etc/nscd.conf ] && { nscd --invalidate group; }
++
+ 		adduser $USERADD_OPTIONS nx
++		[ -f /etc/nscd.conf ] && { nscd --invalidate passwd; }
+ 		
+ 	# no, its a "normal" useradd
+ 	else
+@@ -185,10 +188,16 @@
+ 		if [ "$SETUP_LOCAL_USER" = "yes" ]
+ 		then
+ 			! nx_group_exists && lgroupadd $GROUPADD_OPTIONS nx 
++			[ -f /etc/nscd.conf ] && { nscd --invalidate group; }
++
+ 			luseradd $USERADD_OPTIONS nx
++			[ -f /etc/nscd.conf ] && { nscd --invalidate passwd; }
+ 		else
+ 			! nx_group_exists && groupadd $GROUPADD_OPTIONS nx
++			[ -f /etc/nscd.conf ] && { nscd --invalidate group; }
++
+ 			useradd $USERADD_OPTIONS nx
++			[ -f /etc/nscd.conf ] && { nscd --invalidate passwd; }
+ 		fi
+ 
+ 		
+@@ -448,6 +457,7 @@
+ 	#Perform cleanup?
+ 	[ "$CLEAN" = "yes" ] && uninstall_nx
+ 	
++	[ -f /etc/nscd.conf ] && { nscd --invalidate passwd; nscd --invalidate group; }
+ 	install_nx
+ 
+ 	[ "$AUTOMATIC" = "no" ] && test_nx
+
+
+
+From fabianx at mail.berlios.de  Fri Aug  3 20:49:02 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Fri, 3 Aug 2007 20:49:02 +0200
+Subject: [Freenx-cvs] r356 - freenx-server/trunk
+Message-ID: <200708031849.l73In2Av001013@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-08-03 20:49:01 +0200 (Fri, 03 Aug 2007)
+New Revision: 356
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxclient
+Log:
+Changes the wording slightly in two of the dialogs that nxclient displays to prevent confusion over whether they refer to the dialog box or the local nx client window. - Stephen Shirley (diamond at google.com)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-08-03 18:46:06 UTC (rev 355)
++++ freenx-server/trunk/ChangeLog	2007-08-03 18:49:01 UTC (rev 356)
+@@ -3,6 +3,8 @@
+ 	  with freenx and the commercial client. (diamond at google.com)
+ 	* Added invalidating of NSCD cache after group and user add.
+ 	  (diamond at google.com)
++	* Added better wording with less misunderstanding to dialog of 
++	  nxclient for Suspend/Terminate/Close case.
+ 
+ 07.07.2007 FreeNX 0.7.0 "Jornade SPL Edition VI+1"
+ 	* Fixed the printing support for CUPS 1.2.
+
+Modified: freenx-server/trunk/nxclient
+===================================================================
+--- freenx-server/trunk/nxclient	2007-08-03 18:46:06 UTC (rev 355)
++++ freenx-server/trunk/nxclient	2007-08-03 18:49:01 UTC (rev 356)
+@@ -216,7 +216,7 @@
+ 
+ xdialog_yesnosuspend()
+ {
+-	$DIALOG --title "$DIALOG_CAPTION" --buttons-style text --ok-label "Suspend" --cancel-label "Terminate" --yesno "$DIALOG_MESSAGE Close window to cancel." 400x150
++	$DIALOG --title "$DIALOG_CAPTION" --buttons-style text --ok-label "Suspend" --cancel-label "Terminate" --yesno "$DIALOG_MESSAGE Close this dialog to cancel." 400x150
+ 	RC=$?
+ 	[ $RC -eq 0 ] && return 3
+ 	[ $RC -eq 1 ] && return 2
+@@ -238,7 +238,7 @@
+ 
+ xdialog_printer_ask()
+ {
+-	$DIALOG --title "$DIALOG_CAPTION" --buttons-style text --ok-label "Ok" --cancel-label "Configure" --yesno "$DIALOG_MESSAGE\n\nClose window to cancel." 400x250
++	$DIALOG --title "$DIALOG_CAPTION" --buttons-style text --ok-label "Ok" --cancel-label "Configure" --yesno "$DIALOG_MESSAGE\n\nClose this dialog to cancel." 400x250
+ 	RC=$?
+ 	[ $RC -eq 255 ] && return 2
+ 	return $RC
+
+
+
+From fabianx at mail.berlios.de  Mon Aug  6 15:06:54 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Mon, 6 Aug 2007 15:06:54 +0200
+Subject: [Freenx-cvs] r357 - freenx-server/trunk
+Message-ID: <200708061306.l76D6sir013666@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-08-06 15:06:54 +0200 (Mon, 06 Aug 2007)
+New Revision: 357
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxclient
+Log:
+- Added 'dialog_interface=dialog' option since many installations may not have Xdialog and since
+xmessage is very limiting. (This new option will work on any machine that has dialog and xterm).
+
+Implementing this requires:
+        - Requoting (and saving) the inputs line
+	  ($@)
+	- Launching an xterm to display the
+	  dialog (and logic so only done once when
+	  subdialogs exist)
+	- Using a tempfile to capture temporarily
+	  the result of each dialog
+	- Defining the "dialog" interface
+	  functions analogous to the "Xdialog" interface functions
+          (with a few subtle syntax differences)
+
+JJK (puterguy at bat.berlios.de)
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-08-03 18:49:01 UTC (rev 356)
++++ freenx-server/trunk/ChangeLog	2007-08-06 13:06:54 UTC (rev 357)
+@@ -4,7 +4,11 @@
+ 	* Added invalidating of NSCD cache after group and user add.
+ 	  (diamond at google.com)
+ 	* Added better wording with less misunderstanding to dialog of 
+-	  nxclient for Suspend/Terminate/Close case.
++	  nxclient for Suspend/Terminate/Close case. (diamond at google.com)
++	* Added 'dialog_interface=dialog' option since many installations may 
++	  not have Xdialog and since xmessage is very limiting. This new option 
++	  will work on any machine that has dialog and xterm.
++	  (puterguy at bat.berlios.de)
+ 
+ 07.07.2007 FreeNX 0.7.0 "Jornade SPL Edition VI+1"
+ 	* Fixed the printing support for CUPS 1.2.
+
+Modified: freenx-server/trunk/nxclient
+===================================================================
+--- freenx-server/trunk/nxclient	2007-08-03 18:49:01 UTC (rev 356)
++++ freenx-server/trunk/nxclient	2007-08-06 13:06:54 UTC (rev 357)
+@@ -19,6 +19,21 @@
+ [ -x "$NXCLIENT" -a "$(file -bi $NXCLIENT)" != 'application/x-shellscript' ] \
+ 	&& exec ${NXCLIENT} "$@"
+ 
++#JJK: borrowed from Aron Griffis
++
++function requote 
++{
++	declare arg
++
++	for arg
++	do
++		arg=$(printf '%q' "$arg")
++		printf '%s ' "${arg:-''}"
++	done
++}
++
++INPUTS=$(requote "$@")	#JJK: Save input parameter line...
++
+ TEMP=`getopt -a -o d: --long local,noautokill,dialog:,caption:,message:,display:,printer:,parent: -n $(basename $0) -- "$@"`
+ 
+ if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
+@@ -55,10 +70,34 @@
+ # if --printer is set, the dialog type is overridden
+ [ -n "$DIALOG_PRINTER" ] && DIALOG_TYPE="printer"
+ 
++# FIXME: This should be COMMAND_XDIALOG, ...
+ if [ -x /usr/bin/Xdialog ] 
+ then
+ 	dialog_interface="xdialog"
+ 	DIALOG=/usr/bin/Xdialog # just in case that we have no good path
++elif [ -x /usr/bin/dialog ]
++then
++	#JJK: Added 'dialog_interface=dialog' option because Xdialog not standard
++	#JJK: on some distros such as Fedora and xmessage won't handle long
++	#JJK: lists of ppd files while the combination of 'dialog' and 'xterm'
++	#JJK: should be present on most setups.
++
++	dialog_interface="dialog"
++	DIALOG=/usr/bin/dialog
++	if [ -z "$NXCLIENT_FIRST_TIME" ]
++	then
++		# Run only once in case of subdialogs. Capture result in tempfile
++		TMPFILE=$(mktemp /tmp/nxclient.XXXXX)
++		export NXCLIENT_FIRST_TIME=1
++
++		xterm -geometry 120x24+100+100 +sb -title "NXclient" -e \
++		       /bin/bash -c "$DIALOG --infobox 'Please wait...' 3 25; $0 $INPUTS | tee $TMPFILE" || exit 1
++
++		#Need to recover the last line output and remove non-printing chars
++		tail -1 $TMPFILE | egrep -v "^["
++		rm -f $TMPFILE
++		exit 0
++	fi
+ else
+ 	dialog_interface="xmessage"
+ 	xmessage=$(which xmessage 2>/dev/null)
+@@ -257,7 +296,70 @@
+ 	$DIALOG --stdout --title "$DIALOG_CAPTION" --radiolist "$DIALOG_MESSAGE" 0 0 6 "${XDIALOG_LIST[@]}"
+ }
+ 
++#JJK: dialog interface
++# These are analogous to the Xdialog functions with a few subtle
++# syntax differences
++#
+ 
++dialog_ok()
++{
++	$DIALOG --title "$DIALOG_CAPTION" --msgbox "$DIALOG_MESSAGE" 0 0
++	return 0 # Give cancel on close ...
++}
++
++dialog_yesno()
++{
++	$DIALOG --title "$DIALOG_CAPTION" --yesno "$DIALOG_MESSAGE" 0 0
++	RC=$?
++	[ $RC -eq 0 ] && return 2
++	[ $RC -eq 1 ] && return 0
++}
++
++dialog_yesnosuspend()
++{
++	$DIALOG --title "$DIALOG_CAPTION"  --yes-label "Suspend" --no-label "Terminate" --yesno "$DIALOG_MESSAGE\n\nPress 'Esc' to cancel." 8 60
++	RC=$?
++	[ $RC -eq 0 ] && return 3
++	[ $RC -eq 1 ] && return 2
++}
++
++dialog_panic()
++{
++	$DIALOG --title "$DIALOG_CAPTION" --defaultno --yes-label "Terminate" --no-label "Cancel" --yesno "$DIALOG_MESSAGE" 0 0
++	RC=$?
++	[ $RC -eq 0 ] && return 2
++	[ $RC -eq 1 ] && return 0
++}
++
++dialog_quit()
++{
++	$DIALOG --ok-label "Quit" --title "$DIALOG_CAPTION" --msgbox "$DIALOG_MESSAGE" 0 0
++	return 0 # Give cancel on close ...
++}
++
++dialog_printer_ask()
++{
++	$DIALOG --cr-wrap --title "$DIALOG_CAPTION" --yes-label "Ok" --no-label "Configure" --yesno "$DIALOG_MESSAGE\n\nPress 'Esc' to cancel." 10 70
++	RC=$?
++	echo $RC
++	[ $RC -eq 255 ] && return 2
++	return $RC
++}
++
++dialog_printer_configure_vendor()
++{
++	IFS='|' VENDOR_LIST=( $(utility_printer getvendlist | sed 's/|/||/g') )
++	$DIALOG --stdout --title "$DIALOG_CAPTION" --menu "$DIALOG_MESSAGE" 0 40 15 "${VENDOR_LIST[@]}"
++}
++
++# dialog_printer_configure_driver vendor old_driver
++dialog_printer_configure_driver()
++{
++	IFS='|' XDIALOG_LIST=( $(utility_printer getextdrvlist "$1" | tr '\n' '|') )
++	$DIALOG --stdout --title "$DIALOG_CAPTION" --menu "$DIALOG_MESSAGE" 0 110 15 "${XDIALOG_LIST[@]}"
++}
++
++
+ #
+ # helper functions
+ #
+@@ -299,7 +401,7 @@
+ 	# echo the choosen <ppdfile> to stdout
+ 	[ -n "$DRIVER" ] && echo "$DRIVER"
+ 	[ -z "$DRIVER" ] && echo "cancel: aborted" && exit 2
+-			
++
+ 	exit 0
+ }
+ 
+
+
+
+From fabianx at mail.berlios.de  Wed Aug  8 15:36:54 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Wed, 8 Aug 2007 15:36:54 +0200
+Subject: [Freenx-cvs] r358 - freenx-server/trunk
+Message-ID: <200708081336.l78DasM6008272@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-08-08 15:36:53 +0200 (Wed, 08 Aug 2007)
+New Revision: 358
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxloadconfig
+Log:
+* Fixed the APPLICATION_LIBRARY_PRELOAD to be just a warning and fixed
+  the default path
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-08-06 13:06:54 UTC (rev 357)
++++ freenx-server/trunk/ChangeLog	2007-08-08 13:36:53 UTC (rev 358)
+@@ -9,6 +9,8 @@
+ 	  not have Xdialog and since xmessage is very limiting. This new option 
+ 	  will work on any machine that has dialog and xterm.
+ 	  (puterguy at bat.berlios.de)
++	* Fixed the APPLICATION_LIBRARY_PRELOAD to be just a warning and fixed 
++	  the default path.
+ 
+ 07.07.2007 FreeNX 0.7.0 "Jornade SPL Edition VI+1"
+ 	* Fixed the printing support for CUPS 1.2.
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2007-08-06 13:06:54 UTC (rev 357)
++++ freenx-server/trunk/nxloadconfig	2007-08-08 13:36:53 UTC (rev 358)
+@@ -274,7 +274,7 @@
+ [ -z "$AGENT_LIBRARY_PATH" ] && AGENT_LIBRARY_PATH=$PATH_LIB
+ [ -z "$PROXY_LIBRARY_PATH" ] && PROXY_LIBRARY_PATH=$PATH_LIB
+ [ -z "$APPLICATION_LIBRARY_PATH" ] && APPLICATION_LIBRARY_PATH=$PATH_LIB
+-[ -z "$APPLICATION_LIBRARY_PRELOAD" ] && APPLICATION_LIBRARY_PRELOAD="$APPLICATION_LIBRARY_PATH/libX11.so.6.2:$APPLICATION_LIBRARY_PATH/libXext.so.6.4:$APPLICATION_LIBRARY_PATH/libXcomp.so:$APPLICATION_LIBRARY_PATH/libXcompext.so.1:$APPLICATION_LIBRARY_PATH/libXrender.so.1.2"
++[ -z "$APPLICATION_LIBRARY_PRELOAD" ] && APPLICATION_LIBRARY_PRELOAD="$APPLICATION_LIBRARY_PATH/libX11.so.6.2:$APPLICATION_LIBRARY_PATH/libXext.so.6.4:$APPLICATION_LIBRARY_PATH/libXcomp.so:$APPLICATION_LIBRARY_PATH/libXcompext.so:$APPLICATION_LIBRARY_PATH/libXrender.so.1.2"
+ if [ -z "$ENABLE_2_0_0_BACKEND" ]
+ then
+ 	ENABLE_2_0_0_BACKEND="1"
+@@ -331,7 +331,7 @@
+ 	IFS=":"
+ 	for LIBRARY in $APPLICATION_LIBRARY_PRELOAD; do
+ 		[ ! -e $LIBRARY ] && \
+-			ERROR="yes" && echo "Error: Invalid value \"APPLICATION_LIBRARY_PRELOAD=$APPLICATION_LIBRARY_PRELOAD\"" && break ;
++			WARNING="yes" && echo "Warning: Invalid value \"APPLICATION_LIBRARY_PRELOAD=$APPLICATION_LIBRARY_PRELOAD\". $LIBRARY could not be found. Users will not be able to run a single application in non-rootless mode." && break ;
+ 	done
+ 	IFS=$OLD_IFS
+ 	
+
+
+
+From fabianx at mail.berlios.de  Wed Aug  8 15:52:21 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Wed, 8 Aug 2007 15:52:21 +0200
+Subject: [Freenx-cvs] r359 - freenx-server/trunk
+Message-ID: <200708081352.l78DqLpL008944@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-08-08 15:52:20 +0200 (Wed, 08 Aug 2007)
+New Revision: 359
+
+Modified:
+   freenx-server/trunk/nxclient
+Log:
+More dialog fixes. --stdout was added to all dialog parameters so that only the real output goes to tee.
+
+
+
+Modified: freenx-server/trunk/nxclient
+===================================================================
+--- freenx-server/trunk/nxclient	2007-08-08 13:36:53 UTC (rev 358)
++++ freenx-server/trunk/nxclient	2007-08-08 13:52:20 UTC (rev 359)
+@@ -93,8 +93,8 @@
+ 		xterm -geometry 120x24+100+100 +sb -title "NXclient" -e \
+ 		       /bin/bash -c "$DIALOG --infobox 'Please wait...' 3 25; $0 $INPUTS | tee $TMPFILE" || exit 1
+ 
+-		#Need to recover the last line output and remove non-printing chars
+-		tail -1 $TMPFILE | egrep -v "^["
++		#Need to recover the last line output (and not remove non-printing chars, because --stdout is used)
++		tail -1 $TMPFILE 
+ 		rm -f $TMPFILE
+ 		exit 0
+ 	fi
+@@ -303,13 +303,13 @@
+ 
+ dialog_ok()
+ {
+-	$DIALOG --title "$DIALOG_CAPTION" --msgbox "$DIALOG_MESSAGE" 0 0
++	$DIALOG --stdout --title "$DIALOG_CAPTION" --msgbox "$DIALOG_MESSAGE" 0 0
+ 	return 0 # Give cancel on close ...
+ }
+ 
+ dialog_yesno()
+ {
+-	$DIALOG --title "$DIALOG_CAPTION" --yesno "$DIALOG_MESSAGE" 0 0
++	$DIALOG --stdout --title "$DIALOG_CAPTION" --yesno "$DIALOG_MESSAGE" 0 0
+ 	RC=$?
+ 	[ $RC -eq 0 ] && return 2
+ 	[ $RC -eq 1 ] && return 0
+@@ -317,7 +317,7 @@
+ 
+ dialog_yesnosuspend()
+ {
+-	$DIALOG --title "$DIALOG_CAPTION"  --yes-label "Suspend" --no-label "Terminate" --yesno "$DIALOG_MESSAGE\n\nPress 'Esc' to cancel." 8 60
++	$DIALOG --stdout --title "$DIALOG_CAPTION"  --yes-label "Suspend" --no-label "Terminate" --yesno "$DIALOG_MESSAGE\n\nPress 'Esc' to cancel." 8 60
+ 	RC=$?
+ 	[ $RC -eq 0 ] && return 3
+ 	[ $RC -eq 1 ] && return 2
+@@ -325,7 +325,7 @@
+ 
+ dialog_panic()
+ {
+-	$DIALOG --title "$DIALOG_CAPTION" --defaultno --yes-label "Terminate" --no-label "Cancel" --yesno "$DIALOG_MESSAGE" 0 0
++	$DIALOG --stdout --title "$DIALOG_CAPTION" --defaultno --yes-label "Terminate" --no-label "Cancel" --yesno "$DIALOG_MESSAGE" 0 0
+ 	RC=$?
+ 	[ $RC -eq 0 ] && return 2
+ 	[ $RC -eq 1 ] && return 0
+@@ -333,13 +333,13 @@
+ 
+ dialog_quit()
+ {
+-	$DIALOG --ok-label "Quit" --title "$DIALOG_CAPTION" --msgbox "$DIALOG_MESSAGE" 0 0
++	$DIALOG --stdout --ok-label "Quit" --title "$DIALOG_CAPTION" --msgbox "$DIALOG_MESSAGE" 0 0
+ 	return 0 # Give cancel on close ...
+ }
+ 
+ dialog_printer_ask()
+ {
+-	$DIALOG --cr-wrap --title "$DIALOG_CAPTION" --yes-label "Ok" --no-label "Configure" --yesno "$DIALOG_MESSAGE\n\nPress 'Esc' to cancel." 10 70
++	$DIALOG --stdout --cr-wrap --title "$DIALOG_CAPTION" --yes-label "Ok" --no-label "Configure" --yesno "$DIALOG_MESSAGE\n\nPress 'Esc' to cancel." 10 70
+ 	RC=$?
+ 	echo $RC
+ 	[ $RC -eq 255 ] && return 2
+
+
+
+From fabianx at mail.berlios.de  Wed Aug  8 16:53:43 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Wed, 8 Aug 2007 16:53:43 +0200
+Subject: [Freenx-cvs] r360 - freenx-server/trunk
+Message-ID: <200708081453.l78Erh6U012492@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-08-08 16:53:43 +0200 (Wed, 08 Aug 2007)
+New Revision: 360
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxclient
+   freenx-server/trunk/nxprint
+Log:
+* Added drivers.cache.all that is reloaded just every 60 minutes.
+ (puterguy at bat.berlios.de)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-08-08 13:52:20 UTC (rev 359)
++++ freenx-server/trunk/ChangeLog	2007-08-08 14:53:43 UTC (rev 360)
+@@ -11,6 +11,8 @@
+ 	  (puterguy at bat.berlios.de)
+ 	* Fixed the APPLICATION_LIBRARY_PRELOAD to be just a warning and fixed 
+ 	  the default path.
++	* Added drivers.cache.all that is reloaded just every 60 minutes.
++	  (puterguy at bat.berlios.de)
+ 
+ 07.07.2007 FreeNX 0.7.0 "Jornade SPL Edition VI+1"
+ 	* Fixed the printing support for CUPS 1.2.
+
+Modified: freenx-server/trunk/nxclient
+===================================================================
+--- freenx-server/trunk/nxclient	2007-08-08 13:52:20 UTC (rev 359)
++++ freenx-server/trunk/nxclient	2007-08-08 14:53:43 UTC (rev 360)
+@@ -138,7 +138,7 @@
+ 	UTILITY_NXPRINT="nxprint"
+ 	[ -n "$PATH_BIN" ] && UTILITY_NXPRINT="$PATH_BIN/nxprint"
+ 	# Export configuration vars for nxprint
+-	export ENABLE_FOOMATIC COMMAND_FOOMATIC
++	export ENABLE_FOOMATIC COMMAND_FOOMATIC UTILITY_DRIVERS_CACHE
+ 	case "$1" in 
+ 		get)
+ 			grep "driver|$2|" "$UTILITY_DRIVERS_CACHE" 2>/dev/null
+
+Modified: freenx-server/trunk/nxprint
+===================================================================
+--- freenx-server/trunk/nxprint	2007-08-08 13:52:20 UTC (rev 359)
++++ freenx-server/trunk/nxprint	2007-08-08 14:53:43 UTC (rev 360)
+@@ -44,21 +44,30 @@
+ 	echo "driver|Raw|Raw Queue|raw"
+ 	echo "driver|Download (CUPS)|Download from CUPS server (cached)|download_cached"
+ 	echo "driver|Download (CUPS)|Download from CUPS server (redownload)|download_new"
+-	{ 
+-        cd /usr/share/ppd/
+-        awk -F '"' '/\*Manufacturer:/ { a[FILENAME]=$2 }
+-                    /\*NickName:/ { b[FILENAME]=$2 } 
+-                    END { 
+-                       for (i in a) 
+-                          print "driver|" (a[i]=="ESP"?substr(b[i],0,index(b[i]," ")-1):a[i]) "|"b[i]"|"i"|en"
+-                    }' $(find -name "*.ppd")
++	#JJK: Added the following to avoid multiple calls to NXPRINT which are
++	#JJK: *SLOW* when using 1500+ foomatic drivers
++	#JJK: Note cache is reloaded after 60 minutes (or if empty)
+ 
+-	if [ "$ENABLE_FOOMATIC" = "1" ]
++	if [ -z "$(find $UTILITY_DRIVERS_CACHE.all -mmin -60 2> /dev/null)" ]
+ 	then
+-		[ -z "$COMMAND_FOOMATIC" ] && COMMAND_FOOMATIC="foomatic-ppdfile" 
+-		$COMMAND_FOOMATIC list | awk -F'"' '{ A=""; if ($4 == "HP") { B=substr($6,index($6," ")+1); A=" "substr(B,0,index(B," ")); } printf("driver|%s%s|%s|%s|%s\n",$4,A,$6,$2,substr($3,2)) } '
+-	fi
+-	} | sort
++		{ 
++		cd /usr/share/ppd/
++		awk -F '"' '/\*Manufacturer:/ { a[FILENAME]=$2 }
++			    /\*NickName:/ { b[FILENAME]=$2 } 
++			    END { 
++			       for (i in a) 
++				  print "driver|" (a[i]=="ESP"?substr(b[i],0,index(b[i]," ")-1):a[i]) "|"b[i]"|"i"|en"
++			    }' $(find -name "*.ppd")
++
++		if [ "$ENABLE_FOOMATIC" = "1" ]
++		then
++			[ -z "$COMMAND_FOOMATIC" ] && COMMAND_FOOMATIC="foomatic-ppdfile" 
++			$COMMAND_FOOMATIC list | awk -F'"' '{ A=""; if ($4 == "HP") { B=substr($6,index($6," ")+1); A=" "substr(B,0,index(B," ")); } printf("driver|%s%s|%s|%s|%s\n",$4,A,$6,$2,substr($3,2)) } '
++		fi
++		} | sort > "$UTILITY_DRIVERS_CACHE".all
++       fi
++
++       cat "$UTILITY_DRIVERS_CACHE".all
+ fi
+ 
+ if [ "$PRINTERS" = "yes" ]
+
+
+
+From fabianx at mail.berlios.de  Thu Aug  9 17:58:12 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Thu, 9 Aug 2007 17:58:12 +0200
+Subject: [Freenx-cvs] r361 - freenx-server/trunk
+Message-ID: <200708091558.l79FwCwo002203@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-08-09 17:58:11 +0200 (Thu, 09 Aug 2007)
+New Revision: 361
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxnode
+Log:
+* Fixed missing services stop that lead to redundant mounts and still
+  running cupsd processes.
+  (puterguy at bat.berlios.de)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-08-08 14:53:43 UTC (rev 360)
++++ freenx-server/trunk/ChangeLog	2007-08-09 15:58:11 UTC (rev 361)
+@@ -13,6 +13,9 @@
+ 	  the default path.
+ 	* Added drivers.cache.all that is reloaded just every 60 minutes.
+ 	  (puterguy at bat.berlios.de)
++	* Fixed missing services stop that lead to redundant mounts and still
++	  running cupsd processes.
++	  (puterguy at bat.berlios.de)
+ 
+ 07.07.2007 FreeNX 0.7.0 "Jornade SPL Edition VI+1"
+ 	* Fixed the printing support for CUPS 1.2.
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2007-08-08 14:53:43 UTC (rev 360)
++++ freenx-server/trunk/nxnode	2007-08-09 15:58:11 UTC (rev 361)
+@@ -132,6 +132,10 @@
+ 	NODE_TAIL_PID=$(cat "$USER_FAKE_HOME/.nx/C-$sess_id/pids/tail" 2>/dev/null)
+ 	[ -n "$NODE_TAIL_PID" ] && kill $NODE_TAIL_PID 2>/dev/null
+ 
++	# JJK: Kill running services
++	# FF: Seems this is needed also here ...
++	node_stop_services
++
+ 	# Remove display information
+ 	
+ 	NODE_DISPLAY=$(echo $1 | rev | cut -d"-" -f2 | rev)
+
+
+
+From fabianx at mail.berlios.de  Sat Aug 11 19:08:08 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sat, 11 Aug 2007 19:08:08 +0200
+Subject: [Freenx-cvs] r362 - freenx-server/trunk
+Message-ID: <200708111708.l7BH88oL016168@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-08-11 19:08:07 +0200 (Sat, 11 Aug 2007)
+New Revision: 362
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/node.conf.sample
+   freenx-server/trunk/nxloadconfig
+   freenx-server/trunk/nxnode
+Log:
+* Added support for mount.cifs additionally to the deprecated
+  smbmount. (fabianx at bat.berlios.de, puterguy at bat.berlios.de)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-08-09 15:58:11 UTC (rev 361)
++++ freenx-server/trunk/ChangeLog	2007-08-11 17:08:07 UTC (rev 362)
+@@ -10,12 +10,14 @@
+ 	  will work on any machine that has dialog and xterm.
+ 	  (puterguy at bat.berlios.de)
+ 	* Fixed the APPLICATION_LIBRARY_PRELOAD to be just a warning and fixed 
+-	  the default path.
++	  the default path. (fabianx at bat.berlios.de)
+ 	* Added drivers.cache.all that is reloaded just every 60 minutes.
+ 	  (puterguy at bat.berlios.de)
+ 	* Fixed missing services stop that lead to redundant mounts and still
+ 	  running cupsd processes.
+ 	  (puterguy at bat.berlios.de)
++	* Added support for mount.cifs additionally to the deprecated
++	  smbmount. (fabianx at bat.berlios.de, puterguy at bat.berlios.de)
+ 
+ 07.07.2007 FreeNX 0.7.0 "Jornade SPL Edition VI+1"
+ 	* Fixed the printing support for CUPS 1.2.
+
+Modified: freenx-server/trunk/node.conf.sample
+===================================================================
+--- freenx-server/trunk/node.conf.sample	2007-08-09 15:58:11 UTC (rev 361)
++++ freenx-server/trunk/node.conf.sample	2007-08-11 17:08:07 UTC (rev 362)
+@@ -294,6 +294,18 @@
+ #CUPS_DEFAULT_SOCK="/var/run/cups/cups.sock"
+ #CUPS_ETC="/etc/cups"
+ 
++# SAMBA_MOUNT_SHARE_PROTOCOL is a key to configure the supported 
++# protocols for mounting shares.
++#
++# This key can be set to the following values:
++#
++# both, either SMB and CIFS protocol are supported, this is the default value.
++# smbfs, only SMB protocol is supported.
++# cifs, only CIFS protocol is supported.
++# none, no network file-sharing protocol is supported.
++
++#SAMBA_MOUNT_SHARE_PROTOCOL="both"
++
+ #########################################################################
+ # Path directives
+ #########################################################################
+@@ -357,6 +369,14 @@
+ # 'smbumount'.
+ #COMMAND_SMBUMOUNT=smbumount
+ 
++# The key that contains the name of the complete path of command name
++# 'mount.cifs'.
++#COMMAND_SMBMOUNT_CIFS=/sbin/mount.cifs
++
++# The key that contains the name of the complete path of command name
++# 'umount.cifs'.
++#COMMAND_SMBUMOUNT_CIFS=/sbin/umount.cifs
++
+ # The key that contains the name of the complete path of the 'netcat' command.
+ #COMMAND_NETCAT=netcat
+ 
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2007-08-09 15:58:11 UTC (rev 361)
++++ freenx-server/trunk/nxloadconfig	2007-08-11 17:08:07 UTC (rev 362)
+@@ -157,6 +157,8 @@
+ CUPS_DEFAULT_SOCK="/var/run/cups/cups.sock"
+ CUPS_ETC="/etc/cups/"
+ 
++SAMBA_MOUNT_SHARE_PROTOCOL="both"
++
+ # Path directives
+ 
+ USER_FAKE_HOME="" #Calculated
+@@ -173,6 +175,8 @@
+ COMMAND_XAUTH=/usr/X11R6/bin/xauth
+ COMMAND_SMBMOUNT=smbmount
+ COMMAND_SMBUMOUNT=smbumount
++COMMAND_SMBMOUNT_CIFS=/sbin/mount.cifs
++COMMAND_SMBUMOUNT_CIFS=/sbin/umount.cifs
+ COMMAND_NETCAT=netcat
+ COMMAND_SSH=ssh
+ COMMAND_SSH_KEYGEN=ssh-keygen
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2007-08-09 15:58:11 UTC (rev 361)
++++ freenx-server/trunk/nxnode	2007-08-11 17:08:07 UTC (rev 362)
+@@ -1011,6 +1011,48 @@
+ 	# Rootless fix from 2x nxserver 1.5.0
+ 	realtype=$type
+ 	[ "$type" = "unix-application" -o "$type" = "unix-default" ] && realtype="unix-desktop"
++
++	# NX 2.1.0 file-sharing port options
++	client=$(getparam client)
++
++	smbport=""
++
++	if [ "$samba" = "1" ]
++	then
++		# We know from protocol traces that client=linux,winnt,macosx are valid values.
++		# I hope with smbclientproto=smb on default and smbclientproto=cifs on all valid
++		# values we get support for all those systems.
++
++		smbproto="$SAMBA_MOUNT_SHARE_PROTOCOL"
++
++		if [ "$smbproto" = "both" ]
++		then
++			smbproto="smbfs"
++
++			[ "$client" = "linux" ] && smbproto="cifs"
++			[ "$client" = "winnt" ] && smbproto="cifs"
++			[ "$client" = "macosx" ] && smbproto="cifs"
++
++			# FIXME: This is a rather wild guess
++			[ "$client" = "win9x" ] && smbproto="smbfs"
++		fi
++
++		if [ "$smbproto" = "cifs" ]
++		then
++			smbport=445
++			COMMAND_SMBMOUNT=$COMMAND_SMBMOUNT_CIFS
++			COMMAND_SMBUMOUNT=$COMMAND_SMBUMOUNT_CIFS
++		elif [ "$smbproto" = "none" ] # none
++		then
++			# we set this to true so that the 
++			# SMB mount does not give an error message.
++
++			COMMAND_SMBMOUNT=/bin/true
++			COMMAND_SMBUMOUNT=/bin/true
++		else # smbfs
++			smbport=139
++		fi
++	fi
+ 	
+ 	# FreeNX specific variables
+ 	clientproto=$(getparam clientproto)
+@@ -1148,6 +1190,9 @@
+ NX> 707 SSL tunneling: $ssl_tunnel
+ EOF
+ 
++# File-sharing port options
++[ "$samba" = "1" -a -n "$smbport" ] && echo "NX> 709 File-sharing port: $smbport"
++
+ # collection ...
+ 
+ # NX> 1004 Error:
+
+
+
+From fabianx at mail.berlios.de  Sat Aug 11 19:33:22 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sat, 11 Aug 2007 19:33:22 +0200
+Subject: [Freenx-cvs] r363 - freenx-website
+Message-ID: <200708111733.l7BHXMOY013626@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-08-11 19:33:22 +0200 (Sat, 11 Aug 2007)
+New Revision: 363
+
+Modified:
+   freenx-website/home.inc
+Log:
+Completely forgot to update the homepage with the new release.
+
+
+
+Modified: freenx-website/home.inc
+===================================================================
+--- freenx-website/home.inc	2007-08-11 17:08:07 UTC (rev 362)
++++ freenx-website/home.inc	2007-08-11 17:33:22 UTC (rev 363)
+@@ -13,6 +13,56 @@
+ 	<h3>
+ 		<a
+ 	href="http://mail.kde.org/pipermail/freenx-knx/2007-January/004535.html">FreeNX
++	0.7.0 Released</a> 
++        - Saturday, 07/07/07 - 
++	[<a title="Download"
++	href="http://prdownload.berlios.de/freenx/freenx-0.7.0.tar.gz">Download</a>]
++	</h3>
++	<pre>
++07.07.2007 FreeNX 0.7.0 "Jornade SPL Edition VI+1"
++        * Fixed the printing support for CUPS 1.2.
++          Older versions of CUPS are no longer supported.
++          * Note: You must do as root:
++
++                  cp /usr/lib/cups/backend/ipp /usr/lib/cups/backend/nxipp
++                  chmod 755 /usr/lib/cups/backend/nxipp
++
++                  Or alternatively re-run nxsetup.
++
++        * Added foomatic support.
++          * Note: You might need to do: ln -s /usr/bin/foomatic-ppdfile
++                  /usr/lib/cups/driver/
++        * Added setting of CUPS_SERVER environment var.
++        * Added automatic downloading of PPDs, if the client supports it.
++        * Added configuration vars to tweak the new behaviour.
++        * Added cups seamless support with no "use this driver?" dialogs at all.
++          * Note: You need nxcupsd-wrapper on the client side for CUPS 1.2
++                  clients.
++
++                  Get it from nxutils repository.
++
++        * Fixed Support for "Running" sessions - again.
++        * Made the NXAgent exited with exit code 1 message more verbose.
++        * Added support for nxipp to nxnode and nxsetup.
++        * Added nxcups-gethost script for automatic usage in KDE.
++        * Fixed RDP/VNC sessions. No application should be started for that type.
++          (Patch by Bernard Cafarelli <voyageur at operamail.com>)
++        * Added backingstore fix for older clients from Gentoo.
++          (http://bugs.gentoo.org/show_bug.cgi?id=149298)
++        * Fixed VNC sessions.
++        * Fixed fullscreen sessions.
++          (Patch by Gentoo Bugtracker)
++        * Fixed --broadcast.
++        * Added "passwd -u nx" to nxsetup to fix slackware.
++        * Fixed respecting of enconding settings in case of rootless mode.
++        * Fixed smb mounting in case nxclient sends the wrong port.
++          (Patch by Jan Lockenvitz <jan.lockenvitz.ext at siemens.com>)
++        * Fixed loadbalancing - was still using an undocumented variable.
++	</pre>
++
++	<h3>
++		<a
++	href="http://mail.kde.org/pipermail/freenx-knx/2007-January/004535.html">FreeNX
+ 	0.6.0 Released</a> 
+         - Tuesday, January 23, 2007 - 	
+ 	[<a title="Download"
+
+
+
+From fabianx at mail.berlios.de  Sat Aug 11 20:00:57 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sat, 11 Aug 2007 20:00:57 +0200
+Subject: [Freenx-cvs] r364 - freenx-website
+Message-ID: <200708111800.l7BI0v3N015485@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-08-11 20:00:57 +0200 (Sat, 11 Aug 2007)
+New Revision: 364
+
+Modified:
+   freenx-website/home.inc
+   freenx-website/index.php
+Log:
+- Fixed wrong ML entry.
+- Added FAQ to start page.
+
+
+
+Modified: freenx-website/home.inc
+===================================================================
+--- freenx-website/home.inc	2007-08-11 17:33:22 UTC (rev 363)
++++ freenx-website/home.inc	2007-08-11 18:00:57 UTC (rev 364)
+@@ -12,7 +12,7 @@
+ 	</h2>
+ 	<h3>
+ 		<a
+-	href="http://mail.kde.org/pipermail/freenx-knx/2007-January/004535.html">FreeNX
++	href="http://mail.kde.org/pipermail/freenx-knx/2007-July/005473.html">FreeNX
+ 	0.7.0 Released</a> 
+         - Saturday, 07/07/07 - 
+ 	[<a title="Download"
+
+Modified: freenx-website/index.php
+===================================================================
+--- freenx-website/index.php	2007-08-11 17:33:22 UTC (rev 363)
++++ freenx-website/index.php	2007-08-11 18:00:57 UTC (rev 364)
+@@ -22,6 +22,9 @@
+ 					<h2>
+ 						FreeNX
+ 					</h2>
++					<a href="http://openfacts.berlios.de/index-en.phtml?title=FreeNX_FAQ">
++						Frequently Asked Questions (FAQ)
++					</a>
+ 					<a href="info.php">
+ 						Information
+ 					</a>
+
+
+
+From fabianx at mail.berlios.de  Sat Aug 11 21:44:40 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sat, 11 Aug 2007 21:44:40 +0200
+Subject: [Freenx-cvs] r365 - freenx-server/trunk
+Message-ID: <200708111944.l7BJiegK021333@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-08-11 21:44:40 +0200 (Sat, 11 Aug 2007)
+New Revision: 365
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxserver
+Log:
+* Added "host" output to --list to see which user is connected to
+  which server in case of loadbalancing.
+  (fabianx at bat.berlios.de, Bastian Kames <kames at ibg-monforts.de> 
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-08-11 18:00:57 UTC (rev 364)
++++ freenx-server/trunk/ChangeLog	2007-08-11 19:44:40 UTC (rev 365)
+@@ -18,6 +18,9 @@
+ 	  (puterguy at bat.berlios.de)
+ 	* Added support for mount.cifs additionally to the deprecated
+ 	  smbmount. (fabianx at bat.berlios.de, puterguy at bat.berlios.de)
++	* Added "host" output to --list to see which user is connected to
++	  which server in case of loadbalancing.
++	  (fabianx at bat.berlios.de, Bastian Kames <kames at ibg-monforts.de>)
+ 
+ 07.07.2007 FreeNX 0.7.0 "Jornade SPL Edition VI+1"
+ 	* Fixed the printing support for CUPS 1.2.
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2007-08-11 18:00:57 UTC (rev 364)
++++ freenx-server/trunk/nxserver	2007-08-11 19:44:40 UTC (rev 365)
+@@ -273,15 +273,15 @@
+ {
+ 	echo "NX> 127 Sessions list of user '$1'"
+ 	echo
+-	echo "Display Username        Remote IP       Session ID"
+-	echo "------- --------------- --------------- --------------------------------"
++	echo "Server     Display Username        Remote IP       Session ID"
++	echo "------ ------- --------------- --------------- --------------------------------"
+ 	for i in $NX_SESS_DIR/running/*
+ 	do
+ 		[ -f $i ] || break
+ 		if egrep -q "^userName=$1$" $i
+ 		then
+ 			CMDLINE=$(session_get_cmdline $i)
+-			echo -e "$(getparam display)\t$(getparam userName)\t$(getparam foreignAddress)\t$(getparam sessionId)"
++			echo -e "$(getparam host)\t$(getparam display)\t$(getparam userName)\t$(getparam foreignAddress)\t$(getparam sessionId)"
+ 		fi
+ 	done
+ }
+@@ -324,13 +324,13 @@
+ {
+ 	echo "NX> 127 Sessions list:"
+ 	echo
+-	echo "Display Username        Remote IP       Session ID"
+-	echo "------- --------------- --------------- --------------------------------"
++	echo "Server     Display Username        Remote IP       Session ID"
++	echo "------ ------- --------------- --------------- --------------------------------"
+ 	for i in $NX_SESS_DIR/running/*
+ 	do
+ 		[ -f $i ] || break
+ 		CMDLINE=$(session_get_cmdline $i)
+-		echo -e "$(getparam display)\t$(getparam userName)\t$(getparam foreignAddress)\t$(getparam sessionId)"
++		echo -e "$(getparam host)\t$(getparam display)\t$(getparam userName)\t$(getparam foreignAddress)\t$(getparam sessionId)"
+ 	done
+ }
+ 
+
+
+
+From fabianx at mail.berlios.de  Sat Aug 11 21:50:12 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sat, 11 Aug 2007 21:50:12 +0200
+Subject: [Freenx-cvs] r366 - freenx-server/trunk
+Message-ID: <200708111950.l7BJoCEa021674@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-08-11 21:50:12 +0200 (Sat, 11 Aug 2007)
+New Revision: 366
+
+Modified:
+   freenx-server/trunk/nxnode
+Log:
+Added SMB port catching also to 1.5.0 backend (untested).
+
+
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2007-08-11 19:44:40 UTC (rev 365)
++++ freenx-server/trunk/nxnode	2007-08-11 19:50:12 UTC (rev 366)
+@@ -834,6 +834,17 @@
+ 		fi
+ 
+ 		#
++		# Catch NXAGENT SMB Port (sometimes the port differs from what we got from nxserver)
++		#
++
++		if stringinstring "Info: Listening for SMB connections on port" "$line"
++		then
++			SMBMOUNT_PORT=$(echo $line | cut -d"'" -f2)
++			echo "$SMBMOUNT_PORT" >"$USER_FAKE_HOME/.nx/C-$sess_id/scripts/mport"
++		fi
++
++
++		#
+ 		# Session suspend
+ 		#
+ 
+
+
+
+From fabianx at mail.berlios.de  Sat Aug 11 23:54:53 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sat, 11 Aug 2007 23:54:53 +0200
+Subject: [Freenx-cvs] r367 - freenx-server/trunk
+Message-ID: <200708112154.l7BLsrDk028839@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-08-11 23:54:52 +0200 (Sat, 11 Aug 2007)
+New Revision: 367
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxclient
+Log:
+Fixed nxclient -printer to not use commercial client, because its too
+slow in case of huge databases like foomatic. (fabianx at bat.berlios.de)
+
+A fix was sent to NoMachine and applied to 2x client.
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-08-11 19:50:12 UTC (rev 366)
++++ freenx-server/trunk/ChangeLog	2007-08-11 21:54:52 UTC (rev 367)
+@@ -21,6 +21,8 @@
+ 	* Added "host" output to --list to see which user is connected to
+ 	  which server in case of loadbalancing.
+ 	  (fabianx at bat.berlios.de, Bastian Kames <kames at ibg-monforts.de>)
++	* Fixed nxclient -printer to not use commercial client, because its too 
++	  slow in case of huge databases like foomatic. (fabianx at bat.berlios.de)
+ 
+ 07.07.2007 FreeNX 0.7.0 "Jornade SPL Edition VI+1"
+ 	* Fixed the printing support for CUPS 1.2.
+
+Modified: freenx-server/trunk/nxclient
+===================================================================
+--- freenx-server/trunk/nxclient	2007-08-11 19:50:12 UTC (rev 366)
++++ freenx-server/trunk/nxclient	2007-08-11 21:54:52 UTC (rev 367)
+@@ -13,12 +13,6 @@
+ #
+ # ========================================================================
+ 
+-# First check if the commercial nxclient is available and use it
+-# but check that it isn't this script to prevent a loop!
+-NXCLIENT="/usr/NX/bin/nxclient"
+-[ -x "$NXCLIENT" -a "$(file -bi $NXCLIENT)" != 'application/x-shellscript' ] \
+-	&& exec ${NXCLIENT} "$@"
+-
+ #JJK: borrowed from Aron Griffis
+ 
+ function requote 
+@@ -70,6 +64,18 @@
+ # if --printer is set, the dialog type is overridden
+ [ -n "$DIALOG_PRINTER" ] && DIALOG_TYPE="printer"
+ 
++# First check if the commercial nxclient is available and use it
++# but check that it isn't this script to prevent a loop!
++#
++# Also check that not --printer was used, because the commercial
++# client does not like large databases like used when ENABLE_FOOMATIC=1.
++#
++# This seems to be because the used sorting algorithm scales in O(n^2).
++
++NXCLIENT="/usr/NX/bin/nxclient"
++[ -x "$NXCLIENT" -a "$DIALOG_TYPE" != "printer" -a "$(file -bi $NXCLIENT)" != 'application/x-shellscript' ] \
++	&& exec ${NXCLIENT} "$@"
++
+ # FIXME: This should be COMMAND_XDIALOG, ...
+ if [ -x /usr/bin/Xdialog ] 
+ then
+
+
+
+From fabianx at mail.berlios.de  Sun Aug 12 05:58:24 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sun, 12 Aug 2007 05:58:24 +0200
+Subject: [Freenx-cvs] r368 - freenx-server/trunk
+Message-ID: <200708120358.l7C3wOEn032497@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-08-12 05:58:23 +0200 (Sun, 12 Aug 2007)
+New Revision: 368
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxnode
+Log:
+* Removed bad -noautokill option from the nxclient dialog spawning.
+  (wayneb at bat.berlios.de)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-08-11 21:54:52 UTC (rev 367)
++++ freenx-server/trunk/ChangeLog	2007-08-12 03:58:23 UTC (rev 368)
+@@ -23,6 +23,8 @@
+ 	  (fabianx at bat.berlios.de, Bastian Kames <kames at ibg-monforts.de>)
+ 	* Fixed nxclient -printer to not use commercial client, because its too 
+ 	  slow in case of huge databases like foomatic. (fabianx at bat.berlios.de)
++	* Removed bad -noautokill option from the nxclient dialog spawning.
++	  (wayneb at bat.berlios.de)
+ 
+ 07.07.2007 FreeNX 0.7.0 "Jornade SPL Edition VI+1"
+ 	* Fixed the printing support for CUPS 1.2.
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2007-08-11 21:54:52 UTC (rev 367)
++++ freenx-server/trunk/nxnode	2007-08-12 03:58:23 UTC (rev 368)
+@@ -1263,10 +1263,10 @@
+ 	error=$(PASSWD="$password" "$COMMAND_SMBMOUNT" "//$computername/$share" "$HOME/$dir" -o username="$username,ip=127.0.0.1,port=$port" 2>&1)
+ 	if [ $? -eq 0 ]
+ 	then
+-		$PATH_BIN/nxclient -dialog ok -caption "NXServer Message" -message "Info: Share: '//$computername/$share' mounted on: '$HOME/$dir'" -noautokill -display :$display &
++		$PATH_BIN/nxclient -dialog ok -caption "NXServer Message" -message "Info: Share: '//$computername/$share' mounted on: '$HOME/$dir'" -display :$display &
+ 		echo "$HOME/$dir" >> "$USER_FAKE_HOME/.nx/C-$SERVER_NAME-$display-$sessionid/scripts/mpoint"
+ 	else
+-		$PATH_BIN/nxclient -dialog ok -caption "NXServer Message" -message "Info: Share: '//$computername/$share' failed to mount: $error" -noautokill -display :$display &
++		$PATH_BIN/nxclient -dialog ok -caption "NXServer Message" -message "Info: Share: '//$computername/$share' failed to mount: $error" -display :$display &
+ 	fi
+ }
+ 
+@@ -1302,7 +1302,7 @@
+ 
+ 	if [ "$ENABLE_CUPS_SEAMLESS" != "1" ]
+ 	then
+-		MODEL=$($PATH_BIN/nxclient -printer "$NAME" -noautokill -display :$display)
++		MODEL=$($PATH_BIN/nxclient -printer "$NAME" -display :$display)
+ 		[ -z "$MODEL" -o "$MODEL" = "cancel: aborted" ] && return
+ 	else
+ 		sleep $CUPS_SEAMLESS_DELAY
+@@ -1319,8 +1319,8 @@
+ 		then
+ 			curl --digest -o "$USER_FAKE_HOME/.nx/config/ppd/$printer.ppd" "http://$username:$password at 127.0.0.1:$port/ppd/${printer}_nxdl.ppd" >>$USER_FAKE_HOME/.nx/C-$sess_id/cups/curl.log 2>&1
+ 		RC=$?
+-		[ $RC -eq 0 -a "$ENABLE_CUPS_SEAMLESS" != "1" ] && $PATH_BIN/nxclient --message "Download successful." -noautokill -display :$display
+-		[ $RC -ne 0 -a "$ENABLE_CUPS_SEAMLESS" != "1" ] && $PATH_BIN/nxclient --message "Download failed. Log is: $USER_FAKE_HOME/.nx/C-$sess_id/cups/curl.log" -noautokill -display :$display
++		[ $RC -eq 0 -a "$ENABLE_CUPS_SEAMLESS" != "1" ] && $PATH_BIN/nxclient --message "Download successful." -display :$display
++		[ $RC -ne 0 -a "$ENABLE_CUPS_SEAMLESS" != "1" ] && $PATH_BIN/nxclient --message "Download failed. Log is: $USER_FAKE_HOME/.nx/C-$sess_id/cups/curl.log" -display :$display
+ 		fi
+ 		MODEL="$USER_FAKE_HOME/.nx/config/ppd/$printer.ppd"
+ 	fi
+
+
+
+From fabianx at mail.berlios.de  Sun Aug 12 07:05:50 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sun, 12 Aug 2007 07:05:50 +0200
+Subject: [Freenx-cvs] r369 - freenx-server/trunk
+Message-ID: <200708120505.l7C55oXD022221@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-08-12 07:05:49 +0200 (Sun, 12 Aug 2007)
+New Revision: 369
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/node.conf.sample
+   freenx-server/trunk/nxloadconfig
+   freenx-server/trunk/nxnode
+   freenx-server/trunk/nxserver
+Log:
+* Added basic support for mirrored sessions.
+  * The functionality can be used by connecting to VNC session
+    and choosing to "resume" such a session.
+  * New configuration key: ENABLE_MIRROR_VIA_VNC=1
+  * New configuration key: ENABLE_DESKTOP_SHARING=1
+  (fabianx at bat.berlios.de)
+
+Note: This functionality is not yet _that_ useful as only sessions that the user is logged
+into can be mirrored / shared.
+
+However especially for :0 there might already be use cases.
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-08-12 03:58:23 UTC (rev 368)
++++ freenx-server/trunk/ChangeLog	2007-08-12 05:05:49 UTC (rev 369)
+@@ -25,6 +25,12 @@
+ 	  slow in case of huge databases like foomatic. (fabianx at bat.berlios.de)
+ 	* Removed bad -noautokill option from the nxclient dialog spawning.
+ 	  (wayneb at bat.berlios.de)
++	* Added basic support for mirrored sessions.
++	  * The functionality can be used by connecting to VNC session
++	    and choosing to "resume" such a session.
++	  * New configuration key: ENABLE_MIRROR_VIA_VNC=1
++	  * New configuration key: ENABLE_DESKTOP_SHARING=1
++	  (fabianx at bat.berlios.de)
+ 
+ 07.07.2007 FreeNX 0.7.0 "Jornade SPL Edition VI+1"
+ 	* Fixed the printing support for CUPS 1.2.
+
+Modified: freenx-server/trunk/node.conf.sample
+===================================================================
+--- freenx-server/trunk/node.conf.sample	2007-08-12 03:58:23 UTC (rev 368)
++++ freenx-server/trunk/node.conf.sample	2007-08-12 05:05:49 UTC (rev 369)
+@@ -120,7 +120,22 @@
+ # Especially useful if ENABLE_PERSISTENT_SESSION="all"
+ #DISABLE_PERSISTENT_SESSION=""
+ 
++# This enables the mirroring of running sessions via VNC feature.
++# 
++# Session is marked as resumable and type is vnc-mirrored.
++# 
++#ENABLE_MIRROR_VIA_VNC=1
+ 
++# This enables the sharing of :0 via VNC feature.
++# 
++# Session is marked as resumable and type is vnc-local.
++# 
++# Note: You need to have the rights to access the display
++#       else it does not work.
++#
++#ENABLE_DESKTOP_SHARING=1
++
++
+ #########################################################################
+ # Logging directives
+ #########################################################################
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2007-08-12 03:58:23 UTC (rev 368)
++++ freenx-server/trunk/nxloadconfig	2007-08-12 05:05:49 UTC (rev 369)
+@@ -109,6 +109,8 @@
+ ENABLE_PERSISTENT_SESSION="all"
+ DISABLE_PERSISTENT_SESSION=""
+ 
++ENABLE_MIRROR_VIA_VNC=1
++ENABLE_DESKTOP_SHARING=1
+ 
+ # Logging directives
+ 
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2007-08-12 03:58:23 UTC (rev 368)
++++ freenx-server/trunk/nxnode	2007-08-12 05:05:49 UTC (rev 369)
+@@ -465,13 +465,32 @@
+ 
+ 	elif [ "$type" = "vnc" ]
+ 	then
+-		# nxviewer session (VNC RFP)
++		# nxviewer session (VNC RFB)
+ 		
+ 		[ "$SET_LD_LIBRARY_PATH" = "1" ] && export LD_LIBRARY_PATH="$AGENT_LIBRARY_PATH:$LD_LIBRARY_PATH"
+ 		# Setup password
+ 		
+ 		mkdir -p "$USER_FAKE_HOME/.nx/C-$sess_id/scripts/"
+ 		echo "$agent_password" | $PATH_BIN/nxpasswd "$USER_FAKE_HOME/.nx/C-$sess_id/scripts/.passwd" doit
++
++		# Start x11vnc
++		if [ -n "$mirrordisplay" ]
++		then
++			[ -z "$mirrorhost" ] && mirrorhost="unix"
++			(
++				unset XAUTHORITY
++				# Note: No "-accept popup" as its the same user and with that password
++				#       he could do already more than -accept popup would allow.
++				DISPLAY="$mirrorhost:$mirrordisplay.0" x11vnc -timeout 120 -rfbauth "$USER_FAKE_HOME/.nx/C-$sess_id/scripts/.passwd" >"$USER_FAKE_HOME/.nx/C-$sess_id/scripts/.vnc_port" 2>&3 &
++			)
++			sleep 1
++			agent_port=$(cat "$USER_FAKE_HOME/.nx/C-$sess_id/scripts/.vnc_port" | egrep "^PORT=" | cut -d'=' -f 2)
++			[ -z "agent_port" ] && agent_port="0"
++			# note the :: is not a mistake, but rather a hint for nxviewer to use this as a port and not 
++			# interpret it as a display.
++			agent_server="127.0.0.1::$agent_port"
++			rm -f "$USER_FAKE_HOME/.nx/C-$sess_id/scripts/.vnc_port"
++		fi
+ 		
+ 		# Start the agent
+ 		
+@@ -1069,6 +1088,8 @@
+ 	clientproto=$(getparam clientproto)
+ 	status=$(getparam status)
+ 	host=$(getparam host)
++	mirrordisplay=$(getparam mirrordisplay)
++	mirrorhost=$(getparam mirrorhost)
+ 
+ 	fullscreen=$(getparam fullscreen)
+ 	[ "$geometry" = "fullscreen" ] && fullscreen="1"
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2007-08-12 03:58:23 UTC (rev 368)
++++ freenx-server/trunk/nxserver	2007-08-12 05:05:49 UTC (rev 369)
+@@ -253,20 +253,43 @@
+ 			then
+ 				available="Yes"
+ 			fi
+-			printf "%-7s %-16s %32s %8s %5s %-14s %-11s %s\n" "$(getparam display)" "$(getparam type)" "$(getparam sessionId)" "$options" "$depth" "$geom" "$available" "$(getparam sessionName)" >> $TMPFILE
++			
++			# We automatically offer VNC mirrored sessions for "remote" support
++			if [ "$4" = "vnc" -a "$ENABLE_MIRROR_VIA_VNC" = "1" ] && stringinstring "unix-" "$(getparam type)"
++			then
++				printf "%-7s %-16s %32s %8s %5s %-14s %-11s %s\n" "$(getparam display)" "vnc-mirrored" "$(getparam sessionId)" "$options" "$depth" "$geom" "$available" "$(getparam sessionName) (Mirrored)" >> $TMPFILE
++			else
++				# only unix-* sessions can be resumed, but other session types can still be terminated
++				stringinstring "unix-" "$4" || available="N/A"
++				printf "%-7s %-16s %32s %8s %5s %-14s %-11s %s\n" "$(getparam display)" "$(getparam type)" "$(getparam sessionId)" "$options" "$depth" "$geom" "$available" "$(getparam sessionName)" >> $TMPFILE
++			fi
+ 		fi
+ 		egrep -q "^userName=$1$" $i && let SESSION_COUNT_USER=$SESSION_COUNT_USER+1
+ 	done
++	
++	if [ "$ENABLE_DESKTOP_SHARING" = "1" ]
++	then
++		export DESKTOP_SHARING_IDS=""
++		for i in $(LC_ALL=C netstat -ln --protocol=unix | egrep 'X11-unix/X[0-9]$' | sed 's/.*X\(.*\)/\1/g')
++		do
++			uniqueid=$(echo $[$RANDOM*$RANDOM] | $COMMAND_MD5SUM | cut -d" " -f1 | tr "[a-z]" "[A-Z]")
++			DESKTOP_SHARING_IDS="$DESKTOP_SHARING_IDS $uniqueid=$i"
++			printf "%-7s %-16s %32s %8s %5s %-14s %-11s %s\n" "$i" "vnc-local" "$uniqueid" "--------" "$udepth" "$(echo $3 | cut -d'x' -f1,2)" "Running" "X$i (Local)" >> $TMPFILE
++		done
++	fi
++	
+ 	echo "" >> $TMPFILE
+ 	echo "" >> $TMPFILE
+-	cat $TMPFILE
+-	rm -f $TMPFILE
++	
+ 	if [ "$SESSION_COUNT" -ge "$SESSION_LIMIT" -o "$SESSION_COUNT_USER" -ge "$SESSION_USER_LIMIT" ]
+ 	then
+-		echo "NX> 147 Server capacity: reached for user: $1"
++		echo "NX> 147 Server capacity: reached for user: $1" >> $TMPFILE
+ 	else
+-		echo "NX> 148 Server capacity: not reached for user: $1"
++		echo "NX> 148 Server capacity: not reached for user: $1" >> $TMPFILE
+ 	fi
++	
++	cat $TMPFILE | log_tee
++	rm -f $TMPFILE
+ }
+ 
+ session_list_user()
+@@ -1085,6 +1108,37 @@
+ 	PARAMS="$PARAMS&clientproto=$PROTO"
+ 	CMDLINE=$PARAMS
+ 	echo_x
++
++	# special mirrored type
++	[ "$ACTION" != "start" -a "$(getparam type)" = "vnc" ] && ACTION="mirror"
++
++	if [ "$ACTION" = "mirror" ]
++	then
++		ACTION="start"
++		uniqueid=$(getparam restore)
++		[ -z "$uniqueid" ] && uniqueid=$(getparam id) # 1.4.0-5 compatibility
++		CMDLINE=$(session_get "$uniqueid" 2>/dev/null)
++
++		mirrordisplay=$(getparam display)
++		mirrorhost=$(getparam host)
++
++		if [ -z "$mirrordisplay"  ]
++		then
++			# check for DESKTOP_SHARING_IDS
++			mirrordisplay=$(echo $DESKTOP_SHARING_IDS | tr ' ' '\n' | egrep "^$uniqueid=" | cut -d'=' -f2)
++			mirrorhost="127.0.0.1"
++		fi
++
++		if [ -z "$mirrordisplay" ]
++		then
++			echo_x "NX> 596 Could not find mirrored session $uniqueid. Session failed."
++			echo_x "NX> 596 Sharing: $DESKTOP_SHARING_IDS"
++			return 1
++		fi
++
++		PARAMS="$PARAMS&mirrordisplay=$mirrordisplay&mirrorhost=$mirrorhost"
++		CMDLINE=$PARAMS
++	fi
+ 	
+ 	# If we can't get the userip and SSHD_CHECK_IP is set to 1
+ 	# we bail out.
+@@ -1124,7 +1178,7 @@
+ 	# as only $SSH_CLIENT or $SSH2_CLIENT will be set, this should work
+ 	USERIP=$(echo $SSH_CLIENT $SSH2_CLIENT | cut -d" " -f1 | sed 's/::ffff://g')
+ 	[ -z "$USERIP" ] && USERIP="*"
+-	if [ "$ACTION" = "start" ]
++	if [ "$ACTION" = "start" -o "$ACTION" = "mirror" ]
+ 	then
+ 		server_check_session_count || return 1
+ 		
+@@ -1272,16 +1326,16 @@
+ 
+ 			if [ "$status" = "Suspended" -a -n "$(getparam screeninfo)" ]
+ 			then
+-				session_list_user_suspended "$USER" "Suspended" "$(getparam screeninfo)" "$(getparam type)" | log_tee
++				session_list_user_suspended "$USER" "Suspended" "$(getparam screeninfo)" "$(getparam type)"
+ 			elif [ "$status" = "Suspended,Running" -o "$status" = "Suspended" ] # since 1.4.0-5
+ 			then
+ 				# disabled due to problems with 1.4.0-5 client
+ 				#session_list_user_suspended "$USER" 'Suspended$|^status=Running$' "$(getparam geometry)" "$(getparam type)" | log_tee
+-				session_list_user_suspended "$USER" 'Suspended' "$(getparam geometry)" "$(getparam type)" | log_tee
++				session_list_user_suspended "$USER" 'Suspended' "$(getparam geometry)" "$(getparam type)"
+ 			elif [ "$status" = "suspended,running" -o "$status" = "suspended" ] # since 1.5.0
+ 			then
+ 				status=$(echo $status | sed 's/,/$|^status=/g; s/suspended/Suspended/g; s/running/Running/g')
+-				session_list_user_suspended "$USER" "$status" "$(getparam geometry)" "$(getparam type)" | log_tee
++				session_list_user_suspended "$USER" "$status" "$(getparam geometry)" "$(getparam type)"
+ 			else
+ 				session_list_user "$USER" | log_tee
+ 			fi
+@@ -1307,6 +1361,10 @@
+ 		restoresession*)
+ 			server_startrestore_session "resume"
+ 		;;
++		mirrorsession*)
++			server_startrestore_session "mirror"
++		;;
++
+ 		passwd)
+ 			echo_x "NX> 113 Changing password of user '$USER'"
+ 			echo_x -n "NX> 102 Current password:"
+
+
+
+From fabianx at mail.berlios.de  Sun Aug 12 07:45:19 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sun, 12 Aug 2007 07:45:19 +0200
+Subject: [Freenx-cvs] r370 - in freenx-server/trunk: . nxserver-helper
+Message-ID: <200708120545.l7C5jJZN020103@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-08-12 07:45:19 +0200 (Sun, 12 Aug 2007)
+New Revision: 370
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxloadconfig
+   freenx-server/trunk/nxnode
+   freenx-server/trunk/nxserver
+   freenx-server/trunk/nxserver-helper/nxserver-helper.c
+Log:
+* Fixed some portability issues.
+          * Fixed nxloadconfig in case that COMMAND_X is not only one word,
+            like "openssl md5".
+          * Added usage of "openssl md5" instead of "md5sum" by default.
+          * Changed perl to COMMAND_PERL.
+          * Removed rev and replaced the code with efficient awk code.
+          * Added an outcommented way to also use "POSIX find" for history
+            cleaning.
+
+(Peter O'Gorman <peter at pogma.com>)
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-08-12 05:05:49 UTC (rev 369)
++++ freenx-server/trunk/ChangeLog	2007-08-12 05:45:19 UTC (rev 370)
+@@ -31,6 +31,15 @@
+ 	  * New configuration key: ENABLE_MIRROR_VIA_VNC=1
+ 	  * New configuration key: ENABLE_DESKTOP_SHARING=1
+ 	  (fabianx at bat.berlios.de)
++	* Fixed some portability issues.
++	  * Fixed nxloadconfig in case that COMMAND_X is not only one word,
++	    like "openssl md5".
++	  * Added usage of "openssl md5" instead of "md5sum" by default.
++	  * Changed perl to COMMAND_PERL.
++	  * Removed rev and replaced the code with efficient awk code.
++	  * Added an outcommented way to also use "POSIX find" for history
++	    cleaning.
++	  (Peter O'Gorman <peter at pogma.com>)
+ 
+ 07.07.2007 FreeNX 0.7.0 "Jornade SPL Edition VI+1"
+ 	* Fixed the printing support for CUPS 1.2.
+
+Modified: freenx-server/trunk/nxloadconfig
+===================================================================
+--- freenx-server/trunk/nxloadconfig	2007-08-12 05:05:49 UTC (rev 369)
++++ freenx-server/trunk/nxloadconfig	2007-08-12 05:45:19 UTC (rev 370)
+@@ -183,9 +183,9 @@
+ COMMAND_SSH=ssh
+ COMMAND_SSH_KEYGEN=ssh-keygen
+ COMMAND_CUPSD=/usr/sbin/cupsd
+-COMMAND_MD5SUM=md5sum
++COMMAND_MD5SUM=openssl md5
++COMMAND_PERL=perl
+ 
+-
+ # Misc directives
+ 
+ ENABLE_2_0_0_BACKEND=""
+@@ -237,21 +237,26 @@
+                        done
+                        return 1
+                }
+-
+-	       function rev() {
+-		       perl -lpe'$_ = reverse'
+-	       }
+        ;;
+ esac
+ 
++#
++# Utility functions
++#
++
++function mywhich()
++{
++	which $(echo "$*" | cut -d" " -f1)
++}
++
+ #########################################################################
+ # Retested values
+ #########################################################################
+ 
+ if [ "$NXCONFIG_RETEST" = "1" ]
+ then
+-	{ ! which "$COMMAND_XAUTH" && which xauth; } >/dev/null 2>&1 && COMMAND_XAUTH=$(which xauth)
+-	{ ! which "$COMMAND_NETCAT" && which nc; } >/dev/null 2>&1 && COMMAND_NETCAT=$(which nc)
++	{ ! mywhich "$COMMAND_XAUTH" && which xauth; } >/dev/null 2>&1 && COMMAND_XAUTH=$(which xauth)
++	{ ! mywhich "$COMMAND_NETCAT" && which nc; } >/dev/null 2>&1 && COMMAND_NETCAT=$(which nc)
+ fi
+ 
+ #########################################################################
+@@ -431,7 +436,7 @@
+ 	
+ 	[ -z $(echo "$ENABLE_NOMACHINE_FORWARD_PORT" | egrep "^[0|1]$") ] && \
+ 		ERROR="yes" && echo "Error: Invalid value \"ENABLE_NOMACHINE_FORWARD_PORT=$ENABLE_NOMACHINE_FORWARD_PORT\""
+-	[ "$ENABLE_NOMACHINE_FORWARD_PORT" = "1" ] && ! which "$NOMACHINE_SERVER" >/dev/null 2>&1 && \
++	[ "$ENABLE_NOMACHINE_FORWARD_PORT" = "1" ] && ! mywhich "$NOMACHINE_SERVER" >/dev/null 2>&1 && \
+ 		ERROR="yes" && echo "Error: Invalid value \"NOMACHINE_SERVER=$NOMACHINE_SERVER\""
+ 	[ "$ENABLE_NOMACHINE_FORWARD_PORT" = "1" -a -z $(echo "$NOMACHINE_FORWARD_PORT" | egrep "^[1-9][0-9]{0,4}$") ] && \
+ 		ERROR="yes" && echo "Error: Invalid value \"NOMACHINE_FORWARD_PORT=$NOMACHINE_FORWARD_PORT\""
+@@ -440,13 +445,13 @@
+ 	
+ 	[ -z $(echo "$ENABLE_ESD_PRELOAD" | egrep "^[0|1]$") ] && \
+ 		ERROR="yes" && echo "Error: Invalid value \"ENABLE_ESD_PRELOAD=$ENABLE_ESD_PRELOAD\""
+-	[ "$ENABLE_ESD_PRELOAD" = "1" ] && ! which "$ESD_BIN_PRELOAD" >/dev/null 2>&1 && \
++	[ "$ENABLE_ESD_PRELOAD" = "1" ] && ! mywhich "$ESD_BIN_PRELOAD" >/dev/null 2>&1 && \
+ 		WARNING="yes" && echo "Warning: Invalid value \"ESD_BIN_PRELOAD=$ESD_BIN_PRELOAD\"" \
+ 					  && echo "         No esd preload will be performed."
+ 	
+ 	[ -z $(echo "$ENABLE_ARTSD_PRELOAD" | egrep "^[0|1]$") ] && \
+ 		ERROR="yes" && echo "Error: Invalid value \"ENABLE_ARTSD_PRELOAD=$ENABLE_ARTSD_PRELOAD\""
+-	[ "$ARTSD_BIN_PRELOAD" = "1" ] && ! which "$ARTSD_BIN_PRELOAD" >/dev/null 2>&1 && \
++	[ "$ARTSD_BIN_PRELOAD" = "1" ] && ! mywhich "$ARTSD_BIN_PRELOAD" >/dev/null 2>&1 && \
+ 		WARNING="yes" && echo "Warning: Invalid value \"ARTSD_BIN_PRELOAD=$ARTSD_BIN_PRELOAD\"" \
+ 					  && echo "         No arts preload will be performed."
+ 	
+@@ -456,7 +461,7 @@
+ 		ERROR="yes" && echo "Error: Invalid value \"KDE_PRINTRC=$KDE_PRINTRC\""
+ 
+ 
+-	[ "$ENABLE_FOOMATIC" = "1" ] && ! which "$COMMAND_FOOMATIC" >/dev/null 2>&1 && \
++	[ "$ENABLE_FOOMATIC" = "1" ] && ! mywhich "$COMMAND_FOOMATIC" >/dev/null 2>&1 && \
+ 		WARNING="yes" && echo "Warning: Invalid value \"COMMAND_FOOMATIC=$COMMAND_FOOMATIC\"" \
+ 					  && echo "         Users will not be able to use foomatic."
+ 	[ ! -x "$CUPS_IPP_BACKEND" ] && \
+@@ -476,51 +481,51 @@
+ 	[ -z $(echo "$SET_LD_LIBRARY_PATH" | egrep "^[0|1]$") ] && \
+ 		ERROR="yes" && echo "Error: Invalid value \"SET_LD_LIBRARY_PATH=$SET_LD_LIBRARY_PATH\""
+ 	
+-	[ "$DEFAULT_X_WM" != "" ] && ! which "$DEFAULT_X_WM" >/dev/null 2>&1 && \
++	[ "$DEFAULT_X_WM" != "" ] && ! mywhich "$DEFAULT_X_WM" >/dev/null 2>&1 && \
+ 		ERROR="yes" && echo "Error: Invalid value \"DEFAULT_X_WM=$DEFAULT_X_WM\""
+ 	[ "$DEFAULT_X_WM" != "" -a  -z $(echo "$KILL_DEFAULT_X_WM" | egrep "^[0|1]$") ] && \
+ 		ERROR="yes" && echo "Error: Invalid value \"KILL_DEFAULT_X_WM=$KILL_DEFAULT_X_WM\""
+ 	[ -z "$USER_X_STARTUP_SCRIPT" ] && \
+ 		ERROR="yes" && echo "Error: Invalid value \"USER_X_STARTUP_SCRIPT=$USER_X_STARTUP_SCRIPT\""
+-	! which "$DEFAULT_X_SESSION" >/dev/null 2>&1 && \
++	! mywhich "$DEFAULT_X_SESSION" >/dev/null 2>&1 && \
+ 		WARNING="yes" && echo "Warning: Invalid value \"DEFAULT_X_SESSION=$DEFAULT_X_SESSION\"" \
+ 					  && echo "         Users might not be able to request a default X session."
+-	! which "$COMMAND_START_KDE" >/dev/null 2>&1 && \
++	! mywhich "$COMMAND_START_KDE" >/dev/null 2>&1 && \
+ 		WARNING="yes" && echo "Warning: Invalid value \"COMMAND_START_KDE=$COMMAND_START_KDE\"" \
+ 					  && echo "         Users will not be able to request a KDE session."
+-	! which "$COMMAND_START_GNOME" >/dev/null 2>&1 && \
++	! mywhich "$COMMAND_START_GNOME" >/dev/null 2>&1 && \
+ 		WARNING="yes" && echo "Warning: Invalid value \"COMMAND_START_GNOME=$COMMAND_START_GNOME\"" \
+ 					  && echo "         Users will not be able to request a Gnome session."
+-	! which "$COMMAND_START_CDE" >/dev/null 2>&1 && \
++	! mywhich "$COMMAND_START_CDE" >/dev/null 2>&1 && \
+ 		WARNING="yes" && echo "Warning: Invalid value \"COMMAND_START_CDE=$COMMAND_START_CDE\"" \
+ 					  && echo "         Users will not be able to request a CDE session."
+-	! which "$COMMAND_XTERM" >/dev/null 2>&1 && \
++	! mywhich "$COMMAND_XTERM" >/dev/null 2>&1 && \
+ 		WARNING="yes" && echo "Warning: Invalid value \"COMMAND_XTERM=$COMMAND_XTERM\"" \
+ 					  && echo "         Users will not be able to request an xterm session."
+-	! which "$COMMAND_XAUTH" >/dev/null 2>&1 && \
++	! mywhich "$COMMAND_XAUTH" >/dev/null 2>&1 && \
+ 		ERROR="yes" && echo "Error: Invalid value \"COMMAND_XAUTH=$COMMAND_XAUTH\""
+-	! which "$COMMAND_SMBMOUNT" >/dev/null 2>&1 && \
++	! mywhich "$COMMAND_SMBMOUNT" >/dev/null 2>&1 && \
+ 		WARNING="yes" && echo "Warning: Invalid value \"COMMAND_SMBMOUNT=$COMMAND_SMBMOUNT\". You'll not be able to use SAMBA. "
+-	! which "$COMMAND_SMBUMOUNT" >/dev/null 2>&1 && \
++	! mywhich "$COMMAND_SMBUMOUNT" >/dev/null 2>&1 && \
+ 		WARNING="yes" && echo "Warning: Invalid value \"COMMAND_SMBUMOUNT=$COMMAND_SMBUMOUNT\". You'll not be able to use SAMBA."
+-	! which "$COMMAND_NETCAT" >/dev/null 2>&1 && \
++	! mywhich "$COMMAND_NETCAT" >/dev/null 2>&1 && \
+ 		ERROR="yes" && echo "Error: Invalid value \"COMMAND_NETCAT=$COMMAND_NETCAT\""
+-	! which "$COMMAND_SSH" >/dev/null 2>&1 && \
++	! mywhich "$COMMAND_SSH" >/dev/null 2>&1 && \
+ 		ERROR="yes" && echo "Error: Invalid value \"COMMAND_SSH=$COMMAND_SSH\""
+-	! which "$COMMAND_SSH_KEYGEN" >/dev/null 2>&1 && \
++	! mywhich "$COMMAND_SSH_KEYGEN" >/dev/null 2>&1 && \
+ 		ERROR="yes" && echo "Error: Invalid value \"COMMAND_SSH_KEYGEN=$COMMAND_SSH_KEYGEN\""
+-	! which "$COMMAND_CUPSD" >/dev/null 2>&1 && \
++	! mywhich "$COMMAND_CUPSD" >/dev/null 2>&1 && \
+ 		WARNING="yes" && echo "Warning: Invalid value \"COMMAND_CUPSD=$COMMAND_CUPSD\"" \
+ 					  && echo "         Users will not be able to enable printing."
+ 	[ -z "$(strings $COMMAND_CUPSD | egrep 'CUPS\/1.2')" ] && \
+ 		WARNING="yes" && echo "Warning: Invalid cupsd version of \"$COMMAND_CUPSD\". Need version 1.2." \
+ 					  && echo "         Users will not be able to enable printing."
+-	! which "$COMMAND_MD5SUM" >/dev/null 2>&1 && \
++	! mywhich "$COMMAND_MD5SUM" >/dev/null 2>&1 && \
+ 		ERROR="yes" && echo "Error: Invalid value \"COMMAND_MD5SUM=$COMMAND_MD5SUM\""
+ 
+ 	# Check for expect
+ 	COMMAND_EXPECT=$(head -n1 $PATH_BIN/nxnode-login | cut -d'!' -f2)
+-	! which "$COMMAND_EXPECT" >/dev/null 2>&1 && \
++	! mywhich "$COMMAND_EXPECT" >/dev/null 2>&1 && \
+ 		ERROR="yes" && echo "Error: expect necessary for $PATH_BIN/nxnode-login could not be found in '$COMMAND_EXPECT'. Please install it or change nxnode-login accordingly."
+ 
+ 	# Misc directives
+@@ -534,7 +539,7 @@
+ 		ERROR="yes" && echo "Error: Invalid value \"EXPORT_USERIP=$EXPORT_USERIP\""
+ 	[ -z $(echo "$EXPORT_SESSIONID" | egrep "^[0|1]$") ] && \
+ 		ERROR="yes" && echo "Error: Invalid value \"EXPORT_SESSIONID=$EXPORT_SESSIONID\""
+-	[ -n "$NODE_AUTOSTART" ] && ! which "$NODE_AUTOSTART" >/dev/null 2>&1 && \
++	[ -n "$NODE_AUTOSTART" ] && ! mywhich "$NODE_AUTOSTART" >/dev/null 2>&1 && \
+ 		WARNING="yes" && echo "Warning: Invalid value \"NODE_AUTOSTART=$NODE_AUTOSTART\"" \
+ 					  && echo "         No autostart will be performed."
+ 
+@@ -546,7 +551,7 @@
+ 		
+ 	[ -z $(echo "$ENABLE_USESSION" | egrep "^[0|1]$") ] && \
+ 		ERROR="yes" && echo "Error: Invalid value \"ENABLE_USESSION=$ENABLE_USESSION\""
+-	[ "$ENABLE_USESSION" = "1" ] && ! which "$COMMAND_SESSREG" >/dev/null 2>&1 && \
++	[ "$ENABLE_USESSION" = "1" ] && ! mywhich "$COMMAND_SESSREG" >/dev/null 2>&1 && \
+ 		WARNING="yes" && echo "Warning: Invalid value \"COMMAND_SESSREG=$COMMAND_SESSREG\"" \
+ 					  && echo "         Logged in users will not be registered with sessreg."
+ 	
+
+Modified: freenx-server/trunk/nxnode
+===================================================================
+--- freenx-server/trunk/nxnode	2007-08-12 05:05:49 UTC (rev 369)
++++ freenx-server/trunk/nxnode	2007-08-12 05:45:19 UTC (rev 370)
+@@ -138,7 +138,7 @@
+ 
+ 	# Remove display information
+ 	
+-	NODE_DISPLAY=$(echo $1 | rev | cut -d"-" -f2 | rev)
++	NODE_DISPLAY=$(echo $1 | awk 'BEGIN {FS="-"} {i=NF-1; print $i}')
+ 	rm -f /tmp/.X$NODE_DISPLAY-lock
+ 	rm -f /tmp/.X11-unix/X$NODE_DISPLAY
+ 	
+@@ -211,7 +211,7 @@
+ 			NODE_STARTX=$COMMAND_START_CDE
+ 		;;
+ 		unix-application)
+-			[ "$application" = "xterm" ] && application="$COMMAND_XTERM"
++			[ "$application" = "xterm" ] && application=$COMMAND_XTERM
+ 			NODE_STARTX=$application
+ 		;;
+ 		unix-default)
+@@ -638,8 +638,8 @@
+ 	then
+ 		if egrep -q "^Host=" "$KDE_PRINTRC"
+ 		then
+-			[ "$ENABLE_KDE_CUPS_DYNAMIC" = "1" ] && perl -pi -e 's,^Host=.*,Host[\$ie]=\$\('"$PATH_BIN/nxcups-gethost"'),g' "$KDE_PRINTRC"
+-			[ "$ENABLE_KDE_CUPS_DYNAMIC" != "1" ] && perl -pi -e 's,^Host=.*,Host='"$NODE_CUPSD_SOCKET"',g' "$KDE_PRINTRC"
++			[ "$ENABLE_KDE_CUPS_DYNAMIC" = "1" ] && $COMMAND_PERL -pi -e 's,^Host=.*,Host[\$ie]=\$\('"$PATH_BIN/nxcups-gethost"'),g' "$KDE_PRINTRC"
++			[ "$ENABLE_KDE_CUPS_DYNAMIC" != "1" ] && $COMMAND_PERL -pi -e 's,^Host=.*,Host='"$NODE_CUPSD_SOCKET"',g' "$KDE_PRINTRC"
+ 		else
+ 			echo "[CUPS]" >> "$KDE_PRINTRC"
+ 			[ "$ENABLE_KDE_CUPS_DYNAMIC" = "1" ] && echo "Host[\$ie]=\$($PATH_BIN/nxcups-gethost)" >> "$KDE_PRINTRC"
+@@ -1249,7 +1249,7 @@
+ {
+ 	sessionid=$(getparam_sessionid)
+ 	echo "NX> 716 Terminating session $sessionid on user request."
+-	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | rev |cut -d"-" -f2 |rev)
++	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | awk 'BEGIN {FS="-"} {i=NF-1; print $i}')
+ 	node_terminate_session "$SERVER_NAME-$display-$sessionid"
+ }
+ 
+@@ -1257,7 +1257,7 @@
+ {
+ 	sessionid=$(getparam_sessionid)
+ 	echo "NX> 716 Suspending session $sessionid on user request."
+-	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | rev | cut -d"-" -f2 |rev)
++	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | awk 'BEGIN {FS="-"} {i=NF-1; print $i}') 
+ 	node_suspend_session "$SERVER_NAME-$display-$sessionid"
+ }
+ 
+@@ -1271,7 +1271,7 @@
+ 	computername=$(getparam computername)
+ 	dir=$(getparam dir | sed 's|$(SHARES)|MyShares|g')
+ 	# rdir=$(getparam dir | sed 's|$(SHARES)/||g')
+-	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | rev|cut -d"-" -f2| rev)
++	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | awk 'BEGIN {FS="-"} {i=NF-1; print $i}') 
+ 	mkdir -p "$HOME/$dir"
+ 	# wait up to 30 sec until nxagent has opened the listener port for samba connections
+ 	for (( i=30; $i; --i ))
+@@ -1281,7 +1281,7 @@
+ 	done
+ 	# sometimes the samba port we get from nxserver is not the right one, so let's get it from nxagent
+ 	port=$(cat "$USER_FAKE_HOME/.nx/C-$SERVER_NAME-$display-$sessionid/scripts/mport")
+-	error=$(PASSWD="$password" "$COMMAND_SMBMOUNT" "//$computername/$share" "$HOME/$dir" -o username="$username,ip=127.0.0.1,port=$port" 2>&1)
++	error=$(PASSWD="$password" $COMMAND_SMBMOUNT "//$computername/$share" "$HOME/$dir" -o username="$username,ip=127.0.0.1,port=$port" 2>&1)
+ 	if [ $? -eq 0 ]
+ 	then
+ 		$PATH_BIN/nxclient -dialog ok -caption "NXServer Message" -message "Info: Share: '//$computername/$share' mounted on: '$HOME/$dir'" -display :$display &
+@@ -1304,7 +1304,7 @@
+ 	public=$(getparam public)
+ 	model=$(getparam model)
+ 	defaultPrinter=$(getparam defaultPrinter)
+-	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | rev | cut -d"-" -f2 | rev)
++	display=$(cd $USER_FAKE_HOME/.nx/; echo C-$SERVER_NAME-*-$sessionid | awk 'BEGIN {FS="-"} {i=NF-1; print $i}') 
+ 	sess_id="$SERVER_NAME-$display-$sessionid"
+ 	
+ 	# this will also setup the userspace cupsd
+
+Modified: freenx-server/trunk/nxserver
+===================================================================
+--- freenx-server/trunk/nxserver	2007-08-12 05:05:49 UTC (rev 369)
++++ freenx-server/trunk/nxserver	2007-08-12 05:45:19 UTC (rev 370)
+@@ -67,7 +67,7 @@
+ 	PASSDB_CHUSER="$1"
+ 	PASSDB_ENC_PASS="$2"
+ 	cp -f $NX_ETC_DIR/passwords $NX_ETC_DIR/passwords.orig
+-	perl -pi -e "s/$PASSDB_CHUSER:.*/$PASSDB_CHUSER:$PASSDB_ENC_PASS/g" $NX_ETC_DIR/passwords
++	$COMMAND_PERL -pi -e "s/$PASSDB_CHUSER:.*/$PASSDB_CHUSER:$PASSDB_ENC_PASS/g" $NX_ETC_DIR/passwords
+ }
+ 
+ passdb_user_exists()
+@@ -81,7 +81,7 @@
+ {
+ 	PASSDB_CHUSER="$1"
+ 	cp -f $NX_ETC_DIR/passwords $NX_ETC_DIR/passwords.orig
+-	perl -pi -e "s/$PASSDB_CHUSER:.*\n//g" $NX_ETC_DIR/passwords
++	$COMMAND_PERL -pi -e "s/$PASSDB_CHUSER:.*\n//g" $NX_ETC_DIR/passwords
+ }
+ 
+ passdb_add_user()
+@@ -340,7 +340,11 @@
+ {
+ 	[ "$SESSION_HISTORY" -gt "-1" ] || return
+ 	let SESSION_HISTORY_MINUTES=$SESSION_HISTORY/60
++
++	# If you need posix find compatibility, use the outcommented variant below.
+ 	find $NX_SESS_DIR/closed/ $NX_SESS_DIR/failed/ -type f -mmin +"$SESSION_HISTORY_MINUTES" -exec rm -f '{}' ';'
++	#let SESSION_HISTORY_DAYS=$SESSION_HISTORY_MINUTES/1440
++	#find $NX_SESS_DIR/closed/ $NX_SESS_DIR/failed/ -type f -mtime +"$SESSION_HISTORY_DAYS" -exec rm -f '{}' ';'
+ }
+ 
+ session_list_all()
+@@ -371,7 +375,7 @@
+ 
+ session_change()
+ {
+-	[ -f $NX_SESS_DIR/running/sessionId'{'$1'}' ] && perl -pi -e "s/$2=.*/$2=$3/" $NX_SESS_DIR/running/sessionId'{'$1'}'
++	[ -f $NX_SESS_DIR/running/sessionId'{'$1'}' ] && $COMMAND_PERL -pi -e "s/$2=.*/$2=$3/" $NX_SESS_DIR/running/sessionId'{'$1'}'
+ }
+ 
+ # session_id <new status>
+@@ -393,7 +397,7 @@
+ 
+ session_close()
+ {
+-	perl -pi -e "s/startTime=\(.*\)/startTime=\1\nendTime=$(date +%s)/" $NX_SESS_DIR/running/sessionId'{'$1'}'
++	$COMMAND_PERL -pi -e "s/startTime=\(.*\)/startTime=\1\nendTime=$(date +%s)/" $NX_SESS_DIR/running/sessionId'{'$1'}'
+ 	session_status $1 "Finished"
+ 	[ "$SESSION_HISTORY" = "0" ] && rm -f $NX_SESS_DIR/running/sessionId'{'$1'}'
+ 	[ "$SESSION_HISTORY" = "0" ] || mv -f $NX_SESS_DIR/running/sessionId'{'$1'}' $NX_SESS_DIR/closed/sessionId'{'$1'}'
+@@ -401,7 +405,7 @@
+ 
+ session_fail()
+ {
+-	perl -pi -e "s/startTime=\(.*\)/startTime=\1\nendTime=$(date +%s)/" $NX_SESS_DIR/running/sessionId'{'$1'}'
++	$COMMAND_PERL -pi -e "s/startTime=\(.*\)/startTime=\1\nendTime=$(date +%s)/" $NX_SESS_DIR/running/sessionId'{'$1'}'
+ 	session_status $1 "Failed"
+ 	[ "$SESSION_HISTORY" = "0" ] && rm -f $NX_SESS_DIR/running/sessionId'{'$1'}'
+ 	[ "$SESSION_HISTORY" = "0" ] || mv -f $NX_SESS_DIR/running/sessionId'{'$1'}' $NX_SESS_DIR/failed/sessionId'{'$1'}'
+@@ -458,7 +462,7 @@
+ 
+ echo_secure()
+ {
+-	echo "$@ " | perl -pi -e 's/--cookie=".+?"/--cookie="******"/g; s/--agent_password=".+?"/agent_password="******"/g; s/--password=".+?"/password="******"/g; s/cookie=.+?&/cookie=******&/g; s/agent_password=.+?&/agent_password=******&/g; s/password=.+?&/password=******&/g;'
++	echo "$@ " | $COMMAND_PERL -pi -e 's/--cookie=".+?"/--cookie="******"/g; s/--agent_password=".+?"/agent_password="******"/g; s/--password=".+?"/password="******"/g; s/cookie=.+?&/cookie=******&/g; s/agent_password=.+?&/agent_password=******&/g; s/password=.+?&/password=******&/g;'
+ }
+ 
+ log_secure()
+
+Modified: freenx-server/trunk/nxserver-helper/nxserver-helper.c
+===================================================================
+--- freenx-server/trunk/nxserver-helper/nxserver-helper.c	2007-08-12 05:05:49 UTC (rev 369)
++++ freenx-server/trunk/nxserver-helper/nxserver-helper.c	2007-08-12 05:45:19 UTC (rev 370)
+@@ -9,6 +9,7 @@
+ 
+ #include <sys/types.h>
+ #include <sys/socket.h>
++#include <unistd.h>
+ 
+ int main(int argc, char* argv[])
+ {
+
+
+
+From fabianx at mail.berlios.de  Sun Aug 12 08:03:41 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sun, 12 Aug 2007 08:03:41 +0200
+Subject: [Freenx-cvs] r371 - in freenx-redesign/server: . utility
+Message-ID: <200708120603.l7C63f8J021113@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-08-12 08:03:41 +0200 (Sun, 12 Aug 2007)
+New Revision: 371
+
+Added:
+   freenx-redesign/server/utility/
+   freenx-redesign/server/utility/nxloadconfig
+   freenx-redesign/server/utility/nxlog
+Log:
+Added initial versions of nxlog and nxloadconfig.
+(diamond at google.com)
+
+
+
+Added: freenx-redesign/server/utility/nxloadconfig
+===================================================================
+--- freenx-redesign/server/utility/nxloadconfig	2007-08-12 05:45:19 UTC (rev 370)
++++ freenx-redesign/server/utility/nxloadconfig	2007-08-12 06:03:41 UTC (rev 371)
+@@ -0,0 +1,198 @@
++#!/bin/bash
++
++# nxloadconfig - Read configuration files, setup logging
++#
++# Copyright 2007 Google Inc.
++# All Rights Reserved.
++# Author: diamond at google.com (Stephen Shirley)
++#
++# License: GNU GPL, version 2
++#
++# Used configuration keys:
++#
++# Used internal subfunctions:
++#
++# @sub "log n" log to (sys)log with loglevel n
++#
++# Used internal variables:
++#
++# Used internal components:
++#
++# @comp nxlog
++#
++# Used external programs:
++#
++# @ext getopt - parse command options (enhanced)
++#
++# Accepted protocol requests from client:
++#
++# Used protocol responses to client:
++#
++# FAQ-Questions:
++#
++# SVN: $Id$
++#
++
++# Store these for use later
++ORIG_ARGS=($@)
++SCRIPT_NAME=$(basename $0)
++SCRIPT_DIR=$(dirname $0)
++
++
++parse_args() {
++	ARGS=$(/usr/bin/getopt -n "$SCRIPT_NAME" -o "h" -l "config:,help" -- \
++	"${ORIG_ARGS[@]}" 2>/dev/null)
++
++	if [ $? != 0 ]
++	then
++		# Can't grab only the error message if there's an issue, so just run it
++		# again to output the error directly.
++		/usr/bin/getopt -n "$SCRIPT_NAME" -o "h" -l "config:,help" -- \
++		"${ORIG_ARGS[@]}" > /dev/null
++		exit 1
++	fi
++}
++
++
++process_args() {
++	HELP="no"
++
++	while true; do
++		case "$1" in
++			--config) CONF_NAME="$2"; shift 2 ;;
++			-h|--help) HELP="yes"; shift ;;
++			--) shift; break ;;
++			*) echo "$SCRIPT_NAME: error parsing cmdline" >&2; exit 1 ;;
++		esac
++	done
++
++	[ "$HELP" = "yes" ] && usage
++}
++
++
++usage() {
++	echo "$SCRIPT_NAME - Load the FreeNX configuration variables into the environment."
++	echo "Syntax: nxloadconfig -h|--help"
++	echo "        nxloadconfig [--config=name]"
++	echo
++	echo "  --config=name            Load $PATH_ETC/name.conf config file."
++	echo "  -h,--help                Display this message."
++	exit 0
++}
++
++
++default_if_not_set() {
++	var="$1"
++	default="$2"
++
++	# Is the var set?
++	if ! declare -p "$var" &> /dev/null
++	then
++		# Var is not set, set it to the default now and return
++		declare "$var" "$default"
++		return 0
++	else
++		return 1
++	fi
++}
++
++
++check_dir_vars() {
++	check_dir_var PATH_BASE "/usr/NX"
++	check_dir_var PATH_BIN "$PATH_BASE/bin"
++	check_dir_var PATH_ETC "$PATH_BASE/etc"
++	check_dir_var PATH_LIB "$PATH_BASE/lib"
++}
++
++
++check_dir_var() {
++	var="$1"
++	defdir="$2"
++	# Gets the value of the variable named by $var
++	varval=$(eval echo \$"$foo")
++
++	default_if_not_set "$var" "$defdir" && return
++
++	if [ ! -d "$varval" ]
++	then
++		log $LOG_WARNING "Invalid directory variable $var: $varval"
++		declare "$var" "$defdir"
++	fi
++
++	if [ ! -d "$defdir" ]
++	then
++		log $LOG_ERR "Invalid default directory variable $var: $defdir"
++		exit 1
++	fi
++}
++
++
++check_command_vars() {
++	check_command_var COMMAND_START_KDE "startkde"
++	check_command_var COMMAND_START_GNOME "gnome-session"
++	check_command_var COMMAND_START_CDE "cdwm"
++	check_command_var COMMAND_XTERM "xterm"
++	check_command_var COMMAND_XAUTH "/usr/X11R6/bin/xauth"
++	check_command_var COMMAND_SMBMOUNT "smbmount"
++	check_command_var COMMAND_SMBUMOUNT "smbumount"
++	check_command_var COMMAND_NETCAT "netcat"
++	check_command_var COMMAND_SSH "ssh"
++	check_command_var COMMAND_SSH_KEYGEN "ssh-keygen"
++	check_command_var COMMAND_CUPSD "/usr/sbin/cupsd"
++	check_command_var COMMAND_MD5SUM "md5sum"
++}
++
++
++check_command_var() {
++	var="$1"
++	defcmd="$2"
++	# Gets the value of the variable named by $var
++	varval=$(eval echo \$"$foo")
++
++	default_if_not_set "$var" "$defcmd" && return
++
++	if [ ! -d "$varval" ]
++	then
++		log $LOG_WARNING "Invalid directory variable $var: $varval"
++		declare "$var" "$defdir"
++	fi
++
++	if [ ! -d "$defdir" ]
++	then
++		log $LOG_ERR "Invalid default directory variable $var: $defdir"
++		exit 1
++	fi
++}
++
++
++load_file() {
++	file="$1"
++
++	if [ -f "$file" ]
++	then
++		. "$file"
++	else
++		echo "$SCRIPT_NAME: no such file or directory: \"$file\"" >&2; exit 1;
++	fi
++}
++
++parse_args
++eval set -- "$ARGS"
++process_args "$@"
++
++# Load logging fuctionality
++LOG_LEVEL=$LOG_WARNING
++load_file "$SCRIPT_DIR/nxlog"
++
++# Load general configuration
++load_file "$PATH_ETC/general.conf"
++# Load function-specific configuration
++[ -n "$CONF_NAME" ] && load_file "$PATH_ETC/$CONF_NAME.conf"
++
++check_dir_vars
++check_command_vars
++
++log $LOG_DEBUG "called with cmdline: ${ORIG_ARGS[@]}"
++
++
++# vim: ts=8 noexpandtab sw=8 softtabstop=0
+
+
+Property changes on: freenx-redesign/server/utility/nxloadconfig
+___________________________________________________________________
+Name: svn:executable
+   + *
+Name: svn:keywords
+   + Id
+
+Added: freenx-redesign/server/utility/nxlog
+===================================================================
+--- freenx-redesign/server/utility/nxlog	2007-08-12 05:45:19 UTC (rev 370)
++++ freenx-redesign/server/utility/nxlog	2007-08-12 06:03:41 UTC (rev 371)
+@@ -0,0 +1,111 @@
++#!/bin/bash
++
++# nxlog - Provides functions for logging to syslog
++#
++# Copyright 2007 Google Inc.
++# All Rights Reserved.
++# Author: diamond at google.com (Stephen Shirley)
++#
++# License: GNU GPL, version 2
++#
++# Used configuration keys:
++#
++# Used internal subfunctions:
++#
++# Used internal variables:
++#
++# @var LOG_LEVEL Maximum level messages to log
++#
++# Used internal components:
++#
++# Used external programs:
++#
++# @ext logger - a shell command interface to the syslog(3) system log module
++#
++# Accepted protocol requests from client:
++#
++# Used protocol responses to client:
++#
++# FAQ-Questions:
++#
++# SVN: $Id$
++#
++
++LOG_EMERG=0
++LOG_ALERT=1
++LOG_CRIT=2
++LOG_ERR=3
++LOG_WARNING=4
++LOG_NOTICE=5
++LOG_INFO=6
++LOG_DEBUG=7
++
++
++log()
++{
++	PRIORITY="$1"
++	if [ "$LOG_LEVEL" -ge "$PRIORITY" ]
++	then
++		shift
++		[ "$1" = "-n" ] && shift
++		ARGS="$@"
++		[ -n "$ARGS" ] || ARGS="No arguments supplied to log()"
++		logger -p "syslog.$PRIORITY" -t "$SCRIPT_NAME" -- "$ARGS"
++	fi
++}
++
++
++log_tee()
++{
++	PRIORITY="$1"
++	while read -r; do
++		[ -n "$REPLY" ] && log "$PRIORITY" "$REPLY"
++		echo "$REPLY"
++	done
++}
++
++
++echo_x()
++{
++	echo "$@"
++	case "$NX_LOG_PROG" in
++		"nxserver") prefix="(s>c)" ;;
++		"nxnode") prefix="(n>s)" ;;
++		*) prefix="(?>?)" ;;
++	esac
++        log $LOG_INFO "$prefix $@"
++}
++
++
++read_x()
++{
++	read -t 10 "$@"
++	case "$NX_LOG_PROG" in
++		"nxserver") prefix="(s<c)" ;;
++		"nxnode") prefix="(n<s)" ;;
++		*) prefix="(?<?)" ;;
++	esac
++        log $LOG_INFO "$prefix $REPLY"
++}
++
++
++read_x_prompt() 
++{
++	echo_x -n "$1"
++	shift
++	read_x "$@"
++}
++
++
++if [ "$#" = "0" -a "$SCRIPT_NAME" = "nxlog" ]
++then
++	while read
++	do
++		log $line # no "" here to have it split up in different levels
++	done
++else
++	log "$@"
++fi
++
++
++# vim: ts=8 noexpandtab sw=8 softtabstop=0
+
+
+Property changes on: freenx-redesign/server/utility/nxlog
+___________________________________________________________________
+Name: svn:executable
+   + *
+Name: svn:keywords
+   + Id
+
+
+
+From fabianx at mail.berlios.de  Sun Aug 19 17:44:17 2007
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Sun, 19 Aug 2007 17:44:17 +0200
+Subject: [Freenx-cvs] r372 - freenx-server/trunk
+Message-ID: <200708191544.l7JFiHkt007049@sheep.berlios.de>
+
+Author: fabianx
+Date: 2007-08-19 17:44:16 +0200 (Sun, 19 Aug 2007)
+New Revision: 372
+
+Modified:
+   freenx-server/trunk/ChangeLog
+   freenx-server/trunk/nxkeygen
+Log:
+* Fix ownership of $SSH_AUTHORIZED_KEYS in nxkeygen, just in case
+  it is run without nxsetup.
+
+
+
+Modified: freenx-server/trunk/ChangeLog
+===================================================================
+--- freenx-server/trunk/ChangeLog	2007-08-12 06:03:41 UTC (rev 371)
++++ freenx-server/trunk/ChangeLog	2007-08-19 15:44:16 UTC (rev 372)
+@@ -40,6 +40,9 @@
+ 	  * Added an outcommented way to also use "POSIX find" for history
+ 	    cleaning.
+ 	  (Peter O'Gorman <peter at pogma.com>)
++	* Fix ownership of $SSH_AUTHORIZED_KEYS in nxkeygen, just in case
++	  it is run without nxsetup.
++	  (fabianx at bat.berlios.de, thx to sambiase on #nx)
+ 
+ 07.07.2007 FreeNX 0.7.0 "Jornade SPL Edition VI+1"
+ 	* Fixed the printing support for CUPS 1.2.
+
+Modified: freenx-server/trunk/nxkeygen
+===================================================================
+--- freenx-server/trunk/nxkeygen	2007-08-12 06:03:41 UTC (rev 371)
++++ freenx-server/trunk/nxkeygen	2007-08-19 15:44:16 UTC (rev 372)
+@@ -56,6 +56,10 @@
+ 	echo -n "no-port-forwarding,no-agent-forwarding,command=\"$PATH_BIN/nxserver\" " >$NX_KEY_DIR/$SSH_AUTHORIZED_KEYS
+ 	cat ${NX_SERVER_KEY} >> $NX_KEY_DIR/$SSH_AUTHORIZED_KEYS
+ 
++	# Fix ownership of $SSH_AUTHORIZED_KEYS, just in case nxkeygen is run without nxsetup.
++
++	chown nx:root $NX_KEY_DIR/$SSH_AUTHORIZED_KEYS
++
+ 	# now tell the user what to do
+ 
+ 	echo "Unique key generated; your users must install"
+
+
+

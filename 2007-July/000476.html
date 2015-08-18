@@ -1,0 +1,135 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r343 - freenx-redesign/server/compatibility
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2007-July/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r343%20-%20freenx-redesign/server/compatibility&In-Reply-To=%3C200707051230.l65CU0mg012878%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000475.html">
+   <LINK REL="Next"  HREF="000477.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r343 - freenx-redesign/server/compatibility</H1>
+    <B>fabianx at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r343%20-%20freenx-redesign/server/compatibility&In-Reply-To=%3C200707051230.l65CU0mg012878%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r343 - freenx-redesign/server/compatibility">fabianx at mail.berlios.de
+       </A><BR>
+    <I>Thu Jul  5 14:30:00 CEST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000475.html">[Freenx-cvs] r342 - freenx-redesign/server/compatibility
+</A></li>
+        <LI>Next message: <A HREF="000477.html">[Freenx-cvs] r344 - freenx-redesign/server/compatibility
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#476">[ date ]</a>
+              <a href="thread.html#476">[ thread ]</a>
+              <a href="subject.html#476">[ subject ]</a>
+              <a href="author.html#476">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: fabianx
+Date: 2007-07-05 14:29:59 +0200 (Thu, 05 Jul 2007)
+New Revision: 343
+
+Modified:
+   freenx-redesign/server/compatibility/nxserver-login-helper
+Log:
+Fixed the login-helper to have a FREENX&gt; 100 Switch command.
+
+
+
+Modified: freenx-redesign/server/compatibility/nxserver-login-helper
+===================================================================
+--- freenx-redesign/server/compatibility/nxserver-login-helper	2007-07-04 15:59:35 UTC (rev 342)
++++ freenx-redesign/server/compatibility/nxserver-login-helper	2007-07-05 12:29:59 UTC (rev 343)
+@@ -5,6 +5,7 @@
+ # Environment variables used:
+ #
+ # @param COMMAND_SSH	Command for spawning ssh.
++# @param COMMAND_SSH	Command for spawning netcat.
+ # @param NODE_PUBLICKEY	Public key for test-nx mode.
+ # @param NODE_PASSWORD	Password for ssh|su mode.
+ #
+@@ -24,6 +25,8 @@
+ set parameters [lindex $argv 4]
+ set command_ssh &quot;ssh&quot;
+ catch {set command_ssh $env(COMMAND_SSH)}
++set command_netcat &quot;netcat&quot;
++catch {set command_netcat $env(COMMAND_NETCAT)}
+ set host &quot;127.0.0.1&quot;
+ set timeout 2
+ 
+@@ -77,8 +80,39 @@
+ 	&quot;Permission denied*&quot; { exit 1 }
+ 	&quot;su: Authentication failure&quot; { exit 1 }
+ 	&quot;NX&gt; 103&quot; {
+-		interact
++		set redir &quot;0&quot;
++		interact {
++			-o &quot;FREENX&gt; 100 &quot; {
++				set redir &quot;1&quot;
++				log_user 0
++				expect &quot;Switch:*&quot; { set host_port $expect_out(buffer) }
++				log_user 1
++				return
++			}
++		}
++		if { &quot;$redir&quot; == &quot;1&quot; } {
++		        # Use the spawn id as fd and send everything received from nxserver to stderr.
++		        set fd [ exp_open ]
++
++		        set pid [ exec cat &lt;@$fd &gt;@stderr 2&gt;/dev/null &amp; ]
++
++		        # we do not need fd in here anymore
++		        close $fd
++
++			set host [ exec echo -n &quot;$host_port&quot; | cut -d: -f2 | tr -d &quot;' '&quot; ]
++			set port [ exec echo -n &quot;$host_port&quot; | cut -d: -f3 ]
++			
++			set rc [ catch { exec $command_netcat $host $port &lt;@stdin &gt;@stdout } error ]
++		        catch { exec kill $pid 2&gt;/dev/null }
++			if { &quot;$rc&quot; != &quot;0&quot; } {
++				# redirection failed
++				exit 2
++			}
++		}
++
++		# all okay
+ 		exit 0
+ 	}
+ } 
++# authentication failed
+ exit 1
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000475.html">[Freenx-cvs] r342 - freenx-redesign/server/compatibility
+</A></li>
+	<LI>Next message: <A HREF="000477.html">[Freenx-cvs] r344 - freenx-redesign/server/compatibility
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#476">[ date ]</a>
+              <a href="thread.html#476">[ thread ]</a>
+              <a href="subject.html#476">[ subject ]</a>
+              <a href="author.html#476">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>

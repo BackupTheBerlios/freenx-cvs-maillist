@@ -1,0 +1,102 @@
+From fabianx at mail.berlios.de  Mon Sep  1 22:42:32 2008
+From: fabianx at mail.berlios.de (fabianx at BerliOS)
+Date: Mon, 1 Sep 2008 22:42:32 +0200
+Subject: [Freenx-cvs] r613 - trunk/freenx-server
+Message-ID: <200809012042.m81KgWPa019802@sheep.berlios.de>
+
+Author: fabianx
+Date: 2008-09-01 22:42:31 +0200 (Mon, 01 Sep 2008)
+New Revision: 613
+
+Modified:
+   trunk/freenx-server/ChangeLog
+   trunk/freenx-server/node.conf.sample
+   trunk/freenx-server/nxloadconfig
+   trunk/freenx-server/nxnode
+Log:
+* Fixed non-encrypted session mode. You might need to
+  set EXTERNAL_PROXY_IP in node.conf.
+  (fabianx at bat.berlios.de)
+
+
+
+Modified: trunk/freenx-server/ChangeLog
+===================================================================
+--- trunk/freenx-server/ChangeLog	2008-08-25 03:28:15 UTC (rev 612)
++++ trunk/freenx-server/ChangeLog	2008-09-01 20:42:31 UTC (rev 613)
+@@ -11,6 +11,9 @@
+ 	* Fixed --terminate|--suspend|--force-terminate for
+ 	  usermode case.
+ 	  (fabianx at bat.berlios.de)
++	* Fixed non-encrypted session mode. You might need to
++	  set EXTERNAL_PROXY_IP in node.conf.
++	  (fabianx at bat.berlios.de)
+ 
+ 18.08.2008 FreeNX 0.7.3 "Priscilla One Year Edition"
+ 	* Opened the 0.7.3 development.
+
+Modified: trunk/freenx-server/node.conf.sample
+===================================================================
+--- trunk/freenx-server/node.conf.sample	2008-08-25 03:28:15 UTC (rev 612)
++++ trunk/freenx-server/node.conf.sample	2008-09-01 20:42:31 UTC (rev 613)
+@@ -47,6 +47,11 @@
+ # different than the default hostname (as returned by `hostname`)
+ #SERVER_NAME="$(hostname)"
+ 
++# The node ip which is used by NX Node in unecnrypted session mode.
++# Set it if you want to use a specific external ip or the autodetection
++# is not working.
++#EXTERNAL_PROXY_IP=""
++
+ # The port number where local 'sshd' is listening.
+ #SSHD_PORT=22
+ 
+
+Modified: trunk/freenx-server/nxloadconfig
+===================================================================
+--- trunk/freenx-server/nxloadconfig	2008-08-25 03:28:15 UTC (rev 612)
++++ trunk/freenx-server/nxloadconfig	2008-09-01 20:42:31 UTC (rev 613)
+@@ -85,6 +85,7 @@
+ # General FreeNX directives
+ 
+ SERVER_NAME="$(hostname)"
++EXTERNAL_PROXY_IP=""
+ SSHD_PORT=22
+ 
+ # Authentication / Security directives
+
+Modified: trunk/freenx-server/nxnode
+===================================================================
+--- trunk/freenx-server/nxnode	2008-08-25 03:28:15 UTC (rev 612)
++++ trunk/freenx-server/nxnode	2008-09-01 20:42:31 UTC (rev 613)
+@@ -1184,7 +1184,18 @@
+ 		[ -z "$userip" -a "$host" = "127.0.0.1" ] && userip="127.0.0.1"
+ 		[ -z "$userip" ] && userip="*"
+ 	fi
++
++	# We need our own external IP
++	proxyip="$EXTERNAL_PROXY_IP"
++
++	if [ -z "$proxyip" -a -n "$host" ]
++	then
++		[ "$host" = "127.0.0.1" ] && host=$(hostname)
++		proxyip=$(ping -c1 "$host" | grep 'PING' | cut -d'(' -f2 | cut -d')' -f1)
++	fi
+ 	
++	[ -z "$proxyip" ] && proxyip="127.0.0.1"
++	
+ 	# ok, lets make the session dir first:
+ 	
+ 	sess_id="$SERVER_NAME-$display-$uniqueid"
+@@ -1316,7 +1327,7 @@
+ NX> 705 Session display: $display
+ NX> 703 Session type: $type
+ NX> 701 Proxy cookie: $proxy_cookie
+-NX> 702 Proxy IP: $userip
++NX> 702 Proxy IP: $proxyip
+ NX> 706 Agent cookie: $cookie
+ NX> 704 Session cache: $type
+ NX> 707 SSL tunneling: $ssl_tunnel
+
+
+

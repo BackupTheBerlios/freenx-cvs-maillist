@@ -1,0 +1,273 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Freenx-cvs] r435 - qtnx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/freenx-cvs/2008-January/index.html" >
+   <LINK REL="made" HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r435%20-%20qtnx&In-Reply-To=%3C200801080710.m087A6jq031295%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000560.html">
+   <LINK REL="Next"  HREF="000562.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Freenx-cvs] r435 - qtnx</H1>
+    <B>gwright at BerliOS</B> 
+    <A HREF="mailto:freenx-cvs%40lists.berlios.de?Subject=Re%3A%20%5BFreenx-cvs%5D%20r435%20-%20qtnx&In-Reply-To=%3C200801080710.m087A6jq031295%40sheep.berlios.de%3E"
+       TITLE="[Freenx-cvs] r435 - qtnx">gwright at mail.berlios.de
+       </A><BR>
+    <I>Tue Jan  8 08:10:06 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000560.html">[Freenx-cvs] r434 - qtnx
+</A></li>
+        <LI>Next message: <A HREF="000562.html">[Freenx-cvs] r436 - nxcl/lib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#561">[ date ]</a>
+              <a href="thread.html#561">[ thread ]</a>
+              <a href="subject.html#561">[ subject ]</a>
+              <a href="author.html#561">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: gwright
+Date: 2008-01-08 08:10:05 +0100 (Tue, 08 Jan 2008)
+New Revision: 435
+
+Modified:
+   qtnx/qtnxwindow.cpp
+   qtnx/qtnxwindow.h
+Log:
+Code cleanups - split large code blocks into functions
+
+
+Modified: qtnx/qtnxwindow.cpp
+===================================================================
+--- qtnx/qtnxwindow.cpp	2008-01-07 12:26:52 UTC (rev 434)
++++ qtnx/qtnxwindow.cpp	2008-01-08 07:10:05 UTC (rev 435)
+@@ -28,14 +28,43 @@
+ using namespace nxcl;
+ using namespace std;
+ 
+-QtNXWindow::QtNXWindow() : QMainWindow()
++QtNXWindow::QtNXWindow() : 
++    QMainWindow(),
++    processProbe(new QTimer()),
++    sessionsDialog(NULL)
+ {
+     nxClient.setExternalCallbacks(&amp;callback);
+ 
+-    processProbe = new QTimer();
++    setupUI();
+ 
+-    sessionsDialog = 0;
++    QDir dir(QDir::homePath()+&quot;/.qtnx&quot;,&quot;*.nxml&quot;);
+ 
++    for (unsigned int i=0;i&lt;dir.count();i++) {
++        QString conn=dir[i];
++        ui_lg.session-&gt;addItem(conn.left(conn.length()-5));
++    }
++
++    ui_lg.session-&gt;addItem(tr(&quot;Create new session&quot;));
++
++    connect(ui_lg.connectButton, SIGNAL(pressed()), this, SLOT(startConnect()));
++    connect(ui_lg.configureButton, SIGNAL(pressed()), this, SLOT(configure()));
++    connect(processProbe, SIGNAL(timeout()), this, SLOT(processProbeTimeout()));
++    connect(&amp;callback, SIGNAL(logging(QString)), this, SLOT(logStd(QString)));
++    connect(&amp;callback, SIGNAL(status(QString)), this, 
++            SLOT(updateStatusBar(QString)));
++    connect(&amp;callback, SIGNAL(suspendedSessions(QList&lt;NXResumeData&gt;)), this,
++            SLOT(loadResumeDialog(QList&lt;NXResumeData&gt;)));
++    connect(&amp;callback, SIGNAL(noSessions()), this, SLOT(noSessions()));
++    connect(&amp;callback, SIGNAL(progress(int, QString)), this, 
++            SLOT(handleProgress(int, QString)));
++}
++
++QtNXWindow::~QtNXWindow()
++{
++}
++
++void QtNXWindow::setupUI()
++{
+     logWindow = new QDialog(0);
+     ui_lw.setupUi(logWindow);
+ 
+@@ -73,34 +102,8 @@
+     connectionMenu-&gt;addAction(tr(&quot;Connect...&quot;),
+             this,
+             SLOT(startConnect()));
+-
+-    QDir dir(QDir::homePath()+&quot;/.qtnx&quot;,&quot;*.nxml&quot;);
+-
+-    for (unsigned int i=0;i&lt;dir.count();i++) {
+-        QString conn=dir[i];
+-        ui_lg.session-&gt;addItem(conn.left(conn.length()-5));
+-    }
+-
+-    ui_lg.session-&gt;addItem(tr(&quot;Create new session&quot;));
+-
+-
+-    connect(ui_lg.connectButton, SIGNAL(pressed()), this, SLOT(startConnect()));
+-    connect(ui_lg.configureButton, SIGNAL(pressed()), this, SLOT(configure()));
+-    connect(processProbe, SIGNAL(timeout()), this, SLOT(processProbeTimeout()));
+-    connect(&amp;callback, SIGNAL(logging(QString)), this, SLOT(logStd(QString)));
+-    connect(&amp;callback, SIGNAL(status(QString)), this, 
+-            SLOT(updateStatusBar(QString)));
+-    connect(&amp;callback, SIGNAL(suspendedSessions(QList&lt;NXResumeData&gt;)), this,
+-            SLOT(loadResumeDialog(QList&lt;NXResumeData&gt;)));
+-    connect(&amp;callback, SIGNAL(noSessions()), this, SLOT(noSessions()));
+-    connect(&amp;callback, SIGNAL(progress(int, QString)), this, 
+-            SLOT(handleProgress(int, QString)));
+ }
+ 
+-QtNXWindow::~QtNXWindow()
+-{
+-}
+-
+ void QtNXWindow::showLogWindow()
+ {
+     if (logWindow-&gt;isHidden())
+@@ -181,8 +184,6 @@
+ void QtNXWindow::startConnect()
+ {
+     string key = &quot;&quot;;
+-    QDesktopWidget dw;
+-    QX11Info info;
+ 
+     NXParseXML handler;
+     handler.setData(&amp;config);
+@@ -197,6 +198,36 @@
+     reader.setErrorHandler(&amp;handler);
+     reader.parse(inputSource);
+ 
++    setDefaultData();
++
++    if (!config.key.empty()) {
++        key = config.key;
++        session.key = &quot;supplied&quot;;
++    } else
++        session.key = &quot;default&quot;;
++
++    if (config.sessionType == &quot;unix-application&quot;)
++        session.customCommand = config.customCommand;
++
++    nxClient.setSessionData(&amp;session);
++
++    nxClient.invokeNXSSH(&quot;id.key&quot;, config.serverHost, config.encryption, &quot;&quot;,
++            config.serverPort);
++    processProbe-&gt;start(30);
++
++    string username = ui_lg.username-&gt;text().toStdString();
++    string password = ui_lg.password-&gt;text().toStdString();
++
++    nxClient.setUsername(username);
++    nxClient.setPassword(password);
++    nxClient.setResolution(getWidth(), getHeight());
++
++    nxClient.setDepth(getDepth());
++}
++
++void QtNXWindow::setDefaultData()
++{
++    // These seem to be a fairly sane set of defaults for session data
+     session.sessionName = config.sessionName;
+     session.sessionType = config.sessionType;
+     session.cache = config.cache;
+@@ -218,31 +249,25 @@
+     session.encryption = true;
+     session.virtualDesktop = false;
+     session.terminate = false;
++}
+ 
+-    if (!config.key.empty()) {
+-        key = config.key;
+-        session.key = &quot;supplied&quot;;
+-    } else
+-        session.key = &quot;default&quot;;
++// This should be the only function that needs porting to other platforms
++int QtNXWindow::getDepth()
++{
++    QX11Info info;
++    return info.depth();
++}
+ 
+-    if (config.sessionType == &quot;unix-application&quot;)
+-        session.customCommand = config.customCommand;
++int QtNXWindow::getWidth()
++{
++    QDesktopWidget dw;
++    return dw.screenGeometry(this).width();
++}
+ 
+-    nxClient.setSessionData(&amp;session);
+-
+-    nxClient.invokeNXSSH(&quot;id.key&quot;, config.serverHost, config.encryption, &quot;&quot;,
+-            config.serverPort);
+-    processProbe-&gt;start(30);
+-
+-    string username = ui_lg.username-&gt;text().toStdString();
+-    string password = ui_lg.password-&gt;text().toStdString();
+-
+-    nxClient.setUsername(username);
+-    nxClient.setPassword(password);
+-    nxClient.setResolution(dw.screenGeometry(this).width(),
+-            dw.screenGeometry(this).height());
+-
+-    nxClient.setDepth(info.depth());
++int QtNXWindow::getHeight()
++{
++    QDesktopWidget dw;
++    return dw.screenGeometry(this).height();
+ }
+ 
+ void QtNXWindow::updateStatusBar(QString message)
+
+Modified: qtnx/qtnxwindow.h
+===================================================================
+--- qtnx/qtnxwindow.h	2008-01-07 12:26:52 UTC (rev 434)
++++ qtnx/qtnxwindow.h	2008-01-08 07:10:05 UTC (rev 435)
+@@ -112,6 +112,14 @@
+         void processProbeTimeout();
+         void handleProgress(int, QString);
+     private:
++
++        // Decided to split up the code
++        void setupUI();
++        void setDefaultData();
++        int getWidth();
++        int getHeight();
++        int getDepth();
++
+         Ui::LoginDialog ui_lg;
+         Ui::LogWindow ui_lw;
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000560.html">[Freenx-cvs] r434 - qtnx
+</A></li>
+	<LI>Next message: <A HREF="000562.html">[Freenx-cvs] r436 - nxcl/lib
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#561">[ date ]</a>
+              <a href="thread.html#561">[ thread ]</a>
+              <a href="subject.html#561">[ subject ]</a>
+              <a href="author.html#561">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/freenx-cvs">More information about the Freenx-cvs
+mailing list</a><br>
+</body></html>
